@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the search feature of the local OEF node."""
 import time
 
@@ -30,14 +29,15 @@ from aea.helpers.search.models import (
     Description,
     Query,
 )
-from aea.mail.base import AEAConnectionError, Envelope, InBox, Multiplexer
+from aea.mail.base import AEAConnectionError, Envelope
+from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from ....conftest import _make_local_connection
+from ....conftest import MAX_FLAKY_RERUNS, _make_local_connection
 
 DEFAULT_OEF = "default_oef"
 
@@ -131,6 +131,9 @@ class TestSimpleSearchResult:
         )
         cls.multiplexer.put(envelope)
 
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS
+    )  # TODO: check reasons!. quite unstable test
     def test_not_empty_search_result(self):
         """Test that the search result contains one entry after a successful registration."""
         request_id = 1
@@ -442,6 +445,9 @@ class TestFilteredSearchResult:
         )
         cls.multiplexer1.put(envelope)
 
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS
+    )  # TODO: check reasons!. quite unstable test
     def test_filtered_search_result(self):
         """Test that the search result contains only the entries matching the query."""
         request_id = 1

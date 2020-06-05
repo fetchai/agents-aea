@@ -69,6 +69,7 @@ class TestAEAToACA:
         cls.aca_admin_port = 8020
 
         cls.aea_address = "some string"
+        cls.aea_identity = Identity("", address=cls.aea_address)
 
         cls.cwd = os.getcwd()
 
@@ -102,7 +103,7 @@ class TestAEAToACA:
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
         http_client_connection = HTTPClientConnection(
-            address=self.aea_address,
+            identity=self.aea_identity,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -172,7 +173,7 @@ class TestAEAToACA:
             default_address_key=FetchAICrypto.identifier,
         )
         http_client_connection = HTTPClientConnection(
-            address=self.aea_address,
+            identity=identity,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )

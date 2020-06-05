@@ -28,6 +28,8 @@ import pytest
 
 import requests
 
+from aea.configurations.base import ConnectionConfig
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
@@ -51,18 +53,21 @@ class TestHTTPClientConnect:
         """Initialise the class."""
         cls.address = get_host()
         cls.port = get_unused_tcp_port()
-        cls.agent_address = "some string"
+        cls.agent_identity = Identity("name", address="some string")
+        configuration = ConnectionConfig(
+            host=cls.address,
+            port=cls.port,
+            connection_id=HTTPClientConnection.connection_id,
+        )
         cls.http_client_connection = HTTPClientConnection(
-            address=cls.agent_address,
-            provider_address=cls.address,
-            provider_port=cls.port,
+            configuration=configuration, identity=cls.agent_identity
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 
     @pytest.mark.asyncio
     async def test_initialization(self):
         """Test the initialisation of the class."""
-        assert self.http_client_connection.address == self.agent_address
+        assert self.http_client_connection.address == self.agent_identity.address
 
     @pytest.mark.asyncio
     async def test_connection(self):
@@ -86,11 +91,14 @@ class TestHTTPClientDisconnection:
         """Initialise the class."""
         cls.address = get_host()
         cls.port = get_unused_tcp_port()
-        cls.agent_address = "some string"
+        cls.agent_identity = Identity("name", address="some string")
+        configuration = ConnectionConfig(
+            host=cls.address,
+            port=cls.port,
+            connection_id=HTTPClientConnection.connection_id,
+        )
         cls.http_client_connection = HTTPClientConnection(
-            address=cls.agent_address,
-            provider_address=cls.address,
-            provider_port=cls.port,
+            configuration=configuration, identity=cls.agent_identity,
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 
@@ -115,10 +123,13 @@ async def test_http_send():
     """Test the send functionality of the http client connection."""
     address = get_host()
     port = get_unused_tcp_port()
-    agent_address = "some agent address"
+    agent_identity = Identity("name", address="some agent address")
 
+    configuration = ConnectionConfig(
+        host=address, port=port, connection_id=HTTPClientConnection.connection_id
+    )
     http_client_connection = HTTPClientConnection(
-        address=agent_address, provider_address=address, provider_port=port,
+        configuration=configuration, identity=agent_identity
     )
     http_client_connection.loop = asyncio.get_event_loop()
 

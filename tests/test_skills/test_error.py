@@ -27,7 +27,8 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.mail.base import Envelope, InBox, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import SkillContext

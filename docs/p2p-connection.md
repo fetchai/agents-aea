@@ -57,8 +57,8 @@ You can inspect the `libp2p_node.log` log files of the AEA to see how they disco
 Create one AEA as follows:
 
 ``` bash
-aea fetch fetchai/weather_station:0.4.0
-aea fetch fetchai/weather_client:0.4.0
+aea fetch fetchai/weather_station:0.5.0
+aea fetch fetchai/weather_client:0.5.0
 ```
 
 Then enter each project individually and execute the following to add the `p2p_libp2p` connection:
@@ -71,7 +71,7 @@ Then extend the `aea-config.yaml` of each project as follows:
 ``` yaml
 default_routing:
   ? "fetchai/oef_search:0.2.0"
-  : "fetchai/oef:0.3.0"
+  : "fetchai/oef:0.4.0"
 ```
 ### Run OEF
 
@@ -84,7 +84,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Run the weather station first:
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.3.0"
+aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.4.0"
 ```
 The weather station will form the genesis node. Wait until you see the lines:
 ``` bash
@@ -122,7 +122,7 @@ Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses dis
 Then fund your
 Now run the weather client:
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.3.0"
+aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.4.0"
 ```
 
 ## Deployed Test Network

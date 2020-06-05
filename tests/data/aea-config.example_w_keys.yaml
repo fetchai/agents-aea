@@ -7,7 +7,7 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/oef:0.3.0
+- fetchai/oef:0.4.0
 contracts: []
 protocols:
 - fetchai/oef_search:0.2.0
@@ -16,7 +16,7 @@ protocols:
 - fetchai/fipa:0.3.0
 skills:
 - fetchai/echo:0.1.0
-default_connection: fetchai/oef:0.3.0
+default_connection: fetchai/oef:0.4.0
 default_ledger: fetchai
 ledger_apis:
    fetchai:

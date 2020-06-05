@@ -24,7 +24,8 @@ import unittest.mock
 import pytest
 
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.mail.base import AEAConnectionError, Envelope, Multiplexer
+from aea.mail.base import AEAConnectionError, Envelope
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode

@@ -32,7 +32,8 @@ import pytest
 import aea
 from aea.configurations.base import PublicId
 from aea.connections.stub.connection import _process_line
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
 from ..conftest import _make_stub_connection

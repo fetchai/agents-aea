@@ -14,6 +14,7 @@ from threading import Thread
 from typing import List, Optional
 
 from aea.agent import Agent
+from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.identity.base import Identity
@@ -88,9 +89,12 @@ class MyAgent(Agent):
     identity = Identity(name="my_agent", address="some_address")
 
     # Set up the stub connection
-    stub_connection = StubConnection(
-        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+    configuration = ConnectionConfig(
+        input_file_path=INPUT_FILE,
+        output_file_path=OUTPUT_FILE,
+        connection_id=StubConnection.connection_id,
     )
+    stub_connection = StubConnection(configuration=configuration, identity=identity)
 
     # Create our Agent
     my_agent = MyAgent(identity, [stub_connection])
@@ -152,6 +156,7 @@ from threading import Thread
 from typing import List, Optional
 
 from aea.agent import Agent
+from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.identity.base import Identity
@@ -206,9 +211,12 @@ def run():
     identity = Identity(name="my_agent", address="some_address")
 
     # Set up the stub connection
-    stub_connection = StubConnection(
-        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+    configuration = ConnectionConfig(
+        input_file_path=INPUT_FILE,
+        output_file_path=OUTPUT_FILE,
+        connection_id=StubConnection.connection_id,
     )
+    stub_connection = StubConnection(configuration=configuration, identity=identity)
 
     # Create our Agent
     my_agent = MyAgent(identity, [stub_connection])

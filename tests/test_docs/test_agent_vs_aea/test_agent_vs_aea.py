@@ -16,17 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
 import os
 from pathlib import Path
 
+import pytest
+
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from .agent_code_block import run
 from ..helper import extract_code_blocks, extract_python_code
-from ...conftest import CUR_PATH, ROOT_DIR
+from ...conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
 
 MD_FILE = "docs/agent-vs-aea.md"
 PY_FILE = "test_docs/test_agent_vs_aea/agent_code_block.py"
@@ -50,6 +51,9 @@ class TestAgentVsAEA(BaseAEATestCase):
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS
+    )  # TODO: check why it raises permission error on file on windows platform!
     def test_run_agent(self):
         """Run the agent from the file."""
         run()

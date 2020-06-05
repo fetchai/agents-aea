@@ -16,17 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the weather skills."""
+import pytest
+
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestWeatherSkills(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
@@ -35,9 +37,9 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/weather_station:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
@@ -46,9 +48,9 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/weather_client:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
@@ -57,10 +59,10 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 
         # run agents
         self.set_agent_context(weather_station_aea_name)
-        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(weather_client_aea_name)
-        weather_client_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        weather_client_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         check_strings = (
             "updating weather station services on OEF service directory.",
@@ -103,6 +105,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
@@ -114,14 +117,14 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/weather_station:0.3.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.4.0", weather_station_aea_name
+            "fetchai/weather_station:0.5.0", weather_station_aea_name
         )
         assert (
             diff == []
@@ -129,14 +132,14 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/weather_client:0.2.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.4.0", weather_client_aea_name
+            "fetchai/weather_client:0.5.0", weather_client_aea_name
         )
         assert (
             diff == []
@@ -149,10 +152,10 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         )
 
         self.set_agent_context(weather_station_aea_name)
-        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(weather_client_aea_name)
-        weather_client_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        weather_client_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         check_strings = (
             "updating weather station services on OEF service directory.",

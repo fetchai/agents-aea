@@ -24,14 +24,13 @@ import logging
 import random
 import struct
 from asyncio import AbstractEventLoop, CancelledError
-from pathlib import Path
 from random import randint
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Union
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.crypto.fetchai import FetchAICrypto
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
@@ -76,33 +75,46 @@ class Uri:
         return self._port
 
 
-class Libp2pClientConnection(Connection):
+class P2PLibp2pClientConnection(Connection):
     """
     A libp2p client connection.
     Send and receive envelopes to and from agents on the p2p network without deploying a libp2p node.
     Connect to the libp2p node using traffic delegation service.
     """
 
-    def __init__(
-        self,
-        agent_addr: Address,
-        key: FetchAICrypto,
-        libp2p_delegate_uris: Sequence[Uri],
-        libp2p_delegate_certs: Sequence[Union[str, Path]],
-        **kwargs
-    ):
+    connection_id = PUBLIC_ID
+
+    def __init__(self, **kwargs):
         """
         Initialize a libp2p client connection.
-
-        :param key: FET secp256k1 curve private key of the connection, used for TLS handshake.
-        :param libp2p_delegate_uris: addresses (ip_address:port) of libp2p nodes that can be used as delegates.
-        :param libp2p_delegate_certs: pem encoded X509 certificates file, used to authenticate delegates
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
 
-        self.agent_addr = agent_addr
+        key_file = self.configuration.config.get("key_file")  # Optional[str]
+        # TOFIX(LR) should be a list of libp2p nodes config [(host, port, certfile)]
+        libp2p_host = self.configuration.config.get("libp2p_node_host")  # Optional[str]
+        libp2p_port = self.configuration.config.get("libp2p_node_port")  # Optional[int]
+        libp2p_cert_file = self.configuration.config.get(
+            "libp2p_cert_file"
+        )  # Optional[str]
+
+        if libp2p_host is None or libp2p_port is None:
+            raise ValueError("libp2p node tcp uri is mandatory")
+        libp2p_uri = Uri(host=libp2p_host, port=libp2p_port)
+
+        libp2p_delegate_uris = list()  # type: List[Uri]
+        libp2p_delegate_certs = list()  # type: List[str]
+
+        libp2p_delegate_uris.append(libp2p_uri)
+        if libp2p_cert_file is not None:
+            libp2p_delegate_certs.append(
+                libp2p_cert_file
+            )  # TOFIX(LR) will be mandatory
+
+        if key_file is None:
+            key = FetchAICrypto()
+        else:
+            key = FetchAICrypto(key_file)
 
         # client connection id
         self.key = key
@@ -164,7 +176,7 @@ class Libp2pClientConnection(Connection):
             raise e
 
     async def _setup_connection(self):
-        await self._send(bytes(self.agent_addr, "utf-8"))
+        await self._send(bytes(self.address, "utf-8"))
         await self._receive()
 
     async def disconnect(self) -> None:
@@ -273,45 +285,3 @@ class Libp2pClientConnection(Connection):
                 )
             )
             return None
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the stub connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        key_file = configuration.config.get("key_file")  # Optional[str]
-        # TOFIX(LR) should be a list of libp2p nodes config [(host, port, certfile)]
-        libp2p_host = configuration.config.get("libp2p_node_host")  # Optional[str]
-        libp2p_port = configuration.config.get("libp2p_node_port")  # Optional[int]
-        libp2p_cert_file = configuration.config.get("libp2p_cert_file")  # Optional[str]
-
-        if key_file is None:
-            key = FetchAICrypto()
-        else:
-            key = FetchAICrypto(key_file)
-
-        if libp2p_host is None or libp2p_port is None:
-            raise ValueError("libp2p node tcp uri is mandatory")
-        libp2p_uri = Uri(host=libp2p_host, port=libp2p_port)
-
-        uris = list()  # type: List[Uri]
-        certs_files = list()  # type: List[str]
-
-        uris.append(libp2p_uri)
-        if libp2p_cert_file is not None:
-            certs_files.append(libp2p_cert_file)  # TOFIX(LR) will be mandatory
-
-        return Libp2pClientConnection(
-            address,  # TOFIX(LR) need to generate signature as well
-            key,
-            uris,
-            certs_files,
-            address=address,
-            configuration=configuration,
-        )

@@ -25,7 +25,8 @@ import unittest.mock
 import pytest
 
 import aea
-from aea.mail.base import Envelope, InBox, Multiplexer, OutBox, URI
+from aea.mail.base import Envelope, URI
+from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 

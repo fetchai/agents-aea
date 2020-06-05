@@ -16,20 +16,24 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the generic buyer and seller skills."""
 
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_ETH_PRIVATE_KEY_1, FUNDED_ETH_PRIVATE_KEY_2
+from ...conftest import (
+    FUNDED_ETH_PRIVATE_KEY_1,
+    FUNDED_ETH_PRIVATE_KEY_2,
+    MAX_FLAKY_RERUNS,
+)
 
 
 @pytest.mark.unstable
 class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_generic(self):
         """Run the generic skills sequence."""
         deploy_aea_name = "deploy_aea"
@@ -50,13 +54,13 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
         self.force_set_config(setting_path, ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_ledger", "ethereum")
         self.add_item("skill", "fetchai/erc1155_deploy:0.4.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.4.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.5.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -75,13 +79,13 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         # add packages for agent two
         self.set_agent_context(client_aea_name)
         self.force_set_config(setting_path, ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_ledger", "ethereum")
         self.add_item("skill", "fetchai/erc1155_client:0.3.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.4.0", client_aea_name
+            "fetchai/erc1155_client:0.5.0", client_aea_name
         )
         assert (
             diff == []
@@ -99,7 +103,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
 
         # run agents
         self.set_agent_context(deploy_aea_name)
-        deploy_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        deploy_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         check_strings = (
             "updating erc1155 service on OEF search node.",
@@ -116,7 +120,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
 
         self.set_agent_context(client_aea_name)
-        client_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        client_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         check_strings = (
             "Sending PROPOSE to agent=",
