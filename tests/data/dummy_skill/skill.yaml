@@ -3,7 +3,7 @@ author: dummy_author
 version: 0.1.0
 description: a dummy_skill for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: Qmd3mY5TSBA632qYRixRVELXkmBWMZtvnxJyQC1oHDTuEm
   behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C

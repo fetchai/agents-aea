@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: The scaffold protocol scaffolds a protocol to be implemented by the developer.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmedGZfo1UqT6UJoRkHys9kmquia9BQcK17y2touwSENDU
   message.py: QmT7ymTdi3NaVZH6TdemrhTf5ChqbC6y7v489D4jvpaJzS

@@ -4,7 +4,7 @@ version: 0.4.0
 description: The carpark client skill implements the functionality to run a client
   for carpark data.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmPZ4bRmXpsDKD7ogCJHEMrtm67hpA5aqxvujgfQD1PtMd
   behaviours.py: QmboDuRrgmmFgfWkfvc5GwyYeAmSsJ8AXphhHvmMgMNpBY
