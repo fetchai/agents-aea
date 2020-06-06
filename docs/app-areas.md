@@ -1,6 +1,6 @@
 An AEA is an intelligent agent whose goal is generating economic value for its owner. It can represent machines, humans, or data. 
 
-There are five general application areas for AEAs:
+There are at least five general application areas for AEAs:
 
 * **Inhabitants**: agents paired with real world hardware devices such as drones, laptops, heat sensors, etc. An example can be found <a href="../thermometer-skills">here</a>.
 * **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between old (Web 2.0) and new (Web 3.0) economic models.
@@ -21,7 +21,7 @@ In the short-term we see AEAs primarily deployed in three areas:
 
 ## Multi-agent system versus agent-based modelling
 
-The Fetch.ai multi agent system is a real world multi-agent technological system and, although there is some overlap, it is not the same as agent based modelling where the goal is scientific behavioural observation rather than practical economic gain.
+The Fetch.ai multi-agent system is a real world multi-agent technological system and, although there is some overlap, it is not the same as agent based modelling where the goal is scientific behavioural observation rather than practical economic gain.
 
 Moreover, there is no restriction to *multi*. Single-agent applications are also possible.
 

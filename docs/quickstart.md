@@ -127,6 +127,25 @@ cd my_first_aea
 
 To learn more about the folder structure of an AEA project read on [here](../package-imports).
 
+<details><summary>Alternatively: step by step install</summary>
+
+<b> Create a new AEA </b>   
+<br>    
+First, create a new AEA project and enter it.   
+``` bash    
+aea create my_first_aea
+cd my_first_aea
+```
+<br>  
+<b>Add the echo skill</b>     
+<br>    
+Second, add the echo skill to the project. 
+``` bash
+aea add skill fetchai/echo:0.2.0
+```   
+This copies the `fetchai/echo:0.2.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.2.0` consists of the name of the author of the skill, followed by the skill name and its version.   
+</details>
+
 ## Usage of the stub connection	
 
 AEAs use envelopes containing messages for communication. We use a stub connection to send envelopes to and receive envelopes from the AEA.		
@@ -236,7 +255,7 @@ info: Echo Behaviour: teardown method called.
 
 We can write an end-to-end test for the AEA utilising helper classes provided by the framework.
 
-<details><summary>Step by step install</summary>
+<details><summary>Writing tests</summary>
 
 The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
@@ -318,17 +337,9 @@ aea delete my_first_aea
 
 ## Next steps
 
-For more detailed analysis of the core components of the framework, please check the following:
+To gain an understanding of the core components of the framework, please continue to the next step of 'Getting Started':
 
 - <a href="../core-components/">Core components</a>
-
-We recommend you learn more about the protocols agents use to communicate with each other. Understanding protocols is core to developing your own agent. Check out the following:
-
-- <a href="../protocol/">Protocols</a>
-
-We also recommend you have a look at skill development. Skills are the core business logic commponents of an AEA. Check out the following:
-
-- <a href="../skill/">Skills</a>
 
 For more demos, use cases or step by step guides, please check the following:
 
@@ -338,21 +349,3 @@ For more demos, use cases or step by step guides, please check the following:
 
 <br />
 
-<details><summary>Step by step install</summary>
-
-<b> Create a new AEA </b>		
-<br>		
-First, create a new AEA project and enter it.		
-``` bash		
-aea create my_first_aea
-cd my_first_aea
-```
-<br>  
-<b>Add the echo skill</b> 		
-<br>    
-Second, add the echo skill to the project.		
-``` bash
-aea add skill fetchai/echo:0.2.0		
-```		
-This copies the `fetchai/echo:0.2.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.2.0` consists of the name of the author of the skill, followed by the skill name and its version.		
-</details>
