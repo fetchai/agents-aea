@@ -26,7 +26,7 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from .multiplexer_standalone import run
 from ..helper import extract_code_blocks, extract_python_code
-from ...conftest import CUR_PATH, ROOT_DIR, skip_test_windows
+from ...conftest import CUR_PATH, ROOT_DIR
 
 MD_FILE = "docs/multiplexer-standalone.md"
 PY_FILE = "test_docs/test_multiplexer_standalone/multiplexer_standalone.py"
