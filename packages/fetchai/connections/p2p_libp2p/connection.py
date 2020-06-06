@@ -509,7 +509,12 @@ class P2PLibp2pConnection(Connection):
         assert (
             libp2p_host is not None and libp2p_port is not None and log_file is not None
         ), "Config is missing values!"
-        if libp2p_key_file is None:
+        if (
+            self.has_crypto_store
+            and self.crypto_store.crypto_objects.get("fetchai", None) is not None
+        ):
+            key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
+        elif libp2p_key_file is None:
             key = FetchAICrypto()
         else:
             key = FetchAICrypto(libp2p_key_file)
