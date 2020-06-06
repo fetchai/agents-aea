@@ -721,8 +721,8 @@ class TestFIPA(UseOef):
                 target=0,
                 query=Query([Constraint("something", ConstraintType(">", 1))]),
             )
-            with mock.patch(
-                "packages.fetchai.protocols.fipa.message.FipaMessage.Performative"
+            with mock.patch.object(
+                FipaMessage, "Performative"
             ) as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 FipaMessage.serializer.encode(msg), "Raises Value Error"
@@ -755,8 +755,8 @@ class TestFIPA(UseOef):
                 performative=FipaMessage.Performative.CFP,
                 query=Query([Constraint("something", ConstraintType(">", 1))]),
             )
-            with mock.patch(
-                "packages.fetchai.protocols.fipa.message.FipaMessage.Performative"
+            with mock.patch.object(
+                FipaMessage, "Performative"
             ) as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FipaMessage()

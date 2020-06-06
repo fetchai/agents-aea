@@ -166,7 +166,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
             "checking whether transaction=",
-            # "transaction=",
+            "Sending data to sender=",
         )
         missing_strings = self.missing_from_output(
             seller_aea_process, check_strings, is_terminating=False
@@ -184,8 +184,9 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "Settling transaction on chain!",
             "transaction was successful.",
-            "informing counterparty="
-            # "received INFORM from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
             buyer_aea_process, check_strings, is_terminating=False

@@ -68,7 +68,7 @@ Keep it running for all the following demos.
 First, fetch the seller AEA:
 ``` bash
 aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
-cd generic_seller
+cd my_seller_aea
 aea install
 ```
 
@@ -100,7 +100,7 @@ ledger_apis:
 Then, fetch the buyer AEA:
 ``` bash
 aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
-cd generic_buyer
+cd my_buyer_aea
 aea install
 ```
 
