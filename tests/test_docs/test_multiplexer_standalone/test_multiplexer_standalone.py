@@ -50,7 +50,7 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-@skip_test_windows
+    @skip_test_windows
     def test_run_agent(self):
         """Run the agent from the file."""
         run()
