@@ -25,7 +25,7 @@ import random
 import struct
 from asyncio import AbstractEventLoop, CancelledError
 from random import randint
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
@@ -111,7 +111,12 @@ class P2PLibp2pClientConnection(Connection):
                 libp2p_cert_file
             )  # TOFIX(LR) will be mandatory
 
-        if key_file is None:
+        if (
+            self.has_crypto_store
+            and self.crypto_store.crypto_objects.get("fetchai", None) is not None
+        ):
+            key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
+        elif key_file is None:
             key = FetchAICrypto()
         else:
             key = FetchAICrypto(key_file)

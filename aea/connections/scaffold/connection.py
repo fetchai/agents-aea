@@ -34,17 +34,20 @@ class MyScaffoldConnection(Connection):
     connection_id = PublicId.from_str("fetchai/scaffold:0.1.0")
 
     def __init__(
-        self, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+        self,
+        configuration: ConnectionConfig,
+        identity: Identity,
+        crypto_store: CryptoStore,
     ):
         """
         Initialize a connection to an SDK or API.
 
         :param configuration: the connection configuration.
-        :param cryptos: object to access the connection crypto objects.
+        :param crypto_store: object to access the connection crypto objects.
         :param identity: the identity object.
         """
         super().__init__(
-            configuration=configuration, cryptos=cryptos, identity=identity
+            configuration=configuration, crypto_store=crypto_store, identity=identity
         )
 
     async def connect(self) -> None:
