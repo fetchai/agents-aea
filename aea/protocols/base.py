@@ -317,5 +317,17 @@ class Protocol(Component):
         message_classes = list(filter(lambda x: re.match("\\w+Message", x[0]), classes))
         assert len(message_classes) == 1, "Not exactly one message class detected."
         message_class = message_classes[0][1]
+        class_module = importlib.import_module(
+            configuration.prefix_import_path + ".serialization"
+        )
+        classes = inspect.getmembers(class_module, inspect.isclass)
+        serializer_classes = list(
+            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
+        )
+        assert (
+            len(serializer_classes) == 1
+        ), "Not exactly one serializer class detected."
+        serialize_class = serializer_classes[0][1]
+        message_class.serializer = serialize_class
 
         return Protocol(configuration, message_class)

@@ -96,7 +96,9 @@ class TestGenerateProtocol:
 
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0 when generating a protocol."""
-        assert self.result.exit_code == 0
+        assert self.result.exit_code == 0, "Failed with stdout='{}'".format(
+            self.result.stdout
+        )
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the protocol folder contains a structurally valid configuration file."""

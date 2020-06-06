@@ -67,5 +67,3 @@ def _try_get_address(click_context, type_):
         return address
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
-    else:
-        return address
