@@ -3,7 +3,7 @@ author: fetchai
 version: 0.5.0
 description: An AEA to deploy and interact with an ERC1155
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

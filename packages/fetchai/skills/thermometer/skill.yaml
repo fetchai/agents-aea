@@ -3,7 +3,7 @@ author: fetchai
 version: 0.4.0
 description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmPv8BWTqVCZQJ8YVwWD6T6Hv4fbJZdX2KUiBC7Q32sPdF

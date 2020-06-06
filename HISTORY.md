@@ -1,5 +1,30 @@
 # Release History
 
+## 0.4.0 (2020-06-08)
+
+- Updates message handling in skills
+- Replaces serializer implementation; all serialization is now performed framework side
+- Updates all skills for compatibility with new message handling
+- Updates all protocols and protocol generator
+- Updates package loading mechnanism
+- Adds p2p_libp2p_client connection
+- Fixes CLI bugs and refactors CLI
+- Adds eject command to CLI
+- Exposes identity and connection cryptos to all connections
+- Updates connection loading mechanism
+- Updates all connections for compatibility with new loading mechanism
+- Extracts multiplexer into its own module
+- Implements list all CLI command 
+- Updates wallet to split into several crypto stores
+- Refactors component registry and resources
+- Extends soef connection functionality
+- Implements AEABuilder reentrancy
+- Updates p2p_libp2p connection
+- Adds support for configurable runtime
+- Refactors documentation
+- Multiple docs updates
+- Multiple test stability fixes
+
 ## 0.3.3 (2020-05-24)
 
 - Adds option to pass ledger apis to aea builder

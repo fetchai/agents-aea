@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: The scaffold contract scaffolds a contract to be implemented by the developer.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmPBwWhEg3wcH1q9612srZYAYdANVdWLDFWKs7TviZmVj6
   contract.py: QmXvjkD7ZVEJDJspEz5YApe5bRUxvZHNi8vfyeVHPyQD5G

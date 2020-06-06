@@ -3,7 +3,7 @@ author: fetchai
 version: 0.2.0
 description: The echo skill implements simple echo functionality.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
   behaviours.py: QmXARXRvJkpzuqnYNhJhv42Sk6J4KzRW2AKvC6FJWLU9JL
