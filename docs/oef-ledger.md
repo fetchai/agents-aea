@@ -66,3 +66,10 @@ If you experience any problems launching the `OEF search and communication node`
 Ledgers enable the AEAs to complete a transaction, which can involve the transfer of funds to each other or the execution of smart contracts.
 
 Whilst a ledger can, in principle, also be used to store structured data - for instance, training data in a machine learning model - in most use cases the resulting costs and privacy implications do not make this a relevant use of the ledger. Instead, usually only references to the structured data - often in the form of hashes - are stored on the ledger and the actual data is stored off-chain.
+
+### Framework side crypto and ledger implementations:
+
+
+## IPFS
+
+

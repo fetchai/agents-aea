@@ -6,9 +6,8 @@ In <a href="../core-components-1/">Core Components - Part 1</a> we discussed the
 
 ### Decision Maker
 
-The `DecisionMaker` component manages global agent state updates proposed by the skills and processes the resulting ledger transactions.
+The `DecisionMaker` can be thought off like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA.
 
-It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA.
 
 Skills communicate with the decision maker via `InternalMessages`. There exist two types of these: `TransactionMessage` and `StateUpdateMessage`.
 
@@ -16,7 +15,33 @@ The `StateUpdateMessage` is used to initialize the decision maker with preferenc
 
 The `TransactionMessage` is used by skills to propose a transaction to the decision-maker. It can be used either for settling the transaction on-chain or to sign a transaction to be used within a negotiation.
 
+An `InternalMessage`, say `tx_msg` is sent to the decision maker like so from any skill:
+```
+self.context.decision_maker_message_queue.put_nowait(tx_msg)
+```
+
 The decision maker processes messages and can accept or reject them.
+
+To process `InternalMessages` from the decision maker in a given skill you need to create a `TransactionHandler` like so:
+
+``` python
+class TransactionHandler(Handler):
+
+	protocol_id = InternalMessage.protocol_id
+
+	def handle(self, message: Message):
+		"""
+		Handle an internal message.
+
+		:param message: the internal message from the decision maker.
+		"""
+		# code to handle the message
+```
+
+The framework implements a default `DecisionMaker`. You can implement your own and mount it. To do so, define a single python file in core of the project and point to it in the agent configuration file. The below implements a very basic decision maker:
+
+``` python
+```
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
