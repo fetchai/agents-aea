@@ -428,7 +428,7 @@ def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> in
     :retun: token balance.
     """
     try:
-        if type_ not in agent_config.ledger_apis_dict:
+        if type_ not in agent_config.ledger_apis_dict:  # pragma: no cover
             raise ValueError(
                 "No ledger api config for {} provided in aea-config.yaml.".format(type_)
             )

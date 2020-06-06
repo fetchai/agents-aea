@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the fipa protocol."""
+
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
+
+FipaMessage.serializer = FipaSerializer

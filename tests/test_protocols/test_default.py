@@ -26,7 +26,6 @@ from unittest import mock
 import pytest
 
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 
 def test_default_bytes_serialization():
@@ -38,8 +37,8 @@ def test_default_bytes_serialization():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg_bytes = DefaultSerializer().encode(expected_msg)
-    actual_msg = DefaultSerializer().decode(msg_bytes)
+    msg_bytes = DefaultMessage.serializer.encode(expected_msg)
+    actual_msg = DefaultMessage.serializer.decode(msg_bytes)
     assert expected_msg == actual_msg
 
     with pytest.raises(ValueError):
@@ -47,7 +46,7 @@ def test_default_bytes_serialization():
             "aea.protocols.default.message.DefaultMessage.Performative"
         ) as mock_type_enum:
             mock_type_enum.BYTES.value = "unknown"
-            assert DefaultSerializer().encode(expected_msg), ""
+            assert DefaultMessage.serializer.encode(expected_msg), ""
 
 
 def test_default_error_serialization():
@@ -61,8 +60,8 @@ def test_default_error_serialization():
         error_msg="An error",
         error_data={"error": b"Some error data"},
     )
-    msg_bytes = DefaultSerializer().encode(msg)
-    actual_msg = DefaultSerializer().decode(msg_bytes)
+    msg_bytes = DefaultMessage.serializer.encode(msg)
+    actual_msg = DefaultMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -79,7 +78,7 @@ def test_default_error_serialization():
     #         content = msg.content
     #         body["content"] = base64.b64encode(content).decode("utf-8")
     #         bytes_msg = json.dumps(body).encode("utf-8")
-    #         returned_msg = DefaultSerializer().decode(bytes_msg)
+    #         returned_msg = DefaultMessage.serializer.decode(bytes_msg)
     #         assert msg != returned_msg, "Messages must be different"
 
 

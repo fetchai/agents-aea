@@ -20,11 +20,12 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId, SkillId
 from aea.mail import base_pb2
+from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +208,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
         envelope_pb.protocol_id = str(envelope.protocol_id)
-        envelope_pb.message = envelope.message
+        envelope_pb.message = envelope.message_bytes
         if envelope.context is not None:
             envelope_pb.uri = envelope.context.uri_raw
 
@@ -260,7 +261,7 @@ class Envelope:
         to: Address,
         sender: Address,
         protocol_id: ProtocolId,
-        message: bytes,
+        message: Union[Message, bytes],
         context: Optional[EnvelopeContext] = None,
     ):
         """
@@ -309,14 +310,21 @@ class Envelope:
         self._protocol_id = protocol_id
 
     @property
-    def message(self) -> bytes:
+    def message(self) -> Union[Message, bytes]:
         """Get the protocol-specific message."""
         return self._message
 
     @message.setter
-    def message(self, message: bytes) -> None:
+    def message(self, message: Union[Message, bytes]) -> None:
         """Set the protocol-specific message."""
         self._message = message
+
+    @property
+    def message_bytes(self) -> bytes:
+        """Get the protocol-specific message."""
+        if isinstance(self._message, Message):
+            return self._message.encode()
+        return self._message
 
     @property
     def context(self) -> EnvelopeContext:
@@ -350,7 +358,7 @@ class Envelope:
             and self.context == other.context
         )
 
-    def encode(self, serializer: Optional[EnvelopeSerializer] = None) -> bytes:
+    def encode(self, serializer: Optional[EnvelopeSerializer] = None,) -> bytes:
         """
         Encode the envelope.
 

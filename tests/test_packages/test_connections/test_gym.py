@@ -31,7 +31,6 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.gym.connection import GymChannel, GymConnection
 from packages.fetchai.protocols.gym.message import GymMessage
-from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
@@ -77,12 +76,12 @@ class TestGymConnection:
             action=GymMessage.AnyObject("any_action"),
             step_id=1,
         )
-        msg_bytes = GymSerializer().encode(msg)
+        msg.counterparty = "_to_key"
         envelope = Envelope(
             to="_to_key",
             sender="_from_key",
             protocol_id=GymMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
 
         self.gym_con.connection_status.is_connected = False

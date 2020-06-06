@@ -26,12 +26,10 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
@@ -97,14 +95,10 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": FipaSerializer().encode(msg)},
+            error_data={"fipa_message": msg.encode()},
         )
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(default_msg),
-        )
+        default_msg.counterparty = msg.counterparty
+        self.context.outbox.put_message(message=default_msg)
 
     def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -230,12 +224,7 @@ class OEFSearchHandler(Handler):
                     self.context.agent_name, opponent_addr[-5:]
                 )
             )
-            self.context.outbox.put_message(
-                to=opponent_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(cfp_msg),
-            )
+            self.context.outbox.put_message(message=cfp_msg)
         else:
             self.context.logger.info(
                 "[{}]: found no agents, continue searching.".format(
@@ -286,17 +275,13 @@ class TransactionHandler(Handler):
                 performative=FipaMessage.Performative.ACCEPT_W_INFORM,
                 info={"tx_signature": tx_signature},
             )
+            inform_msg.counterparty = counterparty_addr
             self.context.logger.info(
                 "[{}]: sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(
                     self.context.agent_name, counterparty_addr[-5:], tx_signature
                 )
             )
-            self.context.outbox.put_message(
-                to=counterparty_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(inform_msg),
-            )
+            self.context.outbox.put_message(message=inform_msg)
         else:
             self.context.logger.info(
                 "[{}]: signing failed: tx_msg_response={}".format(

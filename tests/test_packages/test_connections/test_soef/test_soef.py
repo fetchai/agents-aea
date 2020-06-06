@@ -21,7 +21,7 @@
 import logging
 from threading import Thread
 
-from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
@@ -38,7 +38,6 @@ from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 from tests.common.utils import wait_for_condition
 
@@ -59,7 +58,7 @@ def test_soef():
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.1.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.2.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
@@ -90,12 +89,11 @@ def test_soef():
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        message_b = OefSearchSerializer().encode(message)
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
-            message=message_b,
+            protocol_id=message.protocol_id,
+            message=message,
         )
         logger.info(
             "Registering agent at location=({},{}) by agent={}".format(
@@ -120,12 +118,11 @@ def test_soef():
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        message_b = OefSearchSerializer().encode(message)
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
-            message=message_b,
+            protocol_id=message.protocol_id,
+            message=message,
         )
         logger.info("Registering agent personality")
         multiplexer.put(envelope)
@@ -140,12 +137,11 @@ def test_soef():
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        message_b = OefSearchSerializer().encode(message)
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
-            message=message_b,
+            protocol_id=message.protocol_id,
+            message=message,
         )
         logger.info(
             "Searching for agents in radius={} of myself at location=({},{})".format(
@@ -157,7 +153,7 @@ def test_soef():
 
         # check for search results
         envelope = multiplexer.get()
-        message = OefSearchSerializer().decode(envelope.message)
+        message = envelope.message
         assert len(message.agents) >= 0
 
     finally:

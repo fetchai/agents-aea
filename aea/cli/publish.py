@@ -69,7 +69,7 @@ def _validate_config(ctx: Context) -> None:
     """
     try:
         validate_item_config("agent", Path(ctx.cwd))
-    except AEAConfigException as e:
+    except AEAConfigException as e:  # pragma: no cover
         raise click.ClickException("Failed to validate agent config. {}".format(str(e)))
 
 

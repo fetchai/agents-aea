@@ -1,22 +1,22 @@
 name: erc1155_client
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: Qmaxi3vMMikBSUYLbqWXP3KWGkbNE1n1ThmYt268U2z3kF
+  behaviours.py: QmZjPpSukWHJd4FZdxZgVSHzLpMQDEdXgJVTEzNfjbtiQX
   dialogues.py: QmPe9v2HSgd68dB39YEoS2tLw79vKZ8V7svRg2nRqHHWnb
-  handlers.py: Qmapnrjsq2CDUibpnDXSV7VMrdx2pnNeKJRWPdXVyPxyAR
+  handlers.py: QmZVi3EQiuQPYRqZLfZK5DGvzJciqPgN1p26Z4TdUkh3aj
   strategy.py: Qme3Ck9KfWPWXRhV1GvHfYL65VapShETK8jyJqs3a2HBR5
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.3.0
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 behaviours:
   search:
     args:

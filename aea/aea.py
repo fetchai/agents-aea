@@ -241,7 +241,10 @@ class AEA(Agent):
             return
 
         try:
-            msg = protocol.serializer.decode(envelope.message)
+            if isinstance(envelope.message, Message):
+                msg = envelope.message
+            else:
+                msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
             msg.is_incoming = True
         except Exception as e:

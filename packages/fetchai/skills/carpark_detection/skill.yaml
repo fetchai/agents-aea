@@ -1,25 +1,25 @@
 name: carpark_detection
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmZqWhS3LRUs83Vx9LjoeLoWPBziA7Bf11DcPu97YuhQ6M
+  behaviours.py: QmepjZcV5PVT5a9S8cGSAkR8tqPDD6dhGgELywDJUQyqTR
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmaPNzCHC9RnrSQJDGt8kvkerdXS3jYhkPmzz3NtT9eAUh
   dialogues.py: QmXvtptqguRrfHxRpQT9gQYE85x7KLyALmV6Wd7r8ipXxc
-  handlers.py: QmcsfXB51dDWWfYzjKcn4FaRvBkNy6hRo7cqgZqnikafNC
+  handlers.py: QmaMGQv42116aunu21zKLyCETPsVYa1FBDn6x6XMZis1aW
   strategy.py: QmcFQ9QymhW2SRczxiicsgJbUt2PyqZdb3rmQ3ueqWUmzq
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 behaviours:
   car_park_detection:
     args:

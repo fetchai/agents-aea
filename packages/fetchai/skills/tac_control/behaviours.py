@@ -26,9 +26,7 @@ from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.skills.base import Behaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase
 from packages.fetchai.skills.tac_control.parameters import Parameters
 
@@ -122,12 +120,8 @@ class TACBehaviour(Behaviour):
             dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
-        )
+        oef_msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=oef_msg)
         self._registered_desc = desc
 
     def _unregister_tac(self) -> None:
@@ -136,22 +130,19 @@ class TACBehaviour(Behaviour):
 
         :return: None.
         """
-        self._oef_msg_id += 1
-        self.context.logger.info(
-            "[{}]: Unregistering TAC data model".format(self.context.agent_name)
-        )
-        oef_msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(self._oef_msg_id), ""),
-            service_description=self._registered_desc,
-        )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
-        )
-        self._registered_desc = None
+        if self._registered_desc is not None:
+            self._oef_msg_id += 1
+            self.context.logger.info(
+                "[{}]: Unregistering TAC data model".format(self.context.agent_name)
+            )
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(self._oef_msg_id), ""),
+                service_description=self._registered_desc,
+            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
+            self._registered_desc = None
 
     def _start_tac(self):
         """Create a game and send the game configuration to every registered agent."""
@@ -186,12 +177,8 @@ class TACBehaviour(Behaviour):
                     self.context.agent_name, agent_address, str(tac_msg)
                 )
             )
-            self.context.outbox.put_message(
-                to=agent_address,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = agent_address
+            self.context.outbox.put_message(message=tac_msg)
 
     def _cancel_tac(self):
         """Notify agents that the TAC is cancelled."""
@@ -203,12 +190,8 @@ class TACBehaviour(Behaviour):
         )
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
-            self.context.outbox.put_message(
-                to=agent_addr,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = agent_addr
+            self.context.outbox.put_message(message=tac_msg)
         if game.phase == Phase.GAME:
             self.context.logger.info(
                 "[{}]: Finished competition:\n{}".format(

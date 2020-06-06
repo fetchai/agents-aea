@@ -34,7 +34,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = ProtocolId("fetchai", "http", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "http", "0.2.0")
 
     class Performative(Enum):
         """Performatives for the http protocol."""

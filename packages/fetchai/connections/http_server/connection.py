@@ -45,7 +45,6 @@ from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 SUCCESS = 200
 NOT_FOUND = 404
@@ -136,9 +135,9 @@ class Request(OpenAPIRequest):
         envelope = Envelope(
             to=agent_address,
             sender=self.id,
-            protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.2.0"),
             context=context,
-            message=HttpSerializer().encode(http_message),
+            message=http_message,
         )
         return envelope
 
@@ -184,7 +183,10 @@ class Response:
         :return: the response
         """
         if envelope is not None:
-            http_message = cast(HttpMessage, HttpSerializer().decode(envelope.message))
+            assert isinstance(
+                envelope.message, HttpMessage
+            ), "Message not of type HttpMessage"
+            http_message = cast(HttpMessage, envelope.message)
             if http_message.performative == HttpMessage.Performative.RESPONSE:
                 response = Response(
                     http_message.status_code,

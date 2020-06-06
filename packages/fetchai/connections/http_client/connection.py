@@ -32,7 +32,6 @@ from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 SUCCESS = 200
 NOT_FOUND = 404
@@ -101,9 +100,10 @@ class HTTPClientChannel:
                 raise ValueError("Cannot send message.")
 
             if request_envelope is not None:
-                request_http_message = cast(
-                    HttpMessage, HttpSerializer().decode(request_envelope.message)
-                )
+                assert isinstance(
+                    request_envelope.message, HttpMessage
+                ), "Message not of type HttpMessage"
+                request_http_message = cast(HttpMessage, request_envelope.message)
                 if (
                     request_http_message.performative
                     == HttpMessage.Performative.REQUEST
@@ -152,9 +152,9 @@ class HTTPClientChannel:
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",
-            protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.2.0"),
             context=context,
-            message=HttpSerializer().encode(http_message),
+            message=http_message,
         )
         return envelope
 

@@ -13,7 +13,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- 'fetchai/oef_search:0.1.0'
+- 'fetchai/oef_search:0.2.0'
 behaviours:
   my_search_behaviour:
     args:
@@ -30,7 +30,7 @@ dependencies: {}
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
 ``` bash
-aea add protocol fetchai/oef_search:0.1.0
+aea add protocol fetchai/oef_search:0.2.0
 ```
 ``` bash
 aea add connection fetchai/oef:0.4.0
@@ -58,7 +58,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.1.0
+- fetchai/oef_search:0.2.0
 behaviours:
   service:
     args:

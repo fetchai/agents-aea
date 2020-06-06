@@ -36,7 +36,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.3.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
@@ -47,7 +47,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/carpark_client:0.3.0")
+        self.add_item("skill", "fetchai/carpark_client:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
@@ -118,7 +118,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(carpark_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.3.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.run_install()
 
@@ -133,7 +133,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(carpark_client_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/carpark_client:0.3.0")
+        self.add_item("skill", "fetchai/carpark_client:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.run_install()
 

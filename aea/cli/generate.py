@@ -138,7 +138,7 @@ def _generate_item(click_context, item_type, specification_path):
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )
-    except FileExistsError:
+    except FileExistsError:  # pragma: no cover
         raise click.ClickException(
             "A {} with this name already exists. Please choose a different name and try again.".format(
                 item_type

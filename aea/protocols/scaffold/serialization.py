@@ -27,7 +27,8 @@ from aea.protocols.base import Serializer
 class MyScaffoldSerializer(Serializer):  # pragma: no cover
     """Serialization for the scaffold protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Decode the message.
 
@@ -36,7 +37,8 @@ class MyScaffoldSerializer(Serializer):  # pragma: no cover
         """
         raise NotImplementedError  # pragma: no cover
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode the message.
 

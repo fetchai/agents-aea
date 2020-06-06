@@ -32,7 +32,8 @@ from packages.fetchai.protocols.tac.message import TacMessage
 class TacSerializer(Serializer):
     """Serialization for the 'tac' protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a 'Tac' message into bytes.
 
@@ -133,7 +134,8 @@ class TacSerializer(Serializer):
         tac_bytes = tac_msg.SerializeToString()
         return tac_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a 'Tac' message.
 

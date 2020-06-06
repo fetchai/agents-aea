@@ -23,7 +23,7 @@ cd my_gym_aea
 
 ### Add the gym skill 
 ``` bash
-aea add skill fetchai/gym:0.2.0
+aea add skill fetchai/gym:0.3.0
 ```
 
 ### Copy the gym environment to the AEA directory

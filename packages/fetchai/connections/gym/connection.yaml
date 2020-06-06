@@ -6,15 +6,15 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
-  connection.py: QmYjrnaVzcmFGN3RF8TMPk1gCdPYEo9C4VJnnSPCcWj8qS
+  connection.py: QmZMzb3KRwuz3pprdVmYKrAr2sxyPQVgTksBJZQHauoDed
 fingerprint_ignore_patterns: []
 protocols:
-- fetchai/gym:0.1.0
+- fetchai/gym:0.2.0
 class_name: GymConnection
 config:
   env: ''
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/gym:0.1.0
+- fetchai/gym:0.2.0
 dependencies:
   gym: {}

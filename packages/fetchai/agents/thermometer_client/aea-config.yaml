@@ -11,12 +11,12 @@ connections:
 - fetchai/stub:0.5.0
 contracts: []
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 skills:
 - fetchai/error:0.2.0
-- fetchai/thermometer_client:0.2.0
+- fetchai/thermometer_client:0.3.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: fetchai
 ledger_apis:

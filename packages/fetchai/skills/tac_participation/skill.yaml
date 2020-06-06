@@ -1,22 +1,22 @@
 name: tac_participation
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The tac participation skill implements the logic for an AEA to participate
   in the TAC.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
-  behaviours.py: QmTi5FPgKu1NfFBDbacesUP9sxJq3YhVFp3i4JT8n8PdJp
+  behaviours.py: QmeKWfS3kQJ3drc8zTms2mPNpq7yNHj6eoYgd5edS9R5HN
   game.py: QmNxw6Ca7iTQTCU2fZ6ftJfDQpwTBtCCwMPRL1WvT5CzW9
-  handlers.py: Qmetp7jATg1egzNDQBV4ETxHuTV1h6PyTW1mWSC96eNoRr
+  handlers.py: QmdG4cvksdwZzmqtnis2yZSS5LeFuZnGhE3hnAtv3djt9G
   search.py: QmYsFDh6BY8ENi3dPiZs1DSvkrCw2wgjBQjNfJXxRQf9us
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.3.0
 protocols:
-- fetchai/oef_search:0.1.0
-- fetchai/tac:0.1.0
+- fetchai/oef_search:0.2.0
+- fetchai/tac:0.2.0
 behaviours:
   tac:
     args:

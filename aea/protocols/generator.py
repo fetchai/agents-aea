@@ -2062,7 +2062,8 @@ class ProtocolGenerator:
         )
 
         # encoder
-        cls_str += self.indent + "def encode(self, msg: Message) -> bytes:\n"
+        cls_str += self.indent + "@staticmethod\n"
+        cls_str += self.indent + "def encode(msg: Message) -> bytes:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Encode a '{}' message into bytes.\n\n".format(
@@ -2144,7 +2145,8 @@ class ProtocolGenerator:
         self._change_indent(-1)
 
         # decoder
-        cls_str += self.indent + "def decode(self, obj: bytes) -> Message:\n"
+        cls_str += self.indent + "@staticmethod\n"
+        cls_str += self.indent + "def decode(obj: bytes) -> Message:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Decode bytes into a '{}' message.\n\n".format(
@@ -2422,8 +2424,22 @@ class ProtocolGenerator:
         """
         init_str = _copyright_header_str(self.protocol_specification.author)
         init_str += "\n"
-        init_str += '"""This module contains the support resources for the {} protocol."""\n'.format(
+        init_str += '"""This module contains the support resources for the {} protocol."""\n\n'.format(
             self.protocol_specification.name
+        )
+        init_str += "from packages.{}.protocols.{}.message import {}Message\n".format(
+            self.protocol_specification.author,
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
+        )
+        init_str += "from packages.{}.protocols.{}.serialization import {}Serializer\n\n".format(
+            self.protocol_specification.author,
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
+        )
+        init_str += "{}Message.serializer = {}Serializer\n".format(
+            self.protocol_specification_in_camel_case,
+            self.protocol_specification_in_camel_case,
         )
 
         return init_str

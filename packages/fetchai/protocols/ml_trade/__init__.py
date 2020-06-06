@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the ml_trade protocol."""
+
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
+from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
+
+MlTradeMessage.serializer = MlTradeSerializer

@@ -29,7 +29,6 @@ from aea.helpers.search.models import (
 )
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
 def test_oef_serialization_description():
@@ -41,9 +40,9 @@ def test_oef_serialization_description():
         dialogue_reference=(str(1), ""),
         service_description=desc,
     )
-    msg_bytes = OefSearchSerializer().encode(msg)
+    msg_bytes = OefSearchMessage.serializer.encode(msg)
     assert len(msg_bytes) > 0
-    recovered_msg = OefSearchSerializer().decode(msg_bytes)
+    recovered_msg = OefSearchMessage.serializer.decode(msg_bytes)
     assert recovered_msg == msg
 
 
@@ -55,7 +54,7 @@ def test_oef_serialization_query():
         dialogue_reference=(str(1), ""),
         query=query,
     )
-    msg_bytes = OefSearchSerializer().encode(msg)
+    msg_bytes = OefSearchMessage.serializer.encode(msg)
     assert len(msg_bytes) > 0
-    recovered_msg = OefSearchSerializer().decode(msg_bytes)
+    recovered_msg = OefSearchMessage.serializer.decode(msg_bytes)
     assert recovered_msg == msg

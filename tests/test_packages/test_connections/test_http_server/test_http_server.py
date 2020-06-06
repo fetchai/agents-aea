@@ -36,7 +36,6 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ....conftest import (
     ROOT_DIR,
@@ -59,7 +58,7 @@ class TestHTTPServerConnectionConnectDisconnect:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
         cls.configuration = ConnectionConfig(
             host=cls.host,
             port=cls.port,
@@ -94,8 +93,8 @@ class TestHTTPServerConnectionSend:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = HTTPServerConnection.connection_id
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -131,7 +130,7 @@ class TestHTTPServerConnectionSend:
             to=client_id,
             sender="from_key",
             protocol_id=self.protocol_id,
-            message=HttpSerializer().encode(message),
+            message=message,
         )
         await self.http_connection.send(envelope)
         # we expect the envelope to be dropped
@@ -158,7 +157,7 @@ class TestHTTPServerConnectionSend:
             to=client_id,
             sender="from_key",
             protocol_id=self.protocol_id,
-            message=HttpSerializer().encode(message),
+            message=message,
         )
         self.http_connection.channel.pending_request_ids.add("to_key")
         await self.http_connection.send(envelope)
@@ -192,8 +191,8 @@ class TestHTTPServerConnectionGET404:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = HTTPServerConnection.connection_id
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -266,8 +265,8 @@ class TestHTTPServerConnectionGET408:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = HTTPServerConnection.connection_id
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -357,8 +356,8 @@ class TestHTTPServerConnectionGET200:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = HTTPServerConnection.connection_id
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -405,9 +404,7 @@ class TestHTTPServerConnectionGET200:
             await asyncio.sleep(1)
             envelope = await http_connection.receive()
             if envelope is not None:
-                incoming_message = cast(
-                    HttpMessage, HttpSerializer().decode(envelope.message)
-                )
+                incoming_message = cast(HttpMessage, envelope.message)
                 message = HttpMessage(
                     performative=HttpMessage.Performative.RESPONSE,
                     dialogue_reference=("", ""),
@@ -424,7 +421,7 @@ class TestHTTPServerConnectionGET200:
                     sender=envelope.to,
                     protocol_id=envelope.protocol_id,
                     context=envelope.context,
-                    message=HttpSerializer().encode(message),
+                    message=message,
                 )
                 await http_connection.send(response_envelope)
                 is_exiting_correctly = True
@@ -467,8 +464,8 @@ class TestHTTPServerConnectionPOST404:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = HTTPServerConnection.connection_id
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -541,8 +538,8 @@ class TestHTTPServerConnectionPOST408:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = HTTPServerConnection.connection_id
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -632,8 +629,8 @@ class TestHTTPServerConnectionPOST201:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
-        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = HTTPServerConnection.connection_id
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -679,9 +676,7 @@ class TestHTTPServerConnectionPOST201:
             await asyncio.sleep(1)
             envelope = await http_connection.receive()
             if envelope is not None:
-                incoming_message = cast(
-                    HttpMessage, HttpSerializer().decode(envelope.message)
-                )
+                incoming_message = cast(HttpMessage, envelope.message)
                 message = HttpMessage(
                     performative=HttpMessage.Performative.RESPONSE,
                     dialogue_reference=("", ""),
@@ -698,7 +693,7 @@ class TestHTTPServerConnectionPOST201:
                     sender=envelope.to,
                     protocol_id=envelope.protocol_id,
                     context=envelope.context,
-                    message=HttpSerializer().encode(message),
+                    message=message,
                 )
                 await http_connection.send(response_envelope)
                 is_exiting_correctly = True

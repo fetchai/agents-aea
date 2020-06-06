@@ -20,7 +20,6 @@
 """This module contains the tests of the messages module."""
 
 from packages.fetchai.protocols.gym.message import GymMessage
-from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 
 def test_gym_message_instantiation():
@@ -50,8 +49,8 @@ def test_gym_serialization():
         action=GymMessage.AnyObject("any_action"),
         step_id=1,
     )
-    msg_bytes = GymSerializer().encode(msg)
-    actual_msg = GymSerializer().decode(msg_bytes)
+    msg_bytes = GymMessage.serializer.encode(msg)
+    actual_msg = GymMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -63,7 +62,7 @@ def test_gym_serialization():
         done=True,
         step_id=1,
     )
-    msg_bytes = GymSerializer().encode(msg)
-    actual_msg = GymSerializer().decode(msg_bytes)
+    msg_bytes = GymMessage.serializer.encode(msg)
+    actual_msg = GymMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg

@@ -10,7 +10,7 @@ aea install
 aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/thermometer:0.3.0
+aea add skill fetchai/thermometer:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 ```
@@ -23,7 +23,7 @@ aea install
 aea create my_thermometer_client
 cd my_thermometer_client
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/thermometer_client:0.2.0
+aea add skill fetchai/thermometer_client:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 ```

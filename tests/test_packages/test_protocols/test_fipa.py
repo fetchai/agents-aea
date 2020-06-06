@@ -33,7 +33,6 @@ from aea.protocols.base import Message
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -49,20 +48,24 @@ def test_fipa_cfp_serialization():
         performative=FipaMessage.Performative.CFP,
         query=query,
     )
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = FipaSerializer().decode(actual_envelope.message)
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -77,28 +80,26 @@ def test_fipa_cfp_serialization_bytes():
         performative=FipaMessage.Performative.CFP,
         query=query,
     )
-    msg.counterparty = "sender"
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = FipaSerializer().decode(actual_envelope.message)
-    actual_msg.counterparty = "sender"
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
-
-    deserialised_msg = FipaSerializer().decode(envelope.message)
-    deserialised_msg.counterparty = "sender"
-    assert msg.get("performative") == deserialised_msg.get("performative")
 
 
 def test_fipa_propose_serialization():
@@ -111,25 +112,26 @@ def test_fipa_propose_serialization():
         performative=FipaMessage.Performative.PROPOSE,
         proposal=proposal,
     )
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = FipaSerializer().decode(actual_envelope.message)
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
     expected_msg = msg
-
-    p1 = actual_msg.get("proposal")
-    p2 = expected_msg.get("proposal")
-    assert p1.values == p2.values
+    assert expected_msg == actual_msg
 
 
 def test_fipa_accept_serialization():
@@ -140,22 +142,24 @@ def test_fipa_accept_serialization():
         target=0,
         performative=FipaMessage.Performative.ACCEPT,
     )
-    msg.counterparty = "sender"
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = FipaSerializer().decode(actual_envelope.message)
-    actual_msg.counterparty = "sender"
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -168,21 +172,27 @@ def test_performative_match_accept():
         target=0,
         performative=FipaMessage.Performative.MATCH_ACCEPT,
     )
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
-    msg.counterparty = "sender"
+    msg.counterparty = "receiver"
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
-    deserialised_msg = FipaSerializer().decode(envelope.message)
-    assert msg.get("performative") == deserialised_msg.get("performative")
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
 def test_performative_accept_with_inform():
@@ -194,21 +204,26 @@ def test_performative_accept_with_inform():
         performative=FipaMessage.Performative.ACCEPT_W_INFORM,
         info={"address": "dummy_address"},
     )
-
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
-    deserialised_msg = FipaSerializer().decode(envelope.message)
-    assert msg.get("performative") == deserialised_msg.get("performative")
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
 def test_performative_match_accept_with_inform():
@@ -220,21 +235,26 @@ def test_performative_match_accept_with_inform():
         performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
         info={"address": "dummy_address", "signature": "my_signature"},
     )
-
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
-    deserialised_msg = FipaSerializer().decode(envelope.message)
-    assert msg.get("performative") == deserialised_msg.get("performative")
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
 def test_performative_inform():
@@ -246,21 +266,26 @@ def test_performative_inform():
         performative=FipaMessage.Performative.INFORM,
         info={"foo": "bar"},
     )
-
-    msg_bytes = FipaSerializer().encode(msg)
+    msg.counterparty = "receiver"
     envelope = Envelope(
         to="receiver",
         sender="sender",
         protocol_id=FipaMessage.protocol_id,
-        message=msg_bytes,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
-    assert expected_envelope == actual_envelope
-    deserialised_msg = FipaSerializer().decode(envelope.message)
-    assert msg.get("performative") == deserialised_msg.get("performative")
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.counterparty = actual_envelope.to
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
 # def test_unknown_performative():
@@ -312,7 +337,7 @@ def test_fipa_encoding_unknown_performative():
 
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(FipaMessage.Performative, "__eq__", return_value=False):
-            FipaSerializer().encode(msg)
+            FipaMessage.serializer.encode(msg)
 
 
 def test_fipa_decoding_unknown_performative():
@@ -324,10 +349,10 @@ def test_fipa_decoding_unknown_performative():
         performative=FipaMessage.Performative.ACCEPT,
     )
 
-    encoded_msg = FipaSerializer().encode(msg)
+    encoded_msg = FipaMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(FipaMessage.Performative, "__eq__", return_value=False):
-            FipaSerializer().decode(encoded_msg)
+            FipaMessage.serializer.decode(encoded_msg)
 
 
 class TestDialogues:

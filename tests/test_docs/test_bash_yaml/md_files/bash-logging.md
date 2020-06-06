@@ -19,7 +19,7 @@ logging_config:
   version: 1
 private_key_paths: {}
 protocols:
-- fetchai/default:0.1.0
+- fetchai/default:0.2.0
 registry_path: ../packages
 skills:
 - fetchai/error:0.2.0

@@ -73,12 +73,9 @@ from aea.helpers.search.models import (
 )
 from aea.mail.base import Address, Envelope
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
@@ -432,12 +429,11 @@ class OEFChannel(OEFAgent):
             performative=FipaMessage.Performative.CFP,
             query=query if query != b"" else None,
         )
-        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=origin,
             protocol_id=FipaMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -527,12 +523,11 @@ class OEFChannel(OEFAgent):
             message_id=RESPONSE_MESSAGE_ID,
             agents=tuple(agents),
         )
-        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
             protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -562,12 +557,11 @@ class OEFChannel(OEFAgent):
             message_id=RESPONSE_MESSAGE_ID,
             oef_error_operation=operation,
         )
-        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
             protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -595,12 +589,11 @@ class OEFChannel(OEFAgent):
             error_msg="Destination not available",
             error_data={},
         )
-        msg_bytes = DefaultSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
             protocol_id=DefaultMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -621,7 +614,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.1.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.2.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -639,8 +632,10 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        oef_message = OefSearchSerializer().decode(envelope.message)
-        oef_message = cast(OefSearchMessage, oef_message)
+        assert isinstance(
+            envelope.message, OefSearchMessage
+        ), "Message not of type OefSearchMessage"
+        oef_message = cast(OefSearchMessage, envelope.message)
         self.oef_msg_id += 1
         self.oef_msg_it_to_dialogue_reference[self.oef_msg_id] = (
             oef_message.dialogue_reference[0],

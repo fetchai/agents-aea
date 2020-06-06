@@ -28,7 +28,6 @@ import pytest
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 import packages
 
@@ -89,17 +88,21 @@ class TestTCPCommunication:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg_bytes = DefaultSerializer().encode(msg)
         expected_envelope = Envelope(
             to=self.server_addr,
             sender=self.client_addr_1,
             protocol_id=DefaultMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         self.client_1_multiplexer.put(expected_envelope)
         actual_envelope = self.server_multiplexer.get(block=True, timeout=5.0)
 
-        assert expected_envelope == actual_envelope
+        assert expected_envelope.to == actual_envelope.to
+        assert expected_envelope.sender == actual_envelope.sender
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert expected_envelope.message != actual_envelope.message
+        msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        assert expected_envelope.message == msg
 
     def test_communication_server_client(self):
         """Test that envelopes can be sent from a server to a client."""
@@ -110,29 +113,37 @@ class TestTCPCommunication:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg_bytes = DefaultSerializer().encode(msg)
-
         expected_envelope = Envelope(
             to=self.client_addr_1,
             sender=self.server_addr,
             protocol_id=DefaultMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_1_multiplexer.get(block=True, timeout=5.0)
 
-        assert expected_envelope == actual_envelope
+        assert expected_envelope.to == actual_envelope.to
+        assert expected_envelope.sender == actual_envelope.sender
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert expected_envelope.message != actual_envelope.message
+        msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        assert expected_envelope.message == msg
 
         expected_envelope = Envelope(
             to=self.client_addr_2,
             sender=self.server_addr,
             protocol_id=DefaultMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_2_multiplexer.get(block=True, timeout=5.0)
 
-        assert expected_envelope == actual_envelope
+        assert expected_envelope.to == actual_envelope.to
+        assert expected_envelope.sender == actual_envelope.sender
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert expected_envelope.message != actual_envelope.message
+        msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        assert expected_envelope.message == msg
 
     @classmethod
     def teardown_class(cls):

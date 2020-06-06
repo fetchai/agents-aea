@@ -1,22 +1,22 @@
 name: thermometer
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmViRmMqhXUZymShpuK1sS683rTS8jf89pmmzeLNQt4fbp
+  behaviours.py: QmPv8BWTqVCZQJ8YVwWD6T6Hv4fbJZdX2KUiBC7Q32sPdF
   dialogues.py: Qmf3WGxKXa655d67icvZUSk2MzFtUxB6k2ggznSwNZQEjK
-  handlers.py: QmT5hTk4TFipnbkQy5ZfUDTdVqddDNZhXx73WyDTiKTzrX
+  handlers.py: QmaGZWgkcxHikmrzGB7Cnp6WAYBDeEf9wDztu77fAJ2aW6
   strategy.py: QmeoxCowVvHowrggqwYEmywVhx9JGK9Ef7wwaVrQHT5CQt
   thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 behaviours:
   service_registration:
     args:

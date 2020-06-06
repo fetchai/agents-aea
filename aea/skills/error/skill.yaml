@@ -6,11 +6,11 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmYm7UaWVmRy2i35MBKZRnBrpWBJswLdEH6EY1QQKXdQES
-  handlers.py: QmS95DzMH1gEX7WerHp5gq3pZfNjbJQrPDg32wMg2AyTaY
+  handlers.py: QmV1yRiqVZr5fKd6xbDVxtE68kjcWvrH7UEcxKd82jLM68
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.1.0
+- fetchai/default:0.2.0
 behaviours: {}
 handlers:
   error_handler:

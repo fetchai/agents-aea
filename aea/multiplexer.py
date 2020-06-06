@@ -24,11 +24,19 @@ from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
 from typing import Dict, List, Optional, Sequence, Tuple, cast
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStatus
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
-from aea.mail.base import AEAConnectionError, Address, Empty, Envelope, logger
+from aea.mail.base import (
+    AEAConnectionError,
+    Address,
+    Empty,
+    Envelope,
+    EnvelopeContext,
+    logger,
+)
+from aea.protocols.base import Message
 
 
 class AsyncMultiplexer:
@@ -623,14 +631,16 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer):
+    def __init__(self, multiplexer: Multiplexer, default_address: Address):
         """
         Initialize the outbox.
 
         :param multiplexer: the multiplexer
+        :param default_address: the default address of the agent
         """
         super().__init__()
         self._multiplexer = multiplexer
+        self._default_address = default_address
 
     def empty(self) -> bool:
         """
@@ -648,27 +658,44 @@ class OutBox:
         :return: None
         """
         logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}'...".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
+            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'...".format(
+                envelope.to,
+                envelope.sender,
+                envelope.protocol_id,
+                envelope.message,
+                envelope.context,
             )
         )
+        assert isinstance(
+            envelope.message, Message
+        ), "Only Message type allowed in envelope message field when putting into outbox."
         self._multiplexer.put(envelope)
 
     def put_message(
-        self, to: Address, sender: Address, protocol_id: ProtocolId, message: bytes
+        self,
+        message: Message,
+        sender: Optional[Address] = None,
+        context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
 
         This constructs an envelope with the input arguments.
 
-        :param to: the recipient of the envelope.
-        :param sender: the sender of the envelope.
-        :param protocol_id: the protocol id.
-        :param message: the content of the message.
+        :param sender: the sender of the envelope (optional field only necessary when the non-default address is used for sending).
+        :param message: the message.
+        :param context: the envelope context
         :return: None
         """
+        assert isinstance(message, Message), "Provided message not of type Message."
+        assert (
+            message.counterparty
+        ), "Provided message has message.counterparty not set."
         envelope = Envelope(
-            to=to, sender=sender, protocol_id=protocol_id, message=message
+            to=message.counterparty,
+            sender=sender or self._default_address,
+            protocol_id=message.protocol_id,
+            message=message,
+            context=context,
         )
-        self._multiplexer.put(envelope)
+        self.put(envelope)

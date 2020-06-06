@@ -19,7 +19,7 @@ For example, in the `ErrorHandler(Handler)` class, the code often grabs a refere
 Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
 
 ``` python
-self.context.outbox.put_message(to=recipient, sender=self.context.agent_address, protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
+self.context.outbox.put_message(message=reply)
 ``` 
 
 Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the `DecisionMaker`.
@@ -245,7 +245,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.1.0
+- fetchai/default:0.2.0
 ```
 
 
@@ -258,7 +258,7 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `fetchai/default:0.1.0` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:0.2.0` protocol which provides error codes for the above.
 
 
 <br />

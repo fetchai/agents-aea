@@ -30,6 +30,7 @@ from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input_file"
@@ -50,11 +51,15 @@ class MyAgent(Agent):
         print("React called for tick {}".format(self.tick))
         while not self.inbox.empty():
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if envelope is not None:
+            if (
+                envelope is not None
+                and envelope.protocol_id == DefaultMessage.protocol_id
+            ):
                 sender = envelope.sender
                 receiver = envelope.to
                 envelope.to = sender
                 envelope.sender = receiver
+                envelope.message = DefaultMessage.serializer.decode(envelope.message)
                 print(
                     "Received envelope from {} with protocol_id={}".format(
                         sender, envelope.protocol_id
@@ -100,7 +105,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            "my_agent,other_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
+            "my_agent,other_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)

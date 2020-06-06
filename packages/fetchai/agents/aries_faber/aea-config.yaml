@@ -13,12 +13,12 @@ connections:
 - fetchai/webhook:0.2.0
 contracts: []
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/http:0.1.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/http:0.2.0
+- fetchai/oef_search:0.2.0
 skills:
-- fetchai/aries_faber:0.1.0
+- fetchai/aries_faber:0.2.0
 - fetchai/error:0.2.0
 default_connection: fetchai/http_client:0.3.0
 default_ledger: fetchai

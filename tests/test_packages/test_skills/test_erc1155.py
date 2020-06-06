@@ -57,7 +57,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_deploy:0.4.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.5.0")
 
         diff = self.difference_to_fetched_agent(
             "fetchai/erc1155_deployer:0.5.0", deploy_aea_name
@@ -82,7 +82,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_client:0.3.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.4.0")
 
         diff = self.difference_to_fetched_agent(
             "fetchai/erc1155_client:0.5.0", client_aea_name

@@ -28,8 +28,6 @@ from unittest import TestCase, mock
 
 from click import ClickException
 
-from pexpect.exceptions import EOF  # type: ignore
-
 import pytest
 
 import yaml
@@ -745,10 +743,9 @@ def test_run_with_install_deps():
             encoding="utf-8",
             logfile=sys.stdout,
         )
-        process.expect_all(["Start processing messages..."])
+        process.expect_all(["Start processing messages..."], timeout=30)
         time.sleep(1.0)
         process.control_c()
-        process.expect_all([EOF])
         process.wait_to_complete(10)
         assert process.returncode == 0
 
@@ -822,7 +819,7 @@ def test_run_with_install_deps_and_requirement_file():
             encoding="utf-8",
             logfile=sys.stdout,
         )
-        process.expect_all(["Start processing messages..."])
+        process.expect_all(["Start processing messages..."], timeout=30)
         time.sleep(1.0)
         process.control_c()
         process.wait_to_complete(10)
@@ -1457,7 +1454,7 @@ class TestRunFailsWhenProtocolNotComplete:
 
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "protocol", "fetchai/fipa:0.2.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", "fetchai/fipa:0.3.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0

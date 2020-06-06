@@ -74,7 +74,7 @@ A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` ne
 
 First, fetch the seller AEA, which will provide data:
 ``` bash
-aea fetch fetchai/generic_seller:0.1.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
@@ -87,7 +87,7 @@ The following steps create the seller from scratch:
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_seller:0.4.0
+aea add skill fetchai/generic_seller:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
 ```
@@ -107,7 +107,7 @@ ledger_apis:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/generic_buyer:0.1.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
@@ -120,7 +120,7 @@ The following steps create the car data client from scratch:
 aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_buyer:0.3.0
+aea add skill fetchai/generic_buyer:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
 ```
