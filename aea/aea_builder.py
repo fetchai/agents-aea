@@ -291,6 +291,7 @@ class AEABuilder:
         """
         self._name = None  # type: Optional[str]
         self._private_key_paths = {}  # type: Dict[str, Optional[str]]
+        self._connection_private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
@@ -479,7 +480,10 @@ class AEABuilder:
         return self
 
     def add_private_key(
-        self, identifier: str, private_key_path: Optional[PathLike] = None
+        self,
+        identifier: str,
+        private_key_path: Optional[PathLike] = None,
+        is_connection: bool = False,
     ) -> "AEABuilder":
         """
         Add a private key path.
@@ -487,27 +491,44 @@ class AEABuilder:
         :param identifier: the identifier for that private key path.
         :param private_key_path: an (optional) path to the private key file.
             If None, the key will be created at build time.
+        :param is_connection: if the pair is for the connection cryptos
         :return: the AEABuilder
         """
-        self._private_key_paths[identifier] = (
-            str(private_key_path) if private_key_path is not None else None
-        )
+        if is_connection:
+            self._connection_private_key_paths[identifier] = (
+                str(private_key_path) if private_key_path is not None else None
+            )
+        else:
+            self._private_key_paths[identifier] = (
+                str(private_key_path) if private_key_path is not None else None
+            )
         return self
 
-    def remove_private_key(self, identifier: str) -> "AEABuilder":
+    def remove_private_key(
+        self, identifier: str, is_connection: bool = False
+    ) -> "AEABuilder":
         """
         Remove a private key path by identifier, if present.
 
         :param identifier: the identifier of the private key.
+        :param is_connection: if the pair is for the connection cryptos
         :return: the AEABuilder
         """
-        self._private_key_paths.pop(identifier, None)
+        if is_connection:
+            self._connection_private_key_paths.pop(identifier, None)
+        else:
+            self._private_key_paths.pop(identifier, None)
         return self
 
     @property
     def private_key_paths(self) -> Dict[str, Optional[str]]:
         """Get the private key paths."""
         return self._private_key_paths
+
+    @property
+    def connection_private_key_paths(self) -> Dict[str, Optional[str]]:
+        """Get the connection private key paths."""
+        return self._connection_private_key_paths
 
     def add_ledger_api_config(self, identifier: str, config: Dict) -> "AEABuilder":
         """
@@ -777,7 +798,9 @@ class AEABuilder:
         :return: the AEA object.
         """
         resources = Resources()
-        wallet = Wallet(copy(self.private_key_paths))
+        wallet = Wallet(
+            copy(self.private_key_paths), copy(self.connection_private_key_paths)
+        )
         identity = self._build_identity_from_wallet(wallet)
         ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
@@ -1070,6 +1093,15 @@ class AEABuilder:
         ) in agent_configuration.private_key_paths_dict.items():
             self.add_private_key(ledger_identifier, private_key_path)
 
+        # load connection private keys
+        for (
+            ledger_identifier,
+            private_key_path,
+        ) in agent_configuration.connection_private_key_paths_dict.items():
+            self.add_private_key(
+                ledger_identifier, private_key_path, is_connection=True
+            )
+
         # load ledger API configurations
         for (
             ledger_identifier,
@@ -1238,7 +1270,7 @@ class AEABuilder:
                     ComponentType.CONNECTION,
                     configuration,
                     identity=identity,
-                    cryptos=wallet.connection_cryptos,
+                    crypto_store=wallet.connection_cryptos,
                 ),
             )
 

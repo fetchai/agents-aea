@@ -65,7 +65,7 @@ class Connection(Component, ABC):
         self,
         configuration: ConnectionConfig,
         identity: Optional[Identity] = None,
-        cryptos: Optional[CryptoStore] = None,
+        crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
     ):
@@ -77,7 +77,7 @@ class Connection(Component, ABC):
 
         :param configuration: the connection configuration.
         :param identity: the identity object held by the agent.
-        :param cryptos: the crypto store for encrypted communication.
+        :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
@@ -89,8 +89,8 @@ class Connection(Component, ABC):
         self._loop: Optional[AbstractEventLoop] = None
         self._connection_status = ConnectionStatus()
 
-        self._identity: Optional[Identity] = identity
-        self._cryptos: Optional[CryptoStore] = cryptos
+        self._identity = identity
+        self._crypto_store = crypto_store
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -126,10 +126,15 @@ class Connection(Component, ABC):
         return self._identity.address
 
     @property
-    def cryptos(self) -> CryptoStore:
+    def crypto_store(self) -> CryptoStore:
         """Get the crypto store."""
-        assert self._cryptos is not None, "Crypto not available."
-        return self._cryptos
+        assert self._crypto_store is not None, "CryptoStore not available."
+        return self._crypto_store
+
+    @property
+    def has_crypto_store(self) -> bool:
+        """Check if the connection has the crypto store."""
+        return self._crypto_store is not None
 
     @property
     def component_type(self) -> ComponentType:
@@ -189,14 +194,14 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_dir(
-        cls, directory: str, identity: Identity, cryptos: CryptoStore
+        cls, directory: str, identity: Identity, crypto_store: CryptoStore
     ) -> "Connection":
         """
         Load the connection from a directory.
 
         :param directory: the directory to the connection package.
         :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
+        :param crypto_store: object to access the connection crypto objects.
         :return: the connection object.
         """
         configuration = cast(
@@ -204,18 +209,21 @@ class Connection(Component, ABC):
             ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
         )
         configuration._directory = Path(directory)
-        return Connection.from_config(configuration, identity, cryptos)
+        return Connection.from_config(configuration, identity, crypto_store)
 
     @classmethod
     def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+        cls,
+        configuration: ConnectionConfig,
+        identity: Identity,
+        crypto_store: CryptoStore,
     ) -> "Connection":
         """
         Load a connection from a configuration.
 
         :param configuration: the connection configuration.
         :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
+        :param crypto_store: object to access the connection crypto objects.
         :return: an instance of the concrete connection class.
         """
         configuration = cast(ConnectionConfig, configuration)
@@ -243,5 +251,5 @@ class Connection(Component, ABC):
             connection_class_name
         )
         return connection_class(
-            configuration=configuration, identity=identity, cryptos=cryptos
+            configuration=configuration, identity=identity, crypto_store=crypto_store
         )
