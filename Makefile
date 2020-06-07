@@ -125,4 +125,5 @@ new_env: clean
 .PHONY: install_env
 install_env:
 	pipenv install --dev --skip-lock
+	pip uninstall typing -y
 	pip install -e .[all]
