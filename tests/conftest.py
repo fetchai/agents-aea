@@ -799,6 +799,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 
     :return: decorated method.
     """
+
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
         try:
@@ -808,9 +809,11 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
                 print("libp2p log file ======================= {}".format(log_file))
                 with open(log_file, "r") as f:
                     print(f.read())
-                print("=======================================") 
+                print("=======================================")
             raise e
+
     return wrapper
+
 
 class CwdException(Exception):
     """Exception to raise if cwd was not restored by test."""
