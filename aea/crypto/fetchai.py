@@ -93,6 +93,7 @@ class FetchAICrypto(Crypto[Entity]):
 
     @classmethod
     def generate_private_key(cls) -> Entity:
+        """Generate a key pair for fetchai network."""
         entity = Entity()
         return entity
 

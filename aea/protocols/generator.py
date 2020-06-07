@@ -687,7 +687,7 @@ class ProtocolGenerator:
         enum_str += self.indent + "def __str__(self):\n"
         self._change_indent(1)
         enum_str += self.indent + '"""Get the string representation."""\n'
-        enum_str += self.indent + "return self.value\n"
+        enum_str += self.indent + "return str(self.value)\n"
         self._change_indent(-1)
         enum_str += "\n"
         self._change_indent(-1)
@@ -1513,7 +1513,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "\n"
 
         # stats class
-        cls_str += self.indent + "class {}DialogueStats(object):\n".format(
+        cls_str += self.indent + "class {}DialogueStats:\n".format(
             self.protocol_specification_in_camel_case
         )
         self._change_indent(1)
