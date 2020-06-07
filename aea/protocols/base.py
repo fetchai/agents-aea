@@ -215,7 +215,7 @@ class ProtobufSerializer(Serializer):
     def encode(msg: Message) -> bytes:
         """Encode a message into bytes using Protobuf."""
         body_json = Struct()
-        body_json.update(msg.body)
+        body_json.update(msg.body)  # pylint: disable=no-member
         body_bytes = body_json.SerializeToString()
         return body_bytes
 

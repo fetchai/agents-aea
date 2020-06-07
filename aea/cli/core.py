@@ -84,7 +84,7 @@ def cli(click_context, skip_consistency_check: bool) -> None:
 @click.pass_context
 def gui(click_context, port):  # pragma: no cover
     """Run the CLI GUI."""
-    import aea.cli_gui
+    import aea.cli_gui  # pylint: disable=import-outside-toplevel
 
     click.echo("Running the GUI.....(press Ctrl+C to exit)")
     aea.cli_gui.run(port)

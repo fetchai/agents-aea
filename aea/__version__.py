@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Specifies the version of the TAC package."""
+"""Specifies the version of the AEA package."""
 
 __title__ = "aea"
 __description__ = "Autonomous Economic Agent framework"

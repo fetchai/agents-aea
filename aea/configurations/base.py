@@ -124,7 +124,7 @@ class PackageType(Enum):
 
     def __str__(self):
         """Convert to string."""
-        return self.value
+        return str(self.value)
 
 
 def _get_default_configuration_file_name_from_type(
@@ -177,7 +177,7 @@ class ComponentType(Enum):
 
     def __str__(self) -> str:
         """Get the string representation."""
-        return self.value
+        return str(self.value)
 
 
 class ProtocolSpecificationParseError(Exception):
@@ -775,7 +775,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         :return: the configuration object.
         :raises FileNotFoundError: if the configuration file is not found.
         """
-        from aea.configurations.loader import ConfigLoader
+        from aea.configurations.loader import (  # pylint: disable=import-outside-toplevel
+            ConfigLoader,
+        )
 
         configuration_loader = ConfigLoader.from_configuration_type(
             component_type.to_configuration_type()
@@ -1459,7 +1461,7 @@ class SpeechActContentConfig(Configuration):
     def _check_consistency(self):
         """Check consistency of the args."""
         for content_name, content_type in self.args.items():
-            if type(content_name) is not str or type(content_type) is not str:
+            if not isinstance(content_name, str) or not isinstance(content_type, str):
                 raise ProtocolSpecificationParseError(
                     "Contents' names and types must be string."
                 )
@@ -1572,7 +1574,7 @@ class ProtocolSpecification(ProtocolConfig):
             )
         content_dict = {}
         for performative, speech_act_content_config in self.speech_acts.read_all():
-            if type(performative) is not str:
+            if not isinstance(performative, str):
                 raise ProtocolSpecificationParseError(
                     "A 'performative' is not specified as a string."
                 )

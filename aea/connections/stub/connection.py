@@ -38,9 +38,10 @@ from aea.mail.base import Envelope
 
 if platform.is_darwin():
     """Cause fsevent fails on multithreading on macos."""
+    # pylint: disable=ungrouped-imports
     from watchdog.observers.kqueue import KqueueObserver as Observer
 else:
-    from watchdog.observers import Observer
+    from watchdog.observers import Observer  # pylint: disable=ungrouped-imports
 
 
 logger = logging.getLogger(__name__)

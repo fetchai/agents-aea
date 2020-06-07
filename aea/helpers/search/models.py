@@ -42,11 +42,17 @@ class Location:
         self.latitude = latitude
         self.longitude = longitude
 
-    def distance(self, other) -> float:
+    def distance(self, other: "Location") -> float:
+        """
+        Get the distance to another location.
+
+        :param other: the other location
+        :retun: the distance
+        """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
     def __eq__(self, other):
-        if type(other) != Location:
+        if not isinstance(other, Location):
             return False
         else:
             return self.latitude == other.latitude and self.longitude == other.longitude
@@ -236,7 +242,7 @@ class Description:
                 ),
                 None,
             )
-            if type(value) != attribute.type:
+            if not isinstance(value, attribute.type):
                 # values does not match type in data model
                 raise AttributeInconsistencyException(
                     "Attribute {} has incorrect type: {}".format(
@@ -299,7 +305,7 @@ class ConstraintTypes(Enum):
 
     def __str__(self):
         """Get the string representation."""
-        return self.value
+        return str(self.value)
 
 
 class ConstraintType:
@@ -784,7 +790,7 @@ class Query:
         :return ``None``
         :raises ValueError: if the query does not satisfy some sanity requirements.
         """
-        if type(self.constraints) != list:
+        if not isinstance(self.constraints, list):
             raise ValueError(
                 "Constraints must be a list (`List[Constraint]`). Instead is of type '{}'.".format(
                     type(self.constraints).__name__

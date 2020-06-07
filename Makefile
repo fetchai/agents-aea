@@ -43,6 +43,10 @@ lint:
 	black aea benchmark examples packages scripts tests
 	flake8 aea benchmark examples packages scripts tests
 
+.PHONY: pylint
+pylint:
+	pylint aea
+
 .PHONY: security
 security:
 	bandit -s B101 -r aea benchmark examples packages scripts tests

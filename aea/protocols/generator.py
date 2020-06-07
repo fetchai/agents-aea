@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the protocol generator."""
+# pylint: skip-file
 
 import itertools
 import logging

@@ -244,7 +244,7 @@ class AsyncRuntime(BaseRuntime):
             return
 
         def set_task():
-            self._stopping_task = self._loop.create_task(self._stop_coro())
+            self._stopping_task = self._loop.create_task(self._stop_runtime())
 
         self._loop.call_soon_threadsafe(set_task)
 

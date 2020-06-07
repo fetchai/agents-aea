@@ -90,6 +90,7 @@ jobs:
         run: |
           tox -e black-check
           tox -e flake8
+          tox -e pylint
       - name: Static type check
         run: tox -e mypy
       - name: Check package versions in documentation

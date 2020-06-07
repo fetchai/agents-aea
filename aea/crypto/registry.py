@@ -101,7 +101,7 @@ class EntryPoint(RegexConstrainedString):
         return fn
 
 
-class CryptoSpec(object):
+class CryptoSpec:
     """A specification for a particular instance of a crypto object."""
 
     def __init__(
@@ -127,7 +127,7 @@ class CryptoSpec(object):
         return crypto
 
 
-class CryptoRegistry(object):
+class CryptoRegistry:
     """Registry for Crypto classes."""
 
     def __init__(self):

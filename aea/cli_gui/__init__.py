@@ -146,8 +146,8 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
         item_descs
     ), "Number of item ids and descriptions does not match!"
 
-    for i in range(0, len(item_ids)):
-        output.append({"id": item_ids[i], "description": item_descs[i]})
+    for idx, item_id in enumerate(item_ids):
+        output.append({"id": item_id, "description": item_descs[idx]})
 
     for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
         err += line + "\n"

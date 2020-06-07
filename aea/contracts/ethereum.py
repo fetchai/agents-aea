@@ -48,19 +48,23 @@ class Contract(BaseContract):
 
     @property
     def abi(self) -> Dict[str, Any]:
+        """Get the abi."""
         return self._abi
 
     @property
     def bytecode(self) -> bytes:
+        """Get the bytecode."""
         return self._bytecode
 
     @property
     def instance(self) -> EthereumContract:
+        """Get the contract instance."""
         assert self._instance is not None, "Instance not set!"
         return self._instance
 
     @property
     def is_deployed(self) -> bool:
+        """Check if the contract is deployed."""
         return self.instance.address is not None
 
     def set_instance(self, ledger_api: LedgerApi) -> None:
