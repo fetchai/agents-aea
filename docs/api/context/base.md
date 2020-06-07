@@ -1,10 +1,10 @@
 <a name=".aea.context.base"></a>
-## aea.context.base
+# aea.context.base
 
 This module contains the agent context class.
 
 <a name=".aea.context.base.AgentContext"></a>
-### AgentContext
+## AgentContext Objects
 
 ```python
 class AgentContext()

@@ -94,9 +94,15 @@ nav:
         - AEA Builder: 'api/aea_builder.md'
         - Agent: 'api/agent.md'
         - Agent Loop: 'api/agent_loop.md'
+        - Multiplexer: 'api/multiplexer.md'
+        - Runtime: 'api/runtime.md'
+        - Components:
+          - Base: 'api/components/base.md'
+          - Loader: 'api/components/loader.md'
         - Configurations:
           - Base: 'api/configurations/base.md'
           - Components: 'api/configurations/components.md'
+          - Constants: 'api/configurations/constants.md'
           - Loader: 'api/configurations/loader.md'
         - Connections:
           - Base: 'api/connections/base.md'
@@ -110,6 +116,7 @@ nav:
           - Cosmos: 'api/crypto/cosmos.md'
           - Ethereum: 'api/crypto/ethereum.md'
           - Fetchai: 'api/crypto/fetchai.md'
+          - Helpers: 'api/crypto/helpers.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
           - Registry: 'api/crypto/registry.md'
           - Wallet: 'api/crypto/wallet.md'
@@ -122,6 +129,7 @@ nav:
             - Transaction: 'api/decision_maker/messages/transaction.md'
         - Helpers:
           - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
+          - Async Utils: 'api/helpers/async_utils.md'
           - Base: 'api/helpers/base.md'
           - Dialogue:
             - Base: 'api/helpers/dialogue/base.md'
@@ -144,7 +152,10 @@ nav:
             - Custom Types: 'api/protocols/default/custom_types.md'
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
-        - Resources: 'api/registries/resources.md'
+        - Registries:
+          - Base: 'api/registries/base.md'
+          - Filter: 'api/registries/filter.md'
+          - Resources: 'api/registries/resources.md'
         - Skills:
           - Base: 'api/skills/base.md'
           - Error Skill: 'api/skills/error/handlers.md'

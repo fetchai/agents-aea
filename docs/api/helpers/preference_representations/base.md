@@ -1,5 +1,5 @@
 <a name=".aea.helpers.preference_representations.base"></a>
-## aea.helpers.preference`_`representations.base
+# aea.helpers.preference`_`representations.base
 
 Preference representation helpers.
 

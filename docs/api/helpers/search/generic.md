@@ -1,10 +1,10 @@
 <a name=".aea.helpers.search.generic"></a>
-## aea.helpers.search.generic
+# aea.helpers.search.generic
 
 This module contains a generic data model.
 
 <a name=".aea.helpers.search.generic.GenericDataModel"></a>
-### GenericDataModel
+## GenericDataModel Objects
 
 ```python
 class GenericDataModel(DataModel)

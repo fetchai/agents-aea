@@ -1,10 +1,10 @@
 <a name=".aea.skills.behaviours"></a>
-## aea.skills.behaviours
+# aea.skills.behaviours
 
 This module contains the classes for specific behaviours.
 
 <a name=".aea.skills.behaviours.SimpleBehaviour"></a>
-### SimpleBehaviour
+## SimpleBehaviour Objects
 
 ```python
 class SimpleBehaviour(Behaviour,  ABC)
@@ -54,7 +54,7 @@ Do the action.
 Tear the behaviour down.
 
 <a name=".aea.skills.behaviours.CompositeBehaviour"></a>
-### CompositeBehaviour
+## CompositeBehaviour Objects
 
 ```python
 class CompositeBehaviour(Behaviour,  ABC)
@@ -63,7 +63,7 @@ class CompositeBehaviour(Behaviour,  ABC)
 This class implements a composite behaviour.
 
 <a name=".aea.skills.behaviours.CyclicBehaviour"></a>
-### CyclicBehaviour
+## CyclicBehaviour Objects
 
 ```python
 class CyclicBehaviour(SimpleBehaviour,  ABC)
@@ -101,7 +101,7 @@ Return True if the behaviour is terminated, False otherwise.
 The user should implement it properly to determine the stopping condition.
 
 <a name=".aea.skills.behaviours.OneShotBehaviour"></a>
-### OneShotBehaviour
+## OneShotBehaviour Objects
 
 ```python
 class OneShotBehaviour(SimpleBehaviour,  ABC)
@@ -137,7 +137,7 @@ Return True if the behaviour is terminated, False otherwise.
 Wrap the call of the action. This method must be called only by the framework.
 
 <a name=".aea.skills.behaviours.TickerBehaviour"></a>
-### TickerBehaviour
+## TickerBehaviour Objects
 
 ```python
 class TickerBehaviour(SimpleBehaviour,  ABC)
@@ -212,7 +212,7 @@ Check whether it is time to act, according to the tick_interval constraint and t
 True if it is time to act, false otherwise.
 
 <a name=".aea.skills.behaviours.SequenceBehaviour"></a>
-### SequenceBehaviour
+## SequenceBehaviour Objects
 
 ```python
 class SequenceBehaviour(CompositeBehaviour,  ABC)
@@ -265,7 +265,7 @@ Implement the behaviour.
 Return True if the behaviour is terminated, False otherwise.
 
 <a name=".aea.skills.behaviours.State"></a>
-### State
+## State Objects
 
 ```python
 class State(SimpleBehaviour,  ABC)
@@ -318,7 +318,7 @@ Return True if the behaviour is terminated, False otherwise.
 Reset initial conditions.
 
 <a name=".aea.skills.behaviours.FSMBehaviour"></a>
-### FSMBehaviour
+## FSMBehaviour Objects
 
 ```python
 class FSMBehaviour(CompositeBehaviour,  ABC)

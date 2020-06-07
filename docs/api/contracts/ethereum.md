@@ -1,10 +1,10 @@
 <a name=".aea.contracts.ethereum"></a>
-## aea.contracts.ethereum
+# aea.contracts.ethereum
 
 The base ethereum contract.
 
 <a name=".aea.contracts.ethereum.Contract"></a>
-### Contract
+## Contract Objects
 
 ```python
 class Contract(BaseContract)

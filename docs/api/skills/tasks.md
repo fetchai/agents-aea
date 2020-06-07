@@ -1,10 +1,10 @@
 <a name=".aea.skills.tasks"></a>
-## aea.skills.tasks
+# aea.skills.tasks
 
 This module contains the classes for tasks.
 
 <a name=".aea.skills.tasks.Task"></a>
-### Task
+## Task Objects
 
 ```python
 class Task()
@@ -125,7 +125,7 @@ Related to a well-known bug: https://bugs.python.org/issue8296
 None
 
 <a name=".aea.skills.tasks.TaskManager"></a>
-### TaskManager
+## TaskManager Objects
 
 ```python
 class TaskManager()

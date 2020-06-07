@@ -1,10 +1,10 @@
 <a name=".aea.agent"></a>
-## aea.agent
+# aea.agent
 
 This module contains the implementation of a generic agent.
 
 <a name=".aea.agent.AgentState"></a>
-### AgentState
+## AgentState Objects
 
 ```python
 class AgentState(Enum)
@@ -19,7 +19,7 @@ In particular, it can be one of the following states:
 - AgentState.RUNNING: when the agent is running.
 
 <a name=".aea.agent.Liveness"></a>
-### Liveness
+## Liveness Objects
 
 ```python
 class Liveness()
@@ -65,7 +65,7 @@ Start the liveness.
 Stop the liveness.
 
 <a name=".aea.agent.Agent"></a>
-### Agent
+## Agent Objects
 
 ```python
 class Agent(ABC)
@@ -77,7 +77,7 @@ This class provides an abstract base class for a generic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, timeout: float = 1.0, is_debug: bool = False, loop_mode: Optional[str] = None) -> None
+ | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, timeout: float = 1.0, is_debug: bool = False, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None) -> None
 ```
 
 Instantiate the agent.
@@ -90,10 +90,31 @@ Instantiate the agent.
 - `timeout`: the time in (fractions of) seconds to time out an agent between act and react
 - `is_debug`: if True, run the agent in debug mode (does not connect the multiplexer).
 - `loop_mode`: loop_mode to choose agent run loop.
+- `runtime`: runtime to up agent.
 
 **Returns**:
 
 None
+
+<a name=".aea.agent.Agent.is_running"></a>
+#### is`_`running
+
+```python
+ | @property
+ | is_running()
+```
+
+Get running state of the runtime and agent.
+
+<a name=".aea.agent.Agent.is_stopped"></a>
+#### is`_`stopped
+
+```python
+ | @property
+ | is_stopped()
+```
+
+Get running state of the runtime and agent.
 
 <a name=".aea.agent.Agent.identity"></a>
 #### identity
@@ -190,6 +211,16 @@ Get the state of the agent.
 **Returns**:
 
 None
+
+<a name=".aea.agent.Agent.loop_mode"></a>
+#### loop`_`mode
+
+```python
+ | @property
+ | loop_mode() -> str
+```
+
+Get the agent loop mode.
 
 <a name=".aea.agent.Agent.start"></a>
 #### start

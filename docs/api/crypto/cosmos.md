@@ -1,10 +1,10 @@
 <a name=".aea.crypto.cosmos"></a>
-## aea.crypto.cosmos
+# aea.crypto.cosmos
 
 Cosmos module wrapping the public and private key cryptography and ledger api.
 
 <a name=".aea.crypto.cosmos.CosmosCrypto"></a>
-### CosmosCrypto
+## CosmosCrypto Objects
 
 ```python
 class CosmosCrypto(Crypto[SigningKey])
@@ -171,7 +171,7 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 None
 
 <a name=".aea.crypto.cosmos.CosmosApi"></a>
-### CosmosApi
+## CosmosApi Objects
 
 ```python
 class CosmosApi(LedgerApi)
@@ -324,7 +324,7 @@ Check whether a transaction is valid or not (non-blocking).
 True if the random_message is equals to tx['input']
 
 <a name=".aea.crypto.cosmos.CosmosFaucetApi"></a>
-### CosmosFaucetApi
+## CosmosFaucetApi Objects
 
 ```python
 class CosmosFaucetApi(FaucetApi)

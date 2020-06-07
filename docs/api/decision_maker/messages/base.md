@@ -1,10 +1,10 @@
 <a name=".aea.decision_maker.messages.base"></a>
-## aea.decision`_`maker.messages.base
+# aea.decision`_`maker.messages.base
 
 This module contains the base message and serialization definition.
 
 <a name=".aea.decision_maker.messages.base.InternalMessage"></a>
-### InternalMessage
+## InternalMessage Objects
 
 ```python
 class InternalMessage()

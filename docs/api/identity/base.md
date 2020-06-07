@@ -1,10 +1,10 @@
 <a name=".aea.identity.base"></a>
-## aea.identity.base
+# aea.identity.base
 
 This module contains the identity class.
 
 <a name=".aea.identity.base.Identity"></a>
-### Identity
+## Identity Objects
 
 ```python
 class Identity()

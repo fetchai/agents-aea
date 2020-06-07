@@ -1,5 +1,5 @@
 <a name=".aea.helpers.base"></a>
-## aea.helpers.base
+# aea.helpers.base
 
 Miscellaneous helpers.
 
@@ -11,6 +11,25 @@ locate(path)
 ```
 
 Locate an object by name or dotted path, importing as necessary.
+
+<a name=".aea.helpers.base.load_aea_package"></a>
+#### load`_`aea`_`package
+
+```python
+load_aea_package(configuration: ComponentConfiguration) -> None
+```
+
+Load the AEA package.
+
+It adds all the __init__.py modules into `sys.modules`.
+
+**Arguments**:
+
+- `configuration`: the configuration object.
+
+**Returns**:
+
+None
 
 <a name=".aea.helpers.base.load_all_modules"></a>
 #### load`_`all`_`modules
@@ -181,7 +200,7 @@ However, a subprocess.Popen class has the method
 None
 
 <a name=".aea.helpers.base.RegexConstrainedString"></a>
-### RegexConstrainedString
+## RegexConstrainedString Objects
 
 ```python
 class RegexConstrainedString(UserString):

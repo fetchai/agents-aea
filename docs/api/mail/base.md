@@ -1,10 +1,10 @@
 <a name=".aea.mail.base"></a>
-## aea.mail.base
+# aea.mail.base
 
 Mail module abstract base classes.
 
 <a name=".aea.mail.base.AEAConnectionError"></a>
-### AEAConnectionError
+## AEAConnectionError Objects
 
 ```python
 class AEAConnectionError(Exception)
@@ -13,7 +13,7 @@ class AEAConnectionError(Exception)
 Exception class for connection errors.
 
 <a name=".aea.mail.base.Empty"></a>
-### Empty
+## Empty Objects
 
 ```python
 class Empty(Exception)
@@ -22,7 +22,7 @@ class Empty(Exception)
 Exception for when the inbox is empty.
 
 <a name=".aea.mail.base.URI"></a>
-### URI
+## URI Objects
 
 ```python
 class URI()
@@ -168,7 +168,7 @@ Get string representation.
 Compare with another object.
 
 <a name=".aea.mail.base.EnvelopeContext"></a>
-### EnvelopeContext
+## EnvelopeContext Objects
 
 ```python
 class EnvelopeContext()
@@ -219,7 +219,7 @@ Get the string representation.
 Compare with another object.
 
 <a name=".aea.mail.base.EnvelopeSerializer"></a>
-### EnvelopeSerializer
+## EnvelopeSerializer Objects
 
 ```python
 class EnvelopeSerializer(ABC)
@@ -264,7 +264,7 @@ Decode the envelope.
 the envelope
 
 <a name=".aea.mail.base.ProtobufEnvelopeSerializer"></a>
-### ProtobufEnvelopeSerializer
+## ProtobufEnvelopeSerializer Objects
 
 ```python
 class ProtobufEnvelopeSerializer(EnvelopeSerializer)
@@ -307,7 +307,7 @@ Decode the envelope.
 the envelope
 
 <a name=".aea.mail.base.Envelope"></a>
-### Envelope
+## Envelope Objects
 
 ```python
 class Envelope()
@@ -319,7 +319,7 @@ The top level message class for agent to agent communication.
 #### `__`init`__`
 
 ```python
- | __init__(to: Address, sender: Address, protocol_id: ProtocolId, message: bytes, context: Optional[EnvelopeContext] = None)
+ | __init__(to: Address, sender: Address, protocol_id: ProtocolId, message: Union[Message, bytes], context: Optional[EnvelopeContext] = None)
 ```
 
 Initialize a Message object.
@@ -367,10 +367,20 @@ Set the protocol id.
 
 ```python
  | @message.setter
- | message(message: bytes) -> None
+ | message(message: Union[Message, bytes]) -> None
 ```
 
 Set the protocol-specific message.
+
+<a name=".aea.mail.base.Envelope.message_bytes"></a>
+#### message`_`bytes
+
+```python
+ | @property
+ | message_bytes() -> bytes
+```
+
+Get the protocol-specific message.
 
 <a name=".aea.mail.base.Envelope.context"></a>
 #### context
@@ -449,342 +459,4 @@ the decoded envelope.
 ```
 
 Get the string representation of an envelope.
-
-<a name=".aea.mail.base.Multiplexer"></a>
-### Multiplexer
-
-```python
-class Multiplexer()
-```
-
-This class can handle multiple connections at once.
-
-<a name=".aea.mail.base.Multiplexer.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(connections: Sequence["Connection"], default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None)
-```
-
-Initialize the connection multiplexer.
-
-**Arguments**:
-
-- `connections`: a sequence of connections.
-- `default_connection_index`: the index of the connection to use as default.
-| this information is used for envelopes which
-| don't specify any routing context.
-- `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
-
-<a name=".aea.mail.base.Multiplexer.in_queue"></a>
-#### in`_`queue
-
-```python
- | @property
- | in_queue() -> AsyncFriendlyQueue
-```
-
-Get the in queue.
-
-<a name=".aea.mail.base.Multiplexer.out_queue"></a>
-#### out`_`queue
-
-```python
- | @property
- | out_queue() -> asyncio.Queue
-```
-
-Get the out queue.
-
-<a name=".aea.mail.base.Multiplexer.connections"></a>
-#### connections
-
-```python
- | @property
- | connections() -> Tuple["Connection"]
-```
-
-Get the connections.
-
-<a name=".aea.mail.base.Multiplexer.is_connected"></a>
-#### is`_`connected
-
-```python
- | @property
- | is_connected() -> bool
-```
-
-Check whether the multiplexer is processing envelopes.
-
-<a name=".aea.mail.base.Multiplexer.default_routing"></a>
-#### default`_`routing
-
-```python
- | @default_routing.setter
- | default_routing(default_routing: Dict[PublicId, PublicId])
-```
-
-Set the default routing.
-
-<a name=".aea.mail.base.Multiplexer.connection_status"></a>
-#### connection`_`status
-
-```python
- | @property
- | connection_status() -> ConnectionStatus
-```
-
-Get the connection status.
-
-<a name=".aea.mail.base.Multiplexer.connect"></a>
-#### connect
-
-```python
- | connect() -> None
-```
-
-Connect the multiplexer.
-
-<a name=".aea.mail.base.Multiplexer.disconnect"></a>
-#### disconnect
-
-```python
- | disconnect() -> None
-```
-
-Disconnect the multiplexer.
-
-<a name=".aea.mail.base.Multiplexer.get"></a>
-#### get
-
-```python
- | get(block: bool = False, timeout: Optional[float] = None) -> Optional[Envelope]
-```
-
-Get an envelope within a timeout.
-
-**Arguments**:
-
-- `block`: make the call blocking (ignore the timeout).
-- `timeout`: the timeout to wait until an envelope is received.
-
-**Returns**:
-
-the envelope, or None if no envelope is available within a timeout.
-
-<a name=".aea.mail.base.Multiplexer.async_get"></a>
-#### async`_`get
-
-```python
- | async async_get() -> Envelope
-```
-
-Get an envelope async way.
-
-**Returns**:
-
-the envelope
-
-<a name=".aea.mail.base.Multiplexer.async_wait"></a>
-#### async`_`wait
-
-```python
- | async async_wait() -> None
-```
-
-Get an envelope async way.
-
-**Returns**:
-
-the envelope
-
-<a name=".aea.mail.base.Multiplexer.put"></a>
-#### put
-
-```python
- | put(envelope: Envelope) -> None
-```
-
-Schedule an envelope for sending it.
-
-Notice that the output queue is an asyncio.Queue which uses an event loop
-running on a different thread than the one used in this function.
-
-**Arguments**:
-
-- `envelope`: the envelope to be sent.
-
-**Returns**:
-
-None
-
-<a name=".aea.mail.base.InBox"></a>
-### InBox
-
-```python
-class InBox()
-```
-
-A queue from where you can only consume envelopes.
-
-<a name=".aea.mail.base.InBox.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(multiplexer: Multiplexer)
-```
-
-Initialize the inbox.
-
-**Arguments**:
-
-- `multiplexer`: the multiplexer
-
-<a name=".aea.mail.base.InBox.empty"></a>
-#### empty
-
-```python
- | empty() -> bool
-```
-
-Check for a envelope on the in queue.
-
-**Returns**:
-
-boolean indicating whether there is an envelope or not
-
-<a name=".aea.mail.base.InBox.get"></a>
-#### get
-
-```python
- | get(block: bool = False, timeout: Optional[float] = None) -> Envelope
-```
-
-Check for a envelope on the in queue.
-
-**Arguments**:
-
-- `block`: make the call blocking (ignore the timeout).
-- `timeout`: times out the block after timeout seconds.
-
-**Returns**:
-
-the envelope object.
-
-**Raises**:
-
-- `Empty`: if the attempt to get an envelope fails.
-
-<a name=".aea.mail.base.InBox.get_nowait"></a>
-#### get`_`nowait
-
-```python
- | get_nowait() -> Optional[Envelope]
-```
-
-Check for a envelope on the in queue and wait for no time.
-
-**Returns**:
-
-the envelope object
-
-<a name=".aea.mail.base.InBox.async_get"></a>
-#### async`_`get
-
-```python
- | async async_get() -> Envelope
-```
-
-Check for a envelope on the in queue.
-
-**Returns**:
-
-the envelope object.
-
-<a name=".aea.mail.base.InBox.async_wait"></a>
-#### async`_`wait
-
-```python
- | async async_wait() -> None
-```
-
-Check for a envelope on the in queue.
-
-**Returns**:
-
-the envelope object.
-
-<a name=".aea.mail.base.OutBox"></a>
-### OutBox
-
-```python
-class OutBox()
-```
-
-A queue from where you can only enqueue envelopes.
-
-<a name=".aea.mail.base.OutBox.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(multiplexer: Multiplexer)
-```
-
-Initialize the outbox.
-
-**Arguments**:
-
-- `multiplexer`: the multiplexer
-
-<a name=".aea.mail.base.OutBox.empty"></a>
-#### empty
-
-```python
- | empty() -> bool
-```
-
-Check for a envelope on the in queue.
-
-**Returns**:
-
-boolean indicating whether there is an envelope or not
-
-<a name=".aea.mail.base.OutBox.put"></a>
-#### put
-
-```python
- | put(envelope: Envelope) -> None
-```
-
-Put an envelope into the queue.
-
-**Arguments**:
-
-- `envelope`: the envelope.
-
-**Returns**:
-
-None
-
-<a name=".aea.mail.base.OutBox.put_message"></a>
-#### put`_`message
-
-```python
- | put_message(to: Address, sender: Address, protocol_id: ProtocolId, message: bytes) -> None
-```
-
-Put a message in the outbox.
-
-This constructs an envelope with the input arguments.
-
-**Arguments**:
-
-- `to`: the recipient of the envelope.
-- `sender`: the sender of the envelope.
-- `protocol_id`: the protocol id.
-- `message`: the content of the message.
-
-**Returns**:
-
-None
 

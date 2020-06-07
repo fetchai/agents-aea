@@ -1,10 +1,138 @@
 <a name=".aea.aea_builder"></a>
-## aea.aea`_`builder
+# aea.aea`_`builder
 
 This module contains utilities for building an AEA.
 
+<a name=".aea.aea_builder._DependenciesManager.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__()
+```
+
+Initialize the dependency graph.
+
+<a name=".aea.aea_builder._DependenciesManager.all_dependencies"></a>
+#### all`_`dependencies
+
+```python
+ | @property
+ | all_dependencies() -> Set[ComponentId]
+```
+
+Get all dependencies.
+
+<a name=".aea.aea_builder._DependenciesManager.dependencies_highest_version"></a>
+#### dependencies`_`highest`_`version
+
+```python
+ | @property
+ | dependencies_highest_version() -> Set[ComponentId]
+```
+
+Get the dependencies with highest version.
+
+<a name=".aea.aea_builder._DependenciesManager.get_components_by_type"></a>
+#### get`_`components`_`by`_`type
+
+```python
+ | get_components_by_type(component_type: ComponentType) -> Dict[ComponentId, ComponentConfiguration]
+```
+
+Get the components by type.
+
+<a name=".aea.aea_builder._DependenciesManager.protocols"></a>
+#### protocols
+
+```python
+ | @property
+ | protocols() -> Dict[ComponentId, ProtocolConfig]
+```
+
+Get the protocols.
+
+<a name=".aea.aea_builder._DependenciesManager.connections"></a>
+#### connections
+
+```python
+ | @property
+ | connections() -> Dict[ComponentId, ConnectionConfig]
+```
+
+Get the connections.
+
+<a name=".aea.aea_builder._DependenciesManager.skills"></a>
+#### skills
+
+```python
+ | @property
+ | skills() -> Dict[ComponentId, SkillConfig]
+```
+
+Get the skills.
+
+<a name=".aea.aea_builder._DependenciesManager.contracts"></a>
+#### contracts
+
+```python
+ | @property
+ | contracts() -> Dict[ComponentId, ContractConfig]
+```
+
+Get the contracts.
+
+<a name=".aea.aea_builder._DependenciesManager.add_component"></a>
+#### add`_`component
+
+```python
+ | add_component(configuration: ComponentConfiguration) -> None
+```
+
+Add a component to the dependency manager..
+
+**Arguments**:
+
+- `configuration`: the component configuration to add.
+
+**Returns**:
+
+None
+
+<a name=".aea.aea_builder._DependenciesManager.remove_component"></a>
+#### remove`_`component
+
+```python
+ | remove_component(component_id: ComponentId)
+```
+
+Remove a component.
+
+:return None
+
+**Raises**:
+
+- `ValueError`: if some component depends on this package.
+
+<a name=".aea.aea_builder._DependenciesManager.pypi_dependencies"></a>
+#### pypi`_`dependencies
+
+```python
+ | @property
+ | pypi_dependencies() -> Dependencies
+```
+
+Get all the PyPI dependencies.
+
+We currently consider only dependency that have the
+default PyPI index url and that specify only the
+version field.
+
+**Returns**:
+
+the merged PyPI dependencies
+
 <a name=".aea.aea_builder.AEABuilder"></a>
-### AEABuilder
+## AEABuilder Objects
 
 ```python
 class AEABuilder()
@@ -14,6 +142,38 @@ This class helps to build an AEA.
 
 It follows the fluent interface. Every method of the builder
 returns the instance of the builder itself.
+
+Note: the method 'build()' is guaranteed of being
+re-entrant with respect to the 'add_component(path)'
+method. That is, you can invoke the building method
+many times against the same builder instance, and the
+returned agent instance will not share the
+components with other agents, e.g.:
+
+builder = AEABuilder()
+builder.add_component(...)
+...
+
+# first call
+my_aea_1 = builder.build()
+
+# following agents will have different components.
+my_aea_2 = builder.build()  # all good
+
+However, if you manually loaded some of the components and added
+them with the method 'add_component_instance()', then calling build
+more than one time is strongly discouraged:
+
+builder = AEABuilder()
+builder.add_component_instance(...)
+...  # other initialization code
+
+# first call
+my_aea_1 = builder.build()
+
+# in this case, following calls to '.build()'
+# are strongly discouraged.
+# my_aea_2 = builder.builder()  # bad
 
 <a name=".aea.aea_builder.AEABuilder.__init__"></a>
 #### `__`init`__`
@@ -150,6 +310,23 @@ Set the loop mode.
 
 self
 
+<a name=".aea.aea_builder.AEABuilder.set_runtime_mode"></a>
+#### set`_`runtime`_`mode
+
+```python
+ | set_runtime_mode(runtime_mode: Optional[str]) -> "AEABuilder"
+```
+
+Set the runtime mode.
+
+**Arguments**:
+
+- `runtime_mode`: the agent runtime mode
+
+**Returns**:
+
+self
+
 <a name=".aea.aea_builder.AEABuilder.set_name"></a>
 #### set`_`name
 
@@ -188,7 +365,7 @@ the AEABuilder
 #### add`_`private`_`key
 
 ```python
- | add_private_key(identifier: str, private_key_path: PathLike) -> "AEABuilder"
+ | add_private_key(identifier: str, private_key_path: Optional[PathLike] = None, is_connection: bool = False) -> "AEABuilder"
 ```
 
 Add a private key path.
@@ -196,7 +373,9 @@ Add a private key path.
 **Arguments**:
 
 - `identifier`: the identifier for that private key path.
-- `private_key_path`: path to the private key file.
+- `private_key_path`: an (optional) path to the private key file.
+If None, the key will be created at build time.
+- `is_connection`: if the pair is for the connection cryptos
 
 **Returns**:
 
@@ -206,7 +385,7 @@ the AEABuilder
 #### remove`_`private`_`key
 
 ```python
- | remove_private_key(identifier: str) -> "AEABuilder"
+ | remove_private_key(identifier: str, is_connection: bool = False) -> "AEABuilder"
 ```
 
 Remove a private key path by identifier, if present.
@@ -214,6 +393,7 @@ Remove a private key path by identifier, if present.
 **Arguments**:
 
 - `identifier`: the identifier of the private key.
+- `is_connection`: if the pair is for the connection cryptos
 
 **Returns**:
 
@@ -224,10 +404,20 @@ the AEABuilder
 
 ```python
  | @property
- | private_key_paths() -> Dict[str, str]
+ | private_key_paths() -> Dict[str, Optional[str]]
 ```
 
 Get the private key paths.
+
+<a name=".aea.aea_builder.AEABuilder.connection_private_key_paths"></a>
+#### connection`_`private`_`key`_`paths
+
+```python
+ | @property
+ | connection_private_key_paths() -> Dict[str, Optional[str]]
+```
+
+Get the connection private key paths.
 
 <a name=".aea.aea_builder.AEABuilder.add_ledger_api_config"></a>
 #### add`_`ledger`_`api`_`config
@@ -325,6 +515,8 @@ the AEABuilder
 Add already initialized component object to resources or connections.
 
 Please, pay attention, all dependencies have to be already loaded.
+
+Notice also that this will make the call to 'build()' non re-entrant.
 
 :params component: Component instance already initialized.
 
@@ -498,6 +690,12 @@ the AEABuilder
 ```
 
 Build the AEA.
+
+This method is re-entrant only if the components have been
+added through the method 'add_component'. If some of them
+have been loaded with 'add_component_instance', it
+should be called only once, and further calls will lead
+to unexpected behaviour.
 
 **Arguments**:
 

@@ -1,10 +1,10 @@
 <a name=".aea.crypto.ethereum"></a>
-## aea.crypto.ethereum
+# aea.crypto.ethereum
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
 <a name=".aea.crypto.ethereum.EthereumCrypto"></a>
-### EthereumCrypto
+## EthereumCrypto Objects
 
 ```python
 class EthereumCrypto(Crypto[Account])
@@ -171,7 +171,7 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 None
 
 <a name=".aea.crypto.ethereum.EthereumApi"></a>
-### EthereumApi
+## EthereumApi Objects
 
 ```python
 class EthereumApi(LedgerApi)
@@ -324,7 +324,7 @@ Check whether a transaction is valid or not (non-blocking).
 True if the random_message is equals to tx['input']
 
 <a name=".aea.crypto.ethereum.EthereumFaucetApi"></a>
-### EthereumFaucetApi
+## EthereumFaucetApi Objects
 
 ```python
 class EthereumFaucetApi(FaucetApi)
