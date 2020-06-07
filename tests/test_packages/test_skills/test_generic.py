@@ -38,7 +38,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_seller:0.4.0")
+        self.add_item("skill", "fetchai/generic_seller:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -49,7 +49,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.3.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -118,7 +118,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_seller:0.4.0")
+        self.add_item("skill", "fetchai/generic_seller:0.5.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -133,7 +133,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.3.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.4.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -166,7 +166,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
             "checking whether transaction=",
-            # "transaction=",
+            "Sending data to sender=",
         )
         missing_strings = self.missing_from_output(
             seller_aea_process, check_strings, is_terminating=False
@@ -184,8 +184,9 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "Settling transaction on chain!",
             "transaction was successful.",
-            "informing counterparty="
-            # "received INFORM from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
             buyer_aea_process, check_strings, is_terminating=False

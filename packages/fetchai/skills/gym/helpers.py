@@ -25,12 +25,10 @@ from typing import Any, Tuple, cast
 
 import gym
 
-from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.skills.base import SkillContext
 
 from packages.fetchai.protocols.gym.message import GymMessage
-from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 Action = Any
 Observation = Any
@@ -87,10 +85,7 @@ class ProxyEnv(gym.Env):
         self._step_count += 1
         step_id = self._step_count
 
-        out_envelope = self._encode_action(action, step_id)
-
-        # Send the envelope via the proxy agent and to the environment
-        self._skill_context.outbox.put(out_envelope)
+        self._encode_and_send_action(action, step_id)
 
         # Wait (blocking!) for the response envelope from the environment
         gym_msg = self._queue.get(block=True, timeout=None)  # type: GymMessage
@@ -123,14 +118,8 @@ class ProxyEnv(gym.Env):
         self._step_count = 0
         self._is_rl_agent_trained = False
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
-        gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(
-            to=DEFAULT_GYM,
-            sender=self._skill_context.agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_bytes,
-        )
-        self._skill_context.outbox.put(envelope)
+        gym_msg.counterparty = DEFAULT_GYM
+        self._skill_context.outbox.put_message(message=gym_msg)
 
     def close(self) -> None:
         """
@@ -140,18 +129,12 @@ class ProxyEnv(gym.Env):
         """
         self._is_rl_agent_trained = True
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
-        gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(
-            to=DEFAULT_GYM,
-            sender=self._skill_context.agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_bytes,
-        )
-        self._skill_context.outbox.put(envelope)
+        gym_msg.counterparty = DEFAULT_GYM
+        self._skill_context.outbox.put_message(message=gym_msg)
 
-    def _encode_action(self, action: Action, step_id: int) -> Envelope:
+    def _encode_and_send_action(self, action: Action, step_id: int) -> None:
         """
-        Encode the 'action' sent to the step function as one or several envelopes.
+        Encode the 'action' sent to the step function and send it.
 
         :param action: the action that is the output of an RL algorithm.
         :param step_id: the step id
@@ -162,14 +145,9 @@ class ProxyEnv(gym.Env):
             action=GymMessage.AnyObject(action),
             step_id=step_id,
         )
-        gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(
-            to=DEFAULT_GYM,
-            sender=self._skill_context.agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_bytes,
-        )
-        return envelope
+        gym_msg.counterparty = DEFAULT_GYM
+        # Send the message via the proxy agent and to the environment
+        self._skill_context.outbox.put_message(message=gym_msg)
 
     def _message_to_percept(self, message: Message) -> Feedback:
         """

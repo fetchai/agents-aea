@@ -499,10 +499,15 @@ class P2PLibp2pConnection(Connection):
         log_file = self.configuration.config.get("log_file")  # Optional[str]
         env_file = self.configuration.config.get("env_file")  # Optional[str]
 
-        if libp2p_key_file is None:
-            key = FetchAICrypto()
-        else:
+        if (
+            self.has_crypto_store
+            and self.crypto_store.crypto_objects.get("fetchai", None) is not None
+        ):
+            key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
+        elif libp2p_key_file is not None:
             key = FetchAICrypto(libp2p_key_file)
+        else:
+            key = FetchAICrypto()
 
         uri = None
         if libp2p_local_uri is not None:

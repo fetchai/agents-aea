@@ -43,7 +43,6 @@ from aea.mail.base import Address, Envelope
 
 from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
@@ -127,8 +126,10 @@ class SOEFChannel:
         """
         if self.unique_page_address is None:
             self._register_agent()
-        oef_message = OefSearchSerializer().decode(envelope.message)
-        oef_message = cast(OefSearchMessage, oef_message)
+        assert isinstance(
+            envelope.message, OefSearchMessage
+        ), "Message not of type OefSearchMessage"
+        oef_message = cast(OefSearchMessage, envelope.message)
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             service_description = oef_message.service_description
             self.register_service(service_description)
@@ -259,7 +260,7 @@ class SOEFChannel:
             to=self.address,
             sender="simple_oef",
             protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(message),
+            message=message,
         )
         self.in_queue.put_nowait(envelope)
 
@@ -484,7 +485,7 @@ class SOEFChannel:
                     to=self.address,
                     sender="simple_oef",
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(message),
+                    message=message,
                 )
                 self.in_queue.put_nowait(envelope)
             else:
@@ -514,7 +515,7 @@ class SOEFConnection(Connection):
             and kwargs.get("restricted_to_protocols") is None
         ):
             kwargs["restricted_to_protocols"] = [
-                PublicId.from_str("fetchai/oef_search:0.1.0")
+                PublicId.from_str("fetchai/oef_search:0.2.0")
             ]
         super().__init__(**kwargs)
         api_key = cast(str, self.configuration.config.get("api_key"))

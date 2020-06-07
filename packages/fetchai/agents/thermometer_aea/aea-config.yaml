@@ -3,7 +3,7 @@ author: fetchai
 version: 0.3.0
 description: An AEA to represent a thermometer and sell temperature data.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -11,12 +11,12 @@ connections:
 - fetchai/stub:0.5.0
 contracts: []
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 skills:
 - fetchai/error:0.2.0
-- fetchai/thermometer:0.3.0
+- fetchai/thermometer:0.4.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: fetchai
 ledger_apis:

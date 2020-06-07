@@ -112,7 +112,7 @@ class Agent(ABC):
 
         self._multiplexer = Multiplexer(self._connections, loop=loop)
         self._inbox = InBox(self._multiplexer)
-        self._outbox = OutBox(self._multiplexer)
+        self._outbox = OutBox(self._multiplexer, identity.address)
         self._liveness = Liveness()
         self._timeout = timeout
 

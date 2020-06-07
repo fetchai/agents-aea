@@ -379,7 +379,6 @@ def test_get_from_multiplexer_when_empty():
 
 #         assert connection_1.connection_status.is_connected
 #         assert connection_2.connection_status.is_connected
-
 #         message = DefaultMessage(
 #             dialogue_reference=("", ""),
 #             message_id=1,
@@ -395,10 +394,8 @@ def test_get_from_multiplexer_when_empty():
 #             context=EnvelopeContext(connection_id=connection_1.connection_id),
 #         )
 #         multiplexer.put(envelope_from_1_to_2)
-
 #         actual_envelope = multiplexer.get(block=True, timeout=2.0)
 #         assert envelope_from_1_to_2 == actual_envelope
-
 #         envelope_from_2_to_1 = Envelope(
 #             to=identity_1.address,
 #             sender=identity_2.address,
@@ -407,10 +404,8 @@ def test_get_from_multiplexer_when_empty():
 #             context=EnvelopeContext(connection_id=connection_2.connection_id),
 #         )
 #         multiplexer.put(envelope_from_2_to_1)
-
 #         actual_envelope = multiplexer.get(block=True, timeout=2.0)
 #         assert envelope_from_2_to_1 == actual_envelope
-
 #         multiplexer.disconnect()
 
 

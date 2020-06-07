@@ -92,13 +92,13 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     if (
         not is_item_present(ctx, item_type, public_id)
         or public_id not in supported_items
-    ):
+    ):  # pragma: no cover
         raise click.ClickException(
             "{} {} not found in agent items.".format(item_type.title(), public_id)
         )
     src = get_package_path(ctx, item_type, public_id)
     dst = get_package_path(ctx, item_type, public_id, is_vendor=False)
-    if is_item_present(ctx, item_type, public_id, is_vendor=False):
+    if is_item_present(ctx, item_type, public_id, is_vendor=False):  # pragma: no cover
         raise click.ClickException(
             "{} {} is already in a non-vendor item.".format(
                 item_type.title(), public_id

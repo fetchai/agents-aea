@@ -30,7 +30,6 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
-from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
@@ -120,12 +119,8 @@ class TrainHandler(Handler):
                 tx_digest=DUMMY_DIGEST,
                 terms=terms,
             )
-            self.context.outbox.put_message(
-                to=ml_trade_msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=MlTradeMessage.protocol_id,
-                message=MlTradeSerializer().encode(ml_accept),
-            )
+            ml_accept.counterparty = ml_trade_msg.counterparty
+            self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info(
                 "[{}]: sending dummy transaction digest ...".format(
                     self.context.agent_name
@@ -231,12 +226,8 @@ class OEFSearchHandler(Handler):
             cft_msg = MlTradeMessage(
                 performative=MlTradeMessage.Performative.CFP, query=query
             )
-            self.context.outbox.put_message(
-                to=opponent_address,
-                sender=self.context.agent_address,
-                protocol_id=MlTradeMessage.protocol_id,
-                message=MlTradeSerializer().encode(cft_msg),
-            )
+            cft_msg.counterparty = opponent_address
+            self.context.outbox.put_message(message=cft_msg)
 
 
 class MyTransactionHandler(Handler):
@@ -270,12 +261,8 @@ class MyTransactionHandler(Handler):
                 tx_digest=tx_msg_response.tx_digest,
                 terms=terms,
             )
-            self.context.outbox.put_message(
-                to=tx_msg_response.tx_counterparty_addr,
-                sender=self.context.agent_address,
-                protocol_id=MlTradeMessage.protocol_id,
-                message=MlTradeSerializer().encode(ml_accept),
-            )
+            ml_accept.counterparty = tx_msg_response.tx_counterparty_addr
+            self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info(
                 "[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}.".format(
                     self.context.agent_name,

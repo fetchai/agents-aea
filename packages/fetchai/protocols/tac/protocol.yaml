@@ -1,15 +1,15 @@
 name: tac
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
-  __init__.py: QmUH8aTndA3gLK999bviGNg2Ky8dHxZosbA8PRPg9LgtjF
+  __init__.py: QmZYdAjm3o44drRiY3MT4RtG2fFLxtaL8h898DmjoJwJzV
   custom_types.py: QmXQATfnvuCpt4FicF4QcqCcLj9PQNsSHjCBvVQknWpyaN
-  message.py: QmV68VWmJ7x2YczX9bSQxQhyWgbDNzKFLBE2MSWfjpGMtt
-  serialization.py: QmRwii5vMjEKuus3D1TkK7XFuZqV2x88TVB8cRhmv5qNPW
+  message.py: QmcpLRGJSdp9pcjEaVHg2UsgUSKd9PQuuxbzq7vHnwMzh2
+  serialization.py: QmYfsDQXv8j3CyQgQqv77CYLfu9WeNFSGgfhhVzLcPbJpj
   tac.proto: QmedPvKHu387gAsdxTDLWgGcCucYXEfCaTiLJbTJPRqDkR
   tac_pb2.py: QmbjMx3iSHq1FY2kGQR4tJfnS1HQiRCQRrnyv7dFUxEi2V
 fingerprint_ignore_patterns: []

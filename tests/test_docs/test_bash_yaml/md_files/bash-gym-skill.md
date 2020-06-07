@@ -3,7 +3,7 @@ aea create my_gym_aea
 cd my_gym_aea
 ```
 ``` bash
-aea add skill fetchai/gym:0.2.0
+aea add skill fetchai/gym:0.3.0
 ```
 ``` bash
 mkdir gyms

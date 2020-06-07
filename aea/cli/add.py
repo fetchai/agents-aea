@@ -132,7 +132,7 @@ def _add_item(
         )
     item_config = load_item_config(item_type, package_path)
 
-    if not is_fingerprint_correct(package_path, item_config):
+    if not is_fingerprint_correct(package_path, item_config):  # pragma: no cover
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
     register_item(ctx, item_type, item_public_id)

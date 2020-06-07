@@ -57,7 +57,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/tac_control:0.1.0")
+        self.add_item("skill", "fetchai/tac_control:0.2.0")
         self.set_config("agent.default_ledger", "ethereum")
         self.run_install()
 
@@ -74,8 +74,8 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             self.force_set_config(setting_path, ledger_apis)
             self.add_item("connection", "fetchai/oef:0.4.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-            self.add_item("skill", "fetchai/tac_participation:0.1.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.1.0")
+            self.add_item("skill", "fetchai/tac_participation:0.2.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.2.0")
             self.set_config("agent.default_ledger", "ethereum")
             self.run_install()
             diff = self.difference_to_fetched_agent(
@@ -187,7 +187,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.1.0")
+        self.add_item("skill", "fetchai/tac_control_contract:0.2.0")
         self.set_config("agent.default_ledger", "ethereum")
         self.generate_private_key("ethereum")
         self.add_private_key("ethereum", "eth_private_key.txt")
@@ -205,8 +205,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             self.force_set_config(setting_path, ledger_apis)
             self.add_item("connection", "fetchai/oef:0.4.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-            self.add_item("skill", "fetchai/tac_participation:0.1.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.1.0")
+            self.add_item("skill", "fetchai/tac_participation:0.2.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.2.0")
             self.set_config("agent.default_ledger", "ethereum")
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",

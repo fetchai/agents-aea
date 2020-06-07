@@ -54,12 +54,12 @@ class CryptoStore:
         self._addresses = addresses
 
     @property
-    def public_keys(self):
+    def public_keys(self) -> Dict[str, str]:
         """Get the public_key dictionary."""
         return self._public_keys
 
     @property
-    def crypto_objects(self):
+    def crypto_objects(self) -> Dict[str, Crypto]:
         """Get the crypto objects (key pair)."""
         return self._crypto_objects
 
@@ -97,12 +97,12 @@ class Wallet:
         self._connection_cryptos = CryptoStore(connection_private_key_paths)
 
     @property
-    def public_keys(self):
+    def public_keys(self) -> Dict[str, str]:
         """Get the public_key dictionary."""
         return self._main_cryptos.public_keys
 
     @property
-    def crypto_objects(self):
+    def crypto_objects(self) -> Dict[str, Crypto]:
         """Get the crypto objects (key pair)."""
         return self._main_cryptos.crypto_objects
 

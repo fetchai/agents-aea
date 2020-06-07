@@ -1,14 +1,14 @@
 name: aries_faber
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The aries_faber skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
-  behaviours.py: QmVbghCjD5c4iQKxgqAyPh9aEW6yreDMdAkbDAj6qm2LC3
-  handlers.py: QmYbUzoKKa2kiAcdR9FP7VtdkZyJmTXd3sRnbcTBryUTst
+  behaviours.py: QmcAWrjeH7XmCEw1GB2yS5iT2v6kr3h1afudZFj24VHzwU
+  handlers.py: QmRjpmny7aiZ81up598cKtsADyVE1zfzzEjgqEDQvrg9QX
 fingerprint_ignore_patterns: []
 contracts: []
 protocols: []

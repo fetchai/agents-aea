@@ -45,10 +45,7 @@ class TestSkillDocs:
     def test_context(self):
         """Test the code in context."""
         block = self.code_blocks[0]
-        expected = (
-            "self.context.outbox.put_message(to=recipient, sender=self.context.agent_address, "
-            "protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))"
-        )
+        expected = "self.context.outbox.put_message(message=reply)"
         assert block["text"].strip() == expected
         assert block["info"].strip() == "python"
 

@@ -1,16 +1,16 @@
 name: default
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
-  __init__.py: QmXaLVbHaHd71bK2vzpXzWsjnXSLT9kFy11RGmXBZQAuNy
+  __init__.py: QmPMtKUrzVJp594VqNuapJzCesWLQ6Awjqv2ufG3wKNRmH
   custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
   default.proto: QmNzMUvXkBm5bbitR5Yi49ADiwNn1FhCvXqSKKoqAPZyXv
-  default_pb2.py: QmeRdcv4f6X4shHKv6i1ktxDo8W7G6pdHsw4cqmz6WrFz3
-  message.py: QmNfAZGYvBmok9JZ6m8BhBuFcMg9BCpqps4EgHe1HsTQbR
-  serialization.py: QmRoYwiU4WQ279o1mQh1EF9pPhfhTJMkRdKgt6ysLvGCGu
+  default_pb2.py: QmSRFi1s3jcqnPuk4yopJeNuC6o58RL7dvEdt85uns3B3N
+  message.py: QmeZXvSXZ5E6z7rVJSyz1Vw1AWGQKbem3iMscAgHzYxZ3j
+  serialization.py: QmRnajc9BNCftjGkYTKCP9LnD3rq197jM3Re1GDVJTHh2y
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

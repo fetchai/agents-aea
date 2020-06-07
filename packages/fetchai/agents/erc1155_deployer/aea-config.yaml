@@ -3,7 +3,7 @@ author: fetchai
 version: 0.5.0
 description: An AEA to deploy and interact with an ERC1155
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -12,11 +12,11 @@ connections:
 contracts:
 - fetchai/erc1155:0.3.0
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 skills:
-- fetchai/erc1155_deploy:0.4.0
+- fetchai/erc1155_deploy:0.5.0
 - fetchai/error:0.2.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: ethereum

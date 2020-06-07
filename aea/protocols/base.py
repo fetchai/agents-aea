@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the base message and serialization definition."""
-
+import importlib
 import inspect
 import json
 import logging
@@ -26,7 +26,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import copy
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, Type, cast
 
 from google.protobuf.struct_pb2 import Struct
 
@@ -37,16 +37,18 @@ from aea.configurations.base import (
     ProtocolConfig,
     PublicId,
 )
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
-from aea.mail.base import Address
+from aea.helpers.base import load_aea_package
 
 logger = logging.getLogger(__name__)
+
+Address = str
 
 
 class Message:
     """This class implements a message."""
 
     protocol_id = None  # type: PublicId
+    serializer = None  # type: Type["Serializer"]
 
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
@@ -165,12 +167,17 @@ class Message:
             + ")"
         )
 
+    def encode(self) -> bytes:
+        """Encode the message."""
+        return self.serializer.encode(self)
+
 
 class Encoder(ABC):
     """Encoder interface."""
 
+    @staticmethod
     @abstractmethod
-    def encode(self, msg: Message) -> bytes:
+    def encode(msg: Message) -> bytes:
         """
         Encode a message.
 
@@ -182,8 +189,9 @@ class Encoder(ABC):
 class Decoder(ABC):
     """Decoder interface."""
 
+    @staticmethod
     @abstractmethod
-    def decode(self, obj: bytes) -> Message:
+    def decode(obj: bytes) -> Message:
         """
         Decode a message.
 
@@ -203,14 +211,16 @@ class ProtobufSerializer(Serializer):
     It assumes that the Message contains a JSON-serializable body.
     """
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """Encode a message into bytes using Protobuf."""
         body_json = Struct()
         body_json.update(msg.body)
         body_bytes = body_json.SerializeToString()
         return body_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """Decode bytes into a message using Protobuf."""
         body_json = Struct()
         body_json.ParseFromString(obj)
@@ -227,7 +237,8 @@ class JSONSerializer(Serializer):
     It assumes that the Message contains a JSON-serializable body.
     """
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a message into bytes using JSON format.
 
@@ -237,7 +248,8 @@ class JSONSerializer(Serializer):
         bytes_msg = json.dumps(msg.body).encode("utf-8")
         return bytes_msg
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a message using JSON.
 
@@ -255,7 +267,7 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
-    def __init__(self, configuration: ProtocolConfig, serializer: Serializer):
+    def __init__(self, configuration: ProtocolConfig, message_class: Type[Message]):
         """
         Initialize the protocol manager.
 
@@ -264,12 +276,12 @@ class Protocol(Component):
         """
         super().__init__(configuration)
 
-        self._serializer = serializer  # type: Serializer
+        self._message_class = message_class
 
     @property
-    def serializer(self) -> Serializer:
+    def serializer(self) -> Type[Serializer]:
         """Get the serializer."""
-        return self._serializer
+        return self._message_class.serializer
 
     @classmethod
     def from_dir(cls, directory: str) -> "Protocol":
@@ -297,20 +309,25 @@ class Protocol(Component):
         assert (
             configuration.directory is not None
         ), "Configuration must be associated with a directory."
-        directory = configuration.directory
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        load_aea_package(configuration)
+        class_module = importlib.import_module(
+            configuration.prefix_import_path + ".message"
         )
-        add_modules_to_sys_modules(package_modules)
-        serialization_module = load_module(
-            "serialization", Path(directory, "serialization.py")
+        classes = inspect.getmembers(class_module, inspect.isclass)
+        message_classes = list(filter(lambda x: re.match("\\w+Message", x[0]), classes))
+        assert len(message_classes) == 1, "Not exactly one message class detected."
+        message_class = message_classes[0][1]
+        class_module = importlib.import_module(
+            configuration.prefix_import_path + ".serialization"
         )
-        classes = inspect.getmembers(serialization_module, inspect.isclass)
+        classes = inspect.getmembers(class_module, inspect.isclass)
         serializer_classes = list(
             filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
         )
-        assert len(serializer_classes) == 1, "Not exactly one serializer detected."
-        serializer_class = serializer_classes[0][1]
+        assert (
+            len(serializer_classes) == 1
+        ), "Not exactly one serializer class detected."
+        serialize_class = serializer_classes[0][1]
+        message_class.serializer = serialize_class
 
-        serializer = serializer_class()
-        return Protocol(configuration, serializer)
+        return Protocol(configuration, message_class)

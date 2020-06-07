@@ -25,13 +25,13 @@ import unittest.mock
 from .test_base import DummyPID, create_app
 
 dummy_output = """------------------------------
-Public ID: fetchai/default:0.1.0
+Public ID: fetchai/default:0.2.0
 Name: default
 Description: The default item allows for any byte logic.
 Version: 0.1.0
 ------------------------------
 ------------------------------
-Public ID: fetchai/oef_search:0.1.0
+Public ID: fetchai/oef_search:0.2.0
 Name: oef_search
 Description: The oef item implements the OEF specific logic.
 Version: 0.1.0
@@ -67,9 +67,9 @@ def _test_list_items(item_type: str):
     data = json.loads(response_list.get_data(as_text=True))
     assert response_list.status_code == 200
     assert len(data) == 2
-    assert data[0]["id"] == "fetchai/default:0.1.0"
+    assert data[0]["id"] == "fetchai/default:0.2.0"
     assert data[0]["description"] == "The default item allows for any byte logic."
-    assert data[1]["id"] == "fetchai/oef_search:0.1.0"
+    assert data[1]["id"] == "fetchai/oef_search:0.2.0"
     assert data[1]["description"] == "The oef item implements the OEF specific logic."
 
 

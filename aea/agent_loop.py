@@ -251,8 +251,8 @@ class AsyncAgentLoop(BaseAgentLoop):
     async def _task_process_inbox(self) -> None:
         """Process incoming messages."""
         inbox: InBox = self._agent._inbox
+        logger.info("[{}]: Start processing messages...".format(self._agent.name))
         while self.is_running:
-            logger.info("[{}]: Start processing messages...".format(self._agent.name))
             await inbox.async_wait()
 
             if not self.is_running:  # make it close faster

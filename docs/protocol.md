@@ -35,9 +35,9 @@ Protocols can optionally have a dialogue module. A _dialogue_, respectively _dia
 
 The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. This lets the developer specify the speech-acts as well as optionally the dialogue structure (e.g. roles of agents participating in a dialogue, the states a dialogue may end in, and the reply structure of the speech-acts in a dialogue).
 
-## `fetchai/default:0.1.0` protocol
+## `fetchai/default:0.2.0` protocol
 
-The `fetchai/default:0.1.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
+The `fetchai/default:0.2.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
 ``` python
 from enum import Enum
@@ -84,13 +84,13 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.2.0` skill utilises the `fetchai/default:0.1.0` protocol for error handling.
+Each AEA's `fetchai/error:0.2.0` skill utilises the `fetchai/default:0.2.0` protocol for error handling.
 
-## `fetchai/oef_search:0.1.0` protocol
+## `fetchai/oef_search:0.2.0` protocol
 
-The `fetchai/oef_search:0.1.0` protocol is used by AEAs to interact with an [OEF search node](../oef-ledger) to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.2.0` protocol is used by AEAs to interact with an [OEF search node](../oef-ledger) to register and unregister their own services and search for services registered by other agents.
 
-The `fetchai/oef_search:0.1.0` protocol definition includes an `OefSearchMessage` with the following message types:
+The `fetchai/oef_search:0.2.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ``` python
 class Performative(Enum):
@@ -199,7 +199,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.1.0`.
+* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.2.0`.
 
 * If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python
@@ -214,9 +214,11 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:0.2.0` protocol
+## `fetchai/fipa:0.3.0` protocol
 
-The `fetchai/fipa:0.2.0` protocol definition includes a `FipaMessage` with the following performatives:
+This protocol provides classes and functions necessary for communication between AEAs via a variant of the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language.
+
+The `fetchai/fipa:0.3.0` protocol definition includes a `FipaMessage` with the following performatives:
 
 ``` python
 class Performative(Enum):
@@ -249,9 +251,9 @@ def __init__(
 )
 ```
 
-The `fetchai/fipa:0.2.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
+The `fetchai/fipa:0.3.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.2.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.3.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
 
 
 

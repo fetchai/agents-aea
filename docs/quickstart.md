@@ -104,7 +104,7 @@ Confirm password:
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.3
+v0.4.0
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -127,6 +127,25 @@ cd my_first_aea
 
 To learn more about the folder structure of an AEA project read on [here](../package-imports).
 
+<details><summary>Alternatively: step by step install</summary>
+
+<b> Create a new AEA </b>   
+<br>    
+First, create a new AEA project and enter it.   
+``` bash    
+aea create my_first_aea
+cd my_first_aea
+```
+<br>  
+<b>Add the echo skill</b>     
+<br>    
+Second, add the echo skill to the project. 
+``` bash
+aea add skill fetchai/echo:0.2.0
+```   
+This copies the `fetchai/echo:0.2.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.2.0` consists of the name of the author of the skill, followed by the skill name and its version.   
+</details>
+
 ## Usage of the stub connection	
 
 AEAs use envelopes containing messages for communication. We use a stub connection to send envelopes to and receive envelopes from the AEA.		
@@ -146,7 +165,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,
 ```
 
 ## Run the AEA
@@ -172,7 +191,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.3
+v0.4.0
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -193,7 +212,7 @@ Let's look at the `Handler` in more depth.
 From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
@@ -204,6 +223,18 @@ info: Echo Handler: message=Message(dialogue_reference=('', '') message_id=1 tar
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
+
+<details><summary>CLI interact command</summary>
+
+Optionally, use the CLI interact command from a different terminal:
+
+``` bash
+aea interact
+```
+
+You can then send the AEA messages via an interactive tool.
+
+</details>
 
 ## Stop the AEA
 
@@ -224,7 +255,7 @@ info: Echo Behaviour: teardown method called.
 
 We can write an end-to-end test for the AEA utilising helper classes provided by the framework.
 
-<details><summary>Step by step install</summary>
+<details><summary>Writing tests</summary>
 
 The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
@@ -306,17 +337,9 @@ aea delete my_first_aea
 
 ## Next steps
 
-For more detailed analysis of the core components of the framework, please check the following:
+To gain an understanding of the core components of the framework, please continue to the next step of 'Getting Started':
 
 - <a href="../core-components/">Core components</a>
-
-We recommend you learn more about the protocols agents use to communicate with each other. Understanding protocols is core to developing your own agent. Check out the following:
-
-- <a href="../protocol/">Protocols</a>
-
-We also recommend you have a look at skill development. Skills are the core business logic commponents of an AEA. Check out the following:
-
-- <a href="../skill/">Skills</a>
 
 For more demos, use cases or step by step guides, please check the following:
 
@@ -326,21 +349,3 @@ For more demos, use cases or step by step guides, please check the following:
 
 <br />
 
-<details><summary>Step by step install</summary>
-
-<b> Create a new AEA </b>		
-<br>		
-First, create a new AEA project and enter it.		
-``` bash		
-aea create my_first_aea
-cd my_first_aea
-```
-<br>  
-<b>Add the echo skill</b> 		
-<br>    
-Second, add the echo skill to the project.		
-``` bash
-aea add skill fetchai/echo:0.1.0		
-```		
-This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
-</details>

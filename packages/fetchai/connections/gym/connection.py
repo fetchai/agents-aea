@@ -33,14 +33,12 @@ from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope
 
 from packages.fetchai.protocols.gym.message import GymMessage
-from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
 
 """default 'to' field for Gym envelopes."""
 DEFAULT_GYM = "gym"
-
 PUBLIC_ID = PublicId.from_str("fetchai/gym:0.2.0")
 
 
@@ -86,7 +84,7 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
+        if envelope.protocol_id == GymMessage.protocol_id:
             self.handle_gym_message(envelope)
         else:
             raise ValueError("This protocol is not valid for gym.")
@@ -98,8 +96,10 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        gym_message = GymSerializer().decode(envelope.message)
-        gym_message = cast(GymMessage, gym_message)
+        assert isinstance(
+            envelope.message, GymMessage
+        ), "Message not of type GymMessage"
+        gym_message = cast(GymMessage, envelope.message)
         if gym_message.performative == GymMessage.Performative.ACT:
             action = gym_message.action.any
             step_id = gym_message.step_id
@@ -112,12 +112,11 @@ class GymChannel:
                 info=GymMessage.AnyObject(info),
                 step_id=step_id,
             )
-            msg_bytes = GymSerializer().encode(msg)
             envelope = Envelope(
                 to=envelope.sender,
                 sender=DEFAULT_GYM,
                 protocol_id=GymMessage.protocol_id,
-                message=msg_bytes,
+                message=msg,
             )
             self._send(envelope)
         elif gym_message.performative == GymMessage.Performative.RESET:

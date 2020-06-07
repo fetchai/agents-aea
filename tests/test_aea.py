@@ -34,13 +34,11 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 from tests.common.utils import run_in_thread, wait_for_condition
 
@@ -149,13 +147,11 @@ def test_react():
             content=b"hello",
         )
         msg.counterparty = agent.identity.address
-        message_bytes = DefaultSerializer().encode(msg)
-
         envelope = Envelope(
             to=agent.identity.address,
             sender=agent.identity.address,
             protocol_id=DefaultMessage.protocol_id,
-            message=message_bytes,
+            message=msg,
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
@@ -206,13 +202,12 @@ def test_handle():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        message_bytes = DefaultSerializer().encode(msg)
-
+        msg.counterparty = aea.identity.address
         envelope = Envelope(
             to=aea.identity.address,
             sender=aea.identity.address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=message_bytes,
+            message=msg,
         )
 
         with run_in_thread(aea.start, timeout=5):
@@ -235,20 +230,20 @@ def test_handle():
                 protocol_id=DefaultMessage.protocol_id,
                 message=b"",
             )
-            # send envelope via localnode back to agent
-            aea.outbox.put(envelope)
+            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            aea.outbox._multiplexer.put(envelope)
+            """ inbox twice cause first message is invalid. generates error message and it accepted """
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 2, timeout=1,
             )
             #   UNSUPPORTED SKILL
-            msg = FipaSerializer().encode(
-                FipaMessage(
-                    performative=FipaMessage.Performative.ACCEPT,
-                    message_id=1,
-                    dialogue_reference=(str(0), ""),
-                    target=0,
-                )
+            msg = FipaMessage(
+                performative=FipaMessage.Performative.ACCEPT,
+                message_id=1,
+                dialogue_reference=(str(0), ""),
+                target=0,
             )
+            msg.counterparty = aea.identity.address
             envelope = Envelope(
                 to=aea.identity.address,
                 sender=aea.identity.address,
@@ -295,7 +290,7 @@ def test_initialize_aea_programmatically():
             to=aea.identity.address,
             sender=aea.identity.address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(expected_message),
+            message=expected_message,
         )
 
         with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
@@ -391,7 +386,7 @@ def test_initialize_aea_programmatically_build_resources():
                         to=agent_name,
                         sender=agent_name,
                         protocol_id=default_protocol_id,
-                        message=DefaultSerializer().encode(expected_message),
+                        message=expected_message,
                     )
                 )
 

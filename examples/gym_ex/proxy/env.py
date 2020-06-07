@@ -37,7 +37,6 @@ sys.modules["packages.fetchai.connections.gym"] = locate(
 )
 sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
 from packages.fetchai.protocols.gym.message import GymMessage  # noqa: E402
-from packages.fetchai.protocols.gym.serialization import GymSerializer  # noqa: E402
 
 from .agent import ProxyAgent  # noqa: E402
 
@@ -88,10 +87,7 @@ class ProxyEnv(gym.Env):
         self._action_counter += 1
         step_id = self._action_counter
 
-        out_envelope = self._encode_action(action, step_id)
-
-        # Send the envelope via the proxy agent and to the environment
-        self._agent.outbox.put(out_envelope)
+        self._encode_and_send_action(action, step_id)
 
         # Wait (blocking!) for the response envelope from the environment
         in_envelope = self._queue.get(block=True, timeout=None)  # type: Envelope
@@ -120,14 +116,8 @@ class ProxyEnv(gym.Env):
         if not self._agent.multiplexer.is_connected:
             self._connect()
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
-        gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(
-            to=DEFAULT_GYM,
-            sender=self._agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_bytes,
-        )
-        self._agent.outbox.put(envelope)
+        gym_msg.counterparty = DEFAULT_GYM
+        self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
     def close(self) -> None:
         """
@@ -136,14 +126,9 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
-        gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(
-            to=DEFAULT_GYM,
-            sender=self._agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_bytes,
-        )
-        self._agent.outbox.put(envelope)
+        gym_msg.counterparty = DEFAULT_GYM
+        self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
+
         self._disconnect()
 
     def _connect(self):
@@ -167,9 +152,9 @@ class ProxyEnv(gym.Env):
         self._agent_thread.join()
         self._agent_thread = None
 
-    def _encode_action(self, action: Action, step_id: int) -> Envelope:
+    def _encode_and_send_action(self, action: Action, step_id: int) -> None:
         """
-        Encode the 'action' sent to the step function as one or several envelopes.
+        Encode the 'action' sent to the step function and send.
 
         :param action: the action that is the output of an RL algorithm.
         :param step_id: the step id
@@ -180,14 +165,9 @@ class ProxyEnv(gym.Env):
             action=GymMessage.AnyObject(action),
             step_id=step_id,
         )
-        gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(
-            to=DEFAULT_GYM,
-            sender=self._agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_bytes,
-        )
-        return envelope
+        gym_msg.counterparty = DEFAULT_GYM
+        # Send the message via the proxy agent and to the environment
+        self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
     def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> Message:
         """
@@ -199,8 +179,8 @@ class ProxyEnv(gym.Env):
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
-            if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
-                gym_msg = GymSerializer().decode(envelope.message)
+            if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.2.0"):
+                gym_msg = envelope.message
                 if (
                     gym_msg.performative == GymMessage.Performative.PERCEPT
                     and gym_msg.step_id == expected_step_id

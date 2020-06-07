@@ -29,9 +29,7 @@ from aea.skills.behaviours import SimpleBehaviour, TickerBehaviour
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control_contract.game import (
     AgentState,
     Configuration,
@@ -202,12 +200,8 @@ class TACBehaviour(SimpleBehaviour):
             dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
-        )
+        oef_msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=oef_msg)
         self._registered_desc = desc
         self.context.logger.info(
             "[{}]: TAC open for registration until: {}".format(
@@ -221,22 +215,19 @@ class TACBehaviour(SimpleBehaviour):
 
         :return: None.
         """
-        self._oef_msg_id += 1
-        self.context.logger.info(
-            "[{}]: Unregistering TAC data model".format(self.context.agent_name)
-        )
-        oef_msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(self._oef_msg_id), ""),
-            service_description=self._registered_desc,
-        )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
-        )
-        self._registered_desc = None
+        if self._registered_desc is not None:
+            self._oef_msg_id += 1
+            self.context.logger.info(
+                "[{}]: Unregistering TAC data model".format(self.context.agent_name)
+            )
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(self._oef_msg_id), ""),
+                service_description=self._registered_desc,
+            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
+            self._registered_desc = None
 
     def _create_items(
         self, game: Game, ledger_api: LedgerApi, contract: ERC1155Contract
@@ -300,12 +291,8 @@ class TACBehaviour(SimpleBehaviour):
             self.context.logger.debug(
                 "[{}]: game data={}".format(self.context.agent_name, str(tac_msg))
             )
-            self.context.outbox.put_message(
-                to=agent_address,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = agent_address
+            self.context.outbox.put_message(message=tac_msg)
 
     def _end_tac(self, game: Game, reason: str) -> None:
         """Notify agents that the TAC is cancelled."""
@@ -316,12 +303,8 @@ class TACBehaviour(SimpleBehaviour):
         )
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
-            self.context.outbox.put_message(
-                to=agent_addr,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = agent_addr
+            self.context.outbox.put_message(message=tac_msg)
 
     def _game_finished_summary(self, game: Game) -> None:
         """Provide summary of game stats."""

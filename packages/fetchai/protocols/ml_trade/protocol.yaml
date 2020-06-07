@@ -1,16 +1,16 @@
 name: ml_trade
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
-  __init__.py: QmT34enu6hywjnL6Kttxhoedmmg8JuEPBavLruSZGnMWdW
+  __init__.py: QmXZMVdsBXUJxLZvwwhWBx58xfxMSyoGxdYp5Aeqmzqhzt
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
-  message.py: QmNmSti4yEWqciPRx91yaco9oyHxYaMCAvxR8j3YdvpxLR
+  message.py: QmQBnXzgxVSZFCxiJ8hQ3T639ntVpcivEPDpQFzqPePUL1
   ml_trade.proto: QmeB21MQduEGQCrtiYZQzPpRqHL4CWEkvvcaKZ9GsfE8f6
-  ml_trade_pb2.py: QmWTsjtBgu7epfzSoJmAvkaiP74ErPibA3yGQXzk2VBRq4
-  serialization.py: QmTR584SMeiALHpfhJkqPgtAVs24m8sRGd6z1N4WLPDbUw
+  ml_trade_pb2.py: QmZVvugPysR1og6kWCJkvo3af2s9pQRHfuj4BptE7gU1EU
+  serialization.py: QmSHywy12uQkzakU1RHnnkaPuTzaFTALsKisyYF8dPc8ns
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

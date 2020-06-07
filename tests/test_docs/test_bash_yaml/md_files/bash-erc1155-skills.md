@@ -5,7 +5,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/erc1155_deploy:0.4.0
+aea add skill fetchai/erc1155_deploy:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 ```
@@ -17,7 +17,7 @@ aea add-key ethereum eth_private_key.txt
 aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/erc1155_client:0.3.0
+aea add skill fetchai/erc1155_client:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 ```

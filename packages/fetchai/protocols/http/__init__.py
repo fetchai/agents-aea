@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the http protocol."""
+
+from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.http.serialization import HttpSerializer
+
+HttpMessage.serializer = HttpSerializer

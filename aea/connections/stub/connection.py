@@ -19,6 +19,7 @@
 """This module contains the stub connection."""
 
 import asyncio
+import codecs
 import logging
 import os
 import re
@@ -72,7 +73,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += str(e.protocol_id).encode("utf-8")
     result += separator
-    result += e.message
+    result += e.message_bytes
     result += separator
 
     return result
@@ -94,6 +95,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however
     # we know everything remaining constitutes the protobuf message.
     message = SEPARATOR.join(split[3:-1])
+    message = codecs.decode(message, "unicode-escape").encode("utf-8")
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 

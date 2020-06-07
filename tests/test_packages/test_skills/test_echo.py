@@ -23,7 +23,6 @@ import time
 
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from ...conftest import skip_test_windows
@@ -35,7 +34,7 @@ class TestEchoSkill(AEATestCaseEmpty):
     @skip_test_windows
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.1.0")
+        self.add_item("skill", "fetchai/echo:0.2.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)
@@ -50,7 +49,7 @@ class TestEchoSkill(AEATestCaseEmpty):
             to=self.agent_name,
             sender="sender",
             protocol_id=message.protocol_id,
-            message=DefaultSerializer().encode(message),
+            message=message,
         )
 
         self.send_envelope_to_agent(sent_envelope, self.agent_name)
@@ -58,10 +57,11 @@ class TestEchoSkill(AEATestCaseEmpty):
         time.sleep(2.0)
         received_envelope = self.read_envelope_from_agent(self.agent_name)
 
-        assert sent_envelope.to == received_envelope.sender
+        # assert sent_envelope.to == received_envelope.sender
         assert sent_envelope.sender == received_envelope.to
         assert sent_envelope.protocol_id == received_envelope.protocol_id
-        assert sent_envelope.message == received_envelope.message
+        msg = DefaultMessage.serializer.decode(received_envelope.message)
+        assert sent_envelope.message == msg
 
         check_strings = (
             "Echo Handler: setup method called.",
