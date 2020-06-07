@@ -118,6 +118,16 @@ Get the component type.
 
 Get the connection configuration.
 
+<a name=".aea.connections.base.Connection.restricted_to_protocols"></a>
+#### restricted`_`to`_`protocols
+
+```python
+ | @property
+ | restricted_to_protocols() -> Set[PublicId]
+```
+
+Get the ids of the protocols this connection is restricted to.
+
 <a name=".aea.connections.base.Connection.excluded_protocols"></a>
 #### excluded`_`protocols
 

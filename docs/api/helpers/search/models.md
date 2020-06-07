@@ -26,6 +26,20 @@ Initialize a location.
 - `latitude`: the latitude of the location.
 - `longitude`: the longitude of the location.
 
+<a name=".aea.helpers.search.models.Location.distance"></a>
+#### distance
+
+```python
+ | distance(other: "Location") -> float
+```
+
+Get the distance to another location.
+
+**Arguments**:
+
+- `other`: the other location
+:retun: the distance
+
 <a name=".aea.helpers.search.models.AttributeInconsistencyException"></a>
 ## AttributeInconsistencyException Objects
 

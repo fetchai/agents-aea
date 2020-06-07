@@ -3,11 +3,42 @@
 
 Miscellaneous helpers.
 
+<a name=".aea.helpers.base.yaml_load"></a>
+#### yaml`_`load
+
+```python
+yaml_load(stream: TextIO) -> Dict[str, str]
+```
+
+Load a yaml from a file pointer in an ordered way.
+
+**Arguments**:
+
+- `stream`: the file pointer
+
+**Returns**:
+
+the yaml
+
+<a name=".aea.helpers.base.yaml_dump"></a>
+#### yaml`_`dump
+
+```python
+yaml_dump(data, stream: TextIO) -> None
+```
+
+Dump data to a yaml file in an ordered way.
+
+**Arguments**:
+
+- `data`: the data to be dumped
+- `stream`: the file pointer
+
 <a name=".aea.helpers.base.locate"></a>
 #### locate
 
 ```python
-locate(path)
+locate(path: str) -> Any
 ```
 
 Locate an object by name or dotted path, importing as necessary.

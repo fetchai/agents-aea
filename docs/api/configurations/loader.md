@@ -141,3 +141,26 @@ None
 
 Get the configuration loader from the type.
 
+<a name=".aea.configurations.loader.ConfigLoaders"></a>
+## ConfigLoaders Objects
+
+```python
+class ConfigLoaders()
+```
+
+Configuration Loader class to load any package type.
+
+<a name=".aea.configurations.loader.ConfigLoaders.from_package_type"></a>
+#### from`_`package`_`type
+
+```python
+ | @classmethod
+ | from_package_type(cls, configuration_type: Union[PackageType, str]) -> "ConfigLoader"
+```
+
+Get a config loader from the configuration type.
+
+**Arguments**:
+
+- `configuration_type`: the configuration type
+

@@ -560,6 +560,15 @@ Set up the test class.
 
 Teardown the test.
 
+<a name=".aea.test_tools.test_cases.UseOef"></a>
+## UseOef Objects
+
+```python
+class UseOef()
+```
+
+Inherit from this class to launch an OEF node.
+
 <a name=".aea.test_tools.test_cases.AEATestCaseEmpty"></a>
 ## AEATestCaseEmpty Objects
 

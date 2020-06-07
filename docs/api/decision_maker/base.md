@@ -371,6 +371,16 @@ Initialize the decision maker handler.
 - `wallet`: the wallet
 - `kwargs`: the key word arguments
 
+<a name=".aea.decision_maker.base.DecisionMakerHandler.agent_name"></a>
+#### agent`_`name
+
+```python
+ | @property
+ | agent_name() -> str
+```
+
+Get the agent name.
+
 <a name=".aea.decision_maker.base.DecisionMakerHandler.identity"></a>
 #### identity
 

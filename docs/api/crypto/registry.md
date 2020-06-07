@@ -90,7 +90,7 @@ the cyrpto object, loaded following the spec.
 ## CryptoSpec Objects
 
 ```python
-class CryptoSpec(object)
+class CryptoSpec()
 ```
 
 A specification for a particular instance of a crypto object.
@@ -123,7 +123,7 @@ Instantiates an instance of the crypto object with appropriate arguments.
 ## CryptoRegistry Objects
 
 ```python
-class CryptoRegistry(object)
+class CryptoRegistry()
 ```
 
 Registry for Crypto classes.
