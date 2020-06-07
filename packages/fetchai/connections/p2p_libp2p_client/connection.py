@@ -96,7 +96,7 @@ class P2PLibp2pClientConnection(Connection):
         assert nodes is not None, "At least one node should be provided"
         nodes = list(cast(List, nodes))
 
-        nodes_uris = [n["uri"] for n in nodes]
+        nodes_uris = [node["uri"] for node in nodes]
         assert len(nodes_uris) == len(
             nodes
         ), "Delegate Uri should be provided for each node"
@@ -116,7 +116,7 @@ class P2PLibp2pClientConnection(Connection):
         logger.debug("Public key used by libp2p client: {}".format(key.public_key))
 
         # delegate uris
-        self.delegate_uris = [Uri(u) for u in nodes_uris]
+        self.delegate_uris = [Uri(node_uri) for node_uri in nodes_uris]
 
         # delegates certificates
         # TOFIX(LR) will be mandatory
