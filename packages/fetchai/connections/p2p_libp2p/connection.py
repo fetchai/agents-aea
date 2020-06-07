@@ -527,11 +527,11 @@ class P2PLibp2pConnection(Connection):
             # requires entry peers to use as relay
             if entry_peers is None or len(entry_peers) == 0:
                 raise ValueError(
-                    "At least one Entry Peer should be provided when Public Uri is not set"
+                    "At least one Entry Peer should be provided when node can not be publically reachable"
                 )
             if delegate_uri is not None:
                 logger.warn(
-                    "Ignoring Delegate Uri configuration as Public Uri is not set"
+                    "Ignoring Delegate Uri configuration as node can not be publically reachable"
                 )
         else:
             # node will be run as a full NodeDHT
