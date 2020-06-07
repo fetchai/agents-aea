@@ -35,7 +35,7 @@ class TestEjectCommands(AEATestCaseMany):
         cwd = os.path.join(self.t, agent_name)
         self.add_item("connection", "fetchai/gym:0.2.0")
         self.add_item("skill", "fetchai/gym:0.3.0")
-        self.add_item("contract", "fetchai/erc1155:0.3.0")
+        self.add_item("contract", "fetchai/erc1155:0.4.0")
 
         self.run_cli_command("eject", "connection", "fetchai/gym:0.2.0", cwd=cwd)
         assert "gym" not in os.listdir(
@@ -55,7 +55,7 @@ class TestEjectCommands(AEATestCaseMany):
         )
         assert "gym" in os.listdir((os.path.join(cwd, "skills")))
 
-        self.run_cli_command("eject", "contract", "fetchai/erc1155:0.3.0", cwd=cwd)
+        self.run_cli_command("eject", "contract", "fetchai/erc1155:0.4.0", cwd=cwd)
         assert "erc1155" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "contracts"))
         )

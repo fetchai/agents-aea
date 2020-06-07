@@ -121,7 +121,7 @@ class FipaDialogue(Dialogue):
         return VALID_REPLIES[performative]
 
 
-class FipaDialogueStats(object):
+class FipaDialogueStats:
     """Class to handle statistics on fipa dialogues."""
 
     def __init__(self) -> None:

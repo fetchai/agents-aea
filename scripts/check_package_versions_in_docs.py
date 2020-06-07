@@ -86,11 +86,17 @@ DEFAULT_CONFIG_FILE_PATHS = [
 
 
 def default_config_file_paths():
+    """Get (generator) the default config file paths."""
     for item in DEFAULT_CONFIG_FILE_PATHS:
         yield item
 
 
 def get_public_id_from_yaml(configuration_file: Path):
+    """
+    Get the public id from yaml.
+
+    :param configuration_file: the path to the config yaml
+    """
     data = yaml.safe_load(configuration_file.open())
     author = data["author"]
     # handle the case when it's a package or agent config file.

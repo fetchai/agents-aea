@@ -1,5 +1,5 @@
 [MASTER]
-ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py
+ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py
 
 [MESSAGES CONTROL]
 disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,R,W

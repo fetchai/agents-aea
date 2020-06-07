@@ -59,7 +59,7 @@ MultiAddr = str
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
 async def _async_golang_get_deps(
     src: str, loop: AbstractEventLoop
-) -> asyncio.subprocess.Process:
+) -> asyncio.subprocess.Process:  # pylint: disable=no-member
     """
     Downloads dependencies of go 'src' file - asynchronous
     """
@@ -164,10 +164,12 @@ class Uri:
 
     @property
     def host(self) -> str:
+        """Get host."""
         return self._host
 
     @property
     def port(self) -> int:
+        """Get port."""
         return self._port
 
 
@@ -389,6 +391,11 @@ class Libp2pNode:
 
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
+        """
+        Write to the writer stream.
+
+        :param data: data to write to stream
+        """
         size = struct.pack("!I", len(data))
         os.write(self._aea_to_libp2p, size)
         os.write(self._aea_to_libp2p, data)

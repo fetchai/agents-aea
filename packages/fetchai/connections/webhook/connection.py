@@ -136,8 +136,19 @@ class WebhookChannel:
         self.in_queue.put_nowait(webhook_envelop)  # type: ignore
         return web.Response(status=200)
 
-    def send(self, request_envelope: Envelope) -> None:
-        pass
+    def send(self, envelope: Envelope) -> None:
+        """
+        Send an envelope.
+
+        Sending envelopes via the webhook is not possible!
+
+        :param envelope: the envelope
+        """
+        logger.warning(
+            "Dropping envelope={} as sending via the webhook is not possible!".format(
+                envelope
+            )
+        )
 
     async def to_envelope(self, request: web.Request) -> Envelope:
         """

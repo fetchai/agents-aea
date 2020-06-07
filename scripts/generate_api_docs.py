@@ -87,23 +87,41 @@ MODULES_TO_PATH = {
 }
 
 
-def create_subdir(path):
+def create_subdir(path) -> None:
+    """
+    Create a subdirectory.
+
+    :param path: the directory path
+    """
     directory = "/".join(path.split("/")[:-1])
     Path(directory).mkdir(parents=True, exist_ok=True)
 
 
-def replace_underscores(text):
+def replace_underscores(text: str) -> str:
+    """
+    Replace escaped underscores in a text.
+
+    :return: the processed text
+    """
     text_a = text.replace("\\_\\_", "`__`")
     text_b = text_a.replace("\\_", "`_`")
     return text_b
 
 
-def save_to_file(path, text):
+def save_to_file(path: str, text: str) -> None:
+    """
+    Save to a file path.
+
+    :param path: the path
+    :param text: the text
+    :return: None
+    """
     with open(path, "w") as f:
         f.write(text)
 
 
 def generate_api_docs():
+    """Generate the api docs."""
     for module, rel_path in MODULES_TO_PATH.items():
         path = DOCS_DIR + rel_path
         create_subdir(path)

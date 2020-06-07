@@ -44,7 +44,14 @@ class FaberBehaviour(OneShotBehaviour):
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
 
-    def admin_get(self, path: str, content: Dict = None):
+    def _admin_get(self, path: str, content: Dict = None) -> None:
+        """
+        Get from admin.
+
+        :param path: the path
+        :param content: the payload
+        :return: None
+        """
         # Request message & envelope
         request_http_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
@@ -71,7 +78,7 @@ class FaberBehaviour(OneShotBehaviour):
 
         :return: None
         """
-        self.admin_get(ADMIN_COMMAND_STATUS)
+        self._admin_get(ADMIN_COMMAND_STATUS)
 
     def teardown(self) -> None:
         """

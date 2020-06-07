@@ -62,14 +62,22 @@ class Request(OpenAPIRequest):
 
     @property
     def id(self) -> RequestId:
+        """Get the request id."""
         return self._id
 
     @id.setter
     def id(self, id: RequestId) -> None:
+        """Set the request id."""
         self._id = id
 
     @classmethod
     def create(cls, request_handler: BaseHTTPRequestHandler) -> "Request":
+        """
+        Create a request.
+
+        :param request_handler: the request handler
+        :return: a request
+        """
         method = request_handler.command.lower()
 
         parsed_path = urlparse(request_handler.path)
@@ -407,6 +415,8 @@ class HTTPChannel:
 
 
 def HTTPHandlerFactory(channel: HTTPChannel):
+    """Factory for HTTP handlers."""
+
     class HTTPHandler(BaseHTTPRequestHandler):
         """HTTP Handler class to deal with incoming requests."""
 
