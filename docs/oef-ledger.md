@@ -25,7 +25,7 @@ The agent communication network is a peer-to-peer communication network for agen
 
 The implementation builds on the open-source <a href="https://libp2p.io/" target="_blank">libp2p</a> library. A distributed hash table is used by all participating peers to maintain a mapping between agents' cryptographic addresses and their network addresses.
 
-Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a>)
+Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a>).
 
 ### Centralized search and discovery
 
@@ -67,9 +67,8 @@ Ledgers enable the AEAs to complete a transaction, which can involve the transfe
 
 Whilst a ledger can, in principle, also be used to store structured data - for instance, training data in a machine learning model - in most use cases the resulting costs and privacy implications do not make this a relevant use of the ledger. Instead, usually only references to the structured data - often in the form of hashes - are stored on the ledger and the actual data is stored off-chain.
 
-### Framework side crypto and ledger implementations:
+The Python version of the AEA Framework currently integrates with three ledgers:
 
-
-## IPFS
-
-
+- [Fetch.ai ledger](https://docs.fetch.ai/ledger/)
+- [Ethereum ledger](https://ethereum.org/build/)
+- [Cosmos ledger](https://cosmos.network/sdk)

@@ -46,6 +46,7 @@ max_reactions: 20                               # The maximum number of envelope
 skill_exception_policy: propagate               # The exception policy applied to skills (must be one of "propagate", "just_log", or "stop_and_exit")
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)
 loop_mode: async                                # The agent loop mode (must be one of "sync" or "async")
+runtime_mode: threaded                          # The runtime mode (must be one of "threaded" or "async") and determines how agent loop and multiplexer are run
 ```
 
 ## Connection config yaml

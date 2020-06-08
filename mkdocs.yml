@@ -27,7 +27,7 @@ nav:
     - Demos:
       - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
-      - Contract deploy and interact: 'erc1155-skills.md'
+      # - Contract deploy and interact: 'erc1155-skills.md'
       - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
       - Gym skill: 'gym-skill.md'
@@ -45,7 +45,7 @@ nav:
         - Build a skill for an AEA: 'skill-guide.md'
         - Core components - Part 2: 'core-components-2.md'
         - Trade between two AEAs: 'thermometer-skills-step-by-step.md'
-      - Developer guides:
+      - Topic guides:
         - Ways to build an AEA: 'step_one.md'
         - Build an AEA with the CLI: 'build-aea-step-by-step.md'
         - Scaffolding packages: 'scaffolding.md'
@@ -76,6 +76,7 @@ nav:
         - Protocols: 'protocol.md'
         - Skills: 'skill.md'
         - Contracts: 'contract.md'
+        - Decision Maker: 'decision-maker.md'
         - Configurations: 'config.md'
       - Search & Discovery:
         - Defining Data Models: 'defining-data-models.md'
