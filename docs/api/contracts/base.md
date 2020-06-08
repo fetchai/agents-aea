@@ -1,10 +1,10 @@
 <a name=".aea.contracts.base"></a>
-## aea.contracts.base
+# aea.contracts.base
 
 The base contract.
 
 <a name=".aea.contracts.base.Contract"></a>
-### Contract
+## Contract Objects
 
 ```python
 class Contract(Component,  ABC)

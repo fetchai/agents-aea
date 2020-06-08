@@ -183,6 +183,7 @@ class ConfigLoader(Generic[T]):
 
 
 class ConfigLoaders:
+    """Configuration Loader class to load any package type."""
 
     _from_configuration_type_to_loaders = {
         PackageType.AGENT: ConfigLoader("aea-config_schema.json", AgentConfig),
@@ -202,6 +203,11 @@ class ConfigLoaders:
     def from_package_type(
         cls, configuration_type: Union[PackageType, str]
     ) -> "ConfigLoader":
+        """
+        Get a config loader from the configuration type.
+
+        :param configuration_type: the configuration type
+        """
         configuration_type = PackageType(configuration_type)
         return cls._from_configuration_type_to_loaders[configuration_type]
 

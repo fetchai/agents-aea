@@ -1,10 +1,10 @@
 <a name=".aea.helpers.exec_timeout"></a>
-## aea.helpers.exec`_`timeout
+# aea.helpers.exec`_`timeout
 
 Python code execution time limit tools.
 
 <a name=".aea.helpers.exec_timeout.TimeoutResult"></a>
-### TimeoutResult
+## TimeoutResult Objects
 
 ```python
 class TimeoutResult()
@@ -48,7 +48,7 @@ Return True if code was terminated by ExecTimeout cause timeout.
 bool
 
 <a name=".aea.helpers.exec_timeout.TimeoutException"></a>
-### TimeoutException
+## TimeoutException Objects
 
 ```python
 class TimeoutException(BaseException)
@@ -59,7 +59,7 @@ TimeoutException raised by ExecTimeout context managers in thread with limited e
 Used internally, does not propagated outside of context manager
 
 <a name=".aea.helpers.exec_timeout.BaseExecTimeout"></a>
-### BaseExecTimeout
+## BaseExecTimeout Objects
 
 ```python
 class BaseExecTimeout(ABC)
@@ -109,7 +109,7 @@ Exit context manager.
 bool
 
 <a name=".aea.helpers.exec_timeout.ExecTimeoutSigAlarm"></a>
-### ExecTimeoutSigAlarm
+## ExecTimeoutSigAlarm Objects
 
 ```python
 class ExecTimeoutSigAlarm(BaseExecTimeout)
@@ -120,7 +120,7 @@ ExecTimeout context manager implementation using signals and SIGALARM.
 Does not support threads, have to be used only in main thread.
 
 <a name=".aea.helpers.exec_timeout.ExecTimeoutThreadGuard"></a>
-### ExecTimeoutThreadGuard
+## ExecTimeoutThreadGuard Objects
 
 ```python
 class ExecTimeoutThreadGuard(BaseExecTimeout)

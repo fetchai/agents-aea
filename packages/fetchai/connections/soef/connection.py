@@ -160,9 +160,9 @@ class SOEFChannel:
             service_location = service_description.values.get("location", None)
             piece = service_description.values.get("piece", None)
             value = service_description.values.get("value", None)
-            if service_location is not None and type(service_location) == Location:
+            if service_location is not None and isinstance(service_location, Location):
                 self._set_location(service_location)
-            elif type(piece) == str and type(value) == str:
+            elif isinstance(piece, str) and isinstance(value, str):
                 self._set_personality_piece(piece, value)
             else:
                 self._send_error_response()
@@ -183,10 +183,10 @@ class SOEFChannel:
         :return: bool
         """
         is_compatible = (
-            type(service_description.values.get("location", None)) == Location
+            isinstance(service_description.values.get("location", None), Location)
         ) or (
-            type(service_description.values.get("piece", None)) == str
-            and type(service_description.values.get("value", None)) == str
+            isinstance(service_description.values.get("piece", None), str)
+            and isinstance(service_description.values.get("value", None), str)
         )
         return is_compatible
 
@@ -217,9 +217,9 @@ class SOEFChannel:
                         child.tag, child.attrib, child.text
                     )
                 )
-                if "page_address" == child.tag and child.text is not None:
+                if child.tag == "page_address" and child.text is not None:
                     unique_page_address = child.text
-                if "token" == child.tag and child.text is not None:
+                if child.tag == "token" and child.text is not None:
                     unique_token = child.text
             if len(unique_page_address) > 0 and len(unique_token) > 0:
                 logger.debug("Registering agent")
@@ -427,7 +427,7 @@ class SOEFChannel:
         is_compatible = True
         is_compatible = is_compatible and len(query.constraints) == 1
         constraint_one = query.constraints[0]
-        is_compatible = is_compatible and type(constraint_one) == Constraint
+        is_compatible = is_compatible and isinstance(constraint_one, Constraint)
         if is_compatible:
             constraint_one = cast(Constraint, constraint_one)
             is_compatible = is_compatible and (

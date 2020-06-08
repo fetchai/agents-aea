@@ -68,7 +68,7 @@ class IPFSHashOnly:
         :return: a bytes string representing a file in protobuf serialization
         """
         data_pb = unixfs_pb2.Data()  # type: ignore
-        data_pb.Type = unixfs_pb2.Data.File  # type: ignore
+        data_pb.Type = unixfs_pb2.Data.File  # type: ignore # pylint: disable=no-member
         data_pb.Data = data
         data_pb.filesize = len(data)
 

@@ -68,10 +68,12 @@ class Uri:
 
     @property
     def host(self) -> str:
+        """Get host."""
         return self._host
 
     @property
     def port(self) -> int:
+        """Get port."""
         return self._port
 
 

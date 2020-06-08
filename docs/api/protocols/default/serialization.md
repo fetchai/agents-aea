@@ -1,10 +1,10 @@
 <a name=".aea.protocols.default.serialization"></a>
-## aea.protocols.default.serialization
+# aea.protocols.default.serialization
 
 Serialization module for default protocol.
 
 <a name=".aea.protocols.default.serialization.DefaultSerializer"></a>
-### DefaultSerializer
+## DefaultSerializer Objects
 
 ```python
 class DefaultSerializer(Serializer)
@@ -16,6 +16,7 @@ Serialization for the 'default' protocol.
 #### encode
 
 ```python
+ | @staticmethod
  | encode(msg: Message) -> bytes
 ```
 
@@ -33,6 +34,7 @@ the bytes.
 #### decode
 
 ```python
+ | @staticmethod
  | decode(obj: bytes) -> Message
 ```
 

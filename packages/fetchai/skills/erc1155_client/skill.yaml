@@ -7,12 +7,12 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
   behaviours.py: QmZjPpSukWHJd4FZdxZgVSHzLpMQDEdXgJVTEzNfjbtiQX
-  dialogues.py: QmPe9v2HSgd68dB39YEoS2tLw79vKZ8V7svRg2nRqHHWnb
+  dialogues.py: QmWdJrmE9UZ4G3L3LWoaPFNCBG9WA9xcrFkZRkcCSiHG2j
   handlers.py: QmZVi3EQiuQPYRqZLfZK5DGvzJciqPgN1p26Z4TdUkh3aj
   strategy.py: Qme3Ck9KfWPWXRhV1GvHfYL65VapShETK8jyJqs3a2HBR5
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.3.0
+- fetchai/erc1155:0.4.0
 protocols:
 - fetchai/default:0.2.0
 - fetchai/fipa:0.3.0

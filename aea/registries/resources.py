@@ -199,6 +199,12 @@ class Resources:
         self.inject_contracts(skill)
 
     def inject_contracts(self, skill: Skill) -> None:
+        """
+        Inject contracts into a skill context.
+
+        :param skill: a skill
+        :return: None
+        """
         if skill.config.contracts is not None:
             # check all contracts are present
             contracts = {}  # type: Dict[str, Contract]

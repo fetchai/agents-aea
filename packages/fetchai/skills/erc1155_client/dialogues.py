@@ -61,6 +61,7 @@ class Dialogue(FipaDialogue):
 
     @property
     def proposal(self) -> Description:
+        """Get the proposal."""
         assert self._proposal is not None, "Proposal not set!"
         return self._proposal
 

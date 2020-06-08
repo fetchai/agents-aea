@@ -252,7 +252,7 @@ class ProtectedQueue(Queue):
         :raises: ValueError, if caller is not permitted
         :return: internal message
         """
-        if not self._access_code_hash == _hash(access_code):
+        if self._access_code_hash != _hash(access_code):
             raise ValueError("Wrong code, access not permitted!")
         internal_message = super().get(
             block=block, timeout=timeout
@@ -278,6 +278,7 @@ class DecisionMakerHandler(ABC):
 
     @property
     def agent_name(self) -> str:
+        """Get the agent name."""
         return self.identity.name
 
     @property

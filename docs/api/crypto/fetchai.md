@@ -1,10 +1,10 @@
 <a name=".aea.crypto.fetchai"></a>
-## aea.crypto.fetchai
+# aea.crypto.fetchai
 
 Fetchai module wrapping the public and private key cryptography and ledger api.
 
 <a name=".aea.crypto.fetchai.FetchAICrypto"></a>
-### FetchAICrypto
+## FetchAICrypto Objects
 
 ```python
 class FetchAICrypto(Crypto[Entity])
@@ -161,7 +161,7 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 None
 
 <a name=".aea.crypto.fetchai.FetchAIApi"></a>
-### FetchAIApi
+## FetchAIApi Objects
 
 ```python
 class FetchAIApi(LedgerApi)
@@ -297,7 +297,7 @@ Check whether a transaction is valid or not (non-blocking).
 True if the random_message is equals to tx['input']
 
 <a name=".aea.crypto.fetchai.FetchAIFaucetApi"></a>
-### FetchAIFaucetApi
+## FetchAIFaucetApi Objects
 
 ```python
 class FetchAIFaucetApi(FaucetApi)

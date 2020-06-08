@@ -356,6 +356,7 @@ def check_fingerprint(
 
 
 def parse_arguments() -> argparse.Namespace:
+    """Parse arguments."""
     script_name = Path(__file__).name
     parser = argparse.ArgumentParser(
         script_name, description="Generate/check hashes of packages."

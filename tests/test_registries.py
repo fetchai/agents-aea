@@ -71,7 +71,7 @@ class TestContractRegistry:
         cls.registry = AgentComponentRegistry()
         cls.registry.register(contract.component_id, cast(Contract, contract))
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.3.0"),
+            PublicId.from_str("fetchai/erc1155:0.4.0"),
         }
 
     def test_fetch_all(self):
@@ -82,14 +82,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.3.0")
+        contract_id = PublicId.from_str("fetchai/erc1155:0.4.0")
         contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.3.0")
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.4.0")
         component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
         contract_removed = self.registry.fetch(component_id)
         self.registry.unregister(contract_removed.component_id)

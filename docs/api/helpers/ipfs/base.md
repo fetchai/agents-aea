@@ -1,10 +1,10 @@
 <a name=".aea.helpers.ipfs.base"></a>
-## aea.helpers.ipfs.base
+# aea.helpers.ipfs.base
 
 This module contains helper methods and classes for the 'aea' package.
 
 <a name=".aea.helpers.ipfs.base.IPFSHashOnly"></a>
-### IPFSHashOnly
+## IPFSHashOnly Objects
 
 ```python
 class IPFSHashOnly()

@@ -1,5 +1,5 @@
 <a name=".aea.test_tools.generic"></a>
-## aea.test`_`tools.generic
+# aea.test`_`tools.generic
 
 This module contains generic tools for AEA end-to-end testing.
 

@@ -149,6 +149,7 @@ class Connection(Component, ABC):
 
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
+        """Get the ids of the protocols this connection is restricted to."""
         if self._configuration is None:
             return self._restricted_to_protocols
         else:

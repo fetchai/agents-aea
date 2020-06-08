@@ -38,6 +38,12 @@ logger = logging.getLogger(__name__)
 
 
 def component_type_to_class(component_type: ComponentType) -> Type[Component]:
+    """
+    Get the component class from the component type.
+
+    :param component_type: the component type
+    :return: the component class
+    """
     type_to_class: Dict[ComponentType, Type[Component]] = {
         ComponentType.PROTOCOL: Protocol,
         ComponentType.CONTRACT: Contract,

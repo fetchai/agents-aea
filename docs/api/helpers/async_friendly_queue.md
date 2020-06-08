@@ -1,10 +1,10 @@
 <a name=".aea.helpers.async_friendly_queue"></a>
-## aea.helpers.async`_`friendly`_`queue
+# aea.helpers.async`_`friendly`_`queue
 
 This module contains the implementation of AsyncFriendlyQueue.
 
 <a name=".aea.helpers.async_friendly_queue.AsyncFriendlyQueue"></a>
-### AsyncFriendlyQueue
+## AsyncFriendlyQueue Objects
 
 ```python
 class AsyncFriendlyQueue(queue.Queue)

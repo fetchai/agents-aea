@@ -454,7 +454,7 @@ class Transaction:
         w3 = Web3()
         singable_message = encode_defunct(primitive=self.sender_hash)
         result = (
-            w3.eth.account.recover_message(
+            w3.eth.account.recover_message(  # pylint: disable=no-member
                 signable_message=singable_message,
                 signature=HexBytes(self.sender_signature),
             )
@@ -463,7 +463,7 @@ class Transaction:
         counterparty_signable_message = encode_defunct(primitive=self.counterparty_hash)
         result = (
             result
-            and w3.eth.account.recover_message(
+            and w3.eth.account.recover_message(  # pylint: disable=no-member
                 signable_message=counterparty_signable_message,
                 signature=HexBytes(self.counterparty_signature),
             )

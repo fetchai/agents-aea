@@ -1,5 +1,5 @@
 <a name=".aea.configurations.loader"></a>
-## aea.configurations.loader
+# aea.configurations.loader
 
 Implementation of the parser for configuration file.
 
@@ -21,7 +21,7 @@ Make the JSONSchema base URI, cross-platform.
 the string in URI form.
 
 <a name=".aea.configurations.loader.ConfigLoader"></a>
-### ConfigLoader
+## ConfigLoader Objects
 
 ```python
 class ConfigLoader(Generic[T])
@@ -52,6 +52,20 @@ Initialize the parser for configuration files.
 ```
 
 Get the json schema validator.
+
+<a name=".aea.configurations.loader.ConfigLoader.required_fields"></a>
+#### required`_`fields
+
+```python
+ | @property
+ | required_fields() -> List[str]
+```
+
+Get required fields.
+
+**Returns**:
+
+list of required fields.
 
 <a name=".aea.configurations.loader.ConfigLoader.configuration_class"></a>
 #### configuration`_`class
@@ -126,4 +140,27 @@ None
 ```
 
 Get the configuration loader from the type.
+
+<a name=".aea.configurations.loader.ConfigLoaders"></a>
+## ConfigLoaders Objects
+
+```python
+class ConfigLoaders()
+```
+
+Configuration Loader class to load any package type.
+
+<a name=".aea.configurations.loader.ConfigLoaders.from_package_type"></a>
+#### from`_`package`_`type
+
+```python
+ | @classmethod
+ | from_package_type(cls, configuration_type: Union[PackageType, str]) -> "ConfigLoader"
+```
+
+Get a config loader from the configuration type.
+
+**Arguments**:
+
+- `configuration_type`: the configuration type
 

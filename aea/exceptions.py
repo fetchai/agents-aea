@@ -17,6 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 
+"""Exceptions for the AEA package."""
+
 
 class AEAException(Exception):
     """User-defined exception for the AEA framework."""

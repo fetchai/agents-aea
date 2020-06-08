@@ -1,10 +1,10 @@
 <a name=".aea.crypto.registry"></a>
-## aea.crypto.registry
+# aea.crypto.registry
 
 This module implements the crypto registry.
 
 <a name=".aea.crypto.registry.CryptoId"></a>
-### CryptoId
+## CryptoId Objects
 
 ```python
 class CryptoId(RegexConstrainedString)
@@ -32,7 +32,7 @@ Initialize the crypto id.
 Get the id name.
 
 <a name=".aea.crypto.registry.EntryPoint"></a>
-### EntryPoint
+## EntryPoint Objects
 
 ```python
 class EntryPoint(RegexConstrainedString)
@@ -87,10 +87,10 @@ Load the crypto object.
 the cyrpto object, loaded following the spec.
 
 <a name=".aea.crypto.registry.CryptoSpec"></a>
-### CryptoSpec
+## CryptoSpec Objects
 
 ```python
-class CryptoSpec(object)
+class CryptoSpec()
 ```
 
 A specification for a particular instance of a crypto object.
@@ -120,10 +120,10 @@ Initialize a crypto specification.
 Instantiates an instance of the crypto object with appropriate arguments.
 
 <a name=".aea.crypto.registry.CryptoRegistry"></a>
-### CryptoRegistry
+## CryptoRegistry Objects
 
 ```python
-class CryptoRegistry(object)
+class CryptoRegistry()
 ```
 
 Registry for Crypto classes.

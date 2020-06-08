@@ -43,6 +43,10 @@ lint:
 	black aea benchmark examples packages scripts tests
 	flake8 aea benchmark examples packages scripts tests
 
+.PHONY: pylint
+pylint:
+	pylint aea benchmark examples packages scripts
+
 .PHONY: security
 security:
 	bandit -s B101 -r aea benchmark examples packages scripts tests
@@ -121,4 +125,5 @@ new_env: clean
 .PHONY: install_env
 install_env:
 	pipenv install --dev --skip-lock
+	pip uninstall typing -y
 	pip install -e .[all]

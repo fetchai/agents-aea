@@ -1,6 +1,7 @@
 An Autonomous Economic Agent is, in technical terms, defined by the following characteristics:
 
-- It MUST be capable of receiving and sending `Envelopes` which satisfy the following protobuf schema:
+<ul>
+<li> It MUST be capable of receiving and sending `Envelopes` which satisfy the following protobuf schema:
 
 ``` proto
 syntax = "proto3";
@@ -22,14 +23,17 @@ message Envelope{
 </div>
 -->
 
-The format for the above fields, except `message`, is specified below. For those with `regexp`, the format is described in <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target=_blank>regular expression.</a>.
+The format for the above fields, except `message`, is specified below. For those with `regexp`, the format is described in <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target=_blank>regular expression</a>.
 
- * to: any string
- * sender: any string 
- * protocol_id: (`regexp`) `^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`
- * URI: <a href="https://tools.ietf.org/html/rfc3986" target=_blank>this syntax</a>
+<ul>
+<li>to: any string</li>
+<li>sender: any string</li>
+<li>protocol_id: (`regexp`) `^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`</li>
+<li>URI: <a href="https://tools.ietf.org/html/rfc3986" target=_blank>this syntax</a></li>
+</ul>
+</li>
 
-- It MUST implement each protocol with the required meta-fields:
+<li> It MUST implement each protocol with the required meta-fields:
 
 ``` proto
 
@@ -43,15 +47,16 @@ The format for the above fields, except `message`, is specified below. For those
     }
 ```
  where `...` is replaced with the protocol specific performatives.
+</li>
 
-- It MUST implement protocols according to their specification.
+<li> It MUST implement protocols according to their specification.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>This section is incomplete, and will be updated soon!</p>
 </div>
-
-- It SHOULD implement the `fetchai/default:0.1.0` protocol which satisfies the following protobuf schema:
+</li>
+<li> It SHOULD implement the `fetchai/default:0.1.0` protocol which satisfies the following protobuf schema:
 
 ``` proto
 syntax = "proto3";
@@ -96,13 +101,14 @@ message DefaultMessage{
     }
 }
 ```
-
-- It is recommended that it processes `Envelopes` asynchronously. Note, the specification regarding the processing of messages does not impose any particular implementation choice/constraint; for example, the AEA can process envelopes either synchronously and asynchronously. However, due to the high level of activity that an AEA might be subject to, other AEAs expect a certain minimum level of responsiveness and reactivity of an AEA's implementation, especially in the case of many concurrent dialogues with other peers. That could imply the need for asynchronous programming to make the AEA's implementation scalable.
-
-- It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key.
-
-- It SHOULD implement handling of errors using the `default` protocol. The protobuf schema is given above.
-
+</li>
+<li> It is recommended that it processes `Envelopes` asynchronously. Note, the specification regarding the processing of messages does not impose any particular implementation choice/constraint; for example, the AEA can process envelopes either synchronously and asynchronously. However, due to the high level of activity that an AEA might be subject to, other AEAs expect a certain minimum level of responsiveness and reactivity of an AEA's implementation, especially in the case of many concurrent dialogues with other peers. That could imply the need for asynchronous programming to make the AEA's implementation scalable.
+</li>
+<li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key.
+</li>
+<li> It SHOULD implement handling of errors using the `default` protocol. The protobuf schema is given above.
+</li>
+</ul>
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>Additional constraints will be added soon!</p>
