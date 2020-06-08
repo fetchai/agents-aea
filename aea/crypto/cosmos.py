@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 COSMOS_CURRENCY = "ATOM"
-COSMOS_TESTNET_FAUCET_URL = "http://aea-testnet.sandbox.fetch-ai.com:8888/claim"
+COSMOS_TESTNET_FAUCET_URL = "https://faucet-aea-testnet.sandbox.fetch-ai.com:8888/claim"
 
 
 class CosmosCrypto(Crypto[SigningKey]):
@@ -449,8 +449,7 @@ class CosmosFaucetApi(FaucetApi):
                 url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
             )
             if response.status_code == 200:
-                tx_hash = response.text.split("\n")[1]
-                tx_hash = tx_hash[8:]
+                tx_hash = response.text
                 logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
             else:
                 logger.warning(
