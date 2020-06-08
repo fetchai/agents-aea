@@ -626,9 +626,7 @@ class Skill(Component):
         return self._models
 
     @classmethod
-    def from_dir(
-        cls, directory: str, agent_context: Optional[AgentContext] = None
-    ) -> "Skill":
+    def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
         """
         Load the skill from a directory.
 
