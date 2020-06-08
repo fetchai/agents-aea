@@ -126,6 +126,7 @@ class P2PLibp2pClientConnection(Connection):
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
         self.node_uri = self.delegate_uris[index]
         # self.node_cert = self.delegate_certs[index]
+        logger.debug("Node to use as delegate: {}".format(self.node_uri))
 
         # tcp connection
         self._reader = None  # type: Optional[asyncio.StreamReader]
