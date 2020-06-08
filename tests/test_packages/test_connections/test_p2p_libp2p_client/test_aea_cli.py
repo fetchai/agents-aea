@@ -61,9 +61,8 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         cls.node_connection = _make_libp2p_connection(delegate_host=DEFAULT_HOST, delegate_port=DEFAULT_DELEGATE_PORT, delegate=True)
         cls.node_multiplexer= Multiplexer([cls.node_connection])
         cls.log_files = [cls.node_connection.node.log_file]
-        
-        cls.node_multiplexer.connect()
 
+        cls.node_multiplexer.connect()
 
     def test_node(self):
         assert self.node_connection.connection_status.is_connected is True
@@ -72,17 +71,17 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/p2p_libp2p_client:0.1.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.force_set_config(
-            "{}.nodes".format(config_path), [ {"uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT)}]
+            "{}.nodes".format(config_path),
+            [{"uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT)}],
         )
 
         process = self.run_agent()
-        check_strings = "Successfully connected to libp2p node {}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT) 
-        self._assert_agent_running(process, check_strings)
-
-    def _assert_agent_running(self, process, check_strings = "Successfully connected to libp2p node "):
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
+        check_strings = "Successfully connected to libp2p node {}:{}".format(
+            DEFAULT_HOST, DEFAULT_DELEGATE_PORT
+        )
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []
@@ -93,7 +92,6 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
             process
         ), "AEA wasn't successfully terminated."
 
-    
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""

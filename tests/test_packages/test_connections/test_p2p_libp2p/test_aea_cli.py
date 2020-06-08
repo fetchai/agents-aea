@@ -46,6 +46,7 @@ DEFAULT_NET_SIZE = 4
 
 DEFAULT_LAUNCH_TIMEOUT = 25
 
+
 @skip_test_windows
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
@@ -60,7 +61,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
-        
+
         check_strings = "My libp2p addresses: ["
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
@@ -76,7 +77,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 @skip_test_windows
 class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
-    
+
     def test_agent(self):
         self.add_item("connection", "fetchai/p2p_libp2p:0.2.0")
 
@@ -94,7 +95,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         )
 
         process = self.run_agent()
-        
+
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
@@ -108,4 +109,3 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
-
