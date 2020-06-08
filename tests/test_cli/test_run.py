@@ -53,6 +53,7 @@ if sys.platform.startswith("win"):
     pytest.skip("skipping tests on Windows", allow_module_level=True)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_run():
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
