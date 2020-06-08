@@ -59,6 +59,7 @@ nav:
         - Build an AEA programmatically: 'build-aea-programmatically.md'
         - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
         - AEAs vs agents: 'agent-vs-aea.md'
+        - Upgrading versions: 'upgrading.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
         - Frontend intergration: 'connect-a-frontend.md'

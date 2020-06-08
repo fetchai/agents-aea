@@ -32,7 +32,7 @@ self.context.outbox.put_message(message=cfp_msg)
 
 You must update your skills as the old implementation is no longer supported.
 
-- Connection constructors have been simplified. In the past you had to implement both the `__init__` as well as the `from_dir` methods of a Connection. Now you only have to implement the `__init__` method which by default at load time now receives the following kwargs: `configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore`. See for example in the scaffold connection:
+- Connection constructors have been simplified. In the past you had to implement both the `__init__` as well as the `from_config` methods of a Connection. Now you only have to implement the `__init__` method which by default at load time now receives the following kwargs: `configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore`. See for example in the scaffold connection:
 
 ``` python
 class MyScaffoldConnection(Connection):
