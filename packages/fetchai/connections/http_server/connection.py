@@ -36,9 +36,13 @@ from openapi_core.validation.request.datatypes import (
 from openapi_core.validation.request.shortcuts import validate_request
 from openapi_core.validation.request.validators import RequestValidator
 
-from openapi_spec_validator.schemas import read_yaml_file
+from openapi_spec_validator.schemas import (  # pylint: disable=wrong-import-order
+    read_yaml_file,
+)
 
-from werkzeug.datastructures import ImmutableMultiDict
+from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
+    ImmutableMultiDict,
+)
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
@@ -62,14 +66,22 @@ class Request(OpenAPIRequest):
 
     @property
     def id(self) -> RequestId:
+        """Get the request id."""
         return self._id
 
     @id.setter
     def id(self, id: RequestId) -> None:
+        """Set the request id."""
         self._id = id
 
     @classmethod
     def create(cls, request_handler: BaseHTTPRequestHandler) -> "Request":
+        """
+        Create a request.
+
+        :param request_handler: the request handler
+        :return: a request
+        """
         method = request_handler.command.lower()
 
         parsed_path = urlparse(request_handler.path)
@@ -407,6 +419,8 @@ class HTTPChannel:
 
 
 def HTTPHandlerFactory(channel: HTTPChannel):
+    """Factory for HTTP handlers."""
+
     class HTTPHandler(BaseHTTPRequestHandler):
         """HTTP Handler class to deal with incoming requests."""
 

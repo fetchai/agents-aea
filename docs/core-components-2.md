@@ -6,23 +6,9 @@ In <a href="../core-components-1/">Core Components - Part 1</a> we discussed the
 
 ### Decision Maker
 
-The `DecisionMaker` component manages global agent state updates proposed by the skills and processes the resulting ledger transactions.
+The `DecisionMaker` can be thought off like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the wallet's private keys.
 
-It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA.
-
-Skills communicate with the decision maker via `InternalMessages`. There exist two types of these: `TransactionMessage` and `StateUpdateMessage`.
-
-The `StateUpdateMessage` is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place off chain.
-
-The `TransactionMessage` is used by skills to propose a transaction to the decision-maker. It can be used either for settling the transaction on-chain or to sign a transaction to be used within a negotiation.
-
-The decision maker processes messages and can accept or reject them.
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>For examples how to use these concepts have a look at the `tac_` skills. These functionalities are experimental and subject to change.
-</p>
-</div>
+You can learn more about the decision maker <a href="../decision-maker/">here</a>.
 
 ### Wallet
 
@@ -43,6 +29,11 @@ Ledger APIs are special types of connections. In particular, they must implement
  -->
 
 AEAs use Ledger APIs to communicate with public ledgers.
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>More details coming soon.</p>
+</div>
 
 ### Contracts
 

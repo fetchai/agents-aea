@@ -268,17 +268,6 @@ class Agent(ABC):
         self.setup()
         self.liveness.start()
 
-    def _depricated_run_main_loop(self) -> None:
-        """
-        Run the main loop of the agent.
-
-        :return: None
-        """
-        logger.info("[{}]: Start processing messages...".format(self.name))
-        assert self._main_loop is not None, "Agent loop was not set"
-        self._main_loop.start()
-        logger.debug("[{}]: Exiting main loop...".format(self.name))
-
     def stop(self) -> None:
         """
         Stop the agent.

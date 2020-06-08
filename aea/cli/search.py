@@ -215,7 +215,7 @@ def _search_items(ctx: Context, item_type: str, query: str) -> None:
             "GET", "/{}".format(item_type_plural), params={"search": query}
         )
 
-    if not len(results):
+    if len(results) == 0:
         click.echo("No {} found.".format(item_type_plural))  # pragma: no cover
     else:
         click.echo("{} found:\n".format(item_type_plural.title()))

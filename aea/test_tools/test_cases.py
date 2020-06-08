@@ -663,6 +663,10 @@ class BaseAEATestCase(ABC):
 
 @pytest.mark.integration
 class UseOef:
+    """
+    Inherit from this class to launch an OEF node.
+    """
+
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
         """Start an oef node."""
@@ -709,6 +713,7 @@ class AEATestCase(BaseAEATestCase):
     path_to_aea: Union[Path, str] = Path(".")
     packages_dir_path: Path = Path("..", "packages")
     agent_configuration: AgentConfig
+    t: Path  # temporary directory path
 
     @classmethod
     def setup_class(cls):

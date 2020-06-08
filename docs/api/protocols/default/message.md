@@ -1,10 +1,10 @@
 <a name=".aea.protocols.default.message"></a>
-## aea.protocols.default.message
+# aea.protocols.default.message
 
 This module contains default's message definition.
 
 <a name=".aea.protocols.default.message.DefaultMessage"></a>
-### DefaultMessage
+## DefaultMessage Objects
 
 ```python
 class DefaultMessage(Message)
@@ -13,7 +13,7 @@ class DefaultMessage(Message)
 A protocol for exchanging any bytes message.
 
 <a name=".aea.protocols.default.message.DefaultMessage.Performative"></a>
-### Performative
+## Performative Objects
 
 ```python
 class Performative(Enum)

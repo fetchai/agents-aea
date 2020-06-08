@@ -260,7 +260,7 @@ class TestCli:
         if xparam_idx is None:
             return
 
-        import matplotlib.pyplot as plt  # type: ignore
+        import matplotlib.pyplot as plt  # type: ignore # pylint: disable=import-outside-toplevel
 
         reports_sorted_by_arg = sorted(reports, key=lambda x: x.arguments[xparam_idx])  # type: ignore
 

@@ -1,10 +1,10 @@
 <a name=".aea.registries.resources"></a>
-## aea.registries.resources
+# aea.registries.resources
 
 This module contains the resources class.
 
 <a name=".aea.registries.resources.Resources"></a>
-### Resources
+## Resources Objects
 
 ```python
 class Resources()
@@ -16,15 +16,12 @@ This class implements the object that holds the resources of an AEA.
 #### `__`init`__`
 
 ```python
- | __init__(directory: Optional[Union[str, os.PathLike]] = None)
+ | __init__() -> None
 ```
 
 Instantiate the resources.
 
-**Arguments**:
-
-- `directory`: the path to the directory which contains the resources
-(skills, connections and protocols)
+:return None
 
 <a name=".aea.registries.resources.Resources.add_component"></a>
 #### add`_`component
@@ -171,6 +168,23 @@ None
 ```
 
 Add a skill to the set of resources.
+
+**Arguments**:
+
+- `skill`: a skill
+
+**Returns**:
+
+None
+
+<a name=".aea.registries.resources.Resources.inject_contracts"></a>
+#### inject`_`contracts
+
+```python
+ | inject_contracts(skill: Skill) -> None
+```
+
+Inject contracts into a skill context.
 
 **Arguments**:
 

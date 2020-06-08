@@ -1,10 +1,10 @@
 <a name=".aea.decision_maker.messages.state_update"></a>
-## aea.decision`_`maker.messages.state`_`update
+# aea.decision`_`maker.messages.state`_`update
 
 The state update message module.
 
 <a name=".aea.decision_maker.messages.state_update.StateUpdateMessage"></a>
-### StateUpdateMessage
+## StateUpdateMessage Objects
 
 ```python
 class StateUpdateMessage(InternalMessage)
@@ -13,7 +13,7 @@ class StateUpdateMessage(InternalMessage)
 The state update message class.
 
 <a name=".aea.decision_maker.messages.state_update.StateUpdateMessage.Performative"></a>
-### Performative
+## Performative Objects
 
 ```python
 class Performative(Enum)

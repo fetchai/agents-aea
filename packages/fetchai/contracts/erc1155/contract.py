@@ -52,6 +52,10 @@ class ERC1155Contract(Contract):
         CONTRACT_SIGN_HASH_BATCH = "contract_sign_hash_batch"
         CONTRACT_SIGN_HASH_SINGLE = "contract_sign_hash_single"
 
+        def __str__(self):
+            """Get string representation."""
+            return str(self.value)
+
     def __init__(
         self, contract_config: ContractConfig, contract_interface: Dict[str, Any],
     ):
@@ -384,14 +388,14 @@ class ERC1155Contract(Contract):
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
-        for i in range(len(token_ids)):
-            decoded_type = Helpers().decode_id(token_ids[i])
+        for idx, token_id in enumerate(token_ids):
+            decoded_type = Helpers().decode_id(token_id)
             assert (
                 decoded_type == 1 or decoded_type == 2
             ), "The token prefix must be 1 or 2."
             if decoded_type == 1:
                 assert (
-                    mint_quantities[i] == 1
+                    mint_quantities[idx] == 1
                 ), "Cannot mint NFT with mint_quantity more than 1"
         tx = self.instance.functions.mintBatch(
             recipient_address, token_ids, mint_quantities
@@ -1095,15 +1099,15 @@ class Helpers:
                 ]
             )
         )
-        for i in range(len(_ids)):
-            if not i == 0:
+        for idx, _id in enumerate(_ids):
+            if not idx == 0:
                 aggregate_hash = keccak256(
                     b"".join(
                         [
                             aggregate_hash,
-                            _ids[i].to_bytes(32, "big"),
-                            _from_values[i].to_bytes(32, "big"),
-                            _to_values[i].to_bytes(32, "big"),
+                            _id.to_bytes(32, "big"),
+                            _from_values[idx].to_bytes(32, "big"),
+                            _to_values[idx].to_bytes(32, "big"),
                         ]
                     )
                 )

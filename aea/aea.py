@@ -93,6 +93,7 @@ class AEA(Agent):
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param skill_exception_policy: the skill exception policy enum
         :param loop_mode: loop_mode to choose agent run loop.
+        :param runtime_mode: runtime mode (async, threaded) to run AEA in.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None

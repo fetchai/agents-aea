@@ -71,7 +71,7 @@ def check_copyright(file: Path) -> bool:
 
 def parse_args():
     """Parse arguments."""
-    import argparse
+    import argparse  # pylint: disable=import-outside-toplevel
 
     parser = argparse.ArgumentParser("check_copyright_notice")
     parser.add_argument(

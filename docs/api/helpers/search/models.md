@@ -1,10 +1,10 @@
 <a name=".aea.helpers.search.models"></a>
-## aea.helpers.search.models
+# aea.helpers.search.models
 
 Useful classes for the OEF search.
 
 <a name=".aea.helpers.search.models.Location"></a>
-### Location
+## Location Objects
 
 ```python
 class Location()
@@ -26,8 +26,22 @@ Initialize a location.
 - `latitude`: the latitude of the location.
 - `longitude`: the longitude of the location.
 
+<a name=".aea.helpers.search.models.Location.distance"></a>
+#### distance
+
+```python
+ | distance(other: "Location") -> float
+```
+
+Get the distance to another location.
+
+**Arguments**:
+
+- `other`: the other location
+:retun: the distance
+
 <a name=".aea.helpers.search.models.AttributeInconsistencyException"></a>
-### AttributeInconsistencyException
+## AttributeInconsistencyException Objects
 
 ```python
 class AttributeInconsistencyException(Exception)
@@ -38,7 +52,7 @@ Inconsistency is defined when values do not meet their respective schema, or if 
 are not of an allowed type.
 
 <a name=".aea.helpers.search.models.Attribute"></a>
-### Attribute
+## Attribute Objects
 
 ```python
 class Attribute()
@@ -72,7 +86,7 @@ Initialize an attribute.
 Compare with another object.
 
 <a name=".aea.helpers.search.models.DataModel"></a>
-### DataModel
+## DataModel Objects
 
 ```python
 class DataModel()
@@ -125,7 +139,7 @@ It is assumed that each attribute is required.
 the schema compliant with the values specified.
 
 <a name=".aea.helpers.search.models.Description"></a>
-### Description
+## Description Objects
 
 ```python
 class Description()
@@ -218,7 +232,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
 
 <a name=".aea.helpers.search.models.ConstraintTypes"></a>
-### ConstraintTypes
+## ConstraintTypes Objects
 
 ```python
 class ConstraintTypes(Enum)
@@ -236,7 +250,7 @@ Types of constraint.
 Get the string representation.
 
 <a name=".aea.helpers.search.models.ConstraintType"></a>
-### ConstraintType
+## ConstraintType Objects
 
 ```python
 class ConstraintType()
@@ -362,7 +376,7 @@ True if the value satisfy the constraint, False otherwise.
 Check equality with another object.
 
 <a name=".aea.helpers.search.models.ConstraintExpr"></a>
-### ConstraintExpr
+## ConstraintExpr Objects
 
 ```python
 class ConstraintExpr(ABC)
@@ -410,7 +424,7 @@ Specifically, check the following conditions:
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
 <a name=".aea.helpers.search.models.And"></a>
-### And
+## And Objects
 
 ```python
 class And(ConstraintExpr)
@@ -475,7 +489,7 @@ Check whether the constraint expression is valid wrt a data model
 Compare with another object.
 
 <a name=".aea.helpers.search.models.Or"></a>
-### Or
+## Or Objects
 
 ```python
 class Or(ConstraintExpr)
@@ -540,7 +554,7 @@ Check whether the constraint expression is valid wrt a data model
 Compare with another object.
 
 <a name=".aea.helpers.search.models.Not"></a>
-### Not
+## Not Objects
 
 ```python
 class Not(ConstraintExpr)
@@ -605,7 +619,7 @@ Check whether the constraint expression is valid wrt a data model
 Compare with another object.
 
 <a name=".aea.helpers.search.models.Constraint"></a>
-### Constraint
+## Constraint Objects
 
 ```python
 class Constraint(ConstraintExpr)
@@ -706,7 +720,7 @@ Check whether the constraint expression is valid wrt a data model
 Compare with another object.
 
 <a name=".aea.helpers.search.models.Query"></a>
-### Query
+## Query Objects
 
 ```python
 class Query()

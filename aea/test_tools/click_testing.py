@@ -24,6 +24,7 @@ It is an almost exact copy of click.testing, but it fixes an issue in
 CLIRunner.invoke, in the 'finally' clause. More precisely, before reading from
 the testing outstream, it checks whether it has been already closed.
 """
+# pylint: skip-file
 
 import contextlib
 import os

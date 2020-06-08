@@ -1,5 +1,5 @@
 <a name=".aea.helpers.dialogue.base"></a>
-## aea.helpers.dialogue.base
+# aea.helpers.dialogue.base
 
 This module contains the classes required for dialogue management.
 
@@ -8,7 +8,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel"></a>
-### DialogueLabel
+## DialogueLabel Objects
 
 ```python
 class DialogueLabel()
@@ -133,7 +133,7 @@ Get dialogue label from json.
 Get the string representation.
 
 <a name=".aea.helpers.dialogue.base.Dialogue"></a>
-### Dialogue
+## Dialogue Objects
 
 ```python
 class Dialogue(ABC)
@@ -142,7 +142,7 @@ class Dialogue(ABC)
 The dialogue class maintains state of a dialogue and manages it.
 
 <a name=".aea.helpers.dialogue.base.Dialogue.Role"></a>
-### Role
+## Role Objects
 
 ```python
 class Role(Enum)
@@ -160,7 +160,7 @@ This class defines the agent's role in a dialogue.
 Get the string representation.
 
 <a name=".aea.helpers.dialogue.base.Dialogue.EndState"></a>
-### EndState
+## EndState Objects
 
 ```python
 class EndState(Enum)
@@ -469,7 +469,7 @@ Extend the list of incoming messages with 'message'
 None
 
 <a name=".aea.helpers.dialogue.base.Dialogues"></a>
-### Dialogues
+## Dialogues Objects
 
 ```python
 class Dialogues(ABC)

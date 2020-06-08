@@ -156,6 +156,42 @@ def test_soef():
         message = envelope.message
         assert len(message.agents) >= 0
 
+        # find agents near me with filter
+        radius = 0.1
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (agent_location, radius))
+        )
+        personality_filters = [
+            Constraint("genus", ConstraintType("==", "vehicle")),
+            Constraint(
+                "classification", ConstraintType("==", "mobility.railway.train")
+            ),
+        ]
+        closeness_query = Query([close_to_my_service] + personality_filters)
+
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=closeness_query,
+        )
+        envelope = Envelope(
+            to="soef",
+            sender=crypto.address,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
+        logger.info(
+            "Searching for agents in radius={} of myself at location=({},{}) with personality filters".format(
+                radius, agent_location.latitude, agent_location.longitude,
+            )
+        )
+        multiplexer.put(envelope)
+        wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
+
+        # check for search results
+        envelope = multiplexer.get()
+        message = envelope.message
+        assert len(message.agents) >= 0
+
     finally:
         # Shut down the multiplexer
         multiplexer.disconnect()

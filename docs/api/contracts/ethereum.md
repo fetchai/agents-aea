@@ -1,10 +1,10 @@
 <a name=".aea.contracts.ethereum"></a>
-## aea.contracts.ethereum
+# aea.contracts.ethereum
 
 The base ethereum contract.
 
 <a name=".aea.contracts.ethereum.Contract"></a>
-### Contract
+## Contract Objects
 
 ```python
 class Contract(BaseContract)
@@ -25,6 +25,46 @@ Initialize the contract.
 
 - `config`: the contract configurations.
 - `contract_interface`: the contract interface.
+
+<a name=".aea.contracts.ethereum.Contract.abi"></a>
+#### abi
+
+```python
+ | @property
+ | abi() -> Dict[str, Any]
+```
+
+Get the abi.
+
+<a name=".aea.contracts.ethereum.Contract.bytecode"></a>
+#### bytecode
+
+```python
+ | @property
+ | bytecode() -> bytes
+```
+
+Get the bytecode.
+
+<a name=".aea.contracts.ethereum.Contract.instance"></a>
+#### instance
+
+```python
+ | @property
+ | instance() -> EthereumContract
+```
+
+Get the contract instance.
+
+<a name=".aea.contracts.ethereum.Contract.is_deployed"></a>
+#### is`_`deployed
+
+```python
+ | @property
+ | is_deployed() -> bool
+```
+
+Check if the contract is deployed.
 
 <a name=".aea.contracts.ethereum.Contract.set_instance"></a>
 #### set`_`instance

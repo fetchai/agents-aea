@@ -1,10 +1,10 @@
 <a name=".aea.decision_maker.base"></a>
-## aea.decision`_`maker.base
+# aea.decision`_`maker.base
 
 This module contains the decision maker class.
 
 <a name=".aea.decision_maker.base.OwnershipState"></a>
-### OwnershipState
+## OwnershipState Objects
 
 ```python
 class OwnershipState(ABC)
@@ -108,7 +108,7 @@ the final state.
 Copy the object.
 
 <a name=".aea.decision_maker.base.LedgerStateProxy"></a>
-### LedgerStateProxy
+## LedgerStateProxy Objects
 
 ```python
 class LedgerStateProxy(ABC)
@@ -146,7 +146,7 @@ Check if the transaction is affordable on the default ledger.
 whether the transaction is affordable on the ledger
 
 <a name=".aea.decision_maker.base.Preferences"></a>
-### Preferences
+## Preferences Objects
 
 ```python
 class Preferences(ABC)
@@ -230,7 +230,7 @@ the score.
 Copy the object.
 
 <a name=".aea.decision_maker.base.ProtectedQueue"></a>
-### ProtectedQueue
+## ProtectedQueue Objects
 
 ```python
 class ProtectedQueue(Queue)
@@ -348,7 +348,7 @@ Access protected get method.
 internal message
 
 <a name=".aea.decision_maker.base.DecisionMakerHandler"></a>
-### DecisionMakerHandler
+## DecisionMakerHandler Objects
 
 ```python
 class DecisionMakerHandler(ABC)
@@ -370,6 +370,16 @@ Initialize the decision maker handler.
 - `identity`: the identity
 - `wallet`: the wallet
 - `kwargs`: the key word arguments
+
+<a name=".aea.decision_maker.base.DecisionMakerHandler.agent_name"></a>
+#### agent`_`name
+
+```python
+ | @property
+ | agent_name() -> str
+```
+
+Get the agent name.
 
 <a name=".aea.decision_maker.base.DecisionMakerHandler.identity"></a>
 #### identity
@@ -430,7 +440,7 @@ Handle an internal message from the skills.
 None
 
 <a name=".aea.decision_maker.base.DecisionMaker"></a>
-### DecisionMaker
+## DecisionMaker Objects
 
 ```python
 class DecisionMaker()

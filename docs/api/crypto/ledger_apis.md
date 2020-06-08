@@ -1,10 +1,10 @@
 <a name=".aea.crypto.ledger_apis"></a>
-## aea.crypto.ledger`_`apis
+# aea.crypto.ledger`_`apis
 
 Module wrapping all the public and private keys cryptography.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis"></a>
-### LedgerApis
+## LedgerApis Objects
 
 ```python
 class LedgerApis()

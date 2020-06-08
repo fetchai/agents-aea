@@ -59,7 +59,7 @@ class HTTPHandler(Handler):
 
         self.handled_message = None
 
-    def _admin_post(self, path: str, content: Dict = None):
+    def _admin_post(self, path: str, content: Dict = None) -> None:
         # Request message & envelope
         request_http_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
@@ -72,7 +72,7 @@ class HTTPHandler(Handler):
         request_http_message.counterparty = self.admin_url
         self.context.outbox.put_message(message=request_http_message)
 
-    def send_message(self, content: Dict):
+    def _send_message(self, content: Dict) -> None:
         # message & envelope
         message = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES,
@@ -118,7 +118,7 @@ class HTTPHandler(Handler):
                 self.context.logger.info(
                     "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection..."
                 )
-                self.send_message(invitation)
+                self._send_message(invitation)
         elif (
             message.performative == HttpMessage.Performative.REQUEST
         ):  # webhook request

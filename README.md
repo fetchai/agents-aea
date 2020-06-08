@@ -97,6 +97,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 - To run linters (code style checks):
 
       tox -e flake8
+      tox -e pylint
 
 - To run static type checks:
 

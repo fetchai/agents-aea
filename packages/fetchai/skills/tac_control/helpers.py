@@ -27,7 +27,7 @@ from typing import Dict, List, Tuple, cast
 
 import numpy as np
 
-from web3 import Web3
+from web3 import Web3  # pylint: disable=wrong-import-order
 
 from aea.mail.base import Address
 
@@ -314,15 +314,15 @@ def _get_hash(
             ]
         )
     )
-    for i in range(len(good_ids)):
-        if not i == 0:
+    for idx, good_id in enumerate(good_ids):
+        if not idx == 0:
             aggregate_hash = Web3.keccak(
                 b"".join(
                     [
                         aggregate_hash,
-                        good_ids[i].to_bytes(32, "big"),
-                        sender_supplied_quantities[i].to_bytes(32, "big"),
-                        counterparty_supplied_quantities[i].to_bytes(32, "big"),
+                        good_id.to_bytes(32, "big"),
+                        sender_supplied_quantities[idx].to_bytes(32, "big"),
+                        counterparty_supplied_quantities[idx].to_bytes(32, "big"),
                     ]
                 )
             )

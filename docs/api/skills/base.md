@@ -1,10 +1,10 @@
 <a name=".aea.skills.base"></a>
-## aea.skills.base
+# aea.skills.base
 
 This module contains the base classes for the skills.
 
 <a name=".aea.skills.base.SkillContext"></a>
-### SkillContext
+## SkillContext Objects
 
 ```python
 class SkillContext()
@@ -235,7 +235,7 @@ Get the agent context namespace.
 Get attribute.
 
 <a name=".aea.skills.base.SkillComponent"></a>
-### SkillComponent
+## SkillComponent Objects
 
 ```python
 class SkillComponent(ABC)
@@ -348,7 +348,7 @@ None
 Parse the component module.
 
 <a name=".aea.skills.base.AbstractBehaviour"></a>
-### AbstractBehaviour
+## AbstractBehaviour Objects
 
 ```python
 class AbstractBehaviour(SkillComponent,  ABC)
@@ -360,7 +360,7 @@ tick_interval: float, interval to call behaviour's act.
 start_at: optional datetime, when to start periodical calls.
 
 <a name=".aea.skills.base.Behaviour"></a>
-### Behaviour
+## Behaviour Objects
 
 ```python
 class Behaviour(AbstractBehaviour,  ABC)
@@ -421,7 +421,7 @@ Parse the behaviours module.
 a list of Behaviour.
 
 <a name=".aea.skills.base.Handler"></a>
-### Handler
+## Handler Objects
 
 ```python
 class Handler(SkillComponent,  ABC)
@@ -468,7 +468,7 @@ Parse the handler module.
 an handler, or None if the parsing fails.
 
 <a name=".aea.skills.base.Model"></a>
-### Model
+## Model Objects
 
 ```python
 class Model(SkillComponent,  ABC)
@@ -515,7 +515,7 @@ Parse the tasks module.
 a list of Model.
 
 <a name=".aea.skills.base.Skill"></a>
-### Skill
+## Skill Objects
 
 ```python
 class Skill(Component)

@@ -8,9 +8,9 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmRF9abDsBNbbwPgH2i3peCGvb4Z141P46NXHKaJ3PkkbF
-  game.py: QmWmsgv2BgtAtwCcKnqhp3UPaUrenoCYMF4cYKmmAP4GGz
+  game.py: QmXhhbCJyBheEqiRE6ecvTXKbMTvyf6aDwEXZCeLgXARYs
   handlers.py: QmRvgtFvtMsNeTUoKLSeap9efQpohySi4X6UJXDhXVv8Xx
-  helpers.py: QmXKrSAoxxHnfkkQgJo7fFfbXCSbQdT6H6b1GyaRqy5Sur
+  helpers.py: QmT8vvpwxA9rUNX7Xdob4ZNXYXG8LW8nhFfyeV5dUbAFbB
   parameters.py: QmSmR8PycMvfB9omUz7nzZZXqwFkSZMDTb8pBZrntfDPre
 fingerprint_ignore_patterns: []
 contracts: []

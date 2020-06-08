@@ -813,6 +813,7 @@ class ContractManager:
 
     @property
     def confirmed_mint_tokens_agents(self) -> List[str]:
+        """Get the agents which are confirmed to have minted tokens on chain."""
         return self._confirmed_mint_tokens_agents
 
     def add_confirmed_mint_tokens_agents(self, agent_addr: str) -> None:

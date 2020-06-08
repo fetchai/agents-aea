@@ -1,0 +1,26 @@
+[MASTER]
+ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py
+
+[MESSAGES CONTROL]
+disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,R,W
+# Remove eventually
+# general R, W
+# In particular, resolve these and other important warnings:
+# W0703: broad-except
+# W0212: protected-access
+# W0706: try-except-raise
+# W0108: unnecessary-lambda
+
+## keep the following:
+# C0103: invalid-name
+# C0201: consider-iterating-dictionary
+# C0330: Wrong haning indentation
+# http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s)
+# http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s)
+# W1202: logging-format-interpolation
+# W1203: logging-fstring-interpolation
+# W0511: fixme
+# W0107: unnecessary-pass
+
+[IMPORTS]
+ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3

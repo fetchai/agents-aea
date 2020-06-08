@@ -1,10 +1,10 @@
 <a name=".aea.decision_maker.messages.transaction"></a>
-## aea.decision`_`maker.messages.transaction
+# aea.decision`_`maker.messages.transaction
 
 The transaction message module.
 
 <a name=".aea.decision_maker.messages.transaction.TransactionMessage"></a>
-### TransactionMessage
+## TransactionMessage Objects
 
 ```python
 class TransactionMessage(InternalMessage)
@@ -13,7 +13,7 @@ class TransactionMessage(InternalMessage)
 The transaction message class.
 
 <a name=".aea.decision_maker.messages.transaction.TransactionMessage.Performative"></a>
-### Performative
+## Performative Objects
 
 ```python
 class Performative(Enum)

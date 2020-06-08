@@ -1,5 +1,5 @@
 <a name=".aea.configurations.base"></a>
-## aea.configurations.base
+# aea.configurations.base
 
 Classes to handle AEA configurations.
 
@@ -24,7 +24,7 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 
 <a name=".aea.configurations.base.PackageType"></a>
-### PackageType
+## PackageType Objects
 
 ```python
 class PackageType(Enum)
@@ -62,7 +62,7 @@ Get the plural name.
 Convert to string.
 
 <a name=".aea.configurations.base.ComponentType"></a>
-### ComponentType
+## ComponentType Objects
 
 ```python
 class ComponentType(Enum)
@@ -107,7 +107,7 @@ Get the plural version of the component type.
 Get the string representation.
 
 <a name=".aea.configurations.base.ProtocolSpecificationParseError"></a>
-### ProtocolSpecificationParseError
+## ProtocolSpecificationParseError Objects
 
 ```python
 class ProtocolSpecificationParseError(Exception)
@@ -116,7 +116,7 @@ class ProtocolSpecificationParseError(Exception)
 Exception for parsing a protocol specification file.
 
 <a name=".aea.configurations.base.JSONSerializable"></a>
-### JSONSerializable
+## JSONSerializable Objects
 
 ```python
 class JSONSerializable(ABC)
@@ -146,7 +146,7 @@ Compute the JSON representation.
 Build from a JSON object.
 
 <a name=".aea.configurations.base.Configuration"></a>
-### Configuration
+## Configuration Objects
 
 ```python
 class Configuration(JSONSerializable,  ABC)
@@ -198,7 +198,7 @@ It does not do side-effect.
 the ordered dictionary.
 
 <a name=".aea.configurations.base.CRUDCollection"></a>
-### CRUDCollection
+## CRUDCollection Objects
 
 ```python
 class CRUDCollection(Generic[T])
@@ -291,7 +291,7 @@ Delete an item.
 Read all the items.
 
 <a name=".aea.configurations.base.PublicId"></a>
-### PublicId
+## PublicId Objects
 
 ```python
 class PublicId(JSONSerializable)
@@ -520,7 +520,7 @@ Traceback (most recent call last):
 ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author and name attributes are different.
 
 <a name=".aea.configurations.base.PackageId"></a>
-### PackageId
+## PackageId Objects
 
 ```python
 class PackageId()
@@ -639,7 +639,7 @@ Compare with another object.
 Compare two public ids.
 
 <a name=".aea.configurations.base.ComponentId"></a>
-### ComponentId
+## ComponentId Objects
 
 ```python
 class ComponentId(PackageId)
@@ -702,7 +702,7 @@ Get the component identifier without the version.
 Get the prefix import path for this component.
 
 <a name=".aea.configurations.base.PackageConfiguration"></a>
-### PackageConfiguration
+## PackageConfiguration Objects
 
 ```python
 class PackageConfiguration(Configuration,  ABC)
@@ -780,7 +780,7 @@ Get the public id.
 Get the package dependencies.
 
 <a name=".aea.configurations.base.ComponentConfiguration"></a>
-### ComponentConfiguration
+## ComponentConfiguration Objects
 
 ```python
 class ComponentConfiguration(PackageConfiguration,  ABC)
@@ -883,7 +883,7 @@ Check that the AEA version matches the specifier set.
 :raises ValueError if the version of the aea framework falls within a specifier.
 
 <a name=".aea.configurations.base.ConnectionConfig"></a>
-### ConnectionConfig
+## ConnectionConfig Objects
 
 ```python
 class ConnectionConfig(ComponentConfiguration)
@@ -895,7 +895,7 @@ Handle connection configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", **config, ,)
+ | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", connection_id: Optional[PublicId] = None, **config, ,)
 ```
 
 Initialize a connection configuration object.
@@ -941,7 +941,7 @@ Return the JSON representation.
 Initialize from a JSON object.
 
 <a name=".aea.configurations.base.ProtocolConfig"></a>
-### ProtocolConfig
+## ProtocolConfig Objects
 
 ```python
 class ProtocolConfig(ComponentConfiguration)
@@ -989,7 +989,7 @@ Return the JSON representation.
 Initialize from a JSON object.
 
 <a name=".aea.configurations.base.SkillComponentConfiguration"></a>
-### SkillComponentConfiguration
+## SkillComponentConfiguration Objects
 
 ```python
 class SkillComponentConfiguration()
@@ -1033,7 +1033,7 @@ Return the JSON representation.
 Initialize from a JSON object.
 
 <a name=".aea.configurations.base.SkillConfig"></a>
-### SkillConfig
+## SkillConfig Objects
 
 ```python
 class SkillConfig(ComponentConfiguration)
@@ -1091,7 +1091,7 @@ Return the JSON representation.
 Initialize from a JSON object.
 
 <a name=".aea.configurations.base.AgentConfig"></a>
-### AgentConfig
+## AgentConfig Objects
 
 ```python
 class AgentConfig(PackageConfiguration)
@@ -1103,7 +1103,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str, author: str, version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, timeout: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None)
+ | __init__(agent_name: str, author: str, version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, timeout: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None)
 ```
 
 Instantiate the agent configuration object.
@@ -1137,6 +1137,16 @@ Get dictionary version of private key paths.
 ```
 
 Get dictionary version of ledger apis.
+
+<a name=".aea.configurations.base.AgentConfig.connection_private_key_paths_dict"></a>
+#### connection`_`private`_`key`_`paths`_`dict
+
+```python
+ | @property
+ | connection_private_key_paths_dict() -> Dict[str, str]
+```
+
+Get dictionary version of connection private key paths.
 
 <a name=".aea.configurations.base.AgentConfig.default_connection"></a>
 #### default`_`connection
@@ -1195,7 +1205,7 @@ Return the JSON representation.
 Initialize from a JSON object.
 
 <a name=".aea.configurations.base.SpeechActContentConfig"></a>
-### SpeechActContentConfig
+## SpeechActContentConfig Objects
 
 ```python
 class SpeechActContentConfig(Configuration)
@@ -1233,7 +1243,7 @@ Return the JSON representation.
 Initialize from a JSON object.
 
 <a name=".aea.configurations.base.ProtocolSpecification"></a>
-### ProtocolSpecification
+## ProtocolSpecification Objects
 
 ```python
 class ProtocolSpecification(ProtocolConfig)
@@ -1291,7 +1301,7 @@ Return the JSON representation.
 Initialize from a JSON object.
 
 <a name=".aea.configurations.base.ContractConfig"></a>
-### ContractConfig
+## ContractConfig Objects
 
 ```python
 class ContractConfig(ComponentConfiguration)
