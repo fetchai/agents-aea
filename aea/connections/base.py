@@ -34,7 +34,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.crypto.wallet import CryptoStore
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.base import load_aea_package, load_module
 from aea.identity.base import Identity
 
 
@@ -229,10 +229,7 @@ class Connection(Component, ABC):
         """
         configuration = cast(ConnectionConfig, configuration)
         directory = cast(Path, configuration.directory)
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
-        )
-        add_modules_to_sys_modules(package_modules)
+        load_aea_package(configuration)
         connection_module_path = directory / "connection.py"
         assert (
             connection_module_path.exists() and connection_module_path.is_file()

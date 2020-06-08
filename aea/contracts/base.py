@@ -34,7 +34,7 @@ from aea.configurations.base import (
     ContractId,
 )
 from aea.crypto.base import LedgerApi
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.base import load_aea_package, load_module
 
 logger = logging.getLogger(__name__)
 
@@ -128,10 +128,7 @@ class Contract(Component, ABC):
             configuration.directory is not None
         ), "Configuration must be associated with a directory."
         directory = configuration.directory
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
-        )
-        add_modules_to_sys_modules(package_modules)
+        load_aea_package(configuration)
         contract_module = load_module("contracts", directory / "contract.py")
         classes = inspect.getmembers(contract_module, inspect.isclass)
         contract_class_name = cast(str, configuration.class_name)
