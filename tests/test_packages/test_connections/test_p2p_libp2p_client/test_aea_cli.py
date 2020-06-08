@@ -18,28 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
-
-import functools
-import os
-import random
-import string
-import tempfile
-
-import pytest
-
-from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from ....conftest import (
-    _make_libp2p_client_connection,
     _make_libp2p_connection,
     libp2p_log_on_failure,
     skip_test_windows,
 )
-
-from aea.test_tools.test_cases import AEATestCaseEmpty
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
@@ -47,6 +33,7 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
 
 DEFAULT_LAUNCH_TIMEOUT = 5
+
 
 @skip_test_windows
 class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
@@ -57,9 +44,13 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     def setup_class(cls):
         """Set up the test class."""
         AEATestCaseEmpty.setup_class()
-        
-        cls.node_connection = _make_libp2p_connection(delegate_host=DEFAULT_HOST, delegate_port=DEFAULT_DELEGATE_PORT, delegate=True)
-        cls.node_multiplexer= Multiplexer([cls.node_connection])
+
+        cls.node_connection = _make_libp2p_connection(
+            delegate_host=DEFAULT_HOST,
+            delegate_port=DEFAULT_DELEGATE_PORT,
+            delegate=True,
+        )
+        cls.node_multiplexer = Multiplexer([cls.node_connection])
         cls.log_files = [cls.node_connection.node.log_file]
 
         cls.node_multiplexer.connect()

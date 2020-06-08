@@ -19,26 +19,9 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
-import functools
-import os
-import random
-import shutil
-import string
-import tempfile
-import time
-
-import pytest
-
-from aea.mail.base import Envelope
-from aea.multiplexer import Multiplexer
-from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ....conftest import (
-    _make_libp2p_connection,
-    libp2p_log_on_failure,
-    skip_test_windows,
-)
+from ....conftest import skip_test_windows
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
