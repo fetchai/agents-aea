@@ -32,7 +32,8 @@ from packages.fetchai.protocols.gym.message import GymMessage
 class GymSerializer(Serializer):
     """Serialization for the 'gym' protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a 'Gym' message into bytes.
 
@@ -80,7 +81,8 @@ class GymSerializer(Serializer):
         gym_bytes = gym_msg.SerializeToString()
         return gym_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a 'Gym' message.
 

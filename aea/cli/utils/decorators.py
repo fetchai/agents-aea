@@ -23,7 +23,7 @@ import os
 import shutil
 from functools import update_wrapper
 from pathlib import Path
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, Union, cast
 
 import click
 
@@ -39,6 +39,7 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoaders
+from aea.exceptions import AEAException
 
 
 pass_ctx = click.make_pass_decorator(Context)
@@ -143,6 +144,26 @@ def _rmdirs(*paths: str) -> None:
             shutil.rmtree(path)
 
 
+def _cast_ctx(context: Union[Context, click.core.Context]) -> Context:
+    """
+    Cast a Context object from context if needed.
+
+    :param context: Context or click.core.Context object.
+
+    :return: context object.
+    :raises: AEAException if context is none of Context and click.core.Context types.
+    """
+    if isinstance(context, Context):
+        return context
+    elif isinstance(context, click.core.Context):
+        return cast(Context, context.obj)
+    else:  # pragma: no cover
+        raise AEAException(
+            "clean_after decorator should be used only on methods with Context "
+            "or click.core.Context object as a first argument."
+        )
+
+
 def clean_after(func: Callable) -> Callable:
     """
     Decorate a function to remove created folders after ClickException raise.
@@ -152,19 +173,19 @@ def clean_after(func: Callable) -> Callable:
     :return: decorated method.
     """
 
-    def wrapper(click_context, *args, **kwargs):
+    def wrapper(context: Union[Context, click.core.Context], *args, **kwargs):
         """
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 
-        :param click_context: click context object.
+        :param context: context object.
 
         :raises ClickException: if caught re-raises it.
 
         :return: source method output.
         """
-        ctx = cast(Context, click_context.obj)
+        ctx = _cast_ctx(context)
         try:
-            return func(click_context, *args, **kwargs)
+            return func(context, *args, **kwargs)
         except click.ClickException as e:
             _rmdirs(*ctx.clean_paths)
             raise e

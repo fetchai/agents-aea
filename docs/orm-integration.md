@@ -3,7 +3,7 @@ The AEA generic seller with ORM integration demonstrate how to interact with a d
 * The provider of a service in the form of data retrieved from a database.
 * The buyer of a service.
 
-### Discussion
+## Discussion
 
 Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language.
 The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs. 
@@ -13,11 +13,46 @@ This demo will not use any smart contract, because these would be out of the sco
 - We assume, that we have a database `genericdb.db` with table name `data`. This table contains the following columns `timestamp` and `thermometer`
 - We assume, that we have a hardware thermometer sensor that adds the readings in the `genericdb` database
 
-Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
-The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
+Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies. The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
+
+
+## Communication
+
+This diagram shows the communication between the various entities as data is successfully sold by the seller AEA to the buyer. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Search
+        participant Buyer_AEA
+        participant Seller_AEA
+        participant Blockchain
+    
+        activate Buyer_AEA
+        activate Search
+        activate Seller_AEA
+        activate Blockchain
+        
+        Seller_AEA->>Search: register_service
+        Buyer_AEA->>Search: search
+        Search-->>Buyer_AEA: list_of_agents
+        Buyer_AEA->>Seller_AEA: call_for_proposal
+        Seller_AEA->>Buyer_AEA: propose
+        Buyer_AEA->>Seller_AEA: accept
+        Seller_AEA->>Buyer_AEA: match_accept
+        Buyer_AEA->>Blockchain: transfer_funds
+        Buyer_AEA->>Seller_AEA: send_transaction_hash
+        Seller_AEA->>Blockchain: check_transaction_status
+        Seller_AEA->>Buyer_AEA: send_data
+        
+        deactivate Buyer_AEA
+        deactivate Search
+        deactivate Seller_AEA
+        deactivate Blockchain
+       
+</div>
 
 ## Preparation instructions
- 
+
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
@@ -31,32 +66,79 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following demos.
 
-## Demo: Ledger payment
+## Demo instructions
 
-A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` network or Ethereum `ropsten` network. This demo assumes the buyer
-trusts the seller AEA to send the data upon successful payment.
+A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` network or Ethereum `ropsten` network. This demo assumes the buyer trusts the seller AEA to send the data upon successful payment.
 
-### Create the seller AEA (ledger version)
+### Create the seller AEA
 
-Create the AEA that will provide data.
+First, fetch the seller AEA, which will provide data:
+``` bash
+aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
+cd my_seller_aea
+aea install
+```
 
+<details><summary>Alternatively, create from scratch.</summary>
+<p>
+
+The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/generic_seller:0.4.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/generic_seller:0.5.0
+aea install
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 
-### Create the buyer client (ledger version)
+In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
+``` yaml
+ledger_apis:
+  fetchai:
+    network: testnet
+```
 
-In another terminal, create the AEA that will query the seller AEA.
+</p>
+</details>
 
+
+### Create the buyer client
+
+In another terminal, fetch the AEA that will query the seller AEA.
+``` bash
+aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
+cd my_buyer_aea
+aea install
+```
+
+<details><summary>Alternatively, create from scratch.</summary>
+<p>
+
+The following steps create the car data client from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/generic_buyer:0.3.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/generic_buyer:0.4.0
+aea install
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
+
+In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
+
+To connect to Fetchai:
+``` yaml
+ledger_apis:
+  fetchai:
+    network: testnet
+```
+
+</p>
+</details>
+
+
+### Generate wealth for the buyer AEA
 
 Additionally, create the private key for the buyer AEA based on the network you want to transact.
 
@@ -66,24 +148,20 @@ aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
-To generate and add a key for Ethereum use:
+To create some wealth for your buyer AEA based on the network you want to transact with:
+
+On the Fetch.ai `testnet` network.
 ``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
+aea generate-wealth fetchai
 ```
 
-### Update the AEA configs
+<details><summary>Alternatively, create wealth for other test networks.</summary>
+<p>
 
-Both in `my_seller_aea/aea-config.yaml` and
-`my_buyer_aea/aea-config.yaml`, replace `ledger_apis: {}` with the following based on the network you want to connect
+<strong>Ledger Config:</strong>
+<br>
 
-To connect to Fetchai:
-
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
+In `my_buyer_aea/aea-config.yaml` and `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
 
 To connect to Ethereum:
 ``` yaml
@@ -94,9 +172,45 @@ ledger_apis:
     gas_price: 50
 ```
 
+Alternatively, to connect to Cosmos:
+``` yaml
+ledger_apis:
+  cosmos:
+    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+```
+
+<strong>Wealth:</strong>
+<br>
+
+To generate and add a private-public key pair for Ethereum use:
+``` bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
+```
+
+On the Ethereum `ropsten` network.
+``` bash
+aea generate-wealth ethereum
+```
+
+Alternatively, to generate and add a private-public key pair for Cosmos use:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+```
+
+On the Cosmos `testnet` network.
+``` bash
+aea generate-wealth cosmos
+```
+
+</p>
+</details>
+
+
 ### Update the seller and buyer AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
+In `my_seller_aea/vendor/fetchai/skills/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
 ``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
@@ -133,7 +247,7 @@ In `my_seller_aea/vendor/fetchai/generic_seller/skill.yaml`, replace the `data_f
 ```
 The `search_schema` and the `search_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
-In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
+In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
 ``` yaml
 |----------------------------------------------------------------------|
@@ -156,8 +270,9 @@ In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml
 |        search_value: UK           |        search_value: UK          |
 |        constraint_type: '=='      |        constraint_type: '=='     |
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
-|----------------------------------------------------------------------| 
+|----------------------------------------------------------------------|
 ```
+
 After changing the skill config files you should run the following command for both agents to install each dependency:
 ``` bash
 aea install
@@ -245,80 +360,20 @@ Also, create two new functions, one that will create a connection with the datab
             connection.execute(query)
 ```
 
-### Fund the buyer AEA
-
-To create some wealth for your buyer AEA based on the network you want to transact with:
-
-On the Fetch.ai `testnet` network.
-``` bash
-aea generate-wealth fetchai
-```
-
-On the Ethereum `rospten` network.
-``` bash
-aea generate-wealth ethereum
-```
-
 ## Run the AEAs
-
-You can change the endpoint's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
-
-Under config locate :
-
-``` bash
-addr: ${OEF_ADDR: 127.0.0.1}
-```
- and replace it with your ip (The ip of the machine that runs the oef image.)
 
 Run both AEAs from their respective terminals
 
-``` bash 
-aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
-aea run --connections fetchai/oef:0.3.0
+``` bash
+aea run --connections fetchai/oef:0.4.0
 ```
-You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
+You will see that the AEAs negotiate and then transact using the configured testnet.
 
 ## Delete the AEAs
+
 When you're done, go up a level and delete the AEAs.
 ``` bash 
 cd ..
 aea delete my_seller_aea
 aea delete my_buyer_aea
 ```
-
-## Communication
-This diagram shows the communication between the various entities as data is successfully sold by the seller AEA to the buyer. 
-
-<div class="mermaid">
-    sequenceDiagram
-        participant Search
-        participant Buyer_AEA
-        participant Seller_AEA
-        participant Blockchain
-    
-        activate Buyer_AEA
-        activate Search
-        activate Seller_AEA
-        activate Blockchain
-        
-        Seller_AEA->>Search: register_service
-        Buyer_AEA->>Search: search
-        Search-->>Buyer_AEA: list_of_agents
-        Buyer_AEA->>Seller_AEA: call_for_proposal
-        Seller_AEA->>Buyer_AEA: propose
-        Buyer_AEA->>Seller_AEA: accept
-        Seller_AEA->>Buyer_AEA: match_accept
-        Buyer_AEA->>Blockchain: transfer_funds
-        Buyer_AEA->>Seller_AEA: send_transaction_hash
-        Seller_AEA->>Blockchain: check_transaction_status
-        Seller_AEA->>Buyer_AEA: send_data
-        
-        deactivate Buyer_AEA
-        deactivate Search
-        deactivate Seller_AEA
-        deactivate Blockchain
-       
-</div>
-
-

@@ -55,7 +55,7 @@ from oef.schema import (
     Description as OEFDescription,
 )
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import (
     And,
@@ -73,12 +73,9 @@ from aea.helpers.search.models import (
 )
 from aea.mail.base import Address, Envelope
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
@@ -89,7 +86,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.4.0")
 
 
 class OEFObjectTranslator:
@@ -432,12 +429,11 @@ class OEFChannel(OEFAgent):
             performative=FipaMessage.Performative.CFP,
             query=query if query != b"" else None,
         )
-        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=origin,
             protocol_id=FipaMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -527,12 +523,11 @@ class OEFChannel(OEFAgent):
             message_id=RESPONSE_MESSAGE_ID,
             agents=tuple(agents),
         )
-        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
             protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -562,12 +557,11 @@ class OEFChannel(OEFAgent):
             message_id=RESPONSE_MESSAGE_ID,
             oef_error_operation=operation,
         )
-        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
             protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -595,12 +589,11 @@ class OEFChannel(OEFAgent):
             error_msg="Destination not available",
             error_data={},
         )
-        msg_bytes = DefaultSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
             protocol_id=DefaultMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         asyncio.run_coroutine_threadsafe(
             self.in_queue.put(envelope), self.loop
@@ -621,7 +614,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.1.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.2.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -639,8 +632,10 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        oef_message = OefSearchSerializer().decode(envelope.message)
-        oef_message = cast(OefSearchMessage, oef_message)
+        assert isinstance(
+            envelope.message, OefSearchMessage
+        ), "Message not of type OefSearchMessage"
+        oef_message = cast(OefSearchMessage, envelope.message)
         self.oef_msg_id += 1
         self.oef_msg_it_to_dialogue_reference[self.oef_msg_id] = (
             oef_message.dialogue_reference[0],
@@ -671,7 +666,9 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(self, oef_addr: str, oef_port: int = 10000, **kwargs):
+    connection_id = PUBLIC_ID
+
+    def __init__(self, **kwargs):
         """
         Initialize.
 
@@ -679,11 +676,12 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         :param kwargs: the keyword arguments (check the parent constructor)
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
-        self.oef_addr = oef_addr
-        self.oef_port = oef_port
+        addr = cast(str, self.configuration.config.get("addr"))
+        port = cast(int, self.configuration.config.get("port"))
+        assert addr is not None and port is not None, "addr and port must be set!"
+        self.oef_addr = addr
+        self.oef_port = port
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
@@ -799,19 +797,3 @@ class OEFConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.channel.send(envelope)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the OEF connection from the connection configuration.
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        oef_addr = cast(str, configuration.config.get("addr"))
-        oef_port = cast(int, configuration.config.get("port"))
-        return OEFConnection(
-            oef_addr, oef_port, address=address, configuration=configuration
-        )

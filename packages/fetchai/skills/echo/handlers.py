@@ -21,7 +21,6 @@
 
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 
@@ -44,12 +43,7 @@ class EchoHandler(Handler):
         self.context.logger.info(
             "Echo Handler: message={}, sender={}".format(message, message.counterparty)
         )
-        self.context.outbox.put_message(
-            to=message.counterparty,
-            sender=self.context.agent_name,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(message),
-        )
+        self.context.outbox.put_message(sender=self.context.agent_name, message=message)
 
     def teardown(self) -> None:
         """

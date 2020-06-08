@@ -23,20 +23,15 @@ import json
 from typing import Dict, Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.connections.oef.connection import (
     PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
-
-HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
-DEFAULT_PROTOCOL_PUBLIC_ID = DefaultMessage.protocol_id
 
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
@@ -64,7 +59,7 @@ class HTTPHandler(Handler):
 
         self.handled_message = None
 
-    def _admin_post(self, path: str, content: Dict = None):
+    def _admin_post(self, path: str, content: Dict = None) -> None:
         # Request message & envelope
         request_http_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
@@ -74,28 +69,18 @@ class HTTPHandler(Handler):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        self.context.outbox.put_message(
-            to=self.admin_url,
-            sender=self.context.agent_address,
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
-        )
+        request_http_message.counterparty = self.admin_url
+        self.context.outbox.put_message(message=request_http_message)
 
-    def send_message(self, content: Dict):
+    def _send_message(self, content: Dict) -> None:
         # message & envelope
         message = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES,
             content=json.dumps(content).encode("utf-8"),
         )
+        message.counterparty = self.alice_id
         context = EnvelopeContext(connection_id=OEF_CONNECTION_PUBLIC_ID)
-        envelope = Envelope(
-            to=self.alice_id,
-            sender=self.context.agent_address,
-            protocol_id=DEFAULT_PROTOCOL_PUBLIC_ID,
-            context=context,
-            message=DefaultSerializer().encode(message),
-        )
-        self.context.outbox.put(envelope)
+        self.context.outbox.put_message(message=message, context=context)
 
     def setup(self) -> None:
         """
@@ -133,7 +118,7 @@ class HTTPHandler(Handler):
                 self.context.logger.info(
                     "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection..."
                 )
-                self.send_message(invitation)
+                self._send_message(invitation)
         elif (
             message.performative == HttpMessage.Performative.REQUEST
         ):  # webhook request

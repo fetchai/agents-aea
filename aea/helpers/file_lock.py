@@ -24,9 +24,9 @@ import os
 
 # needs win32all to work on Windows
 if os.name == "nt":
-    import win32con
-    import win32file
-    import pywintypes
+    import win32con  # pylint: disable=import-error
+    import win32file  # pylint: disable=import-error
+    import pywintypes  # pylint: disable=import-error
 
     LOCK_EX = win32con.LOCKFILE_EXCLUSIVE_LOCK
     LOCK_SH = 0  # the default
@@ -34,10 +34,12 @@ if os.name == "nt":
     __overlapped = pywintypes.OVERLAPPED()
 
     def lock(file, flags):
+        """Lock a file with flags."""
         hfile = win32file._get_osfhandle(file.fileno())
         win32file.LockFileEx(hfile, flags, 0, 0xFFFF0000, __overlapped)
 
     def unlock(file):
+        """Unlock a file."""
         hfile = win32file._get_osfhandle(file.fileno())
         win32file.UnlockFileEx(hfile, 0, 0xFFFF0000, __overlapped)
 
@@ -47,9 +49,11 @@ elif os.name == "posix":
     import fcntl
 
     def lock(file, flags):
+        """Lock a file with flags."""
         fcntl.flock(file.fileno(), flags)
 
     def unlock(file):
+        """Unlock a file."""
         fcntl.flock(file.fileno(), fcntl.LOCK_UN)
 
 

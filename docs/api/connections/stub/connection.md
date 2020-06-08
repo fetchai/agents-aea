@@ -1,5 +1,5 @@
 <a name=".aea.connections.stub.connection"></a>
-## aea.connections.stub.connection
+# aea.connections.stub.connection
 
 This module contains the stub connection.
 
@@ -39,15 +39,10 @@ Write envelope to file.
 #### `__`init`__`
 
 ```python
- | __init__(input_file_path: Union[str, Path], output_file_path: Union[str, Path], **kwargs)
+ | __init__(**kwargs)
 ```
 
 Initialize a stub connection.
-
-**Arguments**:
-
-- `input_file_path`: the input file for the incoming messages.
-- `output_file_path`: the output file for the outgoing messages.
 
 <a name=".aea.connections.stub.connection.StubConnection.read_envelopes"></a>
 #### read`_`envelopes
@@ -99,23 +94,4 @@ Send messages.
 **Returns**:
 
 None
-
-<a name=".aea.connections.stub.connection.StubConnection.from_config"></a>
-#### from`_`config
-
-```python
- | @classmethod
- | from_config(cls, address: Address, configuration: ConnectionConfig) -> "Connection"
-```
-
-Get the stub connection from the connection configuration.
-
-**Arguments**:
-
-- `address`: the address of the agent.
-- `configuration`: the connection configuration object.
-
-**Returns**:
-
-the connection object
 

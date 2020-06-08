@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the default protocol."""
+
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
+
+DefaultMessage.serializer = DefaultSerializer

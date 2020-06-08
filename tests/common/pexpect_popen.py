@@ -40,6 +40,7 @@ class PexpectWrapper(PopenSpawn):
 
     def control_c(self) -> None:
         """Send control c to process started."""
+        time.sleep(0.1)  # sometimes it's better to wait a bit
         if platform.system() == "Windows":
             self.kill(SIGINT)
         else:

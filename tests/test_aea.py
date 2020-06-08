@@ -18,11 +18,10 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
 
+import logging
 import os
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -35,13 +34,11 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 from tests.common.utils import run_in_thread, wait_for_condition
 
@@ -71,7 +68,7 @@ def test_initialise_aea():
     ), "AEA should not be connected."
     my_AEA.setup()
     assert my_AEA.resources is not None, "Resources must not be None after setup"
-    my_AEA.resources = Resources(str(Path(CUR_PATH, "aea")))
+    my_AEA.resources = Resources()
     assert my_AEA.resources is not None, "Resources must not be None after set"
     assert (
         my_AEA.context.shared_state is not None
@@ -96,7 +93,27 @@ def test_act():
             lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
         )
         behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
+        import time
+
+        time.sleep(1)
         wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=10)
+        agent.stop()
+
+
+def test_start_stop():
+    """Tests the act function of the AEA."""
+    agent_name = "MyAgent"
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    builder = AEABuilder()
+    builder.set_name(agent_name)
+    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+    agent = builder.build()
+
+    with run_in_thread(agent.start, timeout=20):
+        wait_for_condition(
+            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
+        )
         agent.stop()
 
 
@@ -114,12 +131,13 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
+        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
+        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        list(agent._connections)[0]._local_node = node
+        local_connection = list(agent.multiplexer.connections)[0]
+        local_connection._local_node = node
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -129,13 +147,11 @@ def test_react():
             content=b"hello",
         )
         msg.counterparty = agent.identity.address
-        message_bytes = DefaultSerializer().encode(msg)
-
         envelope = Envelope(
             to=agent.identity.address,
             sender=agent.identity.address,
             protocol_id=DefaultMessage.protocol_id,
-            message=message_bytes,
+            message=msg,
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
@@ -157,8 +173,7 @@ def test_react():
             agent.stop()
 
 
-@pytest.mark.asyncio
-async def test_handle():
+def test_handle():
     """Tests handle method of an agent."""
     with LocalNode() as node:
         agent_name = "MyAgent"
@@ -172,12 +187,13 @@ async def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
+        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        list(aea._connections)[0]._local_node = node
+        local_connection = list(aea.multiplexer.connections)[0]
+        local_connection._local_node = node
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -186,16 +202,15 @@ async def test_handle():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        message_bytes = DefaultSerializer().encode(msg)
-
+        msg.counterparty = aea.identity.address
         envelope = Envelope(
             to=aea.identity.address,
             sender=aea.identity.address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=message_bytes,
+            message=msg,
         )
 
-        with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
+        with run_in_thread(aea.start, timeout=5):
             wait_for_condition(
                 lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
             )
@@ -215,22 +230,20 @@ async def test_handle():
                 protocol_id=DefaultMessage.protocol_id,
                 message=b"",
             )
-            # send envelope via localnode back to agent
-            aea.outbox.put(envelope)
+            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            aea.outbox._multiplexer.put(envelope)
             """ inbox twice cause first message is invalid. generates error message and it accepted """
-
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 2, timeout=1,
             )
             #   UNSUPPORTED SKILL
-            msg = FipaSerializer().encode(
-                FipaMessage(
-                    performative=FipaMessage.Performative.ACCEPT,
-                    message_id=1,
-                    dialogue_reference=(str(0), ""),
-                    target=0,
-                )
+            msg = FipaMessage(
+                performative=FipaMessage.Performative.ACCEPT,
+                message_id=1,
+                dialogue_reference=(str(0), ""),
+                target=0,
             )
+            msg.counterparty = aea.identity.address
             envelope = Envelope(
                 to=aea.identity.address,
                 sender=aea.identity.address,
@@ -240,9 +253,8 @@ async def test_handle():
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 3, timeout=1,
+                lambda: len(dummy_handler.handled_messages) == 3, timeout=2,
             )
-
             aea.stop()
 
 
@@ -260,10 +272,11 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
+        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
-        list(aea._connections)[0]._local_node = node
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
+        local_connection = list(aea.multiplexer.connections)[0]
+        local_connection._local_node = node
 
         expected_message = DefaultMessage(
             dialogue_reference=("", ""),
@@ -277,7 +290,7 @@ def test_initialize_aea_programmatically():
             to=aea.identity.address,
             sender=aea.identity.address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(expected_message),
+            message=expected_message,
         )
 
         with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
@@ -334,7 +347,7 @@ def test_initialize_aea_programmatically_build_resources():
             connection = _make_local_connection(agent_name, node)
             connections = [connection]
 
-            resources = Resources(temp)
+            resources = Resources()
 
             default_protocol = Protocol.from_dir(
                 str(Path(AEA_DIR, "protocols", "default"))
@@ -350,6 +363,8 @@ def test_initialize_aea_programmatically_build_resources():
 
             error_skill.skill_context.set_agent_context(aea.context)
             dummy_skill.skill_context.set_agent_context(aea.context)
+            error_skill.skill_context.logger = logging.getLogger("error_skill")
+            dummy_skill.skill_context.logger = logging.getLogger("dummy_skills")
 
             default_protocol_id = DefaultMessage.protocol_id
 
@@ -371,7 +386,7 @@ def test_initialize_aea_programmatically_build_resources():
                         to=agent_name,
                         sender=agent_name,
                         protocol_id=default_protocol_id,
-                        message=DefaultSerializer().encode(expected_message),
+                        message=expected_message,
                     )
                 )
 
@@ -392,7 +407,6 @@ def test_initialize_aea_programmatically_build_resources():
                 wait_for_condition(
                     lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
                 )
-
                 dummy_handler_name = "dummy"
                 dummy_handler = aea.resources._handler_registry.fetch(
                     (dummy_skill_id, dummy_handler_name)

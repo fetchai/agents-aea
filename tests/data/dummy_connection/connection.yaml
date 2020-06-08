@@ -3,17 +3,17 @@ author: fetchai
 version: 0.1.0
 description: dummy_connection connection description.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmbjcWHRhRiYMqZbgeGkEGVYi8hQ1HnYM8pBYugGKx9YnK
-  connection.py: QmYTkRwhj2UNvTbyjq43Z89sZKTaxw21dmR7LdPXg6R3W1
+  connection.py: QmXriASvrroCAKRteP9wUdhAUxH1iZgVTAriGY6ApL3iJc
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: DummyConnection
 config: {}
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/default:0.1.0
+- fetchai/default:0.2.0
 dependencies:
   dep1:
     version: ==1.0.0

@@ -23,19 +23,21 @@ from enum import Enum
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
+from aea.protocols.scaffold.serialization import MyScaffoldSerializer
 
 
 class MyScaffoldMessage(Message):
     """The scaffold message class."""
 
     protocol_id = PublicId("fetchai", "scaffold", "0.1.0")
+    serializer = MyScaffoldSerializer
 
     class Performative(Enum):
         """Scaffold Message types."""
 
         def __str__(self):
             """Get string representation."""
-            return self.value  # pragma: no cover
+            return str(self.value)  # pragma: no cover
 
     def __init__(self, performative: Performative, **kwargs):
         """

@@ -72,7 +72,6 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
 DEFAULT_SERVICES_INTERVAL = 30.0
@@ -160,12 +159,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
+        msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=msg)
         self.context.logger.info(
             "[{}]: updating thermometer services on OEF service directory.".format(
                 self.context.agent_name
@@ -178,25 +173,22 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(oef_msg_id), ""),
-            service_description=self._registered_service_description,
-        )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
-        self.context.logger.info(
-            "[{}]: unregistering thermometer station services from OEF service directory.".format(
-                self.context.agent_name
+        if self._registered_service_description is not None:
+            strategy = cast(Strategy, self.context.strategy)
+            oef_msg_id = strategy.get_next_oef_msg_id()
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(oef_msg_id), ""),
+                service_description=self._registered_service_description,
             )
-        )
-        self._registered_service_description = None
+            msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=msg)
+            self.context.logger.info(
+                "[{}]: unregistering thermometer station services from OEF service directory.".format(
+                    self.context.agent_name
+                )
+            )
+            self._registered_service_description = None
 ```
 
 This Behaviour will register and de-register our AEA’s service on the [OEF search node](../oef-ledger) at regular tick intervals (here 30 seconds). By registering, the AEA becomes discoverable to possible clients.
@@ -254,11 +246,9 @@ from aea.configurations.base import ProtocolId
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.skills.thermometer.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
@@ -333,14 +323,10 @@ Below the `teardown` function, we continue by adding the following code:
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": FipaSerializer().encode(msg)},
+            error_data={"fipa_message": msg.encode()},
         )
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(default_msg),
-        )
+        default_msg.counterparty = msg.counterparty
+        self.context.outbox.put_message(message=default_msg)
 ```
 
 The above code handles an unidentified dialogue by responding to the sender with a `DefaultMessage` containing the appropriate error information. 
@@ -388,12 +374,7 @@ The next code block handles the CFP message, paste the code below the `_handle_u
             )
             proposal_msg.counterparty = msg.counterparty
             dialogue.update(proposal_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(proposal_msg),
-            )
+            self.context.outbox.put_message(message=proposal_msg)
         else:
             self.context.logger.info(
                 "[{}]: declined the CFP from sender={}".format(
@@ -408,12 +389,7 @@ The next code block handles the CFP message, paste the code below the `_handle_u
             )
             decline_msg.counterparty = msg.counterparty
             dialogue.update(decline_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(decline_msg),
-            )
+            self.context.outbox.put_message(message=decline_msg)
 ```
 
 The above code will respond with a `Proposal` to the client if the CFP matches the supplied services and our strategy otherwise it will respond with a `Decline` message. 
@@ -479,12 +455,7 @@ Alternatively, we might receive an `Accept` message. Inorder to handle this opti
         )
         match_accept_msg.counterparty = msg.counterparty
         dialogue.update(match_accept_msg)
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=FipaMessage.protocol_id,
-            message=FipaSerializer().encode(match_accept_msg),
-        )
+        self.context.outbox.put_message(message=match_accept_msg)
 ```
 When the `client_aea` accepts the `Proposal` we send it, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the client about the address we would like it to send the funds to.
 
@@ -559,12 +530,7 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
                 )
                 inform_msg.counterparty = msg.counterparty
                 dialogue.update(inform_msg)
-                self.context.outbox.put_message(
-                    to=msg.counterparty,
-                    sender=self.context.agent_address,
-                    protocol_id=FipaMessage.protocol_id,
-                    message=FipaSerializer().encode(inform_msg),
-                )
+                self.context.outbox.put_message(message=inform_msg)
                 dialogues = cast(Dialogues, self.context.dialogues)
                 dialogues.dialogue_stats.add_dialogue_endstate(
                     Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
@@ -585,12 +551,7 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
             )
             inform_msg.counterparty = msg.counterparty
             dialogue.update(inform_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(inform_msg),
-            )
+            self.context.outbox.put_message(message=inform_msg)
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(
                 Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
@@ -875,7 +836,7 @@ author: fetchai
 version: 0.2.0
 license: Apache-2.0
 fingerprint: {}
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 description: "The thermometer skill implements the functionality to sell data."
 behaviours:
   service_registration:
@@ -899,7 +860,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.2.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.3.0', 'fetchai/oef_search:0.2.0', 'fetchai/default:0.2.0']
 ledgers: ['fetchai']
 dependencies:
   pyserial: {}
@@ -954,7 +915,6 @@ from typing import cast
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -1007,12 +967,8 @@ class MySearchBehaviour(TickerBehaviour):
                 dialogue_reference=(str(search_id), ""),
                 query=query,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(oef_msg),
-            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
 
     def teardown(self) -> None:
         """
@@ -1051,11 +1007,9 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.thermometer_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
@@ -1127,14 +1081,10 @@ You will see that we are following similar logic when we develop the client’s 
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": FipaSerializer().encode(msg)},
+            error_data={"fipa_message": msg.encode()},
         )
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(default_msg),
-        )
+        default_msg.counterparty = msg.counterparty
+        self.context.outbox.put_message(message=default_msg)
 ```
 The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the proposal that we receive from the `my_thermometer` AEA: 
 
@@ -1174,12 +1124,7 @@ The above code handles the unidentified dialogues. And responds with an error me
             )
             accept_msg.counterparty = msg.counterparty
             dialogue.update(accept_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(accept_msg),
-            )
+            self.context.outbox.put_message(message=accept_msg)
         else:
             self.context.logger.info(
                 "[{}]: declining the proposal from sender={}".format(
@@ -1194,12 +1139,7 @@ The above code handles the unidentified dialogues. And responds with an error me
             )
             decline_msg.counterparty = msg.counterparty
             dialogue.update(decline_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(decline_msg),
-            )
+            self.context.outbox.put_message(message=decline_msg)
 ```
 When we receive a proposal we have to check if we have the funds to complete the transaction and if the proposal is acceptable based on our strategy. If the proposal is not affordable or acceptable we respond with a decline message. Otherwise, we send an accept message to the seller. The next code-block handles the decline message that we may receive from the client on our CFP message or our ACCEPT message:
 
@@ -1285,12 +1225,7 @@ The above code terminates each dialogue with the specific aea and stores the ste
             )
             inform_msg.counterparty = msg.counterparty
             dialogue.update(inform_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(inform_msg),
-            )
+            self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
                 "[{}]: informing counterparty={} of payment.".format(
                     self.context.agent_name, msg.counterparty[-5:]
@@ -1402,12 +1337,7 @@ class OEFSearchHandler(Handler):
             )
             cfp_msg.counterparty = opponent_addr
             dialogues.update(cfp_msg)
-            self.context.outbox.put_message(
-                to=opponent_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(cfp_msg),
-            )
+            self.context.outbox.put_message(message=cfp_msg)
         else:
             self.context.logger.info(
                 "[{}]: found no agents, continue searching.".format(
@@ -1463,13 +1393,9 @@ class MyTransactionHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info=json_data,
             )
-            dialogue.outgoing_extend(inform_msg)
-            self.context.outbox.put_message(
-                to=counterparty_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(inform_msg),
-            )
+            inform_msg.counterparty = counterparty_addr
+            dialogue.update(inform_msg)
+            self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
                 "[{}]: informing counterparty={} of transaction digest.".format(
                     self.context.agent_name, counterparty_addr[-5:]
@@ -1691,7 +1617,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: {}
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 description: "The thermometer client skill implements the skill to purchase temperature data."
 behaviours:
   search:
@@ -1721,7 +1647,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.2.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
+protocols: ['fetchai/fipa:0.3.0','fetchai/default:0.2.0','fetchai/oef_search:0.2.0']
 ledgers: ['fetchai']
 ```
 We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 
@@ -1783,10 +1709,10 @@ aea generate-wealth fetchai
 Run both AEAs from their respective terminals
 
 ``` bash 
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
-aea run --connections fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.4.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
@@ -1841,10 +1767,10 @@ Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and reques
 Run both AEAs from their respective terminals.
 
 ``` bash 
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
-aea run --connections fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.4.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Ethereum testnet.

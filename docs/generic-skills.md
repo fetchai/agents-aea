@@ -67,8 +67,8 @@ Keep it running for all the following demos.
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.1.0 --alias my_seller_aea
-cd generic_seller
+aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
+cd my_seller_aea
 aea install
 ```
 
@@ -79,10 +79,10 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/generic_seller:0.4.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/generic_seller:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 ```
 
 In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -99,8 +99,8 @@ ledger_apis:
 
 Then, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.1.0 --alias my_buyer_aea
-cd generic_buyer
+aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
+cd my_buyer_aea
 aea install
 ```
 
@@ -111,10 +111,10 @@ The following steps create the buyer from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/generic_buyer:0.3.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/generic_buyer:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -300,7 +300,7 @@ This updates the buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic
 Run both AEAs from their respective terminals
 
 ``` bash
-aea run --connections fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.4.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 

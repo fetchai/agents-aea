@@ -46,8 +46,6 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 def fetch(click_context, public_id, alias, local):
     """Fetch Agent from Registry."""
     if local:
-        ctx = cast(Context, click_context.obj)
-        ctx.set_config("is_local", True)
         _fetch_agent_locally(click_context, public_id, alias)
     else:
         fetch_agent(click_context, public_id, alias)
@@ -83,6 +81,7 @@ def _fetch_agent_locally(
         packages_path, public_id.author, "agents", public_id.name
     )
     ctx = cast(Context, click_context.obj)
+
     try_to_load_agent_config(ctx, agent_src_path=source_path)
     if not _is_version_correct(ctx, public_id):
         raise click.ClickException(
@@ -111,6 +110,22 @@ def _fetch_agent_locally(
         )
 
     # add dependencies
+    _fetch_agent_deps(click_context)
+    click.echo("Agent {} successfully fetched.".format(public_id.name))
+
+
+def _fetch_agent_deps(click_context: click.core.Context) -> None:
+    """
+    Fetch agent dependencies.
+
+    :param ctx: context object.
+
+    :return: None
+    :raises: ClickException re-raises if occures in _add_item call.
+    """
+    ctx = cast(Context, click_context.obj)
+    ctx.set_config("is_local", True)
+
     for item_type in ("skill", "connection", "contract", "protocol"):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
@@ -123,4 +138,3 @@ def _fetch_agent_locally(
                         item_type, item_id, str(e)
                     )
                 )
-    click.echo("Agent {} successfully fetched.".format(public_id.name))

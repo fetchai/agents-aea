@@ -52,12 +52,10 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_name = "gym"
-        cls.protocol_author = "fetchai"
-        cls.protocol_version = "0.1.0"
-        cls.protocol_id = (
-            cls.protocol_author + "/" + cls.protocol_name + ":" + cls.protocol_version
-        )
+        cls.protocol_id = PublicId.from_str("fetchai/gym:0.2.0")
+        cls.protocol_name = cls.protocol_id.name
+        cls.protocol_author = cls.protocol_id.author
+        cls.protocol_version = cls.protocol_id.version
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -78,13 +76,13 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", str(cls.protocol_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", str(cls.protocol_id)],
             standalone_mode=False,
         )
 
@@ -137,12 +135,10 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_name = "gym"
-        cls.protocol_author = "fetchai"
-        cls.protocol_version = "0.1.0"
-        cls.protocol_id = (
-            cls.protocol_author + "/" + cls.protocol_name + ":" + cls.protocol_version
-        )
+        cls.protocol_id = PublicId.from_str("fetchai/gym:0.2.0")
+        cls.protocol_name = cls.protocol_id.name
+        cls.protocol_author = cls.protocol_id.author
+        cls.protocol_version = cls.protocol_id.version
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -162,7 +158,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", str(cls.protocol_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -204,7 +200,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         )
         assert self.result.exception.message == s
 
-    @unittest.mock.patch("aea.cli.add.get_package_dest_path", return_value="dest/path")
+    @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_protocol_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
@@ -351,7 +347,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.1.0"
+        cls.protocol_id = "fetchai/gym:0.2.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -417,7 +413,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.1.0"
+        cls.protocol_id = "fetchai/gym:0.2.0"
         cls.protocol_name = "gym"
 
         # copy the 'packages' directory in the parent of the agent folder.

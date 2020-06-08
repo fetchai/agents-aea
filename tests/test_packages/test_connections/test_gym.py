@@ -25,11 +25,12 @@ import gym
 
 import pytest
 
+from aea.configurations.base import ConnectionConfig
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.gym.connection import GymChannel, GymConnection
 from packages.fetchai.protocols.gym.message import GymMessage
-from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
@@ -43,7 +44,11 @@ class TestGymConnection:
     def setup_class(cls):
         """Initialise the class."""
         cls.env = gym.GoalEnv()
-        cls.gym_con = GymConnection(gym_env=cls.env, address="my_key")
+        configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
+        identity = Identity("name", address="my_key")
+        cls.gym_con = GymConnection(
+            gym_env=cls.env, identity=identity, configuration=configuration
+        )
         cls.gym_con.channel = GymChannel("my_key", gym.GoalEnv())
         cls.gym_con._connection = None
 
@@ -71,12 +76,12 @@ class TestGymConnection:
             action=GymMessage.AnyObject("any_action"),
             step_id=1,
         )
-        msg_bytes = GymSerializer().encode(msg)
+        msg.counterparty = "_to_key"
         envelope = Envelope(
             to="_to_key",
             sender="_from_key",
             protocol_id=GymMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
 
         self.gym_con.connection_status.is_connected = False

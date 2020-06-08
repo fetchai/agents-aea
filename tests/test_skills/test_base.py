@@ -20,7 +20,6 @@
 """This module contains the tests for the base classes for the skills."""
 
 import os
-from pathlib import Path
 from queue import Queue
 from unittest import TestCase, mock
 from unittest.mock import Mock
@@ -48,13 +47,7 @@ def test_agent_context_ledger_apis():
         {"fetchai": {"network": "testnet"}}, FetchAICrypto.identifier
     )
     identity = Identity("name", address=wallet.addresses[FetchAICrypto.identifier])
-    my_aea = AEA(
-        identity,
-        connections,
-        wallet,
-        ledger_apis,
-        resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-    )
+    my_aea = AEA(identity, connections, wallet, ledger_apis, resources=Resources(),)
 
     assert set(my_aea.context.ledger_apis.apis.keys()) == {"fetchai"}
 
@@ -87,7 +80,7 @@ class TestSkillContext:
             cls.connections,
             cls.wallet,
             cls.ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
+            resources=Resources(),
         )
         cls.skill_context = SkillContext(cls.my_aea.context)
 

@@ -124,7 +124,7 @@ class PackageType(Enum):
 
     def __str__(self):
         """Convert to string."""
-        return self.value
+        return str(self.value)
 
 
 def _get_default_configuration_file_name_from_type(
@@ -177,7 +177,7 @@ class ComponentType(Enum):
 
     def __str__(self) -> str:
         """Get the string representation."""
-        return self.value
+        return str(self.value)
 
 
 class ProtocolSpecificationParseError(Exception):
@@ -775,7 +775,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         :return: the configuration object.
         :raises FileNotFoundError: if the configuration file is not found.
         """
-        from aea.configurations.loader import ConfigLoader
+        from aea.configurations.loader import (  # pylint: disable=import-outside-toplevel
+            ConfigLoader,
+        )
 
         configuration_loader = ConfigLoader.from_configuration_type(
             component_type.to_configuration_type()
@@ -830,8 +832,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: str = "",
+        author: str = "",
         version: str = "",
         license: str = "",
         aea_version: str = "",
@@ -843,9 +845,27 @@ class ConnectionConfig(ComponentConfiguration):
         excluded_protocols: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        connection_id: Optional[PublicId] = None,
         **config,
     ):
         """Initialize a connection configuration object."""
+        if connection_id is None:
+            assert name != "", "Name or connection_id must be set."
+            assert author != "", "Author or connection_id must be set."
+            assert version != "", "Version or connection_id must be set."
+        else:
+            assert (
+                name == "" or name == connection_id.name
+            ), "Non matching name in ConnectionConfig name and public id."
+            name = connection_id.name
+            assert (
+                author == "" or author == connection_id.author
+            ), "Non matching author in ConnectionConfig author and public id."
+            author = connection_id.author
+            assert (
+                version == "" or version == connection_id.version
+            ), "Non matching version in ConnectionConfig version and public id."
+            version = connection_id.version
         super().__init__(
             name,
             author,
@@ -1186,6 +1206,7 @@ class AgentConfig(PackageConfiguration):
         skill_exception_policy: Optional[str] = None,
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1201,6 +1222,7 @@ class AgentConfig(PackageConfiguration):
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
+        self.connection_private_key_paths = CRUDCollection[str]()
         self.ledger_apis = CRUDCollection[Dict]()
 
         self.logging_config = logging_config if logging_config is not None else {}
@@ -1233,6 +1255,7 @@ class AgentConfig(PackageConfiguration):
             else {}
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
+        self.runtime_mode = runtime_mode
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1268,6 +1291,11 @@ class AgentConfig(PackageConfiguration):
             cast(str, key): cast(Dict[str, Union[str, int]], config)
             for key, config in self.ledger_apis.read_all()
         }
+
+    @property
+    def connection_private_key_paths_dict(self) -> Dict[str, str]:
+        """Get dictionary version of connection private key paths."""
+        return {key: path for key, path in self.connection_private_key_paths.read_all()}
 
     @property
     def default_connection(self) -> str:
@@ -1331,6 +1359,12 @@ class AgentConfig(PackageConfiguration):
                 "registry_path": self.registry_path,
             }
         )  # type: Dict[str, Any]
+
+        if len(self.connection_private_key_paths_dict) > 0:
+            config[
+                "connection_private_key_paths"
+            ] = self.connection_private_key_paths_dict
+
         if self.timeout is not None:
             config["timeout"] = self.timeout
         if self.execution_timeout is not None:
@@ -1347,6 +1381,9 @@ class AgentConfig(PackageConfiguration):
             }
         if self.loop_mode is not None:
             config["loop_mode"] = self.loop_mode
+
+        if self.runtime_mode is not None:
+            config["runtime_mode"] = self.runtime_mode
 
         return config
 
@@ -1373,6 +1410,7 @@ class AgentConfig(PackageConfiguration):
             skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
+            runtime_mode=cast(str, obj.get("runtime_mode")),
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore
@@ -1380,6 +1418,9 @@ class AgentConfig(PackageConfiguration):
 
         for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
             agent_config.ledger_apis.create(ledger_id, ledger_data)
+
+        for crypto_id, path in obj.get("connection_private_key_paths", {}).items():  # type: ignore
+            agent_config.connection_private_key_paths.create(crypto_id, path)
 
         # parse connection public ids
         connections = set(
@@ -1420,7 +1461,7 @@ class SpeechActContentConfig(Configuration):
     def _check_consistency(self):
         """Check consistency of the args."""
         for content_name, content_type in self.args.items():
-            if type(content_name) is not str or type(content_type) is not str:
+            if not isinstance(content_name, str) or not isinstance(content_type, str):
                 raise ProtocolSpecificationParseError(
                     "Contents' names and types must be string."
                 )
@@ -1533,7 +1574,7 @@ class ProtocolSpecification(ProtocolConfig):
             )
         content_dict = {}
         for performative, speech_act_content_config in self.speech_acts.read_all():
-            if type(performative) is not str:
+            if not isinstance(performative, str):
                 raise ProtocolSpecificationParseError(
                     "A 'performative' is not specified as a string."
                 )

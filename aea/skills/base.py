@@ -31,6 +31,7 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Set, cast
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -39,13 +40,13 @@ from aea.configurations.base import (
     SkillComponentConfiguration,
     SkillConfig,
 )
-from aea.configurations.components import Component
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
-from aea.mail.base import Address, OutBox
+from aea.mail.base import Address
+from aea.multiplexer import OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 

@@ -27,7 +27,6 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
@@ -100,12 +99,8 @@ class TACHandler(Handler):
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST,
             )
-            self.context.outbox.put_message(
-                to=message.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = message.counterparty
+            self.context.outbox.put_message(message=tac_msg)
             return
 
         game = cast(Game, self.context.game)
@@ -120,12 +115,8 @@ class TACHandler(Handler):
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED,
             )
-            self.context.outbox.put_message(
-                to=message.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = message.counterparty
+            self.context.outbox.put_message(message=tac_msg)
 
         if agent_name in game.registration.agent_addr_to_name.values():
             self.context.logger.warning(
@@ -137,12 +128,8 @@ class TACHandler(Handler):
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED,
             )
-            self.context.outbox.put_message(
-                to=message.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = message.counterparty
+            self.context.outbox.put_message(message=tac_msg)
         game.registration.register_agent(message.counterparty, agent_name)
         self.context.logger.info(
             "[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name)
@@ -168,12 +155,8 @@ class TACHandler(Handler):
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_NOT_REGISTERED,
             )
-            self.context.outbox.put_message(
-                to=message.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
-            )
+            tac_msg.counterparty = message.counterparty
+            self.context.outbox.put_message(message=tac_msg)
         else:
             self.context.logger.debug(
                 "[{}]: Agent unregistered: '{}'".format(

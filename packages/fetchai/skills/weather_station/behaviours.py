@@ -25,7 +25,6 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.weather_station.strategy import Strategy
 
 DEFAULT_SERVICES_INTERVAL = 30.0
@@ -113,12 +112,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
+        msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=msg)
         self.context.logger.info(
             "[{}]: updating weather station services on OEF service directory.".format(
                 self.context.agent_name
@@ -131,22 +126,19 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(oef_msg_id), ""),
-            service_description=self._registered_service_description,
-        )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
-        self.context.logger.info(
-            "[{}]: unregistering weather station services from OEF service directory.".format(
-                self.context.agent_name
+        if self._registered_service_description is not None:
+            strategy = cast(Strategy, self.context.strategy)
+            oef_msg_id = strategy.get_next_oef_msg_id()
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(oef_msg_id), ""),
+                service_description=self._registered_service_description,
             )
-        )
-        self._registered_service_description = None
+            msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=msg)
+            self.context.logger.info(
+                "[{}]: unregistering weather station services from OEF service directory.".format(
+                    self.context.agent_name
+                )
+            )
+            self._registered_service_description = None

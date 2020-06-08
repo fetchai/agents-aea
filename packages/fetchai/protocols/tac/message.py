@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = ProtocolId("fetchai", "tac", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "tac", "0.2.0")
 
     ErrorCode = CustomErrorCode
 
@@ -53,7 +53,7 @@ class TacMessage(Message):
 
         def __str__(self):
             """Get the string representation."""
-            return self.value
+            return str(self.value)
 
     def __init__(
         self,

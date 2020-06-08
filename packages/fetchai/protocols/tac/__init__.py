@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the tac protocol."""
+
+from packages.fetchai.protocols.tac.message import TacMessage
+from packages.fetchai.protocols.tac.serialization import TacSerializer
+
+TacMessage.serializer = TacSerializer

@@ -93,7 +93,9 @@ class EthereumCrypto(Crypto[Account]):
         path = Path(file_name)
         with open(path, "r") as key:
             data = key.read()
-            account = Account.from_key(data)
+            account = Account.from_key(  # pylint: disable=no-value-for-parameter
+                private_key=data
+            )
         return account
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
@@ -138,10 +140,12 @@ class EthereumCrypto(Crypto[Account]):
         """
         if is_deprecated_mode:
             assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
-            address = Account.recoverHash(message_hash=message, signature=signature)
+            address = Account.recoverHash(  # pylint: disable=no-value-for-parameter
+                message_hash=message, signature=signature
+            )
         else:
             signable_message = encode_defunct(primitive=message)
-            address = Account.recover_message(
+            address = Account.recover_message(  # pylint: disable=no-value-for-parameter
                 signable_message=signable_message, signature=signature
             )
         return (address,)
@@ -149,7 +153,7 @@ class EthereumCrypto(Crypto[Account]):
     @classmethod
     def generate_private_key(cls) -> Account:
         """Generate a key pair for ethereum network."""
-        account = Account.create()
+        account = Account.create()  # pylint: disable=no-value-for-parameter
         return account
 
     @classmethod
@@ -201,7 +205,7 @@ class EthereumApi(LedgerApi):
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
         try:
-            balance = self._api.eth.getBalance(address)
+            balance = self._api.eth.getBalance(address)  # pylint: disable=no-member
         except Exception as e:
             logger.warning("Unable to retrieve balance: {}".format(str(e)))
             balance = None
@@ -261,7 +265,7 @@ class EthereumApi(LedgerApi):
     def _try_get_transaction_count(self, address: Address) -> Optional[int]:
         """Try get the transaction count."""
         try:
-            nonce = self._api.eth.getTransactionCount(
+            nonce = self._api.eth.getTransactionCount(  # pylint: disable=no-member
                 self._api.toChecksumAddress(address)
             )
         except Exception as e:  # pragma: no cover
@@ -272,7 +276,9 @@ class EthereumApi(LedgerApi):
     def _try_get_gas_estimate(self, transaction: Dict[str, str]) -> Optional[int]:
         """Try get the gas estimate."""
         try:
-            gas_estimate = self._api.eth.estimateGas(transaction=transaction)
+            gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
+                transaction=transaction
+            )
         except Exception as e:  # pragma: no cover
             logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
             gas_estimate = None
@@ -292,7 +298,9 @@ class EthereumApi(LedgerApi):
         """Try send a signed transaction."""
         try:
             tx_signed = cast(AttributeDict, tx_signed)
-            hex_value = self._api.eth.sendRawTransaction(tx_signed.rawTransaction)
+            hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
+                tx_signed.rawTransaction
+            )
             tx_digest = hex_value.hex()
             logger.debug(
                 "Successfully sent transaction with digest: {}".format(tx_digest)
@@ -333,7 +341,9 @@ class EthereumApi(LedgerApi):
         :return: the tx receipt, if present
         """
         try:
-            tx_receipt = self._api.eth.getTransactionReceipt(tx_digest)
+            tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
+                tx_digest
+            )
         except web3.exceptions.TransactionNotFound as e:
             logger.debug("Error when attempting getting tx receipt: {}".format(str(e)))
             tx_receipt = None
@@ -390,7 +400,7 @@ class EthereumApi(LedgerApi):
         :return: the tx, if found
         """
         try:
-            tx = self._api.eth.getTransaction(tx_digest)
+            tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
         except Exception as e:  # pragma: no cover
             logger.debug("Error when attempting getting tx: {}".format(str(e)))
             tx = None

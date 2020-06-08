@@ -33,8 +33,12 @@ MODULES_TO_PATH = {
     "aea.aea_builder": "api/aea_builder.md",
     "aea.agent": "api/agent.md",
     "aea.agent_loop": "api/agent_loop.md",
+    "aea.multiplexer": "api/multiplexer.md",
+    "aea.runtime": "api/runtime.md",
+    "aea.components.base": "api/components/base.md",
+    "aea.components.loader": "api/components/loader.md",
     "aea.configurations.base": "api/configurations/base.md",
-    "aea.configurations.components": "api/configurations/components.md",
+    "aea.configurations.constants": "api/configurations/constants.md",
     "aea.configurations.loader": "api/configurations/loader.md",
     "aea.connections.base": "api/connections/base.md",
     "aea.connections.stub.connection": "api/connections/stub/connection.md",
@@ -45,6 +49,7 @@ MODULES_TO_PATH = {
     "aea.crypto.cosmos": "api/crypto/cosmos.md",
     "aea.crypto.ethereum": "api/crypto/ethereum.md",
     "aea.crypto.fetchai": "api/crypto/fetchai.md",
+    "aea.crypto.helpers": "api/crypto/helpers.md",
     "aea.crypto.ledger_apis": "api/crypto/ledger_apis.md",
     "aea.crypto.registry": "api/crypto/registry.md",
     "aea.crypto.wallet": "api/crypto/wallet.md",
@@ -59,6 +64,7 @@ MODULES_TO_PATH = {
     "aea.helpers.search.generic": "api/helpers/search/generic.md",
     "aea.helpers.search.models": "api/helpers/search/models.md",
     "aea.helpers.async_friendly_queue": "api/helpers/async_friendly_queue.md",
+    "aea.helpers.async_utils": "api/helpers/async_utils.md",
     "aea.helpers.base": "api/helpers/base.md",
     "aea.helpers.exception_policy": "api/helpers/exception_policy.md",
     "aea.helpers.exec_timeout": "api/helpers/exec_timeout.md",
@@ -69,6 +75,8 @@ MODULES_TO_PATH = {
     "aea.protocols.default.custom_types": "api/protocols/default/custom_types.md",
     "aea.protocols.default.message": "api/protocols/default/message.md",
     "aea.protocols.default.serialization": "api/protocols/default/serialization.md",
+    "aea.registries.base": "api/registries/base.md",
+    "aea.registries.filter": "api/registries/filter.md",
     "aea.registries.resources": "api/registries/resources.md",
     "aea.skills.base": "api/skills/base.md",
     "aea.skills.behaviours": "api/skills/behaviours.md",
@@ -79,23 +87,41 @@ MODULES_TO_PATH = {
 }
 
 
-def create_subdir(path):
+def create_subdir(path) -> None:
+    """
+    Create a subdirectory.
+
+    :param path: the directory path
+    """
     directory = "/".join(path.split("/")[:-1])
     Path(directory).mkdir(parents=True, exist_ok=True)
 
 
-def replace_underscores(text):
+def replace_underscores(text: str) -> str:
+    """
+    Replace escaped underscores in a text.
+
+    :return: the processed text
+    """
     text_a = text.replace("\\_\\_", "`__`")
     text_b = text_a.replace("\\_", "`_`")
     return text_b
 
 
-def save_to_file(path, text):
+def save_to_file(path: str, text: str) -> None:
+    """
+    Save to a file path.
+
+    :param path: the path
+    :param text: the text
+    :return: None
+    """
     with open(path, "w") as f:
         f.write(text)
 
 
 def generate_api_docs():
+    """Generate the api docs."""
     for module, rel_path in MODULES_TO_PATH.items():
         path = DOCS_DIR + rel_path
         create_subdir(path)
@@ -112,8 +138,6 @@ def generate_api_docs():
 if __name__ == "__main__":
     res = shutil.which("pydoc-markdown")
     if res is None:
-        print(
-            "Please install pydoc-markdown first! See the following link: https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop"
-        )
+        print("Please install pydoc-markdown first: `pip install pydoc-markdown`")
         sys.exit(1)
     generate_api_docs()

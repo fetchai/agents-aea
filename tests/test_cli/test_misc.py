@@ -62,6 +62,7 @@ Commands:
   config           Read or modify a configuration.
   create           Create an agent.
   delete           Delete an agent.
+  eject            Eject an installed item.
   fetch            Fetch Agent from Registry.
   fingerprint      Fingerprint a resource.
   freeze           Get the dependencies.

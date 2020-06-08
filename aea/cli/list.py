@@ -25,6 +25,7 @@ from typing import Dict, List
 
 import click
 
+from aea.cli.utils.constants import ITEM_TYPES
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.formatting import format_items, retrieve_details
@@ -41,6 +42,53 @@ from aea.configurations.loader import ConfigLoader
 @check_aea_project
 def list(click_context):
     """List the installed resources."""
+
+
+@list.command()
+@pass_ctx
+def all(ctx: Context):
+    """List all the installed items."""
+    for item_type in ITEM_TYPES:
+        details = _get_item_details(ctx, item_type)
+        if not details:
+            continue
+        output = "{}:\n{}".format(
+            item_type.title() + "s",
+            format_items(sorted(details, key=lambda k: k["name"])),
+        )
+        click.echo(output)
+
+
+@list.command()
+@pass_ctx
+def connections(ctx: Context):
+    """List all the installed connections."""
+    result = _get_item_details(ctx, "connection")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+
+
+@list.command()
+@pass_ctx
+def contracts(ctx: Context):
+    """List all the installed protocols."""
+    result = _get_item_details(ctx, "contract")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+
+
+@list.command()
+@pass_ctx
+def protocols(ctx: Context):
+    """List all the installed protocols."""
+    result = _get_item_details(ctx, "protocol")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+
+
+@list.command()
+@pass_ctx
+def skills(ctx: Context):
+    """List all the installed skills."""
+    result = _get_item_details(ctx, "skill")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 def _get_item_details(ctx, item_type) -> List[Dict]:
@@ -72,35 +120,3 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
         )
         result.append(details)
     return result
-
-
-@list.command()
-@pass_ctx
-def connections(ctx: Context):
-    """List all the installed connections."""
-    result = _get_item_details(ctx, "connection")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
-
-
-@list.command()
-@pass_ctx
-def contracts(ctx: Context):
-    """List all the installed protocols."""
-    result = _get_item_details(ctx, "contract")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
-
-
-@list.command()
-@pass_ctx
-def protocols(ctx: Context):
-    """List all the installed protocols."""
-    result = _get_item_details(ctx, "protocol")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
-
-
-@list.command()
-@pass_ctx
-def skills(ctx: Context):
-    """List all the installed skills."""
-    result = _get_item_details(ctx, "skill")
-    print(format_items(sorted(result, key=lambda k: k["name"])))

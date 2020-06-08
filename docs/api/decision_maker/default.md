@@ -1,10 +1,10 @@
 <a name=".aea.decision_maker.default"></a>
-## aea.decision`_`maker.default
+# aea.decision`_`maker.default
 
 This module contains the decision maker class.
 
 <a name=".aea.decision_maker.default.GoalPursuitReadiness"></a>
-### GoalPursuitReadiness
+## GoalPursuitReadiness Objects
 
 ```python
 class GoalPursuitReadiness()
@@ -13,7 +13,7 @@ class GoalPursuitReadiness()
 The goal pursuit readiness.
 
 <a name=".aea.decision_maker.default.GoalPursuitReadiness.Status"></a>
-### Status
+## Status Objects
 
 ```python
 class Status(Enum)
@@ -63,7 +63,7 @@ Update the goal pursuit readiness.
 None
 
 <a name=".aea.decision_maker.default.OwnershipState"></a>
-### OwnershipState
+## OwnershipState Objects
 
 ```python
 class OwnershipState(BaseOwnershipState)
@@ -195,7 +195,7 @@ the final state.
 Copy the object.
 
 <a name=".aea.decision_maker.default.LedgerStateProxy"></a>
-### LedgerStateProxy
+## LedgerStateProxy Objects
 
 ```python
 class LedgerStateProxy(BaseLedgerStateProxy)
@@ -250,7 +250,7 @@ Check if the transaction is affordable on the default ledger.
 whether the transaction is affordable on the ledger
 
 <a name=".aea.decision_maker.default.Preferences"></a>
-### Preferences
+## Preferences Objects
 
 ```python
 class Preferences(BasePreferences)
@@ -433,7 +433,7 @@ the score.
 Copy the object.
 
 <a name=".aea.decision_maker.default.DecisionMakerHandler"></a>
-### DecisionMakerHandler
+## DecisionMakerHandler Objects
 
 ```python
 class DecisionMakerHandler(BaseDecisionMakerHandler)

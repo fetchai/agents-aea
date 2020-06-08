@@ -71,7 +71,7 @@ Keep it running for the following demo.
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.4.0
+aea fetch fetchai/ml_data_provider:0.5.0
 cd ml_data_provider
 aea install
 ```
@@ -83,9 +83,9 @@ The following steps create the data provider from scratch:
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/ml_data_provider:0.3.0
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/ml_data_provider:0.4.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 aea install
 ```
 
@@ -103,7 +103,7 @@ ledger_apis:
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.4.0
+aea fetch fetchai/ml_model_trainer:0.5.0
 cd ml_model_trainer
 aea install
 ```
@@ -115,9 +115,9 @@ The following steps create the model trainer from scratch:
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/ml_train:0.3.0
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/ml_train:0.4.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 aea install
 ```
 
@@ -251,7 +251,7 @@ This updates the ml_nodel_trainer skill config (`ml_model_trainer/vendor/fetchai
 
 Finally, run both AEAs from their respective directories:
 ``` bash
-aea run --connections fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.4.0
 ```
 
 You can see that the AEAs find each other, negotiate and eventually trade.

@@ -82,7 +82,7 @@ class TestSearchContractsLocal(TestCase):
         self.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
-    @mock.patch("aea.cli.search._search_items", return_value=["item1"])
+    @mock.patch("aea.cli.search._search_items_locally", return_value=["item1"])
     def test_search_contracts_positive(self, *mocks):
         """Test search contracts command positive result."""
         result = self.runner.invoke(
@@ -198,6 +198,18 @@ class TestSearchAgentsLocal:
 
         os.chdir(Path(cls.t, "myagent"))
         result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.description",
+                "Some description.",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False
         )
         assert result.exit_code == 0
@@ -213,7 +225,7 @@ class TestSearchAgentsLocal:
             "------------------------------\n"
             "Public ID: default_author/myagent:0.1.0\n"
             "Name: myagent\n"
-            "Description: \n"
+            "Description: Some description.\n"
             "Author: default_author\n"
             "Version: 0.1.0\n"
             "------------------------------\n\n"
@@ -340,15 +352,15 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        assert (
-            self.result.output == 'Searching for ""...\n'
+        expected = (
+            'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
-            "Public ID: fetchai/echo:0.1.0\n"
+            "Public ID: fetchai/echo:0.2.0\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n"
             "------------------------------\n"
             "Public ID: fetchai/error:0.2.0\n"
@@ -358,6 +370,7 @@ class TestSearchWithRegistryInSubfolderLocal:
             "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
+        assert self.result.output == expected
 
     @classmethod
     def teardown_class(cls):
@@ -414,15 +427,15 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        assert (
-            self.result.output == 'Searching for ""...\n'
+        expected = (
+            'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
-            "Public ID: fetchai/echo:0.1.0\n"
+            "Public ID: fetchai/echo:0.2.0\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n"
             "------------------------------\n"
             "Public ID: fetchai/error:0.2.0\n"
@@ -432,6 +445,7 @@ class TestSearchInAgentDirectoryLocal:
             "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
+        assert self.result.output == expected
 
     @classmethod
     def teardown_class(cls):

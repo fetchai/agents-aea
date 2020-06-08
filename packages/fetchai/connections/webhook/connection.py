@@ -27,18 +27,17 @@ from typing import Optional, Union, cast
 
 from aiohttp import web  # type: ignore
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.2.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
@@ -137,8 +136,19 @@ class WebhookChannel:
         self.in_queue.put_nowait(webhook_envelop)  # type: ignore
         return web.Response(status=200)
 
-    def send(self, request_envelope: Envelope) -> None:
-        pass
+    def send(self, envelope: Envelope) -> None:
+        """
+        Send an envelope.
+
+        Sending envelopes via the webhook is not possible!
+
+        :param envelope: the envelope
+        """
+        logger.warning(
+            "Dropping envelope={} as sending via the webhook is not possible!".format(
+                envelope
+            )
+        )
 
     async def to_envelope(self, request: web.Request) -> Envelope:
         """
@@ -163,9 +173,9 @@ class WebhookChannel:
         envelope = Envelope(
             to=self.agent_address,
             sender=request.remote,
-            protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.2.0"),
             context=context,
-            message=HttpSerializer().encode(http_message),
+            message=http_message,
         )
         return envelope
 
@@ -173,21 +183,19 @@ class WebhookChannel:
 class WebhookConnection(Connection):
     """Proxy to the functionality of a webhook."""
 
-    def __init__(
-        self, webhook_address: str, webhook_port: int, webhook_url_path: str, **kwargs,
-    ):
-        """
-        Initialize a connection.
+    connection_id = PUBLIC_ID
 
-        :param webhook_address: the webhook hostname / IP address
-        :param webhook_port: the webhook port number
-        :param webhook_url_path: the url path to receive webhooks from
-        """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
-
+    def __init__(self, **kwargs):
+        """Initialize a web hook connection."""
         super().__init__(**kwargs)
-
+        webhook_address = cast(str, self.configuration.config.get("webhook_address"))
+        webhook_port = cast(int, self.configuration.config.get("webhook_port"))
+        webhook_url_path = cast(str, self.configuration.config.get("webhook_url_path"))
+        assert (
+            webhook_address is not None
+            and webhook_port is not None
+            and webhook_url_path is not None
+        ), "webhook_address, webhook_port and webhook_url_path must be set!"
         self.channel = WebhookChannel(
             agent_address=self.address,
             webhook_address=webhook_address,
@@ -244,25 +252,3 @@ class WebhookConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the HTTP connection from a connection configuration.
-
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        webhook_address = cast(str, configuration.config.get("webhook_address"))
-        webhook_port = cast(int, configuration.config.get("webhook_port"))
-        webhook_url_path = cast(str, configuration.config.get("webhook_url_path"))
-        return WebhookConnection(
-            webhook_address,
-            webhook_port,
-            webhook_url_path,
-            address=address,
-            configuration=configuration,
-        )

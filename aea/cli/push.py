@@ -29,8 +29,8 @@ from aea.cli.registry.push import push_item
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
+from aea.cli.utils.generic import load_yaml
 from aea.cli.utils.package_utils import (
-    load_yaml,
     try_get_item_source_path,
     try_get_item_target_path,
 )

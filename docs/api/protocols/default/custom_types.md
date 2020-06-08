@@ -1,10 +1,10 @@
 <a name=".aea.protocols.default.custom_types"></a>
-## aea.protocols.default.custom`_`types
+# aea.protocols.default.custom`_`types
 
 This module contains class representations corresponding to every custom type in the protocol specification.
 
 <a name=".aea.protocols.default.custom_types.ErrorCode"></a>
-### ErrorCode
+## ErrorCode Objects
 
 ```python
 class ErrorCode(Enum)

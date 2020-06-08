@@ -33,7 +33,8 @@ from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 class MlTradeSerializer(Serializer):
     """Serialization for the 'ml_trade' protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a 'MlTrade' message into bytes.
 
@@ -79,7 +80,8 @@ class MlTradeSerializer(Serializer):
         ml_trade_bytes = ml_trade_msg.SerializeToString()
         return ml_trade_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a 'MlTrade' message.
 

@@ -35,7 +35,74 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import load_env_file
 
-AEA_DIR = str(Path("."))
+
+@click.command()
+@click.option(
+    "--connections",
+    "connection_ids",
+    cls=ConnectionsOption,
+    required=False,
+    default=None,
+    help="The connection names to use for running the agent. Must be declared in the agent's configuration file.",
+)
+@click.option(
+    "--env",
+    "env_file",
+    type=click.Path(),
+    required=False,
+    default=".env",
+    help="Specify an environment file (default: .env)",
+)
+@click.option(
+    "--install-deps",
+    "is_install_deps",
+    is_flag=True,
+    required=False,
+    default=False,
+    help="Install all the dependencies before running the agent.",
+)
+@click.pass_context
+@check_aea_project
+def run(
+    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
+):
+    """Run the agent."""
+    _run_aea(click_context, connection_ids, env_file, is_install_deps)
+
+
+def _run_aea(
+    click_context: click.core.Context,
+    connection_ids: List[PublicId],
+    env_file: str,
+    is_install_deps: bool,
+) -> None:
+    """
+    Prepare and run an agent.
+
+    :param click_context: click context object.
+    :param connection_ids: list of connections public IDs.
+    :param env_file: a path to env file.
+    :param is_install_deps: bool flag is install deps.
+
+    :return: None
+    :raises: ClickException if any Exception occures.
+    """
+    skip_consistency_check = click_context.obj.config["skip_consistency_check"]
+    _prepare_environment(click_context, env_file, is_install_deps)
+    aea = _build_aea(connection_ids, skip_consistency_check)
+
+    click.echo(AEA_LOGO + "v" + __version__ + "\n")
+    click.echo("Starting AEA '{}' in '{}' mode...".format(aea.name, aea.loop_mode))
+    try:
+        aea.start()
+    except KeyboardInterrupt:
+        click.echo(" AEA '{}' interrupted!".format(aea.name))  # pragma: no cover
+    except Exception as e:
+        raise click.ClickException(str(e))
+    finally:
+        click.echo("Stopping AEA '{}' ...".format(aea.name))
+        aea.stop()
+        click.echo("AEA '{}' stopped.".format(aea.name))
 
 
 def _prepare_environment(click_context, env_file: str, is_install_deps: bool) -> None:
@@ -69,57 +136,3 @@ def _build_aea(
         # TODO use an ad-hoc exception class for predictable errors
         #      all the other exceptions should be logged with ClickException
         raise click.ClickException(str(e))
-
-
-def _run_aea(aea: AEA) -> None:
-    click.echo(AEA_LOGO + "v" + __version__ + "\n")
-    click.echo(
-        "Starting AEA '{}' in '{}' mode...".format(aea.name, aea.DEFAULT_RUN_LOOP)
-    )
-    try:
-        aea.start()
-    except KeyboardInterrupt:
-        click.echo(" AEA '{}' interrupted!".format(aea.name))  # pragma: no cover
-    except Exception as e:
-        raise click.ClickException(str(e))
-    finally:
-        click.echo("Stopping AEA '{}' ...".format(aea.name))
-        aea.stop()
-        click.echo("AEA '{}' stopped.".format(aea.name))
-
-
-@click.command()
-@click.option(
-    "--connections",
-    "connection_ids",
-    cls=ConnectionsOption,
-    required=False,
-    default=None,
-    help="The connection names to use for running the agent. Must be declared in the agent's configuration file.",
-)
-@click.option(
-    "--env",
-    "env_file",
-    type=click.Path(),
-    required=False,
-    default=".env",
-    help="Specify an environment file (default: .env)",
-)
-@click.option(
-    "--install-deps",
-    "is_install_deps",
-    is_flag=True,
-    required=False,
-    default=False,
-    help="Install all the dependencies before running the agent.",
-)
-@click.pass_context
-@check_aea_project
-def run(
-    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
-):
-    """Run the agent."""
-    skip_consistency_check = click_context.obj.config["skip_consistency_check"]
-    _prepare_environment(click_context, env_file, is_install_deps)
-    aea = _build_aea(connection_ids, skip_consistency_check)
-    _run_aea(aea)

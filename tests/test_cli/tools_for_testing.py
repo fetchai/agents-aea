@@ -73,6 +73,9 @@ class ContextMock:
         self.clean_paths: List = []
         self.obj = self
 
+    def set_config(self, key, value):
+        setattr(self.config, key, value)
+
 
 class PublicIdMock:
     """A class to mock PublicId."""
@@ -114,7 +117,7 @@ class ConfigLoaderMock:
 
     def __init__(self, *args, **kwargs):
         """Init the ConfigLoader mock object."""
-        pass
+        self.required_fields = kwargs.get("required_fields", [])
 
     def load(self, *args, **kwargs):
         """Mock the load method."""

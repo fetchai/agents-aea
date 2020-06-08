@@ -33,19 +33,29 @@ from collections import OrderedDict, UserString
 from contextlib import contextmanager
 from pathlib import Path
 from threading import RLock
-from typing import Dict, Sequence, Tuple
+from typing import Any, Dict, Sequence, TextIO, Tuple
 
 from dotenv import load_dotenv
 
 import yaml
 
+from aea.configurations.base import ComponentConfiguration
 
 logger = logging.getLogger(__name__)
 
 
-def yaml_load(stream):
-    def ordered_load(stream, object_pairs_hook=OrderedDict):
+def yaml_load(stream: TextIO) -> Dict[str, str]:
+    """
+    Load a yaml from a file pointer in an ordered way.
+
+    :param stream: the file pointer
+    :return: the yaml
+    """
+
+    def ordered_load(stream: TextIO, object_pairs_hook=OrderedDict):
         class OrderedLoader(yaml.SafeLoader):
+            """A wrapper for safe yaml loader."""
+
             pass
 
         def construct_mapping(loader, node):
@@ -60,9 +70,18 @@ def yaml_load(stream):
     return ordered_load(stream)
 
 
-def yaml_dump(data, stream):
+def yaml_dump(data, stream: TextIO) -> None:
+    """
+    Dump data to a yaml file in an ordered way.
+
+    :param data: the data to be dumped
+    :param stream: the file pointer
+    """
+
     def ordered_dump(data, stream=None, **kwds):
         class OrderedDumper(yaml.SafeDumper):
+            """A wrapper for safe yaml loader."""
+
             pass
 
         def _dict_representer(dumper, data):
@@ -86,7 +105,7 @@ def _get_module(spec):
         return None
 
 
-def locate(path):
+def locate(path: str) -> Any:
     """Locate an object by name or dotted path, importing as necessary."""
     parts = [part for part in path.split(".") if part]
     module, n = None, 0
@@ -117,6 +136,42 @@ def locate(path):
         except AttributeError:
             return None
     return object
+
+
+def load_aea_package(configuration: ComponentConfiguration) -> None:
+    """
+    Load the AEA package.
+
+    It adds all the __init__.py modules into `sys.modules`.
+
+    :param configuration: the configuration object.
+    :return: None
+    """
+    dir = configuration.directory
+    assert dir is not None
+
+    # patch sys.modules with dummy modules
+    prefix_root = "packages"
+    prefix_author = prefix_root + f".{configuration.author}"
+    prefix_pkg_type = prefix_author + f".{configuration.component_type.to_plural()}"
+    prefix_pkg = prefix_pkg_type + f".{configuration.name}"
+    sys.modules[prefix_root] = types.ModuleType(prefix_root)
+    sys.modules[prefix_author] = types.ModuleType(prefix_author)
+    sys.modules[prefix_pkg_type] = types.ModuleType(prefix_pkg_type)
+
+    for subpackage_init_file in dir.rglob("__init__.py"):
+        parent_dir = subpackage_init_file.parent
+        relative_parent_dir = parent_dir.relative_to(dir)
+        if relative_parent_dir == Path("."):
+            # this handles the case when 'subpackage_init_file'
+            # is path/to/package/__init__.py
+            import_path = prefix_pkg
+        else:
+            import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
+        spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[prefix_pkg] = module
+        spec.loader.exec_module(module)  # type: ignore
 
 
 def load_all_modules(
@@ -302,9 +357,9 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:
     :return: None
     """
     if os.name == "posix":
-        process.send_signal(signal.SIGINT)
+        process.send_signal(signal.SIGINT)  # pylint: disable=no-member
     elif os.name == "nt":
-        process.send_signal(signal.CTRL_C_EVENT)
+        process.send_signal(signal.CTRL_C_EVENT)  # pylint: disable=no-member
     else:
         raise ValueError("Other platforms not supported.")
 

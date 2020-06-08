@@ -83,7 +83,7 @@ class DialogueLabel:
 
     def __eq__(self, other) -> bool:
         """Check for equality between two DialogueLabel objects."""
-        if type(other) == DialogueLabel:
+        if isinstance(other, DialogueLabel):
             return (
                 self.dialogue_reference == other.dialogue_reference
                 and self.dialogue_starter_addr == other.dialogue_starter_addr
@@ -145,14 +145,14 @@ class Dialogue(ABC):
 
         def __str__(self):
             """Get the string representation."""
-            return self.value
+            return str(self.value)
 
     class EndState(Enum):
         """This class defines the end states of a dialogue."""
 
         def __str__(self):
             """Get the string representation."""
-            return self.value
+            return str(self.value)
 
     def __init__(
         self,

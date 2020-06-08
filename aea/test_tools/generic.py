@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 
 import yaml
 
-from aea.cli.config import handle_dotted_path
+from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 
@@ -42,7 +42,7 @@ def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
         envelope.to,
         envelope.sender,
         envelope.protocol_id,
-        envelope.message.decode("utf-8"),
+        envelope.message_bytes.decode("utf-8"),
     )
     encoded_envelope = encoded_envelope_str.encode("utf-8")
     with open(Path(file_path), "ab+") as f:

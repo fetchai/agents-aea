@@ -18,13 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for building an AEA."""
-import inspect
 import itertools
 import logging
 import os
 import pprint
-import re
-import sys
+from copy import copy, deepcopy
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -34,6 +32,8 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.components.base import Component
+from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
@@ -48,7 +48,6 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.configurations.components import Component
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
@@ -57,11 +56,10 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
-from aea.contracts.base import Contract
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    _try_validate_private_key_path,
     create_private_key,
+    try_validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registry import registry
@@ -70,14 +68,12 @@ from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
-from aea.exceptions import AEAException, AEAPackageLoadingError
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.exceptions import AEAException
+from aea.helpers.base import load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
-from aea.mail.base import Address
-from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
@@ -112,6 +108,12 @@ class _DependenciesManager:
     def dependencies_highest_version(self) -> Set[ComponentId]:
         """Get the dependencies with highest version."""
         return {max(ids) for _, ids in self._prefix_to_components.items()}
+
+    def get_components_by_type(
+        self, component_type: ComponentType
+    ) -> Dict[ComponentId, ComponentConfiguration]:
+        """Get the components by type."""
+        return self._all_dependencies_by_type.get(component_type, {})
 
     @property
     def protocols(self) -> Dict[ComponentId, ProtocolConfig]:
@@ -236,6 +238,39 @@ class AEABuilder:
 
     It follows the fluent interface. Every method of the builder
     returns the instance of the builder itself.
+
+    Note: the method 'build()' is guaranteed of being
+    re-entrant with respect to the 'add_component(path)'
+    method. That is, you can invoke the building method
+    many times against the same builder instance, and the
+    returned agent instance will not share the
+    components with other agents, e.g.:
+
+        builder = AEABuilder()
+        builder.add_component(...)
+        ...
+
+        # first call
+        my_aea_1 = builder.build()
+
+        # following agents will have different components.
+        my_aea_2 = builder.build()  # all good
+
+    However, if you manually loaded some of the components and added
+    them with the method 'add_component_instance()', then calling build
+    more than one time is strongly discouraged:
+
+        builder = AEABuilder()
+        builder.add_component_instance(...)
+        ...  # other initialization code
+
+        # first call
+        my_aea_1 = builder.build()
+
+        # in this case, following calls to '.build()'
+        # are strongly discouraged.
+        # my_aea_2 = builder.builder()  # bad
+
     """
 
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
@@ -246,6 +281,7 @@ class AEABuilder:
     ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
+    DEFAULT_RUNTIME_MODE = "threaded"
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -254,10 +290,9 @@ class AEABuilder:
         :param with_default_packages: add the default packages.
         """
         self._name = None  # type: Optional[str]
-        self._resources = Resources()
-        self._private_key_paths = {}  # type: Dict[str, str]
+        self._private_key_paths = {}  # type: Dict[str, Optional[str]]
+        self._connection_private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
-        self._default_key = None  # set by the user, or instantiate a default one.
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
@@ -271,6 +306,7 @@ class AEABuilder:
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
+        self._runtime_mode: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         self._component_instances = {
@@ -378,6 +414,16 @@ class AEABuilder:
         self._loop_mode = loop_mode
         return self
 
+    def set_runtime_mode(self, runtime_mode: Optional[str]) -> "AEABuilder":
+        """
+        Set the runtime mode.
+
+        :param runtime_mode: the agent runtime mode
+        :return: self
+        """
+        self._runtime_mode = runtime_mode
+        return self
+
     def _add_default_packages(self) -> None:
         """Add default packages."""
         # add default protocol
@@ -434,32 +480,55 @@ class AEABuilder:
         return self
 
     def add_private_key(
-        self, identifier: str, private_key_path: PathLike
+        self,
+        identifier: str,
+        private_key_path: Optional[PathLike] = None,
+        is_connection: bool = False,
     ) -> "AEABuilder":
         """
         Add a private key path.
 
         :param identifier: the identifier for that private key path.
-        :param private_key_path: path to the private key file.
+        :param private_key_path: an (optional) path to the private key file.
+            If None, the key will be created at build time.
+        :param is_connection: if the pair is for the connection cryptos
         :return: the AEABuilder
         """
-        self._private_key_paths[identifier] = str(private_key_path)
+        if is_connection:
+            self._connection_private_key_paths[identifier] = (
+                str(private_key_path) if private_key_path is not None else None
+            )
+        else:
+            self._private_key_paths[identifier] = (
+                str(private_key_path) if private_key_path is not None else None
+            )
         return self
 
-    def remove_private_key(self, identifier: str) -> "AEABuilder":
+    def remove_private_key(
+        self, identifier: str, is_connection: bool = False
+    ) -> "AEABuilder":
         """
         Remove a private key path by identifier, if present.
 
         :param identifier: the identifier of the private key.
+        :param is_connection: if the pair is for the connection cryptos
         :return: the AEABuilder
         """
-        self._private_key_paths.pop(identifier, None)
+        if is_connection:
+            self._connection_private_key_paths.pop(identifier, None)
+        else:
+            self._private_key_paths.pop(identifier, None)
         return self
 
     @property
-    def private_key_paths(self) -> Dict[str, str]:
+    def private_key_paths(self) -> Dict[str, Optional[str]]:
         """Get the private key paths."""
         return self._private_key_paths
+
+    @property
+    def connection_private_key_paths(self) -> Dict[str, Optional[str]]:
+        """Get the connection private key paths."""
+        return self._connection_private_key_paths
 
     def add_ledger_api_config(self, identifier: str, config: Dict) -> "AEABuilder":
         """
@@ -530,6 +599,8 @@ class AEABuilder:
 
         Please, pay attention, all dependencies have to be already loaded.
 
+        Notice also that this will make the call to 'build()' non re-entrant.
+
         :params component: Component instance already initialized.
         """
         self._check_can_add(component.configuration)
@@ -545,23 +616,6 @@ class AEABuilder:
         self._context_namespace = context_namespace
         return self
 
-    def _add_component_to_resources(self, component: Component) -> None:
-        """Add component to the resources."""
-        if component.component_type == ComponentType.CONNECTION:
-            # Do nothing - we don't add connections to resources.
-            return
-        self._resources.add_component(component)
-
-    def _remove_component_from_resources(self, component_id: ComponentId) -> None:
-        """Remove a component from the resources."""
-        if component_id.component_type == ComponentType.CONNECTION:
-            return
-
-        if component_id.component_type == ComponentType.PROTOCOL:
-            self._resources.remove_protocol(component_id.public_id)
-        elif component_id.component_type == ComponentType.SKILL:
-            self._resources.remove_skill(component_id.public_id)
-
     def remove_component(self, component_id: ComponentId) -> "AEABuilder":
         """
         Remove a component.
@@ -575,7 +629,6 @@ class AEABuilder:
 
     def _remove(self, component_id: ComponentId):
         self._package_dependency_manager.remove_component(component_id)
-        self._remove_component_from_resources(component_id)
 
     def add_protocol(self, directory: PathLike) -> "AEABuilder":
         """
@@ -734,23 +787,30 @@ class AEABuilder:
         """
         Build the AEA.
 
+        This method is re-entrant only if the components have been
+        added through the method 'add_component'. If some of them
+        have been loaded with 'add_component_instance', it
+        should be called only once, and further calls will lead
+        to unexpected behaviour.
+
         :param connection_ids: select only these connections to run the AEA.
         :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         """
-        wallet = Wallet(self.private_key_paths)
+        resources = Resources()
+        wallet = Wallet(
+            copy(self.private_key_paths), copy(self.connection_private_key_paths)
+        )
         identity = self._build_identity_from_wallet(wallet)
         ledger_apis = self._load_ledger_apis(ledger_apis)
-        self._load_and_add_protocols()
-        self._load_and_add_contracts()
-        connections = self._load_connections(identity.address, connection_ids)
-        identity = self._update_identity(identity, wallet, connections)
+        self._load_and_add_components(ComponentType.PROTOCOL, resources)
+        self._load_and_add_components(ComponentType.CONTRACT, resources)
         aea = AEA(
             identity,
-            connections,
+            [],
             wallet,
             ledger_apis,
-            self._resources,
+            resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
             execution_timeout=self._get_execution_timeout(),
@@ -760,10 +820,13 @@ class AEABuilder:
             skill_exception_policy=self._get_skill_exception_policy(),
             default_routing=self._get_default_routing(),
             loop_mode=self._get_loop_mode(),
-            **self._context_namespace,
+            runtime_mode=self._get_runtime_mode(),
+            **deepcopy(self._context_namespace),
         )
+        # load connection
+        self._load_and_add_connections(aea, wallet, connection_ids=connection_ids)
         aea.multiplexer.default_routing = self._get_default_routing()
-        self._load_and_add_skills(aea.context)
+        self._load_and_add_skills(aea.context, resources)
         return aea
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
@@ -775,6 +838,7 @@ class AEABuilder:
         """
         if ledger_apis is not None:
             self._check_consistent(ledger_apis)
+            ledger_apis = deepcopy(ledger_apis)
         else:
             ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
         return ledger_apis
@@ -793,40 +857,6 @@ class AEABuilder:
         assert (
             ledger_apis.default_ledger_id == self._default_ledger
         ), "Default ledger id of LedgerApis does not match provided default ledger."
-
-    # TODO: remove and replace with a clean approach (~noise based crypto module or similar)
-    def _update_identity(
-        self, identity: Identity, wallet: Wallet, connections: List[Connection]
-    ) -> Identity:
-        """TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection."""
-        public_ids = []  # type: List[PublicId]
-        for connection in connections:
-            public_ids.append(connection.public_id)
-        if not PublicId("fetchai", "p2p_noise", "0.1.0") in public_ids:
-            return identity
-        if len(public_ids) == 1:
-            p2p_noise_connection = connections[0]
-            noise_addresses = {
-                p2p_noise_connection.noise_address_id: p2p_noise_connection.noise_address  # type: ignore
-            }
-            # update identity:
-            assert self._name is not None, "Name not set!"
-            if len(wallet.addresses) > 1:
-                identity = Identity(
-                    self._name,
-                    addresses={**wallet.addresses, **noise_addresses},
-                    default_address_key=p2p_noise_connection.noise_address_id,  # type: ignore
-                )
-            else:  # pragma: no cover
-                identity = Identity(self._name, address=p2p_noise_connection.noise_address)  # type: ignore
-            return identity
-        else:
-            logger.error(
-                "The p2p-noise connection can only be used as a single connection. "
-                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.2.0` "
-                "And use `aea run --connections fetchai/p2p_noise:0.2.0` to run it as a single connection."
-            )
-            sys.exit(1)
 
     def _get_agent_loop_timeout(self) -> float:
         """
@@ -898,12 +928,24 @@ class AEABuilder:
 
     def _get_loop_mode(self) -> str:
         """
-        Return the loop mode
+        Return the loop mode name
 
-        :return: the loop mode
+        :return: the loop mode name
         """
         return (
             self._loop_mode if self._loop_mode is not None else self.DEFAULT_LOOP_MODE
+        )
+
+    def _get_runtime_mode(self) -> str:
+        """
+        Return the runtime mode name
+
+        :return: the runtime mode name
+        """
+        return (
+            self._runtime_mode
+            if self._runtime_mode is not None
+            else self.DEFAULT_RUNTIME_MODE
         )
 
     def _check_configuration_not_already_added(self, configuration) -> None:
@@ -1042,6 +1084,7 @@ class AEABuilder:
             )
         self.set_default_routing(agent_configuration.default_routing)
         self.set_loop_mode(agent_configuration.loop_mode)
+        self.set_runtime_mode(agent_configuration.runtime_mode)
 
         # load private keys
         for (
@@ -1049,6 +1092,15 @@ class AEABuilder:
             private_key_path,
         ) in agent_configuration.private_key_paths_dict.items():
             self.add_private_key(ledger_identifier, private_key_path)
+
+        # load connection private keys
+        for (
+            ledger_identifier,
+            private_key_path,
+        ) in agent_configuration.connection_private_key_paths_dict.items():
+            self.add_private_key(
+                ledger_identifier, private_key_path, is_connection=True
+            )
 
         # load ledger API configurations
         for (
@@ -1123,7 +1175,10 @@ class AEABuilder:
         return builder
 
     def _load_connections(
-        self, address: Address, connection_ids: Optional[Collection[PublicId]] = None
+        self,
+        identity: Identity,
+        wallet: Wallet,
+        connection_ids: Optional[Collection[PublicId]] = None,
     ):
         connections_ids = self._process_connection_ids(connection_ids)
 
@@ -1133,57 +1188,33 @@ class AEABuilder:
             ]
 
         return [
-            self._load_connection(address, get_connection_configuration(connection_id))
+            self._load_connection(
+                identity, wallet, get_connection_configuration(connection_id)
+            )
             for connection_id in connections_ids
         ]
 
-    def _load_and_add_protocols(self) -> None:
-        for configuration in self._package_dependency_manager.protocols.values():
-            configuration = cast(ProtocolConfig, configuration)
-            if (
-                configuration
-                in self._component_instances[ComponentType.PROTOCOL].keys()
-            ):
-                protocol = self._component_instances[ComponentType.PROTOCOL][
-                    configuration
-                ]
-            else:
-                try:
-                    protocol = Protocol.from_config(configuration)
-                except ModuleNotFoundError as e:
-                    _handle_error_while_loading_component_module_not_found(
-                        configuration, e
-                    )
-                except Exception as e:
-                    _handle_error_while_loading_component_generic_error(
-                        configuration, e
-                    )
-            self._add_component_to_resources(protocol)
+    def _load_and_add_components(
+        self, component_type: ComponentType, resources: Resources
+    ) -> None:
+        """
+        Load and add components added to the builder to a Resources instance.
 
-    def _load_and_add_contracts(self) -> None:
-        for configuration in self._package_dependency_manager.contracts.values():
-            configuration = cast(ContractConfig, configuration)
-            if (
-                configuration
-                in self._component_instances[ComponentType.CONTRACT].keys()
-            ):
-                contract = self._component_instances[ComponentType.CONTRACT][
-                    configuration
-                ]
+        :param component_type: the component type for which
+        :param resources: the resources object to populate.
+        :return: None
+        """
+        for configuration in self._package_dependency_manager.get_components_by_type(
+            component_type
+        ).values():
+            if configuration in self._component_instances[component_type].keys():
+                component = self._component_instances[component_type][configuration]
             else:
-                try:
-                    contract = Contract.from_config(configuration)
-                except ModuleNotFoundError as e:
-                    _handle_error_while_loading_component_module_not_found(
-                        configuration, e
-                    )
-                except Exception as e:
-                    _handle_error_while_loading_component_generic_error(
-                        configuration, e
-                    )
-            self._add_component_to_resources(contract)
+                configuration = deepcopy(configuration)
+                component = load_component_from_config(component_type, configuration)
+            resources.add_component(component)
 
-    def _load_and_add_skills(self, context: AgentContext) -> None:
+    def _load_and_add_skills(self, context: AgentContext, resources: Resources) -> None:
         for configuration in self._package_dependency_manager.skills.values():
             logger_name = "aea.packages.{}.skills.{}".format(
                 configuration.author, configuration.name
@@ -1196,30 +1227,26 @@ class AEABuilder:
                 skill.skill_context.set_agent_context(context)
                 skill.skill_context.logger = logging.getLogger(logger_name)
             else:
+                configuration = deepcopy(configuration)
                 skill_context = SkillContext()
                 skill_context.set_agent_context(context)
                 skill_context.logger = logging.getLogger(logger_name)
-                try:
-                    skill = Skill.from_config(
-                        configuration, skill_context=skill_context
-                    )
-                except ModuleNotFoundError as e:
-                    _handle_error_while_loading_component_module_not_found(
-                        configuration, e
-                    )
-                except Exception as e:
-                    _handle_error_while_loading_component_generic_error(
-                        configuration, e
-                    )
-            self._add_component_to_resources(skill)
+                skill = cast(
+                    Skill,
+                    load_component_from_config(
+                        ComponentType.SKILL, configuration, skill_context=skill_context
+                    ),
+                )
+            resources.add_component(skill)
 
     def _load_connection(
-        self, address: Address, configuration: ConnectionConfig
+        self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig
     ) -> Connection:
         """
         Load a connection from a directory.
 
-        :param address: the connection address.
+        :param identity: the AEA identity
+        :param wallet: the wallet
         :param configuration: the connection configuration.
         :return: the connection.
         """
@@ -1228,46 +1255,34 @@ class AEABuilder:
                 Connection,
                 self._component_instances[ComponentType.CONNECTION][configuration],
             )
-            if connection.address != address:
+            if connection.address != identity.address:
                 logger.warning(
                     "The address set on connection '{}' does not match the default address!".format(
                         str(connection.connection_id)
                     )
                 )
             return connection
-        try:
-            directory = cast(Path, configuration.directory)
-            package_modules = load_all_modules(
-                directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        else:
+            configuration = deepcopy(configuration)
+            return cast(
+                Connection,
+                load_component_from_config(
+                    ComponentType.CONNECTION,
+                    configuration,
+                    identity=identity,
+                    crypto_store=wallet.connection_cryptos,
+                ),
             )
-            add_modules_to_sys_modules(package_modules)
-            connection_module_path = directory / "connection.py"
-            assert (
-                connection_module_path.exists() and connection_module_path.is_file()
-            ), "Connection module '{}' not found.".format(connection_module_path)
-            connection_module = load_module(
-                "connection_module", directory / "connection.py"
-            )
-            classes = inspect.getmembers(connection_module, inspect.isclass)
-            connection_class_name = cast(str, configuration.class_name)
-            connection_classes = list(
-                filter(lambda x: re.match(connection_class_name, x[0]), classes)
-            )
-            name_to_class = dict(connection_classes)
-            logger.debug("Processing connection {}".format(connection_class_name))
-            connection_class = name_to_class.get(connection_class_name, None)
-            assert (
-                connection_class is not None
-            ), "Connection class '{}' not found.".format(connection_class_name)
-            return connection_class.from_config(
-                address=address, configuration=configuration
-            )
-        except ModuleNotFoundError as e:
-            _handle_error_while_loading_component_module_not_found(configuration, e)
-        except Exception as e:
-            _handle_error_while_loading_component_generic_error(configuration, e)
-        # this is to make MyPy stop complaining of "Missing return statement".
-        assert False  # noqa: B011
+
+    def _load_and_add_connections(
+        self,
+        aea: AEA,
+        wallet: Wallet,
+        connection_ids: Optional[Collection[PublicId]] = None,
+    ):
+        connections = self._load_connections(aea.identity, wallet, connection_ids)
+        for c in connections:
+            aea.multiplexer.add_connection(c, c.public_id == self._default_connection)
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
@@ -1290,7 +1305,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
             agent_configuration.private_key_paths.update(identifier, private_key_path)
         else:
             try:
-                _try_validate_private_key_path(
+                try_validate_private_key_path(
                     identifier,
                     str(aea_project_path / private_key_path),
                     exit_on_error=False,
@@ -1305,95 +1320,3 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)
-
-
-def _handle_error_while_loading_component_module_not_found(
-    configuration: ComponentConfiguration, e: ModuleNotFoundError
-):
-    """
-    Handle ModuleNotFoundError for AEA packages.
-
-    It will rewrite the error message only if the import path starts with 'packages'.
-    To do that, it will extract the wrong import path from the error message.
-
-    Depending on the import path, the possible error messages can be:
-
-    - "No AEA package found with author name '{}', type '{}', name '{}'"
-    - "'{}' is not a valid type name, choose one of ['protocols', 'connections', 'skills', 'contracts']"
-    - "The package '{}/{}' of type '{}' exists, but cannot find module '{}'"
-
-    :raises ModuleNotFoundError: if it is not
-    :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
-    """
-    error_message = str(e)
-    extract_import_path_regex = re.compile(r"No module named '([\w.]+)'")
-    match = extract_import_path_regex.match(error_message)
-    if match is None:
-        # if for some reason we cannot extract the import path, just re-raise the error
-        raise e from e
-
-    import_path = match.group(1)
-    parts = import_path.split(".")
-    nb_parts = len(parts)
-    if parts[0] != "packages" and nb_parts < 2:
-        # if the first part of the import path is not 'packages',
-        # the error is due for other reasons - just re-raise the error
-        raise e from e
-
-    def get_new_error_message_no_package_found() -> str:
-        """Create a new error message in case the package is not found."""
-        assert nb_parts <= 4, "More than 4 parts!"
-        author = parts[1]
-        new_message = "No AEA package found with author name '{}'".format(author)
-
-        if nb_parts >= 3:
-            pkg_type = parts[2]
-            try:
-                ComponentType(pkg_type[:-1])
-            except ValueError:
-                return "'{}' is not a valid type name, choose one of {}".format(
-                    pkg_type, list(map(lambda x: x.to_plural(), ComponentType))
-                )
-            new_message += ", type '{}'".format(pkg_type)
-        if nb_parts == 4:
-            pkg_name = parts[3]
-            new_message += ", name '{}'".format(pkg_name)
-        return new_message
-
-    def get_new_error_message_with_package_found() -> str:
-        """Create a new error message in case the package is found."""
-        assert nb_parts >= 5, "Less than 5 parts!"
-        author, pkg_name, pkg_type = parts[:3]
-        the_rest = ".".join(parts[4:])
-        return "The package '{}/{}' of type '{}' exists, but cannot find module '{}'".format(
-            author, pkg_name, pkg_type, the_rest
-        )
-
-    if nb_parts < 5:
-        new_message = get_new_error_message_no_package_found()
-    else:
-        new_message = get_new_error_message_with_package_found()
-
-    raise AEAPackageLoadingError(
-        "An error occurred while loading {} {}: No module named {}; {}".format(
-            str(configuration.component_type),
-            configuration.public_id,
-            import_path,
-            new_message,
-        )
-    ) from e
-
-
-def _handle_error_while_loading_component_generic_error(
-    configuration: ComponentConfiguration, e: Exception
-):
-    """
-    Handle Exception for AEA packages.
-
-    :raises Exception: the same exception, but prepending an informative message.
-    """
-    raise Exception(
-        "An error occurred while loading {} {}: {}".format(
-            str(configuration.component_type), configuration.public_id, str(e)
-        )
-    ) from e

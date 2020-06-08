@@ -16,17 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the thermometer skills."""
+import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestThermometerSkill(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
@@ -36,9 +37,9 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/thermometer:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/thermometer:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
         )
@@ -47,9 +48,9 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.3.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
         )
@@ -58,11 +59,11 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
-        thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(thermometer_client_aea_name)
         thermometer_client_aea_process = self.run_agent(
-            "--connections", "fetchai/oef:0.3.0"
+            "--connections", "fetchai/oef:0.4.0"
         )
 
         check_strings = (
@@ -108,6 +109,7 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
@@ -119,15 +121,15 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/thermometer:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/thermometer:0.4.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.2.0", thermometer_aea_name
+            "fetchai/thermometer_aea:0.3.0", thermometer_aea_name
         )
         assert (
             diff == []
@@ -135,15 +137,15 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.3.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.2.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.3.0", thermometer_client_aea_name
         )
         assert (
             diff == []
@@ -157,11 +159,11 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
-        thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(thermometer_client_aea_name)
         thermometer_client_aea_process = self.run_agent(
-            "--connections", "fetchai/oef:0.3.0"
+            "--connections", "fetchai/oef:0.4.0"
         )
 
         # TODO: finish test

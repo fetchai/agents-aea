@@ -50,7 +50,7 @@ IDENTIFIER_TO_FAUCET_APIS = {
 logger = logging.getLogger(__name__)
 
 
-def _try_validate_private_key_path(
+def try_validate_private_key_path(
     ledger_id: str, private_key_path: str, exit_on_error: bool = True
 ) -> None:
     """

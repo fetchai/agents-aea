@@ -15,16 +15,19 @@ theme:
 nav:
   - AEA Framework:
     - Welcome: 'index.md'
+    - Version: 'version.md'
     - Concepts:
+      - Language Agnostic Definition: 'language-agnostic-definition.md'
       - Agent-oriented development: 'agent-oriented-development.md'
       - Vision: 'vision.md'
       - Application areas: 'app-areas.md'
       - Relation to OEF and Ledger: 'oef-ledger.md'
       - Identity: 'identity.md'
-      - Trust issues: 'trust.md'
+      # - Trust issues: 'trust.md'
     - Demos:
       - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
+      # - Contract deploy and interact: 'erc1155-skills.md'
       - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
       - Gym skill: 'gym-skill.md'
@@ -36,62 +39,72 @@ nav:
       - Weather skills: 'weather-skills.md'
     - Development:
       - Getting started:
-        - Ways to build an AEA: 'steps.md'
         - AEA quick start: 'quickstart.md'
+        - Core components - Part 1: 'core-components-1.md'
         - AEA and web frameworks: 'aea-vs-mvc.md'
-        - Build an AEA with the CLI: 'build-aea-step-by-step.md'
         - Build a skill for an AEA: 'skill-guide.md'
-        - Build an AEA programmatically: 'build-aea-programmatically.md'
-        - AEAs vs agents: 'agent-vs-aea.md'
-        - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
-      - Step by step guides:
-        - Thermometer skills step-by-step: 'thermometer-skills-step-by-step.md'
-      - Use case components:
-        - Generic skills: 'generic-skills.md'
-        - ORM integration: 'orm-integration.md'
-        - Frontend intergration: 'connect-a-frontend.md'
-        - ERC1155 deploy and interact: 'erc1155-skills.md'
-        - HTTP Connection: 'http-connection-and-skill.md'
-        - Identity - Aries Cloud Agent: 'aries-cloud-agent-example.md'
-        - P2P Connection: 'p2p-connection.md'
-      - Architecture:
-        - Design principles: 'design-principles.md'
-        - Architectural diagram: 'diagram.md'
-        - Core components: 'core-components.md'
-      - CLI:
-        - Installation: 'cli-how-to.md'
-        - Commands: 'cli-commands.md'
-        - File structure: 'package-imports.md'
-        - GUI: 'cli-gui.md'
-        - Generating wealth: 'wealth.md'
-      - Search & Discovery:
-        - Defining Data Models: 'defining-data-models.md'
-        - The Query Language: 'query-language.md'
-      - Developer guides:
-        - Version: 'version.md'
-        - Skill: 'skill.md'
-        - Protocol: 'protocol.md'
-        - Connection: 'connection.md'
-        - Configurations: 'config.md'
+        - Core components - Part 2: 'core-components-2.md'
+        - Trade between two AEAs: 'thermometer-skills-step-by-step.md'
+      - Topic guides:
+        - Ways to build an AEA: 'step_one.md'
+        - Build an AEA with the CLI: 'build-aea-step-by-step.md'
         - Scaffolding packages: 'scaffolding.md'
         - Generating protocols: 'protocol-generator.md'
         - Logging: 'logging.md'
-        - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
-        - Using public ledgers: 'ledger-integration.md'
         - Use multiplexer stand-alone: 'multiplexer-standalone.md'
         - Create stand-alone transaction: 'standalone-transaction.md'
         - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
         - Known limitations: 'known-limits.md'
-      - Performance benchmark: 'performance-benchmark.md'
+        - Build an AEA programmatically: 'build-aea-programmatically.md'
+        - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
+        - AEAs vs agents: 'agent-vs-aea.md'
+        - Upgrading versions: 'upgrading.md'
+      - Use case components:
+        - Generic skills: 'generic-skills.md'
+        - Frontend intergration: 'connect-a-frontend.md'
+        - HTTP Connection: 'http-connection-and-skill.md'
+        - ORM integration: 'orm-integration.md'
+        - Contract deploy and interact: 'erc1155-skills.md'
+        - Identity - Aries Cloud Agent: 'aries-cloud-agent-example.md'
+        - P2P Connection: 'p2p-connection.md'
+        - Using public ledgers: 'ledger-integration.md'
+        - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
+      - Architecture & component deep-dives:
+        - Design principles: 'design-principles.md'
+        - Architectural diagram: 'diagram.md'
+        - Connections: 'connection.md'
+        - Protocols: 'protocol.md'
+        - Skills: 'skill.md'
+        - Contracts: 'contract.md'
+        - Decision Maker: 'decision-maker.md'
+        - Configurations: 'config.md'
+      - Search & Discovery:
+        - Defining Data Models: 'defining-data-models.md'
+        - The Query Language: 'query-language.md'
+      - Developer Interfaces:
+        - CLI:
+          - Installation: 'cli-how-to.md'
+          - Commands: 'cli-commands.md'
+          - File structure: 'package-imports.md'
+          - Generating wealth: 'wealth.md' 
+        - GUI: 'cli-gui.md'
+      - Benchmarks:
+        - Performance benchmark: 'performance-benchmark.md'
       - API:
         - AEA: 'api/aea.md'
         - AEA Builder: 'api/aea_builder.md'
         - Agent: 'api/agent.md'
         - Agent Loop: 'api/agent_loop.md'
+        - Multiplexer: 'api/multiplexer.md'
+        - Runtime: 'api/runtime.md'
+        - Components:
+          - Base: 'api/components/base.md'
+          - Loader: 'api/components/loader.md'
         - Configurations:
           - Base: 'api/configurations/base.md'
           - Components: 'api/configurations/components.md'
+          - Constants: 'api/configurations/constants.md'
           - Loader: 'api/configurations/loader.md'
         - Connections:
           - Base: 'api/connections/base.md'
@@ -105,6 +118,7 @@ nav:
           - Cosmos: 'api/crypto/cosmos.md'
           - Ethereum: 'api/crypto/ethereum.md'
           - Fetchai: 'api/crypto/fetchai.md'
+          - Helpers: 'api/crypto/helpers.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
           - Registry: 'api/crypto/registry.md'
           - Wallet: 'api/crypto/wallet.md'
@@ -117,6 +131,7 @@ nav:
             - Transaction: 'api/decision_maker/messages/transaction.md'
         - Helpers:
           - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
+          - Async Utils: 'api/helpers/async_utils.md'
           - Base: 'api/helpers/base.md'
           - Dialogue:
             - Base: 'api/helpers/dialogue/base.md'
@@ -139,7 +154,10 @@ nav:
             - Custom Types: 'api/protocols/default/custom_types.md'
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
-        - Resources: 'api/registries/resources.md'
+        - Registries:
+          - Base: 'api/registries/base.md'
+          - Filter: 'api/registries/filter.md'
+          - Resources: 'api/registries/resources.md'
         - Skills:
           - Base: 'api/skills/base.md'
           - Error Skill: 'api/skills/error/handlers.md'

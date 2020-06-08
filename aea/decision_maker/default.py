@@ -747,26 +747,26 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param tx_message: the transaction message
         :return: None
         """
+        tx_message_response = TransactionMessage.respond_signing(
+            tx_message, performative=TransactionMessage.Performative.REJECTED_SIGNING,
+        )
         if self._is_acceptable_for_signing(tx_message):
             if self._is_valid_message(tx_message):
                 tx_signature = self._sign_tx_hash(tx_message)
-                tx_message_response = TransactionMessage.respond_signing(
-                    tx_message,
-                    performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                    signed_payload={"tx_signature": tx_signature},
-                )
+                if tx_signature is not None:
+                    tx_message_response = TransactionMessage.respond_signing(
+                        tx_message,
+                        performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
+                        signed_payload={"tx_signature": tx_signature},
+                    )
             if self._is_valid_tx(tx_message):
                 tx_signed = self._sign_ledger_tx(tx_message)
-                tx_message_response = TransactionMessage.respond_signing(
-                    tx_message,
-                    performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                    signed_payload={"tx_signed": tx_signed},
-                )
-        else:
-            tx_message_response = TransactionMessage.respond_signing(
-                tx_message,
-                performative=TransactionMessage.Performative.REJECTED_SIGNING,
-            )
+                if tx_signed is not None:
+                    tx_message_response = TransactionMessage.respond_signing(
+                        tx_message,
+                        performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
+                        signed_payload={"tx_signed": tx_signed},
+                    )
         self.message_out_queue.put(tx_message_response)
 
     def _is_acceptable_for_signing(self, tx_message: TransactionMessage) -> bool:
@@ -808,7 +808,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         is_valid = tx is not None
         return is_valid
 
-    def _sign_tx_hash(self, tx_message: TransactionMessage) -> str:
+    def _sign_tx_hash(self, tx_message: TransactionMessage) -> Optional[str]:
         """
         Sign the tx hash.
 
@@ -816,16 +816,23 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :return: the signature of the signing payload
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get("ethereum")
+            crypto_object = self.wallet.crypto_objects.get("ethereum", None)
             # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
-            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
-        tx_hash = tx_message.signing_payload.get("tx_hash")
-        is_deprecated_mode = tx_message.signing_payload.get("is_deprecated_mode", False)
-        tx_signature = crypto_object.sign_message(tx_hash, is_deprecated_mode)
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id, None)
+        if crypto_object is not None:
+            tx_hash = cast(bytes, tx_message.signing_payload["tx_hash"])
+            is_deprecated_mode = tx_message.signing_payload.get(
+                "is_deprecated_mode", False
+            )
+            tx_signature = crypto_object.sign_message(
+                tx_hash, is_deprecated_mode
+            )  # type: Optional[str]
+        else:
+            tx_signature = None
         return tx_signature
 
-    def _sign_ledger_tx(self, tx_message: TransactionMessage) -> Any:
+    def _sign_ledger_tx(self, tx_message: TransactionMessage) -> Optional[Any]:
         """
         Handle a transaction message for deployment.
 
@@ -833,12 +840,15 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :return: None
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get("ethereum")
+            crypto_object = self.wallet.crypto_objects.get("ethereum", None)
             # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
-            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
-        tx = tx_message.signing_payload.get("tx")
-        tx_signed = crypto_object.sign_transaction(tx)
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id, None)
+        if crypto_object is not None:
+            tx = tx_message.signing_payload["tx"]
+            tx_signed = crypto_object.sign_transaction(tx)  # type: Optional[Any]
+        else:
+            tx_signed = None
         return tx_signed
 
     def _handle_state_update_message(

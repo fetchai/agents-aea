@@ -27,7 +27,7 @@ import json
 
 def parse_args():
     """Parse CLI arguments."""
-    import argparse
+    import argparse  # pylint: disable=import-outside-toplevel
 
     parser = argparse.ArgumentParser("parse_main_dependencies_from_lock")
     parser.add_argument(

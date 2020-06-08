@@ -16,17 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the generic buyer and seller skills."""
+import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestGenericSkills(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"
@@ -35,9 +36,9 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/generic_seller:0.4.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/generic_seller:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -46,9 +47,9 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -57,10 +58,10 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
-        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(buyer_aea_name)
-        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         check_strings = (
             "updating generic seller services on OEF service directory.",
@@ -103,6 +104,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"
@@ -114,13 +116,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/generic_seller:0.4.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/generic_seller:0.5.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.1.0", seller_aea_name
+            "fetchai/generic_seller:0.2.0", seller_aea_name
         )
         assert (
             diff == []
@@ -129,13 +131,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.4.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.1.0", buyer_aea_name
+            "fetchai/generic_buyer:0.2.0", buyer_aea_name
         )
         assert (
             diff == []
@@ -149,10 +151,10 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
-        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(buyer_aea_name)
-        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         # TODO: finish test once testnet is reliable
         check_strings = (
@@ -164,7 +166,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
             "checking whether transaction=",
-            # "transaction=",
+            "Sending data to sender=",
         )
         missing_strings = self.missing_from_output(
             seller_aea_process, check_strings, is_terminating=False
@@ -182,8 +184,9 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "Settling transaction on chain!",
             "transaction was successful.",
-            "informing counterparty="
-            # "received INFORM from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
             buyer_aea_process, check_strings, is_terminating=False

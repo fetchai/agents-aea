@@ -51,16 +51,19 @@ author: solarw
 version: 0.1.0
 license: Apache-2.0
 aea_version: 0.3.0
+description: ''
 connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.4.0
+default_connection: fetchai/stub:0.5.0
 default_ledger: fetchai
 ledger_apis:
   fetchai:
     network: testnet
 private_key_paths:
+    fetchai: tests/data/fet_private_key.txt
+connection_private_key_paths:
     fetchai: tests/data/fet_private_key.txt
 registry_path: ../packages
 """
@@ -238,3 +241,15 @@ class TestSkillExceptionPolicyConfigVariable(BaseConfigTestVariable):
     REQUIRED = False
     AEA_ATTR_NAME = "_skills_exception_policy"
     AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate
+
+
+class TestRuntimeModeConfigVariable(BaseConfigTestVariable):
+    """Test `runtime_mode` aea config option."""
+
+    OPTION_NAME = "runtime_mode"
+    CONFIG_ATTR_NAME = "runtime_mode"
+    GOOD_VALUES = ["threaded", "async"]
+    INCORRECT_VALUES = [None, "sTrING?", -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_runtime_mode"
+    AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_RUNTIME_MODE

@@ -27,11 +27,11 @@ from operator import attrgetter
 from statistics import mean
 from typing import Callable, List, Tuple
 
-from benchmark.framework.benchmark import BenchmarkControl
-
 import memory_profiler  # type: ignore
 
 import psutil  # type: ignore
+
+from benchmark.framework.benchmark import BenchmarkControl  # noqa: I100
 
 from tests.common.utils import timeit_context
 

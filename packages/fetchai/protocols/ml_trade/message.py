@@ -39,7 +39,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = ProtocolId("fetchai", "ml_trade", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "ml_trade", "0.2.0")
 
     Description = CustomDescription
 
@@ -55,7 +55,7 @@ class MlTradeMessage(Message):
 
         def __str__(self):
             """Get the string representation."""
-            return self.value
+            return str(self.value)
 
     def __init__(
         self,

@@ -19,6 +19,7 @@
 """This module contains the stub connection."""
 
 import asyncio
+import codecs
 import logging
 import os
 import re
@@ -29,17 +30,18 @@ from typing import IO, List, Optional, Union
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.utils import platform
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers import file_lock
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 
 if platform.is_darwin():
     """Cause fsevent fails on multithreading on macos."""
+    # pylint: disable=ungrouped-imports
     from watchdog.observers.kqueue import KqueueObserver as Observer
 else:
-    from watchdog.observers import Observer
+    from watchdog.observers import Observer  # pylint: disable=ungrouped-imports
 
 
 logger = logging.getLogger(__name__)
@@ -50,7 +52,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.5.0")
 
 
 class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
@@ -72,7 +74,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += str(e.protocol_id).encode("utf-8")
     result += separator
-    result += e.message
+    result += e.message_bytes
     result += separator
 
     return result
@@ -94,6 +96,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however
     # we know everything remaining constitutes the protobuf message.
     message = SEPARATOR.join(split[3:-1])
+    message = codecs.decode(message, "unicode-escape").encode("utf-8")
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 
@@ -199,23 +202,19 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    def __init__(
-        self,
-        input_file_path: Union[str, Path],
-        output_file_path: Union[str, Path],
-        **kwargs
-    ):
-        """
-        Initialize a stub connection.
+    connection_id = PUBLIC_ID
 
-        :param input_file_path: the input file for the incoming messages.
-        :param output_file_path: the output file for the outgoing messages.
-        """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
+    def __init__(self, **kwargs):
+        """Initialize a stub connection."""
         super().__init__(**kwargs)
-        input_file_path = Path(input_file_path)
-        output_file_path = Path(output_file_path)
+        input_file: str = self.configuration.config.get(
+            INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME
+        )
+        output_file: str = self.configuration.config.get(
+            OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
+        )
+        input_file_path = Path(input_file)
+        output_file_path = Path(output_file)
         if not input_file_path.exists():
             input_file_path.touch()
 
@@ -302,24 +301,3 @@ class StubConnection(Connection):
         :return: None
         """
         write_envelope(envelope, self.output_file)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the stub connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        input_file = configuration.config.get(
-            INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME
-        )  # type: str
-        output_file = configuration.config.get(
-            OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
-        )  # type: str
-        return StubConnection(
-            input_file, output_file, address=address, configuration=configuration,
-        )

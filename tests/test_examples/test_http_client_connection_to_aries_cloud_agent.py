@@ -51,7 +51,6 @@ from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ..conftest import HTTP_PROTOCOL_PUBLIC_ID
 
@@ -70,6 +69,7 @@ class TestAEAToACA:
         cls.aca_admin_port = 8020
 
         cls.aea_address = "some string"
+        cls.aea_identity = Identity("", address=cls.aea_address)
 
         cls.cwd = os.getcwd()
 
@@ -103,7 +103,7 @@ class TestAEAToACA:
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
         http_client_connection = HTTPClientConnection(
-            address=self.aea_address,
+            identity=self.aea_identity,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -123,11 +123,12 @@ class TestAEAToACA:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = "ACA"
         request_envelope = Envelope(
             to="ACA",
             sender="AEA",
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
+            message=request_http_message,
         )
 
         try:
@@ -145,7 +146,7 @@ class TestAEAToACA:
             assert response_envelop.to == self.aea_address
             assert response_envelop.sender == "HTTP Server"
             assert response_envelop.protocol_id == HTTP_PROTOCOL_PUBLIC_ID
-            decoded_response_message = HttpSerializer().decode(response_envelop.message)
+            decoded_response_message = response_envelop.message
             assert (
                 decoded_response_message.performative
                 == HttpMessage.Performative.RESPONSE
@@ -172,7 +173,7 @@ class TestAEAToACA:
             default_address_key=FetchAICrypto.identifier,
         )
         http_client_connection = HTTPClientConnection(
-            address=self.aea_address,
+            identity=identity,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -196,7 +197,7 @@ class TestAEAToACA:
                 )
             )
         )
-        http_protocol = Protocol(http_protocol_configuration, HttpSerializer())
+        http_protocol = Protocol(http_protocol_configuration, HttpMessage.serializer())
         resources.add_protocol(http_protocol)
 
         # Request message & envelope
@@ -213,11 +214,12 @@ class TestAEAToACA:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = "ACA"
         request_envelope = Envelope(
             to="ACA",
             sender="AEA",
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
+            message=request_http_message,
         )
 
         # add a simple skill with handler

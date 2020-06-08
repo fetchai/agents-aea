@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: The scaffold skill is a scaffold for your own skill implementation.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmYa1rczhGTtMJBgCd1QR9uZhhkf45orm7TnGTE5Eizjpy

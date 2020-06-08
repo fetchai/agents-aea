@@ -1,10 +1,10 @@
 <a name=".aea.test_tools.test_cases"></a>
-## aea.test`_`tools.test`_`cases
+# aea.test`_`tools.test`_`cases
 
 This module contains test case classes based on pytest for AEA end-to-end testing.
 
 <a name=".aea.test_tools.test_cases.BaseAEATestCase"></a>
-### BaseAEATestCase
+## BaseAEATestCase Objects
 
 ```python
 class BaseAEATestCase(ABC)
@@ -560,8 +560,17 @@ Set up the test class.
 
 Teardown the test.
 
+<a name=".aea.test_tools.test_cases.UseOef"></a>
+## UseOef Objects
+
+```python
+class UseOef()
+```
+
+Inherit from this class to launch an OEF node.
+
 <a name=".aea.test_tools.test_cases.AEATestCaseEmpty"></a>
-### AEATestCaseEmpty
+## AEATestCaseEmpty Objects
 
 ```python
 class AEATestCaseEmpty(BaseAEATestCase)
@@ -582,7 +591,7 @@ This test case will create a default AEA project.
 Set up the test class.
 
 <a name=".aea.test_tools.test_cases.AEATestCaseMany"></a>
-### AEATestCaseMany
+## AEATestCaseMany Objects
 
 ```python
 class AEATestCaseMany(BaseAEATestCase)
@@ -611,7 +620,7 @@ Set up the test class.
 Teardown the test class.
 
 <a name=".aea.test_tools.test_cases.AEATestCase"></a>
-### AEATestCase
+## AEATestCase Objects
 
 ```python
 class AEATestCase(BaseAEATestCase)

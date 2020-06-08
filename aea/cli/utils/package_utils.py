@@ -23,13 +23,11 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import click
 
 from jsonschema import ValidationError
-
-import yaml
 
 from aea import AEA_DIR
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
@@ -40,15 +38,18 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
     PublicId,
+    _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    _try_validate_private_key_path,
     create_private_key,
+    try_validate_private_key_path,
 )
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registry import registry
+from aea.crypto.wallet import Wallet
 
 
 def verify_or_create_private_keys(ctx: Context) -> None:
@@ -73,7 +74,7 @@ def verify_or_create_private_keys(ctx: Context) -> None:
             aea_conf.private_key_paths.update(identifier, private_key_path)
         else:
             try:
-                _try_validate_private_key_path(identifier, private_key_path)
+                try_validate_private_key_path(identifier, private_key_path)
             except FileNotFoundError:  # pragma: no cover
                 raise click.ClickException(
                     "File {} for private key {} not found.".format(
@@ -173,53 +174,49 @@ def try_get_item_target_path(
     return target_path
 
 
-def get_package_dest_path(
-    ctx: Context, author_name: str, item_type_plural: str, item_name: str
+def get_package_path(
+    ctx: Context, item_type: str, public_id: PublicId, is_vendor: bool = True
 ) -> str:
     """
-    Get a destenation path for a package.
+    Get a vendorized path for a package.
 
     :param ctx: context.
-    :param author_name: package author name.
-    :param item_type_plural: plural of item type.
-    :param item_name: package name.
+    :param item_type: item type.
+    :param public_id: item public ID.
+    :param is_vendor: flag for vendorized path (True by defaut).
 
-    :return: destenation path for package.
+    :return: vendorized estenation path for package.
     """
-    return os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
+    item_type_plural = item_type + "s"
+    if is_vendor:
+        return os.path.join(
+            ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
+        )
+    else:
+        return os.path.join(ctx.cwd, item_type_plural, public_id.name)
 
 
-def copy_package_directory(
-    ctx: Context,
-    package_path: Path,
-    item_type: str,
-    item_name: str,
-    author_name: str,
-    dest: str,
-) -> Path:
+def copy_package_directory(src: Path, dst: str) -> Path:
     """
      Copy a package directory to the agent vendor resources.
 
-    :param ctx: the CLI context .
-    :param package_path: the path to the package to be added.
-    :param item_type: the type of the package.
-    :param item_name: the name of the package.
-    :param author_name: the author of the package.
+    :param src: source path to the package to be added.
+    :param dst: str package destenation path.
 
     :return: copied folder target path.
     :raises SystemExit: if the copy raises an exception.
     """
     # copy the item package into the agent's supported packages.
-    item_type_plural = item_type + "s"
-    src = str(package_path.absolute())
-    logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
+    src_path = str(src.absolute())
+    logger.debug("Copying modules. src={} dst={}".format(src_path, dst))
     try:
-        shutil.copytree(src, dest)
+        shutil.copytree(src_path, dst)
     except Exception as e:
         raise click.ClickException(str(e))
 
-    Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
-    return Path(dest)
+    items_folder = os.path.split(dst)[0]
+    Path(items_folder, "__init__.py").touch()
+    return Path(dst)
 
 
 def find_item_locally(ctx, item_type, item_public_id) -> Path:
@@ -318,23 +315,6 @@ def find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
-def load_yaml(filepath: str) -> Dict:
-    """
-    Read content from yaml file.
-
-    :param filepath: str path to yaml file.
-
-    :return: dict YAML content
-    """
-    with open(filepath, "r") as f:
-        try:
-            return yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise click.ClickException(
-                "Loading yaml config from {} failed: {}".format(filepath, e)
-            )
-
-
 def validate_author_name(author: Optional[str] = None) -> str:
     """
     Validate an author name.
@@ -375,3 +355,87 @@ def validate_author_name(author: Optional[str] = None) -> str:
             )
 
     return valid_author
+
+
+def is_fingerprint_correct(package_path: Path, item_config) -> bool:
+    """
+    Validate fingerprint of item before adding.
+
+    :param package_path: path to a package folder.
+    :param item_config: item configuration.
+
+    :return: None.
+    """
+    fingerprint = _compute_fingerprint(
+        package_path, ignore_patterns=item_config.fingerprint_ignore_patterns
+    )
+    return item_config.fingerprint == fingerprint
+
+
+def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
+    """
+    Register item in agent configuration.
+
+    :param ctx: click context object.
+    :param item_type: type of item.
+    :param item_public_id: PublicId of item.
+
+    :return: None.
+    """
+    logger.debug(
+        "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
+    )
+    item_type_plural = item_type + "s"
+    supported_items = getattr(ctx.agent_config, item_type_plural)
+    supported_items.add(item_public_id)
+    ctx.agent_loader.dump(
+        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+    )
+
+
+def is_item_present(
+    ctx: Context, item_type: str, item_public_id: PublicId, is_vendor: bool = True
+) -> bool:
+    """
+    Check if item is already present in AEA.
+
+    :param ctx: context object.
+    :param item_type: type of an item.
+    :param item_public_id: PublicId of an item.
+    :param is_vendor: flag for vendorized path (True by defaut).
+
+    :return: boolean is item present.
+    """
+    # check item presence only by author/package_name pair, without version.
+    item_type_plural = item_type + "s"
+    items_in_config = set(
+        map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural))
+    )
+    item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
+    return (item_public_id.author, item_public_id.name,) in items_in_config and Path(
+        item_path
+    ).exists()
+
+
+def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> int:
+    """
+    Try to get wallet balance.
+
+    :param agent_config: agent config object.
+    :param wallet: wallet object.
+    :param type_: type of ledger API.
+
+    :retun: token balance.
+    """
+    try:
+        if type_ not in agent_config.ledger_apis_dict:  # pragma: no cover
+            raise ValueError(
+                "No ledger api config for {} provided in aea-config.yaml.".format(type_)
+            )
+        ledger_apis = LedgerApis(
+            agent_config.ledger_apis_dict, agent_config.default_ledger
+        )
+        address = wallet.addresses[type_]
+        return ledger_apis.token_balance(type_, address)
+    except (AssertionError, ValueError) as e:  # pragma: no cover
+        raise click.ClickException(str(e))

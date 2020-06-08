@@ -56,6 +56,58 @@ def search(click_context, local):
         aea search connections
         aea search --local skills
     """
+    _setup_search_command(click_context, local)
+
+
+@search.command()
+@click.option("--query", default="", help="Query string to search Connections by name.")
+@pass_ctx
+def connections(ctx: Context, query):
+    """Search for Connections."""
+    _search_items(ctx, "connection", query)
+
+
+@search.command()
+@click.option("--query", default="", help="Query string to search Contracts by name.")
+@pass_ctx
+def contracts(ctx: Context, query):
+    """Search for Contracts."""
+    _search_items(ctx, "contract", query)
+
+
+@search.command()
+@click.option("--query", default="", help="Query string to search Protocols by name.")
+@pass_ctx
+def protocols(ctx: Context, query):
+    """Search for Protocols."""
+    _search_items(ctx, "protocol", query)
+
+
+@search.command()
+@click.option("--query", default="", help="Query string to search Skills by name.")
+@pass_ctx
+def skills(ctx: Context, query):
+    """Search for Skills."""
+    _search_items(ctx, "skill", query)
+
+
+@search.command()
+@click.option("--query", default="", help="Query string to search Agents by name.")
+@pass_ctx
+def agents(ctx: Context, query):
+    """Search for Agents."""
+    _search_items(ctx, "agent", query)
+
+
+def _setup_search_command(click_context: click.core.Context, local: bool) -> None:
+    """
+    Setup search command.
+
+    :param click_context: click context object.
+    :param local: bool flag for local search.
+
+    :return: None.
+    """
     ctx = cast(Context, click_context.obj)
     if local:
         ctx.set_config("is_local", True)
@@ -100,7 +152,7 @@ def _get_details_from_dir(
         results.append(details)
 
 
-def _search_items(ctx, item_type_plural):
+def _search_items_locally(ctx, item_type_plural):
     registry = cast(str, ctx.config.get("registry_directory"))
     result = []  # type: List[Dict]
     configs = {
@@ -144,91 +196,27 @@ def _search_items(ctx, item_type_plural):
     return sorted(result, key=lambda k: k["name"])
 
 
-@search.command()
-@click.option("--query", default="", help="Query string to search Connections by name.")
-@pass_ctx
-def connections(ctx: Context, query):
-    """Search for Connections."""
+def _search_items(ctx: Context, item_type: str, query: str) -> None:
+    """
+    Search items by query and click.echo results.
+
+    :param ctx: Context object.
+    :param item_type: item type.
+    :param query: query string.
+
+    :return: None
+    """
     click.echo('Searching for "{}"...'.format(query))
+    item_type_plural = item_type + "s"
     if ctx.config.get("is_local"):
-        results = _search_items(ctx, "connections")
+        results = _search_items_locally(ctx, item_type_plural)
     else:
-        results = request_api("GET", "/connections", params={"search": query})
+        results = request_api(
+            "GET", "/{}".format(item_type_plural), params={"search": query}
+        )
 
-    if not len(results):
-        click.echo("No connections found.")  # pragma: no cover
+    if len(results) == 0:
+        click.echo("No {} found.".format(item_type_plural))  # pragma: no cover
     else:
-        click.echo("Connections found:\n")
-        click.echo(format_items(results))
-
-
-@search.command()
-@click.option("--query", default="", help="Query string to search Contracts by name.")
-@pass_ctx
-def contracts(ctx: Context, query):
-    """Search for Contracts."""
-    click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_local"):
-        results = _search_items(ctx, "contracts")
-    else:
-        results = request_api("GET", "/contracts", params={"search": query})
-
-    if not len(results):
-        click.echo("No contracts found.")  # pragma: no cover
-    else:
-        click.echo("Contracts found:\n")
-        click.echo(format_items(results))
-
-
-@search.command()
-@click.option("--query", default="", help="Query string to search Protocols by name.")
-@pass_ctx
-def protocols(ctx: Context, query):
-    """Search for Protocols."""
-    click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_local"):
-        results = _search_items(ctx, "protocols")
-    else:
-        results = request_api("GET", "/protocols", params={"search": query})
-
-    if not len(results):
-        click.echo("No protocols found.")  # pragma: no cover
-    else:
-        click.echo("Protocols found:\n")
-        click.echo(format_items(results))
-
-
-@search.command()
-@click.option("--query", default="", help="Query string to search Skills by name.")
-@pass_ctx
-def skills(ctx: Context, query):
-    """Search for Skills."""
-    click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_local"):
-        results = _search_items(ctx, "skills")
-    else:
-        results = request_api("GET", "/skills", params={"search": query})
-
-    if not len(results):
-        click.echo("No skills found.")  # pragma: no cover
-    else:
-        click.echo("Skills found:\n")
-        click.echo(format_items(results))
-
-
-@search.command()
-@click.option("--query", default="", help="Query string to search Agents by name.")
-@pass_ctx
-def agents(ctx: Context, query):
-    """Search for Agents."""
-    click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_local"):
-        results = _search_items(ctx, "agents")
-    else:
-        results = request_api("GET", "/agents", params={"search": query})
-
-    if not len(results):
-        click.echo("No agents found.")  # pragma: no cover
-    else:
-        click.echo("Agents found:\n")
+        click.echo("{} found:\n".format(item_type_plural.title()))
         click.echo(format_items(results))

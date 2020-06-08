@@ -33,7 +33,8 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 class FipaSerializer(Serializer):
     """Serialization for the 'fipa' protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a 'Fipa' message into bytes.
 
@@ -89,7 +90,8 @@ class FipaSerializer(Serializer):
         fipa_bytes = fipa_msg.SerializeToString()
         return fipa_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a 'Fipa' message.
 

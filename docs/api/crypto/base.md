@@ -1,10 +1,10 @@
 <a name=".aea.crypto.base"></a>
-## aea.crypto.base
+# aea.crypto.base
 
 Abstract module wrapping the public and private key cryptography and ledger api.
 
 <a name=".aea.crypto.base.Crypto"></a>
-### Crypto
+## Crypto Objects
 
 ```python
 class Crypto(Generic[EntityClass],  ABC)
@@ -205,7 +205,7 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 None
 
 <a name=".aea.crypto.base.LedgerApi"></a>
-### LedgerApi
+## LedgerApi Objects
 
 ```python
 class LedgerApi(ABC)
@@ -366,7 +366,7 @@ Generate a random str message.
 return the hash in hex.
 
 <a name=".aea.crypto.base.FaucetApi"></a>
-### FaucetApi
+## FaucetApi Objects
 
 ```python
 class FaucetApi(ABC)

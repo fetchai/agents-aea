@@ -1,10 +1,10 @@
 <a name=".aea.protocols.generator"></a>
-## aea.protocols.generator
+# aea.protocols.generator
 
 This module contains the protocol generator.
 
 <a name=".aea.protocols.generator.ProtocolGenerator"></a>
-### ProtocolGenerator
+## ProtocolGenerator Objects
 
 ```python
 class ProtocolGenerator()

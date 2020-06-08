@@ -53,7 +53,7 @@ class TProtocolMessage(Message):
 
         def __str__(self):
             """Get the string representation."""
-            return self.value
+            return str(self.value)
 
     def __init__(
         self,

@@ -1,10 +1,10 @@
 <a name=".aea.protocols.base"></a>
-## aea.protocols.base
+# aea.protocols.base
 
 This module contains the base message and serialization definition.
 
 <a name=".aea.protocols.base.Message"></a>
-### Message
+## Message Objects
 
 ```python
 class Message()
@@ -137,8 +137,17 @@ Compare with another object.
 
 Get the string representation of the message.
 
+<a name=".aea.protocols.base.Message.encode"></a>
+#### encode
+
+```python
+ | encode() -> bytes
+```
+
+Encode the message.
+
 <a name=".aea.protocols.base.Encoder"></a>
-### Encoder
+## Encoder Objects
 
 ```python
 class Encoder(ABC)
@@ -150,6 +159,7 @@ Encoder interface.
 #### encode
 
 ```python
+ | @staticmethod
  | @abstractmethod
  | encode(msg: Message) -> bytes
 ```
@@ -165,7 +175,7 @@ Encode a message.
 the encoded message.
 
 <a name=".aea.protocols.base.Decoder"></a>
-### Decoder
+## Decoder Objects
 
 ```python
 class Decoder(ABC)
@@ -177,6 +187,7 @@ Decoder interface.
 #### decode
 
 ```python
+ | @staticmethod
  | @abstractmethod
  | decode(obj: bytes) -> Message
 ```
@@ -192,7 +203,7 @@ Decode a message.
 the decoded message.
 
 <a name=".aea.protocols.base.Serializer"></a>
-### Serializer
+## Serializer Objects
 
 ```python
 class Serializer(Encoder,  Decoder,  ABC)
@@ -201,7 +212,7 @@ class Serializer(Encoder,  Decoder,  ABC)
 The implementations of this class defines a serialization layer for a protocol.
 
 <a name=".aea.protocols.base.ProtobufSerializer"></a>
-### ProtobufSerializer
+## ProtobufSerializer Objects
 
 ```python
 class ProtobufSerializer(Serializer)
@@ -215,6 +226,7 @@ It assumes that the Message contains a JSON-serializable body.
 #### encode
 
 ```python
+ | @staticmethod
  | encode(msg: Message) -> bytes
 ```
 
@@ -224,13 +236,14 @@ Encode a message into bytes using Protobuf.
 #### decode
 
 ```python
+ | @staticmethod
  | decode(obj: bytes) -> Message
 ```
 
 Decode bytes into a message using Protobuf.
 
 <a name=".aea.protocols.base.JSONSerializer"></a>
-### JSONSerializer
+## JSONSerializer Objects
 
 ```python
 class JSONSerializer(Serializer)
@@ -244,6 +257,7 @@ It assumes that the Message contains a JSON-serializable body.
 #### encode
 
 ```python
+ | @staticmethod
  | encode(msg: Message) -> bytes
 ```
 
@@ -261,6 +275,7 @@ the serialized message.
 #### decode
 
 ```python
+ | @staticmethod
  | decode(obj: bytes) -> Message
 ```
 
@@ -275,7 +290,7 @@ Decode bytes into a message using JSON.
 the decoded message.
 
 <a name=".aea.protocols.base.Protocol"></a>
-### Protocol
+## Protocol Objects
 
 ```python
 class Protocol(Component)
@@ -289,7 +304,7 @@ It includes a serializer to encode/decode a message.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ProtocolConfig, serializer: Serializer)
+ | __init__(configuration: ProtocolConfig, message_class: Type[Message])
 ```
 
 Initialize the protocol manager.
@@ -304,7 +319,7 @@ Initialize the protocol manager.
 
 ```python
  | @property
- | serializer() -> Serializer
+ | serializer() -> Type[Serializer]
 ```
 
 Get the serializer.

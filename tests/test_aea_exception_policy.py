@@ -78,7 +78,7 @@ class TestAeaExceptionPolicy:
         )
         skill_context._skill = test_skill  # weird hack
 
-        builder._add_component_to_resources(test_skill)
+        builder.add_component_instance(test_skill)
         self.aea = builder.build()
         self.aea_tool = AeaTool(self.aea)
 
@@ -100,7 +100,7 @@ class TestAeaExceptionPolicy:
         with pytest.raises(ExpectedExcepton):
             self.aea.start()
 
-        assert not self.aea.liveness.is_stopped
+        assert not self.aea.is_running
 
     def test_handle_stop_and_exit(self) -> None:
         """Test stop and exit policy on message handle."""
@@ -113,7 +113,7 @@ class TestAeaExceptionPolicy:
         ):
             self.aea.start()
 
-        assert self.aea.liveness.is_stopped
+        assert not self.aea.is_running
 
     def test_handle_just_log(self) -> None:
         """Test just log policy on message handle."""
@@ -127,7 +127,7 @@ class TestAeaExceptionPolicy:
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             time.sleep(1)
-        assert not self.aea.liveness.is_stopped
+        assert self.aea.is_running
         assert patched.call_count == 2
 
     def test_act_propagate(self) -> None:
@@ -138,7 +138,7 @@ class TestAeaExceptionPolicy:
         with pytest.raises(ExpectedExcepton):
             self.aea.start()
 
-        assert not self.aea.liveness.is_stopped
+        assert not self.aea.is_running
 
     def test_act_stop_and_exit(self) -> None:
         """Test stop and exit policy on behaviour act."""
@@ -150,7 +150,7 @@ class TestAeaExceptionPolicy:
         ):
             self.aea.start()
 
-        assert self.aea.liveness.is_stopped
+        assert not self.aea.is_running
 
     def test_act_just_log(self) -> None:
         """Test just log policy on behaviour act."""
@@ -162,7 +162,7 @@ class TestAeaExceptionPolicy:
             t.start()
 
             time.sleep(1)
-        assert not self.aea.liveness.is_stopped
+        assert self.aea.is_running
         assert patched.call_count > 1
 
     def test_act_bad_policy(self) -> None:
@@ -173,9 +173,8 @@ class TestAeaExceptionPolicy:
         with pytest.raises(AEAException, match=r"Unsupported exception policy.*"):
             self.aea.start()
 
-        assert not self.aea.liveness.is_stopped
+        assert not self.aea.is_running
 
     def teardown(self) -> None:
         """Stop AEA if not stopped."""
-        if not self.aea.liveness.is_stopped:
-            self.aea.stop()
+        self.aea.stop()

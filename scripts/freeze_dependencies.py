@@ -27,7 +27,7 @@ import subprocess  # nosec
 
 def parse_args():
     """Parse CLI arguments."""
-    import argparse
+    import argparse  # pylint: disable=import-outside-toplevel
 
     parser = argparse.ArgumentParser("freeze_dependencies")
     parser.add_argument("-o", "--output", type=argparse.FileType("w"), default=None)

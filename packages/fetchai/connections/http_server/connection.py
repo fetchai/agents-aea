@@ -36,16 +36,19 @@ from openapi_core.validation.request.datatypes import (
 from openapi_core.validation.request.shortcuts import validate_request
 from openapi_core.validation.request.validators import RequestValidator
 
-from openapi_spec_validator.schemas import read_yaml_file
+from openapi_spec_validator.schemas import (  # pylint: disable=wrong-import-order
+    read_yaml_file,
+)
 
-from werkzeug.datastructures import ImmutableMultiDict
+from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
+    ImmutableMultiDict,
+)
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 SUCCESS = 200
 NOT_FOUND = 404
@@ -55,6 +58,7 @@ SERVER_ERROR = 500
 logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = str
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.3.0")
 
 
 class Request(OpenAPIRequest):
@@ -62,14 +66,22 @@ class Request(OpenAPIRequest):
 
     @property
     def id(self) -> RequestId:
+        """Get the request id."""
         return self._id
 
     @id.setter
     def id(self, id: RequestId) -> None:
+        """Set the request id."""
         self._id = id
 
     @classmethod
     def create(cls, request_handler: BaseHTTPRequestHandler) -> "Request":
+        """
+        Create a request.
+
+        :param request_handler: the request handler
+        :return: a request
+        """
         method = request_handler.command.lower()
 
         parsed_path = urlparse(request_handler.path)
@@ -135,9 +147,9 @@ class Request(OpenAPIRequest):
         envelope = Envelope(
             to=agent_address,
             sender=self.id,
-            protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.2.0"),
             context=context,
-            message=HttpSerializer().encode(http_message),
+            message=http_message,
         )
         return envelope
 
@@ -183,7 +195,10 @@ class Response:
         :return: the response
         """
         if envelope is not None:
-            http_message = cast(HttpMessage, HttpSerializer().decode(envelope.message))
+            assert isinstance(
+                envelope.message, HttpMessage
+            ), "Message not of type HttpMessage"
+            http_message = cast(HttpMessage, envelope.message)
             if http_message.performative == HttpMessage.Performative.RESPONSE:
                 response = Response(
                     http_message.status_code,
@@ -404,6 +419,8 @@ class HTTPChannel:
 
 
 def HTTPHandlerFactory(channel: HTTPChannel):
+    """Factory for HTTP handlers."""
+
     class HTTPHandler(BaseHTTPRequestHandler):
         """HTTP Handler class to deal with incoming requests."""
 
@@ -459,18 +476,15 @@ def HTTPHandlerFactory(channel: HTTPChannel):
 class HTTPServerConnection(Connection):
     """Proxy to the functionality of the http server implementing a RESTful API specification."""
 
-    def __init__(
-        self, host: str, port: int, api_spec_path: Optional[str] = None, **kwargs,
-    ):
-        """
-        Initialize a connection to an RESTful API.
+    connection_id = PUBLIC_ID
 
-        :param address: the address of the agent.
-        :param host: RESTful API hostname / IP address
-        :param port: RESTful API port number
-        :param api_spec_path: Directory API path and filename of the API spec YAML source file.
-        """
+    def __init__(self, **kwargs):
+        """Initialize a HTTP server connection."""
         super().__init__(**kwargs)
+        host = cast(str, self.configuration.config.get("host"))
+        port = cast(int, self.configuration.config.get("port"))
+        assert host is not None and port is not None, "host and port must be set!"
+        api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))
         self.channel = HTTPChannel(
             self.address,
             host,
@@ -534,21 +548,3 @@ class HTTPServerConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the HTTP connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        host = cast(str, configuration.config.get("host"))
-        port = cast(int, configuration.config.get("port"))
-        api_spec_path = cast(str, configuration.config.get("api_spec_path"))
-        return HTTPServerConnection(
-            host, port, api_spec_path, address=address, configuration=configuration
-        )

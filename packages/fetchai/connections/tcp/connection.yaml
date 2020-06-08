@@ -1,15 +1,15 @@
 name: tcp
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The tcp connection implements a tcp server and client.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
-  base.py: QmUfEKv5FiTvbnuTDB83SaXeKQFYEvoGgdRR4mYXiJt2sd
+  base.py: QmekP8rsHarWmbJy6n5tb6fCs7ByxSM5ogwYjDGJ3Gbfi3
   connection.py: QmcG4q5Hg55aXRPiYi6zXAPDCJGchj7xUMxUHoYRS6G1J5
-  tcp_client.py: Qma2uLye6sKBLD22uTrFinJfsWsDjD7SvpajDhhmExD7xF
-  tcp_server.py: QmQoFA9c5gi515Y5StyAJxJiXfD2V8XmqizMhRWrZcYoKJ
+  tcp_client.py: Qmdc3t4soYeCzEBy5pu3jwsFeAMNiu7tZS2d3hs5mdaCXM
+  tcp_server.py: QmewqNtG3rQXZaXyR9uHwZmYumKxqtozxYUFQK8iqVpMya
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: TCPClientConnection

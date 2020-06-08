@@ -8,8 +8,11 @@ from copy import copy
 from threading import Thread
 from typing import Optional
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import Envelope, Multiplexer
+from aea.identity.base import Identity
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
@@ -27,8 +30,13 @@ A `Multiplexer` only needs a list of connections. The `StubConnection` is a simp
         os.remove(OUTPUT_FILE)
 
     # create the connection and multiplexer objects
+    configuration = ConnectionConfig(
+        input_file=INPUT_FILE,
+        output_file=OUTPUT_FILE,
+        connection_id=StubConnection.connection_id,
+    )
     stub_connection = StubConnection(
-        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+        configuration=configuration, identity=Identity("some_agent", "some_address")
     )
     multiplexer = Multiplexer([stub_connection])
 ```
@@ -52,7 +60,7 @@ We use the input and output text files to send an envelope to our agent and rece
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
-            "multiplexer,some_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
+            "multiplexer,some_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
@@ -110,8 +118,11 @@ from copy import copy
 from threading import Thread
 from typing import Optional
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import Envelope, Multiplexer
+from aea.identity.base import Identity
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
@@ -125,8 +136,13 @@ def run():
         os.remove(OUTPUT_FILE)
 
     # create the connection and multiplexer objects
+    configuration = ConnectionConfig(
+        input_file=INPUT_FILE,
+        output_file=OUTPUT_FILE,
+        connection_id=StubConnection.connection_id,
+    )
     stub_connection = StubConnection(
-        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+        configuration=configuration, identity=Identity("some_agent", "some_address")
     )
     multiplexer = Multiplexer([stub_connection])
     try:
@@ -139,7 +155,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
-            "multiplexer,some_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
+            "multiplexer,some_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)

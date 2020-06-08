@@ -31,7 +31,7 @@ import pytest
 import aea
 import aea.registries.base
 from aea.aea import AEA
-from aea.configurations.base import PublicId
+from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.configurations.constants import DEFAULT_PROTOCOL, DEFAULT_SKILL
 from aea.contracts.base import Contract
 from aea.crypto.fetchai import FetchAICrypto
@@ -41,7 +41,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
-from aea.registries.base import ContractRegistry, ProtocolRegistry
+from aea.registries.base import AgentComponentRegistry
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
@@ -68,39 +68,43 @@ class TestContractRegistry:
             str(Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"))
         )
 
-        cls.registry = ContractRegistry()
-        cls.registry.register(
-            contract.configuration.public_id, cast(Contract, contract)
-        )
+        cls.registry = AgentComponentRegistry()
+        cls.registry.register(contract.component_id, cast(Contract, contract))
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.3.0"),
+            PublicId.from_str("fetchai/erc1155:0.4.0"),
         }
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
-        contracts = self.registry.fetch_all()
+        contracts = self.registry.fetch_by_type(ComponentType.CONTRACT)
         assert all(isinstance(c, Contract) for c in contracts)
-        assert set(c.id for c in contracts) == self.expected_contract_ids
+        assert set(c.public_id for c in contracts) == self.expected_contract_ids
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.3.0")
-        contract = self.registry.fetch(contract_id)
+        contract_id = PublicId.from_str("fetchai/erc1155:0.4.0")
+        contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.3.0")
-        contract_removed = self.registry.fetch(contract_id_removed)
-        self.registry.unregister(contract_id_removed)
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.4.0")
+        component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
+        contract_removed = self.registry.fetch(component_id)
+        self.registry.unregister(contract_removed.component_id)
         expected_contract_ids = set(self.expected_contract_ids)
         expected_contract_ids.remove(contract_id_removed)
 
-        assert set(c.id for c in self.registry.fetch_all()) == expected_contract_ids
+        assert (
+            set(
+                c.public_id for c in self.registry.fetch_by_type(ComponentType.CONTRACT)
+            )
+            == expected_contract_ids
+        )
 
         # restore the contract
-        self.registry.register(contract_id_removed, contract_removed)
+        self.registry.register(component_id, contract_removed)
 
     @classmethod
     def teardown_class(cls):
@@ -129,41 +133,44 @@ class TestProtocolRegistry:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        cls.registry = ProtocolRegistry()
+        cls.registry = AgentComponentRegistry()
 
         protocol_1 = Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
         protocol_2 = Protocol.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
         )
-        cls.registry.register(protocol_1.public_id, protocol_1)
-        cls.registry.register(protocol_2.public_id, protocol_2)
+        cls.registry.register(protocol_1.component_id, protocol_1)
+        cls.registry.register(protocol_2.component_id, protocol_2)
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.2.0"),
+            PublicId.from_str("fetchai/fipa:0.3.0"),
         }
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
-        protocols = self.registry.fetch_all()
+        protocols = self.registry.fetch_by_type(ComponentType.PROTOCOL)
         assert all(isinstance(p, Protocol) for p in protocols)
         assert set(p.public_id for p in protocols) == self.expected_protocol_ids
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
         protocol_id_removed = DEFAULT_PROTOCOL
-        protocol_removed = self.registry.fetch(protocol_id_removed)
-        self.registry.unregister(protocol_id_removed)
+        component_id = ComponentId(ComponentType.PROTOCOL, protocol_id_removed)
+        protocol_removed = self.registry.fetch(component_id)
+        self.registry.unregister(component_id)
         expected_protocols_ids = set(self.expected_protocol_ids)
         expected_protocols_ids.remove(protocol_id_removed)
 
         assert (
-            set(p.public_id for p in self.registry.fetch_all())
+            set(
+                p.public_id for p in self.registry.fetch_by_type(ComponentType.PROTOCOL)
+            )
             == expected_protocols_ids
         )
 
         # restore the protocol
-        self.registry.register(protocol_id_removed, protocol_removed)
+        self.registry.register(component_id, protocol_removed)
 
     @classmethod
     def teardown_class(cls):
@@ -208,7 +215,7 @@ class TestResources:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        cls.resources = Resources(os.path.join(cls.agent_folder))
+        cls.resources = Resources()
 
         cls.resources.add_component(
             Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
@@ -231,7 +238,7 @@ class TestResources:
 
         cls.expected_protocols = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/oef_search:0.1.0"),
+            PublicId.from_str("fetchai/oef_search:0.2.0"),
         }
 
     def test_unregister_handler(self):
@@ -420,7 +427,7 @@ class TestFilter:
         identity = Identity(
             cls.agent_name, address=wallet.addresses[FetchAICrypto.identifier]
         )
-        resources = Resources(cls.agent_folder)
+        resources = Resources()
 
         resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
 

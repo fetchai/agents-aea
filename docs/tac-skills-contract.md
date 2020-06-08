@@ -105,7 +105,7 @@ Keep it running for the following demo.
 
 In the root directory, fetch the controller AEA:
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.1.0
+aea fetch fetchai/tac_controller_contract:0.2.0
 cd tac_controller_contract
 aea install
 ```
@@ -117,10 +117,10 @@ The following steps create the controller from scratch:
 ``` bash
 aea create tac_controller_contract
 cd tac_controller_contract
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/tac_control_contract:0.1.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/tac_control_contract:0.2.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
 ```
 
@@ -165,11 +165,11 @@ aea get-wealth ethereum
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.2.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 cd ..
-aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.2.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea install
@@ -187,11 +187,11 @@ aea create tac_participant_two
 Build participant one:
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/tac_participation:0.2.0
+aea add skill fetchai/tac_negotiation:0.2.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 ```
@@ -199,11 +199,11 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 Then, build participant two:
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.3.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
+aea add connection fetchai/oef:0.4.0
+aea add skill fetchai/tac_participation:0.2.0
+aea add skill fetchai/tac_negotiation:0.2.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 ```
@@ -296,7 +296,7 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef_search:0.1.0', 'fetchai/fipa:0.2.0']
+protocols: ['fetchai/oef_search:0.2.0', 'fetchai/fipa:0.3.0']
 ```
 
 Above, you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements register and search behaviour of an AEA for the `tac_negotiation` skill.

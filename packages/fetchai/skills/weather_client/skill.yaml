@@ -1,21 +1,21 @@
 name: weather_client
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmWiXezpAbn7xBS2QoiyTpD3nGB4i7MsKc86PMZFateuk5
+  behaviours.py: QmeWFX1WyXqE3gcU43ZsNaz1dU1z3kJSwFKfdmvdRyXr3i
   dialogues.py: QmfXc9VBAosqtr28jrJnuGQAdK1vbsT4crSN8gczK3RCKX
-  handlers.py: Qmd3McFBCdTu19TvTyaHqCuNeMRjgQr8UrSDBQirfUwvDR
+  handlers.py: QmQ2t7YYwiNkCo1nVicVX13yhp3dUw6QyZc6MCzLeoupHH
   strategy.py: QmcuqouWhqSzYpaNe8nHcah6JBue5ejHEJTx88B4TckyDj
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 behaviours:
   search:
     args:

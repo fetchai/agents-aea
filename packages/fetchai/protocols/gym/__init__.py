@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the gym protocol."""
+
+from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.protocols.gym.serialization import GymSerializer
+
+GymMessage.serializer = GymSerializer

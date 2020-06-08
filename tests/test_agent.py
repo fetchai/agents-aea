@@ -22,7 +22,7 @@
 from threading import Thread
 
 from aea.agent import Agent, AgentState, Identity
-from aea.mail.base import InBox, OutBox
+from aea.multiplexer import InBox, OutBox
 
 from packages.fetchai.connections.local.connection import LocalNode
 
@@ -82,6 +82,13 @@ def test_run_agent():
         assert isinstance(agent.inbox, InBox)
         assert isinstance(agent.outbox, OutBox)
 
+        agent.multiplexer.disconnect()
+
+        import asyncio
+
+        agent = DummyAgent(
+            identity, [oef_local_connection], loop=asyncio.new_event_loop()
+        )
         agent_thread = Thread(target=agent.start)
         agent_thread.start()
         try:

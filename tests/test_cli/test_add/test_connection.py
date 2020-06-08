@@ -51,17 +51,10 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_name = "local"
+        cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
-        cls.connection_version = "0.1.0"
-        cls.connection_id = (
-            cls.connection_author
-            + "/"
-            + cls.connection_name
-            + ":"
-            + cls.connection_version
-        )
-
+        cls.connection_version = "0.3.0"
+        cls.connection_id = "fetchai/http_client:0.3.0"
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
@@ -93,7 +86,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
             standalone_mode=False,
         )
 
-    @unittest.mock.patch("aea.cli.add.get_package_dest_path", return_value="dest/path")
+    @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_connection_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
@@ -149,16 +142,10 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_name = "local"
+        cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
-        cls.connection_version = "0.1.0"
-        cls.connection_id = (
-            cls.connection_author
-            + "/"
-            + cls.connection_name
-            + ":"
-            + cls.connection_version
-        )
+        cls.connection_version = "0.3.0"
+        cls.connection_id = "fetchai/http_client:0.3.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -355,8 +342,8 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/local:0.1.0"
-        cls.connection_name = "local"
+        cls.connection_id = "fetchai/http_client:0.3.0"
+        cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -423,8 +410,8 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/local:0.1.0"
-        cls.connection_name = "local"
+        cls.connection_id = "fetchai/http_client:0.3.0"
+        cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))

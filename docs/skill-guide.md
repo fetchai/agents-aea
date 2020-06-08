@@ -1,7 +1,10 @@
-<div class="admonition note">
+<!-- <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>
 </div>
+ -->
+
+This guide will take you through the development of a simple skill.
 
 ### Dependencies
 
@@ -29,7 +32,6 @@ from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
 class MySearchBehaviour(TickerBehaviour):
@@ -69,12 +71,8 @@ class MySearchBehaviour(TickerBehaviour):
                 self.context.agent_name, self.sent_search_count
             )
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(search_request),
-        )
+        search_request.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=search_request)
 
     def teardown(self) -> None:
         """
@@ -179,12 +177,12 @@ author: fetchai
 version: 0.1.0
 description: 'A simple search skill utilising the OEF search and communication node.'
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- 'fetchai/oef_search:0.1.0'
+- 'fetchai/oef_search:0.2.0'
 behaviours:
   my_search_behaviour:
     args:
@@ -216,16 +214,16 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.1.0
+aea add protocol fetchai/oef_search:0.2.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the oef connection and install its dependencies:
 ``` bash
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 ```
 
 ## Step 8: Run a service provider AEA
@@ -238,8 +236,8 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.4.0 && cd simple_service_registration
-aea run --connections fetchai/oef:0.3.0
+aea fetch fetchai/simple_service_registration:0.5.0 && cd simple_service_registration
+aea run --connections fetchai/oef:0.4.0
 ```
 
 This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.
@@ -256,7 +254,6 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
 DEFAULT_SERVICES_INTERVAL = 30.0
@@ -313,12 +310,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
+        msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=msg)
         self.context.logger.info(
             "[{}]: updating services on OEF service directory.".format(
                 self.context.agent_name
@@ -339,12 +332,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 dialogue_reference=(str(oef_msg_id), ""),
                 service_description=self._registered_service_description,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(msg),
-            )
+            msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=msg)
             self.context.logger.info(
                 "[{}]: unregistering services from OEF service directory.".format(
                     self.context.agent_name
@@ -415,7 +404,7 @@ author: fetchai
 version: 0.2.0
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.3.0, <0.4.0'
+aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmT4nDbtEz5BDtSbw34fXzdZg4HfbYgV3dfMfsGe9R61n4
@@ -423,7 +412,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.1.0
+- fetchai/oef_search:0.2.0
 behaviours:
   service:
     args:
@@ -457,13 +446,20 @@ dependencies: {}
 We can then launch our AEA.
 
 ``` bash
-aea run --connections fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.4.0
 ```
 
 We can see that the AEA sends search requests to the [OEF search node](../oef-ledger) and receives search responses from the [OEF search node](../oef-ledger). Since our AEA is only searching on the [OEF search node](../oef-ledger) - and not registered on the [OEF search node](../oef-ledger) - the search response returns a single agent (the service provider).
 
 We stop the AEA with `CTRL + C`.
 
+<!-- ## Next steps
+
+We recommend you continue with the next step in the 'Getting Started' series:
+
+- <a href="../aea-vs-mvc/">Build a skill for an AEA</a>
+
+ -->
 ## Now it's your turn
 
 We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.

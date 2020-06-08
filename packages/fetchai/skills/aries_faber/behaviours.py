@@ -25,9 +25,7 @@ from typing import Dict
 from aea.skills.behaviours import OneShotBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
 
@@ -46,7 +44,14 @@ class FaberBehaviour(OneShotBehaviour):
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
 
-    def admin_get(self, path: str, content: Dict = None):
+    def _admin_get(self, path: str, content: Dict = None) -> None:
+        """
+        Get from admin.
+
+        :param path: the path
+        :param content: the payload
+        :return: None
+        """
         # Request message & envelope
         request_http_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
@@ -56,12 +61,8 @@ class FaberBehaviour(OneShotBehaviour):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        self.context.outbox.put_message(
-            to=self.admin_url,
-            sender=self.context.agent_address,
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
-        )
+        request_http_message.counterparty = self.admin_url
+        self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
         """
@@ -77,7 +78,7 @@ class FaberBehaviour(OneShotBehaviour):
 
         :return: None
         """
-        self.admin_get(ADMIN_COMMAND_STATUS)
+        self._admin_get(ADMIN_COMMAND_STATUS)
 
     def teardown(self) -> None:
         """

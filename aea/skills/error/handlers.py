@@ -26,7 +26,6 @@ from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 
@@ -82,12 +81,8 @@ class ErrorHandler(Handler):
                 "envelope": encoded_envelope,
             },
         )
-        self.context.outbox.put_message(
-            to=envelope.sender,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(reply),
-        )
+        reply.counterparty = envelope.sender
+        self.context.outbox.put_message(message=reply)
 
     def send_decoding_error(self, envelope: Envelope) -> None:
         """
@@ -111,12 +106,8 @@ class ErrorHandler(Handler):
             error_msg="Decoding error.",
             error_data={"envelope": encoded_envelope},
         )
-        self.context.outbox.put_message(
-            to=envelope.sender,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(reply),
-        )
+        reply.counterparty = envelope.sender
+        self.context.outbox.put_message(message=reply)
 
     def send_unsupported_skill(self, envelope: Envelope) -> None:
         """
@@ -147,9 +138,5 @@ class ErrorHandler(Handler):
             error_msg="Unsupported skill.",
             error_data={"envelope": encoded_envelope},
         )
-        self.context.outbox.put_message(
-            to=envelope.sender,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(reply),
-        )
+        reply.counterparty = envelope.sender
+        self.context.outbox.put_message(message=reply)

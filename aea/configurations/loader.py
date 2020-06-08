@@ -24,7 +24,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Dict, Generic, TextIO, Type, TypeVar, Union
+from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -92,6 +92,15 @@ class ConfigLoader(Generic[T]):
     def validator(self) -> Draft4Validator:
         """Get the json schema validator."""
         return self._validator
+
+    @property
+    def required_fields(self) -> List[str]:
+        """
+        Get required fields.
+
+        :return: list of required fields.
+        """
+        return self._schema["required"]
 
     @property
     def configuration_class(self) -> Type[T]:
@@ -174,6 +183,7 @@ class ConfigLoader(Generic[T]):
 
 
 class ConfigLoaders:
+    """Configuration Loader class to load any package type."""
 
     _from_configuration_type_to_loaders = {
         PackageType.AGENT: ConfigLoader("aea-config_schema.json", AgentConfig),
@@ -193,6 +203,11 @@ class ConfigLoaders:
     def from_package_type(
         cls, configuration_type: Union[PackageType, str]
     ) -> "ConfigLoader":
+        """
+        Get a config loader from the configuration type.
+
+        :param configuration_type: the configuration type
+        """
         configuration_type = PackageType(configuration_type)
         return cls._from_configuration_type_to_loaders[configuration_type]
 

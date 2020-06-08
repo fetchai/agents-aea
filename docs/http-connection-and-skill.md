@@ -14,13 +14,13 @@ cd my_aea
 Add the http server connection package
 
 ``` bash
-aea add connection fetchai/http_server:0.2.0
+aea add connection fetchai/http_server:0.3.0
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.2.0
+aea config set agent.default_connection fetchai/http_server:0.3.0
 ```
 
 Modify the `api_spec_path`:
@@ -58,7 +58,6 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 
 class HttpHandler(Handler):
@@ -123,12 +122,8 @@ class HttpHandler(Handler):
         self.context.logger.info(
             "[{}] responding with: {}".format(self.context.agent_name, http_response)
         )
-        self.context.outbox.put_message(
-            sender=self.context.agent_address,
-            to=http_msg.counterparty,
-            protocol_id=http_response.protocol_id,
-            message=HttpSerializer().encode(http_response),
-        )
+        http_response.counterparty = http_msg.counterparty
+        self.context.outbox.put_message(message=http_response)
 
     def _handle_post(self, http_msg: HttpMessage) -> None:
         """
@@ -151,12 +146,8 @@ class HttpHandler(Handler):
         self.context.logger.info(
             "[{}] responding with: {}".format(self.context.agent_name, http_response)
         )
-        self.context.outbox.put_message(
-            sender=self.context.agent_address,
-            to=http_msg.counterparty,
-            protocol_id=http_response.protocol_id,
-            message=HttpSerializer().encode(http_response),
-        )
+        http_response.counterparty = http_msg.counterparty
+        self.context.outbox.put_message(message=http_response)
 
     def teardown(self) -> None:
         """
@@ -178,7 +169,7 @@ handlers:
 
 Finally, we run the fingerprinter:
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.1.0
+aea fingerprint skill fetchai/http_echo:0.2.0
 ```
 Note, you will have to replace the author name with your author handle.
 

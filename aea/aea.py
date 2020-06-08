@@ -74,6 +74,7 @@ class AEA(Agent):
         ] = DefaultDecisionMakerHandler,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -92,6 +93,7 @@ class AEA(Agent):
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param skill_exception_policy: the skill exception policy enum
         :param loop_mode: loop_mode to choose agent run loop.
+        :param runtime_mode: runtime mode (async, threaded) to run AEA in.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
@@ -103,6 +105,7 @@ class AEA(Agent):
             timeout=timeout,
             is_debug=is_debug,
             loop_mode=loop_mode,
+            runtime_mode=runtime_mode,
         )
 
         self.max_reactions = max_reactions
@@ -239,7 +242,10 @@ class AEA(Agent):
             return
 
         try:
-            msg = protocol.serializer.decode(envelope.message)
+            if isinstance(envelope.message, Message):
+                msg = envelope.message
+            else:
+                msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
             msg.is_incoming = True
         except Exception as e:
@@ -349,6 +355,8 @@ class AEA(Agent):
 
         :return: None
         """
+        logger.debug("[{}]: Calling teardown method...".format(self.name))
+        self.liveness.stop()
         self.decision_maker.stop()
         self.task_manager.stop()
         self.resources.teardown()

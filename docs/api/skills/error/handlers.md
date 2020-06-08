@@ -1,10 +1,10 @@
 <a name=".aea.skills.error.handlers"></a>
-## aea.skills.error.handlers
+# aea.skills.error.handlers
 
 This package contains the implementation of the handler for the 'default' protocol.
 
 <a name=".aea.skills.error.handlers.ErrorHandler"></a>
-### ErrorHandler
+## ErrorHandler Objects
 
 ```python
 class ErrorHandler(Handler)

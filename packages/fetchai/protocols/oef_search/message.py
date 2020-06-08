@@ -42,7 +42,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = ProtocolId("fetchai", "oef_search", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "oef_search", "0.2.0")
 
     Description = CustomDescription
 
@@ -61,7 +61,7 @@ class OefSearchMessage(Message):
 
         def __str__(self):
             """Get the string representation."""
-            return self.value
+            return str(self.value)
 
     def __init__(
         self,

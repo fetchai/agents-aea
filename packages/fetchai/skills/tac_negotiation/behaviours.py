@@ -25,7 +25,6 @@ from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.tac_negotiation.registration import Registration
 from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
@@ -88,12 +87,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=registration.registered_goods_demanded_description,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(oef_msg),
-            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
             registration.registered_goods_demanded_description = None
 
         if registration.registered_goods_supplied_description is not None:
@@ -102,12 +97,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=registration.registered_goods_supplied_description,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(oef_msg),
-            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
             registration.registered_goods_supplied_description = None
 
     def _register_service(self) -> None:
@@ -141,12 +132,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=goods_supplied_description,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(oef_msg),
-            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
 
         if strategy.is_registering_as_buyer:
             self.context.logger.debug(
@@ -165,12 +152,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=goods_demanded_description,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(oef_msg),
-            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
 
     def _search_services(self) -> None:
         """
@@ -209,12 +192,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                     dialogue_reference=(str(search_id), ""),
                     query=query,
                 )
-                self.context.outbox.put_message(
-                    to=self.context.search_service_address,
-                    sender=self.context.agent_address,
-                    protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(oef_msg),
-                )
+                oef_msg.counterparty = self.context.search_service_address
+                self.context.outbox.put_message(message=oef_msg)
 
         if strategy.is_searching_for_buyers:
             query = strategy.get_own_services_query(
@@ -239,12 +218,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                     dialogue_reference=(str(search_id), ""),
                     query=query,
                 )
-                self.context.outbox.put_message(
-                    to=self.context.search_service_address,
-                    sender=self.context.agent_address,
-                    protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(oef_msg),
-                )
+                oef_msg.counterparty = self.context.search_service_address
+                self.context.outbox.put_message(message=oef_msg)
 
 
 class TransactionCleanUpBehaviour(TickerBehaviour):

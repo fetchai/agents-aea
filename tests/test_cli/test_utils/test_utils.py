@@ -29,7 +29,7 @@ from jsonschema import ValidationError
 
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -41,6 +41,8 @@ from aea.cli.utils.formatting import format_items
 from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
+    is_fingerprint_correct,
+    try_get_balance,
     try_get_item_source_path,
     try_get_item_target_path,
     validate_author_name,
@@ -153,7 +155,7 @@ class InitConfigFolderTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.config.get_or_create_cli_config")
-@mock.patch("aea.cli.utils.package_utils.yaml.dump")
+@mock.patch("aea.cli.utils.generic.yaml.dump")
 @mock.patch("builtins.open", mock.mock_open())
 class UpdateCLIConfigTestCase(TestCase):
     """Test case for update_cli_config method."""
@@ -178,7 +180,7 @@ class GetOrCreateCLIConfigTestCase(TestCase):
     """Test case for read_cli_config method."""
 
     @mock.patch(
-        "aea.cli.utils.package_utils.yaml.safe_load", return_value={"correct": "output"}
+        "aea.cli.utils.generic.yaml.safe_load", return_value={"correct": "output"}
     )
     def testget_or_create_cli_config_positive(self, safe_load_mock):
         """Test for get_or_create_cli_config method positive result."""
@@ -187,7 +189,7 @@ class GetOrCreateCLIConfigTestCase(TestCase):
         self.assertEqual(result, expected_result)
         safe_load_mock.assert_called_once()
 
-    @mock.patch("aea.cli.utils.package_utils.yaml.safe_load", _raise_yamlerror)
+    @mock.patch("aea.cli.utils.generic.yaml.safe_load", _raise_yamlerror)
     def testget_or_create_cli_config_bad_yaml(self):
         """Test for rget_or_create_cli_config method bad yaml behavior."""
         with self.assertRaises(ClickException):
@@ -198,6 +200,7 @@ class CleanAfterTestCase(TestCase):
     """Test case for clean_after decorator method."""
 
     @mock.patch("aea.cli.utils.decorators.os.path.exists", return_value=True)
+    @mock.patch("aea.cli.utils.decorators._cast_ctx", lambda x: x)
     @mock.patch("aea.cli.utils.decorators.shutil.rmtree")
     def test_clean_after_positive(self, rmtree_mock, *mocks):
         """Test clean_after decorator method for positive result."""
@@ -270,7 +273,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.2.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -284,7 +287,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.2.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -303,7 +306,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.2.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -312,7 +315,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.2.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -326,7 +329,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.2.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -345,3 +348,66 @@ class ValidateConfigConsistencyTestCase(TestCase):
             _validate_config_consistency(ContextMock(protocols=["some"]))
 
         self.assertIn("Cannot find", str(cm.exception))
+
+
+@mock.patch(
+    "aea.cli.utils.package_utils._compute_fingerprint",
+    return_value={"correct": "fingerprint"},
+)
+class IsFingerprintCorrectTestCase(TestCase):
+    """Test case for adding skill with invalid fingerprint."""
+
+    def test_is_fingerprint_correct_positive(self, *mocks):
+        """Test is_fingerprint_correct method for positive result."""
+        item_config = mock.Mock()
+        item_config.fingerprint = {"correct": "fingerprint"}
+        item_config.fingerprint_ignore_patterns = []
+        result = is_fingerprint_correct("package_path", item_config)
+        self.assertTrue(result)
+
+    def test_is_fingerprint_correct_negative(self, *mocks):
+        """Test is_fingerprint_correct method for negative result."""
+        item_config = mock.Mock()
+        item_config.fingerprint = {"incorrect": "fingerprint"}
+        item_config.fingerprint_ignore_patterns = []
+        package_path = "package_dir"
+        result = is_fingerprint_correct(package_path, item_config)
+        self.assertFalse(result)
+
+
+@mock.patch("aea.cli.config.click.ParamType")
+class AEAJsonPathTypeTestCase(TestCase):
+    """Test case for AEAJsonPathType class."""
+
+    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=True)
+    def test_convert_root_vendor_positive(self, *mocks):
+        """Test for convert method with root "vendor" positive result."""
+        value = "vendor.author.protocols.package_name.attribute_name"
+        ctx_mock = ContextMock()
+        ctx_mock.obj = mock.Mock()
+        ctx_mock.obj.set_config = mock.Mock()
+        obj = AEAJsonPathType()
+        obj.convert(value, "param", ctx_mock)
+
+    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=False)
+    def test_convert_root_vendor_path_not_exists(self, *mocks):
+        """Test for convert method with root "vendor" path not exists."""
+        value = "vendor.author.protocols.package_name.attribute_name"
+        obj = AEAJsonPathType()
+        with self.assertRaises(BadParameter):
+            obj.convert(value, "param", "ctx")
+
+
+@mock.patch("aea.cli.utils.package_utils.LedgerApis", mock.MagicMock())
+class TryGetBalanceTestCase(TestCase):
+    """Test case for try_get_balance method."""
+
+    def test_try_get_balance_positive(self):
+        """Test for try_get_balance method positive result."""
+        agent_config = mock.Mock()
+        ledger_apis = {"type_": {"address": "some-adress"}}
+        agent_config.ledger_apis_dict = ledger_apis
+
+        wallet_mock = mock.Mock()
+        wallet_mock.addresses = {"type_": "some-adress"}
+        try_get_balance(agent_config, wallet_mock, "type_")

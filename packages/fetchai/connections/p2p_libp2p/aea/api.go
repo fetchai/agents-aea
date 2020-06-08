@@ -25,20 +25,23 @@ import (
 */
 
 type AeaApi struct {
-	msgin_path  string
-	msgout_path string
-	agent_addr  string
-	id          string
-	entry_peers []string
-	host        string
-	port        uint16
-	host_public string
-	port_public uint16
-	msgin       *os.File
-	msgout      *os.File
-	out_queue   chan *Envelope
-	closing     bool
-	sandbox     bool
+	msgin_path    string
+	msgout_path   string
+	agent_addr    string
+	id            string
+	entry_peers   []string
+	host          string
+	port          uint16
+	host_public   string
+	port_public   uint16
+	host_delegate string
+	port_delegate uint16
+	msgin         *os.File
+	msgout        *os.File
+	out_queue     chan *Envelope
+	closing       bool
+	connected     bool
+	sandbox       bool
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -57,6 +60,10 @@ func (aea AeaApi) PublicAddress() (string, uint16) {
 	return aea.host_public, aea.port_public
 }
 
+func (aea AeaApi) DelegateAddress() (string, uint16) {
+	return aea.host_delegate, aea.port_delegate
+}
+
 func (aea AeaApi) EntryPeers() []string {
 	return aea.entry_peers
 }
@@ -73,6 +80,10 @@ func (aea *AeaApi) Queue() <-chan *Envelope {
 	return aea.out_queue
 }
 
+func (aea AeaApi) Connected() bool {
+	return aea.connected
+}
+
 func (aea *AeaApi) Stop() {
 	aea.closing = true
 	aea.stop()
@@ -83,13 +94,19 @@ func (aea *AeaApi) Init() error {
 	if aea.sandbox {
 		return nil
 	}
+
+	if aea.connected {
+		return nil
+	}
+	aea.connected = false
+
 	env_file := os.Args[1]
 	fmt.Println("[aea-api  ][debug] env_file:", env_file)
 
 	// get config
 	err := godotenv.Load(env_file)
 	if err != nil {
-		log.Fatal("Error loading .env.noise file")
+		log.Fatal("Error loading env file")
 	}
 	aea.msgin_path = os.Getenv("AEA_TO_NODE")
 	aea.msgout_path = os.Getenv("NODE_TO_AEA")
@@ -98,6 +115,7 @@ func (aea *AeaApi) Init() error {
 	entry_peers := os.Getenv("AEA_P2P_ENTRY_URIS")
 	uri := os.Getenv("AEA_P2P_URI")
 	uri_public := os.Getenv("AEA_P2P_URI_PUBLIC")
+	uri_delegate := os.Getenv("AEA_P2P_DELEGATE_URI")
 	fmt.Println("[aea-api  ][debug] msgin_path:", aea.msgin_path)
 	fmt.Println("[aea-api  ][debug] msgout_path:", aea.msgout_path)
 	fmt.Println("[aea-api  ][debug] id:", aea.id)
@@ -105,6 +123,7 @@ func (aea *AeaApi) Init() error {
 	fmt.Println("[aea-api  ][debug] entry_peers:", entry_peers)
 	fmt.Println("[aea-api  ][debug] uri:", uri)
 	fmt.Println("[aea-api  ][debug] uri public:", uri_public)
+	fmt.Println("[aea-api  ][debug] uri delegate service:", uri_delegate)
 
 	if aea.msgin_path == "" || aea.msgout_path == "" || aea.id == "" || uri == "" {
 		fmt.Println("[aea-api  ][error] couldn't get configuration")
@@ -136,7 +155,7 @@ func (aea *AeaApi) Init() error {
 	if uri_public != "" {
 		parts = strings.SplitN(uri_public, ":", -1)
 		if len(parts) < 2 {
-			fmt.Println("[aea-api  ][error] malformed Uri:", uri)
+			fmt.Println("[aea-api  ][error] malformed Uri:", uri_public)
 			return errors.New("Malformed Uri.")
 		}
 		aea.host_public = parts[0]
@@ -145,6 +164,21 @@ func (aea *AeaApi) Init() error {
 	} else {
 		aea.host_public = ""
 		aea.port_public = 0
+	}
+
+	// parse delegate uri
+	if uri_delegate != "" {
+		parts = strings.SplitN(uri_delegate, ":", -1)
+		if len(parts) < 2 {
+			fmt.Println("[aea-api  ][error] malformed Uri:", uri_delegate)
+			return errors.New("Malformed Uri.")
+		}
+		aea.host_delegate = parts[0]
+		port, _ = strconv.ParseUint(parts[1], 10, 16)
+		aea.port_delegate = uint16(port)
+	} else {
+		aea.host_delegate = ""
+		aea.port_delegate = 0
 	}
 
 	// parse entry peers multiaddrs
@@ -174,6 +208,8 @@ func (aea *AeaApi) Connect() error {
 	aea.out_queue = make(chan *Envelope, 10)
 	go aea.listen_for_envelopes()
 	fmt.Println("[aea-api  ][info] connected to agent")
+
+	aea.connected = true
 
 	return nil
 }
@@ -233,9 +269,15 @@ func write(pipe *os.File, data []byte) error {
 	binary.BigEndian.PutUint32(buf, size)
 	_, err := pipe.Write(buf)
 	if err != nil {
+		fmt.Println("[aea-api  ][error] while writing size to pipe:", size, buf, ":", err, err == os.ErrInvalid)
 		return err
 	}
+	fmt.Println("[aea-api  ][debug] writing size to pipe:", size, buf, ":", err)
 	_, err = pipe.Write(data)
+	if err != nil {
+		fmt.Println("[aea-api  ][error] while writing data to pipe ", data, ":", err)
+	}
+	fmt.Println("[aea-api  ][debug] writing data to pipe len ", size, ":", err)
 	return err
 }
 
@@ -339,7 +381,7 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
 		i := 1
 		for {
 			time.Sleep(time.Duration((rand.Intn(5000) + 3000)) * time.Millisecond)
-			envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.1.0", []byte("\x08\x01*\x07\n\x05Message from sandbox " + strconv.Itoa(i)), ""}
+			envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.2.0", []byte("\x08\x01*\x07\n\x05Message from sandbox " + strconv.Itoa(i)), ""}
 			err := write_envelope(msgin, envel)
 			if err != nil {
 				fmt.Println("[aea-api  ][error][sandbox] stopped producing envelopes:", err)
