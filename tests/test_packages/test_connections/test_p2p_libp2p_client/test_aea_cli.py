@@ -39,7 +39,7 @@ from ....conftest import (
     skip_test_windows,
 )
 
-from aea.test_tools.test_cases import BaseAEATestCase
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
@@ -48,23 +48,15 @@ DEFAULT_CLIENTS_PER_NODE = 4
 
 DEFAULT_LAUNCH_TIMEOUT = 5
 
-def with_new_agent(fn):
-    @functools.wraps(fn)
-    def wrapper(self, *args, **kwargs):
-        self._create_agent()
-        fn(self, *args, **kwargs)
-        self.delete_agents(self.agent_name)
-    return wrapper
-
 @skip_test_windows
-class TestP2PLibp2pClientConnectionAEARunning(BaseAEATestCase):
+class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p_client connection is correctly run"""
 
     @classmethod
     @libp2p_log_on_failure
     def setup_class(cls):
         """Set up the test class."""
-        BaseAEATestCase.setup_class()
+        AEATestCaseEmpty.setup_class()
         
         cls.node_connection = _make_libp2p_connection(delegate_host=DEFAULT_HOST, delegate_port=DEFAULT_DELEGATE_PORT, delegate=True)
         cls.node_multiplexer= Multiplexer([cls.node_connection])
@@ -76,7 +68,6 @@ class TestP2PLibp2pClientConnectionAEARunning(BaseAEATestCase):
     def test_node(self):
         assert self.node_connection.connection_status.is_connected is True
 
-    @with_new_agent
     def test_connection(self):
         self.add_item("connection", "fetchai/p2p_libp2p_client:0.1.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
@@ -87,11 +78,6 @@ class TestP2PLibp2pClientConnectionAEARunning(BaseAEATestCase):
         process = self.run_agent()
         check_strings = "Successfully connected to libp2p node {}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT) 
         self._assert_agent_running(process, check_strings)
-
-    def _create_agent(self):
-        self.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
-        self.set_agent_context(self.agent_name)
-        self.create_agents(self.agent_name)
 
     def _assert_agent_running(self, process, check_strings = "Successfully connected to libp2p node "):
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
@@ -111,6 +97,6 @@ class TestP2PLibp2pClientConnectionAEARunning(BaseAEATestCase):
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        BaseAEATestCase.teardown_class()
+        AEATestCaseEmpty.teardown_class()
 
         cls.node_multiplexer.disconnect()
