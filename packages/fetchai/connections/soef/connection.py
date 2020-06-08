@@ -26,7 +26,7 @@ from typing import Dict, List, Optional, Set, Tuple, cast
 from urllib import parse
 from uuid import uuid4
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 import requests
 
