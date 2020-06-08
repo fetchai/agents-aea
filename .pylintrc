@@ -23,4 +23,4 @@ disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,R,W
 # W0107: unnecessary-pass
 
 [IMPORTS]
-ignored-modules=tensorflow,temper,skimage
+ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3

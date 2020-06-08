@@ -26,7 +26,7 @@ from typing import Dict, List, Optional, Set, Tuple, cast
 from urllib import parse
 from uuid import uuid4
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 import requests
 
@@ -402,11 +402,19 @@ class SOEFChannel:
                 if c.constraint_type.type == ConstraintTypes.DISTANCE
             ][0]
             service_location, radius = constraint_distance.constraint_type.value
+            equality_constraints = [
+                c
+                for c in constraints
+                if c.constraint_type.type == ConstraintTypes.EQUAL
+            ]
+            personality_filter_params = self._construct_personality_filter_params(
+                equality_constraints
+            )
 
             if self.agent_location is None or self.agent_location != service_location:
                 # we update the location to match the query.
                 self._set_location(service_location)
-            self._find_around_me(radius)
+            self._find_around_me(radius, personality_filter_params)
         else:
             logger.warning(
                 "Service query incompatible with SOEF: constraints={}".format(
@@ -425,19 +433,46 @@ class SOEFChannel:
         :return: bool
         """
         is_compatible = True
-        is_compatible = is_compatible and len(query.constraints) == 1
-        constraint_one = query.constraints[0]
-        is_compatible = is_compatible and isinstance(constraint_one, Constraint)
+        is_compatible = is_compatible and len(query.constraints) >= 1
+        constraint_distances = [
+            c
+            for c in query.constraints
+            if isinstance(c, Constraint)
+            and c.constraint_type.type == ConstraintTypes.DISTANCE
+        ]
+        is_compatible = is_compatible and len(constraint_distances) == 1
         if is_compatible:
-            constraint_one = cast(Constraint, constraint_one)
+            constraint_distance = cast(Constraint, constraint_distances[0])
             is_compatible = is_compatible and (
-                set([constraint_one.attribute_name]) == set(["location"])
-                and set([constraint_one.constraint_type.type])
+                set([constraint_distance.attribute_name]) == set(["location"])
+                and set([constraint_distance.constraint_type.type])
                 == set([ConstraintTypes.DISTANCE])
             )
         return is_compatible
 
-    def _find_around_me(self, radius: float) -> None:
+    @staticmethod
+    def _construct_personality_filter_params(
+        equality_constraints: List[Constraint],
+    ) -> Dict[str, List[str]]:
+        """
+        Construct a dictionary of personality filters.
+
+        :return: bool
+        """
+        personality_filter_params = {"ppfilter": []}  # type: Dict[str, List[str]]
+        for constraint in equality_constraints:
+            if constraint.constraint_type.type != ConstraintTypes.EQUAL:
+                continue
+            personality_filter_params["ppfilter"] = personality_filter_params[
+                "ppfilter"
+            ] + [constraint.attribute_name + "," + constraint.constraint_type.value]
+        if personality_filter_params == {"ppfilter": []}:
+            personality_filter_params = {}
+        return personality_filter_params
+
+    def _find_around_me(
+        self, radius: float, personality_filter_params: Dict[str, List[str]]
+    ) -> None:
         """
         Find agents around me.
 
@@ -449,9 +484,10 @@ class SOEFChannel:
             logger.debug("Searching in radius={} of myself".format(radius))
             url = parse.urljoin(self.base_url, self.unique_page_address)
             params = {
-                "range_in_km": str(radius),
-                "command": "find_around_me",
+                "range_in_km": [str(radius)],
+                "command": ["find_around_me"],
             }
+            params.update(personality_filter_params)
             response = requests.get(url=url, params=params)
             root = ET.fromstring(response.text)
             agents = {

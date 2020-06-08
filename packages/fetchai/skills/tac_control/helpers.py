@@ -27,7 +27,7 @@ from typing import Dict, List, Tuple, cast
 
 import numpy as np
 
-from web3 import Web3
+from web3 import Web3  # pylint: disable=wrong-import-order
 
 from aea.mail.base import Address
 

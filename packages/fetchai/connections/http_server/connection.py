@@ -36,9 +36,13 @@ from openapi_core.validation.request.datatypes import (
 from openapi_core.validation.request.shortcuts import validate_request
 from openapi_core.validation.request.validators import RequestValidator
 
-from openapi_spec_validator.schemas import read_yaml_file
+from openapi_spec_validator.schemas import (  # pylint: disable=wrong-import-order
+    read_yaml_file,
+)
 
-from werkzeug.datastructures import ImmutableMultiDict
+from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
+    ImmutableMultiDict,
+)
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
