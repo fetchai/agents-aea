@@ -627,13 +627,13 @@ class Skill(Component):
 
     @classmethod
     def from_dir(
-        cls, directory: str, skill_context: Optional[SkillContext] = None
+        cls, directory: str, agent_context: Optional[AgentContext] = None
     ) -> "Skill":
         """
         Load the skill from a directory.
 
         :param directory: the directory to the skill package.
-        :param skill_context: the skill context
+        :param agent_context: the skill context
         :return: the skill object.
         """
         configuration = cast(
@@ -641,16 +641,17 @@ class Skill(Component):
             ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
         configuration._directory = Path(directory)
-        return Skill.from_config(configuration, skill_context)
+        return Skill.from_config(configuration, agent_context)
 
     @classmethod
     def from_config(
-        cls, configuration: SkillConfig, skill_context: Optional[SkillContext] = None
+        cls, configuration: SkillConfig, agent_context: Optional[AgentContext] = None
     ) -> "Skill":
         """
         Load the skill from configuration.
 
         :param configuration: a skill configuration. Must be associated with a directory.
+        :param agent_context: the agent context.
         :return: the skill.
         """
         assert (
@@ -660,7 +661,12 @@ class Skill(Component):
         # we put the initialization here because some skill components
         # might need some info from the skill
         # (e.g. see https://github.com/fetchai/agents-aea/issues/1095)
-        skill_context = SkillContext() if skill_context is None else skill_context
+        skill_context = SkillContext()
+        if agent_context is not None:
+            skill_context.set_agent_context(agent_context)
+        logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
+        skill_context.logger = logging.getLogger(logger_name)
+
         skill = Skill(configuration, skill_context)
 
         directory = configuration.directory

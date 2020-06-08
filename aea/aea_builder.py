@@ -75,7 +75,7 @@ from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
-from aea.skills.base import Skill, SkillContext
+from aea.skills.base import Skill
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -1216,28 +1216,20 @@ class AEABuilder:
 
     def _load_and_add_skills(self, context: AgentContext, resources: Resources) -> None:
         for configuration in self._package_dependency_manager.skills.values():
-            logger_name = "aea.packages.{}.skills.{}".format(
-                configuration.author, configuration.name
-            )
             configuration = cast(SkillConfig, configuration)
             if configuration in self._component_instances[ComponentType.SKILL].keys():
-                skill = cast(
+                component = cast(
                     Skill, self._component_instances[ComponentType.SKILL][configuration]
                 )
-                skill.skill_context.set_agent_context(context)
-                skill.skill_context.logger = logging.getLogger(logger_name)
             else:
                 configuration = deepcopy(configuration)
-                skill_context = SkillContext()
-                skill_context.set_agent_context(context)
-                skill_context.logger = logging.getLogger(logger_name)
-                skill = cast(
+                component = cast(
                     Skill,
                     load_component_from_config(
-                        ComponentType.SKILL, configuration, skill_context=skill_context
+                        ComponentType.SKILL, configuration, agent_context=context
                     ),
                 )
-            resources.add_component(skill)
+            resources.add_component(component)
 
     def _load_connection(
         self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig

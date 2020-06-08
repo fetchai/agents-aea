@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
 
-import logging
 import os
 import tempfile
 from pathlib import Path
@@ -348,23 +347,24 @@ def test_initialize_aea_programmatically_build_resources():
             connections = [connection]
 
             resources = Resources()
+            aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
 
             default_protocol = Protocol.from_dir(
                 str(Path(AEA_DIR, "protocols", "default"))
             )
             resources.add_protocol(default_protocol)
 
-            error_skill = Skill.from_dir(str(Path(AEA_DIR, "skills", "error")))
-            dummy_skill = Skill.from_dir(str(Path(CUR_PATH, "data", "dummy_skill")))
+            error_skill = Skill.from_dir(
+                str(Path(AEA_DIR, "skills", "error")), agent_context=aea.context
+            )
+            dummy_skill = Skill.from_dir(
+                str(Path(CUR_PATH, "data", "dummy_skill")), agent_context=aea.context
+            )
             resources.add_skill(dummy_skill)
             resources.add_skill(error_skill)
 
-            aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
-
             error_skill.skill_context.set_agent_context(aea.context)
             dummy_skill.skill_context.set_agent_context(aea.context)
-            error_skill.skill_context.logger = logging.getLogger("error_skill")
-            dummy_skill.skill_context.logger = logging.getLogger("dummy_skills")
 
             default_protocol_id = DefaultMessage.protocol_id
 
