@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"os/signal"
@@ -72,6 +73,7 @@ func check(err error) {
 var (
 	cfg_client            = false
 	cfg_relays            = []peer.ID{}
+	cfg_relays_all        = []peer.ID{}
 	cfg_addresses_map     = map[string]string{}
 	cfg_addresses_tcp_map = map[string]net.Conn{}
 )
@@ -124,8 +126,13 @@ func main() {
 			check(errors.New("client should be provided with bootstrap peers"))
 		}
 		for _, addr := range bootstrapPeers {
-			cfg_relays = append(cfg_relays, addr.ID)
+			cfg_relays_all = append(cfg_relays_all, addr.ID)
 		}
+		// select a relay node randomly
+		rand.Seed(time.Now().Unix())
+		index := rand.Intn(len(cfg_relays_all))
+		cfg_relays = append(cfg_relays, cfg_relays_all[index])
+		log.Println("INFO Using as relay:", cfg_relays[0].Pretty())
 	} else {
 		cfg_client = false
 	}
@@ -401,7 +408,6 @@ func route(envel aea.Envelope, routedHost host.Host, hdht *dht.IpfsDHT) error {
 	if cfg_client {
 		// client can get addresses only through bootstrap peer
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-		// TOFIX(LR) choose relay randomly
 		s, err := routedHost.NewStream(ctx, cfg_relays[0], "/aea-address/0.1.0")
 		if err != nil {
 			log.Println("ERROR route - couldn't open stream to relay", cfg_relays[0].Pretty())
