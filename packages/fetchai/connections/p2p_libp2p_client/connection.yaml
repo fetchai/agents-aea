@@ -8,13 +8,15 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmdZkQc28da18kN4AeThG2yRfbR8goh4Ln5UboHnKCBtNz
+  connection.py: QmT8Ycbip94bgXVcyP6B5LhtfydhmADWMXKiELWdVodWiB
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PLibp2pClientConnection
 config:
-  libp2p_node_host: 127.0.0.1
-  libp2p_node_port: 11000
+  nodes:
+  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11000
+  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11001
+  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11002
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

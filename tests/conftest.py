@@ -747,34 +747,28 @@ def _make_libp2p_connection(
     if relay and delegate:
         configuration = ConnectionConfig(
             libp2p_key_file=None,
-            libp2p_host=host,
-            libp2p_port=port,
-            libp2p_public_host=host,
-            libp2p_public_port=port,
-            libp2p_entry_peers=entry_peers,
-            libp2p_log_file=log_file,
-            libp2p_delegate_port=delegate_port,
-            libp2p_delegate_host=delegate_host,
+            local_uri="{}:{}".format(host, port),
+            public_uri="{}:{}".format(host, port),
+            entry_peers=entry_peers,
+            log_file=log_file,
+            delegate_uri="{}:{}".format(delegate_host, delegate_port),
             connection_id=P2PLibp2pConnection.connection_id,
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
             libp2p_key_file=None,
-            libp2p_host=host,
-            libp2p_port=port,
-            libp2p_public_host=host,
-            libp2p_public_port=port,
-            libp2p_entry_peers=entry_peers,
-            libp2p_log_file=log_file,
+            local_uri="{}:{}".format(host, port),
+            public_uri="{}:{}".format(host, port),
+            entry_peers=entry_peers,
+            log_file=log_file,
             connection_id=P2PLibp2pConnection.connection_id,
         )
     else:
         configuration = ConnectionConfig(
             libp2p_key_file=None,
-            libp2p_host=host,
-            libp2p_port=port,
-            libp2p_entry_peers=entry_peers,
-            libp2p_log_file=log_file,
+            local_uri="{}:{}".format(host, port),
+            entry_peers=entry_peers,
+            log_file=log_file,
             connection_id=P2PLibp2pConnection.connection_id,
         )
     return P2PLibp2pConnection(configuration=configuration, identity=identity)
@@ -785,12 +779,33 @@ def _make_libp2p_client_connection(
 ) -> P2PLibp2pClientConnection:
     identity = Identity("", address=FetchAICrypto().address)
     configuration = ConnectionConfig(
-        libp2p_key_file=None,
-        libp2p_node_host=node_host,
-        libp2p_node_port=node_port,
+        client_key_file=None,
+        nodes=[{"uri": "{}:{}".format(node_host, node_port)}],
         connection_id=P2PLibp2pClientConnection.connection_id,
     )
     return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
+
+
+def libp2p_log_on_failure(fn: Callable) -> Callable:
+    """
+    Decorate a pytest method running a libp2p node to print its logs in case test fails.
+
+    :return: decorated method.
+    """
+
+    @wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        try:
+            fn(self, *args, **kwargs)
+        except Exception as e:
+            for log_file in self.log_files:
+                print("libp2p log file ======================= {}".format(log_file))
+                with open(log_file, "r") as f:
+                    print(f.read())
+                print("=======================================")
+            raise e
+
+    return wrapper
 
 
 class CwdException(Exception):

@@ -33,6 +33,7 @@ from aea.protocols.default.serialization import DefaultSerializer
 from ....conftest import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
+    libp2p_log_on_failure,
     skip_test_windows,
 )
 
@@ -105,10 +106,14 @@ class TestLibp2pClientConnectionEchoEnvelope:
         cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
         cls.multiplexer_client_2.connect()
 
+        cls.log_files = [cls.connection_node.node.log_file]
+
+    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection_client_1.connection_status.is_connected is True
         assert self.connection_client_2.connection_status.is_connected is True
 
+    @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
@@ -136,6 +141,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message == envelope.message
 
+    @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
@@ -170,6 +176,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message == original_envelope.message
 
+    @libp2p_log_on_failure
     def test_envelope_echoed_back_node_agent(self):
         addr_1 = self.connection_client_1.address
         addr_n = self.connection_node.address
@@ -261,12 +268,19 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
         cls.multiplexer_client_2.connect()
 
+        cls.log_files = [
+            cls.connection_node_1.node.log_file,
+            cls.connection_node_2.node.log_file,
+        ]
+
+    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection_node_1.connection_status.is_connected is True
         assert self.connection_node_2.connection_status.is_connected is True
         assert self.connection_client_1.connection_status.is_connected is True
         assert self.connection_client_2.connection_status.is_connected is True
 
+    @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
@@ -294,6 +308,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message == envelope.message
 
+    @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
@@ -328,6 +343,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message == original_envelope.message
 
+    @libp2p_log_on_failure
     def test_envelope_echoed_back_node_agent(self):
         addr_1 = self.connection_client_1.address
         addr_n = self.connection_node_2.address
@@ -425,10 +441,17 @@ class TestLibp2pClientConnectionRouting:
 
                 muxer.connect()
 
+        cls.log_files = [
+            cls.connection_node_1.node.log_file,
+            cls.connection_node_2.node.log_file,
+        ]
+
+    @libp2p_log_on_failure
     def test_connection_is_established(self):
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
+    @libp2p_log_on_failure
     def test_star_routing_connectivity(self):
         msg = DefaultMessage(
             dialogue_reference=("", ""),

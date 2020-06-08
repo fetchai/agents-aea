@@ -9,20 +9,20 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   aea/api.go: QmP4K2iqPWwLb3GZxGKUAhBcJ4cZxu46JictgncYTC1C3E
-  connection.py: QmXU1EksC5dGT3c3j62TdEQY9b9K4PaaYpEqyXiFdzcxWJ
+  connection.py: QmahTLL4JZ9sD22peWaGPS8d7aLgeB2sRMxYmUwTtRwpjF
   go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
-  libp2p_node.go: QmaeJigHExXgSsECEePoZcjZJYBMwoYoz4wPfVix8fPzHM
+  libp2p_node.go: QmTJ7U16frgyi5G8rRy5gLvG5wogkmnCEARQgUi4bPvFuy
 fingerprint_ignore_patterns:
 - go.sum
 - libp2p_node
 protocols: []
 class_name: P2PLibp2pConnection
 config:
-  libp2p_delegate_port: 11000
-  libp2p_entry_peers: []
-  libp2p_host: 127.0.0.1
-  libp2p_log_file: libp2p_node.log
-  libp2p_port: 9000
+  delegate_uri: 127.0.0.1:11000
+  entry_peers: []
+  local_uri: 127.0.0.1:9000
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9000
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
