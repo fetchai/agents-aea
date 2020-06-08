@@ -645,7 +645,7 @@ class Skill(Component):
 
     @classmethod
     def from_config(
-        cls, configuration: SkillConfig, agent_context: Optional[AgentContext] = None
+        cls, configuration: SkillConfig, agent_context: AgentContext
     ) -> "Skill":
         """
         Load the skill from configuration.
@@ -662,8 +662,7 @@ class Skill(Component):
         # might need some info from the skill
         # (e.g. see https://github.com/fetchai/agents-aea/issues/1095)
         skill_context = SkillContext()
-        if agent_context is not None:
-            skill_context.set_agent_context(agent_context)
+        skill_context.set_agent_context(agent_context)
         logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
         skill_context.logger = logging.getLogger(logger_name)
 

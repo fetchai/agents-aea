@@ -363,9 +363,6 @@ def test_initialize_aea_programmatically_build_resources():
             resources.add_skill(dummy_skill)
             resources.add_skill(error_skill)
 
-            error_skill.skill_context.set_agent_context(aea.context)
-            dummy_skill.skill_context.set_agent_context(aea.context)
-
             default_protocol_id = DefaultMessage.protocol_id
 
             expected_message = DefaultMessage(
