@@ -160,6 +160,8 @@ class P2PLibp2pClientConnection(Connection):
 
             self.connection_status.is_connecting = False
             self.connection_status.is_connected = True
+            
+            logger.info("Successfully connected to libp2p node {}".format(str(self.node_uri)))
 
             # start receiving msgs
             self._in_queue = asyncio.Queue()
