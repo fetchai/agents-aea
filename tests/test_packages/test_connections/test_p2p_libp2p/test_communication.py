@@ -304,7 +304,11 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         cls.multiplexer2 = Multiplexer([cls.connection2])
         cls.multiplexer2.connect()
 
-        cls.log_files = [cls.relay.node.log_file]
+        cls.log_files = [
+            cls.relay.node.log_file,
+            cls.connection1.node.log_file,
+            cls.connection2.node.log_file,
+        ]
 
     @libp2p_log_on_failure
     def test_connection_is_established(self):
@@ -448,6 +452,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             cls.connection_relay_1.node.log_file,
             cls.connection_relay_2.node.log_file,
         ]
+        cls.log_files.extend([conn.node.log_file for conn in cls.connections])
         time.sleep(2)
 
     @libp2p_log_on_failure
