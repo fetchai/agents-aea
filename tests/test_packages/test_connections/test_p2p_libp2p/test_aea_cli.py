@@ -19,9 +19,11 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ....conftest import skip_test_windows
+from ....conftest import MAX_FLAKY_RERUNS, skip_test_windows
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
@@ -34,6 +36,7 @@ DEFAULT_LAUNCH_TIMEOUT = 25
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
     def test_agent(self):
         self.add_item("connection", "fetchai/p2p_libp2p:0.2.0")
         self.set_config(
@@ -61,6 +64,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
     def test_agent(self):
         self.add_item("connection", "fetchai/p2p_libp2p:0.2.0")
 

@@ -44,7 +44,7 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.base import load_aea_package, load_module
 from aea.mail.base import Address
 from aea.multiplexer import OutBox
 from aea.protocols.base import Message
@@ -667,10 +667,7 @@ class Skill(Component):
         skill = Skill(configuration, skill_context)
 
         directory = configuration.directory
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
-        )
-        add_modules_to_sys_modules(package_modules)
+        load_aea_package(configuration)
         handlers_by_id = dict(configuration.handlers.read_all())
         handlers = Handler.parse_module(
             str(directory / "handlers.py"), handlers_by_id, skill_context

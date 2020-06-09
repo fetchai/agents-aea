@@ -161,7 +161,7 @@ setup(
     install_requires=base_deps,
     tests_require=["tox"],
     extras_require=all_extras,
-    entry_points={"console_scripts": ["aea=aea.cli:cli"], },
+    entry_points={"console_scripts": ["aea=aea.cli:cli"],},
     zip_safe=False,
     include_package_data=True,
     license=about["__license__"],
