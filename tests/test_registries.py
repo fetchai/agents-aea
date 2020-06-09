@@ -222,10 +222,16 @@ class TestResources:
         )
         # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
         cls.resources.add_component(
-            Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill"))
+            Skill.from_dir(
+                Path(CUR_PATH, "data", "dummy_skill"),
+                agent_context=unittest.mock.MagicMock(),
+            )
         )
         cls.resources.add_component(
-            Skill.from_dir(Path(aea.AEA_DIR, "skills", "error"))
+            Skill.from_dir(
+                Path(aea.AEA_DIR, "skills", "error"),
+                agent_context=unittest.mock.MagicMock(),
+            )
         )
 
         cls.error_skill_public_id = DEFAULT_SKILL
@@ -429,7 +435,12 @@ class TestFilter:
         )
         resources = Resources()
 
-        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
+        resources.add_component(
+            Skill.from_dir(
+                Path(CUR_PATH, "data", "dummy_skill"),
+                agent_context=unittest.mock.MagicMock(),
+            )
+        )
 
         cls.aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
         cls.aea.setup()

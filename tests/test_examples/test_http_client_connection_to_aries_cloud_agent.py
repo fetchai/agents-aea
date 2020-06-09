@@ -234,7 +234,9 @@ class TestAEAToACA:
         resources.add_skill(simple_skill)
 
         # add error skill to AEA
-        error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"))
+        error_skill = Skill.from_dir(
+            os.path.join(AEA_DIR, "skills", "error"), agent_context=aea.context
+        )
         resources.add_skill(error_skill)
 
         # start AEA thread
