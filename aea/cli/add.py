@@ -22,13 +22,12 @@
 from typing import cast
 
 import click
-from click.core import Context as ClickContext
 
 from aea.cli.registry.add import fetch_package
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import check_aea_project, clean_after
+from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     copy_package_directory,
     find_item_in_distribution,
@@ -59,49 +58,46 @@ def add(click_context, local):
 
 @add.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def connection(click_context, connection_public_id: PublicId):
+@pass_ctx
+def connection(ctx: Context, connection_public_id: PublicId):
     """Add a connection to the configuration file."""
-    _add_item(click_context, "connection", connection_public_id)
+    add_item(ctx, "connection", connection_public_id)
 
 
 @add.command()
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def contract(click_context, contract_public_id: PublicId):
+@pass_ctx
+def contract(ctx: Context, contract_public_id: PublicId):
     """Add a contract to the configuration file."""
-    _add_item(click_context, "contract", contract_public_id)
+    add_item(ctx, "contract", contract_public_id)
 
 
 @add.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def protocol(click_context, protocol_public_id):
+@pass_ctx
+def protocol(ctx: Context, protocol_public_id):
     """Add a protocol to the agent."""
-    _add_item(click_context, "protocol", protocol_public_id)
+    add_item(ctx, "protocol", protocol_public_id)
 
 
 @add.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def skill(click_context, skill_public_id: PublicId):
+@pass_ctx
+def skill(ctx: Context, skill_public_id: PublicId):
     """Add a skill to the agent."""
-    _add_item(click_context, "skill", skill_public_id)
+    add_item(ctx, "skill", skill_public_id)
 
 
 @clean_after
-def _add_item(
-    click_context: ClickContext, item_type: str, item_public_id: PublicId
-) -> None:
+def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     """
     Add an item.
 
-    :param click_context: the click context.
+    :param ctx: Context object.
     :param item_type: the item type.
     :param item_public_id: the item public id.
     :return: None
     """
-    ctx = cast(Context, click_context.obj)
     agent_name = cast(str, ctx.agent_config.agent_name)
 
     click.echo(
@@ -136,28 +132,27 @@ def _add_item(
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
     register_item(ctx, item_type, item_public_id)
-    _add_item_deps(click_context, item_type, item_config)
+    add_item_deps(ctx, item_type, item_config)
 
 
-def _add_item_deps(click_context: ClickContext, item_type: str, item_config) -> None:
+def add_item_deps(ctx: Context, item_type: str, item_config) -> None:
     """
-    Add item dependencies. Calls _add_item recursively.
+    Add item dependencies. Calls add_item recursively.
 
-    :param click_context: click context object.
+    :param ctx: Context object.
     :param item_type: type of item.
     :param item_config: item configuration object.
 
     :return: None
     """
-    ctx = cast(Context, click_context.obj)
     if item_type in {"connection", "skill"}:
         # add missing protocols
         for protocol_public_id in item_config.protocols:
             if protocol_public_id not in ctx.agent_config.protocols:
-                _add_item(click_context, "protocol", protocol_public_id)
+                add_item(ctx, "protocol", protocol_public_id)
 
     if item_type == "skill":
         # add missing contracts
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:
-                _add_item(click_context, "contract", contract_public_id)
+                add_item(ctx, "contract", contract_public_id)

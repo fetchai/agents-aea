@@ -26,7 +26,7 @@ from typing import cast
 import click
 
 import aea
-from aea.cli.add import _add_item
+from aea.cli.add import add_item
 from aea.cli.init import do_init
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
@@ -125,8 +125,8 @@ def _create_aea(
             click.echo("Adding default packages ...")
             if local:
                 ctx.set_config("is_local", True)
-            _add_item(click_context, "connection", DEFAULT_CONNECTION)
-            _add_item(click_context, "skill", DEFAULT_SKILL)
+            add_item(ctx, "connection", DEFAULT_CONNECTION)
+            add_item(ctx, "skill", DEFAULT_SKILL)
 
     except Exception as e:
         raise click.ClickException(str(e))

@@ -35,7 +35,7 @@ class AddContractCommandTestCase(TestCase):
         """Set the test up."""
         self.runner = CliRunner()
 
-    @mock.patch("aea.cli.add._add_item")
+    @mock.patch("aea.cli.add.add_item")
     def test_add_contract_positive(self, *mocks):
         """Test add contract command positive result."""
         result = self.runner.invoke(

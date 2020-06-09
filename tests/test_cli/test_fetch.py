@@ -67,7 +67,7 @@ class FetchAgentLocallyTestCase(TestCase):
             _fetch_agent_locally(ContextMock(), PublicIdMock())
 
     @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
-    @mock.patch("aea.cli.fetch._add_item")
+    @mock.patch("aea.cli.fetch.add_item")
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
     @mock.patch("aea.cli.fetch.copy_tree")
     def test__fetch_agent_locally_with_deps_positive(self, *mocks):
@@ -84,7 +84,7 @@ class FetchAgentLocallyTestCase(TestCase):
     @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
     @mock.patch("aea.cli.fetch.copy_tree")
-    @mock.patch("aea.cli.fetch._add_item", _raise_click_exception)
+    @mock.patch("aea.cli.fetch.add_item", _raise_click_exception)
     def test__fetch_agent_locally_with_deps_fail(self, *mocks):
         """Test for fetch_agent_locally method with deps ClickException catch."""
         public_id = PublicIdMock.from_str("author/name:0.1.0")

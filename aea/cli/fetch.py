@@ -25,7 +25,7 @@ from typing import Optional, cast
 
 import click
 
-from aea.cli.add import _add_item
+from aea.cli.add import add_item
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import try_to_load_agent_config
@@ -121,7 +121,7 @@ def _fetch_agent_deps(click_context: click.core.Context) -> None:
     :param ctx: context object.
 
     :return: None
-    :raises: ClickException re-raises if occures in _add_item call.
+    :raises: ClickException re-raises if occures in add_item call.
     """
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", True)
@@ -131,7 +131,7 @@ def _fetch_agent_deps(click_context: click.core.Context) -> None:
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:
             try:
-                _add_item(click_context, item_type, item_id)
+                add_item(ctx, item_type, item_id)
             except click.ClickException as e:
                 raise click.ClickException(
                     "Failed to add {} dependency {}: {}".format(
