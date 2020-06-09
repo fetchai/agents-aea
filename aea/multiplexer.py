@@ -561,7 +561,15 @@ class Multiplexer(AsyncMultiplexer):
         connections: Collection[Connection],
         default_routing: Dict[PublicId, PublicId],
         default_connection: Optional[PublicId] = None,
-    ):
+    ) -> None:
+        """
+        Set up the multiplexer.
+
+        :param connections: the connections to use. It will replace the other ones.
+        :param default_routing: the default routing.
+        :param default_connection: the default connection.
+        :return: None.
+        """
         self.default_routing = default_routing
         self._connections = []
         for c in connections:
