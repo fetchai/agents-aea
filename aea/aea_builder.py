@@ -294,7 +294,7 @@ class AEABuilder:
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
-        self._default_connection = DEFAULT_CONNECTION
+        self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
 
         self._timeout: Optional[float] = None
@@ -817,13 +817,20 @@ class AEABuilder:
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             default_routing=self._get_default_routing(),
+            default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
             **deepcopy(self._context_namespace),
         )
         # load connection
-        self._load_and_add_connections(aea, wallet, connection_ids=connection_ids)
-        aea.multiplexer.default_routing = self._get_default_routing()
+        # TODO check address is the same of identity address
+        # TODO filter connections with connection_ids
+        self._load_and_add_components(
+            ComponentType.CONNECTION,
+            resources,
+            identity=identity,
+            crypto_store=wallet.connection_cryptos,
+        )
         self._load_and_add_components(
             ComponentType.SKILL, resources, agent_context=aea.context
         )
@@ -910,7 +917,7 @@ class AEABuilder:
         """
         Return the skill exception policy.
 
-        :return: the policy
+        :return: the skill exception policy.
         """
         return (
             self._skill_exception_policy
@@ -922,9 +929,17 @@ class AEABuilder:
         """
         Return the default routing
 
-        :return: the policy
+        :return: the default routing
         """
         return self._default_routing
+
+    def _get_default_connection(self) -> PublicId:
+        """
+        Return the default connection
+
+        :return: the default connection
+        """
+        return self._default_connection
 
     def _get_loop_mode(self) -> str:
         """
@@ -1085,6 +1100,13 @@ class AEABuilder:
         self.set_default_routing(agent_configuration.default_routing)
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
+
+        if agent_configuration._default_connection is None:
+            self.set_default_connection(DEFAULT_CONNECTION)
+        else:
+            self.set_default_connection(
+                PublicId.from_str(agent_configuration.default_connection)
+            )
 
         # load private keys
         for (

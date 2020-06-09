@@ -258,8 +258,8 @@ class ThreadedRuntime(BaseRuntime):
 
         self._agent.multiplexer.set_loop(asyncio.new_event_loop())
 
-        self._agent.multiplexer.connect()
         self._agent._start_setup()
+        self._agent.multiplexer.connect()
         self._start_agent_loop()
 
     def _start_agent_loop(self) -> None:

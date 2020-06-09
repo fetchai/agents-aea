@@ -130,12 +130,13 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
+        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        local_connection = list(agent.multiplexer.connections)[0]
+        local_connection = agent.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         msg = DefaultMessage(
@@ -186,12 +187,13 @@ def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
+        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        local_connection = list(aea.multiplexer.connections)[0]
+        local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         msg = DefaultMessage(
@@ -271,10 +273,11 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
+        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
-        local_connection = list(aea.multiplexer.connections)[0]
+        local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         expected_message = DefaultMessage(
@@ -344,15 +347,23 @@ def test_initialize_aea_programmatically_build_resources():
             ledger_apis = LedgerApis({}, FETCHAI)
             identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
             connection = _make_local_connection(agent_name, node)
-            connections = [connection]
 
             resources = Resources()
-            aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
+            # TODO remove connection argument from AEA.__init__
+            aea = AEA(
+                identity,
+                [],
+                wallet,
+                ledger_apis,
+                resources=resources,
+                default_connection=connection.public_id,
+            )
 
             default_protocol = Protocol.from_dir(
                 str(Path(AEA_DIR, "protocols", "default"))
             )
             resources.add_protocol(default_protocol)
+            resources.add_connection(connection)
 
             error_skill = Skill.from_dir(
                 str(Path(AEA_DIR, "skills", "error")), agent_context=aea.context
@@ -435,13 +446,16 @@ def test_add_behaviour_dynamically():
     ledger_apis = LedgerApis({}, FETCHAI)
     resources = Resources()
     identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+    connection = _make_local_connection(identity.address, LocalNode())
     agent = AEA(
         identity,
-        [_make_local_connection(identity.address, LocalNode())],
+        [],
         wallet,
         ledger_apis,
         resources,
+        default_connection=connection.public_id,
     )
+    resources.add_connection(connection)
     resources.add_component(
         Skill.from_dir(
             Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context

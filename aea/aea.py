@@ -23,6 +23,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
 
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
+from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SKILL
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
@@ -75,6 +76,8 @@ class AEA(Agent):
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        default_connection: Optional[PublicId] = None,
+        default_routing: Dict[PublicId, PublicId] = None,
         **kwargs,
     ) -> None:
         """
@@ -94,6 +97,8 @@ class AEA(Agent):
         :param skill_exception_policy: the skill exception policy enum
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode (async, threaded) to run AEA in.
+        :param default_connection: public id to the default connection
+        :param default_routing: dictionary for default routing.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
@@ -124,6 +129,8 @@ class AEA(Agent):
             self.decision_maker.message_in_queue,
             decision_maker_handler.context,
             self.task_manager,
+            default_connection,
+            default_routing if default_routing is not None else {},
             **kwargs,
         )
         self._execution_timeout = execution_timeout
@@ -174,6 +181,13 @@ class AEA(Agent):
         self.decision_maker.start()
         self.resources.setup()
         ExecTimeoutThreadGuard.start()
+
+        self.multiplexer.default_routing = self.context.default_routing
+        self.multiplexer._connections = []
+        for c in self.resources.get_all_connections():
+            self.multiplexer.add_connection(
+                c, c.public_id == self.context.default_connection
+            )
 
     def act(self) -> None:
         """
