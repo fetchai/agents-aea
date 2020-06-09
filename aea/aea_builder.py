@@ -832,6 +832,7 @@ class AEABuilder:
             crypto_store=wallet.connection_cryptos,
         )
         connection_ids = self._process_connection_ids(connection_ids)
+        # TODO this must be corrected before merging fix/1290
         self._unregister_non_selected_connections(resources, connection_ids)
 
         self._load_and_add_components(
