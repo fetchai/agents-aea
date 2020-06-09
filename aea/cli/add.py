@@ -132,10 +132,10 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
     register_item(ctx, item_type, item_public_id)
-    add_item_deps(ctx, item_type, item_config)
+    _add_item_deps(ctx, item_type, item_config)
 
 
-def add_item_deps(ctx: Context, item_type: str, item_config) -> None:
+def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
     """
     Add item dependencies. Calls add_item recursively.
 
