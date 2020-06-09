@@ -831,10 +831,21 @@ class AEABuilder:
             identity=identity,
             crypto_store=wallet.connection_cryptos,
         )
+        connection_ids = self._process_connection_ids(connection_ids)
+        self._unregister_non_selected_connections(resources, connection_ids)
+
         self._load_and_add_components(
             ComponentType.SKILL, resources, agent_context=aea.context
         )
         return aea
+
+    def _unregister_non_selected_connections(
+        self, resources: Resources, connection_ids: Collection[PublicId]
+    ):
+        """Unregister non-selected connections."""
+        for c in resources.get_all_connections():
+            if c.public_id not in connection_ids:
+                resources.remove_connection(c.public_id)
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
         """
