@@ -105,9 +105,7 @@ def run():
     resources = Resources()
 
     # create the AEA
-    my_aea = AEA(
-        identity, [oef_connection], wallet, ledger_apis, resources,  # stub_connection,
-    )
+    my_aea = AEA(identity, [], wallet, ledger_apis, resources,)  # stub_connection,
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
@@ -124,6 +122,9 @@ def run():
         os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "fipa",)
     )
     resources.add_protocol(fipa_protocol)
+
+    # Add the OEF connection
+    resources.add_connection(oef_connection)
 
     # Add the error and weather_station skills
     error_skill = Skill.from_dir(
