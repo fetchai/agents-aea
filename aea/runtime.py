@@ -262,8 +262,7 @@ class ThreadedRuntime(BaseRuntime):
         # some skills might start using the multiplexer queue (e.g. gym skill)
         # and the interleaving with the multiplexer connection set up
         # might cause concurrency issues.
-        # TODO make these methods public before merging fix/1290
-        self._agent._connect()
+        self._agent.connect()
         self._agent._start_setup()
         self._start_agent_loop()
 

@@ -164,15 +164,15 @@ class AEA(Agent):
         """Get the task manager."""
         return self._task_manager
 
-    def _connect(self) -> None:
+    def connect(self) -> None:
         """Connect the multiplexer."""
-        self.multiplexer.default_routing = self.context.default_routing
-        self.multiplexer._connections = []
-        for c in self.resources.get_all_connections():
-            self.multiplexer.add_connection(
-                c, c.public_id == self.context.default_connection
-            )
-        super()._connect()
+        connections = self.resources.get_all_connections()
+        self.multiplexer.setup(
+            connections,
+            default_routing=self.context.default_routing,
+            default_connection=self.context.default_connection,
+        )
+        super().connect()
 
     def setup(self) -> None:
         """
