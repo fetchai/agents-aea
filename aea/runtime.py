@@ -258,8 +258,12 @@ class ThreadedRuntime(BaseRuntime):
 
         self._agent.multiplexer.set_loop(asyncio.new_event_loop())
 
+        # it is important that 'connect' is before 'start setup'.
+        # some skills might start using the multiplexer queue (e.g. gym skill)
+        # and the interleaving with the multiplexer connection set up
+        # might cause concurrency issues.
+        self._agent._connect()
         self._agent._start_setup()
-        self._agent.multiplexer.connect()
         self._start_agent_loop()
 
     def _start_agent_loop(self) -> None:

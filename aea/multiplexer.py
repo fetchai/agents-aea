@@ -59,7 +59,7 @@ class AsyncMultiplexer:
         """
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
-        self.default_connection: Optional[Connection] = None
+        self._default_connection: Optional[Connection] = None
         self._initialize_connections_if_any(connections, default_connection_index)
 
         self._connection_status = ConnectionStatus()
@@ -72,6 +72,15 @@ class AsyncMultiplexer:
         self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
         self.set_loop(loop if loop is not None else asyncio.new_event_loop())
+
+    @property
+    def default_connection(self) -> Connection:
+        """Get the default connection."""
+        if self._default_connection is not None:
+            return self._default_connection
+        else:
+            # return the first
+            return self._connections[0]
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
@@ -109,7 +118,7 @@ class AsyncMultiplexer:
         self._connections.append(connection)
         self._id_to_connection[connection.connection_id] = connection
         if is_default:
-            self.default_connection = connection
+            self._default_connection = connection
 
     def _connection_consistency_checks(self):
         """

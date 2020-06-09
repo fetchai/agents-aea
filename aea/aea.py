@@ -164,6 +164,16 @@ class AEA(Agent):
         """Get the task manager."""
         return self._task_manager
 
+    def _connect(self) -> None:
+        """Connect the multiplexer."""
+        self.multiplexer.default_routing = self.context.default_routing
+        self.multiplexer._connections = []
+        for c in self.resources.get_all_connections():
+            self.multiplexer.add_connection(
+                c, c.public_id == self.context.default_connection
+            )
+        super()._connect()
+
     def setup(self) -> None:
         """
         Set up the agent.
@@ -181,13 +191,6 @@ class AEA(Agent):
         self.decision_maker.start()
         self.resources.setup()
         ExecTimeoutThreadGuard.start()
-
-        self.multiplexer.default_routing = self.context.default_routing
-        self.multiplexer._connections = []
-        for c in self.resources.get_all_connections():
-            self.multiplexer.add_connection(
-                c, c.public_id == self.context.default_connection
-            )
 
     def act(self) -> None:
         """

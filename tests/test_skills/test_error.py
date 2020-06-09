@@ -71,7 +71,6 @@ class TestSkillError:
         self.agent_name = "Agent0"
 
         self.connection = _make_dummy_connection()
-        self.connections = [self.connection]
         self.identity = Identity(
             self.agent_name, address=self.wallet.addresses[FetchAICrypto.identifier]
         )
@@ -79,12 +78,14 @@ class TestSkillError:
 
         self.my_aea = AEA(
             self.identity,
-            self.connections,
+            [],
             self.wallet,
             self.ledger_apis,
             timeout=0.1,
             resources=Resources(),
+            default_connection=self.connection.public_id,
         )
+        self.my_aea.resources.add_connection(self.connection)
 
         self.my_aea._inbox = InboxWithHistory(self.my_aea.multiplexer)
         self.skill_context = SkillContext(self.my_aea._context)

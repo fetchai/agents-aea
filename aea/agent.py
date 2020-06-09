@@ -103,7 +103,7 @@ class Agent(ABC):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param loop_mode: loop_mode to choose agent run loop.
-        :param runtime: runtime to up agent.
+        :param runtime_mode: runtime mode to up agent.
 
         :return: None
         """
@@ -229,6 +229,10 @@ class Agent(ABC):
         """Get the agent loop mode."""
         return self._loop_mode
 
+    def _connect(self) -> None:
+        """Connect the multiplexer."""
+        self.multiplexer.connect()
+
     def start(self) -> None:
         """
         Start the agent.
@@ -247,8 +251,6 @@ class Agent(ABC):
         - sleep for specified timeout,
         - call to react(),
         - call to update().
-
-        :param loop_mode: loop mode to choose  agent run loop. if not specified default one will be used
 
         :return: None
         """
