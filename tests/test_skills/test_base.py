@@ -233,7 +233,7 @@ class SkillComponentTestCase(TestCase):
         with self.assertRaises(AssertionError):
             self.TestComponent(name="some_name", skill_context=None)
         with self.assertRaises(AssertionError):
-            self.TestComponent(name=None, skill_context="agent_context")
+            self.TestComponent(name=None, skill_context="skill_context")
 
     def test_skill_id_positive(self):
         """Test skill_id property positive."""
