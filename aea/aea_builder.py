@@ -54,7 +54,6 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.connections.base import Connection
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     create_private_key,
@@ -1208,26 +1207,6 @@ class AEABuilder:
         )
         return builder
 
-    def _load_connections(
-        self,
-        identity: Identity,
-        wallet: Wallet,
-        connection_ids: Optional[Collection[PublicId]] = None,
-    ):
-        connections_ids = self._process_connection_ids(connection_ids)
-
-        def get_connection_configuration(connection_id):
-            return self._package_dependency_manager.connections[
-                ComponentId(ComponentType.CONNECTION, connection_id)
-            ]
-
-        return [
-            self._load_connection(
-                identity, wallet, get_connection_configuration(connection_id)
-            )
-            for connection_id in connections_ids
-        ]
-
     def _load_and_add_components(
         self, component_type: ComponentType, resources: Resources, **kwargs
     ) -> None:
@@ -1250,51 +1229,6 @@ class AEABuilder:
                     component_type, configuration, **kwargs
                 )
             resources.add_component(component)
-
-    def _load_connection(
-        self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig
-    ) -> Connection:
-        """
-        Load a connection from a directory.
-
-        :param identity: the AEA identity
-        :param wallet: the wallet
-        :param configuration: the connection configuration.
-        :return: the connection.
-        """
-        if configuration in self._component_instances[ComponentType.CONNECTION].keys():
-            connection = cast(
-                Connection,
-                self._component_instances[ComponentType.CONNECTION][configuration],
-            )
-            if connection.address != identity.address:
-                logger.warning(
-                    "The address set on connection '{}' does not match the default address!".format(
-                        str(connection.connection_id)
-                    )
-                )
-            return connection
-        else:
-            configuration = deepcopy(configuration)
-            return cast(
-                Connection,
-                load_component_from_config(
-                    ComponentType.CONNECTION,
-                    configuration,
-                    identity=identity,
-                    crypto_store=wallet.connection_cryptos,
-                ),
-            )
-
-    def _load_and_add_connections(
-        self,
-        aea: AEA,
-        wallet: Wallet,
-        connection_ids: Optional[Collection[PublicId]] = None,
-    ):
-        connections = self._load_connections(aea.identity, wallet, connection_ids)
-        for c in connections:
-            aea.multiplexer.add_connection(c, c.public_id == self._default_connection)
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
