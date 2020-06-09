@@ -434,7 +434,6 @@ def test_add_behaviour_dynamically():
     wallet = Wallet({FETCHAI: private_key_path})
     ledger_apis = LedgerApis({}, FETCHAI)
     resources = Resources()
-    resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
     identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
     agent = AEA(
         identity,
@@ -442,6 +441,11 @@ def test_add_behaviour_dynamically():
         wallet,
         ledger_apis,
         resources,
+    )
+    resources.add_component(
+        Skill.from_dir(
+            Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context
+        )
     )
     for skill in resources.get_all_skills():
         skill.skill_context.set_agent_context(agent.context)
@@ -481,7 +485,6 @@ class TestContextNamespace:
         wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
         resources = Resources()
-        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         cls.context_namespace = {"key1": 1, "key2": 2}
         cls.agent = AEA(
@@ -491,6 +494,11 @@ class TestContextNamespace:
             ledger_apis,
             resources,
             **cls.context_namespace
+        )
+        resources.add_component(
+            Skill.from_dir(
+                Path(CUR_PATH, "data", "dummy_skill"), agent_context=cls.agent.context
+            )
         )
         for skill in resources.get_all_skills():
             skill.skill_context.set_agent_context(cls.agent.context)
