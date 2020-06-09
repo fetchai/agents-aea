@@ -430,7 +430,7 @@ class TestFilter:
         resources = Resources()
 
         resources.add_component(
-            Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill"), agent_context=None)
+            Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill"), agent_context=cls.aea.context)
         )
 
         cls.aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
