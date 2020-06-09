@@ -34,7 +34,7 @@ from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.skills.base import Skill, SkillContext
+from aea.skills.base import Skill
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
@@ -85,20 +85,12 @@ def run():
     resources.add_protocol(fipa_protocol)
 
     # Add the error and weather_station skills
-    error_skill_context = SkillContext()
-    error_skill_context.set_agent_context(my_aea.context)
-    logger_name = "aea.packages.fetchai.skills.error"
-    error_skill_context.logger = logging.getLogger(logger_name)
     error_skill = Skill.from_dir(
-        os.path.join(AEA_DIR, "skills", "error"), skill_context=error_skill_context
+        os.path.join(AEA_DIR, "skills", "error"), agent_context=my_aea.context
     )
-    weather_skill_context = SkillContext()
-    weather_skill_context.set_agent_context(my_aea.context)
-    logger_name = "aea.packages.fetchai.skills.error"
-    weather_skill_context.logger = logging.getLogger(logger_name)
     weather_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client"),
-        skill_context=weather_skill_context,
+        agent_context=my_aea.context,
     )
 
     strategy = cast(Strategy, weather_skill.models.get("strategy"))

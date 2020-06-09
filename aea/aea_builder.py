@@ -55,7 +55,6 @@ from aea.configurations.constants import (
 )
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
-from aea.context.base import AgentContext
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     create_private_key,
@@ -75,7 +74,6 @@ from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
-from aea.skills.base import Skill, SkillContext
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -826,7 +824,9 @@ class AEABuilder:
         # load connection
         self._load_and_add_connections(aea, wallet, connection_ids=connection_ids)
         aea.multiplexer.default_routing = self._get_default_routing()
-        self._load_and_add_skills(aea.context, resources)
+        self._load_and_add_components(
+            ComponentType.SKILL, resources, agent_context=aea.context
+        )
         return aea
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
@@ -1195,13 +1195,14 @@ class AEABuilder:
         ]
 
     def _load_and_add_components(
-        self, component_type: ComponentType, resources: Resources
+        self, component_type: ComponentType, resources: Resources, **kwargs
     ) -> None:
         """
         Load and add components added to the builder to a Resources instance.
 
         :param component_type: the component type for which
         :param resources: the resources object to populate.
+        :param kwargs: keyword argument to forward to the component loader.
         :return: None
         """
         for configuration in self._package_dependency_manager.get_components_by_type(
@@ -1211,33 +1212,10 @@ class AEABuilder:
                 component = self._component_instances[component_type][configuration]
             else:
                 configuration = deepcopy(configuration)
-                component = load_component_from_config(component_type, configuration)
+                component = load_component_from_config(
+                    component_type, configuration, **kwargs
+                )
             resources.add_component(component)
-
-    def _load_and_add_skills(self, context: AgentContext, resources: Resources) -> None:
-        for configuration in self._package_dependency_manager.skills.values():
-            logger_name = "aea.packages.{}.skills.{}".format(
-                configuration.author, configuration.name
-            )
-            configuration = cast(SkillConfig, configuration)
-            if configuration in self._component_instances[ComponentType.SKILL].keys():
-                skill = cast(
-                    Skill, self._component_instances[ComponentType.SKILL][configuration]
-                )
-                skill.skill_context.set_agent_context(context)
-                skill.skill_context.logger = logging.getLogger(logger_name)
-            else:
-                configuration = deepcopy(configuration)
-                skill_context = SkillContext()
-                skill_context.set_agent_context(context)
-                skill_context.logger = logging.getLogger(logger_name)
-                skill = cast(
-                    Skill,
-                    load_component_from_config(
-                        ComponentType.SKILL, configuration, skill_context=skill_context
-                    ),
-                )
-            resources.add_component(skill)
 
     def _load_connection(
         self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig
