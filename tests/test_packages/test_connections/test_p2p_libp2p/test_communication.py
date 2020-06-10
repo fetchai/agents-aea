@@ -52,7 +52,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        #os.chdir(cls.t)
 
         cls.connection = _make_libp2p_connection()
 
@@ -90,7 +90,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        #os.chdir(cls.t)
         cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer1.connect()
@@ -197,7 +197,7 @@ class TestP2PLibp2pConnectionRouting:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        #os.chdir(cls.t)
         port_genesis = DEFAULT_PORT + 10
         cls.connection_genesis = _make_libp2p_connection(port_genesis)
         cls.multiplexer_genesis = Multiplexer([cls.connection_genesis])
@@ -287,7 +287,8 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        #os.chdir(cls.t)
+
         cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer = Multiplexer([cls.relay])
         cls.multiplexer.connect()
@@ -406,7 +407,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        #os.chdir(cls.t)
 
         port_relay_1 = DEFAULT_PORT + 10
         cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)

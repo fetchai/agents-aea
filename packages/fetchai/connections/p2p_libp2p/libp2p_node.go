@@ -526,8 +526,8 @@ func lookupAddress(routedHost host.Host, hdht *dht.IpfsDHT, address string) (pee
 	log.Println("DEBUG found provider after", elapsed)
 
 	// TOFIX(LR) Hack
-	var attemptsFindProviders := 10
-	for len(provider.Addrs) == 0 && attempts_findprovider > 0 {
+	var attemptsFindProviders = 10
+	for len(provider.ID) == 0 && attemptsFindProviders > 0 {
 		attemptsFindProviders--
 		providers := hdht.FindProvidersAsync(ctx, addressCID, 1)
 		start := time.Now()
