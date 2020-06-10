@@ -34,6 +34,7 @@ from ....conftest import (
     MAX_FLAKY_RERUNS,
     _make_libp2p_connection,
     libp2p_log_on_failure,
+    libp2p_log_on_failure_all,
     skip_test_windows,
 )
 
@@ -79,10 +80,12 @@ class TestP2PLibp2pConnectionConnectDisconnect:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionEchoEnvelope:
     """Test that connection will route envelope to destination"""
 
     @classmethod
+    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
@@ -102,13 +105,10 @@ class TestP2PLibp2pConnectionEchoEnvelope:
 
         cls.log_files = [cls.connection1.node.log_file, cls.connection2.node.log_file]
 
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection1.connection_status.is_connected is True
         assert self.connection2.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
-    @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -138,8 +138,6 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
         assert envelope.message == msg
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
-    @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -189,10 +187,12 @@ class TestP2PLibp2pConnectionEchoEnvelope:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
 
     @classmethod
+    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
@@ -223,14 +223,11 @@ class TestP2PLibp2pConnectionRouting:
         cls.log_files = [conn.node.log_file for conn in cls.connections]
         cls.log_files.append(cls.connection_genesis.node.log_file)
 
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection_genesis.connection_status.is_connected is True
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
-    @libp2p_log_on_failure
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]
 
@@ -280,10 +277,12 @@ class TestP2PLibp2pConnectionRouting:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
     """Test that connection will route envelope to destination using the same relay node"""
 
     @classmethod
+    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
@@ -314,14 +313,11 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             cls.connection2.node.log_file,
         ]
 
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.relay.connection_status.is_connected is True
         assert self.connection1.connection_status.is_connected is True
         assert self.connection2.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
-    @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -351,8 +347,6 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
         assert envelope.message == msg
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
-    @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -403,6 +397,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
     """Test that libp2p DHT network will reliably route envelopes from relay/non-relay to relay/non-relay nodes"""
 
@@ -461,15 +456,12 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         cls.log_files.extend([conn.node.log_file for conn in cls.connections])
         time.sleep(2)
 
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection_relay_1.connection_status.is_connected is True
         assert self.connection_relay_2.connection_status.is_connected is True
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
-    @libp2p_log_on_failure
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]
 
