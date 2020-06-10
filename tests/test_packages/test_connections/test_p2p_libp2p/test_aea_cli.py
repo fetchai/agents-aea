@@ -33,7 +33,7 @@ DEFAULT_LAUNCH_TIMEOUT = 25
 
 
 @skip_test_windows
-class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
+class SkipTestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
@@ -61,7 +61,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 
 
 @skip_test_windows
-class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
+class SkipTestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate

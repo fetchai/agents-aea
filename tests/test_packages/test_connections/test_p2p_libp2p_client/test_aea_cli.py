@@ -40,7 +40,7 @@ DEFAULT_LAUNCH_TIMEOUT = 5
 
 
 @skip_test_windows
-class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
+class SkipTestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p_client connection is correctly run"""
 
     @classmethod

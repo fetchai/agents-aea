@@ -46,7 +46,7 @@ DEFAULT_CLIENTS_PER_NODE = 4
 
 @skip_test_windows
 @pytest.mark.asyncio
-class TestLibp2pClientConnectionConnectDisconnect:
+class SkipTestLibp2pClientConnectionConnectDisconnect:
     """Test that connection is established and torn down correctly"""
 
     @classmethod
@@ -85,7 +85,7 @@ class TestLibp2pClientConnectionConnectDisconnect:
 
 
 @skip_test_windows
-class TestLibp2pClientConnectionEchoEnvelope:
+class SkipTestLibp2pClientConnectionEchoEnvelope:
     """Test that connection will route envelope to destination through the same libp2p node"""
 
     @classmethod
@@ -230,7 +230,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
 
 
 @skip_test_windows
-class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
+class SkipTestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
     """Test that connection will route envelope to destination connected to different node"""
 
     @classmethod
@@ -401,7 +401,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
 
 
 @skip_test_windows
-class TestLibp2pClientConnectionRouting:
+class SkipTestLibp2pClientConnectionRouting:
     """Test that libp2p DHT network will reliably route envelopes from clients connected to different nodes"""
 
     @classmethod

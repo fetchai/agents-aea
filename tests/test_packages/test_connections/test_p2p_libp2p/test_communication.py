@@ -43,7 +43,7 @@ DEFAULT_NET_SIZE = 4
 
 @skip_test_windows
 @pytest.mark.asyncio
-class TestP2PLibp2pConnectionConnectDisconnect:
+class SkipTestP2PLibp2pConnectionConnectDisconnect:
     """Test that connection is established and torn down correctly"""
 
     @classmethod
@@ -79,7 +79,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
 
 
 @skip_test_windows
-class TestP2PLibp2pConnectionEchoEnvelope:
+class SkipTestP2PLibp2pConnectionEchoEnvelope:
     """Test that connection will route envelope to destination"""
 
     @classmethod
@@ -189,7 +189,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
 
 
 @skip_test_windows
-class TestP2PLibp2pConnectionRouting:
+class SkipTestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
 
     @classmethod
@@ -280,7 +280,7 @@ class TestP2PLibp2pConnectionRouting:
 
 
 @skip_test_windows
-class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
+class SkipTestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
     """Test that connection will route envelope to destination using the same relay node"""
 
     @classmethod
@@ -403,7 +403,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
 
 
 @skip_test_windows
-class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
+class SkipTestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
     """Test that libp2p DHT network will reliably route envelopes from relay/non-relay to relay/non-relay nodes"""
 
     @classmethod
