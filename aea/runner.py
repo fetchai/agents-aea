@@ -16,20 +16,31 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of AEA multiple instances runner."""
 import asyncio
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import FIRST_EXCEPTION
 from concurrent.futures.thread import ThreadPoolExecutor
+from enum import Enum
 from threading import Thread
 from typing import Awaitable, Dict, Optional, Sequence, Type
 
 from aea.aea import AEA
 
 
+class RunnerExceptionPolicies(Enum):
+    """Runner exception policy modes."""
+
+    restart = "restart"  # restart agent on fail, log exception
+    stop_all = "stop_all"  # stop all agents on one agent's failure, log exception
+    propagate = "propagate"  # log exception and reraise it to upper level
+    log_only = "log_only"  # log exception and skip it
+
+
 class BaseAEAExecutor(ABC):
-    """Base AEA executor to impmlement aea executors to run multiple agents."""
+    """Base AEA executor to implement aea executors to run multiple agents."""
 
     def __init__(self, agents: Sequence[AEA]) -> None:
         """
@@ -119,7 +130,7 @@ class BaseAEAExecutor(ABC):
 
 
 class ThreadExecutor(BaseAEAExecutor):
-    """Thread based executor to run mul,tiple agents in threads."""
+    """Thread based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
         """Set thread pool pool to be used."""
@@ -145,7 +156,7 @@ class ThreadExecutor(BaseAEAExecutor):
 
 
 class AsyncExecutor(BaseAEAExecutor):
-    """Thread based executor to run mul,tiple agents in threads."""
+    """Thread based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
         """Do nothing, cause we run tasks in asyncio event loop and do not need an executor pool."""
@@ -217,7 +228,7 @@ class AEARunner:
         """
         Run agents.
 
-        :param threaded: run in dedicated thread without blockg current thread.
+        :param threaded: run in dedicated thread without blocking current thread.
 
         :return: None
         """
@@ -228,7 +239,14 @@ class AEARunner:
         else:
             self._executor.start()
 
-    def stop(self) -> None:
-        """Stop agents."""
+    def stop(self, timeout: float = 0) -> None:
+        """
+        Stop agents.
+
+        :param timeout: timeout in seconds to wait thread stopped, only if started in thread mode.
+        :return: None
+        """
         self._is_running = False
         self._executor.stop()
+        if self._thread is not None:
+            self._thread.join(timeout=timeout)

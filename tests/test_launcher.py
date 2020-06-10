@@ -43,17 +43,17 @@ from tests.conftest import AUTHOR, CUR_PATH
 class TestThreadLauncherMode:
     """Test launcher in threaded mode."""
 
-    RUNNER_MODE = "thread"
+    RUNNER_MODE = "threaded"
+    t: str = tempfile.mkdtemp()
+    agent_name_1 = "myagent_1"
+    agent_name_2 = "myagent_2"
+    failing_agent = "failing_agent"
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
         cls.runner = CliRunner()
-        cls.agent_name_1 = "myagent_1"
-        cls.agent_name_2 = "myagent_2"
-        cls.failing_agent = "failing_agent"
         cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
@@ -94,7 +94,7 @@ class TestThreadLauncherMode:
     def set_runtime_mode_to_async(cls, agent_name: str) -> None:
         """Set runtime mode of the agent to async."""
         with cd(agent_name):
-            config_path = Path(cls.t, agent_name, DEFAULT_AEA_CONFIG_FILE)  # type: ignore # mypy does not see setup_class
+            config_path = Path(cls.t, agent_name, DEFAULT_AEA_CONFIG_FILE)
             config = yaml.safe_load(open(config_path))
             config.setdefault("runtime_mode", "async")
             yaml.safe_dump(config, open(config_path, "w"))
@@ -104,7 +104,7 @@ class TestThreadLauncherMode:
         """Tear the test down."""
         os.chdir(cls.cwd)
         try:
-            shutil.rmtree(cls.t)  # type: ignore # mypy does not see setup_class
+            shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
 
@@ -112,7 +112,7 @@ class TestThreadLauncherMode:
         """Test agents started stopped."""
         try:
             runner = AEALauncher(
-                [self.agent_name_1, self.agent_name_2], self.RUNNER_MODE  # type: ignore # mypy does not see setup_class
+                [self.agent_name_1, self.agent_name_2], self.RUNNER_MODE
             )
             runner.start(True)
             wait_for_condition(lambda: runner.is_running, timeout=5)
@@ -125,7 +125,7 @@ class TestThreadLauncherMode:
         """Test agents started, one agent failed, exception is raised."""
         try:
             runner = AEALauncher(
-                [self.agent_name_1, self.agent_name_2, self.failing_agent],  # type: ignore # mypy does not see setup_class
+                [self.agent_name_1, self.agent_name_2, self.failing_agent],
                 self.RUNNER_MODE,
             )
 
@@ -144,4 +144,4 @@ class TestAsyncLauncherMode(TestThreadLauncherMode):
 class TestProcessLauncherMode(TestThreadLauncherMode):
     """Test launcher in process mode."""
 
-    RUNNER_MODE = "process"
+    RUNNER_MODE = "multiprocess"

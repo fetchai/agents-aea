@@ -22,7 +22,7 @@ from concurrent.futures.process import ProcessPoolExecutor
 from multiprocessing.synchronize import Event
 from os import PathLike
 from threading import Thread
-from typing import Awaitable, Dict, List, Optional, Sequence, Type
+from typing import Awaitable, Dict, List, Optional, Sequence, Type, Union
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -31,7 +31,7 @@ from aea.helpers.base import cd
 from aea.runner import AsyncExecutor, BaseAEAExecutor, ThreadExecutor
 
 
-def load_agent(agent_dir: PathLike) -> AEA:
+def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
     """
     Load AEA from directory.
 
@@ -122,9 +122,9 @@ class BaseLaunchExecutor:
 
     RUNNER_EXECUTOR_CLASS: Optional[Type[BaseAEAExecutor]] = None
 
-    def __init__(self, agent_dirs: List[PathLike]) -> None:
+    def __init__(self, agent_dirs: List[Union[PathLike, str]]) -> None:
         """
-        Inin launche executor.
+        Init launcher executor.
 
         :param agent_dirs: sequence of agents configuration directories.
         """
@@ -160,7 +160,9 @@ class BaseLaunchExecutor:
 
         :return: bool
         """
-        return bool(self._runner) and self._runner.is_running  # type: ignore  # checked on init
+        if self._runner is None:
+            return False
+        return self._runner.is_running
 
 
 class _AsyncLauncherExecutor(BaseLaunchExecutor):
@@ -180,7 +182,7 @@ class _ProcessLauncherExecutor(BaseLaunchExecutor):
 
     RUNNER_EXECUTOR_CLASS = ProcessExecutor
 
-    def _make_agents(self) -> Sequence[PathLike]:  # type: ignore  # cause need strs for subprocesses
+    def _make_agents(self) -> Sequence[Union[PathLike, str]]:  # type: ignore  # cause need strs for subprocesses
         """Return sequence of agents dirs."""
         return list(self._agent_dirs)
 
@@ -189,18 +191,18 @@ class AEALauncher:
     """Launch multiple AEA from dirs."""
 
     SUPPORTED_MODES: Dict[str, Type[BaseLaunchExecutor]] = {
-        "thread": _ThreadLauncherExecutor,
+        "threaded": _ThreadLauncherExecutor,
         "async": _AsyncLauncherExecutor,
-        "process": _ProcessLauncherExecutor,
+        "multiprocess": _ProcessLauncherExecutor,
     }
 
-    def __init__(self, agent_dirs: List[PathLike], mode: str) -> None:
+    def __init__(self, agent_dirs: List[Union[PathLike, str]], mode: str) -> None:
         """
-        Init AEARunner.
+        Init AEALauncher.
 
-        :param agents: sequence of AEA instances to run.
+        :param agent_dirs: sequence of agent config directories  to run.
         """
-        self.agent_dirs: List[PathLike] = agent_dirs
+        self.agent_dirs: List[Union[PathLike, str]] = agent_dirs
         if mode not in self.SUPPORTED_MODES:
             raise ValueError(f"Unsupported mode: {mode}")
         self._mode = mode
@@ -208,7 +210,7 @@ class AEALauncher:
         self._thread = None
 
     def _make_executor(
-        self, agent_dirs: List[PathLike], mode: str
+        self, agent_dirs: List[Union[PathLike, str]], mode: str
     ) -> BaseLaunchExecutor:
         """
         Construct executor.
@@ -245,7 +247,14 @@ class AEALauncher:
         else:
             self._executor.start()
 
-    def stop(self):
-        """Stop agents."""
+    def stop(self, timeout: float = 0) -> None:
+        """
+        Stop agents.
+
+        :param timeout: timeout in seconds to wait thread stopped, only if started in thread mode.
+        :return: None
+        """
         self._is_running = False
         self._executor.stop()
+        if self._thread is not None:
+            self._thread.join(timeout=timeout)
