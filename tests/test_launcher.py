@@ -44,7 +44,7 @@ class TestThreadLauncherMode:
     """Test launcher in threaded mode."""
 
     RUNNER_MODE = "threaded"
-    t: str = tempfile.mkdtemp()
+    t: str = ""
     agent_name_1 = "myagent_1"
     agent_name_2 = "myagent_2"
     failing_agent = "failing_agent"
@@ -54,6 +54,7 @@ class TestThreadLauncherMode:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
@@ -104,7 +105,8 @@ class TestThreadLauncherMode:
         """Tear the test down."""
         os.chdir(cls.cwd)
         try:
-            shutil.rmtree(cls.t)
+            # shutil.rmtree(cls.t)
+            pass
         except (OSError, IOError):
             pass
 
@@ -131,6 +133,7 @@ class TestThreadLauncherMode:
 
             with pytest.raises(Exception, match="Expected exception!"):
                 runner.start()
+            time.sleep(1)
         finally:
             runner.stop()
 
