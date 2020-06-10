@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of runtime for economic agent (AEA)."""
+
 import asyncio
 import logging
 import threading
@@ -106,6 +107,15 @@ class BaseRuntime(ABC):
         """Get stopped state of the runtime."""
         return self._state.get() == RuntimeStates.stopped
 
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """
+        Set event loop to be used.
+
+        :param loop: event loop to use.
+        """
+        self._loop = loop
+        asyncio.set_event_loop(self._loop)
+
 
 class AsyncRuntime(BaseRuntime):
     """Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loop."""
@@ -125,6 +135,17 @@ class AsyncRuntime(BaseRuntime):
         self._async_stop_lock: Optional[asyncio.Lock] = None
         self._task: Optional[asyncio.Task] = None
 
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """
+        Set event loop to be used.
+
+        :param loop: event loop to use.
+        """
+        super().set_loop(loop)
+        self._agent._multiplexer.set_loop(self._loop)
+        self._agent._main_loop.set_loop(self._loop)
+        self._async_stop_lock = asyncio.Lock()
+
     def _start(self) -> None:
         """
         Start runtime synchronously.
@@ -136,14 +157,10 @@ class AsyncRuntime(BaseRuntime):
         if self._state.get() is RuntimeStates.started:
             raise ValueError("Runtime already started!")
 
-        asyncio.set_event_loop(self._loop)
-        self._agent._multiplexer.set_loop(self._loop)
-        self._agent._main_loop.set_loop(self._loop)
-
+        self.set_loop(self._loop)
         self._state.set(RuntimeStates.started)
 
         self._thread = threading.current_thread()
-        self._async_stop_lock = asyncio.Lock()
 
         logger.debug(f"Start runtime event loop {self._loop}: {id(self._loop)}")
         self._task = self._loop.create_task(self._run_runtime())
@@ -263,6 +280,7 @@ class ThreadedRuntime(BaseRuntime):
         self._start_agent_loop()
 
     def _start_agent_loop(self) -> None:
+        """Start aget's main loop."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         try:
             self._state.set(RuntimeStates.started)
