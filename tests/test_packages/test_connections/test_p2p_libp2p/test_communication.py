@@ -52,7 +52,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        #os.chdir(cls.t)
+        os.chdir(cls.t)
 
         cls.connection = _make_libp2p_connection()
 
@@ -90,9 +90,13 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        #os.chdir(cls.t)
+        os.chdir(cls.t)
+        
+        cls.log_files = []
+
         cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer1 = Multiplexer([cls.connection1])
+        cls.log_files.append(cls.connection1.node.log_file)
         cls.multiplexer1.connect()
 
         genesis_peer = cls.connection1.node.multiaddrs[0]
@@ -101,9 +105,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             port=DEFAULT_PORT + 2, entry_peers=[genesis_peer]
         )
         cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.log_files.append(cls.connection2.node.log_file)
         cls.multiplexer2.connect()
-
-        cls.log_files = [cls.connection1.node.log_file, cls.connection2.node.log_file]
 
     def test_connection_is_established(self):
         assert self.connection1.connection_status.is_connected is True
@@ -197,13 +200,16 @@ class TestP2PLibp2pConnectionRouting:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        #os.chdir(cls.t)
+        os.chdir(cls.t)
+
+        cls.log_files = []
+
         port_genesis = DEFAULT_PORT + 10
         cls.connection_genesis = _make_libp2p_connection(port_genesis)
         cls.multiplexer_genesis = Multiplexer([cls.connection_genesis])
+        cls.log_files.append(cls.connection_genesis.node.log_file)
         cls.multiplexer_genesis.connect()
 
-        time.sleep(2)
         genesis_peer = cls.connection_genesis.node.multiaddrs[0]
 
         cls.connections = [cls.connection_genesis]
@@ -218,10 +224,8 @@ class TestP2PLibp2pConnectionRouting:
             cls.connections.append(conn)
             cls.multiplexers.append(muxer)
 
+            cls.log_files.append(conn.node.log_file)
             muxer.connect()
-
-        cls.log_files = [conn.node.log_file for conn in cls.connections]
-        cls.log_files.append(cls.connection_genesis.node.log_file)
 
     def test_connection_is_established(self):
         assert self.connection_genesis.connection_status.is_connected is True
@@ -287,32 +291,30 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        #os.chdir(cls.t)
+        os.chdir(cls.t)
+
+        cls.log_files = []
 
         cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer = Multiplexer([cls.relay])
+        cls.log_files.append(cls.relay.node.log_file)
         cls.multiplexer.connect()
 
-        time.sleep(2)
         relay_peer = cls.relay.node.multiaddrs[0]
 
         cls.connection1 = _make_libp2p_connection(
             DEFAULT_PORT + 2, relay=False, entry_peers=[relay_peer]
         )
         cls.multiplexer1 = Multiplexer([cls.connection1])
+        cls.log_files.append(cls.connection1.node.log_file)
         cls.multiplexer1.connect()
 
         cls.connection2 = _make_libp2p_connection(
             port=DEFAULT_PORT + 3, entry_peers=[relay_peer]
         )
         cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.log_files.append(cls.connection2.node.log_file)
         cls.multiplexer2.connect()
-
-        cls.log_files = [
-            cls.relay.node.log_file,
-            cls.connection1.node.log_file,
-            cls.connection2.node.log_file,
-        ]
 
     def test_connection_is_established(self):
         assert self.relay.connection_status.is_connected is True
@@ -407,11 +409,14 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        #os.chdir(cls.t)
+        os.chdir(cls.t)
+
+        cls.log_files = []
 
         port_relay_1 = DEFAULT_PORT + 10
         cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)
         cls.multiplexer_relay_1 = Multiplexer([cls.connection_relay_1])
+        cls.log_files.append(cls.connection_relay_1.node.log_file)
         cls.multiplexer_relay_1.connect()
 
         relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
@@ -421,6 +426,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             port=port_relay_2, entry_peers=[relay_peer_1]
         )
         cls.multiplexer_relay_2 = Multiplexer([cls.connection_relay_2])
+        cls.log_files.append(cls.connection_relay_2.node.log_file)
         cls.multiplexer_relay_2.connect()
 
         relay_peer_2 = cls.connection_relay_2.node.multiaddrs[0]
@@ -437,6 +443,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             muxer = Multiplexer([conn])
             cls.connections.append(conn)
             cls.multiplexers.append(muxer)
+            cls.log_files.append(conn.node.log_file)
             muxer.connect()
 
         port = port_relay_2
@@ -448,14 +455,8 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             muxer = Multiplexer([conn])
             cls.connections.append(conn)
             cls.multiplexers.append(muxer)
+            cls.log_files.append(conn.node.log_file)
             muxer.connect()
-
-        cls.log_files = [
-            cls.connection_relay_1.node.log_file,
-            cls.connection_relay_2.node.log_file,
-        ]
-        cls.log_files.extend([conn.node.log_file for conn in cls.connections])
-        time.sleep(2)
 
     def test_connection_is_established(self):
         assert self.connection_relay_1.connection_status.is_connected is True
