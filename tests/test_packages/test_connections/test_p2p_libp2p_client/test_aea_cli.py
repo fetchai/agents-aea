@@ -88,10 +88,12 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
-
+        
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
+        cls.terminate_agents()
+        
         AEATestCaseEmpty.teardown_class()
 
         cls.node_multiplexer.disconnect()

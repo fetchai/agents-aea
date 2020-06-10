@@ -19,11 +19,12 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
+import os
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ....conftest import MAX_FLAKY_RERUNS, skip_test_windows
+from ....conftest import MAX_FLAKY_RERUNS, libp2p_log_on_failure, skip_test_windows
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
@@ -36,15 +37,20 @@ DEFAULT_LAUNCH_TIMEOUT = 25
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
+    @libp2p_log_on_failure
     def test_agent(self):
         self.add_item("connection", "fetchai/p2p_libp2p:0.2.0")
-        self.set_config(
-            "agent.default_connection", "fetchai/p2p_libp2p:0.2.0"
-        )  # TOFIX(LR) not sure is needed
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.2.0")
+
+        # for logging
+        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        log_file = "libp2p_node_{}.log".format(self.agent_name)
+        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
+        self.set_config("{}.log_file".format(config_path), log_file)
+        self.log_files = [log_file]
 
         process = self.run_agent()
-
+        
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
@@ -58,13 +64,21 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
+        
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.terminate_agents()
+
+        AEATestCaseEmpty.teardown_class()
+
 
 
 @skip_test_windows
 class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
+    @libp2p_log_on_failure
     def test_agent(self):
         self.add_item("connection", "fetchai/p2p_libp2p:0.2.0")
 
@@ -81,6 +95,12 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
             "127.0.0.1:{}".format(DEFAULT_DELEGATE_PORT),
         )
 
+        # for logging
+        log_file = "libp2p_node_{}.log".format(self.agent_name)
+        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
+        self.set_config("{}.log_file".format(config_path), log_file)
+        self.log_files = [log_file]
+
         process = self.run_agent()
 
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
@@ -96,3 +116,10 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
+        
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.terminate_agents()
+
+        AEATestCaseEmpty.teardown_class()
