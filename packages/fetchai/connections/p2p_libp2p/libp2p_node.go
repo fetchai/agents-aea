@@ -525,6 +525,17 @@ func lookupAddress(routedHost host.Host, hdht *dht.IpfsDHT, address string) (pee
 	elapsed := time.Since(start)
 	log.Println("DEBUG found provider after", elapsed)
 
+	// TOFIX(LR) Hack
+	var attemptsFindProviders := 10
+	for len(provider.Addrs) == 0 && attempts_findprovider > 0 {
+		attemptsFindProviders--
+		providers := hdht.FindProvidersAsync(ctx, addressCID, 1)
+		start := time.Now()
+		provider := <-providers
+		elapsed := time.Since(start)
+		log.Println("DEBUG found provider", provider, " after", elapsed)
+	}
+
 	// Add peer to host PeerStore - the provider should be the holder of the address
 	routedHost.Peerstore().AddAddrs(provider.ID, provider.Addrs, peerstore.PermanentAddrTTL)
 
