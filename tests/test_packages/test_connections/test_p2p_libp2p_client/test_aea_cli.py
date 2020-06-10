@@ -28,6 +28,7 @@ from ....conftest import (
     MAX_FLAKY_RERUNS,
     _make_libp2p_connection,
     libp2p_log_on_failure,
+    libp2p_log_on_failure_all,
     skip_test_windows,
 )
 
@@ -40,6 +41,7 @@ DEFAULT_LAUNCH_TIMEOUT = 5
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p_client connection is correctly run"""
 
@@ -59,11 +61,9 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
 
         cls.node_multiplexer.connect()
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
     def test_node(self):
         assert self.node_connection.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
     def test_connection(self):
         self.add_item("connection", "fetchai/p2p_libp2p_client:0.1.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"

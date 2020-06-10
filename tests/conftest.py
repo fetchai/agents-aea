@@ -26,6 +26,7 @@ import socket
 import sys
 import threading
 import time
+import types
 from functools import wraps
 from threading import Timer
 from typing import Callable, Optional, Sequence
@@ -807,6 +808,28 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 
     return wrapper
 
+def libp2p_log_on_failure_all(cls):
+    """
+    Decorate every method of a class with `libp2p_log_on_failure`
+
+    :return: class with decorated methods.
+    """
+    # TODO(LR) test it is a type
+    for name, fn in inspect.getmembers(cls):
+        if isinstance(fn, types.FunctionType):
+            setattr(cls, name, libp2p_log_on_failure(fn))
+        # TOFIX(LR) decorate already @classmethod decorated methods
+        continue
+        if isinstance(fn, types.MethodType):
+            if fn.im_self is None:
+                wrapped_fn = libp2p_log_on_failure(fn.im_func)
+                method = types.MethodType(wrapped_fn, None, cls)
+                setattr(cls, name, method)
+            else:
+                wrapped_fn = libp2p_log_on_failure(fn.im_func)
+                clsmethod = types.MethodType(wrapped_fn, cls, type)
+                setattr(cls, name, clsmethod)
+    return cls
 
 class CwdException(Exception):
     """Exception to raise if cwd was not restored by test."""
