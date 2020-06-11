@@ -20,58 +20,39 @@
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import shutil
-import sys
 import time
-import unittest.mock
 from pathlib import Path
+from unittest.mock import patch
 
-from .test_base import TempCWD, create_app
-from ..conftest import CUR_PATH
+from tests.conftest import CUR_PATH
+from tests.test_cli.tools_for_testing import raise_click_exception
+from tests.test_cli_gui.test_base import TempCWD, create_app
 
 
-def test_create_agent():
+@patch("aea.cli_gui.cli_create_aea")
+def test_create_agent(*mocks):
     """Test creating an agent."""
     app = create_app()
     agent_name = "test_agent_id"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "create"
-        assert param_list[4] == "--local"
-        assert param_list[5] == agent_name
-        return 0
-
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_create = app.post(
-            "api/agent", content_type="application/json", data=json.dumps(agent_name)
-        )
+    # Ensure there is now one agent
+    response_create = app.post(
+        "api/agent", content_type="application/json", data=json.dumps(agent_name)
+    )
     assert response_create.status_code == 201
     data = json.loads(response_create.get_data(as_text=True))
     assert data == agent_name
 
 
-def test_create_agent_fail():
+@patch("aea.cli_gui.cli_create_aea", raise_click_exception)
+def test_create_agent_fail(*mocks):
     """Test creating an agent and failing."""
     app = create_app()
     agent_name = "test_agent_id"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "create"
-        assert param_list[4] == "--local"
-        assert param_list[5] == agent_name
-        return 1
-
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_create = app.post(
-            "api/agent", content_type="application/json", data=json.dumps(agent_name)
-        )
+    response_create = app.post(
+        "api/agent", content_type="application/json", data=json.dumps(agent_name)
+    )
     assert response_create.status_code == 400
     data = json.loads(response_create.get_data(as_text=True))
     assert data[
@@ -114,7 +95,7 @@ def test_real_create():
         assert data[0]["description"] == "placeholder description"
 
         # do same but this time find that this is not an agent directory.
-        with unittest.mock.patch("os.path.isdir", return_value=False):
+        with patch("os.path.isdir", return_value=False):
             response_agents = app.get(
                 "api/agent", data=None, content_type="application/json",
             )

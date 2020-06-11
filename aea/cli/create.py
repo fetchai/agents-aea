@@ -58,15 +58,20 @@ from aea.configurations.constants import (
 @click.option("--local", is_flag=True, help="For using local folder.")
 @click.option("--empty", is_flag=True, help="Not adding default dependencies.")
 @click.pass_context
-def create(click_context, agent_name, author, local, empty):
+def create(
+    click_context: click.core.Context,
+    agent_name: str,
+    author: str,
+    local: bool,
+    empty: bool,
+):
     """Create an agent."""
-    _create_aea(click_context, agent_name, author, local, empty)
+    ctx = cast(Context, click_context.obj)
+    create_aea(ctx, agent_name, author, local, empty)
 
 
 @clean_after
-def _create_aea(
-    click_context, agent_name: str, author: str, local: bool, empty: bool,
-) -> None:
+def create_aea(ctx, agent_name: str, author: str, local: bool, empty: bool,) -> None:
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
@@ -94,8 +99,6 @@ def _create_aea(
 
     click.echo("Initializing AEA project '{}'".format(agent_name))
     click.echo("Creating project directory './{}'".format(agent_name))
-
-    ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
     ctx.clean_paths.append(str(path))
 

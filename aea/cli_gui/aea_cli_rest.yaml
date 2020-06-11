@@ -133,8 +133,8 @@ paths:
           schema:
             type: string
 
-  /agent/{agent_id}/{item_type}/{item_id}:
-    delete:
+  /agent/{agent_id}/remove/{item_type}:
+    post:
       operationId: aea.cli_gui.remove_local_item
       tags:
       - agents
@@ -151,9 +151,10 @@ paths:
           type: string
           required: True
         - name: item_id
-          in: path
-          description: item id to delete
-          type: string
+          in: body
+          description: id of item to remove
+          schema:
+            type: string
           required: True
 
       responses:

@@ -154,10 +154,12 @@ class Model{
     removeItem(element, agentId, itemId) {
         var propertyName = element["type"] +  "_id"
         var ajax_options = {
-            type: 'DELETE',
-            url: 'api/agent/' + agentId + '/' + element["type"]+ "/" + itemId,
+            type: 'POST',
+            url: 'api/agent/' + agentId + '/remove/' + element["type"],
             accepts: 'application/json',
-            contentType: 'plain/text'
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(itemId)
         };
         var self = this;
         $.ajax(ajax_options)

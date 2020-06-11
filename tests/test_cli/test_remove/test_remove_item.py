@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Test module for aea.cli.remove._remove_item method."""
+"""Test module for aea.cli.remove.remove_item method."""
 
 from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.remove import _remove_item
+from aea.cli.remove import remove_item
 
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -30,10 +30,10 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 @mock.patch("aea.cli.remove.shutil.rmtree")
 @mock.patch("aea.cli.remove.Path.exists", return_value=False)
 class RemoveItemTestCase(TestCase):
-    """Test case for _remove_item method."""
+    """Test case for remove_item method."""
 
-    def test__remove_item_item_folder_not_exists(self, *mocks):
+    def test_remove_item_item_folder_not_exists(self, *mocks):
         """Test for save_agent_locally item folder not exists."""
         public_id = PublicIdMock.from_str("author/name:0.1.0")
         with self.assertRaises(ClickException):
-            _remove_item(ContextMock(protocols=[public_id]), "protocol", public_id)
+            remove_item(ContextMock(protocols=[public_id]), "protocol", public_id)

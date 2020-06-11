@@ -47,7 +47,7 @@ def connection(ctx: Context, connection_id):
 
     It expects the public id of the connection to remove from the local registry.
     """
-    _remove_item(ctx, "connection", connection_id)
+    remove_item(ctx, "connection", connection_id)
 
 
 @remove.command()
@@ -59,7 +59,7 @@ def contract(ctx: Context, contract_id):
 
     It expects the public id of the contract to remove from the local registry.
     """
-    _remove_item(ctx, "contract", contract_id)
+    remove_item(ctx, "contract", contract_id)
 
 
 @remove.command()
@@ -71,7 +71,7 @@ def protocol(ctx: Context, protocol_id):
 
     It expects the public id of the protocol to remove from the local registry.
     """
-    _remove_item(ctx, "protocol", protocol_id)
+    remove_item(ctx, "protocol", protocol_id)
 
 
 @remove.command()
@@ -83,10 +83,10 @@ def skill(ctx: Context, skill_id):
 
     It expects the public id of the skill to remove from the local registry.
     """
-    _remove_item(ctx, "skill", skill_id)
+    remove_item(ctx, "skill", skill_id)
 
 
-def _remove_item(ctx: Context, item_type, item_id: PublicId):
+def remove_item(ctx: Context, item_type, item_id: PublicId):
     """Remove an item from the configuration file and agent, given the public id."""
     item_name = item_id.name
     item_type_plural = "{}s".format(item_type)
@@ -110,10 +110,10 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
             "The {} '{}' is not supported.".format(item_type, item_id)
         )
 
-    item_folder = Path("vendor", item_id.author, item_type_plural, item_name)
+    item_folder = Path(ctx.cwd, "vendor", item_id.author, item_type_plural, item_name)
     if not item_folder.exists():
         # check if it is present in custom packages.
-        item_folder = Path(item_type_plural, item_name)
+        item_folder = Path(ctx.cwd, item_type_plural, item_name)
         if not item_folder.exists():
             raise click.ClickException(
                 "{} {} not found. Aborting.".format(item_type.title(), item_name)

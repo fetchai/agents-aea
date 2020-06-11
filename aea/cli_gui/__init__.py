@@ -37,6 +37,10 @@ import connexion
 import flask
 
 from aea.cli.add import add_item as cli_add_item
+from aea.cli.create import create_aea as cli_create_aea
+from aea.cli.delete import delete_aea as cli_delete_aea
+from aea.cli.remove import remove_item as cli_remove_item
+from aea.cli.scaffold import scaffold_item as cli_scaffold_item
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
@@ -195,24 +199,10 @@ def search_registered_items(item_type: str, search_term: str):
 
 def create_agent(agent_id: str):
     """Create a new AEA project."""
-    if (
-        _call_aea(
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "create",
-                "--local",
-                agent_id,
-                "--author",
-                DEFAULT_AUTHOR,
-            ],
-            app_context.agents_dir,
-        )
-        == 0
-    ):
-        return agent_id, 201  # 201 (Created)
-    else:
+    ctx = Context(cwd=app_context.agents_dir)
+    try:
+        cli_create_aea(ctx, agent_id, DEFAULT_AUTHOR, local=True, empty=False)
+    except ClickException:
         return (
             {
                 "detail": "Failed to create Agent {} - a folder of this name may exist already".format(
@@ -221,23 +211,22 @@ def create_agent(agent_id: str):
             },
             400,
         )  # 400 Bad request
+    else:
+        return agent_id, 201  # 201 (Created)
 
 
 def delete_agent(agent_id: str):
     """Delete an existing AEA project."""
-    if (
-        _call_aea(
-            [sys.executable, "-m", "aea.cli", "delete", agent_id],
-            app_context.agents_dir,
-        )
-        == 0
-    ):
-        return "Agent {} deleted".format(agent_id), 200  # 200 (OK)
-    else:
+    ctx = Context(cwd=app_context.agents_dir)
+    try:
+        cli_delete_aea(ctx, agent_id)
+    except ClickException:
         return (
             {"detail": "Failed to delete Agent {} - it may not exist".format(agent_id)},
             400,
         )  # 400 Bad request
+    else:
+        return "Agent {} deleted".format(agent_id), 200  # 200 (OK)
 
 
 def add_item(agent_id: str, item_type: str, item_id: str):
@@ -262,14 +251,11 @@ def add_item(agent_id: str, item_type: str, item_id: str):
 def remove_local_item(agent_id: str, item_type: str, item_id: str):
     """Remove a protocol, skill or connection from a local agent."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
-    if (
-        _call_aea(
-            [sys.executable, "-m", "aea.cli", "remove", item_type, item_id], agent_dir
-        )
-        == 0
-    ):
-        return agent_id, 201  # 200 (OK)
-    else:
+    ctx = Context(cwd=agent_dir)
+    try:
+        try_to_load_agent_config(ctx)
+        cli_remove_item(ctx, item_type, PublicId.from_str(item_id))
+    except ClickException:
         return (
             {
                 "detail": "Failed to remove {} {} from agent {}".format(
@@ -278,6 +264,8 @@ def remove_local_item(agent_id: str, item_type: str, item_id: str):
             },
             400,
         )  # 400 Bad request
+    else:
+        return agent_id, 201  # 200 (OK)
 
 
 def get_local_items(agent_id: str, item_type: str):
@@ -296,14 +284,11 @@ def get_local_items(agent_id: str, item_type: str):
 def scaffold_item(agent_id: str, item_type: str, item_id: str):
     """Scaffold a moslty empty item on an agent (either protocol, skill or connection)."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
-    if (
-        _call_aea(
-            [sys.executable, "-m", "aea.cli", "scaffold", item_type, item_id], agent_dir
-        )
-        == 0
-    ):
-        return agent_id, 201  # 200 (OK)
-    else:
+    ctx = Context(cwd=agent_dir)
+    try:
+        try_to_load_agent_config(ctx)
+        cli_scaffold_item(ctx, item_type, item_id)
+    except ClickException:
         return (
             {
                 "detail": "Failed to scaffold a new {} in to agent {}".format(
@@ -312,6 +297,8 @@ def scaffold_item(agent_id: str, item_type: str, item_id: str):
             },
             400,
         )  # 400 Bad request
+    else:
+        return agent_id, 201  # 200 (OK)
 
 
 def _call_aea(param_list: List[str], dir_arg: str) -> int:
