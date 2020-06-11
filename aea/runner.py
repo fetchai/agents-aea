@@ -27,6 +27,7 @@ from aea.helpers.multiple_executor import (
     AbstractMultipleExecutor,
     AbstractMultipleRunner,
     AsyncExecutor,
+    ExecutorExceptionPolicies,
     ThreadExecutor,
 )
 from aea.runtime import AsyncRuntime
@@ -64,7 +65,7 @@ class AEAInstanceTask(AbstractExecutorTask):
     @property
     def id(self):
         """Return agent name."""
-        self._agent.name
+        return self._agent.name
 
 
 class AEARunner(AbstractMultipleRunner):
@@ -75,15 +76,21 @@ class AEARunner(AbstractMultipleRunner):
         "async": AsyncExecutor,
     }
 
-    def __init__(self, agents: Sequence[AEA], mode: str) -> None:
+    def __init__(
+        self,
+        agents: Sequence[AEA],
+        mode: str,
+        fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
+    ) -> None:
         """
         Init AEARunner.
 
         :param agents: sequence of AEA instances to run.
         :param mode: executor name to use.
+        :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
         """
         self._agents = agents
-        super().__init__(mode)
+        super().__init__(mode=mode, fail_policy=fail_policy)
 
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
         """Make tasks to run with executor."""

@@ -34,6 +34,7 @@ from aea.helpers.multiple_executor import (
     AbstractMultipleRunner,
     AbstractMultiprocessExecutorTask,
     AsyncExecutor,
+    ExecutorExceptionPolicies,
     ProcessExecutor,
     ThreadExecutor,
 )
@@ -157,15 +158,21 @@ class AEALauncher(AbstractMultipleRunner):
         "multiprocess": ProcessExecutor,
     }
 
-    def __init__(self, agents: Sequence[Union[PathLike, str]], mode: str) -> None:
+    def __init__(
+        self,
+        agents: Sequence[Union[PathLike, str]],
+        mode: str,
+        fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
+    ) -> None:
         """
         Init AEARunner.
 
         :param agents: sequence of AEA config directories.
         :param mode: executor name to use.
+        :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
         """
         self._agents = agents
-        super().__init__(mode)
+        super().__init__(mode=mode, fail_policy=fail_policy)
 
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
         """Make tasks to run with executor."""

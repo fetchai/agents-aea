@@ -16,15 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains tests for aea runner."""
 import time
+from unittest.mock import patch
 
 import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.crypto.fetchai import FetchAICrypto
+from aea.helpers.multiple_executor import (
+    ExecutorExceptionPolicies,
+    logger as executor_logger,
+)
 from aea.runner import AEARunner
 from aea.skills.base import Skill, SkillContext
 
@@ -80,12 +84,48 @@ class TestThreadedRunner:
         runner.stop()
         assert not runner.is_running
 
-    def test_one_fails(self) -> None:
+    def test_one_fails_propagate_policy(self) -> None:
         """Test agents started, one agent failed, exception is raised."""
-        runner = AEARunner([self.aea1, self.aea2, self.failing_aea], self.RUNNER_MODE)
+        runner = AEARunner(
+            [self.aea1, self.aea2, self.failing_aea],
+            self.RUNNER_MODE,
+            fail_policy=ExecutorExceptionPolicies.propagate,
+        )
 
         with pytest.raises(Exception, match="expected!"):
             runner.start()
+        runner.stop()
+
+    def test_one_fails_log_only_policy(self) -> None:
+        """Test agents started, one agent failed, exception is raised."""
+        runner = AEARunner(
+            [self.aea1, self.aea2, self.failing_aea],
+            self.RUNNER_MODE,
+            fail_policy=ExecutorExceptionPolicies.log_only,
+        )
+        with patch.object(executor_logger, "exception") as mock:
+            runner.start(threaded=True)
+            time.sleep(1)
+        mock.assert_called_with(
+            f"Exception raised during {self.failing_aea.name} running."
+        )
+        assert runner.is_running
+        runner.stop()
+
+    def test_one_fails_stop_policy(self) -> None:
+        """Test agents started, one agent failed, exception is raised."""
+        runner = AEARunner(
+            [self.aea1, self.aea2, self.failing_aea],
+            self.RUNNER_MODE,
+            fail_policy=ExecutorExceptionPolicies.stop_all,
+        )
+        with patch.object(executor_logger, "exception") as mock:
+            runner.start(threaded=True)
+            time.sleep(1)
+        mock.assert_called_with(
+            f"Exception raised during {self.failing_aea.name} running."
+        )
+        assert not runner.is_running
         runner.stop()
 
 

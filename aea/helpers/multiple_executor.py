@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the helpers to run multiple stoppable tasks in different modes: async, threaded, multiprocess ."""
 import asyncio
+import logging
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import FIRST_EXCEPTION
@@ -29,10 +30,12 @@ from threading import Thread
 from typing import Any, Awaitable, Callable, Dict, Optional, Sequence, Tuple, Type
 
 
+logger = logging.getLogger(__name__)
+
+
 class ExecutorExceptionPolicies(Enum):
     """Runner exception policy modes."""
 
-    restart = "restart"  # restart agent on fail, log exception
     stop_all = "stop_all"  # stop all agents on one agent's failure, log exception
     propagate = "propagate"  # log exception and reraise it to upper level
     log_only = "log_only"  # log exception and skip it
@@ -93,12 +96,17 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
 class AbstractMultipleExecutor(ABC):
     """Abstract class to create multiple executors classes."""
 
-    def __init__(self, tasks: Sequence[AbstractExecutorTask]) -> None:
+    def __init__(
+        self,
+        tasks: Sequence[AbstractExecutorTask],
+        task_fail_policy=ExecutorExceptionPolicies.propagate,
+    ) -> None:
         """
         Init executor.
 
         :param tasks: sequence of AbstractExecutorTask instances to run.
         """
+        self._task_fail_policy: ExecutorExceptionPolicies = task_fail_policy
         self._tasks: Sequence[AbstractExecutorTask] = tasks
         self._is_running: bool = False
         self._future_task: Dict[Awaitable, AbstractExecutorTask] = {}
@@ -144,20 +152,47 @@ class AbstractMultipleExecutor(ABC):
             self._future_task.keys(), return_when=FIRST_EXCEPTION
         )
 
-        async def wait_task(task):
+        async def wait_future(future):
             try:
-                await task
-            except Exception:
+                await future
+            except Exception as e:
                 if not skip_exceptions:
-                    raise
+                    await self._handle_exception(self._future_task[future], e)
 
-        for task in done:
-            await wait_task(task)
+        for future in done:
+            await wait_future(future)
 
         if pending:
             done, _ = await asyncio.wait(pending)
             for task in done:
-                await wait_task(task)
+                await wait_future(task)
+
+    async def _handle_exception(
+        self, task: AbstractExecutorTask, exc: Exception
+    ) -> None:
+        """
+        Handle exception raised during task execution.
+
+        Log exception and process according to selected policy.
+
+        :param task: task exception handled in
+        :param exc: Exception raised
+
+        :return: None
+        """
+        logger.exception(f"Exception raised during {task.id} running.")
+        if self._task_fail_policy == ExecutorExceptionPolicies.propagate:
+            raise exc
+        elif self._task_fail_policy == ExecutorExceptionPolicies.log_only:
+            pass
+        elif self._task_fail_policy == ExecutorExceptionPolicies.stop_all:
+            logger.info(
+                f"Stopping executor  according to fail policy cause exception raised in task"
+            )
+            self.stop()
+            await self._wait_tasks_complete(skip_exceptions=True)
+        else:
+            raise ValueError(f"Unknown fail policy: {self._task_fail_policy}")
 
     @abstractmethod
     def _start_task(self, task: AbstractExecutorTask) -> Awaitable:
@@ -238,16 +273,21 @@ class AbstractMultipleRunner:
 
     SUPPORTED_MODES: Dict[str, Type[AbstractMultipleExecutor]] = {}
 
-    def __init__(self, mode: str) -> None:
+    def __init__(
+        self, mode: str, fail_policy=ExecutorExceptionPolicies.propagate
+    ) -> None:
         """
         Init with selected executor mode.
 
         :param mode: one of supported executor modes
+        :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
         """
         if mode not in self.SUPPORTED_MODES:
             raise ValueError(f"Unsupported mode: {mode}")
         self._mode: str = mode
-        self._executor: AbstractMultipleExecutor = self._make_executor(mode)
+        self._executor: AbstractMultipleExecutor = self._make_executor(
+            mode, fail_policy
+        )
         self._thread: Optional[Thread] = None
 
     @property
@@ -282,17 +322,20 @@ class AbstractMultipleRunner:
         if self._thread is not None:
             self._thread.join(timeout=timeout)
 
-    def _make_executor(self, mode: str) -> AbstractMultipleExecutor:
+    def _make_executor(
+        self, mode: str, fail_policy: ExecutorExceptionPolicies
+    ) -> AbstractMultipleExecutor:
         """
         Make an executor instance to run agents with.
 
         :param agents: AEA instances to  run.
         :param mode: executor mode to use.
+        :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
 
         :return: aea executor instance
         """
         executor_cls = self.SUPPORTED_MODES[mode]
-        return executor_cls(tasks=self._make_tasks())
+        return executor_cls(tasks=self._make_tasks(), task_fail_policy=fail_policy)
 
     @abstractmethod
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
