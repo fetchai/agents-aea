@@ -22,7 +22,7 @@ import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
-from typing import Dict, List, Optional, Sequence, Tuple, cast
+from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStatus
@@ -59,7 +59,7 @@ class AsyncMultiplexer:
         """
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
-        self.default_connection: Optional[Connection] = None
+        self._default_connection: Optional[Connection] = None
         self._initialize_connections_if_any(connections, default_connection_index)
 
         self._connection_status = ConnectionStatus()
@@ -72,6 +72,11 @@ class AsyncMultiplexer:
         self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
         self.set_loop(loop if loop is not None else asyncio.new_event_loop())
+
+    @property
+    def default_connection(self) -> Optional[Connection]:
+        """Get the default connection."""
+        return self._default_connection
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
@@ -109,7 +114,7 @@ class AsyncMultiplexer:
         self._connections.append(connection)
         self._id_to_connection[connection.connection_id] = connection
         if is_default:
-            self.default_connection = connection
+            self._default_connection = connection
 
     def _connection_consistency_checks(self):
         """
@@ -546,6 +551,25 @@ class Multiplexer(AsyncMultiplexer):
         :return: None
         """
         self._thread_runner.call(super()._put(envelope))  # .result(240)
+
+    def setup(
+        self,
+        connections: Collection[Connection],
+        default_routing: Dict[PublicId, PublicId],
+        default_connection: Optional[PublicId] = None,
+    ) -> None:
+        """
+        Set up the multiplexer.
+
+        :param connections: the connections to use. It will replace the other ones.
+        :param default_routing: the default routing.
+        :param default_connection: the default connection.
+        :return: None.
+        """
+        self.default_routing = default_routing
+        self._connections = []
+        for c in connections:
+            self.add_connection(c, c.public_id == default_connection)
 
 
 class InBox:

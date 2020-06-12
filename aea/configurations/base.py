@@ -604,8 +604,9 @@ class ComponentId(PackageId):
 
 
 ProtocolId = PublicId
-SkillId = PublicId
 ContractId = PublicId
+ConnectionId = PublicId
+SkillId = PublicId
 
 
 class PackageConfiguration(Configuration, ABC):

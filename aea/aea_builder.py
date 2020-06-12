@@ -54,7 +54,6 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.connections.base import Connection
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     create_private_key,
@@ -294,7 +293,7 @@ class AEABuilder:
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
-        self._default_connection = DEFAULT_CONNECTION
+        self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
 
         self._timeout: Optional[float] = None
@@ -803,9 +802,9 @@ class AEABuilder:
         ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
+        connection_ids = self._process_connection_ids(connection_ids)
         aea = AEA(
             identity,
-            [],
             wallet,
             ledger_apis,
             resources,
@@ -817,13 +816,18 @@ class AEABuilder:
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             default_routing=self._get_default_routing(),
+            default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
+            connection_ids=connection_ids,
             **deepcopy(self._context_namespace),
         )
-        # load connection
-        self._load_and_add_connections(aea, wallet, connection_ids=connection_ids)
-        aea.multiplexer.default_routing = self._get_default_routing()
+        self._load_and_add_components(
+            ComponentType.CONNECTION,
+            resources,
+            identity=identity,
+            crypto_store=wallet.connection_cryptos,
+        )
         self._load_and_add_components(
             ComponentType.SKILL, resources, agent_context=aea.context
         )
@@ -910,7 +914,7 @@ class AEABuilder:
         """
         Return the skill exception policy.
 
-        :return: the policy
+        :return: the skill exception policy.
         """
         return (
             self._skill_exception_policy
@@ -922,9 +926,17 @@ class AEABuilder:
         """
         Return the default routing
 
-        :return: the policy
+        :return: the default routing
         """
         return self._default_routing
+
+    def _get_default_connection(self) -> PublicId:
+        """
+        Return the default connection
+
+        :return: the default connection
+        """
+        return self._default_connection
 
     def _get_loop_mode(self) -> str:
         """
@@ -1086,6 +1098,13 @@ class AEABuilder:
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
 
+        if agent_configuration._default_connection is None:
+            self.set_default_connection(DEFAULT_CONNECTION)
+        else:
+            self.set_default_connection(
+                PublicId.from_str(agent_configuration.default_connection)
+            )
+
         # load private keys
         for (
             ledger_identifier,
@@ -1174,26 +1193,6 @@ class AEABuilder:
         )
         return builder
 
-    def _load_connections(
-        self,
-        identity: Identity,
-        wallet: Wallet,
-        connection_ids: Optional[Collection[PublicId]] = None,
-    ):
-        connections_ids = self._process_connection_ids(connection_ids)
-
-        def get_connection_configuration(connection_id):
-            return self._package_dependency_manager.connections[
-                ComponentId(ComponentType.CONNECTION, connection_id)
-            ]
-
-        return [
-            self._load_connection(
-                identity, wallet, get_connection_configuration(connection_id)
-            )
-            for connection_id in connections_ids
-        ]
-
     def _load_and_add_components(
         self, component_type: ComponentType, resources: Resources, **kwargs
     ) -> None:
@@ -1216,51 +1215,6 @@ class AEABuilder:
                     component_type, configuration, **kwargs
                 )
             resources.add_component(component)
-
-    def _load_connection(
-        self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig
-    ) -> Connection:
-        """
-        Load a connection from a directory.
-
-        :param identity: the AEA identity
-        :param wallet: the wallet
-        :param configuration: the connection configuration.
-        :return: the connection.
-        """
-        if configuration in self._component_instances[ComponentType.CONNECTION].keys():
-            connection = cast(
-                Connection,
-                self._component_instances[ComponentType.CONNECTION][configuration],
-            )
-            if connection.address != identity.address:
-                logger.warning(
-                    "The address set on connection '{}' does not match the default address!".format(
-                        str(connection.connection_id)
-                    )
-                )
-            return connection
-        else:
-            configuration = deepcopy(configuration)
-            return cast(
-                Connection,
-                load_component_from_config(
-                    ComponentType.CONNECTION,
-                    configuration,
-                    identity=identity,
-                    crypto_store=wallet.connection_cryptos,
-                ),
-            )
-
-    def _load_and_add_connections(
-        self,
-        aea: AEA,
-        wallet: Wallet,
-        connection_ids: Optional[Collection[PublicId]] = None,
-    ):
-        connections = self._load_connections(aea.identity, wallet, connection_ids)
-        for c in connections:
-            aea.multiplexer.add_connection(c, c.public_id == self._default_connection)
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:

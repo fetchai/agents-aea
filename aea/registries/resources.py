@@ -27,10 +27,12 @@ from aea.components.base import Component
 from aea.configurations.base import (
     ComponentId,
     ComponentType,
+    ConnectionId,
     ContractId,
     PublicId,
     SkillId,
 )
+from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
@@ -78,6 +80,7 @@ class Resources:
             self._model_registry,
         ]  # type: List[Registry]
 
+    # TODO refactor
     def add_component(self, component: Component):
         """Add a component to resources."""
         if component.component_type == ComponentType.PROTOCOL:
@@ -86,6 +89,8 @@ class Resources:
             self.add_skill(cast(Skill, component))
         elif component.component_type == ComponentType.CONTRACT:
             self.add_contract(cast(Contract, component))
+        elif component.component_type == ComponentType.CONNECTION:
+            self.add_connection(cast(Connection, component))
         else:
             raise ValueError(
                 "Component type {} not supported.".format(
@@ -173,6 +178,47 @@ class Resources:
         """
         self._component_registry.unregister(
             ComponentId(ComponentType.CONTRACT, contract_id)
+        )
+
+    def add_connection(self, connection: Connection) -> None:
+        """
+        Add a connection to the set of resources.
+
+        :param connection: a connection
+        :return: None
+        """
+        self._component_registry.register(connection.component_id, connection)
+
+    def get_connection(self, connection_id: ConnectionId) -> Optional[Connection]:
+        """
+        Get connection for given connection id.
+
+        :param connection_id: the connection id
+        :return: a matching connection, if present, else None
+        """
+        connection = self._component_registry.fetch(
+            ComponentId(ComponentType.CONNECTION, connection_id)
+        )
+        return cast(Connection, connection)
+
+    def get_all_connections(self) -> List[Connection]:
+        """
+        Get the list of all the connections.
+
+        :return: the list of connections.
+        """
+        connections = self._component_registry.fetch_by_type(ComponentType.CONNECTION)
+        return cast(List[Connection], connections)
+
+    def remove_connection(self, connection_id: ConnectionId) -> None:
+        """
+        Remove a connection from the set of resources.
+
+        :param connection_id: the connection id for the connection to be removed.
+        :return: None
+        """
+        self._component_registry.unregister(
+            ComponentId(ComponentType.CONNECTION, connection_id)
         )
 
     def add_skill(self, skill: Skill) -> None:
