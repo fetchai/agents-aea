@@ -426,7 +426,7 @@ class TestFilter:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        connections = [_make_dummy_connection()]
+        connection = _make_dummy_connection()
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FetchAICrypto.identifier: private_key_path})
         ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
@@ -442,7 +442,9 @@ class TestFilter:
             )
         )
 
-        cls.aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
+        resources.add_connection(connection)
+
+        cls.aea = AEA(identity, wallet, ledger_apis, resources=resources,)
         cls.aea.setup()
 
     def test_handle_internal_messages(self):

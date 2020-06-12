@@ -495,17 +495,15 @@ class TestContextNamespace:
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
-        resources = Resources()
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        connection = _make_local_connection(identity.address, LocalNode())
+        resources = Resources()
         cls.context_namespace = {"key1": 1, "key2": 2}
         cls.agent = AEA(
-            identity,
-            [_make_local_connection(identity.address, LocalNode())],
-            wallet,
-            ledger_apis,
-            resources,
-            **cls.context_namespace
+            identity, wallet, ledger_apis, resources, **cls.context_namespace
         )
+
+        resources.add_connection(connection)
         resources.add_component(
             Skill.from_dir(
                 Path(CUR_PATH, "data", "dummy_skill"), agent_context=cls.agent.context
