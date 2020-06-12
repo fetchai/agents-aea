@@ -20,12 +20,14 @@
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import sys
-import unittest.mock
+from unittest.mock import patch
 
 from .test_base import create_app
 
 
-def test_add_item():
+@patch("aea.cli_gui.cli_add_item")
+@patch("aea.cli_gui.try_to_load_agent_config")
+def test_add_item(*mocks):
     """Test remove a skill/connection/protocol.
 
     Actually we just do connection as code coverage is the same.
@@ -35,24 +37,12 @@ def test_add_item():
     agent_name = "test_agent_id"
     connection_id = "author/test_connection:0.1.0"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "add"
-        assert param_list[4] == "--local"
-        assert param_list[5] == "connection"
-        assert param_list[6] == connection_id
-        assert agent_name in dir
-        return 0
-
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_remove = app.post(
-            "api/agent/" + agent_name + "/connection",
-            content_type="application/json",
-            data=json.dumps(connection_id),
-        )
+    # Ensure there is now one agent
+    response_remove = app.post(
+        "api/agent/" + agent_name + "/connection",
+        content_type="application/json",
+        data=json.dumps(connection_id),
+    )
     assert response_remove.status_code == 201
     data = json.loads(response_remove.get_data(as_text=True))
     assert data == agent_name
@@ -79,7 +69,7 @@ def test_delete_agent_fail():
         assert agent_name in dir
         return 1
 
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
+    with patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_remove = app.post(
             "api/agent/" + agent_name + "/connection",

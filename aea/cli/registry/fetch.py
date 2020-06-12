@@ -23,7 +23,7 @@ from typing import Optional, cast
 
 import click
 
-from aea.cli.add import _add_item
+from aea.cli.add import add_item
 from aea.cli.registry.utils import download_file, extract, request_api
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
@@ -81,7 +81,7 @@ def fetch_agent(
         config = getattr(ctx.agent_config, item_type_plural)
         for item_public_id in config:
             try:
-                _add_item(click_context, item_type, item_public_id)
+                add_item(ctx, item_type, item_public_id)
             except Exception as e:
                 raise click.ClickException(
                     'Unable to fetch dependency for agent "{}", aborting. {}'.format(
