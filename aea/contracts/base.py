@@ -113,7 +113,7 @@ class Contract(Component, ABC):
             ContractConfig,
             ComponentConfiguration.load(ComponentType.CONTRACT, Path(directory)),
         )
-        configuration._directory = Path(directory)
+        configuration._directory = Path(directory)  # pylint: disable=protected-access
         return Contract.from_config(configuration)
 
     @classmethod

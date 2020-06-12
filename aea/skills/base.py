@@ -315,6 +315,16 @@ class AbstractBehaviour(SkillComponent, ABC):
     _tick_interval: float = 0.001
     _start_at: Optional[datetime.datetime] = None
 
+    @property
+    def tick_interval(self) -> float:
+        """Get the tick_interval in seconds."""
+        return self._tick_interval
+
+    @property
+    def start_at(self) -> Optional[datetime.datetime]:
+        """Get the start time of the behaviour."""
+        return self._start_at
+
 
 class Behaviour(AbstractBehaviour, ABC):
     """This class implements an abstract behaviour."""
@@ -646,7 +656,7 @@ class Skill(Component):
             SkillConfig,
             ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
-        configuration._directory = Path(directory)
+        configuration._directory = Path(directory)  # pylint: disable=protected-access
         return Skill.from_config(configuration, skill_context)
 
     @classmethod

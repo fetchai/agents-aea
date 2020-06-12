@@ -101,7 +101,7 @@ def _get_module(spec):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         return None
 
 

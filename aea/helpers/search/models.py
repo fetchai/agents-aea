@@ -560,7 +560,7 @@ class And(ConstraintExpr):
                 "subexpression must be at least 2.".format(type(self).__name__)
             )
         for constraint in self.constraints:
-            constraint._check_validity()
+            constraint._check_validity()  # pylint: disable=protected-access
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -609,7 +609,7 @@ class Or(ConstraintExpr):
                 "subexpression must be at least 2.".format(type(self).__name__)
             )
         for constraint in self.constraints:
-            constraint._check_validity()
+            constraint._check_validity()  # pylint: disable=protected-access
 
     def __eq__(self, other):
         """Compare with another object."""

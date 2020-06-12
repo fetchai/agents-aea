@@ -123,6 +123,7 @@ def check_aea_project(f):
     - try to load agent configuration file
     - iterate over all the agent packages and check for consistency.
     """
+
     def wrapper(*args, **kwargs):
         _check_aea_project(args)
         return f(*args, **kwargs)

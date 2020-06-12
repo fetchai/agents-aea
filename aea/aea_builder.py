@@ -589,7 +589,7 @@ class AEABuilder:
         self._check_can_add(configuration)
         # update dependency graph
         self._package_dependency_manager.add_component(configuration)
-        configuration._directory = directory
+        configuration._directory = directory  # pylint: disable=protected-access
 
         return self
 
@@ -948,7 +948,9 @@ class AEABuilder:
             else self.DEFAULT_RUNTIME_MODE
         )
 
-    def _check_configuration_not_already_added(self, configuration: ComponentConfiguration) -> None:
+    def _check_configuration_not_already_added(
+        self, configuration: ComponentConfiguration
+    ) -> None:
         """
         Check the component configuration has not already been added.
 
@@ -1056,7 +1058,7 @@ class AEABuilder:
                 )
             )
 
-    def _set_from_configuration(
+    def set_from_configuration(
         self,
         agent_configuration: AgentConfig,
         aea_project_path: Path,
@@ -1175,7 +1177,7 @@ class AEABuilder:
         loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
-        builder._set_from_configuration(
+        builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check
         )
         return builder

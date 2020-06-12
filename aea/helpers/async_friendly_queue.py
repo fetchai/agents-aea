@@ -41,7 +41,9 @@ class AsyncFriendlyQueue(queue.Queue):
         super().put(item, *args, **kwargs)
         if self._non_empty_waiters:
             waiter = self._non_empty_waiters.popleft()
-            waiter._loop.call_soon_threadsafe(waiter.set_result, True)
+            waiter._loop.call_soon_threadsafe(  # pylint: disable=protected-access
+                waiter.set_result, True
+            )
 
     def get(self, *args, **kwargs) -> Any:
         """

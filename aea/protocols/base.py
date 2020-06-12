@@ -63,7 +63,7 @@ class Message:
         self._is_incoming = False
         try:
             self._is_consistent()
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             logger.error(e)
 
     @property
@@ -295,7 +295,7 @@ class Protocol(Component):
             ProtocolConfig,
             ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
         )
-        configuration._directory = Path(directory)
+        configuration._directory = Path(directory)  # pylint: disable=protected-access
         return Protocol.from_config(configuration)
 
     @classmethod

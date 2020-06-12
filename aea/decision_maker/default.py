@@ -246,7 +246,7 @@ class OwnershipState(BaseOwnershipState):
         """
         new_state = copy.copy(self)
         for tx_message in transactions:
-            new_state._update(tx_message)
+            new_state._update(tx_message)  # pylint: disable=protected-access
 
         return new_state
 

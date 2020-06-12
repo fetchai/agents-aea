@@ -66,8 +66,7 @@ class AEATestWrapper:
 
         builder.set_name(self.name)
 
-        # See https://github.com/fetchai/agents-aea/issues/1237
-        builder._private_key_paths[FetchAICrypto.identifier] = None  # type: ignore
+        builder.add_private_key(FetchAICrypto.identifier, private_key_path=None)
 
         for component in components:
             builder.add_component_instance(component)
@@ -168,7 +167,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea._timeout = timeout
+        self.aea._timeout = timeout  # pylint: disable=protected-access
 
     def setup(self) -> None:
         """
@@ -176,7 +175,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea._start_setup()
+        self.aea.start_setup()
 
     def stop(self) -> None:
         """

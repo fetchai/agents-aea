@@ -433,6 +433,18 @@ class Dialogue(ABC):
             result = target == last_target + 1
         return result
 
+    def update_dialogue_label(self, final_dialogue_label: DialogueLabel) -> None:
+        """
+        Update the dialogue label of the dialogue.
+
+        :param final_dialogue_label: the final dialogue label
+        """
+        assert (
+            self.dialogue_label.dialogue_reference[1] == ""
+            and final_dialogue_label.dialogue_reference[1] != ""
+        ), "Dialogue label cannot be updated."
+        self._dialogue_label == final_dialogue_label
+
     @abstractmethod
     def initial_performative(self) -> Enum:
         """
@@ -603,7 +615,7 @@ class Dialogues(ABC):
                 self_initiated_dialogue_label.dialogue_opponent_addr,
                 self_initiated_dialogue_label.dialogue_starter_addr,
             )
-            self_initiated_dialogue._dialogue_label = final_dialogue_label
+            self_initiated_dialogue.update_dialogue_label(final_dialogue_label)
             assert self_initiated_dialogue.dialogue_label not in self.dialogues
             self.dialogues.update(
                 {self_initiated_dialogue.dialogue_label: self_initiated_dialogue}

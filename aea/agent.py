@@ -205,6 +205,11 @@ class Agent(ABC):
         return self._tick
 
     @property
+    def timeout(self) -> float:
+        """Get the time in (fractions of) seconds to time out an agent between act and react."""
+        return self._timeout
+
+    @property
     def agent_state(self) -> AgentState:
         """
         Get the state of the agent.
@@ -228,6 +233,11 @@ class Agent(ABC):
     def loop_mode(self) -> str:
         """Get the agent loop mode."""
         return self._loop_mode
+
+    @property
+    def main_loop(self) -> BaseAgentLoop:
+        """Get the main agent loop."""
+        return self._main_loop
 
     def start(self) -> None:
         """
@@ -254,7 +264,7 @@ class Agent(ABC):
         """
         self._runtime.start()
 
-    def _start_setup(self) -> None:
+    def start_setup(self) -> None:
         """
         Set up Agent on start.
 

@@ -83,7 +83,7 @@ class AeaTool:
 
     def setup(self) -> "AeaTool":
         """Call AEA._start_setup."""
-        self.aea._start_setup()
+        self.aea.start_setup()
         return self
 
     def wait_outbox_empty(
