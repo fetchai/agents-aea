@@ -250,7 +250,7 @@ class LedgerApis:
         amount: int,
     ) -> bool:
         """
-        Check whether the transaction is valid
+        Check whether the transaction is valid.
 
         :param identifier: Ledger identifier
         :param tx_digest:  the transaction digest

@@ -845,7 +845,7 @@ class AEABuilder:
 
     def _check_consistent(self, ledger_apis: LedgerApis) -> None:
         """
-        Check the ledger apis are consistent with the configs
+        Check the ledger apis are consistent with the configs.
 
         :param ledger_apis: the ledger apis provided
         :return: None
@@ -896,7 +896,7 @@ class AEABuilder:
 
     def _get_decision_maker_handler_class(self) -> Type[DecisionMakerHandler]:
         """
-        Return the decision maker handler class
+        Return the decision maker handler class.
 
         :return: decision maker handler class
         """
@@ -920,7 +920,7 @@ class AEABuilder:
 
     def _get_default_routing(self) -> Dict[PublicId, PublicId]:
         """
-        Return the default routing
+        Return the default routing.
 
         :return: the policy
         """
@@ -928,7 +928,7 @@ class AEABuilder:
 
     def _get_loop_mode(self) -> str:
         """
-        Return the loop mode name
+        Return the loop mode name.
 
         :return: the loop mode name
         """
@@ -938,7 +938,7 @@ class AEABuilder:
 
     def _get_runtime_mode(self) -> str:
         """
-        Return the runtime mode name
+        Return the runtime mode name.
 
         :return: the runtime mode name
         """
@@ -948,7 +948,14 @@ class AEABuilder:
             else self.DEFAULT_RUNTIME_MODE
         )
 
-    def _check_configuration_not_already_added(self, configuration) -> None:
+    def _check_configuration_not_already_added(self, configuration: ComponentConfiguration) -> None:
+        """
+        Check the component configuration has not already been added.
+
+        :param configuration: the configuration being added
+        :return: None
+        :raises AEAException: if the component is already present.
+        """
         if (
             configuration.component_id
             in self._package_dependency_manager.all_dependencies
@@ -983,8 +990,7 @@ class AEABuilder:
 
     def _check_pypi_dependencies(self, configuration: ComponentConfiguration):
         """
-        Check that PyPI dependencies of a package don't conflict with
-        the existing ones.
+        Check that PyPI dependencies of a package don't conflict with the existing ones.
 
         :param configuration: the component configuration.
         :return: None

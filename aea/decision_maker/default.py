@@ -315,9 +315,7 @@ class Preferences(BasePreferences):
     """Class to represent the preferences."""
 
     def __init__(self):
-        """
-        Instantiate an agent preference object.
-        """
+        """Instantiate an agent preference object."""
         self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
         self._transaction_fees = None  # type: Optional[Dict[str, int]]
@@ -799,7 +797,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
     def _is_valid_tx(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction message contains a valid ledger transaction.
-
 
         :param tx_message: the transaction message
         :return: whether the transaction is valid

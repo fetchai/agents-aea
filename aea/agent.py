@@ -198,7 +198,7 @@ class Agent(ABC):
     @property
     def tick(self) -> int:
         """
-        Get the tick (or agent loop count).
+        Get the tick or agent loop count.
 
         Each agent loop (one call to each one of act(), react(), update()) increments the tick.
         """

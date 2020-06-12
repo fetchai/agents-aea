@@ -36,6 +36,7 @@ class Location:
     def __init__(self, latitude: float, longitude: float):
         """
         Initialize a location.
+
         :param latitude: the latitude of the location.
         :param longitude: the longitude of the location.
         """
@@ -52,6 +53,7 @@ class Location:
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
     def __eq__(self, other):
+        """Compare equality of two locations."""
         if not isinstance(other, Location):
             return False
         else:
@@ -68,6 +70,7 @@ ALLOWED_ATTRIBUTE_TYPES = [float, str, bool, int, Location]
 class AttributeInconsistencyException(Exception):
     """
     Raised when the attributes in a Description are inconsistent.
+
     Inconsistency is defined when values do not meet their respective schema, or if the values
     are not of an allowed type.
     """
@@ -207,7 +210,8 @@ class Description:
 
     def _check_consistency(self):
         """
-        Checks the consistency of the values of this description.
+        Check the consistency of the values of this description.
+
         If an attribute has been provided, values are checked against that. If no attribute
         schema has been provided then minimal checking is performed based on the values in the
         provided attribute_value dictionary.
@@ -495,7 +499,7 @@ class ConstraintExpr(ABC):
     @abstractmethod
     def is_valid(self, data_model: DataModel) -> bool:
         """
-        Check whether a constraint expression is valid wrt a data model
+        Check whether a constraint expression is valid wrt a data model.
 
          Specifically, check the following conditions:
         - If all the attributes referenced by the constraints are correctly associated with the Data Model attributes.
@@ -536,7 +540,7 @@ class And(ConstraintExpr):
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
-        Check whether the constraint expression is valid wrt a data model
+        Check whether the constraint expression is valid wrt a data model.
 
         :param data_model: the data model used to check the validity of the constraint expression.
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
@@ -585,7 +589,7 @@ class Or(ConstraintExpr):
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
-        Check whether the constraint expression is valid wrt a data model
+        Check whether the constraint expression is valid wrt a data model.
 
         :param data_model: the data model used to check the validity of the constraint expression.
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
@@ -634,7 +638,7 @@ class Not(ConstraintExpr):
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
-        Check whether the constraint expression is valid wrt a data model
+        Check whether the constraint expression is valid wrt a data model.
 
         :param data_model: the data model used to check the validity of the constraint expression.
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
@@ -725,7 +729,7 @@ class Constraint(ConstraintExpr):
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
-        Check whether the constraint expression is valid wrt a data model
+        Check whether the constraint expression is valid wrt a data model.
 
         :param data_model: the data model used to check the validity of the constraint expression.
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
@@ -776,6 +780,7 @@ class Query:
     def is_valid(self, data_model: DataModel) -> bool:
         """
         Given a data model, check whether the query is valid for that data model.
+
         :return: ``True`` if the query is compliant with the data model, ``False`` otherwise.
         """
         if data_model is None:
@@ -847,6 +852,7 @@ class Query:
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
     Compute the Haversine distance between two locations (i.e. two pairs of latitude and longitude).
+
     :param lat1: the latitude of the first location.
     :param lon1: the longitude of the first location.
     :param lat2: the latitude of the second location.

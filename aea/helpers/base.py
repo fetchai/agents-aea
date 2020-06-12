@@ -376,6 +376,7 @@ class RegexConstrainedString(UserString):
     REGEX = re.compile(".*", flags=re.DOTALL)
 
     def __init__(self, seq):
+        """Initialize a regex constrained string."""
         super().__init__(seq)
 
         if not self.REGEX.match(self.data):

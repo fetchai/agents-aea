@@ -288,7 +288,6 @@ class Dialogue(ABC):
         :param message_id_to_find: the id of the message
         :return: the message if it exists, None otherwise
         """
-
         result = None  # type: Optional[Message]
         list_of_all_messages = self._outgoing_messages + self._incoming_messages
         for message in list_of_all_messages:
@@ -301,7 +300,7 @@ class Dialogue(ABC):
     @property
     def is_empty(self) -> bool:
         """
-        Check whether the dialogue is empty
+        Check whether the dialogue is empty.
 
         :return: True if empty, False otherwise
         """
@@ -309,7 +308,7 @@ class Dialogue(ABC):
 
     def update(self, message: Message) -> bool:
         """
-        Extend the list of incoming/outgoing messages with 'message', if 'message' is valid
+        Extend the list of incoming/outgoing messages with 'message', if 'message' is valid.
 
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
@@ -327,7 +326,7 @@ class Dialogue(ABC):
         self, second_message: Message
     ) -> None:
         """
-        Update this (self initiated) dialogue's dialogue_label with a complete dialogue reference from counterparty's first message
+        Update this (self initiated) dialogue's dialogue_label with a complete dialogue reference from counterparty's first message.
 
         :param second_message: The second message in the dialogue (the first by the counterparty)
         :return: None
@@ -437,7 +436,7 @@ class Dialogue(ABC):
     @abstractmethod
     def initial_performative(self) -> Enum:
         """
-        Get the performative which the initial message in the dialogue must have
+        Get the performative which the initial message in the dialogue must have.
 
         :return: the performative of the initial message
         """
@@ -445,7 +444,7 @@ class Dialogue(ABC):
     @abstractmethod
     def get_replies(self, performative: Enum) -> FrozenSet:
         """
-        Given a `performative`, return the list of performatives which are its valid replies in a dialogue
+        Given a `performative`, return the list of performatives which are its valid replies in a dialogue.
 
         :param performative: the performative in a message
         :return: list of valid performative replies
@@ -495,27 +494,6 @@ class Dialogue(ABC):
         representation = representation[:-1]
         return representation
 
-    # ToDo the following methods are left for backwards compatibility reasons and are unsafe to use. They will be removed in the future
-    def outgoing_extend(self, message: Message) -> None:
-        """
-        UNSAFE TO USE - IS DEPRECATED - USE update(message) METHOD INSTEAD
-        Extend the list of outgoing messages with 'message'
-
-        :param message: a message to be added
-        :return: None
-        """
-        self._outgoing_messages.extend([message])
-
-    def incoming_extend(self, message: Message) -> None:
-        """
-        UNSAFE TO USE - IS DEPRECATED - USE update(message) METHOD INSTEAD
-        Extend the list of incoming messages with 'message'
-
-        :param message: a message to be added
-        :return: None
-        """
-        self._incoming_messages.extend([message])
-
 
 class Dialogues(ABC):
     """The dialogues class keeps track of all dialogues for an agent."""
@@ -544,7 +522,7 @@ class Dialogues(ABC):
 
     def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
         """
-        Return a dialogue label for a new self initiated dialogue
+        Return a dialogue label for a new self initiated dialogue.
 
         :return: the next nonce
         """
@@ -601,7 +579,7 @@ class Dialogues(ABC):
         self, second_message: Message
     ) -> None:
         """
-        Update a self initiated dialogue label with a complete dialogue reference from counterparty's first message
+        Update a self initiated dialogue label with a complete dialogue reference from counterparty's first message.
 
         :param second_message: The second message in the dialogue (the first by the counterparty in a self initiated dialogue)
         :return: None
@@ -727,7 +705,7 @@ class Dialogues(ABC):
     @abstractmethod
     def role_from_first_message(message: Message) -> Dialogue.Role:
         """
-        Infer the role of the agent from an incoming or outgoing first message
+        Infer the role of the agent from an incoming or outgoing first message.
 
         :param message: an incoming/outgoing first message
         :return: the agent's role
@@ -741,76 +719,3 @@ class Dialogues(ABC):
         """
         self._dialogue_nonce += 1
         return self._dialogue_nonce
-
-    # TODO the following methods are left for backwards compatibility reasons and will be removed in the future
-    def is_belonging_to_registered_dialogue(
-        self, msg: Message, agent_addr: Address
-    ) -> bool:
-        """
-        DEPRECATED
-
-        Check whether an agent message is part of a registered dialogue.
-
-        :param msg: the agent message
-        :param agent_addr: the address of the agent
-
-        :return: boolean indicating whether the message belongs to a registered dialogue
-        """
-        pass
-
-    def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
-        """
-        DEPRECATED
-
-        Check whether an agent message is permitted for a new dialogue.
-
-        :param msg: the agent message
-        :return: a boolean indicating whether the message is permitted for a new dialogue
-        """
-        pass
-
-    def get_dialogue(self, msg: Message, address: Address) -> Dialogue:
-        """
-        DEPRECATED
-
-        Retrieve dialogue.
-
-        :param fipa_msg: the fipa message
-        :param agent_addr: the address of the agent
-        :return: the dialogue
-        """
-        pass
-
-    def create_self_initiated(
-        self, dialogue_opponent_addr: Address, role: Dialogue.Role,
-    ) -> Dialogue:
-        """
-        DEPRECATED
-
-        Create a self initiated dialogue.
-
-        :param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.
-        :param role: the agent's role
-
-        :return: the created dialogue.
-        """
-        pass
-
-    def create_opponent_initiated(
-        self,
-        dialogue_opponent_addr: Address,
-        dialogue_reference: Tuple[str, str],
-        role: Dialogue.Role,
-    ) -> Dialogue:
-        """
-        DEPRECATED
-
-        Create an opponent initiated dialogue.
-
-        :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
-        :param dialogue_reference: the reference of the dialogue.
-        :param role: the agent's role
-
-        :return: the created dialogue
-        """
-        pass

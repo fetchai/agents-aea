@@ -90,7 +90,6 @@ def decision_maker_handler(click_context):
 
 @clean_after
 def _scaffold_item(click_context, item_type, item_name):
-
     """Add an item scaffolding to the configuration file and agent."""
     validate_package_name(item_name)
 
@@ -164,7 +163,6 @@ def _scaffold_item(click_context, item_type, item_name):
 
 def _scaffold_dm_handler(click_context):
     """Add a scaffolded decision maker handler to the project and configuration."""
-
     ctx = cast(Context, click_context.obj)
     existing_dm_handler = getattr(ctx.agent_config, "decision_maker_handler")
 

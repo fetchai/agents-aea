@@ -119,7 +119,7 @@ class Contract(Component, ABC):
     @classmethod
     def from_config(cls, configuration: ContractConfig) -> "Contract":
         """
-        Load contract from configuration
+        Load contract from configuration.
 
         :param configuration: the contract configuration.
         :return: the contract object.
