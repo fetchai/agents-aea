@@ -802,6 +802,12 @@ class AEABuilder:
         ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
+        self._load_and_add_components(
+            ComponentType.CONNECTION,
+            resources,
+            identity=identity,
+            crypto_store=wallet.connection_cryptos,
+        )
         connection_ids = self._process_connection_ids(connection_ids)
         aea = AEA(
             identity,
@@ -821,12 +827,6 @@ class AEABuilder:
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
             **deepcopy(self._context_namespace),
-        )
-        self._load_and_add_components(
-            ComponentType.CONNECTION,
-            resources,
-            identity=identity,
-            crypto_store=wallet.connection_cryptos,
         )
         self._load_and_add_components(
             ComponentType.SKILL, resources, agent_context=aea.context
