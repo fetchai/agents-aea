@@ -18,14 +18,15 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import logging
+import operator
 from asyncio import AbstractEventLoop
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
+from functools import partial
+from typing import Any, Callable, Collection, Dict, List, Optional, Sequence, Type, cast
 
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SKILL
-from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -61,7 +62,6 @@ class AEA(Agent):
     def __init__(
         self,
         identity: Identity,
-        connections: List[Connection],
         wallet: Wallet,
         ledger_apis: LedgerApis,
         resources: Resources,
@@ -78,13 +78,13 @@ class AEA(Agent):
         runtime_mode: Optional[str] = None,
         default_connection: Optional[PublicId] = None,
         default_routing: Dict[PublicId, PublicId] = None,
+        connection_ids: Optional[Collection[PublicId]] = None,
         **kwargs,
     ) -> None:
         """
         Instantiate the agent.
 
         :param identity: the identity of the agent
-        :param connections: the list of connections of the agent.
         :param wallet: the wallet of the agent.
         :param ledger_apis: the APIs the agent will use to connect to ledgers.
         :param resources: the resources (protocols and skills) of the agent.
@@ -99,13 +99,14 @@ class AEA(Agent):
         :param runtime_mode: runtime mode (async, threaded) to run AEA in.
         :param default_connection: public id to the default connection
         :param default_routing: dictionary for default routing.
+        :param connection_ids: active connection ids. Default: consider all the ones in the resources.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
         """
         super().__init__(
             identity=identity,
-            connections=connections,
+            connections=[],
             loop=loop,
             timeout=timeout,
             is_debug=is_debug,
@@ -134,6 +135,7 @@ class AEA(Agent):
             **kwargs,
         )
         self._execution_timeout = execution_timeout
+        self._connection_ids = connection_ids
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
@@ -167,6 +169,10 @@ class AEA(Agent):
     def connect(self) -> None:
         """Connect the multiplexer."""
         connections = self.resources.get_all_connections()
+        if self._connection_ids is not None:
+            connections = list(
+                filter(partial(operator.contains, self._connection_ids), connections)
+            )
         self.multiplexer.setup(
             connections,
             default_routing=self.context.default_routing,

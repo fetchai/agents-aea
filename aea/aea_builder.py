@@ -802,9 +802,9 @@ class AEABuilder:
         ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
+        connection_ids = self._process_connection_ids(connection_ids)
         aea = AEA(
             identity,
-            [],
             wallet,
             ledger_apis,
             resources,
@@ -819,33 +819,19 @@ class AEABuilder:
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
+            connection_ids=connection_ids,
             **deepcopy(self._context_namespace),
         )
-        # load connection
-        # TODO check address is the same of identity address
-        # TODO filter connections with connection_ids
         self._load_and_add_components(
             ComponentType.CONNECTION,
             resources,
             identity=identity,
             crypto_store=wallet.connection_cryptos,
         )
-        connection_ids = self._process_connection_ids(connection_ids)
-        # TODO this must be corrected before merging fix/1290
-        self._unregister_non_selected_connections(resources, connection_ids)
-
         self._load_and_add_components(
             ComponentType.SKILL, resources, agent_context=aea.context
         )
         return aea
-
-    def _unregister_non_selected_connections(
-        self, resources: Resources, connection_ids: Collection[PublicId]
-    ):
-        """Unregister non-selected connections."""
-        for c in resources.get_all_connections():
-            if c.public_id not in connection_ids:
-                resources.remove_connection(c.public_id)
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
         """

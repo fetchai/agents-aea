@@ -74,13 +74,9 @@ class AsyncMultiplexer:
         self.set_loop(loop if loop is not None else asyncio.new_event_loop())
 
     @property
-    def default_connection(self) -> Connection:
+    def default_connection(self) -> Optional[Connection]:
         """Get the default connection."""
-        if self._default_connection is not None:
-            return self._default_connection
-        else:
-            # return the first
-            return self._connections[0]
+        return self._default_connection
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """

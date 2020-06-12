@@ -78,7 +78,6 @@ class TestSkillError:
 
         self.my_aea = AEA(
             self.identity,
-            [],
             self.wallet,
             self.ledger_apis,
             timeout=0.1,

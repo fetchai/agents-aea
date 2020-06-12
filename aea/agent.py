@@ -230,7 +230,7 @@ class Agent(ABC):
         return self._loop_mode
 
     def connect(self) -> None:
-        """Connect the multiplexer."""
+        """Connect the agent."""
         self.multiplexer.connect()
 
     def start(self) -> None:

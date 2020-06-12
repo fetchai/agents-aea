@@ -64,7 +64,7 @@ def run():
     resources = Resources()
 
     # create the AEA
-    my_aea = AEA(identity, [], wallet, ledger_apis, resources,)  # stub_connection,
+    my_aea = AEA(identity, wallet, ledger_apis, resources,)  # stub_connection,
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))

@@ -349,10 +349,8 @@ def test_initialize_aea_programmatically_build_resources():
             connection = _make_local_connection(agent_name, node)
 
             resources = Resources()
-            # TODO remove connection argument from AEA.__init__
             aea = AEA(
                 identity,
-                [],
                 wallet,
                 ledger_apis,
                 resources=resources,
@@ -449,7 +447,6 @@ def test_add_behaviour_dynamically():
     connection = _make_local_connection(identity.address, LocalNode())
     agent = AEA(
         identity,
-        [],
         wallet,
         ledger_apis,
         resources,
