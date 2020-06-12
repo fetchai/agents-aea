@@ -18,9 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import logging
-import operator
 from asyncio import AbstractEventLoop
-from functools import partial
 from typing import Any, Callable, Collection, Dict, List, Optional, Sequence, Type, cast
 
 from aea.agent import Agent
@@ -170,9 +168,9 @@ class AEA(Agent):
         """Connect the multiplexer."""
         connections = self.resources.get_all_connections()
         if self._connection_ids is not None:
-            connections = list(
-                filter(partial(operator.contains, self._connection_ids), connections)
-            )
+            connections = [
+                c for c in connections if c.connection_id in self._connection_ids
+            ]
         self.multiplexer.setup(
             connections,
             default_routing=self.context.default_routing,
