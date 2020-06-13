@@ -129,6 +129,11 @@ class AsyncMultiplexer:
             self.connections
         ), "Connection names must be unique."
 
+    def _set_default_connection_if_none(self):
+        """Set the default connection if it is none."""
+        if self._default_connection is None:
+            self._default_connection = self.connections[0]
+
     @property
     def in_queue(self) -> AsyncFriendlyQueue:
         """Get the in queue."""
@@ -171,6 +176,7 @@ class AsyncMultiplexer:
         """Connect the multiplexer."""
         logger.debug("Multiplexer connecting...")
         self._connection_consistency_checks()
+        self._set_default_connection_if_none()
         self._out_queue = asyncio.Queue()
         async with self._lock:
             if self.connection_status.is_connected:
