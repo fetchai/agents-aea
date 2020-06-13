@@ -70,15 +70,18 @@ class TestAeaExceptionPolicy:
         self.handler = handler_cls(name="handler1", skill_context=skill_context)
         self.behaviour = behaviour_cls(name="behaviour1", skill_context=skill_context)
 
-        test_skill = Skill(
-            SkillConfig(name="test_skill", author="fetchai"),
-            skill_context=skill_context,
-            handlers={"handler": self.handler},
-            behaviours={"behaviour": self.behaviour},
+        skill_class = Skill
+        skill_config = SkillConfig(name="test_skill", author="fetchai")
+        builder.add_component_instance(
+            skill_class,
+            configuration=skill_config,
+            args=[skill_config],
+            kwargs=dict(
+                skill_context=skill_context,
+                handlers={"handler": self.handler},
+                behaviours={"behaviour": self.behaviour},
+            ),
         )
-        skill_context._skill = test_skill  # weird hack
-
-        builder.add_component_instance(test_skill)
         self.aea = builder.build()
         self.aea_tool = AeaTool(self.aea)
 

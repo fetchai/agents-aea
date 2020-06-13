@@ -27,12 +27,23 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.components.base import Component
-from aea.configurations.base import ComponentType
+from aea.configurations.base import (
+    ComponentType,
+    ConnectionConfig,
+    ContractConfig,
+    ProtocolConfig,
+    SkillConfig,
+)
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
+from aea.protocols.base import Protocol
+from aea.skills.base import Skill
+
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
+from packages.fetchai.protocols.fipa import FipaMessage
 
 from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
-
+from .data.dummy_connection.connection import DummyConnection
 
 FETCHAI = FetchAICrypto.identifier
 
@@ -97,6 +108,32 @@ def test_when_package_has_missing_dependency():
         )
 
 
+def _are_components_different(
+    components_a: Collection[Component], components_b: Collection[Component]
+) -> None:
+    """
+    Compare collections of component instances.
+    It only makes sense if they have the same number of elements and
+    the same component ids.
+    """
+    assert len(components_a) == len(
+        components_b
+    ), "Cannot compare, number of components is different."
+    assert {c.component_id for c in components_a} == {
+        c.component_id for c in components_b
+    }, "Cannot compare, component ids are different."
+
+    d1 = {c.component_id: c for c in components_a}
+    d2 = {c.component_id: c for c in components_b}
+    assert d1.keys() == d2.keys()
+    assert all(d1[k] is not d2[k] for k in d1.keys())
+
+    c1 = {c.component_id: c.configuration for c in components_a}
+    c2 = {c.component_id: c.configuration for c in components_b}
+    assert c1.keys() == c2.keys()
+    assert all(c1[k] is not c2[k] for k in c1.keys())
+
+
 class TestReentrancy:
     """
     Test the reentrancy of the AEABuilder class, when the components
@@ -142,50 +179,104 @@ class TestReentrancy:
         builder.set_name("aea2")
         cls.aea2 = builder.build()
 
-    @staticmethod
-    def are_components_different(
-        components_a: Collection[Component], components_b: Collection[Component]
-    ) -> None:
-        """
-        Compare collections of component instances.
-        It only makes sense if they have the same number of elements and
-        the same component ids.
-        """
-        assert len(components_a) == len(
-            components_b
-        ), "Cannot compare, number of components is different."
-        assert {c.component_id for c in components_a} == {
-            c.component_id for c in components_b
-        }, "Cannot compare, component ids are different."
-
-        d1 = {c.component_id: c for c in components_a}
-        d2 = {c.component_id: c for c in components_b}
-        assert all(d1[k] is not d2[k] for k in d1.keys())
-
-        c1 = {c.component_id: c.configuration for c in components_a}
-        c2 = {c.component_id: c.configuration for c in components_b}
-        assert all(c1[k] is not c2[k] for k in c1.keys())
-
     def test_skills_instances_are_different(self):
         """Test that skill instances are different."""
         aea1_skills = self.aea1.resources.get_all_skills()
         aea2_skills = self.aea2.resources.get_all_skills()
-        self.are_components_different(aea1_skills, aea2_skills)
+        _are_components_different(aea1_skills, aea2_skills)
 
     def test_protocols_instances_are_different(self):
         """Test that protocols instances are different."""
         aea1_protocols = self.aea1.resources.get_all_protocols()
         aea2_protocols = self.aea2.resources.get_all_protocols()
-        self.are_components_different(aea1_protocols, aea2_protocols)
+        _are_components_different(aea1_protocols, aea2_protocols)
 
     def test_contracts_instances_are_different(self):
         """Test that contract instances are different."""
         aea1_contracts = self.aea1.resources.get_all_contracts()
         aea2_contracts = self.aea2.resources.get_all_contracts()
-        self.are_components_different(aea1_contracts, aea2_contracts)
+        _are_components_different(aea1_contracts, aea2_contracts)
 
     def test_connections_instances_are_different(self):
         """Test that connection instances are different."""
         aea1_connections = self.aea1.multiplexer.connections
         aea2_connections = self.aea2.multiplexer.connections
-        self.are_components_different(aea1_connections, aea2_connections)
+        _are_components_different(aea1_connections, aea2_connections)
+
+
+class TestReentrancyWithInstances:
+    """Test builder.build reentrancy with component specs."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        builder = AEABuilder()
+        builder.set_name("aea1")
+        builder.add_private_key("fetchai")
+
+        # add protocol
+        protocol_config = ProtocolConfig("fipa", "fetchai", "0.1.0")
+        message_class = FipaMessage
+        protocol_class = Protocol
+        builder.add_component_instance(
+            protocol_class,
+            configuration=protocol_config,
+            args=[protocol_config, message_class],
+            kwargs={},
+        )
+
+        # add contract
+        contract_config = ContractConfig("erc1155", "fetchai", "0.1.0")
+        contract_class = ERC1155Contract
+        contract_interface = dict(abi=None, bytecode=None)
+        builder.add_component_instance(
+            contract_class,
+            configuration=contract_config,
+            args=[contract_config, contract_interface],
+            kwargs={},
+        )
+
+        # add connection
+        connection_config = ConnectionConfig("dummy", "fetchai", "0.1.0")
+        connection_class = DummyConnection
+        builder.add_component_instance(
+            connection_class,
+            configuration=connection_config,
+            kwargs=dict(configuration=connection_config),
+        )
+
+        # add skill
+        skill_config = SkillConfig("dummy_skill", "fetchai", "0.1.0")
+        skill_class = Skill
+        builder.add_component_instance(
+            skill_class, configuration=skill_config, args=[skill_config], kwargs={}
+        )
+
+        cls.aea1 = builder.build()
+
+        builder.set_name("aea2")
+        cls.aea2 = builder.build()
+
+    def test_skills_instances_are_different(self):
+        """Test that skill instances are different."""
+        aea1_skills = self.aea1.resources.get_all_skills()
+        aea2_skills = self.aea2.resources.get_all_skills()
+        _are_components_different(aea1_skills, aea2_skills)
+
+    def test_protocols_instances_are_different(self):
+        """Test that protocols instances are different."""
+        aea1_protocols = self.aea1.resources.get_all_protocols()
+        aea2_protocols = self.aea2.resources.get_all_protocols()
+        _are_components_different(aea1_protocols, aea2_protocols)
+
+    def test_contracts_instances_are_different(self):
+        """Test that contract instances are different."""
+        aea1_contracts = self.aea1.resources.get_all_contracts()
+        aea2_contracts = self.aea2.resources.get_all_contracts()
+        _are_components_different(aea1_contracts, aea2_contracts)
+
+    def test_connections_instances_are_different(self):
+        """Test that connection instances are different."""
+        aea1_connections = self.aea1.multiplexer.connections
+        aea2_connections = self.aea2.multiplexer.connections
+        _are_components_different(aea1_connections, aea2_connections)

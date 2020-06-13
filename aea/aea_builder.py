@@ -24,7 +24,19 @@ import os
 import pprint
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import jsonschema
 
@@ -77,6 +89,40 @@ from aea.registries.resources import Resources
 PathLike = Union[os.PathLike, Path, str]
 
 logger = logging.getLogger(__name__)
+
+
+class _ComponentSpec:
+    """Class for component specification."""
+
+    def __init__(
+        self,
+        component_class: Type[Component],
+        configuration: ComponentConfiguration,
+        args: Sequence = (),
+        kwargs: Optional[Dict] = None,
+    ):
+        """
+        Initialize the component specification.
+
+        :param component_class: the class of the component to add.
+        :param configuration: the configuration object.
+        :param args: the argument tuple for the component initialization. Defaults to ().
+        :param kwargs: is a dictionary of keyword arguments for the component initialization. Defaults to {}.
+        """
+        self._component_class = component_class
+        self._configuration = configuration
+        self._args = args
+        self._kwargs = kwargs if kwargs is not None else {}
+
+    def make(self) -> Component:
+        """
+        Make the component instance, given the spec.
+
+        :return: the component instance.
+        """
+        args = deepcopy(self._args)
+        kwargs = deepcopy(self._kwargs)
+        return self._component_class(*args, **kwargs)
 
 
 class _DependenciesManager:
@@ -235,39 +281,6 @@ class AEABuilder:
 
     It follows the fluent interface. Every method of the builder
     returns the instance of the builder itself.
-
-    Note: the method 'build()' is guaranteed of being
-    re-entrant with respect to the 'add_component(path)'
-    method. That is, you can invoke the building method
-    many times against the same builder instance, and the
-    returned agent instance will not share the
-    components with other agents, e.g.:
-
-        builder = AEABuilder()
-        builder.add_component(...)
-        ...
-
-        # first call
-        my_aea_1 = builder.build()
-
-        # following agents will have different components.
-        my_aea_2 = builder.build()  # all good
-
-    However, if you manually loaded some of the components and added
-    them with the method 'add_component_instance()', then calling build
-    more than one time is strongly discouraged:
-
-        builder = AEABuilder()
-        builder.add_component_instance(...)
-        ...  # other initialization code
-
-        # first call
-        my_aea_1 = builder.build()
-
-        # in this case, following calls to '.build()'
-        # are strongly discouraged.
-        # my_aea_2 = builder.builder()  # bad
-
     """
 
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
@@ -306,12 +319,12 @@ class AEABuilder:
         self._runtime_mode: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
-        self._component_instances = {
+        self._component_specs = {
             ComponentType.CONNECTION: {},
             ComponentType.CONTRACT: {},
             ComponentType.PROTOCOL: {},
             ComponentType.SKILL: {},
-        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
+        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, _ComponentSpec]]
 
         if with_default_packages:
             self._add_default_packages()
@@ -590,22 +603,30 @@ class AEABuilder:
 
         return self
 
-    def add_component_instance(self, component: Component) -> "AEABuilder":
+    def add_component_instance(
+        self,
+        component_class: Type[Component],
+        configuration: ComponentConfiguration,
+        args: Sequence = (),
+        kwargs: Optional[Dict] = None,
+    ) -> "AEABuilder":
         """
-        Add already initialized component object to resources or connections.
+        Add a specification for initializing a component.
 
-        Please, pay attention, all dependencies have to be already loaded.
-
-        Notice also that this will make the call to 'build()' non re-entrant.
-
-        :params component: Component instance already initialized.
+        :param component_class: the class of the component to add.
+        :param configuration: the configuration object.
+        :param args: the argument tuple for the component initialization. Defaults to ().
+        :param kwargs: is a dictionary of keyword arguments for the component initialization. Defaults to {}.
+        :return: the AEABuilder
         """
-        self._check_can_add(component.configuration)
+        self._check_can_add(configuration)
         # update dependency graph
-        self._package_dependency_manager.add_component(component.configuration)
-        self._component_instances[component.component_type][
-            component.configuration
-        ] = component
+        self._package_dependency_manager.add_component(configuration)
+        self._component_specs[configuration.component_type][
+            configuration
+        ] = _ComponentSpec(
+            component_class, configuration=configuration, args=args, kwargs=kwargs
+        )
         return self
 
     def set_context_namespace(self, context_namespace: Dict[str, Any]) -> "AEABuilder":
@@ -1207,8 +1228,9 @@ class AEABuilder:
         for configuration in self._package_dependency_manager.get_components_by_type(
             component_type
         ).values():
-            if configuration in self._component_instances[component_type].keys():
-                component = self._component_instances[component_type][configuration]
+            if configuration in self._component_specs[component_type].keys():
+                component_spec = self._component_specs[component_type][configuration]
+                component = component_spec.make()
             else:
                 configuration = deepcopy(configuration)
                 component = load_component_from_config(

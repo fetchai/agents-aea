@@ -94,21 +94,23 @@ class BaseTimeExecutionCase(TestCase):
 
         behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
 
-        test_skill = Skill(
-            SkillConfig(name="test_skill", author="fetchai"),
-            skill_context=skill_context,
-            handlers={
-                "handler1": handler_cls(name="handler1", skill_context=skill_context)
-            },
-            behaviours={
-                "behaviour1": behaviour_cls(
-                    name="behaviour1", skill_context=skill_context
-                )
-            },
-        )
-        skill_context._skill = test_skill  # weird hack
+        skill_class = Skill
+        skill_config = SkillConfig(name="test_skill", author="fetchai")
+        handlers = {
+            "handler1": handler_cls(name="handler1", skill_context=skill_context)
+        }
+        behaviours = {
+            "behaviour1": behaviour_cls(name="behaviour1", skill_context=skill_context)
+        }
 
-        builder.add_component_instance(test_skill)
+        builder.add_component_instance(
+            skill_class,
+            configuration=skill_config,
+            args=[skill_config],
+            kwargs=dict(
+                skill_context=skill_context, handlers=handlers, behaviours=behaviours
+            ),
+        )
         aea = builder.build()
 
         self.aea_tool = AeaTool(aea)
