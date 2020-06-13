@@ -25,8 +25,9 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from copy import copy
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Type, cast
+from typing import Any, Dict, Optional, Tuple, Type, cast
 
 from google.protobuf.struct_pb2 import Struct
 
@@ -115,10 +116,28 @@ class Message:
         self._body = body
 
     @property
+    def dialogue_reference(self) -> Tuple[str, str]:
+        """Get the dialogue_reference of the message."""
+        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
+        return cast(Tuple[str, str], self.get("dialogue_reference"))
+
+    @property
     def message_id(self) -> int:
-        """Get the message id."""
-        assert self.is_set("message_id"), "message_id is not set!"
+        """Get the message_id of the message."""
+        assert self.is_set("message_id"), "message_id is not set."
         return cast(int, self.get("message_id"))
+
+    @property
+    def performative(self) -> Enum:
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "performative is not set."
+        return cast(Enum, self.get("performative"))
+
+    @property
+    def target(self) -> int:
+        """Get the target of the message."""
+        assert self.is_set("target"), "target is not set."
+        return cast(int, self.get("target"))
 
     def set(self, key: str, value: Any) -> None:
         """

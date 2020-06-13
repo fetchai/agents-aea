@@ -331,9 +331,7 @@ class Dialogue(ABC):
         :param second_message: The second message in the dialogue (the first by the counterparty)
         :return: None
         """
-        dialogue_reference = cast(
-            Tuple[str, str], second_message.get("dialogue_reference")
-        )
+        dialogue_reference = second_message.dialogue_reference
         self_initiated_dialogue_reference = (dialogue_reference[0], "")
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference,
@@ -341,13 +339,11 @@ class Dialogue(ABC):
             self.agent_address,
         )
 
-        if not self.is_empty:
-            message_id = second_message.message_id
-
+        if self.last_message is not None:
             if (
                 self.dialogue_label == self_initiated_dialogue_label
-                and self.last_message.message_id == 1  # type: ignore
-                and message_id == 2
+                and self.last_message.message_id == 1
+                and second_message.message_id == 2
                 and second_message.is_incoming
             ):
                 updated_dialogue_label = DialogueLabel(
@@ -355,7 +351,7 @@ class Dialogue(ABC):
                     self_initiated_dialogue_label.dialogue_opponent_addr,
                     self_initiated_dialogue_label.dialogue_starter_addr,
                 )
-                self._dialogue_label = updated_dialogue_label
+                self.update_dialogue_label(updated_dialogue_label)
 
     def is_valid_next_message(self, message: Message) -> bool:
         """
@@ -390,20 +386,20 @@ class Dialogue(ABC):
         :return: True if valid, False otherwise.
         """
         message_id = message.message_id
-        target = cast(int, message.get("target"))
-        performative = cast(Enum, message.get("performative"))
+        target = message.target
+        performative = message.performative
 
-        if self.is_empty:
+        if self.last_message is None:
             result = (
                 message_id == Dialogue.STARTING_MESSAGE_ID
                 and target == Dialogue.STARTING_TARGET
                 and performative == self.initial_performative()
             )
         else:
-            last_message_id = self.last_message.message_id  # type: ignore
+            last_message_id = self.last_message.message_id
             target_message = self.get_message(target)
             if target_message is not None:
-                target_performative = cast(Enum, target_message.get("performative"))
+                target_performative = target_message.performative
                 result = (
                     message_id == last_message_id + 1
                     and 1 <= target <= last_message_id
@@ -425,11 +421,11 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
-        if self.is_empty:
+        if self.last_message is None:
             result = True
         else:
-            target = cast(int, message.get("target"))
-            last_target = self.last_message.target  # type: ignore
+            target = message.target
+            last_target = self.last_message.target
             result = target == last_target + 1
         return result
 
@@ -443,7 +439,7 @@ class Dialogue(ABC):
             self.dialogue_label.dialogue_reference[1] == ""
             and final_dialogue_label.dialogue_reference[1] != ""
         ), "Dialogue label cannot be updated."
-        self._dialogue_label == final_dialogue_label
+        self._dialogue_label = final_dialogue_label
 
     @abstractmethod
     def initial_performative(self) -> Enum:
@@ -551,7 +547,7 @@ class Dialogues(ABC):
         :param message: a new message
         :return: the new or existing dialogue the message is intended for, or None in case of any errors.
         """
-        dialogue_reference = cast(Tuple[str, str], message.get("dialogue_reference"))
+        dialogue_reference = message.dialogue_reference
 
         if (  # new dialogue by other
             dialogue_reference[0] != ""
@@ -577,7 +573,7 @@ class Dialogues(ABC):
             )
         else:  # existing dialogue
             self._update_self_initiated_dialogue_label_on_second_message(message)
-            dialogue = self._get_dialogue(message)
+            dialogue = self.get_dialogue(message)
 
         if dialogue is not None:
             dialogue.update(message)
@@ -596,10 +592,7 @@ class Dialogues(ABC):
         :param second_message: The second message in the dialogue (the first by the counterparty in a self initiated dialogue)
         :return: None
         """
-        dialogue_reference = cast(
-            Tuple[str, str], second_message.get("dialogue_reference")
-        )
-
+        dialogue_reference = second_message.dialogue_reference
         self_initiated_dialogue_reference = (dialogue_reference[0], "")
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference,
@@ -608,27 +601,28 @@ class Dialogues(ABC):
         )
 
         if self_initiated_dialogue_label in self.dialogues:
-            self_initiated_dialogue = self.dialogues[self_initiated_dialogue_label]
-            self.dialogues.pop(self_initiated_dialogue_label)
+            self_initiated_dialogue = self.dialogues.pop(self_initiated_dialogue_label)
             final_dialogue_label = DialogueLabel(
                 dialogue_reference,
                 self_initiated_dialogue_label.dialogue_opponent_addr,
                 self_initiated_dialogue_label.dialogue_starter_addr,
             )
             self_initiated_dialogue.update_dialogue_label(final_dialogue_label)
-            assert self_initiated_dialogue.dialogue_label not in self.dialogues
+            assert (
+                self_initiated_dialogue.dialogue_label not in self.dialogues
+            ), "DialogueLabel already present."
             self.dialogues.update(
                 {self_initiated_dialogue.dialogue_label: self_initiated_dialogue}
             )
 
-    def _get_dialogue(self, message: Message) -> Optional[Dialogue]:
+    def get_dialogue(self, message: Message) -> Optional[Dialogue]:
         """
         Retrieve the dialogue 'message' belongs to.
 
         :param message: a message
         :return: the dialogue, or None in case such a dialogue does not exist
         """
-        dialogue_reference = cast(Tuple[str, str], message.get("dialogue_reference"))
+        dialogue_reference = message.dialogue_reference
         counterparty = message.counterparty
 
         self_initiated_dialogue_label = DialogueLabel(
