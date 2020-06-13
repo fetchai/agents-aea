@@ -20,6 +20,7 @@
 """This module contains utilities for building an AEA."""
 import itertools
 import logging
+import logging.config
 import os
 import pprint
 from copy import copy, deepcopy
