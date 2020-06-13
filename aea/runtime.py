@@ -137,8 +137,8 @@ class AsyncRuntime(BaseRuntime):
             raise ValueError("Runtime already started!")
 
         asyncio.set_event_loop(self._loop)
-        self._agent._multiplexer.set_loop(self._loop)
-        self._agent._main_loop.set_loop(self._loop)
+        self._agent.multiplexer.set_loop(self._loop)
+        self._agent.main_loop.set_loop(self._loop)
 
         self._state.set(RuntimeStates.started)
 
@@ -163,7 +163,7 @@ class AsyncRuntime(BaseRuntime):
         try:
             self._state.set(RuntimeStates.starting)
             await self._start_multiplexer()
-            self._agent._start_setup()
+            self._agent.start_setup()
             await self._start_agent_loop()
         except Exception:
             logger.exception("AsyncRuntime exception during run:")
@@ -174,17 +174,17 @@ class AsyncRuntime(BaseRuntime):
 
     async def _multiplexer_disconnect(self) -> None:
         """Call multiplexer disconnect asynchronous way."""
-        await AsyncMultiplexer.disconnect(self._agent._multiplexer)
+        await AsyncMultiplexer.disconnect(self._agent.multiplexer)
 
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""
-        await AsyncMultiplexer.connect(self._agent._multiplexer)
+        await AsyncMultiplexer.connect(self._agent.multiplexer)
 
     async def _start_agent_loop(self) -> None:
         """Start agent main loop asynchronous way."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self._state.set(RuntimeStates.started)
-        await self._agent._main_loop._run_loop()
+        await self._agent.main_loop._run_loop()
 
     async def _stop_runtime(self) -> None:
         """
@@ -204,11 +204,11 @@ class AsyncRuntime(BaseRuntime):
                     return
 
                 self._state.set(RuntimeStates.stopping)
-                self._agent._main_loop.stop()
+                self._agent.main_loop.stop()
 
                 try:
-                    await self._agent._main_loop._wait_run_loop_stopped()
-                except BaseException:  # nosec
+                    await self._agent.main_loop.wait_run_loop_stopped()
+                except BaseException:  # nosec # pylint: disable=broad-except
                     # on stop we do not care about exceptions here, it should be raised in _start.
                     pass  # nosec
 
@@ -237,7 +237,7 @@ class AsyncRuntime(BaseRuntime):
             try:
                 # dummy spin to cleanup some stuff if it was interrupted
                 self._loop.run_until_complete(asyncio.sleep(0.01))
-            except BaseException:  # nosec
+            except BaseException:  # nosec # pylint: disable=broad-except
                 pass  # nosec
 
             self._loop.run_until_complete(self._stop_runtime())
@@ -259,21 +259,21 @@ class ThreadedRuntime(BaseRuntime):
         self._agent.multiplexer.set_loop(asyncio.new_event_loop())
 
         self._agent.multiplexer.connect()
-        self._agent._start_setup()
+        self._agent.start_setup()
         self._start_agent_loop()
 
     def _start_agent_loop(self) -> None:
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         try:
             self._state.set(RuntimeStates.started)
-            self._agent._main_loop.start()
+            self._agent.main_loop.start()
         finally:
             self._state.set(RuntimeStates.loop_stopped)
 
     def _stop(self) -> None:
         """Implement runtime stop function here."""
         self._state.set(RuntimeStates.stopping)
-        self._agent._main_loop.stop()
+        self._agent.main_loop.stop()
         self._teardown()
         self._agent.multiplexer.disconnect()
         logger.debug("[{}]: Runtime stopped".format(self._agent.name))

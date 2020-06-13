@@ -82,7 +82,7 @@ class BaseAgentLoop(ABC):
         try:
             await self._gather_tasks()
         except (CancelledError, KeyboardInterrupt):
-            await self._wait_run_loop_stopped()
+            await self.wait_run_loop_stopped()
             if self._exceptions:
                 raise self._exceptions[0]
         logger.debug("agent loop stopped")
@@ -97,7 +97,7 @@ class BaseAgentLoop(ABC):
         """Set run loop tasks."""
         raise NotImplementedError
 
-    async def _wait_run_loop_stopped(self) -> None:
+    async def wait_run_loop_stopped(self) -> None:
         """Wait all tasks stopped."""
         return await asyncio.gather(
             *self._tasks, loop=self._loop, return_exceptions=True
@@ -113,7 +113,7 @@ class BaseAgentLoop(ABC):
 
             async def stop():
                 self._stop_tasks()
-                await self._wait_run_loop_stopped()
+                await self.wait_run_loop_stopped()
 
             self._loop.run_until_complete(stop())
 
@@ -188,8 +188,8 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         periodic_caller = PeriodicCaller(
             partial(self._agent._execution_control, behaviour.act_wrapper, behaviour),
-            behaviour._tick_interval,
-            behaviour._start_at,
+            behaviour.tick_interval,
+            behaviour.start_at,
             self._behaviour_exception_callback,
             self._loop,
         )
@@ -199,7 +199,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     def _register_all_behaviours(self) -> None:
         """Register all AEA behaviours to run periodically."""
-        for behaviour in self._agent._get_active_behaviours():
+        for behaviour in self._agent.active_behaviours:
             self._register_behaviour(behaviour)
 
     def _unregister_behaviour(self, behaviour: Behaviour) -> None:
@@ -250,7 +250,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     async def _task_process_inbox(self) -> None:
         """Process incoming messages."""
-        inbox: InBox = self._agent._inbox
+        inbox: InBox = self._agent.inbox
         logger.info("[{}]: Start processing messages...".format(self._agent.name))
         while self.is_running:
             await inbox.async_wait()
@@ -266,13 +266,13 @@ class AsyncAgentLoop(BaseAgentLoop):
         while self.is_running:
             msg = await queue.async_get()
             # TODO: better interaction with agent's internal messages
-            self._agent._filter._process_internal_message(msg)  # type: ignore # mypy can not determine type of _filter
+            self._agent.filter._process_internal_message(msg)
 
     async def _task_process_new_behaviours(self) -> None:
         """Process new behaviours added to skills in runtime."""
         while self.is_running:
             # TODO: better handling internal messages for skills internal updates
-            self._agent._filter._handle_new_behaviours()  # type: ignore # mypy can not determine type of _filter
+            self._agent.filter._handle_new_behaviours()
             self._register_all_behaviours()  # re register, cause new may appear
             await asyncio.sleep(self.NEW_BEHAVIOURS_PROCESS_SLEEP)
 
@@ -295,7 +295,7 @@ class SyncAgentLoop(BaseAgentLoop):
         """Run loop inside coroutine but call synchronous callbacks from agent."""
         while self.is_running:
             self._spin_main_loop()
-            await asyncio.sleep(self._agent._timeout)
+            await asyncio.sleep(self._agent.timeout)
 
     def _spin_main_loop(self) -> None:
         """Run one spin of agent loop: act, react, update."""

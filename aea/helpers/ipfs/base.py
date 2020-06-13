@@ -44,9 +44,7 @@ def _dos2unix(file_content: bytes) -> bytes:
 
 
 class IPFSHashOnly:
-    """
-    A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon.
-    """
+    """A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon."""
 
     def get(self, file_path: str) -> str:
         """

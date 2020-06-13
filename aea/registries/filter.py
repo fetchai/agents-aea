@@ -147,7 +147,7 @@ class Filter:
             while not skill.skill_context.new_behaviours.empty():
                 new_behaviour = skill.skill_context.new_behaviours.get()
                 try:
-                    self.resources._behaviour_registry.register(
+                    self.resources.behaviour_registry.register(
                         (skill.skill_context.skill_id, new_behaviour.name),
                         new_behaviour,
                     )
@@ -160,7 +160,7 @@ class Filter:
         """Handle transaction message from the Decision Maker."""
         skill_callback_ids = tx_message.skill_callback_ids
         for skill_id in skill_callback_ids:
-            handler = self.resources._handler_registry.fetch_internal_handler(skill_id)
+            handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
             if handler is not None:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)

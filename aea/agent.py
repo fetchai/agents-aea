@@ -198,11 +198,16 @@ class Agent(ABC):
     @property
     def tick(self) -> int:
         """
-        Get the tick (or agent loop count).
+        Get the tick or agent loop count.
 
         Each agent loop (one call to each one of act(), react(), update()) increments the tick.
         """
         return self._tick
+
+    @property
+    def timeout(self) -> float:
+        """Get the time in (fractions of) seconds to time out an agent between act and react."""
+        return self._timeout
 
     @property
     def agent_state(self) -> AgentState:
@@ -229,6 +234,11 @@ class Agent(ABC):
         """Get the agent loop mode."""
         return self._loop_mode
 
+    @property
+    def main_loop(self) -> BaseAgentLoop:
+        """Get the main agent loop."""
+        return self._main_loop
+
     def start(self) -> None:
         """
         Start the agent.
@@ -254,7 +264,7 @@ class Agent(ABC):
         """
         self._runtime.start()
 
-    def _start_setup(self) -> None:
+    def start_setup(self) -> None:
         """
         Set up Agent on start.
 

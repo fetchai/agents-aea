@@ -146,12 +146,10 @@ class TestDialogueBase:
         assert self.dialogue.last_incoming_message is None
         assert self.dialogue.last_outgoing_message is None
 
-        self.dialogue.outgoing_extend(message=msg)
-        assert b"Hello" == self.dialogue._outgoing_messages[0].get("content")
+        self.dialogue._outgoing_messages.extend([msg])
         assert self.dialogue.last_outgoing_message == msg
 
-        self.dialogue.incoming_extend(message=msg)
-        assert b"Hello" == self.dialogue._incoming_messages[0].get("content")
+        self.dialogue._incoming_messages.extend([msg])
         assert self.dialogue.last_incoming_message == msg
 
     def test_dialogues(self):

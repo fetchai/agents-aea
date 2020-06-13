@@ -71,7 +71,7 @@ def load_component_from_config(  # type: ignore
         return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         _handle_error_while_loading_component_generic_error(configuration, e)
 
 

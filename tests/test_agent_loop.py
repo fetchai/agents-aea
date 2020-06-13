@@ -108,15 +108,16 @@ class AsyncFakeAgent:
         self.behaviours = behaviours or []
         self._inbox = AsyncFriendlyQueue()
         self.inbox = self._inbox
-        self._filter = MagicMock()
-        self._filter._process_internal_message = MagicMock()
-        self._filter._handle_new_behaviours = MagicMock()
+        self.filter = MagicMock()
+        self.filter._process_internal_message = MagicMock()
+        self.filter._handle_new_behaviours = MagicMock()
         self.decision_maker = MagicMock()
 
         self.decision_maker.message_out_queue = AsyncFriendlyQueue()
-        self._timeout = 0.001
+        self.timeout = 0.001
 
-    def _get_active_behaviours(self) -> List[Behaviour]:
+    @property
+    def active_behaviours(self) -> List[Behaviour]:
         """Return all behaviours."""
         return self.behaviours
 
@@ -154,8 +155,8 @@ class AsyncFakeAgent:
 
     def update(self) -> None:
         """Call internal messages handle and add behaviours handler."""
-        self._filter._process_internal_message()
-        self._filter._handle_new_behaviours()
+        self.filter._process_internal_message()
+        self.filter._handle_new_behaviours()
 
     def _execution_control(
         self,
@@ -245,7 +246,7 @@ class TestAsyncAgentLoop:
             wait_for_condition(lambda: agent_loop.is_running, timeout=10)
             agent.put_internal_message("msg")
             wait_for_condition(
-                lambda: agent._filter._process_internal_message.called is True,
+                lambda: agent.filter._process_internal_message.called is True,
                 timeout=5,
             )
             agent_loop.stop()
@@ -259,7 +260,7 @@ class TestAsyncAgentLoop:
         with run_in_thread(agent_loop.start, timeout=5):
             wait_for_condition(lambda: agent_loop.is_running, timeout=10)
             wait_for_condition(
-                lambda: agent._filter._handle_new_behaviours.call_count >= 2,
+                lambda: agent.filter._handle_new_behaviours.call_count >= 2,
                 timeout=agent_loop.NEW_BEHAVIOURS_PROCESS_SLEEP * 3,
             )
             agent_loop.stop()

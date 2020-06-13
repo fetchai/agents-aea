@@ -28,6 +28,8 @@ from pathlib import Path
 import jsonschema
 from jsonschema import Draft4Validator
 
+import pytest
+
 from aea.cli import cli
 from aea.configurations.loader import make_jsonschema_base_uri
 from aea.test_tools.click_testing import CliRunner
@@ -37,6 +39,7 @@ from ..conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
+    MAX_FLAKY_RERUNS,
 )
 
 
@@ -66,6 +69,7 @@ class TestFreeze:
         """Assert that the exit code is equal to zero (i.e. success)."""
         assert self.result.exit_code == 0
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         assert self.result.output == """protobuf\nvyper==0.1.0b12\n"""

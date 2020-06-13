@@ -159,7 +159,7 @@ class ConfigLoader(Generic[T]):
             raise
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
-        configuration_obj._key_order = key_order
+        configuration_obj._key_order = key_order  # pylint: disable=protected-access
         return configuration_obj
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
