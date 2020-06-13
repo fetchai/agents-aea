@@ -53,24 +53,27 @@ class AbstractExecutorTask(ABC):
         """Return awaitable to get result of task execution."""
         return self._future
 
-    def set_future(self, future: Awaitable) -> None:
+    @future.setter
+    def future(self, future: Awaitable) -> None:
         """Set awaitable to get result of task execution."""
         self._future = future
 
     @abstractmethod
     def start(self):
         """Implement start task function here."""
-        pass
 
     @abstractmethod
     def stop(self) -> None:
         """Implement stop task function here."""
-        pass
 
     @abstractmethod
     def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
-        """Return asyncio Task for task run in asyncio loop."""
-        pass
+        """
+        Create asyncio task for task run in asyncio loop.
+
+        :param loop: the event loop
+        :return: task to run in asyncio loop.
+        """
 
     @property
     def id(self) -> Any:
@@ -84,10 +87,16 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
     @abstractmethod
     def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Return function and arguments to call within subprocess."""
-        pass
 
     def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
-        """Raise error, cause async mode is not supported, cause this task for multiprocess executor only."""
+        """
+        Create asyncio task for task run in asyncio loop.
+
+        Raise error, cause async mode is not supported, cause this task for multiprocess executor only.
+
+        :param loop: the event loop
+        :return: task to run in asyncio loop.
+        """
         raise ValueError(
             "This task was designed only for multiprocess executor, not for async!"
         )
@@ -105,6 +114,7 @@ class AbstractMultipleExecutor(ABC):
         Init executor.
 
         :param tasks: sequence of AbstractExecutorTask instances to run.
+        :param task_fail_policy: the exception policy of all the tasks
         """
         self._task_fail_policy: ExecutorExceptionPolicies = task_fail_policy
         self._tasks: Sequence[AbstractExecutorTask] = tasks
@@ -139,7 +149,7 @@ class AbstractMultipleExecutor(ABC):
         """Schedule tasks."""
         for task in self._tasks:
             future = self._start_task(task)
-            task.set_future(future)
+            task.future = future
             self._future_task[future] = task
 
     async def _wait_tasks_complete(self, skip_exceptions: bool = False) -> None:
@@ -177,7 +187,6 @@ class AbstractMultipleExecutor(ABC):
 
         :param task: task exception handled in
         :param exc: Exception raised
-
         :return: None
         """
         logger.exception(f"Exception raised during {task.id} running.")
@@ -187,7 +196,7 @@ class AbstractMultipleExecutor(ABC):
             pass
         elif self._task_fail_policy == ExecutorExceptionPolicies.stop_all:
             logger.info(
-                f"Stopping executor  according to fail policy cause exception raised in task"
+                "Stopping executor according to fail policy cause exception raised in task"
             )
             self.stop()
             await self._wait_tasks_complete(skip_exceptions=True)
@@ -300,7 +309,6 @@ class AbstractMultipleRunner:
         Run agents.
 
         :param threaded: run in dedicated thread without blocking current thread.
-
         :return: None
         """
         self._is_running = True

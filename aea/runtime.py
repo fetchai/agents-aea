@@ -164,7 +164,7 @@ class AsyncRuntime(BaseRuntime):
         self._thread = threading.current_thread()
 
         logger.debug(f"Start runtime event loop {self._loop}: {id(self._loop)}")
-        self._task = self._loop.create_task(self._run_runtime())
+        self._task = self._loop.create_task(self.run_runtime())
 
         try:
             self._loop.run_until_complete(self._task)
@@ -176,7 +176,7 @@ class AsyncRuntime(BaseRuntime):
         finally:
             self._stopping_task = None
 
-    async def _run_runtime(self) -> None:
+    async def run_runtime(self) -> None:
         """Run agent and starts multiplexer."""
         try:
             self._state.set(RuntimeStates.starting)
@@ -202,7 +202,7 @@ class AsyncRuntime(BaseRuntime):
         """Start agent main loop asynchronous way."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self._state.set(RuntimeStates.started)
-        await self._agent.main_loop._run_loop()
+        await self._agent.main_loop.run_loop()
 
     async def _stop_runtime(self) -> None:
         """

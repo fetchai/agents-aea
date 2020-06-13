@@ -19,7 +19,7 @@
 """This module contains the implementation of AEA multiple instances runner."""
 
 from asyncio.events import AbstractEventLoop
-from typing import Awaitable, Dict, Sequence, Type, cast
+from typing import Awaitable, Dict, Sequence, Type
 
 from aea.aea import AEA
 from aea.helpers.multiple_executor import (
@@ -45,22 +45,27 @@ class AEAInstanceTask(AbstractExecutorTask):
         self._agent = agent
         super().__init__()
 
-    def start(self):
+    def start(self) -> None:
         """Start task."""
         self._agent.start()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop task."""
         self._agent.stop()
 
     def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
-        """Return asyncio Task for task run in asyncio loop."""
-        self._agent._runtime.set_loop(loop)
-        if not hasattr(self._agent._runtime, "_run_runtime"):
+        """
+        Return asyncio Task for task run in asyncio loop.
+
+        :param loop: abstract event loop
+        :return: task to run runtime
+        """
+        self._agent.runtime.set_loop(loop)
+        if not isinstance(self._agent.runtime, AsyncRuntime):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(cast(AsyncRuntime, self._agent._runtime)._run_runtime())
+        return loop.create_task(self._agent.runtime.run_runtime())
 
     @property
     def id(self):

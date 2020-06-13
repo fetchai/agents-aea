@@ -22,7 +22,7 @@ from asyncio.events import AbstractEventLoop
 from multiprocessing.synchronize import Event
 from os import PathLike
 from threading import Thread
-from typing import Any, Awaitable, Callable, Dict, Sequence, Tuple, Type, Union, cast
+from typing import Any, Awaitable, Callable, Dict, Sequence, Tuple, Type, Union
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -104,12 +104,12 @@ class AEADirTask(AbstractExecutorTask):
 
     def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
         """Return asyncio Task for task run in asyncio loop."""
-        self._agent._runtime.set_loop(loop)
-        if not hasattr(self._agent._runtime, "_run_runtime"):
+        self._agent.runtime.set_loop(loop)
+        if not isinstance(self._agent.runtime, AsyncRuntime):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(cast(AsyncRuntime, self._agent._runtime)._run_runtime())
+        return loop.create_task(self._agent.runtime.run_runtime())
 
     @property
     def id(self) -> Union[PathLike, str]:
@@ -160,23 +160,23 @@ class AEALauncher(AbstractMultipleRunner):
 
     def __init__(
         self,
-        agents: Sequence[Union[PathLike, str]],
+        agent_dirs: Sequence[Union[PathLike, str]],
         mode: str,
         fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
     ) -> None:
         """
         Init AEARunner.
 
-        :param agents: sequence of AEA config directories.
+        :param agent_dirs: sequence of AEA config directories.
         :param mode: executor name to use.
         :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
         """
-        self._agents = agents
+        self._agent_dirs = agent_dirs
         super().__init__(mode=mode, fail_policy=fail_policy)
 
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
         """Make tasks to run with executor."""
         if self._mode == "multiprocess":
-            return [AEADirMultiprocessTask(agent) for agent in self._agents]
+            return [AEADirMultiprocessTask(agent_dir) for agent_dir in self._agent_dirs]
         else:
-            return [AEADirTask(agent) for agent in self._agents]
+            return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
