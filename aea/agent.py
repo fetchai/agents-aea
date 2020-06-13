@@ -266,6 +266,7 @@ class Agent(ABC):
 
         :return: None
         """
+        self.connect()
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
         self.liveness.start()

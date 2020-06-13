@@ -75,7 +75,7 @@ class AEA(Agent):
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         default_connection: Optional[PublicId] = None,
-        default_routing: Dict[PublicId, PublicId] = None,
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
         **kwargs,
     ) -> None:
