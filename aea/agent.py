@@ -121,7 +121,6 @@ class Agent(ABC):
         self.is_debug = is_debug
 
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
-
         loop_cls = self._get_main_loop_class()
         self._main_loop: BaseAgentLoop = loop_cls(self)
 
@@ -132,12 +131,12 @@ class Agent(ABC):
     @property
     def is_running(self):
         """Get running state of the runtime and agent."""
-        return self._runtime.is_running
+        return self.runtime.is_running
 
     @property
     def is_stopped(self):
         """Get running state of the runtime and agent."""
-        return self._runtime.is_stopped
+        return self.runtime.is_stopped
 
     def _get_main_loop_class(self) -> Type[BaseAgentLoop]:
         """Get main loop class based on loop mode."""
@@ -239,6 +238,11 @@ class Agent(ABC):
         """Get the main agent loop."""
         return self._main_loop
 
+    @property
+    def runtime(self) -> BaseRuntime:
+        """Get the runtime."""
+        return self._runtime
+
     def start(self) -> None:
         """
         Start the agent.
@@ -262,7 +266,7 @@ class Agent(ABC):
 
         :return: None
         """
-        self._runtime.start()
+        self.runtime.start()
 
     def start_setup(self) -> None:
         """
@@ -290,7 +294,7 @@ class Agent(ABC):
 
         :return: None
         """
-        self._runtime.stop()
+        self.runtime.stop()
 
     @abstractmethod
     def setup(self) -> None:

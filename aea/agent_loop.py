@@ -72,9 +72,9 @@ class BaseAgentLoop(ABC):
 
     def start(self) -> None:
         """Start agent loop synchronously in own asyncio loop."""
-        self._loop.run_until_complete(self._run_loop())
+        self._loop.run_until_complete(self.run_loop())
 
-    async def _run_loop(self) -> None:
+    async def run_loop(self) -> None:
         """Run agent loop."""
         logger.debug("agent loop started")
         self._state.set(AgentLoopStates.started)
