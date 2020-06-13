@@ -286,6 +286,23 @@ class AEABuilder:
 
         :param with_default_packages: add the default packages.
         """
+        self._with_default_packages = with_default_packages
+        self._reset()
+
+    def reset(self) -> None:
+        """
+        Reset the builder.
+
+        :return: None
+        """
+        self._reset()
+
+    def _reset(self) -> None:
+        """
+        Reset the builder (private usage).
+
+        :return: None.
+        """
         self._name = None  # type: Optional[str]
         self._private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._connection_private_key_paths = {}  # type: Dict[str, Optional[str]]
@@ -313,8 +330,11 @@ class AEABuilder:
             ComponentType.SKILL: {},
         }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
 
-        if with_default_packages:
+        if self._with_default_packages:
             self._add_default_packages()
+
+        self._to_reset: bool = False
+        self._build_called: bool = False
 
     def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
         """
@@ -499,6 +519,8 @@ class AEABuilder:
             self._private_key_paths[identifier] = (
                 str(private_key_path) if private_key_path is not None else None
             )
+        if private_key_path is not None:
+            self._to_reset = True
         return self
 
     def remove_private_key(
@@ -600,6 +622,7 @@ class AEABuilder:
 
         :params component: Component instance already initialized.
         """
+        self._to_reset = True
         self._check_can_add(component.configuration)
         # update dependency graph
         self._package_dependency_manager.add_component(component.configuration)
@@ -793,7 +816,9 @@ class AEABuilder:
         :param connection_ids: select only these connections to run the AEA.
         :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
+        :raises ValueError: if we cannot
         """
+        self._check_we_can_build()
         resources = Resources()
         wallet = Wallet(
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
@@ -831,6 +856,7 @@ class AEABuilder:
         self._load_and_add_components(
             ComponentType.SKILL, resources, agent_context=aea.context
         )
+        self._build_called = True
         return aea
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
@@ -1215,6 +1241,14 @@ class AEABuilder:
                     component_type, configuration, **kwargs
                 )
             resources.add_component(component)
+
+    def _check_we_can_build(self):
+        if self._build_called and self._to_reset:
+            raise ValueError(
+                "Cannot build the agent; You have done one of the following:\n"
+                "- added a component instance;\n"
+                "- added a private key manually."
+            )
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
