@@ -343,9 +343,9 @@ class ConstraintType:
         """
         self.type = ConstraintTypes(type)
         self.value = value
-        assert self._check_validity(), "ConstraintType initialization inconsistent."
+        assert self.check_validity(), "ConstraintType initialization inconsistent."
 
-    def _check_validity(self):
+    def check_validity(self):
         """
         Check the validity of the input provided.
 
@@ -508,7 +508,7 @@ class ConstraintExpr(ABC):
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
         """
 
-    def _check_validity(self) -> None:
+    def check_validity(self) -> None:
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 
@@ -547,7 +547,7 @@ class And(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def _check_validity(self):
+    def check_validity(self):
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -560,7 +560,7 @@ class And(ConstraintExpr):
                 "subexpression must be at least 2.".format(type(self).__name__)
             )
         for constraint in self.constraints:
-            constraint._check_validity()  # pylint: disable=protected-access
+            constraint.check_validity()
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -596,7 +596,7 @@ class Or(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def _check_validity(self):
+    def check_validity(self):
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -609,7 +609,7 @@ class Or(ConstraintExpr):
                 "subexpression must be at least 2.".format(type(self).__name__)
             )
         for constraint in self.constraints:
-            constraint._check_validity()  # pylint: disable=protected-access
+            constraint.check_validity()
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -764,7 +764,7 @@ class Query:
         """
         self.constraints = constraints
         self.model = model
-        self._check_validity()
+        self.check_validity()
 
     def check(self, description: Description) -> bool:
         """
@@ -788,7 +788,7 @@ class Query:
 
         return all(c.is_valid(data_model) for c in self.constraints)
 
-    def _check_validity(self):
+    def check_validity(self):
         """
         Check whether the` object is valid.
 

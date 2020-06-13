@@ -218,7 +218,7 @@ class OwnershipState(BaseOwnershipState):
             result = False
         return result
 
-    def _update(self, tx_message: TransactionMessage) -> None:
+    def update(self, tx_message: TransactionMessage) -> None:
         """
         Update the agent state from a transaction.
 
@@ -246,7 +246,7 @@ class OwnershipState(BaseOwnershipState):
         """
         new_state = copy.copy(self)
         for tx_message in transactions:
-            new_state._update(tx_message)  # pylint: disable=protected-access
+            new_state.update(tx_message)
 
         return new_state
 
