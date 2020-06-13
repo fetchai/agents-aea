@@ -220,7 +220,7 @@ class AbstractMultipleExecutor(ABC):
         """
         Stop particular task.
 
-        :param agent: AbstractExecutorTask instance to stop.
+        :param task: AbstractExecutorTask instance to stop.
         :return: None
         """
         task.stop()
@@ -336,7 +336,6 @@ class AbstractMultipleRunner:
         """
         Make an executor instance to run agents with.
 
-        :param agents: AEA instances to  run.
         :param mode: executor mode to use.
         :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
 

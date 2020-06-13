@@ -233,9 +233,9 @@ class Agent(ABC):
         """Get the agent loop mode."""
         return self._loop_mode
 
-    def connect(self) -> None:
-        """Connect the agent."""
-        self.multiplexer.connect()
+    def setup_multiplexer(self) -> None:
+        """Set up the multiplexer"""
+        # implemented in AEA class
 
     @property
     def main_loop(self) -> BaseAgentLoop:
@@ -280,7 +280,6 @@ class Agent(ABC):
 
         :return: None
         """
-        self.connect()
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
         self.liveness.start()

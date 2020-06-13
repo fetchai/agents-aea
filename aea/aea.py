@@ -164,8 +164,8 @@ class AEA(Agent):
         """Get the task manager."""
         return self._task_manager
 
-    def connect(self) -> None:
-        """Connect the multiplexer."""
+    def setup_multiplexer(self) -> None:
+        """Set up the multiplexer"""
         connections = self.resources.get_all_connections()
         if self._connection_ids is not None:
             connections = [
@@ -176,7 +176,6 @@ class AEA(Agent):
             default_routing=self.context.default_routing,
             default_connection=self.context.default_connection,
         )
-        super().connect()
 
     @property
     def filter(self) -> Filter:
