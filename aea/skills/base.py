@@ -656,7 +656,7 @@ class Skill(Component):
             SkillConfig,
             ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
-        configuration._directory = Path(directory)  # pylint: disable=protected-access
+        configuration.directory = Path(directory)
         return Skill.from_config(configuration, skill_context)
 
     @classmethod

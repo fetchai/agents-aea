@@ -314,7 +314,7 @@ class Protocol(Component):
             ProtocolConfig,
             ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
         )
-        configuration._directory = Path(directory)  # pylint: disable=protected-access
+        configuration.directory = Path(directory)
         return Protocol.from_config(configuration)
 
     @classmethod

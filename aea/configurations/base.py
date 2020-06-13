@@ -670,6 +670,12 @@ class PackageConfiguration(Configuration, ABC):
         """Get the path to the configuration file associated to this file, if any."""
         return self._directory
 
+    @directory.setter
+    def directory(self, directory: Path) -> None:
+        """Set directory if not already set."""
+        assert self._directory is None, "Directory already set"
+        self._directory = directory
+
     def _parse_aea_version_specifier(self, aea_version_specifiers: str) -> SpecifierSet:
         try:
             Version(aea_version_specifiers)

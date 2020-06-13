@@ -589,7 +589,7 @@ class AEABuilder:
         self._check_can_add(configuration)
         # update dependency graph
         self._package_dependency_manager.add_component(configuration)
-        configuration._directory = directory  # pylint: disable=protected-access
+        configuration.directory = directory
 
         return self
 

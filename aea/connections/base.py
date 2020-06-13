@@ -209,7 +209,7 @@ class Connection(Component, ABC):
             ConnectionConfig,
             ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
         )
-        configuration._directory = Path(directory)  # pylint: disable=protected-access
+        configuration.directory = Path(directory)
         return Connection.from_config(configuration, identity, crypto_store)
 
     @classmethod
