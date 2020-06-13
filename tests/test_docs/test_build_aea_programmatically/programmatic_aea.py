@@ -77,7 +77,6 @@ def run():
             """Handle incoming message."""
             self.context.logger.info("You got a message: {}".format(str(message)))
 
-    # TODO
     config = SkillConfig(name="test_skill", author="fetchai")
     skill = Skill(configuration=config)
     dummy_handler = DummyHandler(
