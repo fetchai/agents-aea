@@ -1247,7 +1247,8 @@ class AEABuilder:
             raise ValueError(
                 "Cannot build the agent; You have done one of the following:\n"
                 "- added a component instance;\n"
-                "- added a private key manually."
+                "- added a private key manually.\n"
+                "Please call 'reset() if you want to build another agent."
             )
 
 
