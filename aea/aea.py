@@ -178,6 +178,16 @@ class AEA(Agent):
         )
         super().connect()
 
+    @property
+    def filter(self) -> Filter:
+        """Get the filter."""
+        return self._filter
+
+    @property
+    def active_behaviours(self) -> List[Behaviour]:
+        """Get all active behaviours to use in act."""
+        return self.filter.get_active_behaviours()
+
     def setup(self) -> None:
         """
         Set up the agent.
@@ -204,7 +214,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self._get_active_behaviours():
+        for behaviour in self.active_behaviours:
             self._behaviour_act(behaviour)
 
     def react(self) -> None:
@@ -274,7 +284,7 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        handlers = self._filter.get_active_handlers(
+        handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.skill_id
         )
         if len(handlers) == 0:
@@ -334,7 +344,7 @@ class AEA(Agent):
                     fn, component, self._execution_timeout
                 )
             )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
                 raise
             elif self._skills_exception_policy == ExceptionPolicyEnum.just_log:
@@ -350,10 +360,6 @@ class AEA(Agent):
                     f"Unsupported exception policy: {self._skills_exception_policy}"
                 )
 
-    def _get_active_behaviours(self) -> List[Behaviour]:
-        """Get all active behaviours to use in act."""
-        return self._filter.get_active_behaviours()
-
     def update(self) -> None:
         """
         Update the current state of the agent.
@@ -362,7 +368,7 @@ class AEA(Agent):
 
         :return None
         """
-        self._filter.handle_internal_messages()
+        self.filter.handle_internal_messages()
 
     def teardown(self) -> None:
         """

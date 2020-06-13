@@ -42,22 +42,24 @@ aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.4.0"
 ```
 ``` yaml
 config:
-  libp2p_entry_peers: MULTI_ADDRESSES
-  libp2p_host: 0.0.0.0
-  libp2p_log_file: libp2p_node.log
-  libp2p_port: 9001
-```
-``` yaml
-config:
-  libp2p_entry_peers: MULTI_ADDRESSES
-  libp2p_host: 0.0.0.0
-  libp2p_log_file: libp2p_node.log
-  libp2p_port: 9001
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: MULTI_ADDRESSES
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
 ```
 ``` yaml
 default_routing:
   ? "fetchai/oef_search:0.2.0"
   : "fetchai/oef:0.4.0"
+```
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: MULTI_ADDRESSES
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
 ```
 ```yaml
 /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
@@ -66,8 +68,9 @@ default_routing:
 ```
 ``` yaml
 config:
-  libp2p_entry_peers: [/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx, /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW, /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9002/p2p/16Uiu2HAmNJ8ZPRaXgYjhFf8xo8RBTX8YoUU5kzTW7Z4E5J3x9L1t]
-  libp2p_host: 0.0.0.0
-  libp2p_log_file: libp2p_node.log
-  libp2p_port: 9001
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: [/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx, /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW, /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9002/p2p/16Uiu2HAmNJ8ZPRaXgYjhFf8xo8RBTX8YoUU5kzTW7Z4E5J3x9L1t]
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
 ```

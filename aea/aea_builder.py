@@ -20,6 +20,7 @@
 """This module contains utilities for building an AEA."""
 import itertools
 import logging
+import logging.config
 import os
 import pprint
 from copy import copy, deepcopy
@@ -608,7 +609,7 @@ class AEABuilder:
         self._check_can_add(configuration)
         # update dependency graph
         self._package_dependency_manager.add_component(configuration)
-        configuration._directory = directory
+        configuration.directory = directory
 
         return self
 
@@ -875,7 +876,7 @@ class AEABuilder:
 
     def _check_consistent(self, ledger_apis: LedgerApis) -> None:
         """
-        Check the ledger apis are consistent with the configs
+        Check the ledger apis are consistent with the configs.
 
         :param ledger_apis: the ledger apis provided
         :return: None
@@ -926,7 +927,7 @@ class AEABuilder:
 
     def _get_decision_maker_handler_class(self) -> Type[DecisionMakerHandler]:
         """
-        Return the decision maker handler class
+        Return the decision maker handler class.
 
         :return: decision maker handler class
         """
@@ -950,7 +951,7 @@ class AEABuilder:
 
     def _get_default_routing(self) -> Dict[PublicId, PublicId]:
         """
-        Return the default routing
+        Return the default routing.
 
         :return: the default routing
         """
@@ -966,7 +967,7 @@ class AEABuilder:
 
     def _get_loop_mode(self) -> str:
         """
-        Return the loop mode name
+        Return the loop mode name.
 
         :return: the loop mode name
         """
@@ -976,7 +977,7 @@ class AEABuilder:
 
     def _get_runtime_mode(self) -> str:
         """
-        Return the runtime mode name
+        Return the runtime mode name.
 
         :return: the runtime mode name
         """
@@ -986,7 +987,16 @@ class AEABuilder:
             else self.DEFAULT_RUNTIME_MODE
         )
 
-    def _check_configuration_not_already_added(self, configuration) -> None:
+    def _check_configuration_not_already_added(
+        self, configuration: ComponentConfiguration
+    ) -> None:
+        """
+        Check the component configuration has not already been added.
+
+        :param configuration: the configuration being added
+        :return: None
+        :raises AEAException: if the component is already present.
+        """
         if (
             configuration.component_id
             in self._package_dependency_manager.all_dependencies
@@ -1021,8 +1031,7 @@ class AEABuilder:
 
     def _check_pypi_dependencies(self, configuration: ComponentConfiguration):
         """
-        Check that PyPI dependencies of a package don't conflict with
-        the existing ones.
+        Check that PyPI dependencies of a package don't conflict with the existing ones.
 
         :param configuration: the component configuration.
         :return: None
@@ -1088,7 +1097,7 @@ class AEABuilder:
                 )
             )
 
-    def _set_from_configuration(
+    def set_from_configuration(
         self,
         agent_configuration: AgentConfig,
         aea_project_path: Path,
@@ -1214,7 +1223,7 @@ class AEABuilder:
         loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
-        builder._set_from_configuration(
+        builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check
         )
         return builder

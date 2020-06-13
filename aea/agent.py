@@ -121,7 +121,6 @@ class Agent(ABC):
         self.is_debug = is_debug
 
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
-
         loop_cls = self._get_main_loop_class()
         self._main_loop: BaseAgentLoop = loop_cls(self)
 
@@ -132,12 +131,12 @@ class Agent(ABC):
     @property
     def is_running(self):
         """Get running state of the runtime and agent."""
-        return self._runtime.is_running
+        return self.runtime.is_running
 
     @property
     def is_stopped(self):
         """Get running state of the runtime and agent."""
-        return self._runtime.is_stopped
+        return self.runtime.is_stopped
 
     def _get_main_loop_class(self) -> Type[BaseAgentLoop]:
         """Get main loop class based on loop mode."""
@@ -198,11 +197,16 @@ class Agent(ABC):
     @property
     def tick(self) -> int:
         """
-        Get the tick (or agent loop count).
+        Get the tick or agent loop count.
 
         Each agent loop (one call to each one of act(), react(), update()) increments the tick.
         """
         return self._tick
+
+    @property
+    def timeout(self) -> float:
+        """Get the time in (fractions of) seconds to time out an agent between act and react."""
+        return self._timeout
 
     @property
     def agent_state(self) -> AgentState:
@@ -233,6 +237,16 @@ class Agent(ABC):
         """Connect the agent."""
         self.multiplexer.connect()
 
+    @property
+    def main_loop(self) -> BaseAgentLoop:
+        """Get the main agent loop."""
+        return self._main_loop
+
+    @property
+    def runtime(self) -> BaseRuntime:
+        """Get the runtime."""
+        return self._runtime
+
     def start(self) -> None:
         """
         Start the agent.
@@ -254,9 +268,9 @@ class Agent(ABC):
 
         :return: None
         """
-        self._runtime.start()
+        self.runtime.start()
 
-    def _start_setup(self) -> None:
+    def start_setup(self) -> None:
         """
         Set up Agent on start.
 
@@ -283,7 +297,7 @@ class Agent(ABC):
 
         :return: None
         """
-        self._runtime.stop()
+        self.runtime.stop()
 
     @abstractmethod
     def setup(self) -> None:

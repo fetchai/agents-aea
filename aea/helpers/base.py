@@ -99,7 +99,7 @@ def _get_module(spec):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         return None
 
 
@@ -232,6 +232,7 @@ class RegexConstrainedString(UserString):
     REGEX = re.compile(".*", flags=re.DOTALL)
 
     def __init__(self, seq):
+        """Initialize a regex constrained string."""
         super().__init__(seq)
 
         if not self.REGEX.match(self.data):

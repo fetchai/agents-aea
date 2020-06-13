@@ -80,7 +80,16 @@ class Resources:
             self._model_registry,
         ]  # type: List[Registry]
 
-    # TODO refactor
+    @property
+    def behaviour_registry(self) -> ComponentRegistry[Behaviour]:
+        """Get the behaviour registry."""
+        return self._behaviour_registry
+
+    @property
+    def handler_registry(self) -> HandlerRegistry:
+        """Get the handler registry."""
+        return self._handler_registry
+
     def add_component(self, component: Component):
         """Add a component to resources."""
         if component.component_type == ComponentType.PROTOCOL:

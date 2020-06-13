@@ -113,13 +113,13 @@ class Contract(Component, ABC):
             ContractConfig,
             ComponentConfiguration.load(ComponentType.CONTRACT, Path(directory)),
         )
-        configuration._directory = Path(directory)
+        configuration.directory = Path(directory)
         return Contract.from_config(configuration)
 
     @classmethod
     def from_config(cls, configuration: ContractConfig) -> "Contract":
         """
-        Load contract from configuration
+        Load contract from configuration.
 
         :param configuration: the contract configuration.
         :return: the contract object.

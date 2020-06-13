@@ -149,9 +149,9 @@ def _handle_range_constraints(
     lowest_less_than: Specifier, greatest_greater_than: Specifier
 ) -> bool:
     """
-    Helper method for the is_satisfiable function.
+    Check whether two specifiers of the following type are compatible.
 
-    It checks whether two specifiers of the following type are compatible:
+    It is a helper method for the is_satisfiable function and checks:
     - "<=<some-version-number>"
     - ">=<some-version-number>"
 
@@ -186,8 +186,12 @@ def _handle_range_constraints(
 
 def is_simple_dep(dep: Dependency) -> bool:
     """
-    Check if it is a simple dependency. Namely,
-    if it has no field specified, or only the 'version' field set.
+    Check if it is a simple dependency.
+
+    Namely, if it has no field specified, or only the 'version' field set.
+
+    :param dep: the dependency
+    :return: whether it is a simple dependency or not
     """
     return len(dep) == 0 or len(dep) == 1 and "version" in dep
 

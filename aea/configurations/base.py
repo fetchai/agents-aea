@@ -671,6 +671,12 @@ class PackageConfiguration(Configuration, ABC):
         """Get the path to the configuration file associated to this file, if any."""
         return self._directory
 
+    @directory.setter
+    def directory(self, directory: Path) -> None:
+        """Set directory if not already set."""
+        assert self._directory is None, "Directory already set"
+        self._directory = directory
+
     def _parse_aea_version_specifier(self, aea_version_specifiers: str) -> SpecifierSet:
         try:
             Version(aea_version_specifiers)
@@ -761,7 +767,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             component_type, directory
         )
         if not skip_consistency_check:
-            configuration_object._check_configuration_consistency(directory)
+            configuration_object._check_configuration_consistency(  # pylint: disable=protected-access
+                directory
+            )
         return configuration_object
 
     @staticmethod
@@ -1564,7 +1572,7 @@ class ProtocolSpecification(ProtocolConfig):
             protocol_specification.speech_acts.create(
                 speech_act, speech_act_content_config
             )
-        protocol_specification._check_consistency()
+        protocol_specification._check_consistency()  # pylint: disable=protected-access
         return protocol_specification
 
     def _check_consistency(self):

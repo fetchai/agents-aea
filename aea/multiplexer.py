@@ -245,7 +245,7 @@ class AsyncMultiplexer:
             try:
                 await self._connect_one(connection_id)
                 connected.append(connection_id)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error(
                     "Error while connecting {}: {}".format(
                         str(type(connection)), str(e)
@@ -284,7 +284,7 @@ class AsyncMultiplexer:
         for connection_id, connection in self._id_to_connection.items():
             try:
                 await self._disconnect_one(connection_id)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error(
                     "Error while disconnecting {}: {}".format(
                         str(type(connection)), str(e)
@@ -334,7 +334,7 @@ class AsyncMultiplexer:
                 return
             except AEAConnectionError as e:
                 logger.error(str(e))
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error("Error in the sending loop: {}".format(str(e)))
                 return
 
@@ -367,7 +367,7 @@ class AsyncMultiplexer:
             except asyncio.CancelledError:
                 logger.debug("Receiving loop cancelled.")
                 break
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error("Error in the receiving loop: {}".format(str(e)))
                 break
 
