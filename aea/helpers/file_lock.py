@@ -35,12 +35,16 @@ if os.name == "nt":
 
     def lock(file, flags):
         """Lock a file with flags."""
-        hfile = win32file._get_osfhandle(file.fileno())
+        hfile = win32file._get_osfhandle(  # pylint: disable=protected-access
+            file.fileno()
+        )
         win32file.LockFileEx(hfile, flags, 0, 0xFFFF0000, __overlapped)
 
     def unlock(file):
         """Unlock a file."""
-        hfile = win32file._get_osfhandle(file.fileno())
+        hfile = win32file._get_osfhandle(  # pylint: disable=protected-access
+            file.fileno()
+        )
         win32file.UnlockFileEx(hfile, 0, 0xFFFF0000, __overlapped)
 
 

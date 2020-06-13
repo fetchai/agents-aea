@@ -44,7 +44,7 @@ class InternalMessage:
         self._body.update(kwargs)
         try:
             self._is_consistent()
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             logger.error(e)
 
     @property

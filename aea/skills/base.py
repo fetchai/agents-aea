@@ -44,7 +44,7 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.base import load_aea_package, load_module
 from aea.mail.base import Address
 from aea.multiplexer import OutBox
 from aea.protocols.base import Message
@@ -63,6 +63,9 @@ class SkillContext:
     ):
         """
         Initialize a skill context.
+
+        :agent_context: the agent context.
+        :skill: the skill.
         """
         self._agent_context = agent_context  # type: Optional[AgentContext]
         self._in_queue = Queue()  # type: Queue
@@ -126,7 +129,7 @@ class SkillContext:
     @property
     def new_behaviours(self) -> Queue:
         """
-        The queue for the new behaviours.
+        Queue for the new behaviours.
 
         This queue can be used to send messages to the framework
         to request the registration of a behaviour.
@@ -311,6 +314,16 @@ class AbstractBehaviour(SkillComponent, ABC):
 
     _tick_interval: float = 0.001
     _start_at: Optional[datetime.datetime] = None
+
+    @property
+    def tick_interval(self) -> float:
+        """Get the tick_interval in seconds."""
+        return self._tick_interval
+
+    @property
+    def start_at(self) -> Optional[datetime.datetime]:
+        """Get the start time of the behaviour."""
+        return self._start_at
 
 
 class Behaviour(AbstractBehaviour, ABC):
@@ -576,8 +589,11 @@ class Skill(Component):
         Initialize a skill.
 
         :param configuration: the skill configuration.
+        :param skill_context: the skill context.
+        :param handlers: dictionary of handlers.
+        :param behaviours: dictionary of behaviours.
+        :param models: dictionary of models.
         """
-
         super().__init__(configuration)
         self.config = configuration
         self._skill_context = (
@@ -640,7 +656,7 @@ class Skill(Component):
             SkillConfig,
             ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
-        configuration._directory = Path(directory)
+        configuration.directory = Path(directory)
         return Skill.from_config(configuration, skill_context)
 
     @classmethod
@@ -664,10 +680,7 @@ class Skill(Component):
         skill = Skill(configuration, skill_context)
 
         directory = configuration.directory
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
-        )
-        add_modules_to_sys_modules(package_modules)
+        load_aea_package(configuration)
         handlers_by_id = dict(configuration.handlers.read_all())
         handlers = Handler.parse_module(
             str(directory / "handlers.py"), handlers_by_id, skill_context

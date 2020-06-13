@@ -232,7 +232,7 @@ def load_configuration(
         PackageConfiguration,
         configuration_class.from_json(yaml.safe_load(configuration_filepath.open())),
     )
-    configuration_obj._directory = package_path
+    configuration_obj._directory = package_path  # pylint: disable=protected-access
     return cast(PackageConfiguration, configuration_obj)
 
 

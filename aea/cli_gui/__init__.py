@@ -30,10 +30,15 @@ import time
 from enum import Enum
 from typing import Dict, List, Set
 
+from click import ClickException
+
 import connexion
 
 import flask
 
+from aea.cli.add import add_item as cli_add_item
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
 
 elements = [
@@ -237,16 +242,11 @@ def delete_agent(agent_id: str):
 
 def add_item(agent_id: str, item_type: str, item_id: str):
     """Add a protocol, skill or connection to the register to a local agent."""
-    agent_dir = os.path.join(app_context.agents_dir, agent_id)
-    if (
-        _call_aea(
-            [sys.executable, "-m", "aea.cli", "add", "--local", item_type, item_id],
-            agent_dir,
-        )
-        == 0
-    ):
-        return agent_id, 201  # 200 (OK)
-    else:
+    ctx = Context(cwd=os.path.join(app_context.agents_dir, agent_id))
+    try:
+        try_to_load_agent_config(ctx)
+        cli_add_item(ctx, item_type, PublicId.from_str(item_id))
+    except ClickException:
         return (
             {
                 "detail": "Failed to add {} {} to agent {}".format(
@@ -255,6 +255,8 @@ def add_item(agent_id: str, item_type: str, item_id: str):
             },
             400,
         )  # 400 Bad request
+    else:
+        return agent_id, 201  # 200 (OK)
 
 
 def remove_local_item(agent_id: str, item_type: str, item_id: str):

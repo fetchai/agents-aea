@@ -2,7 +2,8 @@ This page provides some tipps of how to upgrade between versions.
 
 ## v0.3.3 to v0.4.0
 
-- Message sending in the skills has been updated. In the past you had to construct messages, then serialize them and place them in an envelope:
+<ul>
+<li> Message sending in the skills has been updated. In the past you had to construct messages, then serialize them and place them in an envelope:
 
 ``` python
 cfp_msg = FipaMessage(...)
@@ -31,8 +32,8 @@ self.context.outbox.put_message(message=cfp_msg)
 ```
 
 You must update your skills as the old implementation is no longer supported.
-
-- Connection constructors have been simplified. In the past you had to implement both the `__init__` as well as the `from_dir` methods of a Connection. Now you only have to implement the `__init__` method which by default at load time now receives the following kwargs: `configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore`. See for example in the scaffold connection:
+</li>
+<li> Connection constructors have been simplified. In the past you had to implement both the `__init__` as well as the `from_config` methods of a Connection. Now you only have to implement the `__init__` method which by default at load time now receives the following kwargs: `configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore`. See for example in the scaffold connection:
 
 ``` python
 class MyScaffoldConnection(Connection):
@@ -61,3 +62,5 @@ class MyScaffoldConnection(Connection):
 As a result of this feature, you are now able to pass key-pairs to your connections via the `CryptoStore`.
 
 You must update your connections as the old implementation is no longer supported.
+</li>
+</ul>

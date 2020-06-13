@@ -101,7 +101,7 @@ def agents(ctx: Context, query):
 
 def _setup_search_command(click_context: click.core.Context, local: bool) -> None:
     """
-    Setup search command.
+    Set up search command.
 
     :param click_context: click context object.
     :param local: bool flag for local search.

@@ -164,7 +164,7 @@ class BaseConfigTestVariable(TestCase):
         """Test AEABuilder applies default value to AEA instance when option is not specified in config."""
         configuration = self._make_configuration(NotSet)
         builder = AEABuilder()
-        builder._set_from_configuration(configuration, aea_project_path=Path("."))
+        builder.set_from_configuration(configuration, aea_project_path=Path("."))
         aea = builder.build()
 
         assert self._get_aea_value(aea) == self.AEA_DEFAULT_VALUE
@@ -175,7 +175,7 @@ class BaseConfigTestVariable(TestCase):
         for good_value in self.GOOD_VALUES:
             configuration = self._make_configuration(good_value)
             builder = AEABuilder()
-            builder._set_from_configuration(
+            builder.set_from_configuration(
                 configuration, aea_project_path=Path(ROOT_DIR)
             )
             aea = builder.build()
