@@ -389,13 +389,6 @@ class FIPANegotiationHandler(Handler):
                     skill_callback_id=self.context.skill_id,
                     info={"dialogue_label": dialogue.dialogue_label.json},
                 )
-                # transaction_msg.set(
-                #     "signing_payload",
-                #     {**transaction_msg.signing_payload, **{"is_deprecated_mode": True}},
-                # )
-                import pdb
-
-                pdb.set_trace()
             self.context.logger.info(
                 "[{}]: sending tx_message={} to decison maker.".format(
                     self.context.agent_name, transaction_msg

@@ -29,9 +29,9 @@ from ...conftest import (
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS,
+    MAX_FLAKY_RERUNS_ETH,
 )
 
-MAX_FLAKY_RERUNS = 1
 
 class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
@@ -54,7 +54,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             "ethereum": {
                 "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
                 "chain_id": 3,
-                "gas_price": 20,
+                "gas_price": 50,
             }
         }
         setting_path = "agent.ledger_apis"
@@ -163,11 +163,11 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
-# @pytest.mark.unstable
+@pytest.mark.ethereum
 class TestTacSkillsContract(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
@@ -215,9 +215,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
 
         # prepare agents for test
         for agent_name, eth_private_key in zip(
-            (tac_aea_one, tac_aea_two)(
-                FUNDED_ETH_PRIVATE_KEY_2, FUNDED_ETH_PRIVATE_KEY_3
-            )
+            (tac_aea_one, tac_aea_two),
+            (FUNDED_ETH_PRIVATE_KEY_2, FUNDED_ETH_PRIVATE_KEY_3),
         ):
             self.set_agent_context(agent_name)
             self.force_set_config(setting_path, ledger_apis)
@@ -253,7 +252,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         self.set_agent_context(tac_controller_name)
         now = datetime.datetime.now().strftime("%d %m %Y %H:%M")
         now_min = datetime.datetime.strptime(now, "%d %m %Y %H:%M")
-        fut = now_min + datetime.timedelta(0, 240)
+        fut = now_min + datetime.timedelta(0, 360)
         start_time = fut.strftime("%d %m %Y %H:%M")
         setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time"
         self.set_config(setting_path, start_time)
@@ -265,7 +264,6 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             "The contract was successfully deployed. Contract address:",
             "Registering TAC data model",
             "TAC open for registration until:",
-            "Setting Up the TAC game.",
         )
         missing_strings = self.missing_from_output(
             tac_controller_process, check_strings, timeout=180, is_terminating=False
@@ -313,7 +311,6 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             "found potential sellers agents=",
             "sending CFP to agent=",
             "Accepting propose",
-            "transaction confirmed by decision maker, sending to controller.",
             "sending match accept to",
             "sending atomic swap tx to ledger.",
             "tx_digest=",
@@ -324,7 +321,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             "Declining propose",
         )
         missing_strings = self.missing_from_output(
-            tac_aea_one_process, check_strings, timeout=300, is_terminating=False
+            tac_aea_one_process, check_strings, timeout=360, is_terminating=False
         )
         assert (
             missing_strings == []

@@ -29,10 +29,12 @@ aea get-wealth ethereum
 aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 cd ..
 aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea install
 ```
 ``` bash
@@ -48,6 +50,7 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 ```
 ``` bash
 cd tac_participant_two
@@ -58,6 +61,7 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 ```
 ``` bash
 aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time

@@ -154,6 +154,7 @@ DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
 MAX_FLAKY_RERUNS = 3
+MAX_FLAKY_RERUNS_ETH = 1
 
 
 contract_config_files = [
