@@ -20,6 +20,7 @@
 """This package contains a scaffold of a handler."""
 
 import pprint
+import time
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
@@ -30,6 +31,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue, Dialogues
@@ -339,6 +341,66 @@ class FIPANegotiationHandler(Handler):
             transactions.add_locked_tx(
                 transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
             )
+            if strategy.is_contract_tx:
+                contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+                if not contract.is_deployed:
+                    ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id)
+                    contract_address = self.context.shared_state.get(
+                        "erc1155_contract_address", None
+                    )
+                    assert (
+                        contract_address is not None
+                    ), "ERC1155Contract address not set!"
+                    contract.set_deployed_instance(
+                        ledger_api, cast(str, contract_address),
+                    )
+                tx_nonce = transaction_msg.info.get("tx_nonce", None)
+                assert tx_nonce is not None, "tx_nonce must be provided"
+                transaction_msg = contract.get_hash_batch_transaction_msg(
+                    from_address=accept.counterparty,
+                    to_address=self.context.agent_address,  # must match self
+                    token_ids=[
+                        int(key)
+                        for key in transaction_msg.tx_quantities_by_good_id.keys()
+                    ]
+                    + [
+                        int(key)
+                        for key in transaction_msg.tx_amount_by_currency_id.keys()
+                    ],
+                    from_supplies=[
+                        quantity if quantity > 0 else 0
+                        for quantity in transaction_msg.tx_quantities_by_good_id.values()
+                    ]
+                    + [
+                        value if value > 0 else 0
+                        for value in transaction_msg.tx_amount_by_currency_id.values()
+                    ],
+                    to_supplies=[
+                        -quantity if quantity < 0 else 0
+                        for quantity in transaction_msg.tx_quantities_by_good_id.values()
+                    ]
+                    + [
+                        -value if value < 0 else 0
+                        for value in transaction_msg.tx_amount_by_currency_id.values()
+                    ],
+                    value=0,
+                    trade_nonce=int(tx_nonce),
+                    ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+                    skill_callback_id=self.context.skill_id,
+                    info={"dialogue_label": dialogue.dialogue_label.json},
+                )
+                # transaction_msg.set(
+                #     "signing_payload",
+                #     {**transaction_msg.signing_payload, **{"is_deprecated_mode": True}},
+                # )
+                import pdb
+
+                pdb.set_trace()
+            self.context.logger.info(
+                "[{}]: sending tx_message={} to decison maker.".format(
+                    self.context.agent_name, transaction_msg
+                )
+            )
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
             self.context.logger.debug(
@@ -384,21 +446,81 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = transactions.pop_pending_initial_acceptance(
                 dialogue.dialogue_label, match_accept.target
             )
-            transaction_msg.set(
-                "skill_callback_ids",
-                [PublicId.from_str("fetchai/tac_participation:0.2.0")],
-            )
-            transaction_msg.set(
-                "info",
-                {
-                    **transaction_msg.info,
-                    **{
-                        "tx_counterparty_signature": match_accept.info.get(
-                            "tx_signature"
-                        ),
-                        "tx_counterparty_id": match_accept.info.get("tx_id"),
+            strategy = cast(Strategy, self.context.strategy)
+            if strategy.is_contract_tx:
+                contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+                if not contract.is_deployed:
+                    ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id)
+                    contract_address = self.context.shared_state.get(
+                        "erc1155_contract_address", None
+                    )
+                    assert (
+                        contract_address is not None
+                    ), "ERC1155Contract address not set!"
+                    contract.set_deployed_instance(
+                        ledger_api, cast(str, contract_address),
+                    )
+                strategy = cast(Strategy, self.context.strategy)
+                tx_nonce = transaction_msg.info.get("tx_nonce", None)
+                tx_signature = match_accept.info.get("tx_signature", None)
+                assert (
+                    tx_nonce is not None and tx_signature is not None
+                ), "tx_nonce or tx_signature not available"
+                transaction_msg = contract.get_atomic_swap_batch_transaction_msg(
+                    from_address=self.context.agent_address,
+                    to_address=match_accept.counterparty,
+                    token_ids=[
+                        int(key)
+                        for key in transaction_msg.tx_quantities_by_good_id.keys()
+                    ]
+                    + [
+                        int(key)
+                        for key in transaction_msg.tx_amount_by_currency_id.keys()
+                    ],
+                    from_supplies=[
+                        -quantity if quantity < 0 else 0
+                        for quantity in transaction_msg.tx_quantities_by_good_id.values()
+                    ]
+                    + [
+                        -value if value < 0 else 0
+                        for value in transaction_msg.tx_amount_by_currency_id.values()
+                    ],
+                    to_supplies=[
+                        quantity if quantity > 0 else 0
+                        for quantity in transaction_msg.tx_quantities_by_good_id.values()
+                    ]
+                    + [
+                        value if value > 0 else 0
+                        for value in transaction_msg.tx_amount_by_currency_id.values()
+                    ],
+                    value=0,
+                    trade_nonce=int(tx_nonce),
+                    ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+                    skill_callback_id=self.context.skill_id,
+                    signature=tx_signature,
+                    info={"dialogue_label": dialogue.dialogue_label.json},
+                )
+            else:
+                transaction_msg.set(
+                    "skill_callback_ids",
+                    [PublicId.from_str("fetchai/tac_participation:0.3.0")],
+                )
+                transaction_msg.set(
+                    "info",
+                    {
+                        **transaction_msg.info,
+                        **{
+                            "tx_counterparty_signature": match_accept.info.get(
+                                "tx_signature"
+                            ),
+                            "tx_counterparty_id": match_accept.info.get("tx_id"),
+                        },
                     },
-                },
+                )
+            self.context.logger.info(
+                "[{}]: sending tx_message={} to decison maker.".format(
+                    self.context.agent_name, transaction_msg
+                )
             )
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
@@ -439,16 +561,17 @@ class TransactionHandler(Handler):
                     self.context.agent_name
                 )
             )
+            strategy = cast(Strategy, self.context.strategy)
             info = tx_message.info
             dialogue_label = DialogueLabel.from_json(
                 cast(Dict[str, str], info.get("dialogue_label"))
             )
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
-            fipa_message = cast(FipaMessage, dialogue.last_incoming_message)
+            last_fipa_message = cast(FipaMessage, dialogue.last_incoming_message)
             if (
-                fipa_message is not None
-                and fipa_message.performative == FipaMessage.Performative.ACCEPT
+                last_fipa_message is not None
+                and last_fipa_message.performative == FipaMessage.Performative.ACCEPT
             ):
                 self.context.logger.info(
                     "[{}]: sending match accept to {}.".format(
@@ -458,9 +581,9 @@ class TransactionHandler(Handler):
                 )
                 fipa_msg = FipaMessage(
                     performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-                    message_id=fipa_message.message_id + 1,
+                    message_id=last_fipa_message.message_id + 1,
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                    target=fipa_message.message_id,
+                    target=last_fipa_message.message_id,
                     info={
                         "tx_signature": tx_message.signed_payload["tx_signature"],
                         "tx_id": tx_message.tx_id,
@@ -469,9 +592,81 @@ class TransactionHandler(Handler):
                 fipa_msg.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
                 dialogue.update(fipa_msg)
                 self.context.outbox.put_message(message=fipa_msg)
+            elif (
+                last_fipa_message is not None
+                and last_fipa_message.performative
+                == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM
+                and strategy.is_contract_tx
+            ):
+                self.context.logger.info(
+                    "[{}]: sending atomic swap tx to ledger.".format(
+                        self.context.agent_name
+                    )
+                )
+                tx_signed = tx_message.signed_payload.get("tx_signed")
+                tx_digest = self.context.ledger_apis.get_api(
+                    strategy.ledger_id
+                ).send_signed_transaction(tx_signed=tx_signed)
+                # TODO; handle case when no tx_digest returned and remove loop
+                assert tx_digest is not None, "Error when submitting tx."
+                self.context.logger.info(
+                    "[{}]: tx_digest={}.".format(self.context.agent_name, tx_digest)
+                )
+                count = 0
+                while (
+                    not self.context.ledger_apis.get_api(
+                        strategy.ledger_id
+                    ).is_transaction_settled(tx_digest)
+                    and count < 20
+                ):
+                    self.context.logger.info(
+                        "[{}]: waiting for tx to confirm. Sleeping for 3 seconds ...".format(
+                            self.context.agent_name
+                        )
+                    )
+                    time.sleep(3.0)
+                    count += 1
+                tx_receipt = self.context.ledger_apis.get_api(
+                    strategy.ledger_id
+                ).get_transaction_receipt(tx_digest=tx_digest)
+                if tx_receipt is None:
+                    self.context.logger.info(
+                        "[{}]: Failed to get tx receipt for atomic swap.".format(
+                            self.context.agent_name
+                        )
+                    )
+                elif tx_receipt.status != 1:
+                    self.context.logger.info(
+                        "[{}]: Failed to conduct atomic swap.".format(
+                            self.context.agent_name
+                        )
+                    )
+                else:
+                    self.context.logger.info(
+                        "[{}]: Successfully conducted atomic swap. Transaction digest: {}".format(
+                            self.context.agent_name, tx_digest
+                        )
+                    )
+                    contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+                    result = contract.get_balances(
+                        address=self.context.agent_address,
+                        token_ids=[
+                            int(key)
+                            for key in tx_message.tx_quantities_by_good_id.keys()
+                        ]
+                        + [
+                            int(key)
+                            for key in tx_message.tx_amount_by_currency_id.keys()
+                        ],
+                    )
+                    self.context.logger.info(
+                        "[{}]: Current balances: {}".format(
+                            self.context.agent_name, result
+                        )
+                    )
             else:
                 self.context.logger.warning(
-                    "[{}]: last message should be of performative accept.".format(
+                    "[{}]: last message should be of performative accept or match accept.".format(
                         self.context.agent_name
                     )
                 )

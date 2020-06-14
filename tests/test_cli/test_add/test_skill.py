@@ -485,7 +485,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.4.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.5.0")
 
         contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)
