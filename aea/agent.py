@@ -233,10 +233,6 @@ class Agent(ABC):
         """Get the agent loop mode."""
         return self._loop_mode
 
-    def setup_multiplexer(self) -> None:
-        """Set up the multiplexer"""
-        # implemented in AEA class
-
     @property
     def main_loop(self) -> BaseAgentLoop:
         """Get the main agent loop."""
@@ -246,6 +242,10 @@ class Agent(ABC):
     def runtime(self) -> BaseRuntime:
         """Get the runtime."""
         return self._runtime
+
+    def setup_multiplexer(self) -> None:
+        """Set up the multiplexer"""
+        pass
 
     def start(self) -> None:
         """

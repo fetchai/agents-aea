@@ -211,7 +211,8 @@ def test_multiple_builds_with_private_keys():
     builder.reset()
     builder.set_name("aea_1")
     builder.add_private_key("fetchai", FETCHAI_PRIVATE_KEY_PATH)
-    builder.build()
+    aea_2 = builder.build()
+    assert isinstance(aea_2, AEA)
 
 
 def test_multiple_builds_with_component_instance():
@@ -227,6 +228,7 @@ def test_multiple_builds_with_component_instance():
 
     # the first call works
     aea_1 = builder.build()
+    assert isinstance(aea_1, AEA)
 
     # the second call fails
     with pytest.raises(ValueError, match="Cannot build.*"):
@@ -237,5 +239,5 @@ def test_multiple_builds_with_component_instance():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
     builder.add_component_instance(a_protocol)
-    aea_1 = builder.build()
-    isinstance(aea_1, AEA)
+    aea_2 = builder.build()
+    assert isinstance(aea_2, AEA)
