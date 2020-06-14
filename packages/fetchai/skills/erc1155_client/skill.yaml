@@ -38,7 +38,7 @@ models:
     class_name: Dialogues
   strategy:
     args:
-      ledger_id: fetchai
+      ledger_id: ethereum
       search_query:
         constraint_type: ==
         search_term: has_erc1155_contract
