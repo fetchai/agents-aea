@@ -256,7 +256,7 @@ class AEABuilder:
 
     However, if you manually loaded some of the components and added
     them with the method 'add_component_instance()', then calling build
-    more than one time is strongly discouraged:
+    more than one time is prevented:
 
         builder = AEABuilder()
         builder.add_component_instance(...)
@@ -265,9 +265,16 @@ class AEABuilder:
         # first call
         my_aea_1 = builder.build()
 
-        # in this case, following calls to '.build()'
-        # are strongly discouraged.
-        # my_aea_2 = builder.builder()  # bad
+        # second call to `build()` would raise a Value Error.
+        # call reset
+        builder.reset()
+
+        # re-add the component and private keys
+        builder.add_component_instance(...)
+        ... # add private keys
+
+        # second call
+        my_aea_2 = builder.builder()
 
     """
 
@@ -288,32 +295,51 @@ class AEABuilder:
         :param with_default_packages: add the default packages.
         """
         self._with_default_packages = with_default_packages
-        self._reset()
+        self._reset(is_full_reset=True)
 
-    def reset(self) -> None:
+    def reset(self, is_full_reset: bool = False) -> None:
         """
         Reset the builder.
 
+        A full reset causes a reset of all data on the builder. A partial reset
+        only resets:
+            - name,
+            - private keys, and
+            - component instances
+
+        :param is_full_reset: whether it is a full reset or not.
         :return: None
         """
-        self._reset()
+        self._reset(is_full_reset)
 
-    def _reset(self) -> None:
+    def _reset(self, is_full_reset: bool = False) -> None:
         """
         Reset the builder (private usage).
 
+        :param is_full_reset: whether it is a full reset or not.
         :return: None.
         """
         self._name = None  # type: Optional[str]
         self._private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._connection_private_key_paths = {}  # type: Dict[str, Optional[str]]
+        if not is_full_reset:
+            self._remove_components_from_dependency_manager()
+        self._component_instances = {
+            ComponentType.CONNECTION: {},
+            ComponentType.CONTRACT: {},
+            ComponentType.PROTOCOL: {},
+            ComponentType.SKILL: {},
+        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
+        self._to_reset: bool = False
+        self._build_called: bool = False
+        if not is_full_reset:
+            return
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
         self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
-
         self._timeout: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
@@ -324,18 +350,16 @@ class AEABuilder:
         self._runtime_mode: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
-        self._component_instances = {
-            ComponentType.CONNECTION: {},
-            ComponentType.CONTRACT: {},
-            ComponentType.PROTOCOL: {},
-            ComponentType.SKILL: {},
-        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
-
         if self._with_default_packages:
             self._add_default_packages()
 
-        self._to_reset: bool = False
-        self._build_called: bool = False
+    def _remove_components_from_dependency_manager(self) -> None:
+        """Remove components added via 'add_component' from the dependency manager."""
+        for component_type in self._component_instances.keys():
+            for component_config in self._component_instances[component_type].keys():
+                self._package_dependency_manager.remove_component(
+                    component_config.component_id
+                )
 
     def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
         """
@@ -620,6 +644,7 @@ class AEABuilder:
         Please, pay attention, all dependencies have to be already loaded.
 
         Notice also that this will make the call to 'build()' non re-entrant.
+        You will have to `reset()` the builder before calling `build()` again.
 
         :params component: Component instance already initialized.
         """
@@ -811,8 +836,9 @@ class AEABuilder:
         This method is re-entrant only if the components have been
         added through the method 'add_component'. If some of them
         have been loaded with 'add_component_instance', it
-        should be called only once, and further calls will lead
-        to unexpected behaviour.
+        can be called only once, and further calls are only possible
+        after a call to 'reset' and re-loading of the components added
+        via 'add_component_instance' and the private keys.
 
         :param connection_ids: select only these connections to run the AEA.
         :param ledger_apis: the api ledger that we want to use.
