@@ -55,8 +55,6 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.connections.base import Connection
-from aea.context.base import AgentContext
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     create_private_key,
@@ -76,7 +74,6 @@ from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
-from aea.skills.base import Skill, SkillContext
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -290,6 +287,23 @@ class AEABuilder:
 
         :param with_default_packages: add the default packages.
         """
+        self._with_default_packages = with_default_packages
+        self._reset()
+
+    def reset(self) -> None:
+        """
+        Reset the builder.
+
+        :return: None
+        """
+        self._reset()
+
+    def _reset(self) -> None:
+        """
+        Reset the builder (private usage).
+
+        :return: None.
+        """
         self._name = None  # type: Optional[str]
         self._private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._connection_private_key_paths = {}  # type: Dict[str, Optional[str]]
@@ -297,7 +311,7 @@ class AEABuilder:
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
-        self._default_connection = DEFAULT_CONNECTION
+        self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
 
         self._timeout: Optional[float] = None
@@ -317,8 +331,11 @@ class AEABuilder:
             ComponentType.SKILL: {},
         }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
 
-        if with_default_packages:
+        if self._with_default_packages:
             self._add_default_packages()
+
+        self._to_reset: bool = False
+        self._build_called: bool = False
 
     def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
         """
@@ -503,6 +520,8 @@ class AEABuilder:
             self._private_key_paths[identifier] = (
                 str(private_key_path) if private_key_path is not None else None
             )
+        if private_key_path is not None:
+            self._to_reset = True
         return self
 
     def remove_private_key(
@@ -604,6 +623,7 @@ class AEABuilder:
 
         :params component: Component instance already initialized.
         """
+        self._to_reset = True
         self._check_can_add(component.configuration)
         # update dependency graph
         self._package_dependency_manager.add_component(component.configuration)
@@ -797,7 +817,9 @@ class AEABuilder:
         :param connection_ids: select only these connections to run the AEA.
         :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
+        :raises ValueError: if we cannot
         """
+        self._check_we_can_build()
         resources = Resources()
         wallet = Wallet(
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
@@ -806,9 +828,15 @@ class AEABuilder:
         ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
+        self._load_and_add_components(
+            ComponentType.CONNECTION,
+            resources,
+            identity=identity,
+            crypto_store=wallet.connection_cryptos,
+        )
+        connection_ids = self._process_connection_ids(connection_ids)
         aea = AEA(
             identity,
-            [],
             wallet,
             ledger_apis,
             resources,
@@ -820,14 +848,16 @@ class AEABuilder:
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             default_routing=self._get_default_routing(),
+            default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
+            connection_ids=connection_ids,
             **deepcopy(self._context_namespace),
         )
-        # load connection
-        self._load_and_add_connections(aea, wallet, connection_ids=connection_ids)
-        aea.multiplexer.default_routing = self._get_default_routing()
-        self._load_and_add_skills(aea.context, resources)
+        self._load_and_add_components(
+            ComponentType.SKILL, resources, agent_context=aea.context
+        )
+        self._build_called = True
         return aea
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
@@ -911,7 +941,7 @@ class AEABuilder:
         """
         Return the skill exception policy.
 
-        :return: the policy
+        :return: the skill exception policy.
         """
         return (
             self._skill_exception_policy
@@ -923,9 +953,17 @@ class AEABuilder:
         """
         Return the default routing.
 
-        :return: the policy
+        :return: the default routing
         """
         return self._default_routing
+
+    def _get_default_connection(self) -> PublicId:
+        """
+        Return the default connection
+
+        :return: the default connection
+        """
+        return self._default_connection
 
     def _get_loop_mode(self) -> str:
         """
@@ -1095,6 +1133,13 @@ class AEABuilder:
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
 
+        if agent_configuration._default_connection is None:
+            self.set_default_connection(DEFAULT_CONNECTION)
+        else:
+            self.set_default_connection(
+                PublicId.from_str(agent_configuration.default_connection)
+            )
+
         # load private keys
         for (
             ledger_identifier,
@@ -1183,34 +1228,15 @@ class AEABuilder:
         )
         return builder
 
-    def _load_connections(
-        self,
-        identity: Identity,
-        wallet: Wallet,
-        connection_ids: Optional[Collection[PublicId]] = None,
-    ):
-        connections_ids = self._process_connection_ids(connection_ids)
-
-        def get_connection_configuration(connection_id):
-            return self._package_dependency_manager.connections[
-                ComponentId(ComponentType.CONNECTION, connection_id)
-            ]
-
-        return [
-            self._load_connection(
-                identity, wallet, get_connection_configuration(connection_id)
-            )
-            for connection_id in connections_ids
-        ]
-
     def _load_and_add_components(
-        self, component_type: ComponentType, resources: Resources
+        self, component_type: ComponentType, resources: Resources, **kwargs
     ) -> None:
         """
         Load and add components added to the builder to a Resources instance.
 
         :param component_type: the component type for which
         :param resources: the resources object to populate.
+        :param kwargs: keyword argument to forward to the component loader.
         :return: None
         """
         for configuration in self._package_dependency_manager.get_components_by_type(
@@ -1220,78 +1246,19 @@ class AEABuilder:
                 component = self._component_instances[component_type][configuration]
             else:
                 configuration = deepcopy(configuration)
-                component = load_component_from_config(component_type, configuration)
+                component = load_component_from_config(
+                    component_type, configuration, **kwargs
+                )
             resources.add_component(component)
 
-    def _load_and_add_skills(self, context: AgentContext, resources: Resources) -> None:
-        for configuration in self._package_dependency_manager.skills.values():
-            logger_name = "aea.packages.{}.skills.{}".format(
-                configuration.author, configuration.name
+    def _check_we_can_build(self):
+        if self._build_called and self._to_reset:
+            raise ValueError(
+                "Cannot build the agent; You have done one of the following:\n"
+                "- added a component instance;\n"
+                "- added a private key manually.\n"
+                "Please call 'reset() if you want to build another agent."
             )
-            configuration = cast(SkillConfig, configuration)
-            if configuration in self._component_instances[ComponentType.SKILL].keys():
-                skill = cast(
-                    Skill, self._component_instances[ComponentType.SKILL][configuration]
-                )
-                skill.skill_context.set_agent_context(context)
-                skill.skill_context.logger = logging.getLogger(logger_name)
-            else:
-                configuration = deepcopy(configuration)
-                skill_context = SkillContext()
-                skill_context.set_agent_context(context)
-                skill_context.logger = logging.getLogger(logger_name)
-                skill = cast(
-                    Skill,
-                    load_component_from_config(
-                        ComponentType.SKILL, configuration, skill_context=skill_context
-                    ),
-                )
-            resources.add_component(skill)
-
-    def _load_connection(
-        self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig
-    ) -> Connection:
-        """
-        Load a connection from a directory.
-
-        :param identity: the AEA identity
-        :param wallet: the wallet
-        :param configuration: the connection configuration.
-        :return: the connection.
-        """
-        if configuration in self._component_instances[ComponentType.CONNECTION].keys():
-            connection = cast(
-                Connection,
-                self._component_instances[ComponentType.CONNECTION][configuration],
-            )
-            if connection.address != identity.address:
-                logger.warning(
-                    "The address set on connection '{}' does not match the default address!".format(
-                        str(connection.connection_id)
-                    )
-                )
-            return connection
-        else:
-            configuration = deepcopy(configuration)
-            return cast(
-                Connection,
-                load_component_from_config(
-                    ComponentType.CONNECTION,
-                    configuration,
-                    identity=identity,
-                    crypto_store=wallet.connection_cryptos,
-                ),
-            )
-
-    def _load_and_add_connections(
-        self,
-        aea: AEA,
-        wallet: Wallet,
-        connection_ids: Optional[Collection[PublicId]] = None,
-    ):
-        connections = self._load_connections(aea.identity, wallet, connection_ids)
-        for c in connections:
-            aea.multiplexer.add_connection(c, c.public_id == self._default_connection)
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:

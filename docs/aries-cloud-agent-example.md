@@ -90,9 +90,10 @@ Now take a look at the following method. This is where the demo resides. It firs
             provider_port=self.aca_admin_port,
         )
         resources = Resources()
+        resources.add_connection(http_client_connection)
 
         # create AEA
-        aea = AEA(identity, [http_client_connection], wallet, ledger_apis, resources)
+        aea = AEA(identity, wallet, ledger_apis, resources)
 ```
 
 It then adds the HTTP protocol to the AEA. THe HTTP protocol defines the format of HTTP interactions (e.g. HTTP Request and Response). 

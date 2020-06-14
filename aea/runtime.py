@@ -180,6 +180,7 @@ class AsyncRuntime(BaseRuntime):
         """Run agent and starts multiplexer."""
         try:
             self._state.set(RuntimeStates.starting)
+            self._agent.setup_multiplexer()
             await self._start_multiplexer()
             self._agent.start_setup()
             await self._start_agent_loop()
@@ -276,6 +277,7 @@ class ThreadedRuntime(BaseRuntime):
 
         self._agent.multiplexer.set_loop(asyncio.new_event_loop())
 
+        self._agent.setup_multiplexer()
         self._agent.multiplexer.connect()
         self._agent.start_setup()
         self._start_agent_loop()

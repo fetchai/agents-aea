@@ -178,9 +178,10 @@ class TestAEAToACA:
             provider_port=self.aca_admin_port,
         )
         resources = Resources()
+        resources.add_connection(http_client_connection)
 
         # create AEA
-        aea = AEA(identity, [http_client_connection], wallet, ledger_apis, resources)
+        aea = AEA(identity, wallet, ledger_apis, resources)
 
         # Add http protocol to AEA resources
         http_protocol_configuration = ProtocolConfig.from_json(
@@ -234,7 +235,9 @@ class TestAEAToACA:
         resources.add_skill(simple_skill)
 
         # add error skill to AEA
-        error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"))
+        error_skill = Skill.from_dir(
+            os.path.join(AEA_DIR, "skills", "error"), agent_context=aea.context
+        )
         resources.add_skill(error_skill)
 
         # start AEA thread
