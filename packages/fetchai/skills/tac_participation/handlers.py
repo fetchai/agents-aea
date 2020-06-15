@@ -300,6 +300,7 @@ class TACHandler(Handler):
                 contract.set_deployed_instance(
                     ledger_api, contract_address,
                 )
+                self.context.shared_state["erc1155_contract_address"] = contract_address
                 self.context.logger.info(
                     "[{}]: Received a contract address: {}".format(
                         self.context.agent_name, contract_address

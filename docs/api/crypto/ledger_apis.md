@@ -184,7 +184,7 @@ Kept for backwards compatibility!
  | is_transaction_valid(identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
-Check whether the transaction is valid
+Check whether the transaction is valid.
 
 **Arguments**:
 

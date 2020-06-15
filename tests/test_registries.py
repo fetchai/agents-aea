@@ -71,7 +71,7 @@ class TestContractRegistry:
         cls.registry = AgentComponentRegistry()
         cls.registry.register(contract.component_id, cast(Contract, contract))
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.4.0"),
+            PublicId.from_str("fetchai/erc1155:0.5.0"),
         }
 
     def test_fetch_all(self):
@@ -82,14 +82,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.4.0")
+        contract_id = PublicId.from_str("fetchai/erc1155:0.5.0")
         contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.4.0")
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.5.0")
         component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
         contract_removed = self.registry.fetch(component_id)
         self.registry.unregister(contract_removed.component_id)
@@ -222,10 +222,16 @@ class TestResources:
         )
         # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
         cls.resources.add_component(
-            Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill"))
+            Skill.from_dir(
+                Path(CUR_PATH, "data", "dummy_skill"),
+                agent_context=unittest.mock.MagicMock(),
+            )
         )
         cls.resources.add_component(
-            Skill.from_dir(Path(aea.AEA_DIR, "skills", "error"))
+            Skill.from_dir(
+                Path(aea.AEA_DIR, "skills", "error"),
+                agent_context=unittest.mock.MagicMock(),
+            )
         )
 
         cls.error_skill_public_id = DEFAULT_SKILL
@@ -420,7 +426,7 @@ class TestFilter:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        connections = [_make_dummy_connection()]
+        connection = _make_dummy_connection()
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FetchAICrypto.identifier: private_key_path})
         ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
@@ -429,9 +435,16 @@ class TestFilter:
         )
         resources = Resources()
 
-        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
+        resources.add_component(
+            Skill.from_dir(
+                Path(CUR_PATH, "data", "dummy_skill"),
+                agent_context=unittest.mock.MagicMock(),
+            )
+        )
 
-        cls.aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
+        resources.add_connection(connection)
+
+        cls.aea = AEA(identity, wallet, ledger_apis, resources=resources,)
         cls.aea.setup()
 
     def test_handle_internal_messages(self):

@@ -23,6 +23,26 @@ Instantiate the resources.
 
 :return None
 
+<a name=".aea.registries.resources.Resources.behaviour_registry"></a>
+#### behaviour`_`registry
+
+```python
+ | @property
+ | behaviour_registry() -> ComponentRegistry[Behaviour]
+```
+
+Get the behaviour registry.
+
+<a name=".aea.registries.resources.Resources.handler_registry"></a>
+#### handler`_`registry
+
+```python
+ | @property
+ | handler_registry() -> HandlerRegistry
+```
+
+Get the handler registry.
+
 <a name=".aea.registries.resources.Resources.add_component"></a>
 #### add`_`component
 
@@ -155,6 +175,70 @@ Remove a contract from the set of resources.
 **Arguments**:
 
 - `contract_id`: the contract id for the contract to be removed.
+
+**Returns**:
+
+None
+
+<a name=".aea.registries.resources.Resources.add_connection"></a>
+#### add`_`connection
+
+```python
+ | add_connection(connection: Connection) -> None
+```
+
+Add a connection to the set of resources.
+
+**Arguments**:
+
+- `connection`: a connection
+
+**Returns**:
+
+None
+
+<a name=".aea.registries.resources.Resources.get_connection"></a>
+#### get`_`connection
+
+```python
+ | get_connection(connection_id: ConnectionId) -> Optional[Connection]
+```
+
+Get connection for given connection id.
+
+**Arguments**:
+
+- `connection_id`: the connection id
+
+**Returns**:
+
+a matching connection, if present, else None
+
+<a name=".aea.registries.resources.Resources.get_all_connections"></a>
+#### get`_`all`_`connections
+
+```python
+ | get_all_connections() -> List[Connection]
+```
+
+Get the list of all the connections.
+
+**Returns**:
+
+the list of connections.
+
+<a name=".aea.registries.resources.Resources.remove_connection"></a>
+#### remove`_`connection
+
+```python
+ | remove_connection(connection_id: ConnectionId) -> None
+```
+
+Remove a connection from the set of resources.
+
+**Arguments**:
+
+- `connection_id`: the connection id for the connection to be removed.
 
 **Returns**:
 

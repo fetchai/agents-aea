@@ -64,6 +64,16 @@ Set the body of hte message.
 
 None
 
+<a name=".aea.protocols.base.Message.dialogue_reference"></a>
+#### dialogue`_`reference
+
+```python
+ | @property
+ | dialogue_reference() -> Tuple[str, str]
+```
+
+Get the dialogue_reference of the message.
+
 <a name=".aea.protocols.base.Message.message_id"></a>
 #### message`_`id
 
@@ -72,7 +82,27 @@ None
  | message_id() -> int
 ```
 
-Get the message id.
+Get the message_id of the message.
+
+<a name=".aea.protocols.base.Message.performative"></a>
+#### performative
+
+```python
+ | @property
+ | performative() -> Enum
+```
+
+Get the performative of the message.
+
+<a name=".aea.protocols.base.Message.target"></a>
+#### target
+
+```python
+ | @property
+ | target() -> int
+```
+
+Get the target of the message.
 
 <a name=".aea.protocols.base.Message.set"></a>
 #### set

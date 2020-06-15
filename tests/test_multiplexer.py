@@ -37,8 +37,6 @@ from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
-# from aea.protocols.default.serialization import DefaultSerializer
-
 from packages.fetchai.connections.local.connection import LocalNode
 
 from .conftest import (

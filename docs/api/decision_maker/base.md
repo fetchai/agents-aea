@@ -389,7 +389,7 @@ Get the agent name.
  | identity() -> Identity
 ```
 
-The identity of the agent.
+Get identity of the agent.
 
 <a name=".aea.decision_maker.base.DecisionMakerHandler.wallet"></a>
 #### wallet
@@ -399,7 +399,7 @@ The identity of the agent.
  | wallet() -> Wallet
 ```
 
-The wallet of the agent.
+Get wallet of the agent.
 
 <a name=".aea.decision_maker.base.DecisionMakerHandler.context"></a>
 #### context

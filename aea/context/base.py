@@ -21,8 +21,9 @@
 
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+from aea.configurations.base import PublicId
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ledger_apis import LedgerApis
 from aea.identity.base import Identity
@@ -45,6 +46,8 @@ class AgentContext:
         decision_maker_message_queue: Queue,
         decision_maker_handler_context: SimpleNamespace,
         task_manager: TaskManager,
+        default_connection: Optional[PublicId],
+        default_routing: Dict[PublicId, PublicId],
         **kwargs
     ):
         """
@@ -70,7 +73,8 @@ class AgentContext:
         self._search_service_address = (
             DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml
         )
-
+        self._default_connection = default_connection
+        self._default_routing = default_routing
         self._namespace = SimpleNamespace(**kwargs)
 
     @property
@@ -138,6 +142,16 @@ class AgentContext:
     def search_service_address(self) -> Address:
         """Get the address of the search service."""
         return self._search_service_address
+
+    @property
+    def default_connection(self) -> Optional[PublicId]:
+        """Get the default connection."""
+        return self._default_connection
+
+    @property
+    def default_routing(self) -> Dict[PublicId, PublicId]:
+        """Get the default routing."""
+        return self._default_routing
 
     @property
     def namespace(self) -> SimpleNamespace:

@@ -44,7 +44,7 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.base import load_aea_package, load_module
 from aea.mail.base import Address
 from aea.multiplexer import OutBox
 from aea.protocols.base import Message
@@ -63,6 +63,9 @@ class SkillContext:
     ):
         """
         Initialize a skill context.
+
+        :agent_context: the agent context.
+        :skill: the skill.
         """
         self._agent_context = agent_context  # type: Optional[AgentContext]
         self._in_queue = Queue()  # type: Queue
@@ -126,7 +129,7 @@ class SkillContext:
     @property
     def new_behaviours(self) -> Queue:
         """
-        The queue for the new behaviours.
+        Queue for the new behaviours.
 
         This queue can be used to send messages to the framework
         to request the registration of a behaviour.
@@ -311,6 +314,16 @@ class AbstractBehaviour(SkillComponent, ABC):
 
     _tick_interval: float = 0.001
     _start_at: Optional[datetime.datetime] = None
+
+    @property
+    def tick_interval(self) -> float:
+        """Get the tick_interval in seconds."""
+        return self._tick_interval
+
+    @property
+    def start_at(self) -> Optional[datetime.datetime]:
+        """Get the start time of the behaviour."""
+        return self._start_at
 
 
 class Behaviour(AbstractBehaviour, ABC):
@@ -576,8 +589,11 @@ class Skill(Component):
         Initialize a skill.
 
         :param configuration: the skill configuration.
+        :param skill_context: the skill context.
+        :param handlers: dictionary of handlers.
+        :param behaviours: dictionary of behaviours.
+        :param models: dictionary of models.
         """
-
         super().__init__(configuration)
         self.config = configuration
         self._skill_context = (
@@ -626,31 +642,30 @@ class Skill(Component):
         return self._models
 
     @classmethod
-    def from_dir(
-        cls, directory: str, skill_context: Optional[SkillContext] = None
-    ) -> "Skill":
+    def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
         """
         Load the skill from a directory.
 
         :param directory: the directory to the skill package.
-        :param skill_context: the skill context
+        :param agent_context: the skill context
         :return: the skill object.
         """
         configuration = cast(
             SkillConfig,
             ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
-        configuration._directory = Path(directory)
-        return Skill.from_config(configuration, skill_context)
+        configuration.directory = Path(directory)
+        return Skill.from_config(configuration, agent_context)
 
     @classmethod
     def from_config(
-        cls, configuration: SkillConfig, skill_context: Optional[SkillContext] = None
+        cls, configuration: SkillConfig, agent_context: AgentContext
     ) -> "Skill":
         """
         Load the skill from configuration.
 
         :param configuration: a skill configuration. Must be associated with a directory.
+        :param agent_context: the agent context.
         :return: the skill.
         """
         assert (
@@ -660,14 +675,15 @@ class Skill(Component):
         # we put the initialization here because some skill components
         # might need some info from the skill
         # (e.g. see https://github.com/fetchai/agents-aea/issues/1095)
-        skill_context = SkillContext() if skill_context is None else skill_context
+        skill_context = SkillContext()
+        skill_context.set_agent_context(agent_context)
+        logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
+        skill_context.logger = logging.getLogger(logger_name)
+
         skill = Skill(configuration, skill_context)
 
         directory = configuration.directory
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
-        )
-        add_modules_to_sys_modules(package_modules)
+        load_aea_package(configuration)
         handlers_by_id = dict(configuration.handlers.read_all())
         handlers = Handler.parse_module(
             str(directory / "handlers.py"), handlers_by_id, skill_context

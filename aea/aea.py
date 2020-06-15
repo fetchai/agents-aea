@@ -19,12 +19,12 @@
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import logging
 from asyncio import AbstractEventLoop
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
+from typing import Any, Callable, Collection, Dict, List, Optional, Sequence, Type, cast
 
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
+from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SKILL
-from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -60,7 +60,6 @@ class AEA(Agent):
     def __init__(
         self,
         identity: Identity,
-        connections: List[Connection],
         wallet: Wallet,
         ledger_apis: LedgerApis,
         resources: Resources,
@@ -75,13 +74,15 @@ class AEA(Agent):
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        default_connection: Optional[PublicId] = None,
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        connection_ids: Optional[Collection[PublicId]] = None,
         **kwargs,
     ) -> None:
         """
         Instantiate the agent.
 
         :param identity: the identity of the agent
-        :param connections: the list of connections of the agent.
         :param wallet: the wallet of the agent.
         :param ledger_apis: the APIs the agent will use to connect to ledgers.
         :param resources: the resources (protocols and skills) of the agent.
@@ -94,13 +95,16 @@ class AEA(Agent):
         :param skill_exception_policy: the skill exception policy enum
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode (async, threaded) to run AEA in.
+        :param default_connection: public id to the default connection
+        :param default_routing: dictionary for default routing.
+        :param connection_ids: active connection ids. Default: consider all the ones in the resources.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
         """
         super().__init__(
             identity=identity,
-            connections=connections,
+            connections=[],
             loop=loop,
             timeout=timeout,
             is_debug=is_debug,
@@ -124,9 +128,12 @@ class AEA(Agent):
             self.decision_maker.message_in_queue,
             decision_maker_handler.context,
             self.task_manager,
+            default_connection,
+            default_routing if default_routing is not None else {},
             **kwargs,
         )
         self._execution_timeout = execution_timeout
+        self._connection_ids = connection_ids
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
@@ -157,6 +164,29 @@ class AEA(Agent):
         """Get the task manager."""
         return self._task_manager
 
+    def setup_multiplexer(self) -> None:
+        """Set up the multiplexer"""
+        connections = self.resources.get_all_connections()
+        if self._connection_ids is not None:
+            connections = [
+                c for c in connections if c.connection_id in self._connection_ids
+            ]
+        self.multiplexer.setup(
+            connections,
+            default_routing=self.context.default_routing,
+            default_connection=self.context.default_connection,
+        )
+
+    @property
+    def filter(self) -> Filter:
+        """Get the filter."""
+        return self._filter
+
+    @property
+    def active_behaviours(self) -> List[Behaviour]:
+        """Get all active behaviours to use in act."""
+        return self.filter.get_active_behaviours()
+
     def setup(self) -> None:
         """
         Set up the agent.
@@ -183,7 +213,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self._get_active_behaviours():
+        for behaviour in self.active_behaviours:
             self._behaviour_act(behaviour)
 
     def react(self) -> None:
@@ -253,7 +283,7 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        handlers = self._filter.get_active_handlers(
+        handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.skill_id
         )
         if len(handlers) == 0:
@@ -313,7 +343,7 @@ class AEA(Agent):
                     fn, component, self._execution_timeout
                 )
             )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
                 raise
             elif self._skills_exception_policy == ExceptionPolicyEnum.just_log:
@@ -329,10 +359,6 @@ class AEA(Agent):
                     f"Unsupported exception policy: {self._skills_exception_policy}"
                 )
 
-    def _get_active_behaviours(self) -> List[Behaviour]:
-        """Get all active behaviours to use in act."""
-        return self._filter.get_active_behaviours()
-
     def update(self) -> None:
         """
         Update the current state of the agent.
@@ -341,7 +367,7 @@ class AEA(Agent):
 
         :return None
         """
-        self._filter.handle_internal_messages()
+        self.filter.handle_internal_messages()
 
     def teardown(self) -> None:
         """

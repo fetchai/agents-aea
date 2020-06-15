@@ -134,8 +134,8 @@ aea config set agent.default_ledger ethereum
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.2.0 --alias tac_participant_one
-aea fetch fetchai/tac_participant:0.2.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
 ```
@@ -153,8 +153,8 @@ Build participant one:
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_participation:0.2.0
-aea add skill fetchai/tac_negotiation:0.2.0
+aea add skill fetchai/tac_participation:0.3.0
+aea add skill fetchai/tac_negotiation:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
@@ -164,8 +164,8 @@ Then, build participant two:
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_participation:0.2.0
-aea add skill fetchai/tac_negotiation:0.2.0
+aea add skill fetchai/tac_participation:0.3.0
+aea add skill fetchai/tac_negotiation:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum

@@ -22,7 +22,7 @@ import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
-from typing import Dict, List, Optional, Sequence, Tuple, cast
+from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStatus
@@ -59,7 +59,7 @@ class AsyncMultiplexer:
         """
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
-        self.default_connection: Optional[Connection] = None
+        self._default_connection: Optional[Connection] = None
         self._initialize_connections_if_any(connections, default_connection_index)
 
         self._connection_status = ConnectionStatus()
@@ -72,6 +72,11 @@ class AsyncMultiplexer:
         self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
         self.set_loop(loop if loop is not None else asyncio.new_event_loop())
+
+    @property
+    def default_connection(self) -> Optional[Connection]:
+        """Get the default connection."""
+        return self._default_connection
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
@@ -109,7 +114,7 @@ class AsyncMultiplexer:
         self._connections.append(connection)
         self._id_to_connection[connection.connection_id] = connection
         if is_default:
-            self.default_connection = connection
+            self._default_connection = connection
 
     def _connection_consistency_checks(self):
         """
@@ -123,6 +128,11 @@ class AsyncMultiplexer:
         assert len(set(c.connection_id for c in self.connections)) == len(
             self.connections
         ), "Connection names must be unique."
+
+    def _set_default_connection_if_none(self):
+        """Set the default connection if it is none."""
+        if self._default_connection is None:
+            self._default_connection = self.connections[0]
 
     @property
     def in_queue(self) -> AsyncFriendlyQueue:
@@ -166,6 +176,7 @@ class AsyncMultiplexer:
         """Connect the multiplexer."""
         logger.debug("Multiplexer connecting...")
         self._connection_consistency_checks()
+        self._set_default_connection_if_none()
         self._out_queue = asyncio.Queue()
         async with self._lock:
             if self.connection_status.is_connected:
@@ -234,7 +245,7 @@ class AsyncMultiplexer:
             try:
                 await self._connect_one(connection_id)
                 connected.append(connection_id)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error(
                     "Error while connecting {}: {}".format(
                         str(type(connection)), str(e)
@@ -273,7 +284,7 @@ class AsyncMultiplexer:
         for connection_id, connection in self._id_to_connection.items():
             try:
                 await self._disconnect_one(connection_id)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error(
                     "Error while disconnecting {}: {}".format(
                         str(type(connection)), str(e)
@@ -323,7 +334,7 @@ class AsyncMultiplexer:
                 return
             except AEAConnectionError as e:
                 logger.error(str(e))
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error("Error in the sending loop: {}".format(str(e)))
                 return
 
@@ -356,7 +367,7 @@ class AsyncMultiplexer:
             except asyncio.CancelledError:
                 logger.debug("Receiving loop cancelled.")
                 break
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error("Error in the receiving loop: {}".format(str(e)))
                 break
 
@@ -546,6 +557,25 @@ class Multiplexer(AsyncMultiplexer):
         :return: None
         """
         self._thread_runner.call(super()._put(envelope))  # .result(240)
+
+    def setup(
+        self,
+        connections: Collection[Connection],
+        default_routing: Dict[PublicId, PublicId],
+        default_connection: Optional[PublicId] = None,
+    ) -> None:
+        """
+        Set up the multiplexer.
+
+        :param connections: the connections to use. It will replace the other ones.
+        :param default_routing: the default routing.
+        :param default_connection: the default connection.
+        :return: None.
+        """
+        self.default_routing = default_routing
+        self._connections = []
+        for c in connections:
+            self.add_connection(c, c.public_id == default_connection)
 
 
 class InBox:

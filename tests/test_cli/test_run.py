@@ -118,6 +118,7 @@ def test_run():
             pass
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_run_with_default_connection():
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()

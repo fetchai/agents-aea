@@ -29,6 +29,16 @@ This information is used for envelopes which don't specify any routing context.
 If connections is None, this parameter is ignored.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
 
+<a name=".aea.multiplexer.AsyncMultiplexer.default_connection"></a>
+#### default`_`connection
+
+```python
+ | @property
+ | default_connection() -> Optional[Connection]
+```
+
+Get the default connection.
+
 <a name=".aea.multiplexer.AsyncMultiplexer.set_loop"></a>
 #### set`_`loop
 
@@ -290,6 +300,25 @@ running on a different thread than the one used in this function.
 **Returns**:
 
 None
+
+<a name=".aea.multiplexer.Multiplexer.setup"></a>
+#### setup
+
+```python
+ | setup(connections: Collection[Connection], default_routing: Dict[PublicId, PublicId], default_connection: Optional[PublicId] = None) -> None
+```
+
+Set up the multiplexer.
+
+**Arguments**:
+
+- `connections`: the connections to use. It will replace the other ones.
+- `default_routing`: the default routing.
+- `default_connection`: the default connection.
+
+**Returns**:
+
+None.
 
 <a name=".aea.multiplexer.InBox"></a>
 ## InBox Objects

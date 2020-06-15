@@ -2,12 +2,12 @@
 ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,R,W
+disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,R,W
 # Remove eventually
 # general R, W
 # In particular, resolve these and other important warnings:
 # W0703: broad-except
-# W0212: protected-access
+# W0212: protected-access, mostly resolved
 # W0706: try-except-raise
 # W0108: unnecessary-lambda
 

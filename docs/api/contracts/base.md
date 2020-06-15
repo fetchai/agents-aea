@@ -138,7 +138,7 @@ the contract object.
  | from_config(cls, configuration: ContractConfig) -> "Contract"
 ```
 
-Load contract from configuration
+Load contract from configuration.
 
 **Arguments**:
 

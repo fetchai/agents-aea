@@ -42,12 +42,11 @@ def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     wallet = Wallet({FetchAICrypto.identifier: private_key_path})
-    connections = [_make_dummy_connection()]
     ledger_apis = LedgerApis(
         {"fetchai": {"network": "testnet"}}, FetchAICrypto.identifier
     )
     identity = Identity("name", address=wallet.addresses[FetchAICrypto.identifier])
-    my_aea = AEA(identity, connections, wallet, ledger_apis, resources=Resources(),)
+    my_aea = AEA(identity, wallet, ledger_apis, resources=Resources(),)
 
     assert set(my_aea.context.ledger_apis.apis.keys()) == {"fetchai"}
 
@@ -69,19 +68,16 @@ class TestSkillContext:
         cls.ledger_apis = LedgerApis(
             {FetchAICrypto.identifier: {"network": "testnet"}}, FetchAICrypto.identifier
         )
-        cls.connections = [_make_dummy_connection()]
+        cls.connection = _make_dummy_connection()
         cls.identity = Identity(
             "name",
             addresses=cls.wallet.addresses,
             default_address_key=FetchAICrypto.identifier,
         )
         cls.my_aea = AEA(
-            cls.identity,
-            cls.connections,
-            cls.wallet,
-            cls.ledger_apis,
-            resources=Resources(),
+            cls.identity, cls.wallet, cls.ledger_apis, resources=Resources(),
         )
+        cls.my_aea.resources.add_connection(cls.connection)
         cls.skill_context = SkillContext(cls.my_aea.context)
 
     def test_agent_name(self):

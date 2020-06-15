@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
 
-import logging
 import os
 import tempfile
 from pathlib import Path
@@ -131,12 +130,13 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
+        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        local_connection = list(agent.multiplexer.connections)[0]
+        local_connection = agent.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         msg = DefaultMessage(
@@ -187,12 +187,13 @@ def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
+        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        local_connection = list(aea.multiplexer.connections)[0]
+        local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         msg = DefaultMessage(
@@ -272,10 +273,11 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        builder.set_default_connection(PublicId.from_str("fetchai/local:0.2.0"))
+        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
-        local_connection = list(aea.multiplexer.connections)[0]
+        local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         expected_message = DefaultMessage(
@@ -345,26 +347,30 @@ def test_initialize_aea_programmatically_build_resources():
             ledger_apis = LedgerApis({}, FETCHAI)
             identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
             connection = _make_local_connection(agent_name, node)
-            connections = [connection]
 
             resources = Resources()
+            aea = AEA(
+                identity,
+                wallet,
+                ledger_apis,
+                resources=resources,
+                default_connection=connection.public_id,
+            )
 
             default_protocol = Protocol.from_dir(
                 str(Path(AEA_DIR, "protocols", "default"))
             )
             resources.add_protocol(default_protocol)
+            resources.add_connection(connection)
 
-            error_skill = Skill.from_dir(str(Path(AEA_DIR, "skills", "error")))
-            dummy_skill = Skill.from_dir(str(Path(CUR_PATH, "data", "dummy_skill")))
+            error_skill = Skill.from_dir(
+                str(Path(AEA_DIR, "skills", "error")), agent_context=aea.context
+            )
+            dummy_skill = Skill.from_dir(
+                str(Path(CUR_PATH, "data", "dummy_skill")), agent_context=aea.context
+            )
             resources.add_skill(dummy_skill)
             resources.add_skill(error_skill)
-
-            aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
-
-            error_skill.skill_context.set_agent_context(aea.context)
-            dummy_skill.skill_context.set_agent_context(aea.context)
-            error_skill.skill_context.logger = logging.getLogger("error_skill")
-            dummy_skill.skill_context.logger = logging.getLogger("dummy_skills")
 
             default_protocol_id = DefaultMessage.protocol_id
 
@@ -437,14 +443,20 @@ def test_add_behaviour_dynamically():
     wallet = Wallet({FETCHAI: private_key_path})
     ledger_apis = LedgerApis({}, FETCHAI)
     resources = Resources()
-    resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
     identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+    connection = _make_local_connection(identity.address, LocalNode())
     agent = AEA(
         identity,
-        [_make_local_connection(identity.address, LocalNode())],
         wallet,
         ledger_apis,
         resources,
+        default_connection=connection.public_id,
+    )
+    resources.add_connection(connection)
+    resources.add_component(
+        Skill.from_dir(
+            Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context
+        )
     )
     for skill in resources.get_all_skills():
         skill.skill_context.set_agent_context(agent.context)
@@ -483,17 +495,19 @@ class TestContextNamespace:
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
-        resources = Resources()
-        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        connection = _make_local_connection(identity.address, LocalNode())
+        resources = Resources()
         cls.context_namespace = {"key1": 1, "key2": 2}
         cls.agent = AEA(
-            identity,
-            [_make_local_connection(identity.address, LocalNode())],
-            wallet,
-            ledger_apis,
-            resources,
-            **cls.context_namespace
+            identity, wallet, ledger_apis, resources, **cls.context_namespace
+        )
+
+        resources.add_connection(connection)
+        resources.add_component(
+            Skill.from_dir(
+                Path(CUR_PATH, "data", "dummy_skill"), agent_context=cls.agent.context
+            )
         )
         for skill in resources.get_all_skills():
             skill.skill_context.set_agent_context(cls.agent.context)

@@ -743,11 +743,11 @@ The fixed version is interpreted with the specifier '=='.
 #### directory
 
 ```python
- | @property
- | directory() -> Optional[Path]
+ | @directory.setter
+ | directory(directory: Path) -> None
 ```
 
-Get the path to the configuration file associated to this file, if any.
+Set directory if not already set.
 
 <a name=".aea.configurations.base.PackageConfiguration.aea_version_specifiers"></a>
 #### aea`_`version`_`specifiers

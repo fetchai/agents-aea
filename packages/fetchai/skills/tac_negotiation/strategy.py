@@ -67,6 +67,8 @@ class Strategy(Model):
         """
         self._register_as = Strategy.RegisterAs(kwargs.pop("register_as", "both"))
         self._search_for = Strategy.SearchFor(kwargs.pop("search_for", "both"))
+        self._is_contract_tx = kwargs.pop("is_contract_tx", False)
+        self._ledger_id = kwargs.pop("ledger_id", "ethereum")
         super().__init__(**kwargs)
 
     @property
@@ -100,6 +102,16 @@ class Strategy(Model):
             self._search_for == Strategy.SearchFor.BUYERS
             or self._search_for == Strategy.SearchFor.BOTH
         )
+
+    @property
+    def is_contract_tx(self) -> bool:
+        """Check if tx are made against the ERC1155 or not."""
+        return self._is_contract_tx
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
 
     def get_own_service_description(
         self, is_supply: bool, is_search_description: bool

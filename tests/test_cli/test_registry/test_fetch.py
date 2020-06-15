@@ -77,7 +77,7 @@ class TestFetchAgent(TestCase):
         download_file_mock.assert_called_once_with("url", "cwd")
         extract_mock.assert_called_once_with("filepath", "cwd")
 
-    @mock.patch("aea.cli.registry.fetch._add_item")
+    @mock.patch("aea.cli.registry.fetch.add_item")
     @mock.patch(
         "aea.cli.registry.fetch.request_api",
         return_value={
@@ -107,7 +107,7 @@ class TestFetchAgent(TestCase):
         extract_mock.assert_called_once_with("filepath", "cwd")
         add_item_mock.assert_called()
 
-    @mock.patch("aea.cli.registry.fetch._add_item", _raise_exception)
+    @mock.patch("aea.cli.registry.fetch.add_item", _raise_exception)
     @mock.patch(
         "aea.cli.registry.fetch.request_api",
         return_value={

@@ -283,12 +283,12 @@ class DecisionMakerHandler(ABC):
 
     @property
     def identity(self) -> Identity:
-        """The identity of the agent."""
+        """Get identity of the agent."""
         return self._identity
 
     @property
     def wallet(self) -> Wallet:
-        """The wallet of the agent."""
+        """Get wallet of the agent."""
         return self._wallet
 
     @property

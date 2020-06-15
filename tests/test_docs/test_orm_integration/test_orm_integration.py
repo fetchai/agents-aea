@@ -28,7 +28,7 @@ import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import ROOT_DIR
+from ...conftest import MAX_FLAKY_RERUNS, ROOT_DIR
 
 seller_strategy_replacement = """models:
   dialogues:
@@ -86,6 +86,7 @@ ORM_SELLER_STRATEGY_PATH = Path(
 class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
     """This class contains the tests for the orm-integration.md guide."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""
         seller_aea_name = "my_seller_aea"

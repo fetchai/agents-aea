@@ -71,6 +71,16 @@ Load a private key in hex format from a file.
 
 the Entity.
 
+<a name=".aea.crypto.fetchai.FetchAICrypto.generate_private_key"></a>
+#### generate`_`private`_`key
+
+```python
+ | @classmethod
+ | generate_private_key(cls) -> Entity
+```
+
+Generate a key pair for fetchai network.
+
 <a name=".aea.crypto.fetchai.FetchAICrypto.sign_message"></a>
 #### sign`_`message
 
