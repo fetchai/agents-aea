@@ -40,6 +40,15 @@ Get the distance to another location.
 - `other`: the other location
 :retun: the distance
 
+<a name=".aea.helpers.search.models.Location.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Compare equality of two locations.
+
 <a name=".aea.helpers.search.models.AttributeInconsistencyException"></a>
 ## AttributeInconsistencyException Objects
 
@@ -48,6 +57,7 @@ class AttributeInconsistencyException(Exception)
 ```
 
 Raised when the attributes in a Description are inconsistent.
+
 Inconsistency is defined when values do not meet their respective schema, or if the values
 are not of an allowed type.
 
@@ -293,6 +303,23 @@ Initialize a constraint type.
 
 - `ValueError`: if the type of the constraint is not
 
+<a name=".aea.helpers.search.models.ConstraintType.check_validity"></a>
+#### check`_`validity
+
+```python
+ | check_validity()
+```
+
+Check the validity of the input provided.
+
+**Returns**:
+
+None
+
+**Raises**:
+
+- `ValueError`: if the value is not valid wrt the constraint type.
+
 <a name=".aea.helpers.search.models.ConstraintType.is_valid"></a>
 #### is`_`valid
 
@@ -410,7 +437,7 @@ True if the description satisfy the constraint expression, False otherwise.
  | is_valid(data_model: DataModel) -> bool
 ```
 
-Check whether a constraint expression is valid wrt a data model
+Check whether a constraint expression is valid wrt a data model.
 
 Specifically, check the following conditions:
 - If all the attributes referenced by the constraints are correctly associated with the Data Model attributes.
@@ -422,6 +449,21 @@ Specifically, check the following conditions:
 **Returns**:
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+
+<a name=".aea.helpers.search.models.ConstraintExpr.check_validity"></a>
+#### check`_`validity
+
+```python
+ | check_validity() -> None
+```
+
+Check whether a Constraint Expression satisfies some basic requirements.
+
+:return ``None``
+
+**Raises**:
+
+- `ValueError`: if the object does not satisfy some requirements.
 
 <a name=".aea.helpers.search.models.And"></a>
 ## And Objects
@@ -469,7 +511,7 @@ True if the description satisfy the constraint expression, False otherwise.
  | is_valid(data_model: DataModel) -> bool
 ```
 
-Check whether the constraint expression is valid wrt a data model
+Check whether the constraint expression is valid wrt a data model.
 
 **Arguments**:
 
@@ -478,6 +520,21 @@ Check whether the constraint expression is valid wrt a data model
 **Returns**:
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+
+<a name=".aea.helpers.search.models.And.check_validity"></a>
+#### check`_`validity
+
+```python
+ | check_validity()
+```
+
+Check whether the Constraint Expression satisfies some basic requirements.
+
+:return ``None``
+
+**Raises**:
+
+- `ValueError`: if the object does not satisfy some requirements.
 
 <a name=".aea.helpers.search.models.And.__eq__"></a>
 #### `__`eq`__`
@@ -534,7 +591,7 @@ True if the description satisfy the constraint expression, False otherwise.
  | is_valid(data_model: DataModel) -> bool
 ```
 
-Check whether the constraint expression is valid wrt a data model
+Check whether the constraint expression is valid wrt a data model.
 
 **Arguments**:
 
@@ -543,6 +600,21 @@ Check whether the constraint expression is valid wrt a data model
 **Returns**:
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+
+<a name=".aea.helpers.search.models.Or.check_validity"></a>
+#### check`_`validity
+
+```python
+ | check_validity()
+```
+
+Check whether the Constraint Expression satisfies some basic requirements.
+
+:return ``None``
+
+**Raises**:
+
+- `ValueError`: if the object does not satisfy some requirements.
 
 <a name=".aea.helpers.search.models.Or.__eq__"></a>
 #### `__`eq`__`
@@ -599,7 +671,7 @@ True if the description satisfy the constraint expression, False otherwise.
  | is_valid(data_model: DataModel) -> bool
 ```
 
-Check whether the constraint expression is valid wrt a data model
+Check whether the constraint expression is valid wrt a data model.
 
 **Arguments**:
 
@@ -700,7 +772,7 @@ False
  | is_valid(data_model: DataModel) -> bool
 ```
 
-Check whether the constraint expression is valid wrt a data model
+Check whether the constraint expression is valid wrt a data model.
 
 **Arguments**:
 
@@ -773,6 +845,21 @@ Given a data model, check whether the query is valid for that data model.
 **Returns**:
 
 ``True`` if the query is compliant with the data model, ``False`` otherwise.
+
+<a name=".aea.helpers.search.models.Query.check_validity"></a>
+#### check`_`validity
+
+```python
+ | check_validity()
+```
+
+Check whether the` object is valid.
+
+:return ``None``
+
+**Raises**:
+
+- `ValueError`: if the query does not satisfy some sanity requirements.
 
 <a name=".aea.helpers.search.models.Query.__eq__"></a>
 #### `__`eq`__`

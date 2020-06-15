@@ -96,7 +96,9 @@ nav:
         - AEA Builder: 'api/aea_builder.md'
         - Agent: 'api/agent.md'
         - Agent Loop: 'api/agent_loop.md'
+        - Launcher: 'api/launcher.md'
         - Multiplexer: 'api/multiplexer.md'
+        - Runner: 'api/runner.md'
         - Runtime: 'api/runtime.md'
         - Components:
           - Base: 'api/components/base.md'

@@ -280,7 +280,15 @@ aea install
 
 ### Modify the seller's strategy
 
-Open the `strategy.py` with your IDE and modify the following.
+Before being able to modify a package we need to eject it from vendor:
+
+``` bash
+aea eject skill fetchai/generic_seller:0.5.0
+```
+
+This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.
+
+Open the `strategy.py` (in `my_seller_aea/skills/generic_seller/strategy.py`) with your IDE and modify the following.
 
 Import the newly installed library to your strategy.
 ``` python
@@ -358,6 +366,12 @@ Also, create two new functions, one that will create a connection with the datab
                 timestamp=time.time(), temprature=str(random.randrange(10, 25))
             )
             connection.execute(query)
+```
+
+After modifying the skill we need to fingerprint it:
+
+``` bash
+aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
 ```
 
 ## Run the AEAs

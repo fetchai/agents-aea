@@ -35,7 +35,7 @@ my_aea_2 = builder.build()  # all good
 
 However, if you manually loaded some of the components and added
 them with the method 'add_component_instance()', then calling build
-more than one time is strongly discouraged:
+more than one time is prevented:
 
 builder = AEABuilder()
 builder.add_component_instance(...)
@@ -44,9 +44,16 @@ builder.add_component_instance(...)
 # first call
 my_aea_1 = builder.build()
 
-# in this case, following calls to '.build()'
-# are strongly discouraged.
-# my_aea_2 = builder.builder()  # bad
+# second call to `build()` would raise a Value Error.
+# call reset
+builder.reset()
+
+# re-add the component and private keys
+builder.add_component_instance(...)
+... # add private keys
+
+# second call
+my_aea_2 = builder.builder()
 
 <a name=".aea.aea_builder.AEABuilder.__init__"></a>
 #### `__`init`__`
@@ -60,6 +67,29 @@ Initialize the builder.
 **Arguments**:
 
 - `with_default_packages`: add the default packages.
+
+<a name=".aea.aea_builder.AEABuilder.reset"></a>
+#### reset
+
+```python
+ | reset(is_full_reset: bool = False) -> None
+```
+
+Reset the builder.
+
+A full reset causes a reset of all data on the builder. A partial reset
+only resets:
+- name,
+- private keys, and
+- component instances
+
+**Arguments**:
+
+- `is_full_reset`: whether it is a full reset or not.
+
+**Returns**:
+
+None
 
 <a name=".aea.aea_builder.AEABuilder.set_timeout"></a>
 #### set`_`timeout
@@ -390,6 +420,7 @@ Add already initialized component object to resources or connections.
 Please, pay attention, all dependencies have to be already loaded.
 
 Notice also that this will make the call to 'build()' non re-entrant.
+You will have to `reset()` the builder before calling `build()` again.
 
 :params component: Component instance already initialized.
 
@@ -567,8 +598,9 @@ Build the AEA.
 This method is re-entrant only if the components have been
 added through the method 'add_component'. If some of them
 have been loaded with 'add_component_instance', it
-should be called only once, and further calls will lead
-to unexpected behaviour.
+can be called only once, and further calls are only possible
+after a call to 'reset' and re-loading of the components added
+via 'add_component_instance' and the private keys.
 
 **Arguments**:
 
@@ -578,6 +610,30 @@ to unexpected behaviour.
 **Returns**:
 
 the AEA object.
+
+**Raises**:
+
+- `ValueError`: if we cannot
+
+<a name=".aea.aea_builder.AEABuilder.set_from_configuration"></a>
+#### set`_`from`_`configuration
+
+```python
+ | set_from_configuration(agent_configuration: AgentConfig, aea_project_path: Path, skip_consistency_check: bool = False) -> None
+```
+
+Set builder variables from AgentConfig.
+
+:params agent_configuration: AgentConfig to get values from.
+:params aea_project_path: PathLike root directory of the agent project.
+
+**Arguments**:
+
+- `skip_consistency_check`: if True, the consistency check are skipped.
+
+**Returns**:
+
+None
 
 <a name=".aea.aea_builder.AEABuilder.from_aea_project"></a>
 #### from`_`aea`_`project
