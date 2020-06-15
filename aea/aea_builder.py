@@ -61,7 +61,7 @@ from aea.crypto.helpers import (
     try_validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.registry import registry
+from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
@@ -1287,6 +1287,7 @@ class AEABuilder:
             )
 
 
+# TODO this function is repeated in 'aea.cli.utils.package_utils.py'
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     """Verify or create private keys."""
     path_to_configuration = aea_project_path / DEFAULT_AEA_CONFIG_FILE
@@ -1295,7 +1296,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     agent_configuration = agent_loader.load(fp_read)
 
     for identifier, _value in agent_configuration.private_key_paths.read_all():
-        if identifier not in registry.supported_crypto_ids:
+        if identifier not in crypto_registry.supported_ids:
             ValueError("Unsupported identifier in private key paths.")
 
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():

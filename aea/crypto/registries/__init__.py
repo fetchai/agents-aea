@@ -17,14 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the crypto modules."""
+"""This module contains the crypto and the ledger APIs registries."""
+from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.registries.base import Registry
 
-from aea.crypto.registries import register_crypto, register_ledger_api  # noqa
+crypto_registry = Registry[Crypto]()
+register_crypto = crypto_registry.register
+make_crypto = crypto_registry.make
 
-register_crypto(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
-register_crypto(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
-register_crypto(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
-
-register_ledger_api(id="fetchai", entry_point="aea.crypto.fetchai:FetchAIApi")
-register_ledger_api(id="ethereum", entry_point="aea.crypto.ethereum:EthereumApi")
-register_ledger_api(id="cosmos", entry_point="aea.crypto.cosmos:CosmosApi")
+ledger_apis_registry = Registry[LedgerApi]()
+register_ledger_api = ledger_apis_registry.register
+make_ledger_api = ledger_apis_registry.make

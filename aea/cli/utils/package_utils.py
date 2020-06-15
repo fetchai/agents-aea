@@ -48,7 +48,7 @@ from aea.crypto.helpers import (
     try_validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.registry import registry
+from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 
 
@@ -64,7 +64,7 @@ def verify_or_create_private_keys(ctx: Context) -> None:
     aea_conf = agent_loader.load(fp)
 
     for identifier, _value in aea_conf.private_key_paths.read_all():
-        if identifier not in registry.supported_crypto_ids:
+        if identifier not in crypto_registry.supported_ids:
             ValueError("Unsupported identifier in private key paths.")
 
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():

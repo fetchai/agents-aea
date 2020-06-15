@@ -29,7 +29,7 @@ import aea.crypto
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.registry import EntryPoint
+from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
 
 from ..data.custom_crypto import CustomCrypto
@@ -39,36 +39,36 @@ logger = logging.getLogger(__name__)
 
 def test_make_fetchai():
     """Test the 'make' method for 'fetchai' crypto."""
-    fetchai_crypto = aea.crypto.make("fetchai")
+    fetchai_crypto = aea.crypto.registries.make_crypto("fetchai")
 
     assert type(fetchai_crypto) == FetchAICrypto
 
     # calling 'make' again will give a different object.
-    fetchai_crypto_1 = aea.crypto.make("fetchai")
+    fetchai_crypto_1 = aea.crypto.registries.make_crypto("fetchai")
     assert type(fetchai_crypto) == type(fetchai_crypto_1)
     assert fetchai_crypto.address != fetchai_crypto_1
 
 
 def test_make_ethereum():
     """Test the 'make' method for 'ethereum' crypto."""
-    ethereum_crypto = aea.crypto.make("ethereum")
+    ethereum_crypto = aea.crypto.registries.make_crypto("ethereum")
 
     assert type(ethereum_crypto) == EthereumCrypto
 
     # calling 'make' again will give a different object.
-    ethereum_crypto_1 = aea.crypto.make("ethereum")
+    ethereum_crypto_1 = aea.crypto.registries.make_crypto("ethereum")
     assert type(ethereum_crypto) == type(ethereum_crypto_1)
     assert ethereum_crypto.address != ethereum_crypto_1.address
 
 
 def test_make_cosmos():
     """Test the 'make' method for 'cosmos' crypto."""
-    cosmos_crypto = aea.crypto.make("cosmos")
+    cosmos_crypto = aea.crypto.registries.make_crypto("cosmos")
 
     assert type(cosmos_crypto) == CosmosCrypto
 
     # calling 'make' again will give a different object.
-    cosmos_crypto_1 = aea.crypto.make("cosmos")
+    cosmos_crypto_1 = aea.crypto.registries.make_crypto("cosmos")
     assert type(cosmos_crypto) == type(cosmos_crypto_1)
     assert cosmos_crypto.address != cosmos_crypto_1.address
 
@@ -76,12 +76,14 @@ def test_make_cosmos():
 def test_register_custom_crypto():
     """Test the 'register' method with a custom crypto object."""
 
-    aea.crypto.register(
+    aea.crypto.registries.register_crypto(
         "my_custom_crypto", entry_point="tests.data.custom_crypto:CustomCrypto"
     )
 
-    assert aea.crypto.registry.registry.specs.get("my_custom_crypto") is not None
-    actual_spec = aea.crypto.registry.registry.specs["my_custom_crypto"]
+    assert (
+        aea.crypto.registries.crypto_registry.specs.get("my_custom_crypto") is not None
+    )
+    actual_spec = aea.crypto.registries.crypto_registry.specs["my_custom_crypto"]
 
     expected_id = "my_custom_crypto"
     expected_entry_point = EntryPoint("tests.data.custom_crypto:CustomCrypto")
@@ -90,41 +92,43 @@ def test_register_custom_crypto():
     assert actual_spec.entry_point.import_path == expected_entry_point.import_path
     assert actual_spec.entry_point.class_name == expected_entry_point.class_name
 
-    my_crypto = aea.crypto.make("my_custom_crypto")
+    my_crypto = aea.crypto.registries.make_crypto("my_custom_crypto")
     assert type(my_crypto) == CustomCrypto
 
     # calling 'make' again will give a different object.
-    my_crypto_1 = aea.crypto.make("my_custom_crypto")
+    my_crypto_1 = aea.crypto.registries.make_crypto("my_custom_crypto")
     assert type(my_crypto) == type(my_crypto_1)
     assert my_crypto != my_crypto_1
 
-    aea.crypto.registry.registry.specs.pop("my_custom_crypto")
+    aea.crypto.registries.crypto_registry.specs.pop("my_custom_crypto")
 
 
 def test_cannot_register_crypto_twice():
     """Test we cannot register a crytpo twice."""
-    aea.crypto.register(
+    aea.crypto.registries.register_crypto(
         "my_custom_crypto", entry_point="tests.data.custom_crypto:CustomCrypto"
     )
 
     with pytest.raises(AEAException, match="Cannot re-register id: 'my_custom_crypto'"):
-        aea.crypto.register(
+        aea.crypto.registries.register_crypto(
             "my_custom_crypto", entry_point="tests.data.custom_crypto:CustomCrypto"
         )
 
-    aea.crypto.registry.registry.specs.pop("my_custom_crypto")
+    aea.crypto.registries.crypto_registry.specs.pop("my_custom_crypto")
 
 
 @mock.patch("importlib.import_module", side_effect=ImportError)
 def test_import_error(*mocks):
     """Test import errors."""
-    aea.crypto.register("some_crypto", entry_point="path.to.module:SomeCrypto")
+    aea.crypto.registries.register_crypto(
+        "some_crypto", entry_point="path.to.module:SomeCrypto"
+    )
     with pytest.raises(
         AEAException,
-        match="A module (.*) was specified for the crypto but was not found",
+        match="A module (.*) was specified for the item but was not found",
     ):
-        aea.crypto.make("some_crypto", module="some.module")
-    aea.crypto.registry.registry.specs.pop("some_crypto")
+        aea.crypto.registries.make_crypto("some_crypto", module="some.module")
+    aea.crypto.registries.crypto_registry.specs.pop("some_crypto")
 
 
 class TestRegisterWithMalformedId:
@@ -136,21 +140,27 @@ class TestRegisterWithMalformedId:
         """Spaces not allowed in a Crypto ID."""
         # beginning space
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register(" malformed_id", "path.to.module:CryptoClass")
+            aea.crypto.registries.register_crypto(
+                " malformed_id", "path.to.module:CryptoClass"
+            )
 
         # trailing space
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register("malformed_id ", "path.to.module:CryptoClass")
+            aea.crypto.registries.register_crypto(
+                "malformed_id ", "path.to.module:CryptoClass"
+            )
 
         # in between
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register("malformed id", "path.to.module:CryptoClass")
+            aea.crypto.registries.register_crypto(
+                "malformed id", "path.to.module:CryptoClass"
+            )
 
     @pytest.mark.parametrize("special_character", string.punctuation.replace("_", ""))
     def test_special_characters(self, special_character):
         """Special characters are not allowed (only underscore)."""
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register(
+            aea.crypto.registries.register_crypto(
                 "malformed_id" + special_character, "path.to.module:CryptoClass"
             )
 
@@ -158,7 +168,9 @@ class TestRegisterWithMalformedId:
     def test_beginning_digit(self, digit):
         """Digits in the beginning are not allowed."""
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register(digit + "malformed_id", "path.to.module:CryptoClass")
+            aea.crypto.registries.register_crypto(
+                digit + "malformed_id", "path.to.module:CryptoClass"
+            )
 
 
 class TestRegisterWithMalformedEntryPoint:
@@ -170,21 +182,27 @@ class TestRegisterWithMalformedEntryPoint:
         """Spaces not allowed in a Crypto ID."""
         # beginning space
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register("crypto_id", " path.to.module:CryptoClass")
+            aea.crypto.registries.register_crypto(
+                "crypto_id", " path.to.module:CryptoClass"
+            )
 
         # trailing space
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register("crypto_id", "path.to.module :CryptoClass")
+            aea.crypto.registries.register_crypto(
+                "crypto_id", "path.to.module :CryptoClass"
+            )
 
         # in between
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register("crypto_id", "path.to .module:CryptoClass")
+            aea.crypto.registries.register_crypto(
+                "crypto_id", "path.to .module:CryptoClass"
+            )
 
     @pytest.mark.parametrize("special_character", string.punctuation.replace("_", ""))
     def test_special_characters(self, special_character):
         """Special characters are not allowed (only underscore)."""
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register(
+            aea.crypto.registries.register_crypto(
                 "crypto_id", "path" + special_character + ".to.module:CryptoClass"
             )
 
@@ -192,4 +210,6 @@ class TestRegisterWithMalformedEntryPoint:
     def test_beginning_digit(self, digit):
         """Digits in the beginning are not allowed."""
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.register("crypto_id", "path." + digit + "to.module:CryptoClass")
+            aea.crypto.registries.register_crypto(
+                "crypto_id", "path." + digit + "to.module:CryptoClass"
+            )

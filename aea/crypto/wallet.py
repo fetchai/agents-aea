@@ -21,8 +21,8 @@
 
 from typing import Dict, Optional, cast
 
-import aea.crypto
 from aea.crypto.base import Crypto
+from aea.crypto.registries import make_crypto
 
 
 class CryptoStore:
@@ -44,7 +44,7 @@ class CryptoStore:
         addresses = {}  # type: Dict[str, str]
 
         for identifier, path in crypto_id_to_path.items():
-            crypto = aea.crypto.make(identifier, private_key_path=path)
+            crypto = make_crypto(identifier, private_key_path=path)
             crypto_objects[identifier] = crypto
             public_keys[identifier] = cast(str, crypto.public_key)
             addresses[identifier] = cast(str, crypto.address)

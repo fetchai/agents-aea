@@ -23,10 +23,10 @@ import logging
 import sys
 from typing import Optional
 
-import aea.crypto
 from aea.crypto.cosmos import CosmosCrypto, CosmosFaucetApi
 from aea.crypto.ethereum import EthereumCrypto, EthereumFaucetApi
 from aea.crypto.fetchai import FetchAICrypto, FetchAIFaucetApi
+from aea.crypto.registries import make_crypto
 
 COSMOS_PRIVATE_KEY_FILE = "cosmos_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
@@ -64,7 +64,7 @@ def try_validate_private_key_path(
     try:
         # to validate the file, we just try to create a crypto object
         # with private_key_path as parameter
-        aea.crypto.make(ledger_id, private_key_path=private_key_path)
+        make_crypto(ledger_id, private_key_path=private_key_path)
     except Exception as e:
         logger.error(
             "This is not a valid private key file: '{}'\n Exception: '{}'".format(
@@ -87,7 +87,7 @@ def create_private_key(ledger_id: str, private_key_file: Optional[str] = None) -
     """
     if private_key_file is None:
         private_key_file = IDENTIFIER_TO_KEY_FILES[ledger_id]
-    crypto = aea.crypto.make(ledger_id)
+    crypto = make_crypto(ledger_id)
     crypto.dump(open(private_key_file, "wb"))
 
 
