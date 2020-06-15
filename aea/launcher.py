@@ -19,10 +19,11 @@
 """This module contains the implementation of multiple AEA configs launcher."""
 import multiprocessing
 from asyncio.events import AbstractEventLoop
+from concurrent.futures.process import BrokenProcessPool
 from multiprocessing.synchronize import Event
 from os import PathLike
 from threading import Thread
-from typing import Any, Awaitable, Callable, Dict, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, Sequence, Tuple, Type, Union, cast
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -36,6 +37,7 @@ from aea.helpers.multiple_executor import (
     AsyncExecutor,
     ExecutorExceptionPolicies,
     ProcessExecutor,
+    TaskAwaitable,
     ThreadExecutor,
 )
 from aea.runtime import AsyncRuntime
@@ -71,6 +73,8 @@ def _run_agent(agent_dir: Union[PathLike, str], stop_event: Event) -> None:
     Thread(target=stop_event_thread, daemon=True).start()
     try:
         agent.start()
+    except KeyboardInterrupt:
+        agent.stop()
     except Exception as e:
         exc = AEAException(f"Raised {type(e)}({e})")
         exc.__traceback__ = e.__traceback__
@@ -102,7 +106,7 @@ class AEADirTask(AbstractExecutorTask):
             raise Exception("Task was not started!")
         self._agent.stop()
 
-    def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
+    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
         """Return asyncio Task for task run in asyncio loop."""
         self._agent.runtime.set_loop(loop)
         if not isinstance(self._agent.runtime, AsyncRuntime):
@@ -147,6 +151,21 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
     def id(self) -> Union[PathLike, str]:
         """Return agent_dir."""
         return self._agent_dir
+
+    @property
+    def failed(self) -> bool:
+        """
+        Return was exception failed or not.
+
+        If it's running it's not failed.
+
+        :rerurn: bool
+        """
+        if not self._future or not super().failed:
+            return False
+        if isinstance(self._future.exception(), BrokenProcessPool):
+            return False
+        return True
 
 
 class AEALauncher(AbstractMultipleRunner):
