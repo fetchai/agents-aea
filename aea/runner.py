@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of AEA multiple instances runner."""
-
+import logging
 from asyncio.events import AbstractEventLoop
-from typing import Dict, Sequence, Type, cast
+from typing import Dict, Sequence, Type
 
 from aea.aea import AEA
 from aea.helpers.multiple_executor import (
@@ -32,6 +32,9 @@ from aea.helpers.multiple_executor import (
     ThreadExecutor,
 )
 from aea.runtime import AsyncRuntime
+
+
+logger = logging.getLogger(__name__)
 
 
 class AEAInstanceTask(AbstractExecutorTask):
@@ -48,7 +51,11 @@ class AEAInstanceTask(AbstractExecutorTask):
 
     def start(self) -> None:
         """Start task."""
-        self._agent.start()
+        try:
+            self._agent.start()
+        except BaseException:
+            logger.exception("Exceptions raised in runner task.")
+            raise
 
     def stop(self) -> None:
         """Stop task."""

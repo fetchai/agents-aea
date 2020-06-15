@@ -29,12 +29,11 @@ from enum import Enum
 from threading import Thread
 from typing import (
     Any,
-    Awaitable,
     Callable,
     Dict,
-    Iterable,
     Optional,
     Sequence,
+    Set,
     Tuple,
     Type,
     Union,
@@ -172,16 +171,22 @@ class AbstractMultipleExecutor(ABC):
         self._is_running = True
         self._start_tasks()
         self._loop.run_until_complete(self._wait_tasks_complete())
+        self._is_running = False
 
     def stop(self) -> None:
         """Stop tasks."""
         self._is_running = False
+
         for task in self._tasks:
             self._stop_task(task)
+
         if not self._loop.is_running():
             self._loop.run_until_complete(
                 self._wait_tasks_complete(skip_exceptions=True)
             )
+
+        if self._executor_pool:
+            self._executor_pool.shutdown(wait=True)
 
     def _start_tasks(self) -> None:
         """Schedule tasks."""
@@ -196,25 +201,24 @@ class AbstractMultipleExecutor(ABC):
 
         :param skip_exceptions: skip exceptions if raised in tasks
         """
-        tasks = cast(Iterable[Awaitable], list(self._future_task.keys()))
-        done, pending = await asyncio.wait(tasks, return_when=FIRST_EXCEPTION)
+        pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
         async def wait_future(future):
             try:
                 await future
             except KeyboardInterrupt:
-                pass  # skip it.
+                logger.exception("KeyboardInterrupt in task!")
+                if not skip_exceptions:
+                    raise
             except Exception as e:
+                logger.exception("Exception in task!")
                 if not skip_exceptions:
                     await self._handle_exception(self._future_task[future], e)
 
-        for future in done:
-            await wait_future(future)
-
-        if pending:
-            done, _ = await asyncio.wait(pending)
-            for task in done:
-                await wait_future(task)
+        while pending:
+            done, pending = await asyncio.wait(pending, return_when=FIRST_EXCEPTION)
+            for future in done:
+                await wait_future(future)
 
     async def _handle_exception(
         self, task: AbstractExecutorTask, exc: Exception
@@ -229,6 +233,7 @@ class AbstractMultipleExecutor(ABC):
         :return: None
         """
         logger.exception(f"Exception raised during {task.id} running.")
+        logger.info(f"Exception raised during {task.id} running.")
         if self._task_fail_policy == ExecutorExceptionPolicies.propagate:
             raise exc
         elif self._task_fail_policy == ExecutorExceptionPolicies.log_only:
@@ -421,3 +426,11 @@ class AbstractMultipleRunner:
     def not_failed(self):
         """Return sequence successful tasks."""
         return [i.id for i in self._executor.not_failed_tasks]
+
+    def join_thread(self) -> None:
+        """Join thread if running in thread mode."""
+        if self._thread is None:
+            raise ValueError("Not started in thread mode.")
+        # do not block with join, helpful to catch Keyboardiinterrupted exception
+        while self._thread.is_alive():
+            self._thread.join(0.1)

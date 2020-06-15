@@ -17,18 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea launch' subcommand."""
-import os
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import List
+from typing import List, cast
 
 import click
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.run import run
 from aea.cli.utils.click_utils import AgentDirectory
+from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.helpers.base import cd
 from aea.helpers.multiple_executor import ExecutorExceptionPolicies
@@ -58,17 +57,17 @@ def _launch_agents(
     :return: None.
     """
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
-    if multithreaded:
-        failed = _launch_threads(click_context, agents_directories)
-    else:
-        failed = _launch_subprocesses(click_context, agents_directories)
-    logger.debug(f"Exit cli. code: {failed}")
-    sys.exit(failed)
-
-
-def _run_agent(click_context, agent_directory: str):
-    os.chdir(agent_directory)
-    click_context.invoke(run)
+    try:
+        if multithreaded:
+            failed = _launch_threads(click_context, agents_directories)
+        else:
+            failed = _launch_subprocesses(click_context, agents_directories)
+    except BaseException:
+        logger.exception(f"Exception in launch agents.")
+        failed = -1
+    finally:
+        logger.debug(f"Exit cli. code: {failed}")
+        sys.exit(failed)
 
 
 def _launch_subprocesses(click_context: click.Context, agents: List[Path]) -> int:
@@ -79,8 +78,13 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]) -> in
     :param agents: list of paths to agent projects.
     :return: execution status
     """
+    ctx = cast(Context, click_context.obj)
+
     launcher = AEALauncher(
-        agents, mode="multiprocess", fail_policy=ExecutorExceptionPolicies.log_only
+        agents,
+        mode="multiprocess",
+        fail_policy=ExecutorExceptionPolicies.log_only,
+        log_level=ctx.verbosity,
     )
 
     try:
@@ -116,7 +120,8 @@ def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
         agents=aeas, mode="threaded", fail_policy=ExecutorExceptionPolicies.log_only
     )
     try:
-        runner.start()
+        runner.start(threaded=True)
+        runner.join_thread()  # for some reason on windows and python 3.7/3.7 keyboard interuption exception gets lost so run in threaded mode to catch keyboard interruped
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected.")
     finally:
