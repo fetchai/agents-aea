@@ -10,13 +10,9 @@ message LedgerApiMessage{
         string address = 2;
     }
 
-    message Transfer_Performative{
+    message Send_Signed_Transaction_Performative{
         string ledger_id = 1;
-        string destination_address = 2;
-        int32 amount = 3;
-        int32 tx_fee = 4;
-        int32 tx_nonce = 5;
-        map<string, string> data = 6;
+        bytes signed_tx = 2;
     }
 
     message Is_Transaction_Settled_Performative{
@@ -34,15 +30,17 @@ message LedgerApiMessage{
         string tx_digest = 2;
     }
 
-    message Generate_Tx_Nonce_Performative{
-        string ledger_id = 1;
-    }
-
     message Balance_Performative{
-        string ledger_id = 1;
+        int32 amount = 1;
     }
 
-    message Tx_Digest_Performative{}
+    message Tx_Digest_Performative{
+        string digest = 1;
+    }
+
+    message Tx_Receipt_Performative{
+        map<string, string> data = 1;
+    }
 
 
     // Standard LedgerApiMessage fields
@@ -52,12 +50,12 @@ message LedgerApiMessage{
     int32 target = 4;
     oneof performative{
         Balance_Performative balance = 5;
-        Generate_Tx_Nonce_Performative generate_tx_nonce = 6;
-        Get_Balance_Performative get_balance = 7;
-        Get_Transaction_Receipt_Performative get_transaction_receipt = 8;
-        Is_Transaction_Settled_Performative is_transaction_settled = 9;
-        Is_Transaction_Valid_Performative is_transaction_valid = 10;
-        Transfer_Performative transfer = 11;
-        Tx_Digest_Performative tx_digest = 12;
+        Get_Balance_Performative get_balance = 6;
+        Get_Transaction_Receipt_Performative get_transaction_receipt = 7;
+        Is_Transaction_Settled_Performative is_transaction_settled = 8;
+        Is_Transaction_Valid_Performative is_transaction_valid = 9;
+        Send_Signed_Transaction_Performative send_signed_transaction = 10;
+        Tx_Digest_Performative tx_digest = 11;
+        Tx_Receipt_Performative tx_receipt = 12;
     }
 }

@@ -6,32 +6,35 @@ description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 speech_acts:
+  # requests
   get_balance:
     ledger_id: pt:str
     address: pt:str
-  transfer:
+  send_signed_transaction:
     ledger_id: pt:str
-    destination_address: pt:str
-    amount: pt:int
-    tx_fee: pt:int
-    tx_nonce: pt:int
-    data: pt:dict[pt:str, pt:str]
-
+    signed_tx: pt:bytes
+  # the following could be merged together
   is_transaction_settled:
     ledger_id: pt:str
     tx_digest: pt:str
   is_transaction_valid:
     ledger_id: pt:str
     tx_digest: pt:str
-
   get_transaction_receipt:
     ledger_id: pt:str
     tx_digest: pt:str
 
-  generate_tx_nonce:
-    ledger_id: pt:str
-
-  balance:
-    ledger_id: pt:str
-  tx_digest: {}
+  # responses
+  balance: # response to 'get_balance'
+    amount: pt:int
+  tx_digest: # response to 'send_signed_transaction'
+    digest: pt:str
+  tx_receipt: # response to 'get_transaction_receipt'
+    data: pt:dict[pt:str,pt:str]
+...
+---
+reply:
+  get_balance: [balance]
+  send_signed_transaction: [tx_digest]
+  get_transaction_receipt: [tx_receipt]
 ...

@@ -55,21 +55,13 @@ class LedgerApiSerializer(Serializer):
             address = msg.address
             performative.address = address
             ledger_api_msg.get_balance.CopyFrom(performative)
-        elif performative_id == LedgerApiMessage.Performative.TRANSFER:
-            performative = ledger_api_pb2.LedgerApiMessage.Transfer_Performative()  # type: ignore
+        elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION:
+            performative = ledger_api_pb2.LedgerApiMessage.Send_Signed_Transaction_Performative()  # type: ignore
             ledger_id = msg.ledger_id
             performative.ledger_id = ledger_id
-            destination_address = msg.destination_address
-            performative.destination_address = destination_address
-            amount = msg.amount
-            performative.amount = amount
-            tx_fee = msg.tx_fee
-            performative.tx_fee = tx_fee
-            tx_nonce = msg.tx_nonce
-            performative.tx_nonce = tx_nonce
-            data = msg.data
-            performative.data.update(data)
-            ledger_api_msg.transfer.CopyFrom(performative)
+            signed_tx = msg.signed_tx
+            performative.signed_tx = signed_tx
+            ledger_api_msg.send_signed_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.IS_TRANSACTION_SETTLED:
             performative = ledger_api_pb2.LedgerApiMessage.Is_Transaction_Settled_Performative()  # type: ignore
             ledger_id = msg.ledger_id
@@ -91,19 +83,21 @@ class LedgerApiSerializer(Serializer):
             tx_digest = msg.tx_digest
             performative.tx_digest = tx_digest
             ledger_api_msg.get_transaction_receipt.CopyFrom(performative)
-        elif performative_id == LedgerApiMessage.Performative.GENERATE_TX_NONCE:
-            performative = ledger_api_pb2.LedgerApiMessage.Generate_Tx_Nonce_Performative()  # type: ignore
-            ledger_id = msg.ledger_id
-            performative.ledger_id = ledger_id
-            ledger_api_msg.generate_tx_nonce.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.BALANCE:
             performative = ledger_api_pb2.LedgerApiMessage.Balance_Performative()  # type: ignore
-            ledger_id = msg.ledger_id
-            performative.ledger_id = ledger_id
+            amount = msg.amount
+            performative.amount = amount
             ledger_api_msg.balance.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.TX_DIGEST:
             performative = ledger_api_pb2.LedgerApiMessage.Tx_Digest_Performative()  # type: ignore
+            digest = msg.digest
+            performative.digest = digest
             ledger_api_msg.tx_digest.CopyFrom(performative)
+        elif performative_id == LedgerApiMessage.Performative.TX_RECEIPT:
+            performative = ledger_api_pb2.LedgerApiMessage.Tx_Receipt_Performative()  # type: ignore
+            data = msg.data
+            performative.data.update(data)
+            ledger_api_msg.tx_receipt.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -135,20 +129,11 @@ class LedgerApiSerializer(Serializer):
             performative_content["ledger_id"] = ledger_id
             address = ledger_api_pb.get_balance.address
             performative_content["address"] = address
-        elif performative_id == LedgerApiMessage.Performative.TRANSFER:
-            ledger_id = ledger_api_pb.transfer.ledger_id
+        elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION:
+            ledger_id = ledger_api_pb.send_signed_transaction.ledger_id
             performative_content["ledger_id"] = ledger_id
-            destination_address = ledger_api_pb.transfer.destination_address
-            performative_content["destination_address"] = destination_address
-            amount = ledger_api_pb.transfer.amount
-            performative_content["amount"] = amount
-            tx_fee = ledger_api_pb.transfer.tx_fee
-            performative_content["tx_fee"] = tx_fee
-            tx_nonce = ledger_api_pb.transfer.tx_nonce
-            performative_content["tx_nonce"] = tx_nonce
-            data = ledger_api_pb.transfer.data
-            data_dict = dict(data)
-            performative_content["data"] = data_dict
+            signed_tx = ledger_api_pb.send_signed_transaction.signed_tx
+            performative_content["signed_tx"] = signed_tx
         elif performative_id == LedgerApiMessage.Performative.IS_TRANSACTION_SETTLED:
             ledger_id = ledger_api_pb.is_transaction_settled.ledger_id
             performative_content["ledger_id"] = ledger_id
@@ -164,14 +149,16 @@ class LedgerApiSerializer(Serializer):
             performative_content["ledger_id"] = ledger_id
             tx_digest = ledger_api_pb.get_transaction_receipt.tx_digest
             performative_content["tx_digest"] = tx_digest
-        elif performative_id == LedgerApiMessage.Performative.GENERATE_TX_NONCE:
-            ledger_id = ledger_api_pb.generate_tx_nonce.ledger_id
-            performative_content["ledger_id"] = ledger_id
         elif performative_id == LedgerApiMessage.Performative.BALANCE:
-            ledger_id = ledger_api_pb.balance.ledger_id
-            performative_content["ledger_id"] = ledger_id
+            amount = ledger_api_pb.balance.amount
+            performative_content["amount"] = amount
         elif performative_id == LedgerApiMessage.Performative.TX_DIGEST:
-            pass
+            digest = ledger_api_pb.tx_digest.digest
+            performative_content["digest"] = digest
+        elif performative_id == LedgerApiMessage.Performative.TX_RECEIPT:
+            data = ledger_api_pb.tx_receipt.data
+            data_dict = dict(data)
+            performative_content["data"] = data_dict
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 

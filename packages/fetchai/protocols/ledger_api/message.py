@@ -40,13 +40,13 @@ class LedgerApiMessage(Message):
         """Performatives for the ledger_api protocol."""
 
         BALANCE = "balance"
-        GENERATE_TX_NONCE = "generate_tx_nonce"
         GET_BALANCE = "get_balance"
         GET_TRANSACTION_RECEIPT = "get_transaction_receipt"
         IS_TRANSACTION_SETTLED = "is_transaction_settled"
         IS_TRANSACTION_VALID = "is_transaction_valid"
-        TRANSFER = "transfer"
+        SEND_SIGNED_TRANSACTION = "send_signed_transaction"
         TX_DIGEST = "tx_digest"
+        TX_RECEIPT = "tx_receipt"
 
         def __str__(self):
             """Get the string representation."""
@@ -77,13 +77,13 @@ class LedgerApiMessage(Message):
         )
         self._performatives = {
             "balance",
-            "generate_tx_nonce",
             "get_balance",
             "get_transaction_receipt",
             "is_transaction_settled",
             "is_transaction_valid",
-            "transfer",
+            "send_signed_transaction",
             "tx_digest",
+            "tx_receipt",
         }
 
     @property
@@ -134,12 +134,10 @@ class LedgerApiMessage(Message):
         return cast(Dict[str, str], self.get("data"))
 
     @property
-    def destination_address(self) -> str:
-        """Get the 'destination_address' content from the message."""
-        assert self.is_set(
-            "destination_address"
-        ), "'destination_address' content is not set."
-        return cast(str, self.get("destination_address"))
+    def digest(self) -> str:
+        """Get the 'digest' content from the message."""
+        assert self.is_set("digest"), "'digest' content is not set."
+        return cast(str, self.get("digest"))
 
     @property
     def ledger_id(self) -> str:
@@ -148,22 +146,16 @@ class LedgerApiMessage(Message):
         return cast(str, self.get("ledger_id"))
 
     @property
+    def signed_tx(self) -> bytes:
+        """Get the 'signed_tx' content from the message."""
+        assert self.is_set("signed_tx"), "'signed_tx' content is not set."
+        return cast(bytes, self.get("signed_tx"))
+
+    @property
     def tx_digest(self) -> str:
         """Get the 'tx_digest' content from the message."""
         assert self.is_set("tx_digest"), "'tx_digest' content is not set."
         return cast(str, self.get("tx_digest"))
-
-    @property
-    def tx_fee(self) -> int:
-        """Get the 'tx_fee' content from the message."""
-        assert self.is_set("tx_fee"), "'tx_fee' content is not set."
-        return cast(int, self.get("tx_fee"))
-
-    @property
-    def tx_nonce(self) -> int:
-        """Get the 'tx_nonce' content from the message."""
-        assert self.is_set("tx_nonce"), "'tx_nonce' content is not set."
-        return cast(int, self.get("tx_nonce"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the ledger_api protocol."""
@@ -217,49 +209,21 @@ class LedgerApiMessage(Message):
                 ), "Invalid type for content 'address'. Expected 'str'. Found '{}'.".format(
                     type(self.address)
                 )
-            elif self.performative == LedgerApiMessage.Performative.TRANSFER:
-                expected_nb_of_contents = 6
+            elif (
+                self.performative
+                == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION
+            ):
+                expected_nb_of_contents = 2
                 assert (
                     type(self.ledger_id) == str
                 ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
                     type(self.ledger_id)
                 )
                 assert (
-                    type(self.destination_address) == str
-                ), "Invalid type for content 'destination_address'. Expected 'str'. Found '{}'.".format(
-                    type(self.destination_address)
+                    type(self.signed_tx) == bytes
+                ), "Invalid type for content 'signed_tx'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.signed_tx)
                 )
-                assert (
-                    type(self.amount) == int
-                ), "Invalid type for content 'amount'. Expected 'int'. Found '{}'.".format(
-                    type(self.amount)
-                )
-                assert (
-                    type(self.tx_fee) == int
-                ), "Invalid type for content 'tx_fee'. Expected 'int'. Found '{}'.".format(
-                    type(self.tx_fee)
-                )
-                assert (
-                    type(self.tx_nonce) == int
-                ), "Invalid type for content 'tx_nonce'. Expected 'int'. Found '{}'.".format(
-                    type(self.tx_nonce)
-                )
-                assert (
-                    type(self.data) == dict
-                ), "Invalid type for content 'data'. Expected 'dict'. Found '{}'.".format(
-                    type(self.data)
-                )
-                for key_of_data, value_of_data in self.data.items():
-                    assert (
-                        type(key_of_data) == str
-                    ), "Invalid type for dictionary keys in content 'data'. Expected 'str'. Found '{}'.".format(
-                        type(key_of_data)
-                    )
-                    assert (
-                        type(value_of_data) == str
-                    ), "Invalid type for dictionary values in content 'data'. Expected 'str'. Found '{}'.".format(
-                        type(value_of_data)
-                    )
             elif (
                 self.performative
                 == LedgerApiMessage.Performative.IS_TRANSACTION_SETTLED
@@ -304,22 +268,38 @@ class LedgerApiMessage(Message):
                 ), "Invalid type for content 'tx_digest'. Expected 'str'. Found '{}'.".format(
                     type(self.tx_digest)
                 )
-            elif self.performative == LedgerApiMessage.Performative.GENERATE_TX_NONCE:
-                expected_nb_of_contents = 1
-                assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
-                )
             elif self.performative == LedgerApiMessage.Performative.BALANCE:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
+                    type(self.amount) == int
+                ), "Invalid type for content 'amount'. Expected 'int'. Found '{}'.".format(
+                    type(self.amount)
                 )
             elif self.performative == LedgerApiMessage.Performative.TX_DIGEST:
-                expected_nb_of_contents = 0
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.digest) == str
+                ), "Invalid type for content 'digest'. Expected 'str'. Found '{}'.".format(
+                    type(self.digest)
+                )
+            elif self.performative == LedgerApiMessage.Performative.TX_RECEIPT:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.data) == dict
+                ), "Invalid type for content 'data'. Expected 'dict'. Found '{}'.".format(
+                    type(self.data)
+                )
+                for key_of_data, value_of_data in self.data.items():
+                    assert (
+                        type(key_of_data) == str
+                    ), "Invalid type for dictionary keys in content 'data'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_data)
+                    )
+                    assert (
+                        type(value_of_data) == str
+                    ), "Invalid type for dictionary values in content 'data'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_data)
+                    )
 
             # Check correct content count
             assert (
