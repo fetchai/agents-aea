@@ -202,9 +202,9 @@ class AbstractMultipleExecutor(ABC):
         async def wait_future(future):
             try:
                 await future
-            except (KeyboardInterrupt):
-                pass
-            except (Exception) as e:
+            except KeyboardInterrupt:
+                pass  # skip it.
+            except Exception as e:
                 if not skip_exceptions:
                     await self._handle_exception(self._future_task[future], e)
 
