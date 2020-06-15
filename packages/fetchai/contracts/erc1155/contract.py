@@ -226,6 +226,8 @@ class ERC1155Contract(Contract):
         """
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        if nonce > self.nonce:
+            self.nonce = nonce
         assert nonce <= self.nonce, "The local nonce should be >= from the chain nonce."
         tx = self.instance.functions.createBatch(
             deployer_address, token_ids
@@ -296,6 +298,8 @@ class ERC1155Contract(Contract):
         """
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        if nonce > self.nonce:
+            self.nonce = nonce
         assert nonce <= self.nonce, "The local nonce should be >= from the chain nonce."
         tx = self.instance.functions.createSingle(
             deployer_address, token_id, ""
@@ -387,6 +391,8 @@ class ERC1155Contract(Contract):
         """
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        if nonce > self.nonce:
+            self.nonce = nonce
         assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
         for idx, token_id in enumerate(token_ids):
             decoded_type = Helpers().decode_id(token_id)
@@ -476,6 +482,8 @@ class ERC1155Contract(Contract):
         """
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        if nonce > self.nonce:
+            self.nonce = nonce
         assert nonce <= self.nonce, "The local nonce should be >= from the chain nonce."
         assert recipient_address is not None
         decoded_type = Helpers().decode_id(token_id)
@@ -611,6 +619,8 @@ class ERC1155Contract(Contract):
         data = b"single_atomic_swap"
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
+        if nonce > self.nonce:
+            self.nonce = nonce
         assert nonce <= self.nonce, "The local nonce should be >= from the chain nonce."
         tx = self.instance.functions.trade(
             from_address,
@@ -704,17 +714,26 @@ class ERC1155Contract(Contract):
             )
         )
         tx_quantities_by_good_id = {}
+        tx_amount_by_currency_id = {}
         for idx, token_id in enumerate(token_ids):
-            tx_quantities_by_good_id[str(token_id)] = (
-                -from_supplies[idx] + to_supplies[idx]
-            )
+            # HACK; we need to fix currency ids
+            if idx < 9:
+                tx_quantities_by_good_id[str(token_id)] = (
+                    -from_supplies[idx] + to_supplies[idx]
+                )
+            elif idx == 9:
+                tx_amount_by_currency_id[str(token_id)] = (
+                    -from_supplies[idx] + to_supplies[idx]
+                )
+            else:
+                ValueError("Should not be here!")
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
             tx_id=transaction_id,
             tx_sender_addr=from_address,
             tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: value},
+            tx_amount_by_currency_id=tx_amount_by_currency_id,  # {ETHEREUM_CURRENCY: value}, temporary hack
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id=tx_quantities_by_good_id,
@@ -754,6 +773,8 @@ class ERC1155Contract(Contract):
         data = b"batch_atomic_swap"
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
+        if nonce > self.nonce:
+            self.nonce = nonce
         assert nonce <= self.nonce, "The local nonce should be >= from the chain nonce."
         tx = self.instance.functions.tradeBatch(
             from_address,
@@ -946,17 +967,26 @@ class ERC1155Contract(Contract):
             )
         )
         tx_quantities_by_good_id = {}
+        tx_amount_by_currency_id = {}
         for idx, token_id in enumerate(token_ids):
-            tx_quantities_by_good_id[str(token_id)] = (
-                -from_supplies[idx] + to_supplies[idx]
-            )
+            # HACK; we need to fix currency ids
+            if idx < 9:
+                tx_quantities_by_good_id[str(token_id)] = (
+                    from_supplies[idx] - to_supplies[idx]
+                )
+            elif idx == 9:
+                tx_amount_by_currency_id[str(token_id)] = (
+                    from_supplies[idx] - to_supplies[idx]
+                )
+            else:
+                ValueError("Should not be here!")
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
             tx_id=transaction_id,
             tx_sender_addr=from_address,
             tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: value},
+            tx_amount_by_currency_id=tx_amount_by_currency_id,  # {ETHEREUM_CURRENCY: value}, temporary hack
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id=tx_quantities_by_good_id,
@@ -1004,7 +1034,7 @@ class ERC1155Contract(Contract):
         )
         assert (
             tx_hash
-            == self.instance.functions.getBatchHash(
+            == self.instance.functions.getHash(
                 from_address,
                 to_address,
                 token_ids,
