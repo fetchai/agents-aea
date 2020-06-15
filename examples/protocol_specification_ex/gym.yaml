@@ -22,3 +22,12 @@ speech_acts:
 ct:AnyObject: |
   bytes any = 1;
 ...
+---
+reply:
+  act: [percept]
+  percept: []
+  reset: []
+  close: []
+roles: {agent, environment}
+end_states: [open, closed]
+...

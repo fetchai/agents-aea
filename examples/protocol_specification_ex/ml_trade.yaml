@@ -29,3 +29,12 @@ ct:Query: |
 ct:Description: |
   bytes description = 1;
 ...
+---
+reply:
+  cfp: [terms]
+  terms: [accept]
+  accept: [data]
+  data: [accept, terms]
+roles: {seller, buyer}
+end_states: [successful, open]
+...

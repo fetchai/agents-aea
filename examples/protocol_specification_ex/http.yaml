@@ -19,3 +19,10 @@ speech_acts:
     headers: pt:str
     bodyy: pt:bytes
 ...
+---
+reply:
+  request: [response]
+  response: []
+roles: {client, server}
+end_states: []
+...

@@ -24,3 +24,10 @@ ct:ErrorCode: |
     }
   ErrorCodeEnum error_code = 1;
 ...
+---
+reply:
+  bytes: [bytes, error]
+  error: []
+roles: {agent}
+end_states: [open, closed]
+...

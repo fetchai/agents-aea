@@ -37,3 +37,13 @@ ct:OefErrorOperation: |
       }
   OefErrorEnum oef_error = 1;
 ...
+---
+reply:
+  register_service: [oef_error]
+  unregister_service: [oef_error]
+  search_services: [search_result,oef_error]
+  search_result: []
+  oef_error: []
+roles: {agent, oef_node}
+end_states: [open, closed]
+...
