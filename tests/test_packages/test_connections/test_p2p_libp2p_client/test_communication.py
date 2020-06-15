@@ -114,7 +114,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert self.connection_client_1.connection_status.is_connected is True
         assert self.connection_client_2.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
     @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection_client_1.address
@@ -143,7 +143,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message == envelope.message
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
     @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection_client_1.address
@@ -179,7 +179,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message == original_envelope.message
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
     @libp2p_log_on_failure
     def test_envelope_echoed_back_node_agent(self):
         addr_1 = self.connection_client_1.address
@@ -284,7 +284,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert self.connection_client_1.connection_status.is_connected is True
         assert self.connection_client_2.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
     @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection_client_1.address
@@ -313,7 +313,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message == envelope.message
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
     @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection_client_1.address
@@ -349,7 +349,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message == original_envelope.message
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
     @libp2p_log_on_failure
     def test_envelope_echoed_back_node_agent(self):
         addr_1 = self.connection_client_1.address
@@ -458,7 +458,7 @@ class TestLibp2pClientConnectionRouting:
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause libp2p dht.FindProviders
     @libp2p_log_on_failure
     def test_star_routing_connectivity(self):
         msg = DefaultMessage(
