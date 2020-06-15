@@ -21,6 +21,9 @@ This class implements the context of a skill.
 
 Initialize a skill context.
 
+:agent_context: the agent context.
+:skill: the skill.
+
 <a name=".aea.skills.base.SkillContext.set_agent_context"></a>
 #### set`_`agent`_`context
 
@@ -78,7 +81,7 @@ Set the status of the skill (active/not active).
  | new_behaviours() -> Queue
 ```
 
-The queue for the new behaviours.
+Queue for the new behaviours.
 
 This queue can be used to send messages to the framework
 to request the registration of a behaviour.
@@ -359,6 +362,26 @@ Abstract behaviour for periodical calls.
 tick_interval: float, interval to call behaviour's act.
 start_at: optional datetime, when to start periodical calls.
 
+<a name=".aea.skills.base.AbstractBehaviour.tick_interval"></a>
+#### tick`_`interval
+
+```python
+ | @property
+ | tick_interval() -> float
+```
+
+Get the tick_interval in seconds.
+
+<a name=".aea.skills.base.AbstractBehaviour.start_at"></a>
+#### start`_`at
+
+```python
+ | @property
+ | start_at() -> Optional[datetime.datetime]
+```
+
+Get the start time of the behaviour.
+
 <a name=".aea.skills.base.Behaviour"></a>
 ## Behaviour Objects
 
@@ -535,6 +558,10 @@ Initialize a skill.
 **Arguments**:
 
 - `configuration`: the skill configuration.
+- `skill_context`: the skill context.
+- `handlers`: dictionary of handlers.
+- `behaviours`: dictionary of behaviours.
+- `models`: dictionary of models.
 
 <a name=".aea.skills.base.Skill.contracts"></a>
 #### contracts
@@ -600,7 +627,7 @@ Get the handlers.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, skill_context: Optional[SkillContext] = None) -> "Skill"
+ | from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill"
 ```
 
 Load the skill from a directory.
@@ -608,7 +635,7 @@ Load the skill from a directory.
 **Arguments**:
 
 - `directory`: the directory to the skill package.
-- `skill_context`: the skill context
+- `agent_context`: the skill context
 
 **Returns**:
 
@@ -619,7 +646,7 @@ the skill object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: SkillConfig, skill_context: Optional[SkillContext] = None) -> "Skill"
+ | from_config(cls, configuration: SkillConfig, agent_context: AgentContext) -> "Skill"
 ```
 
 Load the skill from configuration.
@@ -627,6 +654,7 @@ Load the skill from configuration.
 **Arguments**:
 
 - `configuration`: a skill configuration. Must be associated with a directory.
+- `agent_context`: the agent context.
 
 **Returns**:
 

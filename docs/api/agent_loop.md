@@ -42,6 +42,24 @@ Set event loop and all event loopp related objects.
 
 Start agent loop synchronously in own asyncio loop.
 
+<a name=".aea.agent_loop.BaseAgentLoop.run_loop"></a>
+#### run`_`loop
+
+```python
+ | async run_loop() -> None
+```
+
+Run agent loop.
+
+<a name=".aea.agent_loop.BaseAgentLoop.wait_run_loop_stopped"></a>
+#### wait`_`run`_`loop`_`stopped
+
+```python
+ | async wait_run_loop_stopped() -> None
+```
+
+Wait all tasks stopped.
+
 <a name=".aea.agent_loop.BaseAgentLoop.stop"></a>
 #### stop
 

@@ -90,7 +90,7 @@ Instantiate the agent.
 - `timeout`: the time in (fractions of) seconds to time out an agent between act and react
 - `is_debug`: if True, run the agent in debug mode (does not connect the multiplexer).
 - `loop_mode`: loop_mode to choose agent run loop.
-- `runtime`: runtime to up agent.
+- `runtime_mode`: runtime mode to up agent.
 
 **Returns**:
 
@@ -190,9 +190,19 @@ Get the liveness.
  | tick() -> int
 ```
 
-Get the tick (or agent loop count).
+Get the tick or agent loop count.
 
 Each agent loop (one call to each one of act(), react(), update()) increments the tick.
+
+<a name=".aea.agent.Agent.timeout"></a>
+#### timeout
+
+```python
+ | @property
+ | timeout() -> float
+```
+
+Get the time in (fractions of) seconds to time out an agent between act and react.
 
 <a name=".aea.agent.Agent.agent_state"></a>
 #### agent`_`state
@@ -222,6 +232,35 @@ None
 
 Get the agent loop mode.
 
+<a name=".aea.agent.Agent.main_loop"></a>
+#### main`_`loop
+
+```python
+ | @property
+ | main_loop() -> BaseAgentLoop
+```
+
+Get the main agent loop.
+
+<a name=".aea.agent.Agent.runtime"></a>
+#### runtime
+
+```python
+ | @property
+ | runtime() -> BaseRuntime
+```
+
+Get the runtime.
+
+<a name=".aea.agent.Agent.setup_multiplexer"></a>
+#### setup`_`multiplexer
+
+```python
+ | setup_multiplexer() -> None
+```
+
+Set up the multiplexer
+
 <a name=".aea.agent.Agent.start"></a>
 #### start
 
@@ -246,9 +285,22 @@ While the liveness of the agent is not stopped it continues to loop over:
 - call to react(),
 - call to update().
 
-**Arguments**:
+**Returns**:
 
-- `loop_mode`: loop mode to choose  agent run loop. if not specified default one will be used
+None
+
+<a name=".aea.agent.Agent.start_setup"></a>
+#### start`_`setup
+
+```python
+ | start_setup() -> None
+```
+
+Set up Agent on start.
+
+- connect Multiplexer
+- call agent.setup
+- set liveness to started
 
 **Returns**:
 

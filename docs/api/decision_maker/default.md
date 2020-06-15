@@ -168,6 +168,23 @@ Note, the agent is the sender of the transaction message by design.
 
 True if the transaction is legal wrt the current state, false otherwise.
 
+<a name=".aea.decision_maker.default.OwnershipState.update"></a>
+#### update
+
+```python
+ | update(tx_message: TransactionMessage) -> None
+```
+
+Update the agent state from a transaction.
+
+**Arguments**:
+
+- `tx_message`: the transaction message
+
+**Returns**:
+
+None
+
 <a name=".aea.decision_maker.default.OwnershipState.apply_transactions"></a>
 #### apply`_`transactions
 

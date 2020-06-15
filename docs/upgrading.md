@@ -1,5 +1,9 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.4.0 to v0.4.1
+
+No breaking changes mean there are no upgrage requirements.
+
 ## v0.3.3 to v0.4.0
 
 <ul>

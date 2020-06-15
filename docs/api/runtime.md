@@ -77,6 +77,19 @@ Get running state of the runtime.
 
 Get stopped state of the runtime.
 
+<a name=".aea.runtime.BaseRuntime.set_loop"></a>
+#### set`_`loop
+
+```python
+ | set_loop(loop: AbstractEventLoop) -> None
+```
+
+Set event loop to be used.
+
+**Arguments**:
+
+- `loop`: event loop to use.
+
 <a name=".aea.runtime.AsyncRuntime"></a>
 ## AsyncRuntime Objects
 
@@ -103,6 +116,28 @@ Init runtime.
 **Returns**:
 
 None
+
+<a name=".aea.runtime.AsyncRuntime.set_loop"></a>
+#### set`_`loop
+
+```python
+ | set_loop(loop: AbstractEventLoop) -> None
+```
+
+Set event loop to be used.
+
+**Arguments**:
+
+- `loop`: event loop to use.
+
+<a name=".aea.runtime.AsyncRuntime.run_runtime"></a>
+#### run`_`runtime
+
+```python
+ | async run_runtime() -> None
+```
+
+Run agent and starts multiplexer.
 
 <a name=".aea.runtime.ThreadedRuntime"></a>
 ## ThreadedRuntime Objects

@@ -1,5 +1,18 @@
 # Release History
 
+## 0.4.1 (2020-06-15)
+
+- Updates component package module loading for skill and connection
+- Unifies component package loading across package types
+- Adds connections registry to resources
+- Upgrades CLI commands for easier programmatic usage
+- Adds AEARunner and AEALauncher for programmatic launch of multiple agents
+- Refactors AEABuilder to support re-entrancy and resetting
+- Fixes tac packages to work with erc1155 contract
+- Multiple refactoring to improve public and private access patterns
+- Multiple docs updates
+- Multiple test stability fixes
+
 ## 0.4.0 (2020-06-08)
 
 - Updates message handling in skills
