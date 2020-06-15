@@ -32,7 +32,7 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.decision_maker.messages.base import PUBLIC_ID as INTERNAL_PROTOCOL_ID
+from aea.decision_maker.messages.base import InternalMessage
 from aea.skills.base import Behaviour, Handler, Model
 
 logger = logging.getLogger(__name__)
@@ -478,4 +478,4 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         :param skill_id: the skill id
         :return: the internal handler registered for the skill id
         """
-        return self.fetch_by_protocol_and_skill(INTERNAL_PROTOCOL_ID, skill_id)
+        return self.fetch_by_protocol_and_skill(InternalMessage.protocol_id, skill_id)

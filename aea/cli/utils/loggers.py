@@ -56,8 +56,8 @@ class ColorFormatter(logging.Formatter):
 
 
 def simple_verbosity_option(
-    *names, logger=None, **kwargs
-):  # pylint: disable=redefined-outer-name
+    logger=None, *names, **kwargs
+):  # pylint: disable=redefined-outer-name,keyword-arg-before-vararg
     """Add a decorator that adds a `--verbosity, -v` option to the decorated command.
 
     Name can be configured through `*names`. Keyword arguments are passed to
