@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package fetch.aea.LedgerApi;
+
+message LedgerApiMessage{
+
+    // Performatives and contents
+    message Get_Balance_Performative{
+        string ledger_id = 1;
+        string address = 2;
+    }
+
+    message Transfer_Performative{
+        string ledger_id = 1;
+        string destination_address = 2;
+        int32 amount = 3;
+        int32 tx_fee = 4;
+        int32 tx_nonce = 5;
+        map<string, string> data = 6;
+    }
+
+    message Is_Transaction_Settled_Performative{
+        string ledger_id = 1;
+        string tx_digest = 2;
+    }
+
+    message Is_Transaction_Valid_Performative{
+        string ledger_id = 1;
+        string tx_digest = 2;
+    }
+
+    message Get_Transaction_Receipt_Performative{
+        string ledger_id = 1;
+        string tx_digest = 2;
+    }
+
+    message Generate_Tx_Nonce_Performative{
+        string ledger_id = 1;
+    }
+
+    message Balance_Performative{
+        string ledger_id = 1;
+    }
+
+    message Tx_Digest_Performative{}
+
+
+    // Standard LedgerApiMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Balance_Performative balance = 5;
+        Generate_Tx_Nonce_Performative generate_tx_nonce = 6;
+        Get_Balance_Performative get_balance = 7;
+        Get_Transaction_Receipt_Performative get_transaction_receipt = 8;
+        Is_Transaction_Settled_Performative is_transaction_settled = 9;
+        Is_Transaction_Valid_Performative is_transaction_valid = 10;
+        Transfer_Performative transfer = 11;
+        Tx_Digest_Performative tx_digest = 12;
+    }
+}
