@@ -27,11 +27,13 @@ from aea.configurations.base import PublicId
 
 logger = logging.getLogger(__name__)
 
+PUBLIC_ID = PublicId.from_str("fetchai/internal:0.1.0")
+
 
 class InternalMessage:
     """This class implements a message."""
 
-    protocol_id = PublicId("fetchai", "internal", "0.1.0")
+    protocol_id = PUBLIC_ID
 
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """

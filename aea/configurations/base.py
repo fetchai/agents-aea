@@ -332,7 +332,8 @@ class PublicId(JSONSerializable):
         self._name = name
         self._version, self._version_info = self._process_version(version)
 
-    def _process_version(self, version_like: PackageVersionLike) -> Tuple[Any, Any]:
+    @staticmethod
+    def _process_version(version_like: PackageVersionLike) -> Tuple[Any, Any]:
         if isinstance(version_like, str):
             return version_like, semver.VersionInfo.parse(version_like)
         elif isinstance(version_like, semver.VersionInfo):
@@ -677,7 +678,8 @@ class PackageConfiguration(Configuration, ABC):
         assert self._directory is None, "Directory already set"
         self._directory = directory
 
-    def _parse_aea_version_specifier(self, aea_version_specifiers: str) -> SpecifierSet:
+    @staticmethod
+    def _parse_aea_version_specifier(aea_version_specifiers: str) -> SpecifierSet:
         try:
             Version(aea_version_specifiers)
             return SpecifierSet("==" + aea_version_specifiers)
@@ -863,16 +865,19 @@ class ConnectionConfig(ComponentConfiguration):
             assert author != "", "Author or connection_id must be set."
             assert version != "", "Version or connection_id must be set."
         else:
-            assert (
-                name == "" or name == connection_id.name
+            assert name in (
+                "",
+                connection_id.name,
             ), "Non matching name in ConnectionConfig name and public id."
             name = connection_id.name
-            assert (
-                author == "" or author == connection_id.author
+            assert author in (
+                "",
+                connection_id.author,
             ), "Non matching author in ConnectionConfig author and public id."
             author = connection_id.author
-            assert (
-                version == "" or version == connection_id.version
+            assert version in (
+                "",
+                connection_id.version,
             ), "Non matching version in ConnectionConfig version and public id."
             version = connection_id.version
         super().__init__(
@@ -1176,15 +1181,15 @@ class SkillConfig(ComponentConfiguration):
             description=description,
         )
 
-        for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():  # type: ignore
+        for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
             behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
             skill_config.behaviours.create(behaviour_id, behaviour_config)
 
-        for handler_id, handler_data in obj.get("handlers", {}).items():  # type: ignore
+        for handler_id, handler_data in obj.get("handlers", {}).items():
             handler_config = SkillComponentConfiguration.from_json(handler_data)
             skill_config.handlers.create(handler_id, handler_config)
 
-        for model_id, model_data in obj.get("models", {}).items():  # type: ignore
+        for model_id, model_data in obj.get("models", {}).items():
             model_config = SkillComponentConfiguration.from_json(model_data)
             skill_config.models.create(model_id, model_config)
 
@@ -1422,13 +1427,13 @@ class AgentConfig(PackageConfiguration):
             runtime_mode=cast(str, obj.get("runtime_mode")),
         )
 
-        for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore
+        for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)
 
-        for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
+        for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():
             agent_config.ledger_apis.create(ledger_id, ledger_data)
 
-        for crypto_id, path in obj.get("connection_private_key_paths", {}).items():  # type: ignore
+        for crypto_id, path in obj.get("connection_private_key_paths", {}).items():
             agent_config.connection_private_key_paths.create(crypto_id, path)
 
         # parse connection public ids
@@ -1565,7 +1570,7 @@ class ProtocolSpecification(ProtocolConfig):
             aea_version=cast(str, obj.get("aea_version", "")),
             description=cast(str, obj.get("description", "")),
         )
-        for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
+        for speech_act, speech_act_content in obj.get("speech_acts", {}).items():
             speech_act_content_config = SpeechActContentConfig.from_json(
                 speech_act_content
             )

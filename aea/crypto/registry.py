@@ -44,7 +44,7 @@ class CryptoId(RegexConstrainedString):
 
     REGEX = re.compile(r"^({})$".format(PY_ID_REGEX))
 
-    def __init__(self, seq):
+    def __init__(self, seq):  # pylint: disable=useless-super-delegation
         """Initialize the crypto id."""
         super().__init__(seq)
 

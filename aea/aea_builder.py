@@ -287,6 +287,9 @@ class AEABuilder:
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
+    DEFAULT_SEARCH_SERVICE_ADDRESS = "oef"
+
+    # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -464,6 +467,16 @@ class AEABuilder:
         :return: self
         """
         self._runtime_mode = runtime_mode
+        return self
+
+    def set_search_service_address(self, search_service_address: str) -> "AEABuilder":
+        """
+        Set the search service address.
+
+        :param search_service_address: the search service address
+        :return: self
+        """
+        self._search_service_address = search_service_address
         return self
 
     def _add_default_packages(self) -> None:
@@ -878,6 +891,7 @@ class AEABuilder:
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
+            search_service_address=self._get_search_service_address(),
             **deepcopy(self._context_namespace),
         )
         self._load_and_add_components(
@@ -1011,6 +1025,18 @@ class AEABuilder:
             self._runtime_mode
             if self._runtime_mode is not None
             else self.DEFAULT_RUNTIME_MODE
+        )
+
+    def _get_search_service_address(self) -> str:
+        """
+        Return the search service address.
+
+        :return: the search service address.
+        """
+        return (
+            self._search_service_address
+            if self._search_service_address is not None
+            else self.DEFAULT_SEARCH_SERVICE_ADDRESS
         )
 
     def _check_configuration_not_already_added(

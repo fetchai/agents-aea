@@ -215,7 +215,7 @@ class CosmosApi(LedgerApi):
             )
         return balance
 
-    def transfer(
+    def transfer(  # pylint: disable=arguments-differ
         self,
         crypto: Crypto,
         destination_address: Address,
@@ -437,7 +437,8 @@ class CosmosFaucetApi(FaucetApi):
         """
         self._try_get_wealth(address)
 
-    def _try_get_wealth(self, address: Address) -> None:
+    @staticmethod
+    def _try_get_wealth(address: Address) -> None:
         """
         Get wealth from the faucet for the provided address.
 

@@ -594,7 +594,7 @@ def _kill_running_oef_nodes():
     stdout = b""
     try:
         process.wait(10.0)
-        (stdout, stderr) = process.communicate()
+        (stdout, _) = process.communicate()
         image_ids.update(stdout.decode("utf-8").splitlines())
     finally:
         _terminate_process(process)
@@ -605,7 +605,7 @@ def _kill_running_oef_nodes():
     )
     try:
         process.wait(5.0)
-        (stdout, stderr) = process.communicate()
+        (stdout, _) = process.communicate()
         image_ids.update(stdout.decode("utf-8").splitlines())
     finally:
         _terminate_process(process)
@@ -620,7 +620,7 @@ def create_app():
     """Run the flask server."""
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
     app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
-    global app_context
+    global app_context  # pylint: disable=global-statement
     app_context = AppContext()
 
     app_context.oef_process = None
@@ -636,21 +636,21 @@ def create_app():
     app.add_api("aea_cli_rest.yaml")
 
     @app.route("/")
-    def home():
+    def home():  # pylint: disable=unused-variable
         """Respond to browser URL:  localhost:5000/."""
         return flask.render_template(
             "home.html", len=len(elements), htmlElements=elements
         )
 
     @app.route("/static/js/home.js")
-    def homejs():
+    def homejs():  # pylint: disable=unused-variable
         """Serve the home.js file (as it needs templating)."""
         return flask.render_template(
             "home.js", len=len(elements), htmlElements=elements
         )
 
     @app.route("/favicon.ico")
-    def favicon():
+    def favicon():  # pylint: disable=unused-variable
         """Return an icon to be displayed in the browser."""
         return flask.send_from_directory(
             os.path.join(app.root_path, "static"),

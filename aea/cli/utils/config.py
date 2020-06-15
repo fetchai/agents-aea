@@ -27,7 +27,7 @@ from typing import Dict, Tuple
 
 import click
 
-import jsonschema  # type: ignore
+import jsonschema
 
 import yaml
 
@@ -41,6 +41,7 @@ from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
+    PackageConfiguration,
     PackageType,
     _get_default_configuration_file_name_from_type,
 )
@@ -124,7 +125,7 @@ def get_or_create_cli_config() -> Dict:
     return load_yaml(CLI_CONFIG_PATH)
 
 
-def load_item_config(item_type: str, package_path: Path) -> ConfigLoader:
+def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:
     """
     Load item configuration.
 
@@ -239,7 +240,7 @@ def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
         setattr(item_config, key, value)
 
     config_filepath = os.path.join(
-        package_path, item_config.default_configuration_filename  # type: ignore
+        package_path, item_config.default_configuration_filename
     )
     loader = ConfigLoaders.from_package_type(item_type)
     with open(config_filepath, "w") as f:

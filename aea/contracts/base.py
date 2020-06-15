@@ -60,10 +60,10 @@ class Contract(Component, ABC):
         return self.public_id
 
     @property
-    def config(self) -> ContractConfig:
+    def configuration(self) -> ContractConfig:
         """Get the configuration."""
-        # return self._config
-        return self._configuration  # type: ignore
+        assert self._configuration is not None, "Configuration not set."
+        return cast(ContractConfig, super().configuration)
 
     @property
     def contract_interface(self) -> Dict[str, Any]:

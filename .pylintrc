@@ -2,16 +2,52 @@
 ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,R,W
-# Remove eventually
-# general R, W
-# In particular, resolve these and other important warnings:
+disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,W0105,W0621,W0235,W0703,W0212,W0706,W0108,W0622,W0613,W0201,W0223,W0221,W0611,W0612,W0222,W1505,W0106,R0902,R0913,R0914,R1720,R1705,R0801,R0904,R0903,R0911,R0912,R1721,R0901,R1718,R1723,R1704,R0916,R0201,R1714,R1702,R0123,R0915,R1710,R1703,R1716,R1711,R0205,R0401,R1722
+
+## Resolve these:
 # W0703: broad-except
 # W0212: protected-access, mostly resolved
 # W0706: try-except-raise
 # W0108: unnecessary-lambda
+# W0622: redefined-builtin
+# W0163: unused-argument
+# W0201: attribute-defined-outside-init
+# W0223: abstract-method
+# W0222: signature-differs
+# W0221: arguments-differ
+# W0611: unused-import
+# W0612: unused-variable
+# W1505: deprecated-method
+# W0106: expression-not-assigned
+# R0902: too-many-instance-attributes
+# R0913: too-many-arguments
+# R0914: too-many-locals
+# R1720: no-else-raise
+# R1705: no-else-return
+# R1723: no-else-break
+# R0904: too-many-public-methods
+# R0903: too-few-public-methods
+# R0911: too-many-return-statements
+# R0912: too-many-branches
+# R1721: unnecessary-comprehension
+# R0901: too-many-ancestors
+# R1718: consider-using-set-comprehension
+# R1716: chained-comparison
+# R1704: redefined-argument-from-local
+# R0916: too-many-boolean-expressions
+# R0201: no-self-use
+# R1714: consider-using-in
+# R1702: too-many-nested-blocks
+# R0123: literal-comparison
+# R0915: too-many-statements
+# R0205: useless-object-inheritance
+# R1710: inconsistent-return-statements
+# R1703: simplifiable-if-statement
+# R1711: useless-return
+# R0401: cyclic-import
+# R1722: consider-using-sys-exit
 
-## keep the following:
+## Keep the following:
 # C0103: invalid-name
 # C0201: consider-iterating-dictionary
 # C0330: Wrong haning indentation
@@ -21,6 +57,10 @@ disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,R,W
 # W1203: logging-fstring-interpolation
 # W0511: fixme
 # W0107: unnecessary-pass
+# W0105: pointless-string-statement
+# W0621: redefined-outer-name
+# W0235: useless-super-delegation
+# R0801: similar lines
 
 [IMPORTS]
 ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3

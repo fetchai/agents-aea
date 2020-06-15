@@ -55,7 +55,9 @@ class ColorFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)  # pragma: no cover
 
 
-def simple_verbosity_option(logger=None, *names, **kwargs):
+def simple_verbosity_option(
+    *names, logger=None, **kwargs
+):  # pylint: disable=redefined-outer-name
     """Add a decorator that adds a `--verbosity, -v` option to the decorated command.
 
     Name can be configured through `*names`. Keyword arguments are passed to
@@ -84,7 +86,7 @@ def simple_verbosity_option(logger=None, *names, **kwargs):
     return decorator
 
 
-def default_logging_config(logger):
+def default_logging_config(logger):  # pylint: disable=redefined-outer-name
     """Set up the default handler and formatter on the given logger."""
     default_handler = logging.StreamHandler(stream=sys.stdout)
     default_handler.formatter = ColorFormatter()
