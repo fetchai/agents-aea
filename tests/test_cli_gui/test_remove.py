@@ -38,7 +38,7 @@ def test_remove_item(*mocks):
     connection_name = "fetchai/test_connection:0.1.0"
 
     response_remove = app.post(
-        "api/agent/" + agent_name + "/remove/connection",
+        "api/agent/" + agent_name + "/connection/remove",
         content_type="application/json",
         data=json.dumps(connection_name),
     )
@@ -59,7 +59,7 @@ def test_remove_item_fail(*mocks):
     connection_name = "fetchai/test_connection:0.1.0"
 
     response_remove = app.post(
-        "api/agent/" + agent_name + "/remove/connection",
+        "api/agent/" + agent_name + "/connection/remove",
         content_type="application/json",
         data=json.dumps(connection_name),
     )

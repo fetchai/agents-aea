@@ -89,7 +89,16 @@ def decision_maker_handler(ctx: Context):
 
 @clean_after
 def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
-    """Add an item scaffolding to the configuration file and agent."""
+    """
+    Add an item scaffolding to the configuration file and agent.
+
+    :param ctx: Context object.
+    :param item_type: type of item.
+    :param item_name: item name.
+
+    :return: None
+    :raises ClickException: if some error occures.
+    """
     validate_package_name(item_name)
     author_name = ctx.agent_config.author
     loader = getattr(ctx, "{}_loader".format(item_type))

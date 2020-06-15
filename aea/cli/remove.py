@@ -86,8 +86,17 @@ def skill(ctx: Context, skill_id):
     remove_item(ctx, "skill", skill_id)
 
 
-def remove_item(ctx: Context, item_type, item_id: PublicId):
-    """Remove an item from the configuration file and agent, given the public id."""
+def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
+    """
+    Remove an item from the configuration file and agent, given the public id.
+
+    :param ctx: Context object.
+    :param item_type: type of item.
+    :param item_id: item public ID.
+
+    :return: None
+    :raises ClickException: if some error occures.
+    """
     item_name = item_id.name
     item_type_plural = "{}s".format(item_type)
     existing_item_ids = getattr(ctx.agent_config, item_type_plural)

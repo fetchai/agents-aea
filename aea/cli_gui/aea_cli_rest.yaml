@@ -133,7 +133,7 @@ paths:
           schema:
             type: string
 
-  /agent/{agent_id}/remove/{item_type}:
+  /agent/{agent_id}/{item_type}/remove:
     post:
       operationId: aea.cli_gui.remove_local_item
       tags:

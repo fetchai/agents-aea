@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,23 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea gui` sub-commands."""
+"""This module contains the support resources for the default protocol."""
 
-import json
-from unittest.mock import patch
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
-from tests.test_cli_gui.test_base import create_app
-
-
-@patch("aea.cli_gui.cli_list_agent_items", return_value=[{"name": "some-connection"}])
-@patch("aea.cli_gui.try_to_load_agent_config")
-def test_list_connections(*mocks):
-    """Test list localConnections."""
-    app = create_app()
-
-    response = app.get("api/agent/agent_name/connection")
-    assert response.status_code == 200
-
-    result = json.loads(response.get_data(as_text=True))
-    expected_result = [{"name": "some-connection"}]
-    assert result == expected_result
+DefaultMessage.serializer = DefaultSerializer

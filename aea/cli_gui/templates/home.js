@@ -155,7 +155,7 @@ class Model{
         var propertyName = element["type"] +  "_id"
         var ajax_options = {
             type: 'POST',
-            url: 'api/agent/' + agentId + '/remove/' + element["type"],
+            url: 'api/agent/' + agentId  + element["type"]+ '/remove/',
             accepts: 'application/json',
             contentType: 'application/json',
             dataType: 'json',
@@ -329,7 +329,7 @@ class View{
         // did we get a people array?
         if (tableName) {
             for (let i=0, l=data.length; i < l; i++) {
-                rows += `<tr><td class="id interactive">${data[i].id}</td><td class="description interactive">${data[i].description}</td></tr>`;
+                rows += `<tr><td class="id interactive">${data[i].public_id}</td><td class="description interactive">${data[i].description}</td></tr>`;
             }
             $('.' + tableName + ' table > tbody').append(rows);
         }

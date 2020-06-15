@@ -17,23 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea gui` sub-commands."""
-
-import json
-from unittest.mock import patch
-
-from tests.test_cli_gui.test_base import create_app
-
-
-@patch("aea.cli_gui.cli_list_agent_items", return_value=[{"name": "some-connection"}])
-@patch("aea.cli_gui.try_to_load_agent_config")
-def test_list_connections(*mocks):
-    """Test list localConnections."""
-    app = create_app()
-
-    response = app.get("api/agent/agent_name/connection")
-    assert response.status_code == 200
-
-    result = json.loads(response.get_data(as_text=True))
-    expected_result = [{"name": "some-connection"}]
-    assert result == expected_result
+"""This module contains the implementation of the error skill."""

@@ -39,10 +39,12 @@ import flask
 from aea.cli.add import add_item as cli_add_item
 from aea.cli.create import create_aea as cli_create_aea
 from aea.cli.delete import delete_aea as cli_delete_aea
+from aea.cli.list import list_agent_items as cli_list_agent_items
 from aea.cli.remove import remove_item as cli_remove_item
 from aea.cli.scaffold import scaffold_item as cli_scaffold_item
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
+from aea.cli.utils.formatting import sort_items
 from aea.configurations.base import PublicId
 
 elements = [
@@ -134,7 +136,15 @@ def get_agents() -> List[Dict]:
     for path in file_list:
         if is_agent_dir(path):
             _head, tail = os.path.split(path)
-            agent_list.append({"id": tail, "description": "placeholder description"})
+            agent_list.append(
+                {
+                    "public_id": tail,  # it is not a public_id actually, just a folder name.
+                    # the reason it's called here so is the view that is used to represent items with public_ids
+                    # used also for agent displaying
+                    # TODO: change it when we will have a separate view for an agent.
+                    "description": "placeholder description",
+                }
+            )
 
     return agent_list
 
@@ -269,16 +279,21 @@ def remove_local_item(agent_id: str, item_type: str, item_id: str):
 
 
 def get_local_items(agent_id: str, item_type: str):
+
     """Return a list of protocols, skills or connections supported by a local agent."""
     if agent_id == "NONE":
         return [], 200  # 200 (Success)
 
     # need to place ourselves one directory down so the searcher can find the packages
-    pid = _call_aea_async(
-        [sys.executable, "-m", "aea.cli", "list", item_type + "s"],
-        os.path.join(app_context.agents_dir, agent_id),
-    )
-    return _sync_extract_items_from_tty(pid)
+    ctx = Context(cwd=os.path.join(app_context.agents_dir, agent_id))
+    try:
+        try_to_load_agent_config(ctx)
+        result = cli_list_agent_items(ctx, item_type)
+    except ClickException:
+        return {"detail": "Failed to list agent items."}, 400  # 400 Bad request
+    else:
+        sorted_items = sort_items(result)
+        return sorted_items, 200  # 200 (Success)
 
 
 def scaffold_item(agent_id: str, item_type: str, item_id: str):

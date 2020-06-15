@@ -28,7 +28,7 @@ import click
 from aea.cli.utils.constants import ITEM_TYPES
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
-from aea.cli.utils.formatting import format_items, retrieve_details
+from aea.cli.utils.formatting import format_items, retrieve_details, sort_items
 from aea.configurations.base import (
     PackageType,
     PublicId,
@@ -49,12 +49,11 @@ def list(click_context):
 def all(ctx: Context):
     """List all the installed items."""
     for item_type in ITEM_TYPES:
-        details = _get_item_details(ctx, item_type)
+        details = list_agent_items(ctx, item_type)
         if not details:
             continue
         output = "{}:\n{}".format(
-            item_type.title() + "s",
-            format_items(sorted(details, key=lambda k: k["name"])),
+            item_type.title() + "s", format_items(sort_items(details))
         )
         click.echo(output)
 
@@ -63,35 +62,35 @@ def all(ctx: Context):
 @pass_ctx
 def connections(ctx: Context):
     """List all the installed connections."""
-    result = _get_item_details(ctx, "connection")
-    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+    result = list_agent_items(ctx, "connection")
+    click.echo(format_items(sort_items(result)))
 
 
 @list.command()
 @pass_ctx
 def contracts(ctx: Context):
     """List all the installed protocols."""
-    result = _get_item_details(ctx, "contract")
-    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+    result = list_agent_items(ctx, "contract")
+    click.echo(format_items(sort_items(result)))
 
 
 @list.command()
 @pass_ctx
 def protocols(ctx: Context):
     """List all the installed protocols."""
-    result = _get_item_details(ctx, "protocol")
-    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+    result = list_agent_items(ctx, "protocol")
+    click.echo(format_items(sort_items(result)))
 
 
 @list.command()
 @pass_ctx
 def skills(ctx: Context):
     """List all the installed skills."""
-    result = _get_item_details(ctx, "skill")
+    result = list_agent_items(ctx, "skill")
     click.echo(format_items(sorted(result, key=lambda k: k["name"])))
 
 
-def _get_item_details(ctx, item_type) -> List[Dict]:
+def list_agent_items(ctx: Context, item_type: str) -> List[Dict]:
     """Return a list of item details, given the item type."""
     result = []
     item_type_plural = item_type + "s"

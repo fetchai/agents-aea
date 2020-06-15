@@ -71,7 +71,9 @@ def create(
 
 
 @clean_after
-def create_aea(ctx, agent_name: str, author: str, local: bool, empty: bool,) -> None:
+def create_aea(
+    ctx: Context, agent_name: str, author: str, local: bool, empty: bool,
+) -> None:
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
