@@ -91,7 +91,7 @@ def test_real_create():
         data = json.loads(response_agents.get_data(as_text=True))
         assert response_agents.status_code == 200
         assert len(data) == 1
-        assert data[0]["id"] == agent_id
+        assert data[0]["public_id"] == agent_id
         assert data[0]["description"] == "placeholder description"
 
         # do same but this time find that this is not an agent directory.

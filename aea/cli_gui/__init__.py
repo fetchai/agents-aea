@@ -42,6 +42,7 @@ from aea.cli.delete import delete_aea as cli_delete_aea
 from aea.cli.list import list_agent_items as cli_list_agent_items
 from aea.cli.remove import remove_item as cli_remove_item
 from aea.cli.scaffold import scaffold_item as cli_scaffold_item
+from aea.cli.search import search_items as cli_search_items
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
@@ -182,29 +183,33 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
 
 def get_registered_items(item_type: str):
     """Create a new AEA project."""
-    # need to place ourselves one directory down so the searcher can find the packages
-    pid = _call_aea_async(
-        [sys.executable, "-m", "aea.cli", "search", "--local", item_type + "s"],
-        app_context.agents_dir,
-    )
-    return _sync_extract_items_from_tty(pid)
+    # need to place ourselves one directory down so the cher can find the packages
+    ctx = Context(cwd=app_context.agents_dir)
+    try:
+        result = cli_search_items(ctx, item_type, query="")
+    except ClickException:
+        return {"detail": "Failed to search items."}, 400  # 400 Bad request
+    else:
+        sorted_items = sort_items(result)
+        return sorted_items, 200  # 200 (Success)
 
 
 def search_registered_items(item_type: str, search_term: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
-    pid = _call_aea_async(
-        ["aea", "search", "--local", item_type + "s", "--query", search_term],
-        os.path.join(app_context.agents_dir, "aea"),
-    )
-    ret = _sync_extract_items_from_tty(pid)
-    search_result, status = ret
-    response = {
-        "search_result": search_result,
-        "item_type": item_type,
-        "search_term": search_term,
-    }
-    return response, status
+    ctx = Context(cwd=os.path.join(app_context.agents_dir, "aea"))
+    try:
+        result = cli_search_items(ctx, item_type, query=search_term)
+    except ClickException:
+        return {"detail": "Failed to search items."}, 400  # 400 Bad request
+    else:
+        sorted_items = sort_items(result)
+        response = {
+            "search_result": sorted_items,
+            "item_type": item_type,
+            "search_term": search_term,
+        }
+        return response, 200  # 200 (Success)
 
 
 def create_agent(agent_id: str):
@@ -435,7 +440,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
         connections = get_local_items(agent_id, "connection")[0]
         has_named_connection = False
         for element in connections:
-            if element["id"] == connection_id:
+            if element["public_id"] == connection_id:
                 has_named_connection = True
         if has_named_connection:
             agent_process = _call_aea_async(
