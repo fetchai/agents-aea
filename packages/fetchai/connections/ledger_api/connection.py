@@ -78,7 +78,7 @@ class LedgerApiConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        if type(envelope.message) == bytes:
+        if isinstance(envelope.message, bytes):
             message = cast(
                 LedgerApiMessage,
                 LedgerApiMessage.serializer.decode(envelope.message_bytes),

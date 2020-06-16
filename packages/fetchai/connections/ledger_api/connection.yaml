@@ -6,7 +6,7 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmdrHkH2hNAKbQLjH7UGbY5uWAzFYJtzUoma7wmijnnACZ
+  connection.py: QmXh9kUH2GCSttR7E5bkUq7FE3W559txzZ3dxifTyncpqT
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: LedgerApiConnection

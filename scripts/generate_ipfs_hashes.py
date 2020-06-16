@@ -440,10 +440,10 @@ def check_same_ipfs_hash(client, configuration, package_type, all_expected_hashe
     result = actual_hash == expected_hash
     if not result:
         print(
-            "IPFS Hashes do not match for {} in {}".format(
-                configuration.name, configuration.directory
-            )
+            f"IPFS Hashes do not match for {configuration.name} in {configuration.directory}"
         )
+        print(f"Expected: {expected_hash}")
+        print(f"Actual:   {actual_hash}")
     return result
 
 
