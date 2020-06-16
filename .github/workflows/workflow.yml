@@ -97,6 +97,11 @@ jobs:
         run: tox -e package_version_checks
       - name: Generate Documentation
         run: tox -e docs
+      - name: Golang code style check
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.26
+          working-directory: packages/fetchai/connections/p2p_libp2p/
 
   integration_checks:
     runs-on: ubuntu-latest
