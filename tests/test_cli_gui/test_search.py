@@ -35,5 +35,9 @@ def test_search_connections(*mocks):
     assert response.status_code == 200
 
     result = json.loads(response.get_data(as_text=True))
-    expected_result = {'item_type': 'connection', 'search_result': [], 'search_term': 'query'}
+    expected_result = {
+        "item_type": "connection",
+        "search_result": [],
+        "search_term": "query",
+    }
     assert result == expected_result

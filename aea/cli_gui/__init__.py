@@ -42,7 +42,10 @@ from aea.cli.delete import delete_aea as cli_delete_aea
 from aea.cli.list import list_agent_items as cli_list_agent_items
 from aea.cli.remove import remove_item as cli_remove_item
 from aea.cli.scaffold import scaffold_item as cli_scaffold_item
-from aea.cli.search import search_items as cli_search_items
+from aea.cli.search import (
+    search_items as cli_search_items,
+    setup_search_ctx as cli_setup_search_ctx,
+)
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
@@ -94,6 +97,8 @@ class AppContext:
     ui_is_starting = False
     agents_dir = os.path.abspath(os.getcwd())
     module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
+
+    local = "--local" in sys.argv  # a hack to get "local" option from cli args
 
 
 app_context = AppContext()
@@ -186,6 +191,7 @@ def get_registered_items(item_type: str):
     # need to place ourselves one directory down so the cher can find the packages
     ctx = Context(cwd=app_context.agents_dir)
     try:
+        cli_setup_search_ctx(ctx, local=app_context.local)
         result = cli_search_items(ctx, item_type, query="")
     except ClickException:
         return {"detail": "Failed to search items."}, 400  # 400 Bad request
@@ -199,6 +205,7 @@ def search_registered_items(item_type: str, search_term: str):
     # need to place ourselves one directory down so the searcher can find the packages
     ctx = Context(cwd=os.path.join(app_context.agents_dir, "aea"))
     try:
+        cli_setup_search_ctx(ctx, local=app_context.local)
         result = cli_search_items(ctx, item_type, query=search_term)
     except ClickException:
         return {"detail": "Failed to search items."}, 400  # 400 Bad request
@@ -216,7 +223,9 @@ def create_agent(agent_id: str):
     """Create a new AEA project."""
     ctx = Context(cwd=app_context.agents_dir)
     try:
-        cli_create_aea(ctx, agent_id, DEFAULT_AUTHOR, local=True, empty=False)
+        cli_create_aea(
+            ctx, agent_id, DEFAULT_AUTHOR, local=app_context.local, empty=False
+        )
     except ClickException:
         return (
             {
@@ -247,6 +256,7 @@ def delete_agent(agent_id: str):
 def add_item(agent_id: str, item_type: str, item_id: str):
     """Add a protocol, skill or connection to the register to a local agent."""
     ctx = Context(cwd=os.path.join(app_context.agents_dir, agent_id))
+    ctx.set_config("is_local", app_context.local)
     try:
         try_to_load_agent_config(ctx)
         cli_add_item(ctx, item_type, PublicId.from_str(item_id))

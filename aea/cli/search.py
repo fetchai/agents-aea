@@ -56,7 +56,8 @@ def search(click_context, local):
         aea search connections
         aea search --local skills
     """
-    _setup_search_command(click_context, local)
+    ctx = cast(Context, click_context.obj)
+    setup_search_ctx(ctx, local)
 
 
 @search.command()
@@ -104,7 +105,7 @@ def agents(ctx: Context, query):
     _output_search_results(item_type, search_items(ctx, item_type, query))
 
 
-def _setup_search_command(click_context: click.core.Context, local: bool) -> None:
+def setup_search_ctx(ctx: Context, local: bool) -> None:
     """
     Setup search command.
 
@@ -113,7 +114,6 @@ def _setup_search_command(click_context: click.core.Context, local: bool) -> Non
 
     :return: None.
     """
-    ctx = cast(Context, click_context.obj)
     if local:
         ctx.set_config("is_local", True)
         # if we are in an agent directory, try to load the configuration file.
