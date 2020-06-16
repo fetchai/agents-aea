@@ -54,9 +54,7 @@ def component_type_to_class(component_type: ComponentType) -> Type[Component]:
 
 
 def load_component_from_config(  # type: ignore
-    configuration: ComponentConfiguration,
-    *args,
-    **kwargs
+    configuration: ComponentConfiguration, *args, **kwargs
 ) -> Component:
     """
     Load a component from a directory.

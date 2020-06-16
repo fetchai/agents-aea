@@ -1299,9 +1299,7 @@ class AEABuilder:
                 component = self._component_instances[component_type][configuration]
             else:
                 configuration = deepcopy(configuration)
-                component = load_component_from_config(
-                    configuration, **kwargs
-                )
+                component = load_component_from_config(configuration, **kwargs)
             resources.add_component(component)
 
     def _check_we_can_build(self):

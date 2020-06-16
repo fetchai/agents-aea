@@ -800,7 +800,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         try:
             fp = open(configuration_filepath)
             configuration_object = configuration_loader.load(fp)
-            configuration_object.directory = directory
         except FileNotFoundError:
             raise FileNotFoundError(
                 "{} configuration not found: {}".format(

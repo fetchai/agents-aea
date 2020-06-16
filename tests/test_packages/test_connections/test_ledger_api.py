@@ -26,8 +26,6 @@ from typing import cast
 import pytest
 
 import aea
-from aea.components.loader import load_component_from_config
-from aea.configurations.base import ComponentConfiguration, ComponentType
 from aea.connections.base import Connection
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
@@ -60,12 +58,9 @@ ledger_ids = pytest.mark.parametrize(
 async def ledger_apis_connection(request):
     identity = Identity("name", FetchAICrypto().address)
     crypto_store = CryptoStore()
-    configuration = ComponentConfiguration.load(
-        ComponentType.CONNECTION,
-        Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger_api"),
-    )
-    connection = load_component_from_config(
-        configuration, identity=identity, crypto_store=crypto_store
+    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger_api")
+    connection = Connection.from_dir(
+        directory, identity=identity, crypto_store=crypto_store
     )
     connection = cast(Connection, connection)
     await connection.connect()
@@ -77,15 +72,60 @@ async def ledger_apis_connection(request):
 @ledger_ids
 async def test_get_balance(ledger_id, address, ledger_apis_connection: Connection):
     """Test get balance."""
-    request = LedgerApiMessage("get_balance", ledger_id=ledger_id, address=address)
+    request = LedgerApiMessage(
+        LedgerApiMessage.Performative.GET_BALANCE, ledger_id=ledger_id, address=address
+    )
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
 
-    assert response.message.performative == LedgerApiMessage.Performative.BALANCE
-    actual_balance_amount = response.message.amount
+    assert response is not None
+    assert type(response.message) == LedgerApiMessage
+    message = cast(LedgerApiMessage, response.message)
+    actual_balance_amount = message.amount
     expected_balance_amount = aea.crypto.registries.make_ledger_api(
         ledger_id
     ).get_balance(address)
     assert actual_balance_amount == expected_balance_amount
+
+
+# @pytest.mark.asyncio
+# @ledger_ids
+# async def test_send_signed_transaction(ledger_id, address, ledger_apis_connection: Connection):
+#     """Test send signed transaction."""
+#     request = LedgerApiMessage(
+#         LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+#         ledger_id=ledger_id,
+#         address=address
+#     )
+#     envelope = Envelope("", "", request.protocol_id, message=request)
+#     await ledger_apis_connection.send(envelope)
+#     await asyncio.sleep(0.01)
+#     response = await ledger_apis_connection.receive()
+#
+#     assert response is not None
+#     assert type(response.message) == LedgerApiMessage
+#     message = cast(LedgerApiMessage, response.message)
+
+
+# @pytest.mark.asyncio
+# @ledger_ids
+# async def test_get_transaction_receipt(ledger_id, address, ledger_apis_connection: Connection):
+#     """Test get balance."""
+#     request = LedgerApiMessage(
+#         LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT, ledger_id=ledger_id, tx_digest=address
+#     )
+#     envelope = Envelope("", "", request.protocol_id, message=request)
+#     await ledger_apis_connection.send(envelope)
+#     await asyncio.sleep(0.01)
+#     response = await ledger_apis_connection.receive()
+#
+#     assert response is not None
+#     assert type(response.message) == LedgerApiMessage
+#     message = cast(LedgerApiMessage, response.message)
+#     actual_balance_amount = message.amount
+#     expected_balance_amount = aea.crypto.registries.make_ledger_api(
+#         ledger_id
+#     ).get_balance(address)
+#     assert actual_balance_amount == expected_balance_amount

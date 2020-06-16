@@ -22,7 +22,7 @@ import asyncio
 from asyncio import Task
 from collections import deque
 from concurrent.futures import Executor
-from typing import Callable, List, Optional, cast
+from typing import Callable, Deque, List, Optional, cast
 
 import aea
 from aea.configurations.base import ConnectionConfig, PublicId
@@ -59,8 +59,8 @@ class LedgerApiConnection(Connection):
 
         self._dispatcher = _RequestDispatcher(self.loop)
 
-        self.receiving_tasks: List[asyncio.Task] = []
-        self.done_tasks = deque()
+        self.receiving_tasks: List[asyncio.Future] = []
+        self.done_tasks: Deque[asyncio.Future] = deque()
 
     async def connect(self) -> None:
         """Set up the connection."""
@@ -79,10 +79,12 @@ class LedgerApiConnection(Connection):
         :return: None
         """
         if type(envelope.message) == bytes:
-            message = LedgerApiMessage.serializer.decode(envelope.message)
+            message = cast(
+                LedgerApiMessage,
+                LedgerApiMessage.serializer.decode(envelope.message_bytes),
+            )
         else:
-            message = envelope.message
-        message = cast(LedgerApiMessage, message)
+            message = cast(LedgerApiMessage, envelope.message)
         api = aea.crypto.registries.make_ledger_api(message.ledger_id)
         task = self._dispatcher.dispatch(api, message)
         self.receiving_tasks.append(task)
@@ -98,7 +100,7 @@ class LedgerApiConnection(Connection):
             message = self.done_tasks.pop().result()
             envelope = Envelope(
                 to=self.address,
-                sender=None,
+                sender="",
                 protocol_id=message.protocol_id,
                 message=message,
             )
@@ -113,13 +115,13 @@ class LedgerApiConnection(Connection):
         message = done.pop().result() if len(done) > 0 else None
 
         # update done tasks
-        self.done_tasks.extend(done)
+        self.done_tasks.extend([*done])
         # update receiving tasks
         self.receiving_tasks[:] = pending
 
         envelope = Envelope(
             to=self.address,
-            sender=None,
+            sender="",
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -128,7 +130,9 @@ class LedgerApiConnection(Connection):
 
 class _RequestDispatcher:
     def __init__(
-        self, loop: Optional[asyncio.AbstractEventLoop], executor: Optional[Executor] = None
+        self,
+        loop: Optional[asyncio.AbstractEventLoop],
+        executor: Optional[Executor] = None,
     ):
         """
         Initialize the request dispatcher.
