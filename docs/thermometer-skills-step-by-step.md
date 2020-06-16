@@ -2,9 +2,10 @@ This guide is a step-by-step introduction to building an AEA that represents sta
 
 If you simply want to run the resulting AEAs <a href="../thermometer-skills">go here</a>.
 
-## Planning the AEA
+## Hardware Requirements
 
 To follow this tutorial to completion you will need:
+
  - Raspberry Pi 4
  
  - Mini SD card
@@ -15,18 +16,13 @@ To follow this tutorial to completion you will need:
 	
 The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the [OEF search and communication node](../oef-ledger) and will identify itself as a seller of that data.
 
-## Dependencies
+If you simply want to follow the "software" part of the guide then you only require the dependencies listed in the <a href="#dependencies">Dependencies</a> section.
 
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+### Setup the environment
 
-## Setup the environment
+You can follow the guide <a href=../raspberry-set-up> here </a> in order to setup your environment and prepare your Raspberry Pi.
 
-You can follow this link <a href=#raspberry-set-up.md> here </a> in order to setup your environment and prepare your raspberry.
-
-Once you setup your raspberry 
-
-Open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there 
-(I named mine 99-hidraw-permissions.rules)
+Once you setup your Raspberry Pi, open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there  (I named mine `99-hidraw-permissions.rules`)
 ``` bash
 sudo nano 99-hidraw-permissions.rules
 ```  
@@ -34,8 +30,11 @@ and add the following inside the file:
 ``` bash
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
-this assigns all devices coming out of the hidraw subsystem in the kernel to the group plugdev and sets the permissions 
-to r/w r/w r (for root [the default owner], plugdev, and everyone else respectively)
+this assigns all devices coming out of the hidraw subsystem in the kernel to the group `plugdev` and sets the permissions to `r/w r/w r` (for root [the default owner], plugdev, and everyone else respectively).
+
+## Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ## Thermometer AEA
 

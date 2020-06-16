@@ -25,7 +25,7 @@ The agent communication network is a peer-to-peer communication network for agen
 
 The implementation builds on the open-source <a href="https://libp2p.io/" target="_blank">libp2p</a> library. A distributed hash table is used by all participating peers to maintain a mapping between agents' cryptographic addresses and their network addresses.
 
-Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a>).
+Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a> for an example).
 
 ### Centralized search and discovery
 

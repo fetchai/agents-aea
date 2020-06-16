@@ -28,7 +28,7 @@ nav:
       - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
       # - Contract deploy and interact: 'erc1155-skills.md'
-      - Generic skills: 'generic-skills.md'
+      # - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
       - Gym skill: 'gym-skill.md'
       - ML skills: 'ml-skills.md'
