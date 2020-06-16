@@ -58,14 +58,16 @@ ct:ErrorCode: |
   ErrorCodeEnum error_code = 1;
 ...
 ---
+entry: [register]
 reply:
-  register: [tac_error]
+  register: [tac_error, game_data, cancelled]
   unregister: [tac_error]
   transaction: [transaction_confirmation,tac_error]
   cancelled: []
-  game_data: []
-  transaction_confirmation: []
+  game_data: [transaction]
+  transaction_confirmation: [transaction]
   tac_error: []
+exit: [cancelled, tac_error]
 roles: {agent, controller}
-end_states: [open, closed]
+end_states: [successful, failed]
 ...

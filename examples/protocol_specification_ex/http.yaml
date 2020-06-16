@@ -20,9 +20,11 @@ speech_acts:
     bodyy: pt:bytes
 ...
 ---
+entry: [request]
 reply:
   request: [response]
   response: []
+exit: [response]
 roles: {client, server}
-end_states: []
+end_states: [successful]
 ...

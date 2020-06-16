@@ -38,12 +38,14 @@ ct:OefErrorOperation: |
   OefErrorEnum oef_error = 1;
 ...
 ---
+entry: [register_service, unregister_service, search_services]
 reply:
   register_service: [oef_error]
   unregister_service: [oef_error]
   search_services: [search_result,oef_error]
   search_result: []
   oef_error: []
+exit: [oef_error, search_result]
 roles: {agent, oef_node}
-end_states: [open, closed]
+end_states: [successful, failed]
 ...

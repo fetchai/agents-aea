@@ -25,9 +25,11 @@ ct:ErrorCode: |
   ErrorCodeEnum error_code = 1;
 ...
 ---
+entry: [bytes, error]
 reply:
   bytes: [bytes, error]
   error: []
+exit: [bytes, error]
 roles: {agent}
-end_states: [open, closed]
+end_states: [successful, failed]
 ...
