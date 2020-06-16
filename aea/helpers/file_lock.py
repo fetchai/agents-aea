@@ -49,7 +49,7 @@ if os.name == "nt":
 
 
 elif os.name == "posix":
-    from fcntl import LOCK_EX, LOCK_SH, LOCK_NB  # noqa
+    from fcntl import LOCK_EX, LOCK_SH, LOCK_NB  # noqa # pylint: disable=unused-import
     import fcntl
 
     def lock(file, flags):

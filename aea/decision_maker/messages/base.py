@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class InternalMessage:
     """This class implements a message."""
 
-    protocol_id = PublicId("fetchai", "internal", "0.1.0")
+    protocol_id = PublicId.from_str("fetchai/internal:0.1.0")
 
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """

@@ -21,7 +21,7 @@
 import os
 import random
 import shutil
-import signal
+import signal  # pylint: disable=unused-import
 import string
 import subprocess  # nosec
 import sys

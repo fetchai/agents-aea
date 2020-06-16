@@ -20,18 +20,16 @@
 
 import asyncio
 import logging
-import threading
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from enum import Enum
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from aea.agent_loop import AsyncState
 from aea.helpers.async_utils import ensure_loop
 from aea.multiplexer import AsyncMultiplexer
 
-if False:
-    # for mypy
+if TYPE_CHECKING:
     from aea.agent import Agent
 
 
@@ -160,8 +158,6 @@ class AsyncRuntime(BaseRuntime):
         self.set_loop(self._loop)
 
         self._state.set(RuntimeStates.started)
-
-        self._thread = threading.current_thread()
 
         logger.debug(f"Start runtime event loop {self._loop}: {id(self._loop)}")
         self._task = self._loop.create_task(self.run_runtime())
