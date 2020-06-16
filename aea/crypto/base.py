@@ -33,7 +33,9 @@ class Crypto(Generic[EntityClass], ABC):
 
     identifier = "base"
 
-    def __init__(self, private_key_path: Optional[str] = None, **kwargs):
+    def __init__(
+        self, private_key_path: Optional[str] = None, **kwargs
+    ):  # pylint: disable=unused-argument
         """
         Initialize the crypto object.
 

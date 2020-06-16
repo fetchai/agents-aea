@@ -30,6 +30,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    TYPE_CHECKING,
 )
 
 from aea.exceptions import AEAException
@@ -44,7 +45,7 @@ from aea.skills.base import Behaviour
 
 logger = logging.getLogger(__name__)
 
-if False:  # MYPY compatible for types definitions
+if TYPE_CHECKING:
     from aea.aea import AEA  # pragma: no cover
     from aea.agent import Agent  # pragma: no cover
 
