@@ -351,6 +351,7 @@ class AEABuilder:
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
+        self._search_service_address: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         if self._with_default_packages:
