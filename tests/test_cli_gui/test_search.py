@@ -160,10 +160,7 @@ def test_real_search():
     )
     i += 1
     assert data[i]["id"] == "fetchai/ledger_api:0.1.0"
-    assert (
-        data[i]["description"]
-        == "A protocol for ledger APIs requests and responses."
-    )
+    assert data[i]["description"] == "A connection to interact with any ledger API."
     i += 1
     assert data[i]["id"] == "fetchai/local:0.2.0"
     assert (

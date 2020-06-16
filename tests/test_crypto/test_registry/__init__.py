@@ -17,16 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the crypto and the ledger APIs registries."""
-from typing import Callable
-
-from aea.crypto.base import Crypto, LedgerApi
-from aea.crypto.registries.base import Registry
-
-crypto_registry: Registry[Crypto] = Registry[Crypto]()
-register_crypto = crypto_registry.register
-make_crypto: Callable[..., Crypto] = crypto_registry.make
-
-ledger_apis_registry: Registry[LedgerApi] = Registry[LedgerApi]()
-register_ledger_api = ledger_apis_registry.register
-make_ledger_api: Callable[..., LedgerApi] = ledger_apis_registry.make
+"""This module contains the tests for the crypto and ledger registries."""

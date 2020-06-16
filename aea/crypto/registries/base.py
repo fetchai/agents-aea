@@ -128,7 +128,7 @@ class ItemSpec(Generic[ItemType]):
         _kwargs = self._kwargs.copy()
         _kwargs.update(kwargs)
         cls = self.entry_point.load()
-        item = cls(**kwargs)  # type: ignore
+        item = cls(**_kwargs)  # type: ignore
         return item
 
 
@@ -137,7 +137,7 @@ class Registry(Generic[ItemType]):
 
     def __init__(self):
         """Initialize the registry."""
-        self.specs = {}  # type: Dict[ItemId, ItemSpec]
+        self.specs = {}  # type: Dict[ItemId, ItemSpec[ItemType]]
 
     @property
     def supported_ids(self) -> Set[str]:
@@ -197,7 +197,7 @@ class Registry(Generic[ItemType]):
         """
         return id in self.specs.keys()
 
-    def _get_spec(self, id: ItemId, module: Optional[str] = None):
+    def _get_spec(self, id: ItemId, module: Optional[str] = None) -> ItemSpec[ItemType]:
         """Get the item spec."""
         if module is not None:
             try:

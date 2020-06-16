@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the crypto/registry module."""
+"""This module contains the tests for the crypto registry."""
 
 import logging
 import string
@@ -32,7 +32,7 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
 
-from ..data.custom_crypto import CustomCrypto
+from ...data.custom_crypto import CustomCrypto
 
 logger = logging.getLogger(__name__)
 

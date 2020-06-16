@@ -25,6 +25,17 @@ register_crypto(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
 register_crypto(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
 register_crypto(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
 
-register_ledger_api(id="fetchai", entry_point="aea.crypto.fetchai:FetchAIApi")
-register_ledger_api(id="ethereum", entry_point="aea.crypto.ethereum:EthereumApi")
-register_ledger_api(id="cosmos", entry_point="aea.crypto.cosmos:CosmosApi")
+register_ledger_api(
+    id="fetchai", entry_point="aea.crypto.fetchai:FetchAIApi", network="testnet"
+)
+register_ledger_api(
+    id="ethereum",
+    entry_point="aea.crypto.ethereum:EthereumApi",
+    address="https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+    gas_price=50,
+)
+register_ledger_api(
+    id="cosmos",
+    entry_point="aea.crypto.cosmos:CosmosApi",
+    address="http://aea-testnet.sandbox.fetch-ai.com:1317",
+)

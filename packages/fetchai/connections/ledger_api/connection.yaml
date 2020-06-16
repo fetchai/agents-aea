@@ -1,13 +1,12 @@
 name: ledger_api
 author: fetchai
 version: 0.1.0
-description: The scaffold connection provides a scaffold for a connection to be implemented
-  by the developer.
+description: A connection to interact with any ledger API.
 license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmeFHV5PJ9DfKjcMnEkkMCjrfWcoN7C7oSHJqPyJRFsU3X
+  connection.py: QmdtGrU7FZpT92qY3YMSNVtpxtD8QhB7mwozVL4MzjZib9
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: MyScaffoldConnection

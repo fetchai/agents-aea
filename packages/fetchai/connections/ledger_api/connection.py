@@ -52,11 +52,9 @@ class LedgerApiConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
-        raise NotImplementedError  # pragma: no cover
 
     async def disconnect(self) -> None:
         """Tear down the connection."""
-        raise NotImplementedError  # pragma: no cover
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -65,7 +63,6 @@ class LedgerApiConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        raise NotImplementedError  # pragma: no cover
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -73,4 +70,3 @@ class LedgerApiConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        raise NotImplementedError  # pragma: no cover
