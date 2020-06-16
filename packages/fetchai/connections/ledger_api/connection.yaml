@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmWEvgiApbrPyBFvp334DFFijyJrGcGMmgZk2eyo2FgmUd
+  connection.py: QmTozmf5T2PYff4hJH7RD3a8RwMEtx5s9vknRHP7zeBDYX
 fingerprint_ignore_patterns: []
 protocols: []
-class_name: MyScaffoldConnection
+class_name: LedgerApiConnection
 config:
   foo: bar
 excluded_protocols: []

@@ -31,6 +31,7 @@ from aea.crypto.base import LedgerApi
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+
 from packages.fetchai.protocols.ledger_api import LedgerApiMessage
 
 
@@ -94,7 +95,13 @@ class LedgerApiConnection(Connection):
         """
         # if there are done tasks, return the result
         if len(self.done_tasks) > 0:
-            envelope = self.done_tasks.pop().result()
+            message = self.done_tasks.pop().result()
+            envelope = Envelope(
+                to=self.address,
+                sender=None,
+                protocol_id=message.protocol_id,
+                message=message,
+            )
             return envelope
 
         # wait for completion of at least one receiving task
@@ -103,19 +110,25 @@ class LedgerApiConnection(Connection):
         )
 
         # pick one done task
-        envelope = done.pop().result() if len(done) > 0 else None
+        message = done.pop().result() if len(done) > 0 else None
 
         # update done tasks
         self.done_tasks.extend(done)
         # update receiving tasks
         self.receiving_tasks[:] = pending
 
+        envelope = Envelope(
+            to=self.address,
+            sender=None,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
         return envelope
 
 
 class _RequestDispatcher:
     def __init__(
-        self, loop: asyncio.AbstractEventLoop, executor: Optional[Executor] = None
+        self, loop: Optional[asyncio.AbstractEventLoop], executor: Optional[Executor] = None
     ):
         """
         Initialize the request dispatcher.
@@ -123,7 +136,7 @@ class _RequestDispatcher:
         :param loop: the asyncio loop.
         :param executor: an executor.
         """
-        self.loop = loop
+        self.loop = loop if loop is not None else asyncio.get_event_loop()
         self.executor = executor
 
     async def run_async(self, func: Callable, *args):
@@ -170,7 +183,9 @@ class _RequestDispatcher:
         """
         # TODO wrapping synchronous calls with multithreading to make it asynchronous.
         #   LedgerApi async APIs would solve that.
-        return api.get_balance(message.address)
+        balance = api.get_balance(message.address)
+        result = LedgerApiMessage(LedgerApiMessage.Performative.BALANCE, amount=balance)
+        return result
 
     def get_transaction_receipt(self, api: LedgerApi, message: LedgerApiMessage):
         """
@@ -180,7 +195,9 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        return api.get_transaction_receipt(message.tx_digest)
+        # TODO what is a receipt? needs better data structures
+        # result = api.get_transaction_receipt(message.tx_digest)
+        return LedgerApiMessage(performative=LedgerApiMessage.Performative.TX_RECEIPT)
 
     def send_signed_transaction(self, api: LedgerApi, message: LedgerApiMessage):
         """
@@ -190,7 +207,10 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        return api.send_signed_transaction(message.signed_tx)
+        tx_digest = api.send_signed_transaction(message.signed_tx)
+        return LedgerApiMessage(
+            performative=LedgerApiMessage.Performative.TX_DIGEST, tx_digest=tx_digest
+        )
 
     def is_transaction_settled(self, api: LedgerApi, message: LedgerApiMessage):
         """
@@ -200,7 +220,8 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        return api.is_transaction_settled(message.tx_digest)
+        # TODO remove?
+        # is_transaction_settled = api.is_transaction_settled(message.tx_digest)
 
     def is_transaction_valid(self, api: LedgerApi, message: LedgerApiMessage):
         """

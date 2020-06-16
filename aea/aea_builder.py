@@ -1300,7 +1300,7 @@ class AEABuilder:
             else:
                 configuration = deepcopy(configuration)
                 component = load_component_from_config(
-                    component_type, configuration, **kwargs
+                    configuration, **kwargs
                 )
             resources.add_component(component)
 
