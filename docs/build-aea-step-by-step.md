@@ -7,7 +7,7 @@ Building an AEA step by step (ensure you have followed the <a href="../quickstar
 </li>
 <li>Look for, then add or generate the <a href="../protocol/">protocols</a> you require: `aea search protocols`, then `aea add protocol [public_id]` or `aea generate protocol [path_to_specification]`</li>
 <li>Look for, then add or code the <a href="../skill/">skills</a> you need: `aea search skills`, then `aea add skill [public_id]`. <a href="../skill-guide/">This guide</a> shows you step by step how to develop a skill.</li>
-<li>Where required, scaffold any of the above resources with the <a href="../scaffolding/">scaffolding tool</a> or generate a protocol with the <a href="../generator/">protocol generator</a>.</li>
+<li>Where required, scaffold any of the above resources with the <a href="../scaffolding/">scaffolding tool</a> or generate a protocol with the <a href="../protocol-generator/">protocol generator</a>.</li>
 <li>Now, run your AEA: `aea run --connections [public_id]`</li> 
 </ol>
 

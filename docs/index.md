@@ -25,7 +25,7 @@ AEAs are not:
 
 The AEA framework is a Python-based development suite which equips you with an efficient and accessible set of tools for building AEAs. The framework is modular, extensible, and composable. This framework attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
 
-To get started developing your own AEA, check out the <a href="step_one">getting started</a> section.
+To get started developing your own AEA, check out the <a href="quickstart">getting started</a> section.
 
 To learn more about some of the distinctive characteristics of agent-oriented development, check out the guide on <a href="agent-oriented-development">agent-oriented development</a>.
 

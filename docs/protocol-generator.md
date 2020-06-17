@@ -3,31 +3,30 @@
   <p>This is currently an experimental feature. To try it follow this guide.</p>
 </div>
 
-## Preparation instructions
-
-### Dependencies
-
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-### How to run
+## How to run
 
 First make sure you are inside your AEA's folder (see <a href="../quickstart">here</a> on how to create a new agent).
 
-Then run  
+Then run
 
 ``` bash
 aea generate protocol <path-to-protocol-specification>
 ```
 
-where `<path-to-protocol-specification>` is the path to a <a href="./#protocol-specification">protocol specification</a> file. 
+where `<path-to-protocol-specification>` is the path to a <a href="./#protocol-specification">protocol specification</a> file.
 
+If there are no errors, this command will generate the protocol and place it in your AEA project. The name of the protocol's directory will match the protocol name given in the specification. The author will match the registered author in the CLI. The generator currently produces the following files (assuming the name of the protocol in the specification is `sample`):
 
-If there are no errors, this command will generate the protocol and place it in your AEA project. The name of the protocol's directory will match the protocol name given in the specification.
+* `message.py`: defines messages valid under the `sample` protocol 
+* `serialisation.py`: defines how messages are serialised/deserialised 
+* `__init__.py`: makes the directory a package
+* `protocol.yaml`: contains package information about the `sample` protocol 
+* `sample.proto` protocol buffer schema file
+* `sample_pb2.py`: the generated protocol buffer implementation
+* `custom_types.py`: stub implementations for custom types (created only if the specification contains custom types)
 
 ## Protocol Specification
-A protocol can be described in a yaml file.
-As such, it needs to follow the <a href="https://pyyaml.org/wiki/PyYAMLDocumentation" target="_blank">yaml format</a>. 
-The following is an example protocol specification:
+A protocol can be described in a yaml file. As such, it needs to follow the <a href="https://pyyaml.org/wiki/PyYAMLDocumentation" target="_blank">yaml format</a>. The following is an example protocol specification:
 
 ``` yaml
 ---
@@ -80,15 +79,13 @@ The allowed fields and what they represent are:
 
 All of the above fields are mandatory and each is a key/value pair, where both key and value are yaml strings. 
 
-In addition, the first yaml document in a protocol specification must describe the syntax of valid messages according to this protocol.
-Therefore, there is another mandatory field: `speech-acts`, which defines the set of _performatives_ valid under this protocol, and a set of _contents_ for each performative. 
+In addition, the first yaml document in a protocol specification must describe the syntax of valid messages according to this protocol. Therefore, there is another mandatory field: `speech-acts`, which defines the set of _performatives_ valid under this protocol, and a set of _contents_ for each performative.
 
-A _performative_ defines the type of a message (e.g. propose, accept) and has a set of _contents_ (or parameters) of varying types.    
+A _performative_ defines the type of a message (e.g. propose, accept) and has a set of _contents_ (or parameters) of varying types.
 
-The format of the `speech-act` is as follows:
-`speech-act` is a dictionary, where each key is a **unique** _performative_ (yaml string), and the value is a _content_ dictionary. If a performative does not have any content, then its content dictionary is empty, e.g. `accept`, `decline` and `match_accept` in the above specification.
+The format of the `speech-act` is as follows: `speech-act` is a dictionary, where each key is a **unique** _performative_ (yaml string), and the value is a _content_ dictionary. If a performative does not have any content, then its content dictionary is empty, e.g. `accept`, `decline` and `match_accept` in the above specification.
 
-A content dictionary in turn is composed of key/value pairs, where each key is the name of a content (yaml string) and the value is its <a href="./#types">type</a> (yaml string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:DataModel`.  
+A content dictionary in turn is composed of key/value pairs, where each key is the name of a content (yaml string) and the value is its <a href="./#types">type</a> (yaml string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:DataModel`.
 
 #### Types
 
@@ -119,14 +116,13 @@ An optional type for a content denotes that the content's existence is optional,
 | Multi types                | `<MT>`  | `pt:union[<PT>/<CT>/<PCT>/<PMT>, ..., <PT>/<CT>/<PCT>/<PMT>]` | `pt:union[ct:DataModel, pt:set[pt:str]]` | `Union[DataModel, FrozenSet[str]]` |
 | Optional types             | `<O>`   | `pt:optional[<MT>/<PMT>/<PCT>/<PT>/<CT>]`                                       | `pt:optional[pt:bool]`                   | `Optional[bool]`                   |
 
-<sup>*</sup> <sub>This is how variable length tuples containing elements of the same type are declared in Python; see <a href="https://docs.python.org/3/library/typing.html#typing.Tuple" target=_blank>here</a> </sub>
+*This is how variable length tuples containing elements of the same type are declared in Python*; see <a href="https://docs.python.org/3/library/typing.html#typing.Tuple" target=_blank>here</a>
 
 ### Protocol Buffer Schema
 
-Currently, there are no official method provided by the AEA framework for describing custom types in a programming language independent format. 
-This means that if a protocol specification includes custom types, the required implementations must be provided manually. 
+Currently, there is no official method provided by the AEA framework for describing custom types in a programming language independent format. This means that if a protocol specification includes custom types, the required implementations must be provided manually. 
 
-Therefore, if any of the contents declared in `speech-acts is of a custom type, the specification must then have a second yaml document, containing the protocol buffer schema code for every custom type.
+Therefore, if any of the contents declared in `speech-acts` is of a custom type, the specification must then have a second yaml document, containing the protocol buffer schema code for every custom type.
 
 You can see an example of the second yaml document in the above protocol specification.
 
@@ -166,17 +162,6 @@ If there is one role, then the two agents in a dialogue take the same role.
 3. In protocol buffer version 3, which is the version used by the generator, there is no way to check whether an optional field (i.e. contents of type `pt:optional[...]`) has been set or not (see discussion <a href="https://github.com/protocolbuffers/protobuf/issues/1606" target=_blank>here</a>). In proto3, all optional fields are assigned a default value (e.g. `0` for integers types, `false` for boolean types, etc). Therefore, given an optional field whose value is the default value, there is no way to know from the optional field itself, whether it is not set, or in fact is set but its value happens to be the default value. Because of this, in the generated protocol schema file (the `.proto` file), for every optional content there is a second field that declares whether this field is set or not. We will maintain this temporary solution until a cleaner alternative is found.
 4. Be aware that currently, using the generated protocols in python, there might be some rounding errors when serialising and then deserialising values of `pt:float` contents.
 
-## Generated protocol package
-
-The generator currently produces the following files (assuming the name of the protocol in the specification is `sample`):
-
-* `message.py`: defines messages valid under the `sample` protocol 
-* `serialisation.py`: defines how messages are serialised/deserialised 
-* `__init__.py`: makes the directory a package
-* `protocol.yaml`: contains basic information about the `sample` protocol 
-* `sample.proto` protocol buffer schema file
-* `sample_pb2.py`: the generated protocol buffer implementation
-* `custom_types.py`: stub implementations for custom types (created only if the specification contains custom types)
 
 ## Demo instructions
 
@@ -196,7 +181,6 @@ aea generate protocol ../examples/protocol_specification_ex/sample.yaml
 This will generate the protocol and place it in your AEA project.
 
 Third, try generating other protocols by first defining a specification, then running the generator.
-
 
 
 <br />
