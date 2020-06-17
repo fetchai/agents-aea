@@ -22,23 +22,12 @@ import os
 import sys
 from unittest.mock import Mock
 
-import pytest
-
 from aea.skills.base import Skill
 
 from .conftest import CUR_PATH
 
 
-@pytest.fixture(autouse=True, scope="module")
-def cleanup_sys_modules():
-    """Restore the original content of sys.modules"""
-    # make a copy of the keys
-    original_keys = set(sys.modules.keys())
-    yield
-    sys.modules = {k: v for k, v in sys.modules.items() if k in original_keys}
-
-
-def test_loading(cleanup_sys_modules):
+def test_loading():
     """Test that we correctly load AEA package modules."""
     agent_context_mock = Mock()
     skill_directory = os.path.join(CUR_PATH, "data", "dummy_skill")
