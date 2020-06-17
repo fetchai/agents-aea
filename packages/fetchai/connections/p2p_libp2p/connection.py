@@ -556,13 +556,13 @@ class P2PLibp2pConnection(Connection):
 
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
-        workdir = tempfile.mkdtemp()
-        distutils.dir_util.copy_tree(LIBP2P_NODE_MODULE, workdir)
-        
+        self.libp2p_workdir = tempfile.mkdtemp()
+        distutils.dir_util.copy_tree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
+
         self.node = Libp2pNode(
             self.address,
             key,
-            workdir,
+            self.libp2p_workdir,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
@@ -624,6 +624,8 @@ class P2PLibp2pConnection(Connection):
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
         self.node.stop()
+        if self.libp2p_workdir is not None:
+            distutils.dir_util.remove_tree(self.libp2p_workdir)
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
