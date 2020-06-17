@@ -66,3 +66,5 @@ RESOURCE_TYPE_TO_CONFIG_FILE = {
     "contracts": DEFAULT_CONTRACT_CONFIG_FILE,
 }  # type: Dict[str, str]
 FALSE_EQUIVALENTS = ["f", "false", "False"]
+
+DEFAULT_AUTHOR = "default_author"

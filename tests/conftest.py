@@ -43,7 +43,6 @@ import pytest
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
-from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -59,6 +58,7 @@ from aea.connections.stub.connection import StubConnection
 from aea.crypto.fetchai import FetchAICrypto
 from aea.identity.base import Identity
 from aea.mail.base import Address
+from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection

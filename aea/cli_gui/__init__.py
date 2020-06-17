@@ -46,7 +46,8 @@ from aea.cli.search import (
     search_items as cli_search_items,
     setup_search_ctx as cli_setup_search_ctx,
 )
-from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
+from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
 from aea.configurations.base import PublicId
@@ -61,13 +62,11 @@ elements = [
     ["local", "skill", "localSkills"],
 ]
 
-DEFAULT_AUTHOR = "default_author"
-
 _processes = set()  # type: Set[subprocess.Popen]
 
 
 class ProcessState(Enum):
-    """The state of execution of the OEF Node."""
+    """The state of execution of the agent."""
 
     NOT_STARTED = "Not started yet"
     RUNNING = "Running"
@@ -76,7 +75,6 @@ class ProcessState(Enum):
     FAILED = "Failed"
 
 
-oef_node_name = "aea_local_oef_node"
 max_log_lines = 100
 lock = threading.Lock()
 
@@ -87,18 +85,18 @@ class AppContext:
     Can't add it into the app object itself because mypy complains.
     """
 
-    oef_process = None
     agent_processes: Dict[str, subprocess.Popen] = {}
     agent_tty: Dict[str, List[str]] = {}
     agent_error: Dict[str, List[str]] = {}
-    oef_tty: List[str] = []
-    oef_error: List[str] = []
 
     ui_is_starting = False
     agents_dir = os.path.abspath(os.getcwd())
     module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
 
     local = "--local" in sys.argv  # a hack to get "local" option from cli args
+
+    config = get_or_create_cli_config()
+    author = config.get(AUTHOR_KEY)
 
 
 app_context = AppContext()
@@ -222,10 +220,9 @@ def search_registered_items(item_type: str, search_term: str):
 def create_agent(agent_id: str):
     """Create a new AEA project."""
     ctx = Context(cwd=app_context.agents_dir)
+    author = app_context.author if app_context.local else None
     try:
-        cli_create_aea(
-            ctx, agent_id, DEFAULT_AUTHOR, local=app_context.local, empty=False
-        )
+        cli_create_aea(ctx, agent_id, author, local=app_context.local, empty=False)
     except ClickException as e:
         return (
             {"detail": "Failed to create Agent. {}".format(str(e))},
@@ -350,74 +347,6 @@ def _call_aea_async(param_list: List[str], dir_arg: str) -> subprocess.Popen:
         _processes.add(ret)
         os.chdir(old_cwd)
     return ret
-
-
-def start_oef_node():
-    """Start an OEF node running."""
-    _kill_running_oef_nodes()
-
-    param_list = [
-        sys.executable,
-        "./scripts/oef/launch.py",
-        "--disable_stdin",
-        "--name",
-        oef_node_name,
-        "-c",
-        "./scripts/oef/launch_config.json",
-    ]
-
-    app_context.oef_process = _call_aea_async(param_list, app_context.agents_dir)
-
-    if app_context.oef_process is not None:
-        app_context.oef_tty = []
-        app_context.oef_error = []
-
-        tty_read_thread = threading.Thread(
-            target=_read_tty, args=(app_context.oef_process, app_context.oef_tty)
-        )
-        tty_read_thread.start()
-
-        error_read_thread = threading.Thread(
-            target=_read_error, args=(app_context.oef_process, app_context.oef_error)
-        )
-        error_read_thread.start()
-
-        return "OEF Node started", 200  # 200 (OK)
-    else:
-        return {"detail": "Failed to start OEF Node"}, 400  # 400 Bad request
-
-
-def get_oef_node_status():
-    """Get the status of the OEF Node."""
-    tty_str = ""
-    error_str = ""
-    status_str = str(ProcessState.NOT_STARTED).replace("ProcessState.", "")
-
-    if app_context.oef_process is not None:
-        status_str = str(get_process_status(app_context.oef_process)).replace(
-            "ProcessState.", ""
-        )
-
-        total_num_lines = len(app_context.oef_tty)
-        for i in range(max(0, total_num_lines - max_log_lines), total_num_lines):
-            tty_str += app_context.oef_tty[i]
-
-        tty_str = tty_str.replace("\n", "<br>")
-
-        total_num_lines = len(app_context.oef_error)
-        for i in range(max(0, total_num_lines - max_log_lines), total_num_lines):
-            error_str += app_context.oef_error[i]
-
-        error_str = error_str.replace("\n", "<br>")
-
-    return {"status": status_str, "tty": tty_str, "error": error_str}, 200  # (OK)
-
-
-def stop_oef_node():
-    """Stop an OEF node running."""
-    _kill_running_oef_nodes()
-    app_context.oef_process = None
-    return "All fine", 200  # 200 (OK)
 
 
 def start_agent(agent_id: str, connection_id: PublicId):
@@ -595,40 +524,6 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
         return ProcessState.FAILED
 
 
-def _kill_running_oef_nodes():
-    logging.info("Kill off any existing OEF nodes which are running...")
-    # find already running images
-    image_ids = set()
-
-    process = subprocess.Popen(  # nosec
-        ["docker", "ps", "-q", "--filter", "ancestor=fetchai/oef-search:0.7"],
-        stdout=subprocess.PIPE,
-    )
-    stdout = b""
-    try:
-        process.wait(10.0)
-        (stdout, _) = process.communicate()
-        image_ids.update(stdout.decode("utf-8").splitlines())
-    finally:
-        _terminate_process(process)
-
-    process = subprocess.Popen(  # nosec
-        ["docker", "ps", "-q", "--filter", "name=" + oef_node_name],
-        stdout=subprocess.PIPE,
-    )
-    try:
-        process.wait(5.0)
-        (stdout, _) = process.communicate()
-        image_ids.update(stdout.decode("utf-8").splitlines())
-    finally:
-        _terminate_process(process)
-
-    if stdout != b"":
-        _call_subprocess(
-            ["docker", "kill", *list(image_ids)], timeout=30.0, stdout=subprocess.PIPE
-        )
-
-
 def create_app():
     """Run the flask server."""
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -636,7 +531,6 @@ def create_app():
     global app_context  # pylint: disable=global-statement
     app_context = AppContext()
 
-    app_context.oef_process = None
     app_context.agent_processes = {}
     app_context.agent_tty = {}
     app_context.agent_error = {}
@@ -697,14 +591,12 @@ def _terminate_processes():
 
 def run(port: int, host: str = "127.0.0.1"):
     """Run the GUI."""
-    _kill_running_oef_nodes()
 
     app = create_app()
     try:
         app.run(host=host, port=port, debug=False)
     finally:
         _terminate_processes()
-        stop_oef_node()
 
     return app
 

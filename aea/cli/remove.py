@@ -19,6 +19,7 @@
 
 """Implementation of the 'aea remove' subcommand."""
 
+import os
 import shutil
 from pathlib import Path
 
@@ -148,4 +149,5 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     item_public_id = existing_items_name_to_ids[item_name]
     logger.debug("Removing the {} from {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
     existing_item_ids.remove(item_public_id)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
+        ctx.agent_loader.dump(ctx.agent_config, f)

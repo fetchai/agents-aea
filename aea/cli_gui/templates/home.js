@@ -61,23 +61,6 @@ class Model{
         })
     }
 
-    readOEFStatus() {
-        var ajax_options = {
-            type: 'GET',
-            url: 'api/oef',
-            accepts: 'application/json',
-            contentType: 'plain/text'
-        };
-        var self = this;
-        $.ajax(ajax_options)
-        .done(function(data) {
-            self.$event_pump.trigger('model_OEFStatusReadSuccess', [data]);
-        })
-        .fail(function(xhr, textStatus, errorThrown) {
-            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-        })
-    }
-
     readAgentStatus(agentId) {
         var ajax_options = {
             type: 'GET',
@@ -155,7 +138,7 @@ class Model{
         var propertyName = element["type"] +  "_id"
         var ajax_options = {
             type: 'POST',
-            url: 'api/agent/' + agentId  + element["type"]+ '/remove/',
+            url: 'api/agent/' + agentId  + '/' + element["type"]+ '/remove',
             accepts: 'application/json',
             contentType: 'application/json',
             dataType: 'json',
@@ -205,38 +188,6 @@ class Model{
             self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
         })
     }
-    startOEFNode(){
-        var ajax_options = {
-            type: 'POST',
-            url: 'api/oef',
-            accepts: 'application/json',
-            contentType: 'plain/text'
-        };
-        var self = this;
-        $.ajax(ajax_options)
-        .done(function(data) {
-            self.$event_pump.trigger('model_StartOEFNodeSuccess', [data]);
-        })
-        .fail(function(xhr, textStatus, errorThrown) {
-            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-        })
-    }
-    stopOEFNode(){
-        var ajax_options = {
-            type: 'DELETE',
-            url: 'api/oef',
-            accepts: 'application/json',
-            contentType: 'plain/text'
-        };
-        var self = this;
-        $.ajax(ajax_options)
-        .done(function(data) {
-            self.$event_pump.trigger('model_StopOEFNodeSuccess', [data]);
-        })
-        .fail(function(xhr, textStatus, errorThrown) {
-            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-        })
-    }
     startAgent(agentId, runConnectionId){
         var ajax_options = {
             type: 'POST',
@@ -279,18 +230,6 @@ class View{
     constructor(){
         this.$event_pump = $('body');
 
-    }
-
-    setOEFStatus(status){
-        $('#oefStatus').html(status);
-    }
-    setOEFTTY(tty){
-        $('#oefTTY').html(tty);
-        $('#oefTTY').scrollTop($('#oefTTY')[0].scrollHeight);
-    }
-    setOEFError(error){
-        $('#oefError').html(error);
-        $('#oefError').scrollTop($('#oefError')[0].scrollHeight);
     }
     setAgentStatus(status){
         $('#agentStatus').html(status);
@@ -504,12 +443,6 @@ class Controller{
             });
 
         }
-        this.$event_pump.on('model_OEFStatusReadSuccess', function(e, data) {
-            self.view.setOEFStatus("OEF Node Status: " + data["status"])
-            self.view.setOEFTTY(data["tty"])
-            self.view.setOEFError(data["error"])
-            self.handleButtonStates()
-        });
 
         this.$event_pump.on('model_AgentStatusReadSuccess', function(e, data) {
             self.view.setAgentStatus("Agent Status: " + data["status"])
@@ -522,20 +455,6 @@ class Controller{
             self.view.setSearchType(data["item_type"])
             self.view.build_table(data["search_result"], 'searchItemsTable');
             self.handleButtonStates()
-        });
-
-
-        $('#startOEFNode').click({el: element}, function(e) {
-            e.preventDefault();
-
-            self.model.startOEFNode()
-            e.preventDefault();
-        });
-        $('#stopOEFNode').click({el: element}, function(e) {
-            e.preventDefault();
-
-            self.model.stopOEFNode()
-            e.preventDefault();
         });
 
         $('#startAgent').click({el: element}, function(e) {
@@ -646,7 +565,6 @@ class Controller{
                 self.handleButtonStates()});
         }
 
-        this.getOEFStatus();
         this.getAgentStatus();
 
     }
@@ -715,26 +633,6 @@ class Controller{
             $('.localItemHeading').html("Local");
 
         }
-
-        var isOEFStopped = $('#oefStatus').html().includes("NOT_STARTED")
-        $('#startOEFNode').prop('disabled',!isOEFStopped);
-        $('#stopOEFNode').prop('disabled', isOEFStopped);
-
-        var agentOEFStopped = $('#agentStatus').html().includes("NOT_STARTED")
-        var hasValidAgent = this.validateId(agentSelectionId);
-        $('#startAgent').prop('disabled', !hasValidAgent || !agentOEFStopped);
-        $('#stopAgent').prop('disabled', !hasValidAgent || agentOEFStopped);
-
-
-    }
-
-    getOEFStatus(){
-        this.model.readOEFStatus()
-        self = this
-        setTimeout(function() {
-            self.getOEFStatus()
-        }, 500)
-
     }
 
     getAgentStatus(){
