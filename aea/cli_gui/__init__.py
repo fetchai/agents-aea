@@ -253,11 +253,11 @@ def add_item(agent_id: str, item_type: str, item_id: str):
     try:
         try_to_load_agent_config(ctx)
         cli_add_item(ctx, item_type, PublicId.from_str(item_id))
-    except ClickException:
+    except ClickException as e:
         return (
             {
-                "detail": "Failed to add {} {} to agent {}".format(
-                    item_type, item_id, agent_id
+                "detail": "Failed to add {} {} to agent {}. {}".format(
+                    item_type, item_id, agent_id, str(e)
                 )
             },
             400,
