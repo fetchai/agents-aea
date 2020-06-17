@@ -59,6 +59,12 @@ func check(err error) {
 	}
 }
 
+func ignore(err error) {
+	if err != nil {
+		log.Println("TRACE", err)
+	}
+}
+
 // DHTPeer A full libp2p node for the Agents Communication Network.
 // It is required to have a local address and a public one
 // and can acts as a relay for `DHTClient`.
@@ -90,7 +96,7 @@ type DHTPeer struct {
 }
 
 // New creates a new DHTPeer
-func New(opts ...DHTPeerOption) (*DHTPeer, error) {
+func New(opts ...Option) (*DHTPeer, error) {
 	var err error
 	dhtPeer := &DHTPeer{}
 
@@ -201,7 +207,11 @@ func New(opts ...DHTPeerOption) (*DHTPeer, error) {
 			log.Println("ERROR failed to notify bootstrap peer", bPeer.ID, ":", err.Error())
 			return nil, err
 		}
-		s.Write([]byte("/aea-notif/0.1.0"))
+		_, err = s.Write([]byte("/aea-notif/0.1.0"))
+		if err != nil {
+			log.Println("ERROR failed to notify bootstrap peer", bPeer.ID, ":", err.Error())
+			return nil, err
+		}
 		s.Close()
 	}
 
@@ -261,6 +271,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		return
 	}
 	err = writeBytesConn(conn, []byte("DONE"))
+	ignore(err)
 
 	addr := string(buf)
 	log.Println("DEBUG connection from ", conn.RemoteAddr().String(),
@@ -292,9 +303,17 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		}
 
 		// route envelope
-		go dhtPeer.RouteEnvelope(*envel)
+		go func() {
+			err := dhtPeer.RouteEnvelope(*envel)
+			ignore(err)
+		}()
 	}
 
+}
+
+// ProcessEnvelope register callback function
+func (dhtPeer *DHTPeer) ProcessEnvelope(fn func(aea.Envelope) error) {
+	dhtPeer.processEnvelope = fn
 }
 
 // RouteEnvelope to its destination
@@ -324,7 +343,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 		var err error
 		if sPeerID, exists := dhtPeer.dhtAddresses[target]; exists {
 			log.Println("DEBUG route - destination", target, "is a relay client")
-			peerID, err = peer.IDB58Decode(sPeerID)
+			peerID, err = peer.Decode(sPeerID)
 			if err != nil {
 				log.Println("CRITICAL couldn't parse peer id from relay client id")
 				return err
@@ -341,7 +360,8 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 		log.Println("DEBUG route - got peer id for agent address", target, ":", peerID.Pretty())
 
 		log.Println("DEBUG route - opening stream to target ", peerID)
-		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
 		stream, err := dhtPeer.routedHost.NewStream(ctx, peerID, "/aea/0.1.0")
 		if err != nil {
 			log.Println("ERROR route - timeout, couldn't open stream to target ", peerID)
@@ -351,7 +371,8 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 		log.Println("DEBUG route - sending envelope to target...")
 		err = writeEnvelope(envel, stream)
 		if err != nil {
-			stream.Reset()
+			errReset := stream.Reset()
+			ignore(errReset)
 		} else {
 			stream.Close()
 		}
@@ -370,7 +391,8 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 
 	log.Println("INFO Querying for providers for cid", addressCID.String(),
 		" of address", address, "...")
-	ctx, _ := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
 	providers := dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 1)
 	start := time.Now()
 	provider := <-providers
@@ -400,7 +422,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	}
 	s.Close()
 
-	peerid, err := peer.IDB58Decode(msg)
+	peerid, err := peer.Decode(msg)
 	if err != nil {
 		return "", errors.New("CRITICAL couldn't get peer ID from message:" + err.Error())
 	}
@@ -414,7 +436,8 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 	envel, err := readEnvelope(stream)
 	if err != nil {
 		log.Println("ERROR While reading envelope from stream:", err)
-		stream.Reset()
+		err = stream.Reset()
+		ignore(err)
 		return
 	}
 	stream.Close()
@@ -443,7 +466,8 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 	reqAddress, err := readString(stream)
 	if err != nil {
 		log.Println("ERROR While reading Address from stream:", err)
-		stream.Reset()
+		err = stream.Reset()
+		ignore(err)
 		return
 	}
 
@@ -529,20 +553,24 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	clientAddr, err := readBytes(stream)
 	if err != nil {
 		log.Println("ERROR While reading client Address from stream:", err)
-		stream.Reset()
+		err = stream.Reset()
+		ignore(err)
 		return
 	}
 
 	err = writeBytes(stream, []byte("doneAddress"))
+	ignore(err)
 
 	clientPeerID, err := readBytes(stream)
 	if err != nil {
 		log.Println("ERROR While reading client peerID from stream:", err)
-		stream.Reset()
+		err = stream.Reset()
+		ignore(err)
 		return
 	}
 
 	err = writeBytes(stream, []byte("donePeerID"))
+	ignore(err)
 
 	log.Println("DEBUG Received address registration request (addr, peerid):", clientAddr, clientPeerID)
 	dhtPeer.dhtAddresses[string(clientAddr)] = string(clientPeerID)
@@ -551,7 +579,8 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		err = dhtPeer.registerAgentAddress(string(clientAddr))
 		if err != nil {
 			log.Println("ERROR While announcing client address", clientAddr, "to the dht:", err)
-			stream.Reset()
+			err = stream.Reset()
+			ignore(err)
 			return
 		}
 	}
@@ -564,7 +593,8 @@ func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	}
 
 	// TOFIX(LR) tune timeout
-	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
 	log.Println("DEBUG Announcing address", addr, "to the dht with cid key", addressCID.String())
 	err = dhtPeer.dht.Provide(ctx, addressCID, true)
@@ -674,23 +704,6 @@ func readEnvelopeConn(conn net.Conn) (*aea.Envelope, error) {
 	}
 	err = proto.Unmarshal(data, envelope)
 	return envelope, err
-}
-
-func aeaAddressCID(addr string) (cid.Cid, error) {
-	pref := cid.Prefix{
-		Version:  0,
-		Codec:    cid.Raw,
-		MhType:   multihash.SHA2_256,
-		MhLength: -1, // default length
-	}
-
-	// And then feed it some data
-	c, err := pref.Sum([]byte(addr))
-	if err != nil {
-		return cid.Cid{}, err
-	}
-
-	return c, nil
 }
 
 func computeCID(addr string) (cid.Cid, error) {

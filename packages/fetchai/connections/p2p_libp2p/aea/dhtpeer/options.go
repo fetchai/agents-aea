@@ -30,11 +30,11 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
-// DHTPeerOption for dhtpeer.New
-type DHTPeerOption func(*DHTPeer) error
+// Option for dhtpeer.New
+type Option func(*DHTPeer) error
 
 // IdentityFromFetchAIKey for dhtpeer.New
-func IdentityFromFetchAIKey(key string) DHTPeerOption {
+func IdentityFromFetchAIKey(key string) Option {
 	return func(dhtPeer *DHTPeer) error {
 		var err error
 		dhtPeer.key, dhtPeer.publicKey, err = KeyPairFromFetchAIKey(key)
@@ -46,7 +46,7 @@ func IdentityFromFetchAIKey(key string) DHTPeerOption {
 }
 
 // RegisterAgentAddress for dhtpeer.New
-func RegisterAgentAddress(addr string, isReady func() bool) DHTPeerOption {
+func RegisterAgentAddress(addr string, isReady func() bool) Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.myAgentAddress = addr
 		dhtPeer.myAgentReady = isReady
@@ -55,7 +55,7 @@ func RegisterAgentAddress(addr string, isReady func() bool) DHTPeerOption {
 }
 
 // BootstrapFrom for dhtpeer.New
-func BootstrapFrom(entryPeers []string) DHTPeerOption {
+func BootstrapFrom(entryPeers []string) Option {
 	return func(dhtPeer *DHTPeer) error {
 		var err error
 		dhtPeer.bootstrapPeers, err = GetPeersAddrInfo(entryPeers)
@@ -67,7 +67,7 @@ func BootstrapFrom(entryPeers []string) DHTPeerOption {
 }
 
 // LocalURI for dhtpeer.New
-func LocalURI(host string, port uint16) DHTPeerOption {
+func LocalURI(host string, port uint16) Option {
 	return func(dhtPeer *DHTPeer) error {
 		var err error
 		dhtPeer.localMultiaddr, err =
@@ -82,7 +82,7 @@ func LocalURI(host string, port uint16) DHTPeerOption {
 }
 
 // PublicURI for dhtpeer.New
-func PublicURI(host string, port uint16) DHTPeerOption {
+func PublicURI(host string, port uint16) Option {
 	return func(dhtPeer *DHTPeer) error {
 		var err error
 		dhtPeer.publicMultiaddr, err =
@@ -97,7 +97,7 @@ func PublicURI(host string, port uint16) DHTPeerOption {
 }
 
 // EnableDelegateService for dhtpeer.New
-func EnableDelegateService(port uint16) DHTPeerOption {
+func EnableDelegateService(port uint16) Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.delegatePort = port
 		return nil
@@ -105,7 +105,7 @@ func EnableDelegateService(port uint16) DHTPeerOption {
 }
 
 // EnableRelayService for dhtpeer.New
-func EnableRelayService() DHTPeerOption {
+func EnableRelayService() Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.enableRelay = true
 		return nil

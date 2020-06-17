@@ -20,6 +20,7 @@
 
 package dhtclient
 
+/*
 import (
 	"github.com/libp2p/go-libp2p-core/peer"
 
@@ -41,3 +42,4 @@ type DHTClient struct {
 	relayPeer       peer.ID
 	processEnvelope func(aea.Envelope) error
 }
+*/

@@ -21,6 +21,7 @@
 package dhtpeer
 
 import (
+	"libp2p_node/aea"
 	"testing"
 )
 
@@ -29,7 +30,45 @@ func TestSuccess(t *testing.T) {
 	t.Log("Bound to succeed")
 }
 
+//
+const (
+	DefaultLocalHost    = "127.0.0.1"
+	DefaultLocalPort    = 2000
+	DefaultFetchAIKey   = "5071fbef50ed1fa1061d84dbf8152c7811f9a3a992ca6c43ae70b80c5ceb56df"
+	DefaultAgentAddress = "2FRCqDBo7Yw3E2VJc1tAkggppWzLnCCYjPN9zHrQrj8Fupzmkr"
+	DefaultDelegatePort = 3000
+)
+
 // TestNewWithAeaAgent dht peer with agent attached
 func TestNewWithAeaAgent(t *testing.T) {
-	t.Error("Bound to fail.")
+	opts := []Option{
+		LocalURI(DefaultLocalHost, DefaultLocalPort),
+		PublicURI(DefaultLocalHost, DefaultLocalPort),
+		IdentityFromFetchAIKey(DefaultFetchAIKey),
+		RegisterAgentAddress(DefaultAgentAddress, func() bool { return true }),
+		EnableRelayService(),
+		EnableDelegateService(DefaultDelegatePort),
+	}
+
+	dhtPeer, err := New(opts...)
+	if err != nil {
+		t.Error("Failed at DHTPeer initialization:", err)
+	}
+
+	var rxEnvelopes []aea.Envelope
+	dhtPeer.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxEnvelopes = append(rxEnvelopes, envel)
+		return nil
+	})
+
+	err = dhtPeer.RouteEnvelope(aea.Envelope{
+		To: DefaultAgentAddress,
+	})
+	if err != nil {
+		t.Error("Failed to Route envelope to local Agent")
+	}
+
+	if len(rxEnvelopes) == 0 {
+		t.Error("Failed to Route & Process envelope to local Agent")
+	}
 }

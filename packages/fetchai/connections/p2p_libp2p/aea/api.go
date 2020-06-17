@@ -347,7 +347,12 @@ func setup_aea_sandbox() (string, string, string, string, uint16, error) {
 		}
 		return "", "", "", "", 0, erro
 	}
-	go run_aea_sandbox(msgin_path, msgout_path)
+	// TOFIX(LR) should use channels
+	go func() {
+		err := run_aea_sandbox(msgin_path, msgout_path)
+		if err != nil {
+		}
+	}()
 	return msgin_path, msgout_path, id, host, port, nil
 }
 
