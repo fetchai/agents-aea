@@ -88,59 +88,100 @@ ledger_apis:
     address: http://aea-testnet.sandbox.fetch-ai.com:1317
 ```
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      total_price: 10              |      total_price: 10             |
-|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      has_data_source: True        |      has_data_source: True       |
-|      data_for_sale: {}            |      data_for_sale: {}           |
-|      search_schema:               |      search_schema:              |
-|        attribute_one:             |        attribute_one:            |
-|          name: country            |          name: country           |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|        attribute_two:             |        attribute_two:            |
-|          name: city               |          name: city              |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|      search_data:                 |      search_data:                |
-|        country: UK                |        country: UK               |
-|        city: Cambridge            |        city: Cambridge           |
-|dependencies:                      |dependencies:                     |
-|  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------|
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      total_price: 10
+      seller_tx_fee: 0
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      has_data_source: True
+      data_for_sale: {}
+      search_schema:
+        attribute_one:
+          name: country
+          type: str
+          is_required: True
+        attribute_two:
+          name: city
+          type: str
+          is_required: True
+      search_data:
+        country: UK
+        city: Cambridge
+dependencies:
+  SQLAlchemy: {}
 ```
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |  
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      max_price: 40                |      max_price: 40               |
-|      max_buyer_tx_fee: 100        |      max_buyer_tx_fee: 200000    |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      search_query:                |      search_query:               |
-|        search_term: country       |        search_term: country      |
-|        search_value: UK           |        search_value: UK          |
-|        constraint_type: '=='      |        constraint_type: '=='     |
-|ledgers: ['fetchai']               |ledgers: ['ethereum']             |
-|----------------------------------------------------------------------|
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      max_price: 40
+      max_buyer_tx_fee: 100
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      search_query:
+        search_term: country
+        search_value: UK
+        constraint_type: '=='
+ledgers: ['fetchai']
+```
+``` yaml
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      total_price: 10
+      seller_tx_fee: 0
+      currency_id: 'ETH'
+      ledger_id: 'ethereum'
+      is_ledger_tx: True
+      has_data_source: True
+      data_for_sale: {}
+      search_schema:
+        attribute_one:
+          name: country
+          type: str
+          is_required: True
+        attribute_two:
+          name: city
+          type: str
+          is_required: True
+      search_data:
+        country: UK
+        city: Cambridge
+dependencies:
+  SQLAlchemy: {}
+```
+``` yaml
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      max_price: 40
+      max_buyer_tx_fee: 20000
+      currency_id: 'ETH'
+      ledger_id: 'ethereum'
+      is_ledger_tx: True
+      search_query:
+        search_term: country
+        search_value: UK
+        constraint_type: '=='
+ledgers: ['ethereum']
 ```

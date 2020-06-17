@@ -9,6 +9,10 @@ There are two types of AEAs:
 
 The scope of the specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC. This demo uses another AEA - a controller AEA - to take the role of running the competition. Transactions are validated on an ERC1155 smart contract on the Ropsten Ethereum testnet.
 
+In the below video we discuss the framework and TAC in more detail:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/gvzYX7CYk-A" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Communication
 
 There are two types of interactions:

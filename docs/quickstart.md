@@ -232,7 +232,7 @@ Optionally, use the CLI interact command from a different terminal:
 aea interact
 ```
 
-You can then send the AEA messages via an interactive tool.
+You can then send the AEA messages via an interactive tool by typing `hello` into the prompt and hitting enter twice (once to send, once more to check for a response).
 
 </details>
 

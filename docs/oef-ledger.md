@@ -25,13 +25,13 @@ The agent communication network is a peer-to-peer communication network for agen
 
 The implementation builds on the open-source <a href="https://libp2p.io/" target="_blank">libp2p</a> library. A distributed hash table is used by all participating peers to maintain a mapping between agents' cryptographic addresses and their network addresses.
 
-Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a>).
+Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a> for an example).
 
 ### Centralized search and discovery
 
-A `simple OEF search node` allows agents to search and discover each other. In particular, agents can register themselves and their services as well as send search requests.
+A <a href="../simple-oef">`simple OEF search node`</a> allows agents to search and discover each other. In particular, agents can register themselves and their services as well as send search requests.
 
-For two agents to be able to find each other, at least one must register as a service and the other must query the `simple OEF search node` for this service.
+For two agents to be able to find each other, at least one must register themselves and the other must query the `simple OEF search node` for it. Detailed documentation is provided <a href="../simple-oef">`here`</a>.
 
 ### Deprecated alternative (for local development only)
 

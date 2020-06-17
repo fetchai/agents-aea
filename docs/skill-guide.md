@@ -23,7 +23,7 @@ In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `
 
 ## Step 2: Develop a Behaviour
 
-A `Behaviour` class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
+A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
 
 In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the [OEF search node](../oef-ledger) via the [OEF communication network](../oef-ledger).
 
@@ -85,7 +85,7 @@ class MySearchBehaviour(TickerBehaviour):
         )
 ```
 
-Searches are proactive and, as such, well placed in a `Behaviour`. Specifically, we subclass the `TickerBehaviour` as it allows us to repeatedly search at a defined tick interval.
+Searches are proactive and, as such, well placed in a <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>. Specifically, we subclass the <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> as it allows us to repeatedly search at a defined tick interval.
 
 We place this code in `my_aea/skills/my_search/behaviours.py`.
 
@@ -93,7 +93,7 @@ We place this code in `my_aea/skills/my_search/behaviours.py`.
 
 So far, we have tasked the AEA with sending search requests to the [OEF search node](../oef-ledger). However, we have no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) at the moment. The AEA would simply respond to the [OEF search node](../oef-ledger) via the default `error` skill which sends all unrecognised envelopes back to the sender.
 
-Let us now implement a handler to deal with the incoming search responses.
+Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming search responses.
 
 ``` python
 from aea.skills.base import Handler
@@ -157,13 +157,13 @@ We also implement a trivial check on the difference between the amount of search
 
 Note, how the handler simply reacts to incoming events (i.e. messages). It could initiate further actions, however, they are still reactions to the upstream search event.
 
-Also note, how we have access to other objects in the skill via `self.context`.
+Also note, how we have access to other objects in the skill via `self.context`, the <a href="../api/skills/base#skillcontext-objects">`SkillContext`</a>.
 
 We place this code in `my_aea/skills/my_search/handlers.py`.
 
 ## Step 4: Remove unused Model
 
-We have implemented a behaviour and a handler. We could also implement a `model`, but instead we delete this file in this case, to keep it simple.
+We have implemented a behaviour and a handler. We could also implement a <a href="../api/skills/base#model-objects">`Model`</a>, but instead we delete this file in this case, to keep it simple.
 
 We remove the file `my_aea/skills/my_search/my_model.py`.
 
@@ -245,7 +245,7 @@ This AEA will simply register a location service on the [OEF search node](../oef
 <details><summary>Click here to see full code</summary>
 <p>
 
-We use a ticker behaviour to update the service registration at regular intervals. The following code is placed in `behaviours.py`. 
+We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`. 
 
 ``` python
 from typing import Optional, cast
@@ -342,7 +342,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self._registered_service_description = None
 ```
 
-We create a `model` type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
+We create a <a href="../api/skills/base#model-objects">`Model`</a> type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
 
 ``` python
 from typing import Any, Dict, Optional
@@ -453,14 +453,17 @@ We can see that the AEA sends search requests to the [OEF search node](../oef-le
 
 We stop the AEA with `CTRL + C`.
 
-<!-- ## Next steps
+## Next steps
+
+
+### Recommended
 
 We recommend you continue with the next step in the 'Getting Started' series:
 
-- <a href="../aea-vs-mvc/">Build a skill for an AEA</a>
+- <a href="../core-components-2">Core components (Part 2)</a>
 
- -->
-## Now it's your turn
+
+### Relevant deep-dives
 
 We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.
 

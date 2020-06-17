@@ -81,12 +81,10 @@ python templates/v1/basic.py --name my_agent --dashboard
 
 Click through to the <a href="http://localhost:8097" target="_blank">controller GUI</a>.
 
-
-
-## Launcher GUI
+<!-- ## Launcher GUI
 
 !!!	Todo
-
+ -->
 
 ## Possible gotchas
 
