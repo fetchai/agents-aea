@@ -74,6 +74,18 @@ def create(
 def create_aea(
     ctx: Context, agent_name: str, author: str, local: bool, empty: bool,
 ) -> None:
+    """
+    Create AEA project.
+
+    :param ctx: Context object.
+    :param agent_name: agent name.
+    :param author: author name.
+    :param local: boolean flag for local folder usage.
+    :param empty: boolean flag for adding default dependencies.
+
+    :return: None
+    :raises: ClickException if an error occured.
+    """
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
