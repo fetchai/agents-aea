@@ -101,7 +101,7 @@ def test_create_and_run_agent():
         assert response_stop.status_code == 200
         time.sleep(2)
 
-        # run the agent with stub connection (as no OEF node is running)
+        # run the agent with stub connection
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
