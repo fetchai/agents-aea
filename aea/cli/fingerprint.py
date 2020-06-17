@@ -25,7 +25,7 @@ import click
 
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
-from aea.configurations.base import (  # noqa: F401
+from aea.configurations.base import (  # noqa: F401 # pylint: disable=unused-import
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,

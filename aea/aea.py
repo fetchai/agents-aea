@@ -77,6 +77,7 @@ class AEA(Agent):
         default_connection: Optional[PublicId] = None,
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
+        search_service_address: str = "oef",
         **kwargs,
     ) -> None:
         """
@@ -98,6 +99,7 @@ class AEA(Agent):
         :param default_connection: public id to the default connection
         :param default_routing: dictionary for default routing.
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
+        :param search_service_address: the address of the search service used.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
@@ -130,6 +132,7 @@ class AEA(Agent):
             self.task_manager,
             default_connection,
             default_routing if default_routing is not None else {},
+            search_service_address,
             **kwargs,
         )
         self._execution_timeout = execution_timeout

@@ -511,7 +511,7 @@ class Multiplexer(AsyncMultiplexer):
         super().set_loop(loop)
         self._thread_runner = ThreadedAsyncRunner(self._loop)
 
-    def connect(self) -> None:  # type: ignore  # cause overrides coroutine
+    def connect(self) -> None:  # type: ignore # cause overrides coroutine # pylint: disable=invalid-overridden-method
         """
         Connect the multiplexer.
 
@@ -525,7 +525,7 @@ class Multiplexer(AsyncMultiplexer):
             self._thread_runner.call(super().connect()).result(240)
             self._is_connected = True
 
-    def disconnect(self) -> None:  # type: ignore  # cause overrides coroutine
+    def disconnect(self) -> None:  # type: ignore # cause overrides coroutine # pylint: disable=invalid-overridden-method
         """
         Disconnect the multiplexer.
 
