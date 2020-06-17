@@ -228,9 +228,7 @@ def create_agent(agent_id: str):
         )
     except ClickException as e:
         return (
-            {
-                "detail": "Failed to create Agent. {}".format(str(e))
-            },
+            {"detail": "Failed to create Agent. {}".format(str(e))},
             400,
         )  # 400 Bad request
     else:

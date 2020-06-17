@@ -55,9 +55,7 @@ def test_create_agent_fail(*mocks):
     )
     assert response_create.status_code == 400
     data = json.loads(response_create.get_data(as_text=True))
-    assert data[
-        "detail"
-    ] == "Failed to create Agent. Message"
+    assert data["detail"] == "Failed to create Agent. Message"
 
 
 def test_real_create_local(*mocks):
