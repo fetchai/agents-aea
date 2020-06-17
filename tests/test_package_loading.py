@@ -44,14 +44,12 @@ def test_loading(cleanup_sys_modules):
     skill_directory = os.path.join(CUR_PATH, "data", "dummy_skill")
 
     prefixes = [
+        "packages",
         "packages.dummy_author",
         "packages.dummy_author.skills",
         "packages.dummy_author.skills.dummy",
         "packages.dummy_author.skills.dummy.dummy_subpackage",
     ]
-    assert all(
-        prefix not in sys.modules for prefix in prefixes
-    ), "Some package is already loaded."
     Skill.from_dir(skill_directory, agent_context_mock)
     assert all(
         prefix in sys.modules for prefix in prefixes
@@ -61,7 +59,3 @@ def test_loading(cleanup_sys_modules):
     from packages.dummy_author.skills.dummy.dummy_subpackage.foo import bar  # type: ignore
 
     assert bar() == 42
-
-    # unload the modules.
-    for prefix in prefixes:
-        sys.modules.pop(prefix)
