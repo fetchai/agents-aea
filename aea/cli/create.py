@@ -97,9 +97,6 @@ def create_aea(
         if local:
             do_init(author, False, False)
         else:
-            import pdb
-
-            pdb.set_trace()
             raise click.ClickException(
                 "Author is not set up. Please use 'aea init' to initialize."
             )
