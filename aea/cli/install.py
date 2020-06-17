@@ -46,20 +46,20 @@ from aea.exceptions import AEAException
 @check_aea_project
 def install(click_context, requirement: Optional[str]):
     """Install the dependencies."""
-    _do_install(click_context, requirement)
+    ctx = cast(Context, click_context.obj)
+    do_install(ctx, requirement)
 
 
-def _do_install(click_context: click.core.Context, requirement: Optional[str]) -> None:
+def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
     """
     Install necessary dependencies.
 
-    :param click_context: click context object.
+    :param ctx: context object.
     :param requirement: optional str requirement.
 
     :return: None
     :raises: ClickException if AEAException occurres.
     """
-    ctx = cast(Context, click_context.obj)
     try:
         if requirement:
             logger.debug("Installing the dependencies in '{}'...".format(requirement))
