@@ -44,9 +44,7 @@ def _dos2unix(file_content: bytes) -> bytes:
 
 
 class IPFSHashOnly:
-    """
-    A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon.
-    """
+    """A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon."""
 
     def get(self, file_path: str) -> str:
         """
@@ -60,7 +58,8 @@ class IPFSHashOnly:
         ipfs_hash = self._generate_multihash(file_pb)
         return ipfs_hash
 
-    def _pb_serialize_file(self, data: bytes) -> bytes:
+    @staticmethod
+    def _pb_serialize_file(data: bytes) -> bytes:
         """
         Serialize a bytes object representing a file.
 
@@ -79,7 +78,8 @@ class IPFSHashOnly:
         result = outer_node.SerializeToString()
         return result
 
-    def _generate_multihash(self, pb_data: bytes) -> str:
+    @staticmethod
+    def _generate_multihash(pb_data: bytes) -> str:
         """
         Generate an IPFS multihash.
 

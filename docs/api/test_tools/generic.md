@@ -44,6 +44,7 @@ force_set_config(dotted_path: str, value: Any) -> None
 ```
 
 Set an AEA config without validation.
+
 Run from agent's directory.
 
 Allowed dotted_path:

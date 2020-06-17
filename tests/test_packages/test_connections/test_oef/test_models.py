@@ -228,7 +228,7 @@ class TestCheckValidity:
         m_constraint = ConstraintType("==", 3)
         with mock.patch("aea.helpers.search.models.ConstraintTypes") as mocked_types:
             mocked_types.EQUAL.value = "unknown"
-            assert not m_constraint._check_validity(), "My constraint must not be valid"
+            assert not m_constraint.check_validity(), "My constraint must not be valid"
 
     def test_not_check(self):
         """Test the not().check function."""

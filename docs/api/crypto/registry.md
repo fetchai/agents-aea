@@ -117,7 +117,15 @@ Initialize a crypto specification.
  | make(**kwargs) -> Crypto
 ```
 
-Instantiates an instance of the crypto object with appropriate arguments.
+Instantiate an instance of the crypto object with appropriate arguments.
+
+**Arguments**:
+
+- `kwargs`: the key word arguments
+
+**Returns**:
+
+a crypto object
 
 <a name=".aea.crypto.registry.CryptoRegistry"></a>
 ## CryptoRegistry Objects

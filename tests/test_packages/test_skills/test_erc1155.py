@@ -25,15 +25,15 @@ from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 from ...conftest import (
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
-    MAX_FLAKY_RERUNS,
+    MAX_FLAKY_RERUNS_ETH,
 )
 
 
-@pytest.mark.unstable
+@pytest.mark.ethereum
 class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_generic(self):
         """Run the generic skills sequence."""
         deploy_aea_name = "deploy_aea"
@@ -57,10 +57,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_deploy:0.5.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.6.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.5.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.6.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -82,10 +82,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_client:0.4.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.5.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.5.0", client_aea_name
+            "fetchai/erc1155_client:0.6.0", client_aea_name
         )
         assert (
             diff == []

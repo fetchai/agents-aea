@@ -111,7 +111,7 @@ def _copyright_header_str(author: str) -> str:
 
 def _to_camel_case(text: str) -> str:
     """
-    Convert a text in snake_case format into the CamelCase format
+    Convert a text in snake_case format into the CamelCase format.
 
     :param text: the text to be converted.
     :return: The text in CamelCase format.
@@ -121,7 +121,7 @@ def _to_camel_case(text: str) -> str:
 
 def _camel_case_to_snake_case(text: str) -> str:
     """
-    Convert a text in CamelCase format into the snake_case format
+    Convert a text in CamelCase format into the snake_case format.
 
     :param text: the text to be converted.
     :return: The text in CamelCase format.
@@ -409,6 +409,8 @@ def _is_valid_content_name(content_name: str) -> bool:
 def _includes_custom_type(content_type: str) -> bool:
     """
     Evaluate whether a content type is a custom type or has a custom type as a sub-type.
+
+    :param content_type: the content type
     :return: Boolean result
     """
     if content_type.startswith("Optional"):
@@ -640,7 +642,7 @@ class ProtocolGenerator:
 
     def _import_from_custom_types_module(self) -> str:
         """
-        Manage import statement from custom_types module
+        Manage import statement from custom_types module.
 
         :return: import statement for the custom_types module
         """
@@ -1688,7 +1690,7 @@ class ProtocolGenerator:
 
     def _custom_types_module_str(self) -> str:
         """
-        Produces the contents of the custom_types module, containing classes corresponding to every custom type in the protocol specification.
+        Produce the contents of the custom_types module, containing classes corresponding to every custom type in the protocol specification.
 
         :return: the custom_types.py file content
         """
@@ -2003,6 +2005,8 @@ class ProtocolGenerator:
     def _to_custom_custom(self, content_type: str) -> str:
         """
         Evaluate whether a content type is a custom type or has a custom type as a sub-type.
+
+        :param content_type: the content type.
         :return: Boolean result
         """
         new_content_type = content_type

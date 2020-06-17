@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, **kwargs)
+ | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], **kwargs)
 ```
 
 Initialize an agent context.
@@ -155,6 +155,26 @@ Get the task manager.
 ```
 
 Get the address of the search service.
+
+<a name=".aea.context.base.AgentContext.default_connection"></a>
+#### default`_`connection
+
+```python
+ | @property
+ | default_connection() -> Optional[PublicId]
+```
+
+Get the default connection.
+
+<a name=".aea.context.base.AgentContext.default_routing"></a>
+#### default`_`routing
+
+```python
+ | @property
+ | default_routing() -> Dict[PublicId, PublicId]
+```
+
+Get the default routing.
 
 <a name=".aea.context.base.AgentContext.namespace"></a>
 #### namespace

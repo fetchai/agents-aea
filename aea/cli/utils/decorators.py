@@ -49,11 +49,11 @@ def _validate_config_consistency(ctx: Context):
     """
     Validate fingerprints for every agent component.
 
+    :param ctx: the context
     :raise ValueError: if there is a missing configuration file.
                        or if the configuration file is not valid.
                        or if the fingerprints do not match
     """
-
     packages_public_ids_to_types = dict(
         [
             *map(lambda x: (x, PackageType.PROTOCOL), ctx.agent_config.protocols),
@@ -118,7 +118,7 @@ def _check_aea_project(args):
 
 def check_aea_project(f):
     """
-    Decorator that checks the consistency of the project.
+    Check the consistency of the project as a decorator.
 
     - try to load agent configuration file
     - iterate over all the agent packages and check for consistency.

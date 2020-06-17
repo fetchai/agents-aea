@@ -52,6 +52,12 @@ aea generate-wealth cosmos
 aea install
 ```
 ``` bash
+aea eject skill fetchai/generic_seller:0.5.0
+```
+``` bash
+aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
+```
+``` bash
 aea run --connections fetchai/oef:0.4.0
 ```
 ``` bash

@@ -16,9 +16,9 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connections: List[Connection], wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 0, is_debug: bool = False, max_reactions: int = 20, decision_maker_handler_class: Type[
+ | __init__(identity: Identity, wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 0, is_debug: bool = False, max_reactions: int = 20, decision_maker_handler_class: Type[
  |             DecisionMakerHandler
- |         ] = DefaultDecisionMakerHandler, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, **kwargs, ,) -> None
+ |         ] = DefaultDecisionMakerHandler, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, **kwargs, ,) -> None
 ```
 
 Instantiate the agent.
@@ -26,7 +26,6 @@ Instantiate the agent.
 **Arguments**:
 
 - `identity`: the identity of the agent
-- `connections`: the list of connections of the agent.
 - `wallet`: the wallet of the agent.
 - `ledger_apis`: the APIs the agent will use to connect to ledgers.
 - `resources`: the resources (protocols and skills) of the agent.
@@ -38,6 +37,10 @@ Instantiate the agent.
 - `decision_maker_handler_class`: the class implementing the decision maker handler to be used.
 - `skill_exception_policy`: the skill exception policy enum
 - `loop_mode`: loop_mode to choose agent run loop.
+- `runtime_mode`: runtime mode (async, threaded) to run AEA in.
+- `default_connection`: public id to the default connection
+- `default_routing`: dictionary for default routing.
+- `connection_ids`: active connection ids. Default: consider all the ones in the resources.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 **Returns**:
@@ -83,6 +86,35 @@ Set resources.
 ```
 
 Get the task manager.
+
+<a name=".aea.aea.AEA.setup_multiplexer"></a>
+#### setup`_`multiplexer
+
+```python
+ | setup_multiplexer() -> None
+```
+
+Set up the multiplexer
+
+<a name=".aea.aea.AEA.filter"></a>
+#### filter
+
+```python
+ | @property
+ | filter() -> Filter
+```
+
+Get the filter.
+
+<a name=".aea.aea.AEA.active_behaviours"></a>
+#### active`_`behaviours
+
+```python
+ | @property
+ | active_behaviours() -> List[Behaviour]
+```
+
+Get all active behaviours to use in act.
 
 <a name=".aea.aea.AEA.setup"></a>
 #### setup

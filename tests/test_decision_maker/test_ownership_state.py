@@ -239,7 +239,7 @@ def test_transaction_update():
         ledger_id="fetchai",
         tx_nonce="transaction nonce",
     )
-    ownership_state._update(tx_message=tx_message)
+    ownership_state.update(tx_message=tx_message)
     expected_amount_by_currency_id = {"FET": 75}
     expected_quantities_by_good_id = {"good_id": 30}
     assert ownership_state.amount_by_currency_id == expected_amount_by_currency_id
@@ -270,7 +270,7 @@ def test_transaction_update_receive():
         ledger_id="fetchai",
         tx_nonce="transaction nonce",
     )
-    ownership_state._update(tx_message=tx_message)
+    ownership_state.update(tx_message=tx_message)
     expected_amount_by_currency_id = {"FET": 90}
     expected_quantities_by_good_id = {"good_id": 20}
     assert ownership_state.amount_by_currency_id == expected_amount_by_currency_id

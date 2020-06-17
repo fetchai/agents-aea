@@ -25,14 +25,16 @@ from typing import Collection
 
 import pytest
 
+from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.components.base import Component
-from aea.configurations.base import ComponentType
+from aea.configurations.base import ComponentType, ProtocolConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
+from aea.protocols.base import Protocol
+from aea.protocols.default import DefaultMessage
 
-from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
-
+from .conftest import CUR_PATH, FETCHAI_PRIVATE_KEY_PATH, ROOT_DIR, skip_test_windows
 
 FETCHAI = FetchAICrypto.identifier
 
@@ -189,3 +191,53 @@ class TestReentrancy:
         aea1_connections = self.aea1.multiplexer.connections
         aea2_connections = self.aea2.multiplexer.connections
         self.are_components_different(aea1_connections, aea2_connections)
+
+
+def test_multiple_builds_with_private_keys():
+    """Test multiple calls to the 'build()' method when adding custom private keys."""
+    builder = AEABuilder()
+    builder.set_name("aea_1")
+    builder.add_private_key("fetchai", FETCHAI_PRIVATE_KEY_PATH)
+
+    # the first call works
+    aea_1 = builder.build()
+    assert isinstance(aea_1, AEA)
+
+    # the second call fails
+    with pytest.raises(ValueError, match="Cannot build.*"):
+        builder.build()
+
+    # after reset, it works
+    builder.reset()
+    builder.set_name("aea_1")
+    builder.add_private_key("fetchai", FETCHAI_PRIVATE_KEY_PATH)
+    aea_2 = builder.build()
+    assert isinstance(aea_2, AEA)
+
+
+def test_multiple_builds_with_component_instance():
+    """Test multiple calls to the 'build()' method when adding component instances."""
+    builder = AEABuilder()
+    builder.set_name("aea_1")
+    builder.add_private_key("fetchai")
+
+    a_protocol = Protocol(
+        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
+    )
+    builder.add_component_instance(a_protocol)
+
+    # the first call works
+    aea_1 = builder.build()
+    assert isinstance(aea_1, AEA)
+
+    # the second call fails
+    with pytest.raises(ValueError, match="Cannot build.*"):
+        builder.build()
+
+    # after reset, it works
+    builder.reset()
+    builder.set_name("aea_1")
+    builder.add_private_key("fetchai")
+    builder.add_component_instance(a_protocol)
+    aea_2 = builder.build()
+    assert isinstance(aea_2, AEA)

@@ -16,9 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""
-This module implements the crypto registry.
-"""
+
+"""This module implements the crypto registry."""
+
 import importlib
 import re
 from typing import Dict, Optional, Set, Type, Union
@@ -44,7 +44,7 @@ class CryptoId(RegexConstrainedString):
 
     REGEX = re.compile(r"^({})$".format(PY_ID_REGEX))
 
-    def __init__(self, seq):
+    def __init__(self, seq):  # pylint: disable=useless-super-delegation
         """Initialize the crypto id."""
         super().__init__(seq)
 
@@ -119,7 +119,12 @@ class CryptoSpec:
         self._kwargs = {} if kwargs is None else kwargs
 
     def make(self, **kwargs) -> Crypto:
-        """Instantiates an instance of the crypto object with appropriate arguments."""
+        """
+        Instantiate an instance of the crypto object with appropriate arguments.
+
+        :param kwargs: the key word arguments
+        :return: a crypto object
+        """
         _kwargs = self._kwargs.copy()
         _kwargs.update(kwargs)
         cls = self.entry_point.load()

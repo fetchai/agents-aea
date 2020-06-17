@@ -120,7 +120,7 @@ class BenchmarkFuncDetails(BaseFuncDetails):
             )
 
         for arg in self._arguments:
-            if arg.default == inspect._empty:  # type: ignore
+            if arg.default == inspect._empty:  # type: ignore # pylint: disable=protected-access
                 raise ValueError(
                     "function should have default values for every param except first one"
                 )

@@ -21,9 +21,8 @@
 
 import logging
 import queue
-import re
 from queue import Queue
-from typing import List, Optional, Tuple, TypeVar, cast
+from typing import List, Optional, cast
 
 from aea.configurations.base import (
     PublicId,
@@ -33,21 +32,9 @@ from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.registries.resources import Resources
-from aea.skills.base import Behaviour, Handler, Model
-from aea.skills.tasks import Task
+from aea.skills.base import Behaviour, Handler
 
 logger = logging.getLogger(__name__)
-
-PACKAGE_NAME_REGEX = re.compile(
-    "^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE
-)
-INTERNAL_PROTOCOL_ID = PublicId.from_str("fetchai/internal:0.1.0")
-DECISION_MAKER = "decision_maker"
-
-Item = TypeVar("Item")
-ItemId = TypeVar("ItemId")
-ComponentId = Tuple[SkillId, str]
-SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
 
 
 class Filter:
@@ -147,7 +134,7 @@ class Filter:
             while not skill.skill_context.new_behaviours.empty():
                 new_behaviour = skill.skill_context.new_behaviours.get()
                 try:
-                    self.resources._behaviour_registry.register(
+                    self.resources.behaviour_registry.register(
                         (skill.skill_context.skill_id, new_behaviour.name),
                         new_behaviour,
                     )
@@ -160,7 +147,7 @@ class Filter:
         """Handle transaction message from the Decision Maker."""
         skill_callback_ids = tx_message.skill_callback_ids
         for skill_id in skill_callback_ids:
-            handler = self.resources._handler_registry.fetch_internal_handler(skill_id)
+            handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
             if handler is not None:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)

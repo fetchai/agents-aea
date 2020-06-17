@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class InternalMessage:
     """This class implements a message."""
 
-    protocol_id = PublicId("fetchai", "internal", "0.1.0")
+    protocol_id = PublicId.from_str("fetchai/internal:0.1.0")
 
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
@@ -44,7 +44,7 @@ class InternalMessage:
         self._body.update(kwargs)
         try:
             self._is_consistent()
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             logger.error(e)
 
     @property

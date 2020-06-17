@@ -90,10 +90,10 @@ class AsyncState:
     def _state_changed(self, state: Any) -> None:
         """Fulfill watchers for state."""
         for watcher in list(self._watchers):
-            if state not in watcher._states:  # type: ignore
+            if state not in watcher._states:  # type: ignore # pylint: disable=protected-access
                 continue
             if not watcher.done():
-                watcher._loop.call_soon_threadsafe(
+                watcher._loop.call_soon_threadsafe(  # pylint: disable=protected-access
                     self._watcher_result_callback(watcher), (self._state, state)
                 )
             self._remove_watcher(watcher)
@@ -127,7 +127,7 @@ class AsyncState:
             return (None, self._state)
 
         watcher: Future = Future()
-        watcher._states = states  # type: ignore
+        watcher._states = states  # type: ignore  # pylint: disable=protected-access
         self._watchers.add(watcher)
         try:
             return await watcher
@@ -171,7 +171,7 @@ class PeriodicCaller:
         self._schedule_call()
         try:
             self._periodic_callable()
-        except Exception as exception:
+        except Exception as exception:  # pylint: disable=broad-except
             if not self._exception_callback:
                 raise
             self._exception_callback(self._periodic_callable, exception)
