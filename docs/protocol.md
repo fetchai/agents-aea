@@ -1,4 +1,30 @@
-A `Protocol` manages message representation (syntax in `message.py`), optionally rules of the message exchange (semantics in `dialogues.py`), as well as encoding and decoding (in `serialization.py`). All protocols are for point to point interactions between two agents. Agents can be AEAs or other types of agent-like services.
+<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define agent to agent interactions, which include:
+
+* messages, which define the representation;
+
+* serialization logic, which define how a message is encoded for transport; and, optionally
+
+* dialogues, which define rules over message sequences.
+
+The framework provides one default protocol, called `default` and introduced <a href="#fetchaidefault020-protocol">below</a>. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#defaultmessage-objects">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#defaultserializer-objects">`DefaultSerializer`</a> and <a href="..api/protocols/default/dialogues#defaultdialogues-objects">`DefaultDialogue`</a> classes.
+
+Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
+
+
+## Components of a protocol
+
+A protocol package contains the following files:
+
+* `__init__.py`
+* `message.py`, which defines message representation
+* `serialization.py`, which defines the encoding and decoding logic
+* two protobuf related files
+
+It optionally also contains
+* `dialogues.py`, which defines rules of the message exchange
+* `custom_types.py`, which defines custom types 
+
+All protocols are for point to point interactions between two agents or agent-like services.
 
 <!-- ## Interaction Protocols
 
@@ -15,7 +41,7 @@ Each `Message` in an interaction protocol has a set of default fields:
 * `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the agent who first initiates the dialogue (i.e. sends the first message). The second part of the tuple is the reference assigned to by the other agent. * `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the dialogue initiator, the second part of the tuple is the reference assigned to by the dialogue responder. The default value is `("", "")`.
 * `message_id: int`, the identifier of the message in a dialogue. The default value is `1`.
 * `target: int`, the id of the message this message is replying to. The default value is `0`.
-* `Performative: Enum`, the purpose/intention of the message. 
+* `performative: Enum`, the purpose/intention of the message. 
 * `is_incoming: bool`, a boolean specifying whether the message is outgoing (from the agent), or incoming (from the other agent). The default value is `False`. 
 * `counterparty: Address`, the address of the counterparty of this agent; the other agent, this agent is communicating with.  
 
@@ -29,7 +55,9 @@ Each message may optionally have any number of contents of varying types.
 
 ## Dialogue rules
 
-Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single dialogue, respectively all dialogues, associated with the protocol. 
+Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single dialogue, respectively all dialogues, associated with the protocol.
+
+The framework provides a number of helpful classes which implement most of the logic to maintain dialogues, namely the <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> base classes.
 
 ## Custom protocol
 

@@ -1,18 +1,18 @@
-We recommend reading <a href="../defining-data-model">Defining a Data Model</a> before reading this section.
+We recommend reading <a href="../defining-data-models">Defining a Data Model</a> before reading this section.
 
 Along with the Data Model language, the AEA framework offers the possibility to specify _queries_ defined over data models.
 
 The `aea.helpers.search` module implements the API that allows you to build queries.
 
-In one sentence, a `Query` is a set of _constraints_, defined over a _cata model_.
-The outcome is a set of _description_ (that is, instances of `Description`)
+In one sentence, a <a href="../api/helpers/search/models#query-objects">`Query`</a> is a set of _constraints_, defined over a _cata model_.
+The outcome is a set of _description_ (that is, instances of <a href="../api/helpers/search/models#description-objects">`Description`</a>)
 _matching_ with the query. That is, all the description whose attributes satisfy the constraints in the query.
 
 In the next sections, we describe how to build queries.
 
 ## Constraints
 
-A _constraint_ is associated with an _attribute name_ and imposes restrictions on the domain of that attribute.
+A <a href="../api/helpers/search/models#constraint-objects">`Constraint`</a> is associated with an _attribute name_ and imposes restrictions on the domain of that attribute.
 That is, it imposes some limitations on the values the attribute can assume.
 
 We have different types of constraints:
@@ -39,7 +39,7 @@ In the following, we show how to define them.
 
 ### Relation
 
-There are several constraint types that allows you to impose specific values for the attributes.
+There are several <a href="../api/helpers/search/models#constrainttype-objects">`ConstraintTypes`</a> that allows you to impose specific values for the attributes.
 
 The types of relation constraints are:
 
@@ -115,7 +115,7 @@ Constraint("genre", ConstraintType("within", (1960, 1970)))
 
 ### Distance
 
-The _distance_ is a constraint type that allows you to put a limit on a `Location` attribute type. More specifically, you can set a maximum distance from a given location (the _center_), such that will be considered only the instances whose location attribute value is within a distance from the center.
+The _distance_ is a constraint type that allows you to put a limit on a <a href="../api/helpers/search/models#location-objects">`Location`</a> attribute type. More specifically, you can set a maximum distance from a given location (the _center_), such that will be considered only the instances whose location attribute value is within a distance from the center.
 
 **Examples**:
 
@@ -141,7 +141,7 @@ close_to_tour_eiffel.check(Description({"position": colosseum}))  # gives `False
 
 The constraints above mentioned can be combined with the common logical operators (i.e. and, or and not), yielding more complex expression.
 
-In particular we can specify any conjunction/disjunction/negations of the previous constraints or composite constraint expressions, e.g.:
+In particular we can specify any conjunction/disjunction/negations of the previous constraints or composite <a href="../api/helpers/search/models#constraintexpression-objects">`ConstraintExpressions`</a>, e.g.:
 
 * books that belong to _Horror_ **and** has been published after 2000, but **not** published by _Stephen King_.
 * books whose author is **either** _J. K. Rowling_ **or** _J. R. R. Tolkien_

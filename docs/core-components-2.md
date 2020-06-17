@@ -30,7 +30,7 @@ The identity can be accessed in a skill via the <a href="../api/context/base#age
 
 <a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the skills.
 
-Contracts usually contain the logic to create contract txs.
+Contracts usually contain the logic to create contract transactions.
 
 Contracts can be added as packages. For more details on contracts also read the contract guide <a href="../contract">here</a>.
 

@@ -1,11 +1,6 @@
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>This section is highly experimental. We will update it soon.</p>
-</div>
-
 The `fetchai/p2p_libp2p:0.2.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
-## Local Demo
+## Local demo
 
 ### Create and run the genesis AEA
 
@@ -51,7 +46,7 @@ aea run --connections fetchai/p2p_libp2p:0.2.0
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
 
 
-## Local Demo with skills
+## Local demo with skills
 
 ### Fetch the weather station and client
 
@@ -126,7 +121,7 @@ Now run the weather client:
 aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.4.0"
 ```
 
-## Deployed Test Network
+## Deployed agent communication network
 
 You can connect to the deployed public test network by adding one or multiple of the following addresses as the `lipp2p_entry_peers`:
 

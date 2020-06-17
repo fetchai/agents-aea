@@ -1,6 +1,19 @@
-An AEA developer writes skills that the framework can call.
+<a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 
-When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour`, `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
+A skill encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
+
+* <a href="../api/skills/base#handler-objects">`Handler`</a>: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages (see next section).
+* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which futher the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
+* <a href="../api/skills/base#model-objects">`Model`</a>: none, one or more `Models` that inherit from the `Model` can be accessed via the `SkillContext`.
+* <a href="../api/skills/tasks#task-objects">`Task`</a>: none, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of skills, but `Task`s are declared in or from skills if a packaging approach for AEA creation is used.
+
+A skill can read (parts of) the state of the the AEA (as summarised in the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>), and suggest actions to the AEA according to its specific logic. As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. In technical terms this means skills are horizontally arranged.
+
+For instance, an AEA who is trading goods, could subscribe to more than one skill, where each skill corresponds to a different trading strategy.  The skills could then read the preference and ownership state of the AEA, and independently suggest profitable transactions.
+
+The framework places no limits on the complexity of skills. They can implement simple (e.g. `if-this-then-that`) or complex (e.g. a deep learning model or reinforcement learning agent).
+
+The framework provides one default skill, called `error`. Additional skills can be added as packages.
 
 ## Independence of skills
 
@@ -10,20 +23,19 @@ Two skills can communicate with each other in two ways. The skill context provid
 
 ## Context
 
-The skill has a `SkillContext` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the `AgentContext`. The `AgentContext` provides read access to AEA specific information like the public key and address of the AEA, its preferences and ownership state. It also provides access to the `OutBox`.
+The skill has a <a href="../api/skills/base#skillcontext-objects">`SkillContext`</a> object which is shared by all `Handler`, `Behaviour`, and `Model` objects. The skill context also has a link to the `AgentContext`. The `AgentContext` provides read access to AEA specific information like the public key and address of the AEA, its preferences and ownership state. It also provides access to the `OutBox`.
 
 This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the AEA.
 
 For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
-Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
-
 ``` python
 self.context.outbox.put_message(message=reply)
 ``` 
 
-Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the `DecisionMaker`.
+Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
 
+Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the `DecisionMaker`.
 
 ## What to code
 
@@ -39,9 +51,9 @@ There can be none, one or more `Handler` class per skill.
 
 * `handle(self, message: Message)`: is where the skill receives a `Message` of the specified protocol and decides what to do with it.
 
+A handler can be registered in one way:
 
-!!!	Todo
-	For example.
+- By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
 
 
 ### `behaviours.py`
@@ -50,33 +62,29 @@ Conceptually, a `Behaviour`  class contains the business logic specific to initi
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
+* `act(self)`: is how the framework calls the `Behaviour` code.
+
 A behaviour can be registered in two ways:
 
 - By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
 - In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
 
-
-* `act(self)`: is how the framework calls the `Behaviour` code.
-
 The framework supports different types of behaviours:
-- `OneShotBehaviour`: this behaviour is executed only once.
-- `CyclicBehaviour`: this behaviour is executed many times, 
-  as long as `done()` returns `True`.)
-- `TickerBehaviour`: the `act()` method is called every `tick_interval`.
- E.g. if the `TickerBehaviour` subclass is instantiated
+
+- <a href="../api/skills/behaviours#oneshotbehaviour-objects">`OneShotBehaviour`</a>: this behaviour is executed only once.
+- <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a>: the `act()` method is called every `tick_interval`. E.g. if the `TickerBehaviour` subclass is instantiated
  
-There is another category of behaviours, called `CompositeBehaviour`. 
-- `SequenceBehaviour`: a sequence of `Behaviour` classes, executed 
+There is another category of behaviours, called <a href="../api/skills/behaviours#compositebehaviour-objects">`CompositeBehaviour`</a>:
+
+- <a href="../api/skills/behaviours#sequencebehaviour-objects">`SequenceBehaviour`</a>: a sequence of `Behaviour` classes, executed 
   one after the other.
-- `FSMBehaviour`: a state machine of `State` behaviours. 
-    A state is in charge of scheduling the next state.
+- <a href="../api/skills/behaviours#fsmbehaviour-objects">`FSMBehaviour`</a>: a state machine of `State` behaviours. A state is in charge of scheduling the next state.
 
 
 If your behaviour fits one of the above, we suggest subclassing your
 behaviour class with that behaviour class. Otherwise, you
 can always subclass the general-purpose `Behaviour` class.
 
-!!
 Follows an example of a custom behaviour:
 
 ``` python
@@ -208,7 +216,7 @@ class MyBehaviour(TickerBehaviour):
 
 ### Models
 
-The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end, the developer can subclass an abstract `Model`. These models are made available on the context level upon initialization of the AEA.
+The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end, the developer can subclass an abstract <a href="../api/skills/base#model-objects">`Model`</a>. These models are made available on the context level upon initialization of the AEA.
 
 Say, the developer has a class called `SomeModel`
 ``` python

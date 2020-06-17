@@ -4,7 +4,7 @@ This page provides some tipps of how to upgrade between versions.
 
 There are no upgrage requirements if you use the CLI based approach to AEA development.
 
-Connections are now added via `Resources` to the AEA, not the AEA constructor directly. For programmatic usage remove the list of connections from the AEA constructor and instead add the connections to resources.
+Connections are now added via <a href="../api/registries/resources#resources-objects">`Resources`</a> to the AEA, not the AEA constructor directly. For programmatic usage remove the list of connections from the AEA constructor and instead add the connections to resources.
 
 ## v0.3.3 to v0.4.0
 
