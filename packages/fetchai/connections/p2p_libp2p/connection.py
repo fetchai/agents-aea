@@ -20,6 +20,7 @@
 """This module contains the p2p libp2p connection."""
 
 import asyncio
+import distutils
 import errno
 import logging
 import os
@@ -555,10 +556,13 @@ class P2PLibp2pConnection(Connection):
 
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
+        workdir = tempfile.mkdtemp()
+        distutils.dir_util.copy_tree(LIBP2P_NODE_MODULE, workdir)
+        
         self.node = Libp2pNode(
             self.address,
             key,
-            LIBP2P_NODE_MODULE,
+            workdir,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
