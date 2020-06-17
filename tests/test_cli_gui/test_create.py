@@ -57,12 +57,10 @@ def test_create_agent_fail(*mocks):
     data = json.loads(response_create.get_data(as_text=True))
     assert data[
         "detail"
-    ] == "Failed to create Agent {} - a folder of this name may exist already".format(
-        agent_name
-    )
+    ] == "Failed to create Agent. Message"
 
 
-def test_real_create():
+def test_real_create_local(*mocks):
     """Really create an agent (have to test the call_aea at some point)."""
     # Set up a temporary current working directory to make agents in
     with TempCWD() as temp_cwd:
@@ -74,9 +72,10 @@ def test_real_create():
         )
 
         agent_id = "test_agent_id"
-        response_create = app.post(
-            "api/agent", content_type="application/json", data=json.dumps(agent_id)
-        )
+        with patch("aea.cli_gui.app_context.local", True):
+            response_create = app.post(
+                "api/agent", content_type="application/json", data=json.dumps(agent_id)
+            )
         assert response_create.status_code == 201
         data = json.loads(response_create.get_data(as_text=True))
         assert data == agent_id

@@ -226,12 +226,10 @@ def create_agent(agent_id: str):
         cli_create_aea(
             ctx, agent_id, DEFAULT_AUTHOR, local=app_context.local, empty=False
         )
-    except ClickException:
+    except ClickException as e:
         return (
             {
-                "detail": "Failed to create Agent {} - a folder of this name may exist already".format(
-                    agent_id
-                )
+                "detail": "Failed to create Agent. {}".format(str(e))
             },
             400,
         )  # 400 Bad request
