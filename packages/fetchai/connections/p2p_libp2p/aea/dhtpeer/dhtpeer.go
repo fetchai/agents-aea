@@ -18,7 +18,7 @@
 * ------------------------------------------------------------------------------
  */
 
-package main
+package dhtpeer
 
 import (
 	"bufio"
@@ -89,8 +89,8 @@ type DHTPeer struct {
 	processEnvelope  func(aea.Envelope) error
 }
 
-// NewDHTPeer creates a new DHTPeer
-func NewDHTPeer(opts ...DHTPeerOption) (*DHTPeer, error) {
+// New creates a new DHTPeer
+func New(opts ...DHTPeerOption) (*DHTPeer, error) {
 	var err error
 	dhtPeer := &DHTPeer{}
 

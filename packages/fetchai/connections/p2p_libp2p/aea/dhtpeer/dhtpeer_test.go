@@ -18,26 +18,18 @@
 * ------------------------------------------------------------------------------
  */
 
-package dhtclient
+package dhtpeer
 
 import (
-	"github.com/libp2p/go-libp2p-core/peer"
-
-	aea "libp2p_node/aea"
+	"testing"
 )
 
-// panics if err is not nil
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
+// TestSuccess example of a successful test
+func TestSuccess(t *testing.T) {
+	t.Log("Bound to succeed")
 }
 
-// DHTClient
-// A restricted libp2p node for the Agents Communication Network
-// It use a `DHTPeer` to communicate with other peers.
-type DHTClient struct {
-	bootstrapPeers  []peer.AddrInfo
-	relayPeer       peer.ID
-	processEnvelope func(aea.Envelope) error
+// TestNewWithAeaAgent dht peer with agent attached
+func TestNewWithAeaAgent(t *testing.T) {
+	t.Error("Bound to fail.")
 }
