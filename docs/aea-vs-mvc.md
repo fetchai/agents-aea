@@ -17,7 +17,7 @@ The AEA framework is based on <a href="https://en.wikipedia.org/wiki/Asynchronou
 - <a href="../api/skills/tasks#task-objects">`Task`</a>: are meant to deal with long running executions and can be thought of as the equivalent of background tasks in traditional web apps.
 - <a href="../api/skills/base#model-objects">`Model`</a>: implement business logic and data representation, as such they are similar to the `Model` in MVC.
 
-<img src="/assets/skill-components.png" alt="AEA Skill Components" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/skill-components.png" alt="AEA Skill Components" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 The `View` concept is probably best compared to the `Message` of a given `Protocol` in the AEA framework. Whilst views represent information to the client, messages represent information sent to other agents and services.
 
