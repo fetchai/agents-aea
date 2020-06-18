@@ -786,7 +786,9 @@ class AEABuilder:
             )
         else:  # pragma: no cover
             identity = Identity(
-                self._name, address=wallet.addresses[self._default_ledger],
+                self._name,
+                address=wallet.addresses[self._default_ledger],
+                default_address_key=self._default_ledger,
             )
         return identity
 
