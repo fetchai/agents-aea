@@ -11,10 +11,9 @@ fingerprint:
   aea/api.go: QmP4K2iqPWwLb3GZxGKUAhBcJ4cZxu46JictgncYTC1C3E
   connection.py: QmbPuwgAYed7JVptHXfybt6xVjLFqXdYsN3mqbHmnP1hh2
   go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
+  go.sum: QmUS2gw2ogZVi4z6zVUpG3wtKLBC3edXjHsKCtPbmKzz9G
   libp2p_node.go: QmTJ7U16frgyi5G8rRy5gLvG5wogkmnCEARQgUi4bPvFuy
-fingerprint_ignore_patterns:
-- go.sum
-- libp2p_node
+fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PLibp2pConnection
 config:
