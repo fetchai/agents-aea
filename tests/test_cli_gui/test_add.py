@@ -19,7 +19,6 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
-import sys
 from unittest.mock import patch
 
 from tests.test_cli.tools_for_testing import raise_click_exception

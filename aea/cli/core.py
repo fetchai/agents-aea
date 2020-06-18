@@ -38,7 +38,7 @@ from aea.cli.generate_key import generate_key
 from aea.cli.generate_wealth import generate_wealth
 from aea.cli.get_address import get_address
 from aea.cli.get_wealth import get_wealth
-from aea.cli.init import do_init, init
+from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.interact import interact
 from aea.cli.launch import launch
@@ -87,24 +87,26 @@ def cli(click_context, skip_consistency_check: bool) -> None:
 @click.pass_context
 def gui(click_context, port, local):  # pragma: no cover
     """Run the CLI GUI."""
-    _init_gui(local)
+    _init_gui()
     import aea.cli_gui  # pylint: disable=import-outside-toplevel,redefined-outer-name
 
     click.echo("Running the GUI.....(press Ctrl+C to exit)")
     aea.cli_gui.run(port)
 
 
-def _init_gui(local: bool) -> None:
+def _init_gui() -> None:
     """
     Initialize GUI before start.
 
-    :param local: a boolean flag for local author.
-
     :return: None
+    :raisees: ClickException if author is not set up.
     """
     config = get_or_create_cli_config()
     author = config.get(AUTHOR_KEY, None)
-    do_init(author, reset=False, registry=not local)
+    if author is None:
+        raise click.ClickException(
+            "Author is not set up. Please run 'aea init' and then restart."
+        )
 
 
 cli.add_command(_list)

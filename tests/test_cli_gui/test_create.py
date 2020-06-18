@@ -24,6 +24,10 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
+from aea.cli.create import create_aea
+from aea.cli.utils.context import Context
+from aea.test_tools.constants import DEFAULT_AUTHOR
+
 from tests.conftest import CUR_PATH
 from tests.test_cli.tools_for_testing import raise_click_exception
 from tests.test_cli_gui.test_base import TempCWD, create_app
@@ -70,13 +74,12 @@ def test_real_create_local(*mocks):
         )
 
         agent_id = "test_agent_id"
-        with patch("aea.cli_gui.app_context.local", True):
-            response_create = app.post(
-                "api/agent", content_type="application/json", data=json.dumps(agent_id)
-            )
-        assert response_create.status_code == 201
-        data = json.loads(response_create.get_data(as_text=True))
-        assert data == agent_id
+
+        # Make an agent
+        # We do it programmatically as we need to create an agent with default author
+        # that was prevented from GUI.
+        ctx = Context(cwd=temp_cwd.temp_dir)
+        create_aea(ctx, agent_id, local=True, author=DEFAULT_AUTHOR)
 
         # Give it a bit of time so the polling funcionts get called
         time.sleep(1)

@@ -46,8 +46,7 @@ from aea.cli.search import (
     search_items as cli_search_items,
     setup_search_ctx as cli_setup_search_ctx,
 )
-from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
-from aea.cli.utils.constants import AUTHOR_KEY
+from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
 from aea.configurations.base import PublicId
@@ -94,9 +93,6 @@ class AppContext:
     module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
 
     local = "--local" in sys.argv  # a hack to get "local" option from cli args
-
-    config = get_or_create_cli_config()
-    author = config.get(AUTHOR_KEY)
 
 
 app_context = AppContext()
@@ -220,9 +216,8 @@ def search_registered_items(item_type: str, search_term: str):
 def create_agent(agent_id: str):
     """Create a new AEA project."""
     ctx = Context(cwd=app_context.agents_dir)
-    author = app_context.author if app_context.local else None
     try:
-        cli_create_aea(ctx, agent_id, author, local=app_context.local, empty=False)
+        cli_create_aea(ctx, agent_id, local=app_context.local)
     except ClickException as e:
         return (
             {"detail": "Failed to create Agent. {}".format(str(e))},
