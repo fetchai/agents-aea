@@ -1,12 +1,12 @@
-The `DecisionMaker` can be thought off like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA.
+The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the wallet's private keys.
 
 ## Interaction with skills
 
-Skills communicate with the decision maker via `InternalMessages`. There exist two types of these: `TransactionMessage` and `StateUpdateMessage`.
+Skills communicate with the decision maker via <a href="../api/decision_maker/messages/base#internalmessage-objects">`InternalMessages`</a>. There exist two types of these:
 
-The `StateUpdateMessage` is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place off chain.
+- <a href="../api/decision_maker/messages/transaction#transactionmessage-objects">`TransactionMessage`</a>: it is used by skills to propose a transaction to the decision-maker. It can be used either for settling the transaction on-chain or to sign a transaction to be used within a negotiation.
 
-The `TransactionMessage` is used by skills to propose a transaction to the decision-maker. It can be used either for settling the transaction on-chain or to sign a transaction to be used within a negotiation.
+- <a href="../api/decision_maker/messages/state_update#stateupdatemessage-objects">`StateUpdateMessage`</a>: it is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place off chain.
 
 An `InternalMessage`, say `tx_msg` is sent to the decision maker like so from any skill:
 ```
@@ -33,7 +33,7 @@ class TransactionHandler(Handler):
 
 ## Custom DecisionMaker
 
-The framework implements a default `DecisionMaker`. You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `DecisionMakerHandler`:
+The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a>. You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `DecisionMakerHandler`:
 
 ``` bash
 aea scaffold decision-maker-handler

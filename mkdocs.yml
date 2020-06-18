@@ -12,6 +12,8 @@ theme:
   feature:
     tabs: true
 
+strict: true
+
 nav:
   - AEA Framework:
     - Welcome: 'index.md'
@@ -28,7 +30,7 @@ nav:
       - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
       # - Contract deploy and interact: 'erc1155-skills.md'
-      - Generic skills: 'generic-skills.md'
+      # - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
       - Gym skill: 'gym-skill.md'
       - ML skills: 'ml-skills.md'
@@ -46,7 +48,7 @@ nav:
         - Core components - Part 2: 'core-components-2.md'
         - Trade between two AEAs: 'thermometer-skills-step-by-step.md'
       - Topic guides:
-        - Ways to build an AEA: 'step_one.md'
+        - Ways to build an AEA: 'step-one.md'
         - Build an AEA with the CLI: 'build-aea-step-by-step.md'
         - Scaffolding packages: 'scaffolding.md'
         - Generating protocols: 'protocol-generator.md'
@@ -62,13 +64,11 @@ nav:
         - Upgrading versions: 'upgrading.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
-        - Frontend intergration: 'connect-a-frontend.md'
+        - Front-end intergration: 'connect-a-frontend.md'
         - HTTP Connection: 'http-connection-and-skill.md'
         - ORM integration: 'orm-integration.md'
         - Contract deploy and interact: 'erc1155-skills.md'
-        - Identity - Aries Cloud Agent: 'aries-cloud-agent-example.md'
         - P2P Connection: 'p2p-connection.md'
-        - Using public ledgers: 'ledger-integration.md'
         - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
       - Architecture & component deep-dives:
         - Design principles: 'design-principles.md'
@@ -78,6 +78,7 @@ nav:
         - Skills: 'skill.md'
         - Contracts: 'contract.md'
         - Decision Maker: 'decision-maker.md'
+        - Ledger & Crypto APIs: 'ledger-integration.md'
         - Configurations: 'config.md'
       - Search & Discovery:
         - Defining Data Models: 'defining-data-models.md'
@@ -166,6 +167,7 @@ nav:
           - Behaviors: 'api/skills/behaviours.md'
           - Task: 'api/skills/tasks.md'
         - Test Tools: 'api/test_tools/generic.md'
+    - Simple OEF: 'simple-oef.md'
     - Q&A: 'questions-and-answers.md'
 
 plugins:

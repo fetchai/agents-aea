@@ -1,20 +1,14 @@
-The AEA generic seller with ORM integration demonstrate how to interact with a database using python-sql objects.
-
-* The provider of a service in the form of data retrieved from a database.
-* The buyer of a service.
+The AEA generic seller with ORM integration demonstrates how to configure an AEA to interact with a database using python-sql objects.
 
 ## Discussion
 
-Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language.
-The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs. 
-This demo will not use any smart contract, because these would be out of the scope of the tutorial.
+Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language. The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs.
 
 - We assume, that you followed the guide for the <a href="/generic-skills/"> generic-skills. </a>
 - We assume, that we have a database `genericdb.db` with table name `data`. This table contains the following columns `timestamp` and `thermometer`
-- We assume, that we have a hardware thermometer sensor that adds the readings in the `genericdb` database
+- We assume, that we have a hardware thermometer sensor that adds the readings in the `genericdb` database (although you can follow the guide without having access to a sensor).
 
-Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies. The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
-
+Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies. The `aea install` command will install each dependency that the specific AEA needs and which is listed in the skill's YAML file. 
 
 ## Communication
 
@@ -212,66 +206,117 @@ aea generate-wealth cosmos
 
 In `my_seller_aea/vendor/fetchai/skills/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      total_price: 10              |      total_price: 10             |
-|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      has_data_source: True        |      has_data_source: True       |
-|      data_for_sale: {}            |      data_for_sale: {}           |
-|      search_schema:               |      search_schema:              |
-|        attribute_one:             |        attribute_one:            |
-|          name: country            |          name: country           |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|        attribute_two:             |        attribute_two:            |
-|          name: city               |          name: city              |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|      search_data:                 |      search_data:                |
-|        country: UK                |        country: UK               |
-|        city: Cambridge            |        city: Cambridge           |
-|dependencies:                      |dependencies:                     |
-|  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------|
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      total_price: 10
+      seller_tx_fee: 0
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      has_data_source: True
+      data_for_sale: {}
+      search_schema:
+        attribute_one:
+          name: country
+          type: str
+          is_required: True
+        attribute_two:
+          name: city
+          type: str
+          is_required: True
+      search_data:
+        country: UK
+        city: Cambridge
+dependencies:
+  SQLAlchemy: {}
 ```
 The `search_schema` and the `search_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
 In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |  
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      max_price: 40                |      max_price: 40               |
-|      max_buyer_tx_fee: 100        |      max_buyer_tx_fee: 200000    |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      search_query:                |      search_query:               |
-|        search_term: country       |        search_term: country      |
-|        search_value: UK           |        search_value: UK          |
-|        constraint_type: '=='      |        constraint_type: '=='     |
-|ledgers: ['fetchai']               |ledgers: ['ethereum']             |
-|----------------------------------------------------------------------|
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      max_price: 40
+      max_buyer_tx_fee: 100
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      search_query:
+        search_term: country
+        search_value: UK
+        constraint_type: '=='
+ledgers: ['fetchai']
 ```
+
+<details><summary>Alternatively, configure skills for other test networks.</summary>
+<p>
+
+<strong>Ethereum:</strong>
+<br>
+``` yaml
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      total_price: 10
+      seller_tx_fee: 0
+      currency_id: 'ETH'
+      ledger_id: 'ethereum'
+      is_ledger_tx: True
+      has_data_source: True
+      data_for_sale: {}
+      search_schema:
+        attribute_one:
+          name: country
+          type: str
+          is_required: True
+        attribute_two:
+          name: city
+          type: str
+          is_required: True
+      search_data:
+        country: UK
+        city: Cambridge
+dependencies:
+  SQLAlchemy: {}
+```
+
+``` yaml
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    class_name: Strategy
+    args:
+      max_price: 40
+      max_buyer_tx_fee: 20000
+      currency_id: 'ETH'
+      ledger_id: 'ethereum'
+      is_ledger_tx: True
+      search_query:
+        search_term: country
+        search_value: UK
+        constraint_type: '=='
+ledgers: ['ethereum']
+```
+
+</p>
+</details>
 
 After changing the skill config files you should run the following command for both agents to install each dependency:
 ``` bash

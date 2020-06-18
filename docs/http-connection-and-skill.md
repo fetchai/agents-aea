@@ -46,7 +46,7 @@ aea scaffold skill http_echo
 We will implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
 
 
-First, we delete the `my_model.py` and `behaviour.py`. The server will be pyrely reactive, so we only require the `handlers.py` file. We update the `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
+First, we delete the `my_model.py` and `behaviour.py` (in `my_aea/skills/http_echo/`). The server will be purely reactive, so we only require the `handlers.py` file. We update the `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
 
 Next we implement a basic handler which prints the received envelopes and responds:
 

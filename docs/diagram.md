@@ -1,27 +1,20 @@
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Work in progress.</p>
-</div>
-
 The framework has two distinctive parts.
 
--   A **core** that is developed by the Fetch.ai team as well as external contributors.
--   **Extensions** (also known as **packages**) developed by any developer which promotes a modular and scalable framework.
+- A **core** that is developed by the Fetch.ai team as well as external contributors.
+- **Extensions** (also known as **packages**) developed by any developer.
 
-Currently, the framework supports three types of packages which can be added to the core as modules:
+Currently, the framework supports four types of packages which can be added to the core as modules:
 
--   Skills
--   Protocols
--   Connections
+- Skills
+- Protocols
+- Connections
+- Contracts
 
 The following figure illustrates the framework's architecture:
 
 <center>![The AEA Framework Architecture](assets/framework-architecture.png)</center>
 
-
-In most cases, as a developer in the AEA framework, it is sufficient to focus on skills development, utilising existing protocols and connections.
-The later doesn't try to discourage you though, from creating your own `connections` or `protocols` but you will need a better understanding of the framework than creating a skill.
-
+The execution is broken down in more detail below:
 
 <center>![Threads](assets/threads.png)</center>
 
@@ -41,7 +34,7 @@ The agent operation breaks down into three parts:
 
 To prevent a developer from blocking the main loop with custom skill code, an execution time limit is  applied to every `Behaviour.act` and `Handler.handle` call.
 
-By default, the execution limit is set to `0` seconds, which disables the feature. You can set the limit to `0.1` seconds to test your AEA for production readiness. If the `act` or `handle` time exceed this limit, the call will be terminated.
+By default, the execution limit is set to `0` seconds, which disables the feature. You can set the limit to a strictly positive value (e.g. `0.1` seconds) to test your AEA for production readiness. If the `act` or `handle` time exceed this limit, the call will be terminated.
 
 An appropriate message is added to the logs in the case of some code execution being terminated.
 

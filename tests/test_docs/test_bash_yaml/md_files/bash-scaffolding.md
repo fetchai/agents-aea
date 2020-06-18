@@ -9,8 +9,11 @@ aea scaffold skill my_skill
 aea scaffold protocol my_protocol
 ```
 ``` bash
+aea scaffold contract my_contract
+```
+``` bash
 aea scaffold connection my_connection
 ```
 ``` bash
-aea fingerprint [package_name]
+aea fingerprint [package_name] [public_id]
 ```

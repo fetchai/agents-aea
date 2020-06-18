@@ -5,19 +5,13 @@ The following demo demonstrates an interaction between two AEAs.
 The provider of weather data (managed with the CLI).
 The buyer of weather data (managed programmatically).
 
-## Preparation instructions
-
-### Dependencies
-
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
 ## Discussion
 
 The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order 
 to achieve this we are going to use the weather station skills. 
 This demo does not utilize a smart contract or a ledger interaction. 
 
-### Launch an OEF search and communication node
+## Launch an OEF search and communication node
 
 In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash

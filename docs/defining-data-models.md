@@ -1,13 +1,13 @@
 In this section, we explain how to define _data models_, an important component of the OEF Search & Discovery. It allows agents to describe themselves and to discover the services/resources they are interested in.
 
-In a sentence, a `DataModel` is a set of _attributes_, and a `Description` of a service/resource is an assignment of those attributes.
+In a sentence, a <a href="../api/helpers/search/models#datamodel-objects">`DataModel`</a> is a set of _attributes_, and a <a href="../api/helpers/search/models#description-objects">`Description`</a> of a service/resource is an assignment of those attributes.
 
 All you need to specify data models and descriptions (that is, instances of the data model) can be found in the `aea.helpers.search` module.
 
 
 ## Attributes
 
-At the lowest level of our data model language, we have the `Attribute`.
+At the lowest level of our data model language, we have the <a href="../api/helpers/search/models#attribute-objects">`Attribute`</a>.
 An attribute is an abstract definition of a property.
 
 It is identified by a _name_, that must be unique in a given data model (that is, we can't have two attributes that share the same name).
