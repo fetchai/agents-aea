@@ -34,7 +34,7 @@ from aea.cli.utils.decorators import check_aea_project, clean_after
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import validate_package_name
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
-from aea.configurations.base import (  # noqa: F401
+from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-import
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,

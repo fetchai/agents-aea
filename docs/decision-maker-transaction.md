@@ -1,5 +1,5 @@
-This guide can be considered as a part 2 of the <a href="/standalone-transaction/">the stand-alone transaction demo </a> we did in a previous guide. After the completion of the transaction,
-we get the transaction digest. With this we can search for the transaction on the <a href='https://explore-testnet.fetch.ai'>block explorer</a>. The main difference is that now we are going to use the decision-maker to settle the transaction.
+This guide can be considered as a part two of the <a href="../standalone-transaction/">stand-alone transaction demo</a> we did in a previous guide. There, after the completion of the transaction,
+we get the transaction digest. With this we can search for the transaction on the <a href='https://explore-testnet.fetch.ai'>block explorer</a>. The main difference is that here we are going to use the <a href="/decision-maker/">decision maker</a> to settle the transaction.
 
 First, import the libraries and the set the constant values.
 

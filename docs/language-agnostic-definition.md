@@ -1,7 +1,7 @@
 An Autonomous Economic Agent is, in technical terms, defined by the following characteristics:
 
 <ul>
-<li> It MUST be capable of receiving and sending `Envelopes` which satisfy the following protobuf schema:
+<li> It MUST be capable of receiving and sending `Envelopes` which satisfy the following <a href="https://developers.google.com/protocol-buffers" target=_blank>protobuf</a> schema:
 
 ``` proto
 syntax = "proto3";
@@ -46,10 +46,10 @@ The format for the above fields, except `message`, is specified below. For those
         ...
     }
 ```
- where `...` is replaced with the protocol specific performatives.
+ where `...` is replaced with the protocol specific performatives (see <a href="../protocol-generator">here</a> for details).
 </li>
 
-<li> It MUST implement protocols according to their specification.
+<li> It MUST implement protocols according to their specification (see <a href="../protocol-generator">here</a> for details).
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

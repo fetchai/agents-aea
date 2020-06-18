@@ -794,7 +794,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         is_valid = isinstance(tx_hash, bytes)
         return is_valid
 
-    def _is_valid_tx(self, tx_message: TransactionMessage) -> bool:
+    @staticmethod
+    def _is_valid_tx(tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction message contains a valid ledger transaction.
 

@@ -21,7 +21,6 @@
 import itertools
 import logging
 import operator
-import re
 from abc import ABC, abstractmethod
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
@@ -33,16 +32,10 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
+from aea.decision_maker.messages.base import InternalMessage
 from aea.skills.base import Behaviour, Handler, Model
 
-
 logger = logging.getLogger(__name__)
-
-PACKAGE_NAME_REGEX = re.compile(
-    "^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE
-)
-INTERNAL_PROTOCOL_ID = PublicId.from_str("fetchai/internal:0.1.0")
-DECISION_MAKER = "decision_maker"
 
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
@@ -119,7 +112,9 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
-    def register(self, component_id: ComponentId, component: Component) -> None:
+    def register(
+        self, component_id: ComponentId, component: Component
+    ) -> None:  # pylint: disable=arguments-differ
         """
         Register a component.
 
@@ -165,7 +160,9 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         if item is not None:
             logger.debug("Component '{}' has been removed.".format(item.component_id))
 
-    def unregister(self, component_id: ComponentId) -> None:
+    def unregister(
+        self, component_id: ComponentId
+    ) -> None:  # pylint: disable=arguments-differ
         """
         Unregister a component.
 
@@ -177,7 +174,9 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
             )
         self._unregister(component_id)
 
-    def fetch(self, component_id: ComponentId) -> Optional[Component]:
+    def fetch(
+        self, component_id: ComponentId
+    ) -> Optional[Component]:  # pylint: disable=arguments-differ
         """
         Fetch the component by id.
 
@@ -479,4 +478,4 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         :param skill_id: the skill id
         :return: the internal handler registered for the skill id
         """
-        return self.fetch_by_protocol_and_skill(INTERNAL_PROTOCOL_ID, skill_id)
+        return self.fetch_by_protocol_and_skill(InternalMessage.protocol_id, skill_id)

@@ -28,7 +28,7 @@ from typing import Any, BinaryIO, Optional, Tuple, cast
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.tx import TxContents, TxStatus
 from fetchai.ledger.crypto import Address as FetchaiAddress
-from fetchai.ledger.crypto import Entity, Identity  # type: ignore
+from fetchai.ledger.crypto import Entity, Identity
 from fetchai.ledger.serialisation import sha256_hash
 
 import requests
@@ -189,7 +189,7 @@ class FetchAIApi(LedgerApi):
             balance = None
         return balance
 
-    def transfer(
+    def transfer(  # pylint: disable=arguments-differ
         self,
         crypto: Crypto,
         destination_address: Address,
@@ -333,7 +333,8 @@ class FetchAIFaucetApi(FaucetApi):
         """
         self._try_get_wealth(address)
 
-    def _try_get_wealth(self, address: Address) -> None:
+    @staticmethod
+    def _try_get_wealth(address: Address) -> None:
         """
         Get wealth from the faucet for the provided address.
 

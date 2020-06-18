@@ -19,9 +19,7 @@
 
 """This module contains the resources class."""
 
-import logging
-import re
-from typing import Dict, List, Optional, TypeVar, cast
+from typing import Dict, List, Optional, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -29,7 +27,6 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionId,
     ContractId,
-    PublicId,
     SkillId,
 )
 from aea.connections.base import Connection
@@ -43,20 +40,6 @@ from aea.registries.base import (
     Registry,
 )
 from aea.skills.base import Behaviour, Handler, Model, Skill
-from aea.skills.tasks import Task
-
-
-logger = logging.getLogger(__name__)
-
-PACKAGE_NAME_REGEX = re.compile(
-    "^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE
-)
-INTERNAL_PROTOCOL_ID = PublicId.from_str("fetchai/internal:0.1.0")
-DECISION_MAKER = "decision_maker"
-
-Item = TypeVar("Item")
-ItemId = TypeVar("ItemId")
-SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
 
 
 class Resources:

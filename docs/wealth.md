@@ -18,21 +18,14 @@ ledger_apis:
   fetchai:
     network: testnet
 ```
-for fetchai or
-``` yaml
-ledger_apis:
-  fetchai:
-    host: testnet.fetch-ai.com
-    port: 80
-```
-or 
+for Fetch.ai, or
 ``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
 ```
-or both
+for Ethereum, or both
 ``` yaml
 ledger_apis:
   ethereum:

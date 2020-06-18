@@ -30,7 +30,6 @@ from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumApi
 from aea.crypto.fetchai import FETCHAI_CURRENCY, FetchAIApi
 from aea.mail.base import Address
 
-SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [
     CosmosApi.identifier,
     EthereumApi.identifier,
@@ -46,8 +45,6 @@ IDENTIFIER_FOR_UNAVAILABLE_BALANCE = -1
 logger = logging.getLogger(__name__)
 
 MAX_CONNECTION_RETRY = 3
-GAS_PRICE = "50"
-GAS_ID = "gwei"
 LEDGER_STATUS_UNKNOWN = "UNKNOWN"
 
 

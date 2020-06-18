@@ -222,7 +222,7 @@ class AEATestWrapper:
         :return: None
         """
         self.stop_loop()
-        return None
+        return None  # pylint: disable=useless-return
 
     def start_loop(self) -> None:
         """

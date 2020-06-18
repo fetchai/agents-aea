@@ -126,7 +126,7 @@ Next, we are going to discuss the different implementation of `send_transaction`
 
 ## Fetch.ai Ledger
 ``` python
-    def transfer(
+    def transfer(  # pylint: disable=arguments-differ
         self,
         crypto: Crypto,
         destination_address: Address,
@@ -196,7 +196,7 @@ If both of these checks return True we consider the transaction as valid.
 ## Ethereum Ledger
 
 ``` python
-    def transfer(
+    def transfer(  # pylint: disable=arguments-differ
         self,
         crypto: Crypto,
         destination_address: Address,

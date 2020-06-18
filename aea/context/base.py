@@ -31,8 +31,6 @@ from aea.mail.base import Address
 from aea.multiplexer import OutBox
 from aea.skills.tasks import TaskManager
 
-DEFAULT_OEF = "default_oef"
-
 
 class AgentContext:
     """Provide read access to relevant objects of the agent for the skills."""
@@ -48,6 +46,7 @@ class AgentContext:
         task_manager: TaskManager,
         default_connection: Optional[PublicId],
         default_routing: Dict[PublicId, PublicId],
+        search_service_address: Address,
         **kwargs
     ):
         """
@@ -70,9 +69,7 @@ class AgentContext:
         self._decision_maker_message_queue = decision_maker_message_queue
         self._decision_maker_handler_context = decision_maker_handler_context
         self._task_manager = task_manager
-        self._search_service_address = (
-            DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml
-        )
+        self._search_service_address = search_service_address
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._namespace = SimpleNamespace(**kwargs)

@@ -1,10 +1,11 @@
-This guide is a step-by-step introduction to building an AEA that represents static, and dynamic data to be advertised on the Open Economic Framework.
+This guide is a step-by-step introduction to building an AEA that represents static, and dynamic data to be advertised on the <a href=../oef-ledger>Open Economic Framework</a>.
 
 If you simply want to run the resulting AEAs <a href="../thermometer-skills">go here</a>.
 
-## Planning the AEA
+## Hardware Requirements (Optional)
 
 To follow this tutorial to completion you will need:
+
  - Raspberry Pi 4
  
  - Mini SD card
@@ -15,18 +16,13 @@ To follow this tutorial to completion you will need:
 	
 The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the [OEF search and communication node](../oef-ledger) and will identify itself as a seller of that data.
 
-## Dependencies
+If you simply want to follow the software part of the guide then you only require the dependencies listed in the <a href="#dependencies">Dependencies</a> section.
 
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+### Setup the environment
 
-## Setup the environment
+You can follow the guide <a href=../raspberry-set-up> here </a> in order to setup your environment and prepare your Raspberry Pi.
 
-You can follow this link <a href=#raspberry-set-up.md> here </a> in order to setup your environment and prepare your raspberry.
-
-Once you setup your raspberry 
-
-Open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there 
-(I named mine 99-hidraw-permissions.rules)
+Once you setup your Raspberry Pi, open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there  (I named mine `99-hidraw-permissions.rules`)
 ``` bash
 sudo nano 99-hidraw-permissions.rules
 ```  
@@ -34,8 +30,11 @@ and add the following inside the file:
 ``` bash
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
-this assigns all devices coming out of the hidraw subsystem in the kernel to the group plugdev and sets the permissions 
-to r/w r/w r (for root [the default owner], plugdev, and everyone else respectively)
+this assigns all devices coming out of the hidraw subsystem in the kernel to the group `plugdev` and sets the permissions to `r/w r/w r` (for root [the default owner], plugdev, and everyone else respectively).
+
+## Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ## Thermometer AEA
 
@@ -51,7 +50,7 @@ Our newly created AEA is inside the current working directory. Let’s create ou
 aea scaffold skill thermometer
 ```
 
-This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder and it must contain the following files:
+This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_thermometer/skills/thermometer/`) and it must contain the following files:
 
 - `behaviours.py`
 - `handlers.py`
@@ -61,9 +60,9 @@ This command will create the correct structure for a new skill inside our AEA pr
 
 ### Step 2: Create the behaviour
 
-A Behaviour class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
+A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
 
-Open the behaviours.py (`my_thermometer/skills/thermometer/behaviours.py`) and add the following code:
+Open the `behaviours.py` file (`my_thermometer/skills/thermometer/behaviours.py`) and add the following code:
 
 ``` python
 from typing import Optional, cast
@@ -191,15 +190,15 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self._registered_service_description = None
 ```
 
-This Behaviour will register and de-register our AEA’s service on the [OEF search node](../oef-ledger) at regular tick intervals (here 30 seconds). By registering, the AEA becomes discoverable to possible clients.
+This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the [OEF search node](../oef-ledger) at regular tick intervals (here 30 seconds). By registering, the AEA becomes discoverable to possible clients.
 
 The act method unregisters and registers the AEA to the [OEF search node](../oef-ledger) on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
 
-Currently, the AEA-framework supports two different blockchains [Ethereum, Fetchai], and that’s the reason we are checking if we have balance for these two blockchains in the setup method.
+At setup we are checking if we have a positive account balance for the AEA's address on the configured ledger.
 
 ### Step 3: Create the handler
 
-So far, we have tasked the AEA with sending register/unregister requests to the [OEF search node](../oef-ledger). However, we have so far no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or messages sent from any other AEA.
+So far, we have tasked the AEA with sending register/unregister requests to the [OEF search node](../oef-ledger). However, we have at present no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or messages sent from any other AEA.
 
 We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow, up to the agreement between a seller_AEA and a client_AEA.
 
@@ -236,7 +235,7 @@ We have to specify the logic to negotiate with another AEA based on the strategy
 
 In the context of our thermometer use-case, the `my_thermometer` AEA is the seller.
 
-Let us now implement a handler to deal with the incoming messages. Open the `handlers.py` file (`my_thermometer/skills/thermometer/handlers.py`) and add the following code:
+Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_thermometer/skills/thermometer/handlers.py`) and add the following code:
 
 ``` python
 import time
@@ -296,11 +295,11 @@ class FIPAHandler(Handler):
         """
         pass
 ```
-The code above is logic for handling `FipaMessages` received by the `my_thermometer` AEA. We use `Dialogues` to keep track of the dialogue state between the `my_thermometer` and the `client_aea`.
+The code above is logic for handling `FipaMessages` received by the `my_thermometer` AEA. We use `Dialogues` (more on this below in <a href="#step-5-create-the-dialogues">this</a> section) to keep track of the dialogue state between the `my_thermometer` and the `client_aea`.
 
-First, we check if the message is registered to an existing dialogue or if we have to create a new dialogue. The second part assigns messages to their handler based on the message's performative. We are going to implement each case in a different function.
+First, we check if the message is registered to an existing dialogue or if we have to create a new dialogue. The second part matches messages with their handler based on the message's performative. We are going to implement each case in a different function.
 
-Below the `teardown` function, we continue by adding the following code:
+Below the unused `teardown` function, we continue by adding the following code:
 
 ``` python
     def _handle_unidentified_dialogue(self, msg: FipaMessage) -> None:
@@ -419,7 +418,7 @@ The next code-block  handles the decline message we receive from the client. Add
 ```
 If we receive a decline message from the client we close the dialogue and terminate this conversation with the `client_aea`.
 
-Alternatively, we might receive an `Accept` message. Inorder to handle this option add the following code below the `_handle_decline` function:
+Alternatively, we might receive an `Accept` message. In order to handle this option add the following code below the `_handle_decline` function:
 
 ``` python
     def _handle_accept(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -457,9 +456,9 @@ Alternatively, we might receive an `Accept` message. Inorder to handle this opti
         dialogue.update(match_accept_msg)
         self.context.outbox.put_message(message=match_accept_msg)
 ```
-When the `client_aea` accepts the `Proposal` we send it, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the client about the address we would like it to send the funds to.
+When the `client_aea` accepts the `Proposal` we send it, and therefores sends us an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the client about the address we would like it to send the funds to.
 
-Lastly, when we receive the `Inform` message it means that the client has sent the funds to the provided address. Add the following code:
+Lastly, we handle the `INFORM` message, which the client uses to inform us that it has sent the funds to the provided address. Add the following code:
 
 ``` python
     def _handle_inform(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -563,12 +562,11 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
                 )
             )
 ```
-We are checking the inform message. If it contains the transaction digest we verify that transaction matches the proposal that the client accepted. If the transaction is valid and we received the funds then we send the data to the client. 
-Otherwise we do not send the data.
+We are checking the inform message. If it contains the transaction digest we verify that transaction matches the proposal that the client accepted. If the transaction is valid and we received the funds then we send the data to the client.  Otherwise we do not send the data.
 
 ### Step 4: Create the strategy
 
-We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file to `strategy.py` and paste the following code: 
+Next, we are going to create the strategy that we want our `my_thermometer` AEA to follow. Rename the `my_model.py` file (`my_thermometer/skills/thermometer/my_model.py`) to `strategy.py` and copy and paste the following code: 
 
 ``` python 
 from random import randrange
@@ -712,12 +710,11 @@ the [OEF search node](../oef-ledger) registration and we assume that the query m
         return degrees
 ```
 
-Before the creation of the actual proposal, we have to check if this sale generates value for us or a loss. If it is a loss, we abort and warn the developer. The helper private function `_build_data_payload`, is where we read data from our sensor or in case we don’t have a sensor generate a random number.
+Before the creation of the actual proposal, we have to check if the sale generates value for us or a loss. If it is a loss, we abort and warn the developer. The helper private function `_build_data_payload`, is where we read data from our sensor or in case we do not have a sensor generate a random number.
 
 ### Step 5: Create the dialogues
 
-When we are negotiating with other AEA we would like to keep track on these negotiations for various reasons. 
-So create a new file and name it dialogues.py. Inside this file add the following code: 
+When we are negotiating with other AEAs we would like to keep track of the state of these negotiations. To this end we create a new file in the skill folder (`my_thermometer/skills/thermometer/`) and name it `dialogues.py`. Inside this file add the following code: 
 
 ``` python
 from typing import Dict, Optional
@@ -796,12 +793,13 @@ class Dialogues(Model, FipaDialogues):
         return dialogue
 ```
 
-The dialogues class stores dialogue with each `client_aea` in a list so we can have access to previous messages and 
-enable us to identify possible communications problems between the `my_thermometer` AEA and the `my_client` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
+The `Dialogues` class stores dialogue with each `client_aea` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_thermometer` AEA and the `my_client` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
+
+The `Dialogues` class extends `FipaDialogues`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `Dialogue` class extends `FipaDialogue`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
 
 ### Step 6: Create the data_model
 
-Each AEA in the oef needs a Description in order to be able to register as a service. The data model will help us create this description. Create a new file and call it `thermometer_data_model.py` and paste the following code: 
+Each AEA in the oef needs a <a href="../api/helpers/search/models#description-objects">`Description`</a> in order to be able to register as a service. The <a href="../api/helpers/search/models#datamodel-objects">`DataModel`</a> will help us create this description. Create a new file in the skill directory (`my_thermometer/skills/thermometer/`) and call it `thermometer_data_model.py` and paste the following code: 
 
 ``` python
 from aea.helpers.search.models import Attribute, DataModel
@@ -826,9 +824,7 @@ This data model registers to the [OEF search node](../oef-ledger) as an AEA that
 
 ### Step 7: Update the YAML files
 
-Since we made so many changes to our AEA we have to update the `skill.yaml` to contain our newly created scripts and the details that will be used from the strategy.
-
-Firstly, we will update the `skill.yaml`. Make sure that your `skill.yaml` matches with the following code 
+Since we made so many changes to our AEA we have to update the `skill.yaml` (at `my_thermometer/skills/thermometer/skill.yaml`). Make sure that your `skill.yaml` matches with the following code 
 
 ``` yaml
 name: thermometer
@@ -867,7 +863,7 @@ dependencies:
   temper-py: {}
 ```
 
-We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to sell each reading for or the currency we would like to transact with. Lastly, the dependencies are the third party packages we need to install in order to get readings from the sensor. 
+We must pay attention to the models and in particular the strategy’s variables. Here we can change the price we would like to sell each reading for or the currency we would like to transact with. Lastly, the dependencies are the third party packages we need to install in order to get readings from the sensor. 
 
 Finally, we fingerprint our new skill:
 
@@ -895,7 +891,7 @@ Our newly created AEA is inside the current working directory. Let’s create ou
 aea scaffold skill thermometer_client
 ```
 
-This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder and it must contain the following files:
+This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_client/skills/thermometer_client/`) and it must contain the following files:
 
 - `behaviours.py`
 - `handlers.py`
@@ -905,7 +901,7 @@ This command will create the correct structure for a new skill inside our AEA pr
 
 ### Step 2: Create the behaviour
 
-A Behaviour class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
+A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
 
 Open the `behaviours.py` (`my_client/skills/thermometer_client/behaviours.py`) and add the following code:
 
@@ -989,13 +985,13 @@ class MySearchBehaviour(TickerBehaviour):
             )
 ```
 
-This Behaviour will search on  the[OEF search node](../oef-ledger) with a specific query at regular tick intervals. 
+This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will search on  the[OEF search node](../oef-ledger) with a specific query at regular tick intervals. 
 
 ### Step 3: Create the handler
 
-So far, we have tasked the AEA with sending search queries to the [OEF search node](../oef-ledger). However, we have so far no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or messages sent by other agent.
+So far, we have tasked the AEA with sending search queries to the [OEF search node](../oef-ledger). However, we have at present no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or messages sent by other agent.
 
-This script contains the logic to negotiate with another AEA based on the strategy we want our AEA to follow:
+Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_client/skills/thermometer_client/handlers.py`) and add the following code:
 
 ``` python
 import pprint
@@ -1062,7 +1058,7 @@ class FIPAHandler(Handler):
         """
         pass
 ```
-You will see that we are following similar logic when we develop the client’s side of the negotiation. The first thing is that we create a new dialogue and we store it in the dialogues class. Then we are checking what kind of message we received. So lets start creating our handlers:
+You will see that we are following similar logic to the thermometer when we develop the client’s side of the negotiation. First, we create a new dialogue and we store it in the dialogues class. Then we are checking what kind of message we received. So lets start creating our handlers:
 
 ``` python 
     def _handle_unidentified_dialogue(self, msg: FipaMessage) -> None:
@@ -1086,7 +1082,7 @@ You will see that we are following similar logic when we develop the client’s 
         default_msg.counterparty = msg.counterparty
         self.context.outbox.put_message(message=default_msg)
 ```
-The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the proposal that we receive from the `my_thermometer` AEA: 
+The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the `Proposal` that we receive from the `my_thermometer` AEA: 
 
 ``` python
     def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -1141,7 +1137,9 @@ The above code handles the unidentified dialogues. And responds with an error me
             dialogue.update(decline_msg)
             self.context.outbox.put_message(message=decline_msg)
 ```
-When we receive a proposal we have to check if we have the funds to complete the transaction and if the proposal is acceptable based on our strategy. If the proposal is not affordable or acceptable we respond with a decline message. Otherwise, we send an accept message to the seller. The next code-block handles the decline message that we may receive from the client on our CFP message or our ACCEPT message:
+When we receive a proposal we have to check if we have the funds to complete the transaction and if the proposal is acceptable based on our strategy. If the proposal is not affordable or acceptable we respond with a `DECLINE` message. Otherwise, we send an `ACCEPT` message to the seller.
+
+The next code-block handles the `DECLINE` message that we may receive from the client on our `CFP`message or our `ACCEPT` message:
 
 ``` python
     def _handle_decline(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -1168,7 +1166,9 @@ When we receive a proposal we have to check if we have the funds to complete the
                 Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated
             )
 ```
-The above code terminates each dialogue with the specific aea and stores the step. For example, if the `target == 1` we know that the seller declined our CFP message. In case you didn’t receive any decline message that means that the `my_thermometer` AEA want to move on with the sale, in that case, it will send a `match_accept` message in order to handle this add the following code : 
+The above code terminates each dialogue with the specific AEA and stores the step. For example, if the `target == 1` we know that the seller declined our `CFP` message.
+
+In case we do not receive any `DECLINE` message that means that the `my_thermometer` AEA want to move on with the sale, in that case, it will send a `MATCH_ACCEPT` message. In order to handle this we add the following code: 
 
 ``` python
     def _handle_match_accept(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -1232,8 +1232,9 @@ The above code terminates each dialogue with the specific aea and stores the ste
                 )
             )
 ```
-The first thing we are checking is if we enabled our aea to transact with a ledger. If we can transact with a ledger we generate a transaction message and we propose it to the `decision_maker`. The `decision_maker` then will check the transaction message if it is acceptable, we have the funds, etc, it signs and sends the transaction to the specified ledger. Then it returns us the transaction digest. 
-Lastly, we need to handle the inform message because this is the message that will have our data:
+The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a transaction message and we propose it to the `DecisionMaker` (more on the `DecisionMaker` <a href="../decision-maker">here</a>. The `DecisionMaker` then will check the transaction message. If it is acceptable (i.e. we have the funds, etc) it signs and sends the transaction to the specified ledger. Then it returns us the transaction digest.
+
+Lastly, we need to handle the `INFORM` message. This is the message that will have our data:
 
 ``` python
     def _handle_inform(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -1267,10 +1268,11 @@ Lastly, we need to handle the inform message because this is the message that wi
                 )
             )
 ```
-The main difference between this handler and the `thermometer` skill handler is that in this one we create more than one handler. 
-The reason is that we receive messages not only from the `my_thermometer` AEA but also from the `decision_maker` and the [OEF search node](../oef-ledger). So we need a handler to be able to read different kinds of messages.
+The main difference between the `thermometer_client` and the `thermometer` skill `handlers.py` file is that in this one we create more than one handler.
 
-To handle the [OEF search node](../oef-ledger) response on our search request adds the following code in the same file:
+The reason is that we receive messages not only from the `my_thermometer` AEA but also from the `DecisionMaker` and the [OEF search node](../oef-ledger). We need one handler for each type of protocol we use.
+
+To handle the messages in the `oef_search` protocol used by the [OEF search node](../oef-ledger) we add the following code in the same file (`my_client/skills/thermometer_client/handlers.py`):
 
 ``` python 
 class OEFSearchHandler(Handler):
@@ -1345,9 +1347,9 @@ class OEFSearchHandler(Handler):
                 )
             )
 ```
-When we receive a message from the oef of a type `OefSearchMessage.Performative.SEARCH_RESULT`, we are passing the details to the handle function. The latest calls the `_handle_search` function and passes as input to the agent list. There we are checking that the list contains some agents and we stop the search. We pick our first agent and we send a CFP message.
+When we receive a message from the [OEF search node](../oef-ledger) of a type `OefSearchMessage.Performative.SEARCH_RESULT`, we are passing the details to the relevant handler method. In the `_handle_search` function we are checking that the response contains some agents and we stop the search if it does. We pick our first agent and we send a `CFP` message.
 
-The last handler we will need is the `MyTransactionHandler`. This one will handle the internal messages that we receive from the `decision_maker`.
+The last handler we need is the `MyTransactionHandler`. This handler will handle the internal messages that we receive from the `DecisionMaker`.
 
 ``` python 
 class MyTransactionHandler(Handler):
@@ -1414,13 +1416,15 @@ class MyTransactionHandler(Handler):
         """
         pass
 ```
-Remember that we send a message to the `decision_maker` with a transaction proposal? Here we handle the response from the `decision_maker`.
+Remember that we send a message to the `DecisionMaker` with a transaction proposal. Here, we handle the response from the `DecisionMaker`.
 
-If the message is of type SUCCESFUL_SETTLEMENT, we generate the inform_msg for the seller_aea to inform him that we completed the transaction and transferred the funds to the address that he sent us and we pass the transaction digest so the other aea can verify the transaction. Otherwise, the `decision_maker` will inform us that something went wrong and the transaction was not successful.
+If the message is of performative `SUCCESFUL_SETTLEMENT`, we generate the `INFORM` message for the `thermometer` to inform it that we completed the transaction and transferred the funds to the address that it sent us. We also pass along the transaction digest so the `thermometer` aea can verify the transaction.
+
+If the transaction was unsuccessful, the `DecisionMaker` will inform us that something went wrong and the transaction was not successful.
 
 ### Step 4: Create the strategy
 
-We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file to `strategy.py` and paste the following code: 
+We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_client/skills/thermometer_client/`) to `strategy.py` and paste the following code: 
 
 ``` python
 from typing import cast
@@ -1457,7 +1461,7 @@ class Strategy(Model):
         self.is_searching = True
 ```
 
-We initialize the strategy class. We are trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two functions are related to the oef search service, add them under the initialization of the class:
+We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two functions are related to the oef search service, add them under the initialization of the class:
 
 ``` python
     @property
@@ -1486,7 +1490,7 @@ We initialize the strategy class. We are trying to read the strategy variables f
         return query
 ```
 
-The following code block checks if the proposal that we received is acceptable based on the strategy
+The following code block checks if the proposal that we received is acceptable based on the strategy:
 
 ``` python 
     def is_acceptable_proposal(self, proposal: Description) -> bool:
@@ -1503,8 +1507,8 @@ The following code block checks if the proposal that we received is acceptable b
         )
         return result
 ```
-The `is_affordable_proposal` checks if we can afford the transaction based on the funds we have in our wallet 
-on the ledger.
+
+The `is_affordable_proposal` method checks if we can afford the transaction based on the funds we have in our wallet on the ledger.
 
 ``` python 
     def is_affordable_proposal(self, proposal: Description) -> bool:
@@ -1523,9 +1527,10 @@ on the ledger.
             result = True
         return result
 ```
+
 ### Step 5: Create the dialogues
 
-When we are negotiating with other AEA we would like to keep track of these negotiations for various reasons. Create a new file and name it `dialogues.py`. Inside this file add the following code: 
+As mentioned, when we are negotiating with other AEA we would like to keep track of these negotiations for various reasons. Create a new file and name it `dialogues.py` (in `my_client/skills/thermometer_client/`). Inside this file add the following code: 
 
 ``` python
 from typing import Optional
@@ -1603,13 +1608,13 @@ class Dialogues(Model, FipaDialogues):
         return dialogue
 ```
 
-The dialogues class stores dialogue with each `my_thermometer` AEA in a list so we can have access to previous messages and enable us to identify possible communications problems between the `my_thermometer` AEA and the `my_client` AEA.
+The dialogues class stores dialogue with each AEA so we can have access to previous messages and enable us to identify possible communications problems between the `my_thermometer` AEA and the `my_client` AEA.
 
 ### Step 6: Update the YAML files
 
-Since we made so many changes to our aea we have to update the `skill.yaml` to contain our newly created scripts and the details that will be used from the strategy.
+Since we made so many changes to our AEA we have to update the `skill.yaml` to contain our newly created scripts and the details that will be used from the strategy.
 
-Firstly, we will update the `skill.yaml`. Make sure that your `skill.yaml` matches with the following code:
+First, we update the `skill.yaml`. Make sure that your `skill.yaml` matches with the following code:
 
 ``` yaml
 name: thermometer_client
@@ -1650,7 +1655,7 @@ models:
 protocols: ['fetchai/fipa:0.3.0','fetchai/default:0.2.0','fetchai/oef_search:0.2.0']
 ledgers: ['fetchai']
 ```
-We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 
+We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading at or the currency we would like to transact with. 
 
 Finally, we fingerprint our new skill:
 
@@ -1664,17 +1669,17 @@ This will hash each file and save the hash in the fingerprint. This way, in the 
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>Make sure that your thermometer sensor is connected to the Raspberry's usb port.</p>
+  <p>If you are using the Raspberry Pi, make sure that your thermometer sensor is connected to the Raspberry Pi's USB port.</p>
 </div>
 
-You can change the end-point's address and port by modifying the connection's yaml file (`*/connection/oef/connection.yaml`)
+You can change the end-point's address and port by modifying the connection's yaml file (`*vendor/fetchai/connections/oef/connection.yaml`)
 
 Under config locate:
 
 ``` yaml
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
-and replace it with your ip (The ip of the machine that runs the oef image.)
+and replace it with your IP (the IP of the machine that runs the [OEF search and communication node](../oef-ledger) image.)
 
 In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
@@ -1690,7 +1695,7 @@ aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
-### Update the AEA configs
+#### Update the AEA configs
 
 Both in `my_thermometer/aea-config.yaml` and `my_client/aea-config.yaml`, replace ```ledger_apis```: {} with the following.
 ``` yaml
@@ -1698,13 +1703,15 @@ ledger_apis:
   fetchai:
     network: testnet
 ```
-### Fund the temperature client AEA
+#### Fund the temperature client AEA
 
 Create some wealth for your weather client on the Fetch.ai testnet. (It takes a while).
 
 ``` bash 
 aea generate-wealth fetchai
 ```
+
+#### Run both AEAs
 
 Run both AEAs from their respective terminals
 
@@ -1728,7 +1735,7 @@ aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 
-### Update the AEA configs
+#### Update the AEA configs
 
 Both in `my_thermometer/aea-config.yaml` and `my_client/aea-config.yaml`, replace `ledger_apis: {}` with the following.
 
@@ -1740,7 +1747,7 @@ ledger_apis:
     gas_price: 50
 ```
 
-### Update the skill configs
+#### Update the skill configs
 
 In the thermometer skill config (`my_thermometer/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
@@ -1759,10 +1766,12 @@ ledger_id: 'ethereum'
 is_ledger_tx: True
 ```
 
-### Fund the thermometer client AEA
+#### Fund the thermometer client AEA
 
 Create some wealth for your weather client on the Ethereum Ropsten test net.
 Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_client/eth_private_key.txt`.
+
+#### Run both AEAs
 
 Run both AEAs from their respective terminals.
 
@@ -1777,9 +1786,19 @@ You will see that the AEAs negotiate and then transact using the Ethereum testne
 
 ## Delete the AEAs
 
-When you're done, go up a level and delete the AEAs.
+When you are done, go up a level and delete the AEAs.
 ``` bash 
 cd ..
 aea delete my_thermometer
 aea delete my_client
 ```
+
+## Next steps
+
+You have completed the "Getting Started" series. Congratulations!
+
+### Recommended
+
+We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="fetch-ai.slack.com">Slack</a>. Speak to you there!
+
+<br />

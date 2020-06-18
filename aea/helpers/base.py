@@ -168,7 +168,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
             import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
         module = importlib.util.module_from_spec(spec)
-        sys.modules[prefix_pkg] = module
+        sys.modules[import_path] = module
         spec.loader.exec_module(module)  # type: ignore
 
 
