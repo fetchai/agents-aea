@@ -58,6 +58,7 @@ elements = [
     ["registered", "skill", "registeredSkills"],
     ["local", "protocol", "localProtocols"],
     ["local", "connection", "localConnections"],
+    ["local", "contract", "localContracts"],
     ["local", "skill", "localSkills"],
 ]
 
