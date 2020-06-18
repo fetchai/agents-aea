@@ -637,6 +637,7 @@ class Controller{
 
     getAgentStatus(){
         var agentId = $('#localAgentsSelectionId').html()
+        self = this
         if (self.validateId(agentId)){
             this.model.readAgentStatus(agentId)
         }
@@ -645,7 +646,6 @@ class Controller{
             self.view.setAgentTTY("<br><br><br><br><br>")
             self.view.setAgentError("<br><br><br><br><br>")
         }
-        self = this
         setTimeout(function() {
             self.getAgentStatus()
         }, 500)
