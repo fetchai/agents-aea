@@ -21,13 +21,11 @@
 package dhtpeer
 
 import (
-	"encoding/hex"
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcec"
-	"github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
+
+	utils "libp2p_node/aea/utils"
 )
 
 // Option for dhtpeer.New
@@ -37,7 +35,7 @@ type Option func(*DHTPeer) error
 func IdentityFromFetchAIKey(key string) Option {
 	return func(dhtPeer *DHTPeer) error {
 		var err error
-		dhtPeer.key, dhtPeer.publicKey, err = KeyPairFromFetchAIKey(key)
+		dhtPeer.key, dhtPeer.publicKey, err = utils.KeyPairFromFetchAIKey(key)
 		if err != nil {
 			return err
 		}
@@ -58,7 +56,7 @@ func RegisterAgentAddress(addr string, isReady func() bool) Option {
 func BootstrapFrom(entryPeers []string) Option {
 	return func(dhtPeer *DHTPeer) error {
 		var err error
-		dhtPeer.bootstrapPeers, err = GetPeersAddrInfo(entryPeers)
+		dhtPeer.bootstrapPeers, err = utils.GetPeersAddrInfo(entryPeers)
 		if err != nil {
 			return err
 		}
@@ -111,62 +109,4 @@ func EnableRelayService() Option {
 		return nil
 	}
 
-}
-
-/*
-   Helpers
-*/
-
-// KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key
-func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
-	pk_bytes, err := hex.DecodeString(key)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	btc_private_key, _ := btcec.PrivKeyFromBytes(btcec.S256(), pk_bytes)
-	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btc_private_key)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return prvKey, pubKey, nil
-}
-
-// GetPeersAddrInfo Parse multiaddresses and convert them to peer.AddrInfo
-func GetPeersAddrInfo(peers []string) ([]peer.AddrInfo, error) {
-	pinfos := make([]peer.AddrInfo, len(peers))
-	for i, addr := range peers {
-		maddr := multiaddr.StringCast(addr)
-		p, err := peer.AddrInfoFromP2pAddr(maddr)
-		if err != nil {
-			return pinfos, err
-		}
-		pinfos[i] = *p
-	}
-	return pinfos, nil
-}
-
-// IDFromFetchAIPublicKey Get PeeID (multihash) from fetchai public key
-func IDFromFetchAIPublicKey(public_key string) (peer.ID, error) {
-	b, err := hex.DecodeString(public_key)
-	if err != nil {
-		return "", err
-	}
-
-	pub_bytes := make([]byte, 0, btcec.PubKeyBytesLenUncompressed)
-	pub_bytes = append(pub_bytes, 0x4) // btcec.pubkeyUncompressed
-	pub_bytes = append(pub_bytes, b...)
-
-	pub_key, err := btcec.ParsePubKey(pub_bytes, btcec.S256())
-	if err != nil {
-		return "", err
-	}
-
-	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pub_key))
-	if err != nil {
-		return "", err
-	}
-
-	return multihash, nil
 }

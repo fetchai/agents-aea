@@ -21,35 +21,28 @@
 package dhtpeer
 
 import (
-	"bufio"
 	"context"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"strconv"
-	"sync"
 	"time"
 
-	"github.com/ipfs/go-cid"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/multiformats/go-multiaddr"
-	"github.com/multiformats/go-multihash"
 
 	circuit "github.com/libp2p/go-libp2p-circuit"
 	kaddht "github.com/libp2p/go-libp2p-kad-dht"
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
-	proto "github.com/golang/protobuf/proto"
-
 	aea "libp2p_node/aea"
+	utils "libp2p_node/aea/utils"
 )
 
 // panics if err is not nil
@@ -159,7 +152,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	// connect to the booststrap nodes
 	if len(dhtPeer.bootstrapPeers) > 0 {
-		err = bootstrapConnect(ctx, dhtPeer.routedHost, dhtPeer.bootstrapPeers)
+		err = utils.BootstrapConnect(ctx, dhtPeer.routedHost, dhtPeer.bootstrapPeers)
 		if err != nil {
 			return nil, err
 		}
@@ -265,12 +258,12 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	log.Println("INFO received a new connection from ", conn.RemoteAddr().String())
 
 	// read agent address
-	buf, err := readBytesConn(conn)
+	buf, err := utils.ReadBytesConn(conn)
 	if err != nil {
 		log.Println("ERROR while receiving agent's Address:", err)
 		return
 	}
-	err = writeBytesConn(conn, []byte("DONE"))
+	err = utils.WriteBytesConn(conn, []byte("DONE"))
 	ignore(err)
 
 	addr := string(buf)
@@ -290,7 +283,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 	for {
 		// read envelopes
-		envel, err := readEnvelopeConn(conn)
+		envel, err := utils.ReadEnvelopeConn(conn)
 		if err != nil {
 			if err == io.EOF {
 				log.Println("INFO connection closed by client:", err)
@@ -337,7 +330,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 	} else if conn, exists := dhtPeer.tcpAddresses[target]; exists {
 		log.Println("DEBUG route - destination", target, " is a delegate client",
 			conn.RemoteAddr().String())
-		return writeEnvelopeConn(conn, envel)
+		return utils.WriteEnvelopeConn(conn, envel)
 	} else {
 		var peerID peer.ID
 		var err error
@@ -369,7 +362,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 		}
 
 		log.Println("DEBUG route - sending envelope to target...")
-		err = writeEnvelope(envel, stream)
+		err = utils.WriteEnvelope(envel, stream)
 		if err != nil {
 			errReset := stream.Reset()
 			ignore(errReset)
@@ -384,7 +377,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 }
 
 func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
-	addressCID, err := computeCID(address)
+	addressCID, err := utils.ComputeCID(address)
 	if err != nil {
 		return "", err
 	}
@@ -411,12 +404,12 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 
 	log.Println("DEBUG reading peer ID from provider for addr", address)
 
-	err = writeBytes(s, []byte(address))
+	err = utils.WriteBytes(s, []byte(address))
 	if err != nil {
 		return "", errors.New("ERROR while sending address to peer:" + err.Error())
 	}
 
-	msg, err := readString(s)
+	msg, err := utils.ReadString(s)
 	if err != nil {
 		return "", errors.New("ERROR while reading target peer id from peer:" + err.Error())
 	}
@@ -433,7 +426,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 	log.Println("DEBUG Got a new aea envelope stream")
 
-	envel, err := readEnvelope(stream)
+	envel, err := utils.ReadEnvelope(stream)
 	if err != nil {
 		log.Println("ERROR While reading envelope from stream:", err)
 		err = stream.Reset()
@@ -446,7 +439,7 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 
 	// check if destination is a tcp client
 	if conn, exists := dhtPeer.tcpAddresses[envel.To]; exists {
-		err = writeEnvelopeConn(conn, *envel)
+		err = utils.WriteEnvelopeConn(conn, *envel)
 		if err != nil {
 			log.Println("ERROR While sending envelope to tcp client:", err)
 		}
@@ -463,7 +456,7 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 	log.Println("DEBUG Got a new aea address stream")
 
-	reqAddress, err := readString(stream)
+	reqAddress, err := utils.ReadString(stream)
 	if err != nil {
 		log.Println("ERROR While reading Address from stream:", err)
 		err = stream.Reset()
@@ -508,7 +501,7 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 	}
 
 	log.Println("DEBUG sending peer id", sPeerID, "for address", reqAddress)
-	err = writeBytes(stream, []byte(sPeerID))
+	err = utils.WriteBytes(stream, []byte(sPeerID))
 	if err != nil {
 		log.Println("ERROR While sending peerID to peer:", err)
 	}
@@ -550,7 +543,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	log.Println("DEBUG Got a new aea register stream")
 
-	clientAddr, err := readBytes(stream)
+	clientAddr, err := utils.ReadBytes(stream)
 	if err != nil {
 		log.Println("ERROR While reading client Address from stream:", err)
 		err = stream.Reset()
@@ -558,10 +551,10 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		return
 	}
 
-	err = writeBytes(stream, []byte("doneAddress"))
+	err = utils.WriteBytes(stream, []byte("doneAddress"))
 	ignore(err)
 
-	clientPeerID, err := readBytes(stream)
+	clientPeerID, err := utils.ReadBytes(stream)
 	if err != nil {
 		log.Println("ERROR While reading client peerID from stream:", err)
 		err = stream.Reset()
@@ -569,7 +562,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		return
 	}
 
-	err = writeBytes(stream, []byte("donePeerID"))
+	err = utils.WriteBytes(stream, []byte("donePeerID"))
 	ignore(err)
 
 	log.Println("DEBUG Received address registration request (addr, peerid):", clientAddr, clientPeerID)
@@ -587,7 +580,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 }
 
 func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
-	addressCID, err := computeCID(addr)
+	addressCID, err := utils.ComputeCID(addr)
 	if err != nil {
 		return err
 	}
@@ -602,217 +595,4 @@ func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 		return err
 	}
 	return nil
-}
-
-/*
-	Helpers
-*/
-
-// This code is borrowed from the go-ipfs bootstrap process
-func bootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) error {
-	if len(peers) < 1 {
-		return errors.New("not enough bootstrap peers")
-	}
-
-	errs := make(chan error, len(peers))
-	var wg sync.WaitGroup
-	for _, p := range peers {
-
-		// performed asynchronously because when performed synchronously, if
-		// one `Connect` call hangs, subsequent calls are more likely to
-		// fail/abort due to an expiring context.
-		// Also, performed asynchronously for dial speed.
-
-		wg.Add(1)
-		go func(p peer.AddrInfo) {
-			defer wg.Done()
-			defer log.Println(ctx, "bootstrapDial", ph.ID(), p.ID)
-			log.Printf("%s bootstrapping to %s", ph.ID(), p.ID)
-
-			ph.Peerstore().AddAddrs(p.ID, p.Addrs, peerstore.PermanentAddrTTL)
-			if err := ph.Connect(ctx, p); err != nil {
-				log.Println(ctx, "bootstrapDialFailed", p.ID)
-				log.Printf("failed to bootstrap with %v: %s", p.ID, err)
-				errs <- err
-				return
-			}
-
-			log.Println(ctx, "bootstrapDialSuccess", p.ID)
-			log.Printf("bootstrapped with %v", p.ID)
-		}(p)
-	}
-	wg.Wait()
-
-	// our failure condition is when no connection attempt succeeded.
-	// So drain the errs channel, counting the results.
-	close(errs)
-	count := 0
-	var err error
-	for err = range errs {
-		if err != nil {
-			count++
-		}
-	}
-	if count == len(peers) {
-		return fmt.Errorf("failed to bootstrap. %s", err)
-	}
-	return nil
-}
-
-/*
-   Utils
-*/
-
-func writeBytesConn(conn net.Conn, data []byte) error {
-	size := uint32(len(data))
-	buf := make([]byte, 4)
-	binary.BigEndian.PutUint32(buf, size)
-	_, err := conn.Write(buf)
-	if err != nil {
-		return err
-	}
-	_, err = conn.Write(data)
-	return err
-}
-
-func readBytesConn(conn net.Conn) ([]byte, error) {
-	buf := make([]byte, 4)
-	_, err := conn.Read(buf)
-	if err != nil {
-		return buf, err
-	}
-	size := binary.BigEndian.Uint32(buf)
-
-	buf = make([]byte, size)
-	_, err = conn.Read(buf)
-	return buf, err
-}
-
-func writeEnvelopeConn(conn net.Conn, envelope aea.Envelope) error {
-	data, err := proto.Marshal(&envelope)
-	if err != nil {
-		return err
-	}
-	return writeBytesConn(conn, data)
-}
-
-func readEnvelopeConn(conn net.Conn) (*aea.Envelope, error) {
-	envelope := &aea.Envelope{}
-	data, err := readBytesConn(conn)
-	if err != nil {
-		return envelope, err
-	}
-	err = proto.Unmarshal(data, envelope)
-	return envelope, err
-}
-
-func computeCID(addr string) (cid.Cid, error) {
-	pref := cid.Prefix{
-		Version:  0,
-		Codec:    cid.Raw,
-		MhType:   multihash.SHA2_256,
-		MhLength: -1, // default length
-	}
-
-	// And then feed it some data
-	c, err := pref.Sum([]byte(addr))
-	if err != nil {
-		return cid.Cid{}, err
-	}
-
-	return c, nil
-}
-
-func readBytes(s network.Stream) ([]byte, error) {
-	rstream := bufio.NewReader(s)
-
-	buf := make([]byte, 4)
-	_, err := io.ReadFull(rstream, buf)
-	if err != nil {
-		log.Println("ERROR while receiving size:", err)
-		return buf, err
-	}
-
-	size := binary.BigEndian.Uint32(buf)
-	log.Println("DEBUG expecting", size)
-
-	buf = make([]byte, size)
-	_, err = io.ReadFull(rstream, buf)
-
-	return buf, err
-}
-
-func writeBytes(s network.Stream, data []byte) error {
-	wstream := bufio.NewWriter(s)
-
-	size := uint32(len(data))
-	buf := make([]byte, 4)
-	binary.BigEndian.PutUint32(buf, size)
-
-	_, err := wstream.Write(buf)
-	if err != nil {
-		log.Println("ERROR while sending size:", err)
-		return err
-	}
-
-	log.Println("DEBUG writing", len(data))
-	_, err = wstream.Write(data)
-	wstream.Flush()
-	return err
-}
-
-func readString(s network.Stream) (string, error) {
-	data, err := readBytes(s)
-	return string(data), err
-}
-
-func writeEnvelope(envel aea.Envelope, s network.Stream) error {
-	wstream := bufio.NewWriter(s)
-	data, err := proto.Marshal(&envel)
-	if err != nil {
-		return err
-	}
-	size := uint32(len(data))
-
-	buf := make([]byte, 4)
-	binary.BigEndian.PutUint32(buf, size)
-	//log.Println("DEBUG writing size:", size, buf)
-	_, err = wstream.Write(buf)
-	if err != nil {
-		return err
-	}
-
-	//log.Println("DEBUG writing data:", data)
-	_, err = wstream.Write(data)
-	if err != nil {
-		return err
-	}
-
-	wstream.Flush()
-	return nil
-}
-
-func readEnvelope(s network.Stream) (*aea.Envelope, error) {
-	envel := &aea.Envelope{}
-	rstream := bufio.NewReader(s)
-
-	buf := make([]byte, 4)
-	_, err := io.ReadFull(rstream, buf)
-
-	if err != nil {
-		log.Println("ERROR while reading size")
-		return envel, err
-	}
-
-	size := binary.BigEndian.Uint32(buf)
-	fmt.Println("DEBUG received size:", size, buf)
-	buf = make([]byte, size)
-	_, err = io.ReadFull(rstream, buf)
-	if err != nil {
-		log.Println("ERROR while reading data")
-		return envel, err
-	}
-
-	err = proto.Unmarshal(buf, envel)
-	return envel, err
 }
