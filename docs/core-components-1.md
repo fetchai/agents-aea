@@ -6,7 +6,7 @@ The AEA framework consists of several core elements, some which are required to 
 
 ### Envelope
 
-<center>![Envelope of an AEA](assets/envelope.jpg)</center>
+<img src="/assets/envelope.png" alt="Envelope of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object with which agents communicate. It is a vehicle for messages with five attribute parameters:
 
@@ -50,7 +50,7 @@ An AEA can run connections via a multiplexer.
 
 ### Multiplexer
 
-<center>![Multiplexer of an AEA](assets/multiplexer.jpg)</center> 
+<img src="/assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 The <a href="../api/multiplexer#multiplexer-objects">`Multiplexer`</a> is responsible for maintaining potentially multiple connections.
 
@@ -58,7 +58,7 @@ It maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a hr
 
 ### Skill
 
-<center>![Skills of an AEA](assets/skills.jpg)</center>
+<img src="/assets/skills.png" alt="Skills of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 <a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 

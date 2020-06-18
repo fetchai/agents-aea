@@ -1,6 +1,6 @@
 AEAs are more than just agents.
 
-<center>![AEA vs Agent vs Multiplexer](assets/aea-vs-agent-vs-multiplexer.png)</center>
+<img src="/assets/aea-vs-agent-vs-multiplexer.png" alt="AEA vs Agent vs Multiplexer" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
 
 In this guide we show some of the differences in terms of code.
 

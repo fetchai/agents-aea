@@ -6,7 +6,7 @@ In <a href="../core-components-1">Core Components - Part 1</a> we discussed the 
 
 ### Decision Maker
 
-<center>![Decision Maker of an AEA](assets/decision-maker.jpg)</center>
+<img src="/assets/decision-maker.png" alt="Decision Maker of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the wallet's private keys.
 
@@ -26,7 +26,7 @@ The identity can be accessed in a skill via the <a href="../api/context/base#age
 
 ### Contracts
 
-<center>![Contracts of an AEA](assets/contracts.jpg)</center>
+<img src="/assets/contracts.png" alt="Contracts of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 <a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the skills.
 
@@ -38,7 +38,7 @@ Contracts can be added as packages. For more details on contracts also read the 
 
 Taken together, the core components from this section and the <a href="../core-components-1">first part</a> provide the following simplified illustration of an AEA:
 
-<center>![Simplified illustration of an AEA](assets/simplified-aea.jpg)</center>
+<img src="/assets/simplified-aea.png" alt="Simplified illustration of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
 
 ## Next steps
 

@@ -10,6 +10,7 @@ The framework provides one default protocol, called `default` and introduced <a 
 
 Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
 
+We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
 ## Components of a protocol
 
@@ -62,6 +63,8 @@ The framework provides a number of helpful classes which implement most of the l
 ## Custom protocol
 
 The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. This lets the developer specify the speech-acts as well as optionally the dialogue structure (e.g. roles of agents participating in a dialogue, the states a dialogue may end in, and the reply structure of the speech-acts in a dialogue).
+
+We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
 ## `fetchai/default:0.2.0` protocol
 
@@ -283,6 +286,221 @@ The `fetchai/fipa:0.3.0` protocol also defines a `FipaDialogue` class which spec
 
 For examples of the usage of the `fetchai/fipa:0.3.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
 
+
+### Fipa dialogue
+
+Below, we give an example of a dialogue between two agents. In practice; both dialogues would be maintained in the respective agent.
+
+We first create concrete implementations of `FipaDialogue` and `FipaDialogues` for the buyer and seller:
+``` python
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
+from aea.mail.base import Address, Envelope
+from aea.protocols.base import Message
+
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
+from packages.fetchai.protocols.fipa.message import FipaMessage
+
+
+class BuyerDialogue(FipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self.proposal = None  # type: Optional[Description]
+
+
+class BuyerDialogues(FipaDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, agent_address: str) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        FipaDialogues.__init__(self, agent_address)
+
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
+    ) -> BuyerDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = BuyerDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.BUYER
+
+
+class SellerDialogue(FipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self.proposal = None  # type: Optional[Description]
+
+
+class SellerDialogues(FipaDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, agent_address) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        FipaDialogues.__init__(self, agent_address)
+
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
+    ) -> SellerDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = SellerDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.SELLER
+```
+
+Next, we can immitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:
+``` python
+buyer_address = "buyer_address_stub"
+seller_address = "seller_address_stub"
+buyer_dialogues = BuyerDialogues(buyer_address)
+seller_dialogues = SellerDialogues(seller_address)
+```
+
+First, the buyer creates a message destined for the seller and updates the dialogues:
+``` python
+cfp_msg = FipaMessage(
+    message_id=1,
+    dialogue_reference=buyer_dialogues.new_self_initiated_dialogue_reference(),
+    target=0,
+    performative=FipaMessage.Performative.CFP,
+    query=Query([Constraint("something", ConstraintType(">", 1))]),
+)
+cfp_msg.counterparty = seller_addr
+
+# Extends the outgoing list of messages.
+buyer_dialogue = buyer_dialogues.update(cfp_msg)
+```
+If the message has been correctly constructed, the `buyer_dialogue` will be returned, otherwise it will be `None`.
+
+In a skill, the message could now be sent:
+``` python
+# In a skill we would do:
+# self.context.outbox.put_message(message=cfp_msg)
+```
+
+However, here we simply continue with the seller:
+``` python
+# change the incoming message field & counterparty
+cfp_msg.is_incoming = True
+cfp_msg.counterparty = buyer_address
+```
+In the skill, the above two lines will be done by the framework; you can simply receive the message in the handler.
+
+We update the seller's dialogues model next to generate a new dialogue:
+``` python
+# Creates a new dialogue for the seller side based on the income message.
+seller_dialogue = seller_dialogues.update(cfp_msg)
+```
+
+Next, the seller can generate a proposal:
+``` python
+# Generate a proposal message to send to the buyer.
+proposal = Description({"foo1": 1, "bar1": 2})
+message_id = cfp_msg.message_id + 1
+target = cfp_msg.message_id
+proposal_msg = FipaMessage(
+    message_id=message_id,
+    dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
+    target=target,
+    performative=FipaMessage.Performative.PROPOSE,
+    proposal=proposal,
+)
+proposal_msg.counterparty = cfp_msg.counterparty
+
+# Then we update the dialogue
+seller_dialogue.update(proposal_msg)
+```
+
+In a skill, the message could now be sent:
+``` python
+# In a skill we would do:
+# self.context.outbox.put_message(message=proposal_msg)
+```
+
+The dialogue can continue like this.
+
+To retrieve a dialogue for a given message, we can do the following:
+
+``` python
+retrieved_dialogue = seller_dialogues.get_dialogue(cfp_msg)
+```
 
 
 <br />
