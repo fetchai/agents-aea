@@ -12,11 +12,12 @@ Currently, the framework supports four types of packages which can be added to t
 
 The following figure illustrates the framework's architecture:
 
-<center>![The AEA Framework Architecture](assets/framework-architecture.png)</center>
+<img src="/assets/simplified-aea.png" alt="Simplified illustration of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
+
 
 The execution is broken down in more detail below:
 
-<center>![Threads](assets/threads.png)</center>
+<img src="/assets/execution.png" alt="Execution of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
 
 The agent operation breaks down into three parts:
 

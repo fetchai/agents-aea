@@ -167,8 +167,8 @@ nav:
           - Behaviors: 'api/skills/behaviours.md'
           - Task: 'api/skills/tasks.md'
         - Test Tools: 'api/test_tools/generic.md'
-    - Simple OEF: 'simple-oef.md'
     - Q&A: 'questions-and-answers.md'
+  - Simple OEF: 'simple-oef.md'
 
 plugins:
     - markdownmermaid
