@@ -21,7 +21,7 @@
 
 import os
 from pathlib import Path
-from typing import cast
+from typing import Optional, cast
 
 import click
 
@@ -67,21 +67,25 @@ def create(
 ):
     """Create an agent."""
     ctx = cast(Context, click_context.obj)
-    create_aea(ctx, agent_name, author, local, empty)
+    create_aea(ctx, agent_name, local, author=author, empty=empty)
 
 
 @clean_after
 def create_aea(
-    ctx: Context, agent_name: str, author: str, local: bool, empty: bool,
+    ctx: Context,
+    agent_name: str,
+    local: bool,
+    author: Optional[str] = None,
+    empty: bool = False,
 ) -> None:
     """
     Create AEA project.
 
     :param ctx: Context object.
-    :param agent_name: agent name.
-    :param author: author name.
     :param local: boolean flag for local folder usage.
-    :param empty: boolean flag for adding default dependencies.
+    :param agent_name: agent name.
+    :param author: optional author name (valid with local=True only).
+    :param empty: optional boolean flag for skip adding default dependencies.
 
     :return: None
     :raises: ClickException if an error occured.
