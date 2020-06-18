@@ -19,10 +19,10 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
-import sys
 from unittest.mock import patch
 
-from .test_base import create_app
+from tests.test_cli.tools_for_testing import raise_click_exception
+from tests.test_cli_gui.test_base import create_app
 
 
 @patch("aea.cli_gui.cli_add_item")
@@ -48,7 +48,9 @@ def test_add_item(*mocks):
     assert data == agent_name
 
 
-def test_delete_agent_fail():
+@patch("aea.cli_gui.cli_add_item", raise_click_exception)
+@patch("aea.cli_gui.try_to_load_agent_config")
+def test_add_fail(*mocks):
     """Test remove a skill/connection/protocol when it fails.
 
     Actually we just do connection as code coverage is the same.
@@ -58,26 +60,13 @@ def test_delete_agent_fail():
     agent_name = "test_agent_id"
     connection_id = "author/test_connection:0.1.0"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "add"
-        assert param_list[4] == "--local"
-        assert param_list[5] == "connection"
-        assert param_list[6] == connection_id
-        assert agent_name in dir
-        return 1
-
-    with patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_remove = app.post(
-            "api/agent/" + agent_name + "/connection",
-            content_type="application/json",
-            data=json.dumps(connection_id),
-        )
+    response_remove = app.post(
+        "api/agent/" + agent_name + "/connection",
+        content_type="application/json",
+        data=json.dumps(connection_id),
+    )
     assert response_remove.status_code == 400
     data = json.loads(response_remove.get_data(as_text=True))
-    assert data["detail"] == "Failed to add connection {} to agent {}".format(
+    assert data["detail"] == "Failed to add connection {} to agent {}. Message".format(
         connection_id, agent_name
     )

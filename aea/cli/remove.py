@@ -19,6 +19,7 @@
 
 """Implementation of the 'aea remove' subcommand."""
 
+import os
 import shutil
 from pathlib import Path
 
@@ -47,7 +48,7 @@ def connection(ctx: Context, connection_id):
 
     It expects the public id of the connection to remove from the local registry.
     """
-    _remove_item(ctx, "connection", connection_id)
+    remove_item(ctx, "connection", connection_id)
 
 
 @remove.command()
@@ -59,7 +60,7 @@ def contract(ctx: Context, contract_id):
 
     It expects the public id of the contract to remove from the local registry.
     """
-    _remove_item(ctx, "contract", contract_id)
+    remove_item(ctx, "contract", contract_id)
 
 
 @remove.command()
@@ -71,7 +72,7 @@ def protocol(ctx: Context, protocol_id):
 
     It expects the public id of the protocol to remove from the local registry.
     """
-    _remove_item(ctx, "protocol", protocol_id)
+    remove_item(ctx, "protocol", protocol_id)
 
 
 @remove.command()
@@ -83,11 +84,20 @@ def skill(ctx: Context, skill_id):
 
     It expects the public id of the skill to remove from the local registry.
     """
-    _remove_item(ctx, "skill", skill_id)
+    remove_item(ctx, "skill", skill_id)
 
 
-def _remove_item(ctx: Context, item_type, item_id: PublicId):
-    """Remove an item from the configuration file and agent, given the public id."""
+def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
+    """
+    Remove an item from the configuration file and agent, given the public id.
+
+    :param ctx: Context object.
+    :param item_type: type of item.
+    :param item_id: item public ID.
+
+    :return: None
+    :raises ClickException: if some error occures.
+    """
     item_name = item_id.name
     item_type_plural = "{}s".format(item_type)
     existing_item_ids = getattr(ctx.agent_config, item_type_plural)
@@ -110,10 +120,10 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
             "The {} '{}' is not supported.".format(item_type, item_id)
         )
 
-    item_folder = Path("vendor", item_id.author, item_type_plural, item_name)
+    item_folder = Path(ctx.cwd, "vendor", item_id.author, item_type_plural, item_name)
     if not item_folder.exists():
         # check if it is present in custom packages.
-        item_folder = Path(item_type_plural, item_name)
+        item_folder = Path(ctx.cwd, item_type_plural, item_name)
         if not item_folder.exists():
             raise click.ClickException(
                 "{} {} not found. Aborting.".format(item_type.title(), item_name)
@@ -139,4 +149,5 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
     item_public_id = existing_items_name_to_ids[item_name]
     logger.debug("Removing the {} from {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
     existing_item_ids.remove(item_public_id)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
+        ctx.agent_loader.dump(ctx.agent_config, f)

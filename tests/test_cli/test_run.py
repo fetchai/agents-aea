@@ -33,7 +33,7 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.cli.run import _build_aea, _run_aea
+from aea.cli.run import _build_aea, run_aea
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -1508,16 +1508,15 @@ def _raise_click_exception(*args, **kwargs):
 
 
 class RunAEATestCase(TestCase):
-    """Test case for _run_aea method."""
+    """Test case for run_aea method."""
 
     @mock.patch("aea.cli.run._prepare_environment", _raise_click_exception)
-    def test__run_aea_negative(self, *mocks):
-        """Test _run_aea method for negative result."""
-        click_context = mock.Mock()
-        click_context.obj = mock.Mock()
-        click_context.obj.config = {"skip_consistency_check": True}
+    def test_run_aea_negative(self, *mocks):
+        """Test run_aea method for negative result."""
+        ctx = mock.Mock()
+        ctx.config = {"skip_consistency_check": True}
         with self.assertRaises(ClickException):
-            _run_aea(click_context, ["author/name:0.1.0"], "env_file", False)
+            run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
 
 
 def _raise_aea_package_loading_error(*args, **kwargs):
@@ -1526,7 +1525,7 @@ def _raise_aea_package_loading_error(*args, **kwargs):
 
 @mock.patch("aea.cli.run.AEABuilder.from_aea_project", _raise_aea_package_loading_error)
 class BuildAEATestCase(TestCase):
-    """Test case for _run_aea method."""
+    """Test case for run_aea method."""
 
     def test__build_aea_negative(self, *mocks):
         """Test _build_aea method for negative result."""

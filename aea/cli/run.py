@@ -20,16 +20,17 @@
 """Implementation of the 'aea run' subcommand."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, cast
 
 import click
 
 from aea import __version__
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.install import install
+from aea.cli.install import do_install
 from aea.cli.utils.click_utils import ConnectionsOption
 from aea.cli.utils.constants import AEA_LOGO
+from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAPackageLoadingError
@@ -67,19 +68,17 @@ def run(
     click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
 ):
     """Run the agent."""
-    _run_aea(click_context, connection_ids, env_file, is_install_deps)
+    ctx = cast(Context, click_context.obj)
+    run_aea(ctx, connection_ids, env_file, is_install_deps)
 
 
-def _run_aea(
-    click_context: click.core.Context,
-    connection_ids: List[PublicId],
-    env_file: str,
-    is_install_deps: bool,
+def run_aea(
+    ctx: Context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool,
 ) -> None:
     """
     Prepare and run an agent.
 
-    :param click_context: click context object.
+    :param ctx: a context object.
     :param connection_ids: list of connections public IDs.
     :param env_file: a path to env file.
     :param is_install_deps: bool flag is install deps.
@@ -87,8 +86,8 @@ def _run_aea(
     :return: None
     :raises: ClickException if any Exception occures.
     """
-    skip_consistency_check = click_context.obj.config["skip_consistency_check"]
-    _prepare_environment(click_context, env_file, is_install_deps)
+    skip_consistency_check = ctx.config["skip_consistency_check"]
+    _prepare_environment(ctx, env_file, is_install_deps)
     aea = _build_aea(connection_ids, skip_consistency_check)
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
@@ -105,20 +104,20 @@ def _run_aea(
         click.echo("AEA '{}' stopped.".format(aea.name))
 
 
-def _prepare_environment(click_context, env_file: str, is_install_deps: bool) -> None:
+def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> None:
     """
     Prepare the AEA project environment.
 
-    :param click_context: the click context
+    :param ctx: a context object.
     :param env_file: the path to the envrionemtn file.
     :param is_install_deps: whether to install the dependencies
     """
     load_env_file(env_file)
     if is_install_deps:
         if Path("requirements.txt").exists():
-            click_context.invoke(install, requirement="requirements.txt")
+            do_install(ctx, requirement="requirements.txt")
         else:
-            click_context.invoke(install)
+            do_install(ctx)
 
 
 def _build_aea(

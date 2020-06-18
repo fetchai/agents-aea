@@ -52,6 +52,8 @@ from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
+from aea.cli.utils.config import get_or_create_cli_config
+from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.helpers.win32 import enable_ctrl_c_support
@@ -81,13 +83,30 @@ def cli(click_context, skip_consistency_check: bool) -> None:
 
 @cli.command()
 @click.option("-p", "--port", default=8080)
+@click.option("--local", is_flag=True, help="For using local folder.")
 @click.pass_context
-def gui(click_context, port):  # pragma: no cover
+def gui(click_context, port, local):  # pragma: no cover
     """Run the CLI GUI."""
+    _init_gui()
     import aea.cli_gui  # pylint: disable=import-outside-toplevel,redefined-outer-name
 
     click.echo("Running the GUI.....(press Ctrl+C to exit)")
     aea.cli_gui.run(port)
+
+
+def _init_gui() -> None:
+    """
+    Initialize GUI before start.
+
+    :return: None
+    :raisees: ClickException if author is not set up.
+    """
+    config = get_or_create_cli_config()
+    author = config.get(AUTHOR_KEY, None)
+    if author is None:
+        raise click.ClickException(
+            "Author is not set up. Please run 'aea init' and then restart."
+        )
 
 
 cli.add_command(_list)
