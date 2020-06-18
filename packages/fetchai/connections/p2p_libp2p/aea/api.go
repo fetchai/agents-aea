@@ -6,13 +6,10 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
-	"time"
 
 	proto "github.com/golang/protobuf/proto"
 	"github.com/joho/godotenv"
@@ -214,6 +211,7 @@ func (aea *AeaApi) Connect() error {
 	return nil
 }
 
+/*
 func (aea *AeaApi) WithSandbox() *AeaApi {
 	var err error
 	fmt.Println("[aea-api  ][warning] running in sandbox mode")
@@ -224,6 +222,7 @@ func (aea *AeaApi) WithSandbox() *AeaApi {
 	aea.sandbox = true
 	return aea
 }
+*/
 
 func UnmarshalEnvelope(buf []byte) (Envelope, error) {
 	envelope := &Envelope{}
@@ -318,9 +317,11 @@ func read_envelope(pipe *os.File) (*Envelope, error) {
 /*
 
   Sandbox
+  - DISABLED
 
 */
 
+/*
 func setup_aea_sandbox() (string, string, string, string, uint16, error) {
 	// setup id
 	id := ""
@@ -398,6 +399,7 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
 
 	return nil
 }
+*/
 
 /*
 
