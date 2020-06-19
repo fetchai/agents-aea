@@ -187,15 +187,9 @@ aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-<<<<<<< HEAD
-aea add connection fetchai/http_client:0.3.0
+aea add connection fetchai/http_client:0.4.0
 aea add connection fetchai/webhook:0.3.0
 aea add connection fetchai/oef:0.5.0
-=======
-aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.2.0
-aea add connection fetchai/oef:0.4.0
->>>>>>> develop
 ```
 
 You now need to configure the `webhook` connection.
@@ -329,15 +323,9 @@ aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.a
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-<<<<<<< HEAD
-aea add connection fetchai/http_client:0.3.0
+aea add connection fetchai/http_client:0.4.0
 aea add connection fetchai/webhook:0.3.0
 aea add connection fetchai/oef:0.5.0
-=======
-aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.2.0
-aea add connection fetchai/oef:0.4.0
->>>>>>> develop
 ```
 
 You now need to configure the `webhook` connection.
