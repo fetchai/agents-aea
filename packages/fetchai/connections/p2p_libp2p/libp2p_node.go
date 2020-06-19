@@ -76,6 +76,7 @@ func ignore(err error) {
 type DHTNode interface {
 	RouteEnvelope(aea.Envelope) error
 	ProcessEnvelope(func(aea.Envelope) error)
+	MultiAddr() string
 }
 */
 

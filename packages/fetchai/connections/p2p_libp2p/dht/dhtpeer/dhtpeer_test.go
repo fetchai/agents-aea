@@ -21,14 +21,10 @@
 package dhtpeer
 
 import (
-	"libp2p_node/aea"
 	"testing"
-)
 
-// TestSuccess example of a successful test
-func TestSuccess(t *testing.T) {
-	t.Log("Bound to succeed")
-}
+	"libp2p_node/aea"
+)
 
 //
 const (
@@ -41,6 +37,7 @@ const (
 
 // TestNewWithAeaAgent dht peer with agent attached
 func TestNewWithAeaAgent(t *testing.T) {
+	t.Log("Starting testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
 	opts := []Option{
 		LocalURI(DefaultLocalHost, DefaultLocalPort),
 		PublicURI(DefaultLocalHost, DefaultLocalPort),
@@ -52,7 +49,7 @@ func TestNewWithAeaAgent(t *testing.T) {
 
 	dhtPeer, err := New(opts...)
 	if err != nil {
-		t.Error("Failed at DHTPeer initialization:", err)
+		t.Fatal("Failed at DHTPeer initialization:", err)
 	}
 
 	var rxEnvelopes []aea.Envelope
@@ -71,4 +68,11 @@ func TestNewWithAeaAgent(t *testing.T) {
 	if len(rxEnvelopes) == 0 {
 		t.Error("Failed to Route & Process envelope to local Agent")
 	}
+
+	t.Cleanup(func() {
+		t.Log("Cleaning testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
+		dhtPeer.Close()
+	})
+	t.Log("Ending testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
+	defer dhtPeer.Close()
 }

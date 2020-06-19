@@ -25,7 +25,7 @@ import (
 
 	"github.com/multiformats/go-multiaddr"
 
-	utils "libp2p_node/aea/utils"
+	utils "libp2p_node/utils"
 )
 
 // Option for dhtpeer.New
