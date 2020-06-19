@@ -182,7 +182,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- 'fetchai/oef_search:0.2.0'
+- 'fetchai/oef_search:0.3.0'
 behaviours:
   my_search_behaviour:
     args:
@@ -214,16 +214,16 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.2.0
+aea add protocol fetchai/oef_search:0.3.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the oef connection and install its dependencies:
 ``` bash
-aea add connection fetchai/oef:0.4.0
+aea add connection fetchai/oef:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 ## Step 8: Run a service provider AEA
@@ -237,7 +237,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
 ``` bash
 aea fetch fetchai/simple_service_registration:0.5.0 && cd simple_service_registration
-aea run --connections fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.5.0
 ```
 
 This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.
@@ -412,7 +412,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.2.0
+- fetchai/oef_search:0.3.0
 behaviours:
   service:
     args:
@@ -446,7 +446,7 @@ dependencies: {}
 We can then launch our AEA.
 
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.5.0
 ```
 
 We can see that the AEA sends search requests to the [OEF search node](../oef-ledger) and receives search responses from the [OEF search node](../oef-ledger). Since our AEA is only searching on the [OEF search node](../oef-ledger) - and not registered on the [OEF search node](../oef-ledger) - the search response returns a single agent (the service provider).

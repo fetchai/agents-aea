@@ -58,7 +58,7 @@ class TestHTTPServerConnectionConnectDisconnect:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
         cls.configuration = ConnectionConfig(
             host=cls.host,
             port=cls.port,
@@ -94,7 +94,7 @@ class TestHTTPServerConnectionSend:
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = HTTPServerConnection.connection_id
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -192,7 +192,7 @@ class TestHTTPServerConnectionGET404:
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = HTTPServerConnection.connection_id
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -266,7 +266,7 @@ class TestHTTPServerConnectionGET408:
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = HTTPServerConnection.connection_id
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -357,7 +357,7 @@ class TestHTTPServerConnectionGET200:
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = HTTPServerConnection.connection_id
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -465,7 +465,7 @@ class TestHTTPServerConnectionPOST404:
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = HTTPServerConnection.connection_id
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -539,7 +539,7 @@ class TestHTTPServerConnectionPOST408:
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = HTTPServerConnection.connection_id
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,
@@ -630,7 +630,7 @@ class TestHTTPServerConnectionPOST201:
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = HTTPServerConnection.connection_id
-        cls.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        cls.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         cls.configuration = ConnectionConfig(
             host=cls.host,

@@ -141,7 +141,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/echo:0.2.0")
+        cls.skill_id = PublicId.from_str("fetchai/echo:0.3.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -351,7 +351,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.2.0"
+        cls.skill_id = "fetchai/echo:0.3.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -423,7 +423,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.2.0"
+        cls.skill_id = "fetchai/echo:0.3.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -485,7 +485,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.5.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.6.0")
 
         contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)

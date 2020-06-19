@@ -20,9 +20,8 @@
 """
 This module contains the classes required for default dialogue management.
 
-- DialogueLabel: The dialogue label class acts as an identifier for dialogues.
-- Dialogue: The dialogue class maintains state of a dialogue and manages it.
-- Dialogues: The dialogues class keeps track of all dialogues.
+- DefaultDialogue: The dialogue class maintains state of a dialogue and manages it.
+- DefaultDialogues: The dialogues class keeps track of all dialogues.
 """
 
 from abc import ABC
@@ -73,7 +72,6 @@ class DefaultDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param agent_address: the address of the agent for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
         :return: None
         """
         Dialogue.__init__(

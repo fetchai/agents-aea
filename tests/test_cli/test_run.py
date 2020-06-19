@@ -1456,7 +1456,7 @@ class TestRunFailsWhenProtocolNotComplete:
 
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "protocol", "fetchai/fipa:0.3.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", "fetchai/fipa:0.4.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0

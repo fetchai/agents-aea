@@ -1156,7 +1156,8 @@ class ProtocolGenerator:
         self._change_indent(-1)
         cls_str += self.indent + "@property\n"
         cls_str += (
-            self.indent + "def performative(self) -> Performative:  # noqa: F821\n"
+            self.indent
+            + "def performative(self) -> Performative:  # type: ignore # noqa: F821\n"
         )
         self._change_indent(1)
         cls_str += self.indent + '"""Get the performative of the message."""\n'
@@ -1334,24 +1335,18 @@ class ProtocolGenerator:
             if len(self._reply[performative]) > 0:
                 valid_replies_str += "\n"
                 self._change_indent(1)
-                valid_replies_str += self.indent + "["
+                valid_replies_str += self.indent + "{"
                 for reply in self._reply[performative]:
                     valid_replies_str += "{}Message.Performative.{}, ".format(
                         self.protocol_specification_in_camel_case, reply.upper()
                     )
                 valid_replies_str = valid_replies_str[:-2]
-                valid_replies_str += "]\n"
+                valid_replies_str += "}\n"
                 self._change_indent(-1)
             valid_replies_str += self.indent + "),\n"
 
         self._change_indent(-1)
-        valid_replies_str += (
-            self.indent
-            + "}}  # type: Dict[{}Message.Performative, FrozenSet[{}Message.Performative]]\n".format(
-                self.protocol_specification_in_camel_case,
-                self.protocol_specification_in_camel_case,
-            )
-        )
+        valid_replies_str += self.indent + "}"
         return valid_replies_str
 
     def _end_state_enum_str(self) -> str:
@@ -1429,7 +1424,6 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += self.indent + "from abc import ABC\n"
-        cls_str += self.indent + "from enum import Enum\n"
         cls_str += (
             self.indent + "from typing import Dict, FrozenSet, Optional, cast\n\n"
         )
@@ -1513,7 +1507,7 @@ class ProtocolGenerator:
             + ":param role: the role of the agent this dialogue is maintained for\n"
         )
         cls_str += self.indent + ":return: None\n"
-        cls_str += self.indent +'"""\n'
+        cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogue.__init__(\n"
         cls_str += self.indent + "self,\n"
         cls_str += self.indent + "dialogue_label=dialogue_label,\n"
@@ -1564,6 +1558,7 @@ class ProtocolGenerator:
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "return True\n\n"
         self._change_indent(-1)
+        self._change_indent(-1)
 
         # dialogues class
         cls_str += self.indent + "class {}Dialogues(Dialogues, ABC):\n".format(
@@ -1579,14 +1574,14 @@ class ProtocolGenerator:
         end_states_str = ", ".join(
             [
                 "{}Dialogue.EndState.{}".format(
-                    self.protocol_specification_in_camel_case, end_state
+                    self.protocol_specification_in_camel_case, end_state.upper()
                 )
                 for end_state in self._end_states
             ]
         )
-        cls_str += self.indent +"END_STATES = frozenset(\n"
+        cls_str += self.indent + "END_STATES = frozenset(\n"
         cls_str += self.indent + "{" + end_states_str + "}"
-        cls_str += self.indent +")\n\n"
+        cls_str += self.indent + ")\n\n"
         cls_str += self.indent + "def __init__(self, agent_address: Address) -> None:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
@@ -1598,7 +1593,8 @@ class ProtocolGenerator:
         cls_str += self.indent + ":return: None\n"
         cls_str += self.indent + '"""\n'
         cls_str += (
-            self.indent + "Dialogues.__init__(self, agent_address=agent_address, end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES))\n"
+            self.indent
+            + "Dialogues.__init__(self, agent_address=agent_address, end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES))\n"
         )
         self._change_indent(-1)
         cls_str += self.indent + "def create_dialogue(\n"

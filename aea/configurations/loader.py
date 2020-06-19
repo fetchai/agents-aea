@@ -124,8 +124,12 @@ class ConfigLoader(Generic[T]):
             protobuf_snippets_json = {}
             dialogue_configuration = {}  # type: Dict
         elif len(yaml_documents) == 2:
-            protobuf_snippets_json = yaml_documents[1]
-            dialogue_configuration = {}
+            protobuf_snippets_json = (
+                {} if "initiation" in yaml_documents[1] else yaml_documents[1]
+            )
+            dialogue_configuration = (
+                yaml_documents[1] if "initiation" in yaml_documents[1] else {}
+            )
         elif len(yaml_documents) == 3:
             protobuf_snippets_json = yaml_documents[1]
             dialogue_configuration = yaml_documents[2]

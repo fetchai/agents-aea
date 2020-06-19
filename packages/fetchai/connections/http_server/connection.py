@@ -147,7 +147,7 @@ class Request(OpenAPIRequest):
         envelope = Envelope(
             to=agent_address,
             sender=self.id,
-            protocol_id=PublicId.from_str("fetchai/http:0.2.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.3.0"),
             context=context,
             message=http_message,
         )

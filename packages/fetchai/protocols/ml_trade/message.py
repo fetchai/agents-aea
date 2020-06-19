@@ -39,7 +39,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = ProtocolId("fetchai", "ml_trade", "0.2.0")
+    protocol_id = ProtocolId("fetchai", "ml_trade", "0.3.0")
 
     Description = CustomDescription
 
@@ -100,7 +100,7 @@ class MlTradeMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(MlTradeMessage.Performative, self.get("performative"))

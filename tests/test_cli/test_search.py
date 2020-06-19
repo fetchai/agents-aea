@@ -356,7 +356,7 @@ class TestSearchWithRegistryInSubfolderLocal:
             'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
-            "Public ID: fetchai/echo:0.2.0\n"
+            "Public ID: fetchai/echo:0.3.0\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"
@@ -431,7 +431,7 @@ class TestSearchInAgentDirectoryLocal:
             'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
-            "Public ID: fetchai/echo:0.2.0\n"
+            "Public ID: fetchai/echo:0.3.0\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"

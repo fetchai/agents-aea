@@ -92,7 +92,7 @@ class DefaultMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(DefaultMessage.Performative, self.get("performative"))

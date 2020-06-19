@@ -18,10 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains the classes required for fipa dialogue management.
+This module contains the classes required for ml_trade dialogue management.
 
-- FipaDialogue: The dialogue class maintains state of a dialogue and manages it.
-- FipaDialogues: The dialogues class keeps track of all dialogues.
+- MlTradeDialogue: The dialogue class maintains state of a dialogue and manages it.
+- MlTradeDialogues: The dialogues class keeps track of all dialogues.
 """
 
 from abc import ABC
@@ -31,70 +31,35 @@ from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 
 
-class FipaDialogue(Dialogue):
-    """The fipa dialogue class maintains state of a dialogue and manages it."""
+class MlTradeDialogue(Dialogue):
+    """The ml_trade dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({FipaMessage.Performative.CFP})
-    TERMINAL_PERFORMATIVES = frozenset(
-        {
-            FipaMessage.Performative.DECLINE,
-            FipaMessage.Performative.MATCH_ACCEPT,
-            FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            FipaMessage.Performative.INFORM,
-        }
-    )
+    INITIAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.CFP})
+    TERMINAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.DATA})
     VALID_REPLIES = {
-        FipaMessage.Performative.ACCEPT: frozenset(
-            {
-                FipaMessage.Performative.DECLINE,
-                FipaMessage.Performative.MATCH_ACCEPT,
-                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            }
+        MlTradeMessage.Performative.ACCEPT: frozenset(
+            {MlTradeMessage.Performative.DATA}
         ),
-        FipaMessage.Performative.ACCEPT_W_INFORM: frozenset(
-            {
-                FipaMessage.Performative.DECLINE,
-                FipaMessage.Performative.MATCH_ACCEPT,
-                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            }
-        ),
-        FipaMessage.Performative.CFP: frozenset(
-            {FipaMessage.Performative.PROPOSE, FipaMessage.Performative.DECLINE}
-        ),
-        FipaMessage.Performative.DECLINE: frozenset(),
-        FipaMessage.Performative.INFORM: frozenset({FipaMessage.Performative.INFORM}),
-        FipaMessage.Performative.MATCH_ACCEPT: frozenset(
-            {FipaMessage.Performative.INFORM}
-        ),
-        FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: frozenset(
-            {FipaMessage.Performative.INFORM}
-        ),
-        FipaMessage.Performative.PROPOSE: frozenset(
-            {
-                FipaMessage.Performative.ACCEPT,
-                FipaMessage.Performative.ACCEPT_W_INFORM,
-                FipaMessage.Performative.DECLINE,
-                FipaMessage.Performative.PROPOSE,
-            }
+        MlTradeMessage.Performative.CFP: frozenset({MlTradeMessage.Performative.TERMS}),
+        MlTradeMessage.Performative.DATA: frozenset(),
+        MlTradeMessage.Performative.TERMS: frozenset(
+            {MlTradeMessage.Performative.ACCEPT}
         ),
     }
 
     class AgentRole(Dialogue.Role):
-        """This class defines the agent's role in a fipa dialogue."""
+        """This class defines the agent's role in a ml_trade dialogue."""
 
         SELLER = "seller"
         BUYER = "buyer"
 
     class EndState(Dialogue.EndState):
-        """This class defines the end states of a fipa dialogue."""
+        """This class defines the end states of a ml_trade dialogue."""
 
         SUCCESSFUL = 0
-        DECLINED_CFP = 1
-        DECLINED_PROPOSE = 2
-        DECLINED_ACCEPT = 3
 
     def __init__(
         self,
@@ -138,17 +103,10 @@ class FipaDialogue(Dialogue):
         return True
 
 
-class FipaDialogues(Dialogues, ABC):
-    """This class keeps track of all fipa dialogues."""
+class MlTradeDialogues(Dialogues, ABC):
+    """This class keeps track of all ml_trade dialogues."""
 
-    END_STATES = frozenset(
-        {
-            FipaDialogue.EndState.SUCCESSFUL,
-            FipaDialogue.EndState.DECLINED_CFP,
-            FipaDialogue.EndState.DECLINED_PROPOSE,
-            FipaDialogue.EndState.DECLINED_ACCEPT,
-        }
-    )
+    END_STATES = frozenset({MlTradeDialogue.EndState.SUCCESSFUL})
 
     def __init__(self, agent_address: Address) -> None:
         """
@@ -165,7 +123,7 @@ class FipaDialogues(Dialogues, ABC):
 
     def create_dialogue(
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> FipaDialogue:
+    ) -> MlTradeDialogue:
         """
         Create an instance of fipa dialogue.
 
@@ -174,7 +132,7 @@ class FipaDialogues(Dialogues, ABC):
 
         :return: the created dialogue
         """
-        dialogue = FipaDialogue(
+        dialogue = MlTradeDialogue(
             dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue
