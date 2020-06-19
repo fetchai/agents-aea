@@ -80,6 +80,14 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
+    def test_request_api_500(self, request_mock):
+        """Test for request_api method 500 server response."""
+        resp_mock = mock.Mock()
+        resp_mock.status_code = 500
+        request_mock.return_value = resp_mock
+        with self.assertRaises(ClickException):
+            request_api("GET", "/path")
+
     def test_request_api_201(self, request_mock):
         """Test for request_api method 201 server response."""
         expected_result = {"correct": "json"}
