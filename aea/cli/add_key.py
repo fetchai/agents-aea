@@ -28,14 +28,14 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.helpers import try_validate_private_key_path
-from aea.crypto.registry import registry
+from aea.crypto.registries import crypto_registry
 
 
 @click.command()
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(list(registry.supported_crypto_ids)),
+    type=click.Choice(list(crypto_registry.supported_ids)),
     required=True,
 )
 @click.argument(

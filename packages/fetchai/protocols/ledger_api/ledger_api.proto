@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package fetch.aea.LedgerApi;
+
+message LedgerApiMessage{
+
+    // Performatives and contents
+    message Get_Balance_Performative{
+        string ledger_id = 1;
+        string address = 2;
+    }
+
+    message Send_Signed_Tx_Performative{
+        string ledger_id = 1;
+        bytes signed_tx = 2;
+    }
+
+    message Get_Tx_Receipt_Performative{
+        string ledger_id = 1;
+        string tx_digest = 2;
+    }
+
+    message Balance_Performative{
+        int32 amount = 1;
+    }
+
+    message Tx_Digest_Performative{
+        string digest = 1;
+    }
+
+    message Tx_Receipt_Performative{
+        map<string, string> data = 1;
+    }
+
+
+    // Standard LedgerApiMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Balance_Performative balance = 5;
+        Get_Balance_Performative get_balance = 6;
+        Get_Tx_Receipt_Performative get_tx_receipt = 7;
+        Send_Signed_Tx_Performative send_signed_tx = 8;
+        Tx_Digest_Performative tx_digest = 9;
+        Tx_Receipt_Performative tx_receipt = 10;
+    }
+}

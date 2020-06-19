@@ -17,25 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the crypto modules."""
+"""This module contains the crypto and the ledger APIs registries."""
+from typing import Callable
 
-from aea.crypto.registries import register_crypto, register_ledger_api  # noqa
+from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.registries.base import Registry
 
-register_crypto(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
-register_crypto(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
-register_crypto(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
+crypto_registry: Registry[Crypto] = Registry[Crypto]()
+register_crypto = crypto_registry.register
+make_crypto: Callable[..., Crypto] = crypto_registry.make
 
-register_ledger_api(
-    id="fetchai", entry_point="aea.crypto.fetchai:FetchAIApi", network="testnet"
-)
-register_ledger_api(
-    id="ethereum",
-    entry_point="aea.crypto.ethereum:EthereumApi",
-    address="https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-    gas_price=50,
-)
-register_ledger_api(
-    id="cosmos",
-    entry_point="aea.crypto.cosmos:CosmosApi",
-    address="http://aea-testnet.sandbox.fetch-ai.com:1317",
-)
+ledger_apis_registry: Registry[LedgerApi] = Registry[LedgerApi]()
+register_ledger_api = ledger_apis_registry.register
+make_ledger_api: Callable[..., LedgerApi] = ledger_apis_registry.make

@@ -26,7 +26,7 @@ import click
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import verify_or_create_private_keys
-from aea.crypto.registry import registry
+from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 
 
@@ -34,7 +34,7 @@ from aea.crypto.wallet import Wallet
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(list(registry.supported_crypto_ids)),
+    type=click.Choice(list(crypto_registry.supported_ids)),
     required=True,
 )
 @click.pass_context
