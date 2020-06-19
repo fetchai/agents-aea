@@ -66,9 +66,9 @@ The developer can generate custom protocols with the <a href="../protocol-genera
 
 We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
-## `fetchai/default:0.2.0` protocol
+## `fetchai/default:0.3.0` protocol
 
-The `fetchai/default:0.2.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
+The `fetchai/default:0.3.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
 ``` python
 from enum import Enum
@@ -115,7 +115,7 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.2.0` skill utilises the `fetchai/default:0.2.0` protocol for error handling.
+Each AEA's `fetchai/error:0.2.0` skill utilises the `fetchai/default:0.3.0` protocol for error handling.
 
 ## `fetchai/oef_search:0.2.0` protocol
 

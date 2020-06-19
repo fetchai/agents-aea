@@ -27,7 +27,7 @@ This module contains the classes required for fipa dialogue management.
 
 from abc import ABC
 from enum import Enum
-from typing import Dict, FrozenSet, cast
+from typing import Dict, FrozenSet, Set, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
@@ -87,6 +87,29 @@ class FipaDialogue(Dialogue):
         DECLINED_PROPOSE = 2
         DECLINED_ACCEPT = 3
 
+    @property
+    def initial_performatives(self) -> Set[FipaMessage.Performative]:
+        """
+        Get the performatives one of which the initial message in the dialogue must have.
+
+        :return: the valid performatives of the initial message
+        """
+        return {FipaMessage.Performative.CFP}
+
+    @property
+    def terminal_performatives(self) -> Set[FipaMessage.Performative]:
+        """
+        Get the performatives one of which the terminal message in the dialogue must have.
+
+        :return: the valid performatives of the terminal message
+        """
+        return {
+            FipaMessage.Performative.DECLINE,
+            FipaMessage.Performative.MATCH_ACCEPT,
+            FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            FipaMessage.Performative.INFORM,
+        }
+
     def is_valid(self, message: Message) -> bool:
         """
         Check whether 'message' is a valid next message in the dialogue.
@@ -98,14 +121,6 @@ class FipaDialogue(Dialogue):
         :return: True if valid, False otherwise
         """
         return True
-
-    def initial_performative(self) -> FipaMessage.Performative:
-        """
-        Get the performative which the initial message in the dialogue must have.
-
-        :return: the performative of the initial message
-        """
-        return FipaMessage.Performative.CFP
 
     def get_replies(self, performative: Enum) -> FrozenSet:
         """

@@ -114,14 +114,14 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
     try:
-        # click.echo("Provide performative of protocol fetchai/default:0.2.0:")
+        # click.echo("Provide performative of protocol fetchai/default:0.3.0:")
         # performative_str = input()  # nosec
         # if performative_str == "":
         #     raise InterruptInputException
         performative_str = "bytes"
         performative = DefaultMessage.Performative(performative_str)
         click.echo(
-            "Provide message of protocol fetchai/default:0.2.0 for performative {}:".format(
+            "Provide message of protocol fetchai/default:0.3.0 for performative {}:".format(
                 performative_str
             )
         )

@@ -20,11 +20,11 @@ speech_acts:
     bodyy: pt:bytes
 ...
 ---
-entry: [request]
+initiation: [request]
 reply:
   request: [response]
   response: []
-exit: [response]
+termination: [response]
 roles: {client, server}
 end_states: [successful]
 ...

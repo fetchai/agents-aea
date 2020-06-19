@@ -140,6 +140,72 @@ class Dialogue(ABC):
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0
 
+    class Rules:
+        """This class defines the rules for the dialogue."""
+
+        def __init__(
+            self,
+            initial_performatives: FrozenSet[Message.Performative],
+            terminal_performatives: FrozenSet[Message.Performative],
+            valid_replies: Dict[Message.Performative, FrozenSet[Message.Performative]],
+        ) -> None:
+            """
+            Initialize a dialogue.
+
+            :param dialogue_label: the identifier of the dialogue
+            :param agent_address: the address of the agent for whom this dialogue is maintained
+            :param role: the role of the agent this dialogue is maintained for
+            :param rules: the rules of the dialogue
+
+            :return: None
+            """
+            self._initial_performatives = initial_performatives
+            self._terminal_performatives = terminal_performatives
+            self._valid_replies = valid_replies
+
+        @property
+        def initial_performatives(self) -> FrozenSet[Message.Performative]:
+            """
+            Get the performatives one of which the terminal message in the dialogue must have.
+
+            :return: the valid performatives of an terminal message
+            """
+            return self._initial_performatives
+
+        @property
+        def terminal_performatives(self) -> FrozenSet[Message.Performative]:
+            """
+            Get the performatives one of which the terminal message in the dialogue must have.
+
+            :return: the valid performatives of an terminal message
+            """
+            return self._terminal_performatives
+
+        @property
+        def valid_replies(
+            self,
+        ) -> Dict[Message.Performative, FrozenSet[Message.Performative]]:
+            """
+            Get all the valid performatives which are a valid replies to performatives.
+
+            :return: the full valid reply structure.
+            """
+            return self._valid_replies
+
+        def get_valid_replies(
+            self, performative: Message.Performative
+        ) -> FrozenSet[Message.Performative]:
+            """
+            Given a `performative`, return the list of performatives which are its valid replies in a dialogue.
+
+            :param performative: the performative in a message
+            :return: list of valid performative replies
+            """
+            assert (
+                performative in self.valid_replies
+            ), "this performative '{}' is not supported".format(performative)
+            return self.valid_replies[performative]
+
     class Role(Enum):
         """This class defines the agent's role in a dialogue."""
 
@@ -159,6 +225,7 @@ class Dialogue(ABC):
         dialogue_label: DialogueLabel,
         agent_address: Optional[Address] = None,
         role: Optional[Role] = None,
+        rules: Optional[Rules] = None,
     ) -> None:
         """
         Initialize a dialogue.
@@ -166,6 +233,7 @@ class Dialogue(ABC):
         :param dialogue_label: the identifier of the dialogue
         :param agent_address: the address of the agent for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
+        :param rules: the rules of the dialogue
 
         :return: None
         """
@@ -180,6 +248,7 @@ class Dialogue(ABC):
 
         self._outgoing_messages = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
+        self._rules = rules
 
     @property
     def dialogue_label(self) -> DialogueLabel:
@@ -228,6 +297,16 @@ class Dialogue(ABC):
         :return: None
         """
         self._role = role
+
+    @property
+    def rules(self) -> "Rules":
+        """
+        Get the dialogue rules.
+
+        :return: the rules
+        """
+        assert self._rules is not None, "Rules is not set."
+        return self._rules
 
     @property
     def is_self_initiated(self) -> bool:
@@ -393,7 +472,7 @@ class Dialogue(ABC):
             result = (
                 message_id == Dialogue.STARTING_MESSAGE_ID
                 and target == Dialogue.STARTING_TARGET
-                and performative == self.initial_performative()
+                and performative in self.rules.initial_performatives
             )
         else:
             last_message_id = self.last_message.message_id
@@ -403,7 +482,8 @@ class Dialogue(ABC):
                 result = (
                     message_id == last_message_id + 1
                     and 1 <= target <= last_message_id
-                    and performative in self.get_replies(target_performative)
+                    and performative
+                    in self.rules.get_valid_replies(target_performative)
                 )
             else:
                 result = False
@@ -440,23 +520,6 @@ class Dialogue(ABC):
             and final_dialogue_label.dialogue_reference[1] != ""
         ), "Dialogue label cannot be updated."
         self._dialogue_label = final_dialogue_label
-
-    @abstractmethod
-    def initial_performative(self) -> Enum:
-        """
-        Get the performative which the initial message in the dialogue must have.
-
-        :return: the performative of the initial message
-        """
-
-    @abstractmethod
-    def get_replies(self, performative: Enum) -> FrozenSet:
-        """
-        Given a `performative`, return the list of performatives which are its valid replies in a dialogue.
-
-        :param performative: the performative in a message
-        :return: list of valid performative replies
-        """
 
     @abstractmethod
     def is_valid(self, message: Message) -> bool:
@@ -503,19 +566,68 @@ class Dialogue(ABC):
         return representation
 
 
+class DialogueStats(ABC):
+    """Class to handle statistics on default dialogues."""
+
+    def __init__(self, end_states: FrozenSet[Dialogue.EndState]) -> None:
+        """
+        Initialize a StatsManager.
+
+        :param end_states: the list of dialogue endstates
+        """
+        self._self_initiated = {
+            e: 0 for e in end_states
+        }  # type: Dict[Dialogue.EndState, int]
+        self._other_initiated = {
+            e: 0 for e in end_states
+        }  # type: Dict[Dialogue.EndState, int]
+
+    @property
+    def self_initiated(self) -> Dict[Dialogue.EndState, int]:
+        """Get the stats dictionary on self initiated dialogues."""
+        return self._self_initiated
+
+    @property
+    def other_initiated(self) -> Dict[Dialogue.EndState, int]:
+        """Get the stats dictionary on other initiated dialogues."""
+        return self._other_initiated
+
+    def add_dialogue_endstate(
+        self, end_state: Dialogue.EndState, is_self_initiated: bool
+    ) -> None:
+        """
+        Add dialogue endstate stats.
+
+        :param end_state: the end state of the dialogue
+        :param is_self_initiated: whether the dialogue is initiated by the agent or the opponent
+
+        :return: None
+        """
+        if is_self_initiated:
+            assert end_state in self._self_initiated, "End state not present!"
+            self._self_initiated[end_state] += 1
+        else:
+            assert end_state in self._other_initiated, "End state not present!"
+            self._other_initiated[end_state] += 1
+
+
 class Dialogues(ABC):
     """The dialogues class keeps track of all dialogues for an agent."""
 
-    def __init__(self, agent_address: Address = "") -> None:
+    def __init__(
+        self, agent_address: Address, end_states: FrozenSet[Dialogue.EndState]
+    ) -> None:
         """
         Initialize dialogues.
 
         :param agent_address: the address of the agent for whom dialogues are maintained
+        :param end_states: the list of dialogue endstates
         :return: None
         """
         self._dialogues = {}  # type: Dict[DialogueLabel, Dialogue]
         self._agent_address = agent_address
         self._dialogue_nonce = 0
+        self._dialogue_stats = DialogueStats(end_states)
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
@@ -527,6 +639,15 @@ class Dialogues(ABC):
         """Get the address of the agent for whom dialogues are maintained."""
         assert self._agent_address != "", "agent_address is not set."
         return self._agent_address
+
+    @property
+    def dialogue_stats(self) -> DialogueStats:
+        """
+        Get the dialogue statistics.
+
+        :return: dialogue stats object
+        """
+        return self._dialogue_stats
 
     def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
         """

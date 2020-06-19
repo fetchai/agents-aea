@@ -30,13 +30,13 @@ ct:Description: |
   bytes description = 1;
 ...
 ---
-entry: [cfp]
+initiation: [cfp]
 reply:
   cfp: [terms]
   terms: [accept]
   accept: [data]
   data: []
-exit: [data]
+termination: [data]
 roles: {seller, buyer}
 end_states: [successful]
 ...

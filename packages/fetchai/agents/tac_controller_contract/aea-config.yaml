@@ -13,7 +13,7 @@ connections:
 contracts:
 - fetchai/erc1155:0.5.0
 protocols:
-- fetchai/default:0.2.0
+- fetchai/default:0.3.0
 - fetchai/fipa:0.3.0
 - fetchai/oef_search:0.2.0
 - fetchai/tac:0.2.0

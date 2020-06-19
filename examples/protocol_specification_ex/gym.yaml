@@ -15,6 +15,7 @@ speech_acts:
     reward: pt:float
     done: pt:bool
     info: ct:AnyObject
+  status: pt:dict[pt:str, pt:str]
   reset: {}
   close: {}
 ...
@@ -23,14 +24,14 @@ ct:AnyObject: |
   bytes any = 1;
 ...
 ---
-entry: [reset]
+initiation: [reset]
 reply:
   reset: [status]
   status: [act, close, reset]
   act: [percept]
   percept: [act, close, reset]
   close: []
-exit: [close]
+termination: [close]
 roles: {agent, environment}
 end_states: [successful]
 ...

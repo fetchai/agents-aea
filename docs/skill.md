@@ -255,7 +255,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.2.0
+- fetchai/default:0.3.0
 ```
 
 
@@ -268,7 +268,7 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `fetchai/default:0.2.0` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:0.3.0` protocol which provides error codes for the above.
 
 
 <br />
