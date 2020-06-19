@@ -39,7 +39,6 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.loader import ConfigLoader
 from aea.connections.stub.connection import (
@@ -51,6 +50,7 @@ from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.helpers.base import cd, sigint_crossplatform
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
+from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.generic import (
     force_set_config,

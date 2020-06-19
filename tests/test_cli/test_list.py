@@ -191,7 +191,7 @@ class ListContractsCommandTestCase(TestCase):
         shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(self.t, "dummy_aea"))
         os.chdir(Path(self.t, "dummy_aea"))
 
-    @mock.patch("aea.cli.list._get_item_details")
+    @mock.patch("aea.cli.list.list_agent_items")
     @mock.patch("aea.cli.utils.formatting.format_items")
     def test_list_contracts_positive(self, *mocks):
         """Test list contracts command positive result."""
@@ -216,7 +216,7 @@ class ListAllCommandTestCase(TestCase):
         """Set the test up."""
         self.runner = CliRunner()
 
-    @mock.patch("aea.cli.list._get_item_details", return_value=[])
+    @mock.patch("aea.cli.list.list_agent_items", return_value=[])
     @mock.patch("aea.cli.list.format_items")
     @mock.patch("aea.cli.utils.decorators._check_aea_project")
     def test_list_all_no_details_positive(self, *mocks):
@@ -227,7 +227,7 @@ class ListAllCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertEqual(result.output, "")
 
-    @mock.patch("aea.cli.list._get_item_details", return_value=[{"name": "some"}])
+    @mock.patch("aea.cli.list.list_agent_items", return_value=[{"name": "some"}])
     @mock.patch("aea.cli.list.format_items", return_value="correct")
     @mock.patch("aea.cli.utils.decorators._check_aea_project")
     def test_list_all_positive(self, *mocks):

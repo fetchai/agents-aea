@@ -19,7 +19,7 @@
 
 """Module with formatting utils of the aea cli."""
 
-from typing import Dict
+from typing import Dict, List
 
 from aea.configurations.base import AgentConfig
 from aea.configurations.loader import ConfigLoader
@@ -60,3 +60,14 @@ def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> D
         "description": config.description,
         "version": config.version,
     }
+
+
+def sort_items(items: List[Dict]) -> List[Dict]:
+    """
+    Sort a list of dict items associated with packages.
+
+    :param items: list of dicts that represent items.
+
+    :return: sorted list.
+    """
+    return sorted(items, key=lambda k: k["name"])

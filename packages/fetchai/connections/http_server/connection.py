@@ -16,17 +16,21 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-"""HTTP server connection, channel, server, and handler"""
-
+"""HTTP server connection, channel, server, and handler."""
 import asyncio
+import email
 import logging
+from abc import ABC, abstractmethod
 from asyncio import CancelledError
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from threading import Lock, Thread
+from asyncio.events import AbstractEventLoop
+from asyncio.futures import Future
+from traceback import format_exc
 from typing import Dict, Optional, Set, cast
 from urllib.parse import parse_qs, urlencode, urlparse
 from uuid import uuid4
+
+from aiohttp import web
+from aiohttp.web_request import BaseRequest
 
 from openapi_core import create_spec
 from openapi_core.validation.request.datatypes import (
@@ -58,7 +62,21 @@ SERVER_ERROR = 500
 logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = str
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.4.0")
+
+
+def headers_to_string(headers: Dict):
+    """
+    Convert headers to string.
+
+    :param headers: dict
+
+    :return: str
+    """
+    msg = email.message.Message()
+    for name, value in headers.items():
+        msg.add_header(name, value)
+    return msg.as_string()
 
 
 class Request(OpenAPIRequest):
@@ -75,43 +93,39 @@ class Request(OpenAPIRequest):
         self._id = id
 
     @classmethod
-    def create(cls, request_handler: BaseHTTPRequestHandler) -> "Request":
+    async def create(cls, http_request: BaseRequest) -> "Request":
         """
         Create a request.
 
-        :param request_handler: the request handler
+        :param http_request: http_request
         :return: a request
         """
-        method = request_handler.command.lower()
+        method = http_request.method.lower()
 
-        parsed_path = urlparse(request_handler.path)
+        parsed_path = urlparse(http_request.path_qs)
 
-        url = "http://{}:{}{}".format(
-            *request_handler.server.server_address, parsed_path.path
-        )
+        url = http_request.url
 
-        content_length = request_handler.headers["Content-Length"]
-        body = (
-            None
-            if content_length is None
-            else request_handler.rfile.read(int(content_length)).decode()
-        )
+        body = await http_request.read()
 
-        mimetype = request_handler.headers.get_content_type()
+        mimetype = http_request.content_type
 
         query_params = parse_qs(parsed_path.query, keep_blank_values=True)
+
         parameters = RequestParameters(
             query=ImmutableMultiDict(query_params),
-            header=request_handler.headers.as_string(),
+            header=headers_to_string(dict(http_request.headers)),
             path={},
         )
+
         request = Request(
-            full_url_pattern=url,
+            full_url_pattern=str(url),
             method=method,
             parameters=parameters,
             body=body,
             mimetype=mimetype,
         )
+
         request.id = uuid4().hex
         return request
 
@@ -141,7 +155,7 @@ class Request(OpenAPIRequest):
             method=self.method,
             url=url,
             headers=self.parameters.header,
-            bodyy=self.body.encode() if self.body is not None else b"",
+            bodyy=self.body if self.body is not None else b"",
             version="",
         )
         envelope = Envelope(
@@ -154,61 +168,30 @@ class Request(OpenAPIRequest):
         return envelope
 
 
-class Response:
+class Response(web.Response):
     """Generic response object."""
 
-    def __init__(
-        self, status_code: int, status_text: str, body: Optional[bytes] = None
-    ):
-        """
-        Initialize the response.
-
-        :param status_code: the status code
-        :param status_text: the status text
-        :param body: the body
-        """
-        self._status_code = status_code
-        self._status_text = status_text
-        self._body = body
-
-    @property
-    def status_code(self) -> int:
-        """Get the status code."""
-        return self._status_code
-
-    @property
-    def status_text(self) -> str:
-        """Get the status text."""
-        return self._status_text
-
-    @property
-    def body(self) -> Optional[bytes]:
-        """Get the body."""
-        return self._body
-
     @classmethod
-    def from_envelope(cls, envelope: Optional[Envelope] = None) -> "Response":
+    def from_envelope(cls, envelope: Envelope) -> "Response":
         """
         Turn an envelope into a response.
 
         :param envelope: the envelope
         :return: the response
         """
-        if envelope is not None:
-            assert isinstance(
-                envelope.message, HttpMessage
-            ), "Message not of type HttpMessage"
-            http_message = cast(HttpMessage, envelope.message)
-            if http_message.performative == HttpMessage.Performative.RESPONSE:
-                response = Response(
-                    http_message.status_code,
-                    http_message.status_text,
-                    http_message.bodyy,
-                )
-            else:
-                response = Response(SERVER_ERROR, "Server error")
+        assert isinstance(
+            envelope.message, HttpMessage
+        ), "Message not of type HttpMessage"
+
+        http_message = cast(HttpMessage, envelope.message)
+        if http_message.performative == HttpMessage.Performative.RESPONSE:
+            response = cls(
+                status=http_message.status_code,
+                reason=http_message.status_text,
+                body=http_message.bodyy,
+            )
         else:
-            response = Response(REQUEST_TIMEOUT, "Request Timeout")
+            response = cls(status=SERVER_ERROR, text="Server error")
         return response
 
 
@@ -250,12 +233,78 @@ class APISpec:
         try:
             validate_request(self._validator, request)
         except Exception:
+            logger.exception("APISpec verify exception")
             return False
         return True
 
 
-class HTTPChannel:
+class BaseAsyncChannel(ABC):
+    """Base asynchronous channel class."""
+
+    def __init__(self, address: Address, connection_id: PublicId,) -> None:
+        """
+        Initialize a channel.
+
+        :param address: the address of the agent.
+        :param connection_id: public id of connection using this chanel.
+        """
+        self._in_queue = None  # type: Optional[asyncio.Queue]
+        self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
+        self.is_stopped = True
+        self.address = address
+        self.connection_id = connection_id
+
+    @abstractmethod
+    async def connect(self, loop: AbstractEventLoop) -> None:
+        """
+        Connect.
+
+        Upon HTTP Channel connection, kickstart the HTTP Server in its own thread.
+
+        :param loop: asyncio event loop
+
+        :return: None
+        """
+        self._loop = loop
+        self._in_queue = asyncio.Queue()
+        self.is_stopped = False
+
+    async def get_message(self) -> Optional["Envelope"]:
+        """
+        Get http response from in-queue.
+
+        :return: None or envelope with http response.
+        """
+        if self._in_queue is None:
+            raise ValueError("Looks like channel is not connected!")
+
+        try:
+            return await self._in_queue.get()
+        except CancelledError:
+            return None
+
+    @abstractmethod
+    def send(self, envelope: Envelope) -> None:
+        """
+        Send the envelope in_queue.
+
+        :param envelope: the envelope
+        :return: None
+        """
+
+    @abstractmethod
+    async def disconnect(self) -> None:
+        """
+        Disconnect.
+
+        Shut-off the HTTP Server.
+        """
+
+
+class HTTPChannel(BaseAsyncChannel):
     """A wrapper for an RESTful API with an internal HTTPServer."""
+
+    RESPONSE_TIMEOUT = 300
 
     def __init__(
         self,
@@ -274,52 +323,96 @@ class HTTPChannel:
         :param host: RESTful API hostname / IP address
         :param port: RESTful API port number
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
+        :param connection_id: public id of connection using this chanel.
+        :param restricted_to_protocols: set of restricted protocols
         :param timeout_window: the timeout (in seconds) for a request to be handled.
         """
-        self.address = address
+        super().__init__(address=address, connection_id=connection_id)
         self.host = host
         self.port = port
         self.server_address = "http://{}:{}".format(self.host, self.port)
-        self.connection_id = connection_id
         self.restricted_to_protocols = restricted_to_protocols
-        self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
-        self.thread = None  # type: Optional[Thread]
-        self.lock = Lock()
-        self.is_stopped = True
+
         self._api_spec = APISpec(api_spec_path, self.server_address)
         self.timeout_window = timeout_window
-        self.http_server = None  # type: Optional[HTTPServer]
-        self.dispatch_ready_envelopes = {}  # type: Dict[RequestId, Envelope]
-        self.timed_out_request_ids = set()  # type: Set[RequestId]
-        self.pending_request_ids = set()  # type: Set[RequestId]
+        self.http_server: Optional[web.TCPSite] = None
+        self.pending_requests: Dict[RequestId, Future] = {}
 
     @property
     def api_spec(self) -> APISpec:
         """Get the api spec."""
         return self._api_spec
 
-    def connect(self):
+    async def connect(self, loop: AbstractEventLoop) -> None:
         """
         Connect.
 
         Upon HTTP Channel connection, kickstart the HTTP Server in its own thread.
+
+        :param loop: asyncio event loop
+
+        :return: None
         """
         if self.is_stopped:
+            await super().connect(loop)
+
             try:
-                self.http_server = HTTPServer(
-                    (self.host, self.port), HTTPHandlerFactory(self)
-                )
+                await self._start_http_server()
                 logger.info("HTTP Server has connected to port: {}.".format(self.port))
-                self.thread = Thread(target=self.http_server.serve_forever)
-                self.thread.start()
-                self.is_stopped = False
             except OSError:
+                self.is_stopped = True
                 logger.error(
                     "{}:{} is already in use, please try another Socket.".format(
                         self.host, self.port
                     )
                 )
+
+    async def _http_handler(self, http_request: BaseRequest) -> Response:
+        """
+        Verify the request then send the request to Agent as an envelope.
+
+        :param request: the request object
+
+        :return: a tuple of response code and response description
+        """
+        request = await Request.create(http_request)
+        assert self._in_queue is not None, "Channel not connected!"
+
+        is_valid_request = self.api_spec.verify(request)
+
+        if not is_valid_request:
+            logger.warning(f"request is not valid: {request}")
+            return Response(status=NOT_FOUND, reason="Request Not Found")
+
+        try:
+            self.pending_requests[request.id] = Future()
+            # turn request into envelope
+            envelope = request.to_envelope(self.connection_id, self.address)
+            # send the envelope to the agent's inbox (via self.in_queue)
+            await self._in_queue.put(envelope)
+            # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
+
+            response_envelope = await asyncio.wait_for(
+                self.pending_requests[request.id], timeout=self.RESPONSE_TIMEOUT
+            )
+            return Response.from_envelope(response_envelope)
+
+        except asyncio.TimeoutError:
+            return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
+        except BaseException:
+            return Response(
+                status=SERVER_ERROR, reason="Server Error", text=format_exc()
+            )
+        finally:
+            self.pending_requests.pop(request.id, None)
+
+    async def _start_http_server(self) -> None:
+        """Start http server."""
+        server = web.Server(self._http_handler)
+        runner = web.ServerRunner(server)
+        await runner.setup()
+        self.http_server = web.TCPSite(runner, self.host, self.port)
+        await self.http_server.start()
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -338,139 +431,29 @@ class HTTPChannel:
             )
             raise ValueError("Cannot send message.")
 
-        if envelope.to in self.timed_out_request_ids:
-            self.timed_out_request_ids.remove(envelope.to)
+        future = self.pending_requests.pop(envelope.to, None)
+
+        if not future:
             logger.warning(
                 "Dropping envelope for request id {} which has timed out.".format(
                     envelope.to
                 )
             )
-        elif envelope.to in self.pending_request_ids:
-            self.pending_request_ids.remove(envelope.to)
-            self.dispatch_ready_envelopes.update({envelope.to: envelope})
         else:
-            logger.warning(
-                "Dropping envelope for unknown request id {}.".format(envelope.to)
-            )
+            future.set_result(envelope)
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """
         Disconnect.
 
-        Shut-off the HTTP Server and join the thread, then stop the channel.
+        Shut-off the HTTP Server.
         """
-        assert (
-            self.http_server is not None and self.thread is not None
-        ), "Server not connected, call connect first!"
+        assert self.http_server is not None, "Server not connected, call connect first!"
 
         if not self.is_stopped:
-            self.http_server.shutdown()
+            await self.http_server.stop()
             logger.info("HTTP Server has shutdown on port: {}.".format(self.port))
             self.is_stopped = True
-            self.thread.join()
-
-    async def process(self, request: Request) -> Response:
-        """
-        Verify the request then send the request to Agent as an envelope.
-
-        :param request: the request object
-        :return: a tuple of response code and response description
-        """
-        assert self.in_queue is not None, "Channel not connected!"
-
-        is_valid_request = self.api_spec.verify(request)
-
-        if is_valid_request:
-            self.pending_request_ids.add(request.id)
-            # turn request into envelope
-            envelope = request.to_envelope(self.connection_id, self.address)
-            # send the envelope to the agent's inbox (via self.in_queue)
-            self.in_queue.put_nowait(envelope)
-            # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
-            response_envelope = await self.get_response(envelope.sender)
-            # turn response envelope into response
-            response = Response.from_envelope(response_envelope)
-        else:
-            response = Response(NOT_FOUND, "Request Not Found")
-
-        return response
-
-    async def get_response(
-        self, request_id: RequestId, sleep: float = 0.1
-    ) -> Optional[Envelope]:
-        """
-        Get the response.
-
-        :param request_id: the request id
-        :return: the envelope
-        """
-        not_received = True
-        timeout_count = 0.0
-        while not_received and timeout_count <= self.timeout_window:
-            envelope = self.dispatch_ready_envelopes.get(request_id, None)
-            if envelope is None:
-                await asyncio.sleep(sleep)
-                timeout_count += sleep
-            else:
-                not_received = False
-        if not_received:
-            self.timed_out_request_ids.add(request_id)
-        return envelope
-
-
-def HTTPHandlerFactory(channel: HTTPChannel):
-    """Factory for HTTP handlers."""
-
-    class HTTPHandler(BaseHTTPRequestHandler):
-        """HTTP Handler class to deal with incoming requests."""
-
-        def __init__(self, *args, **kwargs):
-            """Initialize a HTTP Handler."""
-            self._channel = channel
-            super(HTTPHandler, self).__init__(*args, **kwargs)
-
-        @property
-        def channel(self) -> HTTPChannel:
-            """Get the http channel."""
-            return self._channel
-
-        def do_HEAD(self):
-            """Deal with header only requests."""
-            self.send_response(SUCCESS)
-            self.send_header("Content-Type", "text/plain; charset=utf-8")
-            self.end_headers()
-
-        def do_GET(self):
-            """Respond to a GET request."""
-            request = Request.create(self)
-
-            future = asyncio.run_coroutine_threadsafe(
-                self.channel.process(request), self.channel.loop
-            )
-            response = future.result()
-
-            self.send_response(response.status_code, response.status_text)
-            self.send_header("Content-Type", "text/plain; charset=utf-8")
-            self.end_headers()
-            if response.body is not None:
-                self.wfile.write(response.body)
-
-        def do_POST(self):
-            """Respond to a POST request."""
-            request = Request.create(self)
-
-            future = asyncio.run_coroutine_threadsafe(
-                self.channel.process(request), self.channel.loop
-            )
-            response = future.result()
-
-            self.send_response(response.status_code, response.status_text)
-            self.send_header("Content-Type", "text/plain; charset=utf-8")
-            self.end_headers()
-            if response.body is not None:
-                self.wfile.write(response.body)
-
-    return HTTPHandler
 
 
 class HTTPServerConnection(Connection):
@@ -502,9 +485,7 @@ class HTTPServerConnection(Connection):
         """
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
-            self.channel.in_queue = asyncio.Queue()
-            self.channel.loop = self.loop
-            self.channel.connect()
+            await self.channel.connect(loop=self.loop)
 
     async def disconnect(self) -> None:
         """
@@ -514,7 +495,7 @@ class HTTPServerConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.connection_status.is_connected = False
-            self.channel.disconnect()
+            await self.channel.disconnect()
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -539,12 +520,7 @@ class HTTPServerConnection(Connection):
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
-        assert self.channel.in_queue is not None
         try:
-            envelope = await self.channel.in_queue.get()
-            if envelope is None:
-                return None  # pragma: no cover
-
-            return envelope
+            return await self.channel.get_message()
         except CancelledError:  # pragma: no cover
             return None

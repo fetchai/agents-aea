@@ -16,16 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-"""HTTP client connection and channel"""
+"""HTTP client connection and channel."""
 
 import asyncio
 import json
 import logging
 from asyncio import CancelledError
-from typing import Optional, Set, Union, cast
+from asyncio.events import AbstractEventLoop
+from asyncio.tasks import Task
+from traceback import format_exc
+from typing import Any, Optional, Set, Union, cast
 
-import requests
+import aiohttp
+from aiohttp.client_reqrep import ClientResponse
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
@@ -37,15 +40,20 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.4.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
 
 
-class HTTPClientChannel:
+class HTTPClientAsyncChannel:
     """A wrapper for a HTTPClient."""
+
+    DEFAULT_TIMEOUT = 300  # default timeout in seconds
+    DEFAULT_EXCEPTION_CODE = (
+        600  # custom code to indicate there was exception during request
+    )
 
     def __init__(
         self,
@@ -70,83 +78,192 @@ class HTTPClientChannel:
         self.port = port
         self.connection_id = connection_id
         self.restricted_to_protocols = restricted_to_protocols
-        self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
-        self.loop = (
+
+        self._in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
+        self._loop = (
             None
         )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
         self.excluded_protocols = excluded_protocols
         self.is_stopped = True
         logger.info("Initialised the HTTP client channel")
+        self._tasks: Set[Task] = set()
 
-    def connect(self):
-        """Connect."""
-        pass
+    async def connect(self, loop: AbstractEventLoop) -> None:
+        """
+        Connect channel using loop.
+
+        :param loop: asyncio event loop to use
+
+        :return: None
+        """
+        self._loop = loop
+        self._in_queue = asyncio.Queue()
+        self.is_stopped = False
+
+    async def _http_request_task(self, request_http_message: HttpMessage) -> None:
+        """
+        Perform http request and send back response.
+
+        :param request_http_message: HttpMessage with http request constructed.
+
+        :return: None
+        """
+        if not self._loop:
+            raise ValueError("Channel is not connected")
+
+        try:
+            resp = await asyncio.wait_for(
+                self._perform_http_request(request_http_message),
+                timeout=self.DEFAULT_TIMEOUT,
+            )
+            envelope = self.to_envelope(
+                self.connection_id,
+                request_http_message,
+                status_code=resp.status,
+                headers=resp.headers,
+                status_text=resp.reason,
+                bodyy=resp._body if resp._body is not None else b"",
+            )
+        except Exception:
+            envelope = self.to_envelope(
+                self.connection_id,
+                request_http_message,
+                status_code=self.DEFAULT_EXCEPTION_CODE,
+                headers={},
+                status_text="HTTPConnection request error.",
+                bodyy=format_exc().encode("utf-8"),
+            )
+        if self._in_queue is not None:
+            await self._in_queue.put(envelope)
+
+    async def _perform_http_request(
+        self, request_http_message: HttpMessage
+    ) -> ClientResponse:
+        """
+        Perform http request and return response.
+
+        :param request_http_message: HttpMessage with http request constructed.
+
+        :return: aiohttp.ClientResponse
+        """
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.request(
+                    method=request_http_message.method,
+                    url=request_http_message.url,
+                    headers=request_http_message.headers,
+                    data=request_http_message.bodyy,
+                ) as resp:
+                    await resp.read()
+                return resp
+        except Exception:
+            logger.exception(
+                f"Exception raised during http call: {request_http_message.method} {request_http_message.url}"
+            )
+            raise
 
     def send(self, request_envelope: Envelope) -> None:
         """
-        Convert an http envelope into an http request, send the http request, wait for and receive its response, translate the response into a response envelop,
-        and send the response envelope to the in-queue.
+        Send an envelope with http request data to request.
+
+        Convert an http envelope into an http request.
+        Send the http request
+        Wait for and receive its response
+        Translate the response into a response envelop.
+        Send the response envelope to the in-queue.
 
         :param request_envelope: the envelope containing an http request
+
         :return: None
         """
-        if self.excluded_protocols is not None:
-            if request_envelope.protocol_id in self.excluded_protocols:
-                logger.error(
-                    "This envelope cannot be sent with the http client connection: protocol_id={}".format(
-                        request_envelope.protocol_id
-                    )
-                )
-                raise ValueError("Cannot send message.")
+        if self._loop is None or self.is_stopped:
+            raise ValueError("Can not send a message! Channel is not started!")
 
-            if request_envelope is not None:
-                assert isinstance(
-                    request_envelope.message, HttpMessage
-                ), "Message not of type HttpMessage"
-                request_http_message = cast(HttpMessage, request_envelope.message)
-                if (
-                    request_http_message.performative
-                    == HttpMessage.Performative.REQUEST
-                ):
-                    response = requests.request(
-                        method=request_http_message.method,
-                        url=request_http_message.url,
-                        headers=request_http_message.headers,
-                        data=request_http_message.bodyy,
-                    )
-                    response_envelope = self.to_envelope(
-                        self.connection_id, request_http_message, response
-                    )
-                    self.in_queue.put_nowait(response_envelope)  # type: ignore
-                else:
-                    logger.warning(
-                        "The HTTPMessage performative must be a REQUEST. Envelop dropped."
-                    )
+        if request_envelope is None:
+            return
+
+        if request_envelope.protocol_id in (self.excluded_protocols or []):
+            logger.error(
+                "This envelope cannot be sent with the http client connection: protocol_id={}".format(
+                    request_envelope.protocol_id
+                )
+            )
+            raise ValueError("Cannot send message.")
+
+        assert isinstance(
+            request_envelope.message, HttpMessage
+        ), "Message not of type HttpMessage"
+
+        request_http_message = cast(HttpMessage, request_envelope.message)
+
+        if request_http_message.performative != HttpMessage.Performative.REQUEST:
+            logger.warning(
+                "The HTTPMessage performative must be a REQUEST. Envelop dropped."
+            )
+            return
+
+        task = self._loop.create_task(self._http_request_task(request_http_message))
+        task.add_done_callback(self._task_done_callback)
+        self._tasks.add(task)
+
+    def _task_done_callback(self, task: Task) -> None:
+        """
+        Handle http request task completed.
+
+        Removes tasks from _tasks.
+
+        :param task: Task completed.
+
+        :return: None
+        """
+        self._tasks.remove(task)
+        logger.debug(f"Task completed: {task}")
+
+    async def get_message(self) -> Union["Envelope", None]:
+        """
+        Get http response from in-queue.
+
+        :return: None or envelope with http response.
+        """
+        if self._in_queue is None:
+            raise ValueError("Looks like channel is not connected!")
+
+        try:
+            return await self._in_queue.get()
+        except CancelledError:
+            return None
 
     def to_envelope(
         self,
         connection_id: PublicId,
         http_request_message: HttpMessage,
-        http_response: requests.models.Response,
+        status_code: int,
+        headers: dict,
+        status_text: Optional[Any],
+        bodyy: bytes,
     ) -> Envelope:
         """
         Convert an HTTP response object (from the 'requests' library) into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
         :param connection_id: the connection id
         :param http_request_message: the message of the http request envelop
-        :param http_response: the http response object
-        """
+        :param status_code: the http status code, int
+        :param headers: dict of http response headers
+        :param status_text: the http status_text, str
+        :param bodyy: bytes of http response content
 
+        :return: Envelope with http response data.
+        """
         context = EnvelopeContext(connection_id=connection_id)
         http_message = HttpMessage(
             dialogue_reference=http_request_message.dialogue_reference,
             target=http_request_message.target,
             message_id=http_request_message.message_id,
             performative=HttpMessage.Performative.RESPONSE,
-            status_code=http_response.status_code,
-            headers=json.dumps(dict(http_response.headers)),
-            status_text=http_response.reason,
-            bodyy=http_response.content if http_response.content is not None else b"",
+            status_code=status_code,
+            headers=json.dumps(dict(headers.items())),
+            status_text=status_text,
+            bodyy=bodyy,
             version="",
         )
         envelope = Envelope(
@@ -158,11 +275,30 @@ class HTTPClientChannel:
         )
         return envelope
 
-    def disconnect(self) -> None:
+    async def _cancel_tasks(self) -> None:
+        """Cancel all requests tasks pending."""
+        for task in list(self._tasks):
+            if task.done():
+                continue
+            task.cancel()
+
+        for task in list(self._tasks):
+            try:
+                await task
+            except CancelledError:
+                pass  # nosec
+            except KeyboardInterrupt:
+                raise
+            except Exception:  # nosec
+                pass  # nosec  # error should be handled in done callback
+
+    async def disconnect(self) -> None:
         """Disconnect."""
         if not self.is_stopped:
             logger.info("HTTP Client has shutdown on port: {}.".format(self.port))
             self.is_stopped = True
+
+            await self._cancel_tasks()
 
 
 class HTTPClientConnection(Connection):
@@ -176,7 +312,7 @@ class HTTPClientConnection(Connection):
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
         assert host is not None and port is not None, "host and port must be set!"
-        self.channel = HTTPClientChannel(
+        self.channel = HTTPClientAsyncChannel(
             self.address,
             host,
             port,
@@ -192,9 +328,7 @@ class HTTPClientConnection(Connection):
         """
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
-            self.channel.in_queue = asyncio.Queue()
-            self.channel.loop = self.loop
-            self.channel.connect()
+            await self.channel.connect(self._loop)
 
     async def disconnect(self) -> None:
         """
@@ -204,7 +338,7 @@ class HTTPClientConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.connection_status.is_connected = False
-            self.channel.disconnect()
+            await self.channel.disconnect()
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -229,11 +363,5 @@ class HTTPClientConnection(Connection):
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
-        assert self.channel.in_queue is not None
-        try:
-            envelope = await self.channel.in_queue.get()
-            if envelope is None:
-                return None  # pragma: no cover
-            return envelope
-        except CancelledError:  # pragma: no cover
-            return None
+
+        return await self.channel.get_message()
