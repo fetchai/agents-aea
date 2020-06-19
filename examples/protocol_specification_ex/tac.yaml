@@ -68,6 +68,6 @@ reply:
   transaction_confirmation: [transaction]
   tac_error: []
 termination: [cancelled, tac_error]
-roles: {agent, controller}
+roles: {participant, controller}
 end_states: [successful, failed]
 ...

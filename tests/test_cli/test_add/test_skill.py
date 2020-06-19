@@ -59,7 +59,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/error:0.2.0")
+        cls.skill_id = PublicId.from_str("fetchai/error:0.3.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version

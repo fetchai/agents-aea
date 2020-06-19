@@ -15,7 +15,7 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
-aea fetch fetchai/thermometer_client:0.4.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.3.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```

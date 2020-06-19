@@ -72,7 +72,7 @@ class TacDialogue(Dialogue):
         """This class defines the agent's role in a tac dialogue."""
 
         CONTROLLER = "controller"
-        AGENT = "agent"
+        PARTICIPANT = "participant"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a tac dialogue."""
