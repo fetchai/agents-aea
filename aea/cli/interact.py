@@ -25,8 +25,8 @@ from typing import Optional, Union
 
 import click
 
-from aea.cli.utils.exceptions import InterruptInputException
 from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.exceptions import InterruptInputException
 from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
