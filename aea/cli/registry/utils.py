@@ -101,6 +101,10 @@ def request_api(
         raise click.ClickException(
             "You are not authenticated. " 'Please sign in with "aea login" command.'
         )
+    elif resp.status_code == 500:
+        raise click.ClickException(
+            "Registry internal server error."
+        )
     elif resp.status_code == 404:
         raise click.ClickException("Not found in Registry.")
     elif resp.status_code == 409:

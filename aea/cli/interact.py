@@ -26,6 +26,7 @@ from typing import Optional, Union
 import click
 
 from aea.cli.utils.exceptions import InterruptInputException
+from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -44,7 +45,9 @@ from aea.protocols.default.message import DefaultMessage
 
 
 @click.command()
-def interact():
+@click.pass_context
+@check_aea_project
+def interact(click_context: click.core.Context):
     """Interact with a running AEA via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
