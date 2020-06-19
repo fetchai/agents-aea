@@ -15,7 +15,7 @@ aea create aries_alice
 cd aries_alice
 ```
 ``` bash
-aea add skill fetchai/aries_alice:0.2.0
+aea add skill fetchai/aries_alice:0.3.0
 ```
 ``` bash
 aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_host 127.0.0.1
@@ -31,8 +31,8 @@ aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_
 ```
 ``` bash
 aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.2.0
-aea add connection fetchai/oef:0.4.0
+aea add connection fetchai/webhook:0.3.0
+aea add connection fetchai/oef:0.5.0
 ```
 ``` bash
 aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8032
@@ -41,7 +41,7 @@ aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port
 aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webhooks/topic/{topic}/
 ```
 ``` bash
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
 aea fetch fetchai/aries_alice:0.3.0
@@ -79,7 +79,7 @@ aea create aries_faber
 cd aries_faber
 ```
 ``` bash
-aea add skill fetchai/aries_faber:0.2.0
+aea add skill fetchai/aries_faber:0.3.0
 ```
 ``` bash
 aea config set vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_host 127.0.0.1
@@ -98,8 +98,8 @@ aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.a
 ```
 ``` bash
 aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.2.0
-aea add connection fetchai/oef:0.4.0
+aea add connection fetchai/webhook:0.3.0
+aea add connection fetchai/oef:0.5.0
 ```
 ``` bash
 aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8022

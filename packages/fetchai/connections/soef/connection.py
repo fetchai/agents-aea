@@ -53,7 +53,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.3.0")
 
 
 class SOEFChannel:
@@ -551,7 +551,7 @@ class SOEFConnection(Connection):
             and kwargs.get("restricted_to_protocols") is None
         ):
             kwargs["restricted_to_protocols"] = [
-                PublicId.from_str("fetchai/oef_search:0.2.0")
+                PublicId.from_str("fetchai/oef_search:0.3.0")
             ]
         super().__init__(**kwargs)
         api_key = cast(str, self.configuration.config.get("api_key"))

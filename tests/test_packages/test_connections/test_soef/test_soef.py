@@ -58,7 +58,7 @@ def test_soef():
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.2.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.3.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)

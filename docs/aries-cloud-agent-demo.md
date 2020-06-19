@@ -162,7 +162,7 @@ cd aries_alice
 Add the `aries_alice` skill:
 
 ``` bash
-aea add skill fetchai/aries_alice:0.2.0
+aea add skill fetchai/aries_alice:0.3.0
 ```
 
 You now need to configure this skill to ensure `admin_host` and `admin_port` values in the skill's configuration file `alice/vendor/fetchai/skills/aries_alice/skill.yaml` match with the values you noted above for **Alice_ACA**.
@@ -188,8 +188,8 @@ Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
 aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.2.0
-aea add connection fetchai/oef:0.4.0
+aea add connection fetchai/webhook:0.3.0
+aea add connection fetchai/oef:0.5.0
 ```
 
 You now need to configure the `webhook` connection.
@@ -211,7 +211,7 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 Now you must ensure **Alice_AEA**'s default connection is `oef`.
 
 ``` bash
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 ### Alice_AEA -- Method 2: Fetch the Agent
@@ -292,7 +292,7 @@ cd aries_faber
 Add the `aries_faber` skill:
 
 ``` bash
-aea add skill fetchai/aries_faber:0.2.0
+aea add skill fetchai/aries_faber:0.3.0
 ```
 You now need to configure this skill to ensure `admin_host` and `admin_port` values in the skill's configuration file `faber/vendor/fetchai/skills/aries_alice/skill.yaml` match with the values you noted above for **Faber_ACA**.
 
@@ -324,8 +324,8 @@ Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
 aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.2.0
-aea add connection fetchai/oef:0.4.0
+aea add connection fetchai/webhook:0.3.0
+aea add connection fetchai/oef:0.5.0
 ```
 
 You now need to configure the `webhook` connection.

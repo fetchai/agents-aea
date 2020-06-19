@@ -86,7 +86,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.5.0")
 
 
 class OEFObjectTranslator:
@@ -614,7 +614,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.2.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.3.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)

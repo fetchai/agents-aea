@@ -45,12 +45,14 @@ ct:Description: |
   bytes description = 1;
 ...
 ---
+initiation: [cfp]
 reply:
   cfp: [propose, decline]
   propose: [accept, decline]
   accept: [decline, match_accept]
   decline: []
   match_accept: []
+termination: [decline, match_accept]
 roles: {buyer, seller}
 end_states: [successful, failed]
 ...

@@ -51,6 +51,13 @@ class Message:
     protocol_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
+    class Performative(Enum):
+        """Performatives for the base message."""
+
+        def __str__(self):
+            """Get the string representation."""
+            return str(self.value)
+
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
@@ -128,10 +135,10 @@ class Message:
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Enum:
+    def performative(self) -> "Performative":
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
-        return cast(Enum, self.get("performative"))
+        return cast(Message.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:

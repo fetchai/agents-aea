@@ -1,7 +1,7 @@
 ---
 name: fipa
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
@@ -33,6 +33,7 @@ ct:Description: |
   bytes description = 1;
 ...
 ---
+initiation: [cfp]
 reply:
   cfp: [propose, decline]
   propose: [accept, accept_w_inform, decline, propose]
@@ -42,6 +43,7 @@ reply:
   match_accept: [inform]
   match_accept_w_inform: [inform]
   inform: [inform]
+termination: [decline, match_accept, match_accept_w_inform, inform]
 roles: {seller, buyer}
 end_states: [successful, declined_cfp, declined_propose, declined_accept]
 ...

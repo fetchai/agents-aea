@@ -1,7 +1,7 @@
 ---
 name: default
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
@@ -23,4 +23,13 @@ ct:ErrorCode: |
       INVALID_DIALOGUE = 4;
     }
   ErrorCodeEnum error_code = 1;
+...
+---
+initiation: [bytes, error]
+reply:
+  bytes: [bytes, error]
+  error: []
+termination: [bytes, error]
+roles: {agent}
+end_states: [successful, failed]
 ...

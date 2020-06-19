@@ -9,8 +9,8 @@ aea install
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_seller:0.5.0
+aea add connection fetchai/oef:0.5.0
+aea add skill fetchai/generic_seller:0.6.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
 ```
@@ -22,8 +22,8 @@ aea install
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_buyer:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add skill fetchai/generic_buyer:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
 ```
@@ -52,13 +52,13 @@ aea generate-wealth cosmos
 aea install
 ```
 ``` bash
-aea eject skill fetchai/generic_seller:0.5.0
+aea eject skill fetchai/generic_seller:0.6.0
 ```
 ``` bash
 aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
 ```
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.5.0
 ```
 ``` bash
 cd ..

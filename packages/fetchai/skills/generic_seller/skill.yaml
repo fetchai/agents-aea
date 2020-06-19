@@ -1,6 +1,6 @@
 name: generic_seller
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
@@ -14,9 +14,9 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.2.0
-- fetchai/fipa:0.3.0
-- fetchai/oef_search:0.2.0
+- fetchai/default:0.3.0
+- fetchai/fipa:0.4.0
+- fetchai/oef_search:0.3.0
 behaviours:
   service_registration:
     args:

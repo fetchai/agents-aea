@@ -24,6 +24,10 @@ message GymMessage{
         AnyObject info = 5;
     }
 
+    message Status_Performative{
+        map<string, string> content = 1;
+    }
+
     message Reset_Performative{}
 
     message Close_Performative{}
@@ -39,5 +43,6 @@ message GymMessage{
         Close_Performative close = 6;
         Percept_Performative percept = 7;
         Reset_Performative reset = 8;
+        Status_Performative status = 9;
     }
 }

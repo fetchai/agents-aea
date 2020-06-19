@@ -76,7 +76,7 @@ class TestHTTPServer:
             ROOT_DIR, "tests", "data", "petstore_sim.yaml"
         )
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.2.0")
+        self.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
 
         self.configuration = ConnectionConfig(
             host=self.host,

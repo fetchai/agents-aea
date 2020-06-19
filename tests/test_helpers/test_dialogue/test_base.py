@@ -18,33 +18,53 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the helper module."""
-from enum import Enum
-from typing import Dict, FrozenSet
+
+from typing import Dict, FrozenSet, Optional, cast
 
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.dialogue.base import Dialogues as BaseDialogues
+from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 
 
 class Dialogue(BaseDialogue):
-    def get_replies(self, performative: Enum) -> FrozenSet:
-        """
-        Given a `performative`, return the list of performatives which are its valid replies in a dialogue
 
-        :param performative: the performative in a message
-        :return: list of valid performative replies
-        """
-        pass
+    INITIAL_PERFORMATIVES = frozenset({})  # type: FrozenSet[Message.Performative]
+    TERMINAL_PERFORMATIVES = frozenset({})  # type: FrozenSet[Message.Performative]
+    VALID_REPLIES = (
+        {}
+    )  # type: Dict[Message.Performative, FrozenSet[Message.Performative]]
 
-    def initial_performative(self) -> Enum:
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Optional[Address] = None,
+        role: Optional[BaseDialogue.Role] = None,
+    ) -> None:
         """
-        Get the performative which the initial message in the dialogue must have
+        Initialize a dialogue.
 
-        :return: the performative of the initial message
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+        :return: None
         """
-        pass
+        BaseDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            rules=BaseDialogue.Rules(
+                cast(FrozenSet[Message.Performative], self.INITIAL_PERFORMATIVES),
+                cast(FrozenSet[Message.Performative], self.TERMINAL_PERFORMATIVES),
+                cast(
+                    Dict[Message.Performative, FrozenSet[Message.Performative]],
+                    self.VALID_REPLIES,
+                ),
+            ),
+        )
 
     def is_valid(self, message: Message) -> bool:
         """
@@ -59,6 +79,22 @@ class Dialogue(BaseDialogue):
 
 
 class Dialogues(BaseDialogues):
+
+    END_STATES = frozenset({})  # type: FrozenSet[BaseDialogue.EndState]
+
+    def __init__(self, agent_address: Address) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        BaseDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            end_states=cast(FrozenSet[BaseDialogue.EndState], self.END_STATES),
+        )
+
     def create_dialogue(
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> Dialogue:
@@ -95,7 +131,7 @@ class TestDialogueBase:
             dialogue_starter_addr="starter",
         )
         cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
-        cls.dialogues = Dialogues()
+        cls.dialogues = Dialogues("address")
 
     def test_dialogue_label(self):
         """Test the dialogue_label."""
