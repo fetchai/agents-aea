@@ -145,7 +145,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.4.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.3.0", thermometer_client_aea_name
         )
         assert (
             diff == []

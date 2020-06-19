@@ -56,6 +56,7 @@ def test_create_and_run_agent():
         # We do it programmatically as we need to create an agent with default author
         # that was prevented from GUI.
         ctx = Context(cwd=temp_cwd.temp_dir)
+        ctx.set_config("is_local", True)
         create_aea(ctx, agent_id, local=True, author=DEFAULT_AUTHOR)
 
         # Add the local connection
