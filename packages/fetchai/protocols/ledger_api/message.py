@@ -21,10 +21,14 @@
 
 import logging
 from enum import Enum
-from typing import Dict, Set, Tuple, cast
+from typing import Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
+
+from packages.fetchai.protocols.ledger_api.custom_types import (
+    AnyObject as CustomAnyObject,
+)
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
 
@@ -36,10 +40,13 @@ class LedgerApiMessage(Message):
 
     protocol_id = ProtocolId("fetchai", "ledger_api", "0.1.0")
 
+    AnyObject = CustomAnyObject
+
     class Performative(Enum):
         """Performatives for the ledger_api protocol."""
 
         BALANCE = "balance"
+        ERROR = "error"
         GET_BALANCE = "get_balance"
         GET_TX_RECEIPT = "get_tx_receipt"
         SEND_SIGNED_TX = "send_signed_tx"
@@ -75,6 +82,7 @@ class LedgerApiMessage(Message):
         )
         self._performatives = {
             "balance",
+            "error",
             "get_balance",
             "get_tx_receipt",
             "send_signed_tx",
@@ -124,10 +132,15 @@ class LedgerApiMessage(Message):
         return cast(int, self.get("amount"))
 
     @property
-    def data(self) -> Dict[str, str]:
+    def code(self) -> Optional[int]:
+        """Get the 'code' content from the message."""
+        return cast(Optional[int], self.get("code"))
+
+    @property
+    def data(self) -> CustomAnyObject:
         """Get the 'data' content from the message."""
         assert self.is_set("data"), "'data' content is not set."
-        return cast(Dict[str, str], self.get("data"))
+        return cast(CustomAnyObject, self.get("data"))
 
     @property
     def digest(self) -> str:
@@ -142,10 +155,15 @@ class LedgerApiMessage(Message):
         return cast(str, self.get("ledger_id"))
 
     @property
-    def signed_tx(self) -> bytes:
+    def message(self) -> Optional[str]:
+        """Get the 'message' content from the message."""
+        return cast(Optional[str], self.get("message"))
+
+    @property
+    def signed_tx(self) -> CustomAnyObject:
         """Get the 'signed_tx' content from the message."""
         assert self.is_set("signed_tx"), "'signed_tx' content is not set."
-        return cast(bytes, self.get("signed_tx"))
+        return cast(CustomAnyObject, self.get("signed_tx"))
 
     @property
     def tx_digest(self) -> str:
@@ -213,8 +231,8 @@ class LedgerApiMessage(Message):
                     type(self.ledger_id)
                 )
                 assert (
-                    type(self.signed_tx) == bytes
-                ), "Invalid type for content 'signed_tx'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.signed_tx) == CustomAnyObject
+                ), "Invalid type for content 'signed_tx'. Expected 'AnyObject'. Found '{}'.".format(
                     type(self.signed_tx)
                 )
             elif self.performative == LedgerApiMessage.Performative.GET_TX_RECEIPT:
@@ -246,21 +264,33 @@ class LedgerApiMessage(Message):
             elif self.performative == LedgerApiMessage.Performative.TX_RECEIPT:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.data) == dict
-                ), "Invalid type for content 'data'. Expected 'dict'. Found '{}'.".format(
+                    type(self.data) == CustomAnyObject
+                ), "Invalid type for content 'data'. Expected 'AnyObject'. Found '{}'.".format(
                     type(self.data)
                 )
-                for key_of_data, value_of_data in self.data.items():
+            elif self.performative == LedgerApiMessage.Performative.ERROR:
+                expected_nb_of_contents = 1
+                if self.is_set("code"):
+                    expected_nb_of_contents += 1
+                    code = cast(int, self.code)
                     assert (
-                        type(key_of_data) == str
-                    ), "Invalid type for dictionary keys in content 'data'. Expected 'str'. Found '{}'.".format(
-                        type(key_of_data)
+                        type(code) == int
+                    ), "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
+                        type(code)
                     )
+                if self.is_set("message"):
+                    expected_nb_of_contents += 1
+                    message = cast(str, self.message)
                     assert (
-                        type(value_of_data) == str
-                    ), "Invalid type for dictionary values in content 'data'. Expected 'str'. Found '{}'.".format(
-                        type(value_of_data)
+                        type(message) == str
+                    ), "Invalid type for content 'message'. Expected 'str'. Found '{}'.".format(
+                        type(message)
                     )
+                assert (
+                    type(self.data) == CustomAnyObject
+                ), "Invalid type for content 'data'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.data)
+                )
 
             # Check correct content count
             assert (

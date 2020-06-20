@@ -4,6 +4,12 @@ package fetch.aea.LedgerApi;
 
 message LedgerApiMessage{
 
+    // Custom Types
+    message AnyObject{
+        bytes any = 1;
+    }
+
+
     // Performatives and contents
     message Get_Balance_Performative{
         string ledger_id = 1;
@@ -12,7 +18,7 @@ message LedgerApiMessage{
 
     message Send_Signed_Tx_Performative{
         string ledger_id = 1;
-        bytes signed_tx = 2;
+        AnyObject signed_tx = 2;
     }
 
     message Get_Tx_Receipt_Performative{
@@ -29,7 +35,15 @@ message LedgerApiMessage{
     }
 
     message Tx_Receipt_Performative{
-        map<string, string> data = 1;
+        AnyObject data = 1;
+    }
+
+    message Error_Performative{
+        int32 code = 1;
+        bool code_is_set = 2;
+        string message = 3;
+        bool message_is_set = 4;
+        AnyObject data = 5;
     }
 
 
@@ -40,10 +54,11 @@ message LedgerApiMessage{
     int32 target = 4;
     oneof performative{
         Balance_Performative balance = 5;
-        Get_Balance_Performative get_balance = 6;
-        Get_Tx_Receipt_Performative get_tx_receipt = 7;
-        Send_Signed_Tx_Performative send_signed_tx = 8;
-        Tx_Digest_Performative tx_digest = 9;
-        Tx_Receipt_Performative tx_receipt = 10;
+        Error_Performative error = 6;
+        Get_Balance_Performative get_balance = 7;
+        Get_Tx_Receipt_Performative get_tx_receipt = 8;
+        Send_Signed_Tx_Performative send_signed_tx = 9;
+        Tx_Digest_Performative tx_digest = 10;
+        Tx_Receipt_Performative tx_receipt = 11;
     }
 }

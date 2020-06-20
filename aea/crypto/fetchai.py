@@ -225,7 +225,8 @@ class FetchAIApi(LedgerApi):
 
         :param tx_signed: the signed transaction
         """
-        raise NotImplementedError  # pragma: no cover
+        # see 'api.tokens.transfer' implementation
+        return self.api.tokens._post_tx_json(tx_signed, "transfer")
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""

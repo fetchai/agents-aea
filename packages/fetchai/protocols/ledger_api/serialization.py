@@ -25,6 +25,7 @@ from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2
+from packages.fetchai.protocols.ledger_api.custom_types import AnyObject
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 
@@ -60,7 +61,7 @@ class LedgerApiSerializer(Serializer):
             ledger_id = msg.ledger_id
             performative.ledger_id = ledger_id
             signed_tx = msg.signed_tx
-            performative.signed_tx = signed_tx
+            AnyObject.encode(performative.signed_tx, signed_tx)
             ledger_api_msg.send_signed_tx.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.GET_TX_RECEIPT:
             performative = ledger_api_pb2.LedgerApiMessage.Get_Tx_Receipt_Performative()  # type: ignore
@@ -82,8 +83,21 @@ class LedgerApiSerializer(Serializer):
         elif performative_id == LedgerApiMessage.Performative.TX_RECEIPT:
             performative = ledger_api_pb2.LedgerApiMessage.Tx_Receipt_Performative()  # type: ignore
             data = msg.data
-            performative.data.update(data)
+            AnyObject.encode(performative.data, data)
             ledger_api_msg.tx_receipt.CopyFrom(performative)
+        elif performative_id == LedgerApiMessage.Performative.ERROR:
+            performative = ledger_api_pb2.LedgerApiMessage.Error_Performative()  # type: ignore
+            if msg.is_set("code"):
+                performative.code_is_set = True
+                code = msg.code
+                performative.code = code
+            if msg.is_set("message"):
+                performative.message_is_set = True
+                message = msg.message
+                performative.message = message
+            data = msg.data
+            AnyObject.encode(performative.data, data)
+            ledger_api_msg.error.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -118,7 +132,8 @@ class LedgerApiSerializer(Serializer):
         elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TX:
             ledger_id = ledger_api_pb.send_signed_tx.ledger_id
             performative_content["ledger_id"] = ledger_id
-            signed_tx = ledger_api_pb.send_signed_tx.signed_tx
+            pb2_signed_tx = ledger_api_pb.send_signed_tx.signed_tx
+            signed_tx = AnyObject.decode(pb2_signed_tx)
             performative_content["signed_tx"] = signed_tx
         elif performative_id == LedgerApiMessage.Performative.GET_TX_RECEIPT:
             ledger_id = ledger_api_pb.get_tx_receipt.ledger_id
@@ -132,9 +147,19 @@ class LedgerApiSerializer(Serializer):
             digest = ledger_api_pb.tx_digest.digest
             performative_content["digest"] = digest
         elif performative_id == LedgerApiMessage.Performative.TX_RECEIPT:
-            data = ledger_api_pb.tx_receipt.data
-            data_dict = dict(data)
-            performative_content["data"] = data_dict
+            pb2_data = ledger_api_pb.tx_receipt.data
+            data = AnyObject.decode(pb2_data)
+            performative_content["data"] = data
+        elif performative_id == LedgerApiMessage.Performative.ERROR:
+            if ledger_api_pb.error.code_is_set:
+                code = ledger_api_pb.error.code
+                performative_content["code"] = code
+            if ledger_api_pb.error.message_is_set:
+                message = ledger_api_pb.error.message
+                performative_content["message"] = message
+            pb2_data = ledger_api_pb.error.data
+            data = AnyObject.decode(pb2_data)
+            performative_content["data"] = data
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 
