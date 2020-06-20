@@ -25,9 +25,7 @@ register_crypto(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
 register_crypto(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
 register_crypto(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
 
-DEFAULT_FETCHAI_LEDGER_CONFIG = dict(
-    network="testnet"
-)
+DEFAULT_FETCHAI_LEDGER_CONFIG = dict(network="testnet")
 register_ledger_api(
     id="fetchai",
     entry_point="aea.crypto.fetchai:FetchAIApi",

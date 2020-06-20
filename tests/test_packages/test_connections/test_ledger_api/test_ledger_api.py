@@ -28,7 +28,7 @@ import pytest
 import aea
 from aea.connections.base import Connection
 from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumCrypto, EthereumApi
+from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
@@ -40,10 +40,13 @@ from packages.fetchai.protocols.ledger_api.custom_types import AnyObject
 from tests.conftest import (
     COSMOS_ADDRESS_ONE,
     ETHEREUM_ADDRESS_ONE,
+    ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_ADDRESS_ONE,
-    ROOT_DIR, ETHEREUM_PRIVATE_KEY_PATH,
+    ROOT_DIR,
 )
-from tests.test_packages.test_connections.test_ledger_api.utils import make_ethereum_transaction
+from tests.test_packages.test_connections.test_ledger_api.utils import (
+    make_ethereum_transaction,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -105,19 +108,15 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     amount = 40000
     fee = 30000
     tx_nonce = api.generate_tx_nonce(crypto1.address, crypto2.address)
-    tx = make_ethereum_transaction(crypto1,
-                              api,
-                              crypto2.address,
-                              amount,
-                              fee,
-                              tx_nonce,
-                              chain_id=3)
+    tx = make_ethereum_transaction(
+        crypto1, api, crypto2.address, amount, fee, tx_nonce, chain_id=3
+    )
 
     signed_transaction = crypto1.sign_transaction(tx)
     request = LedgerApiMessage(
         LedgerApiMessage.Performative.SEND_SIGNED_TX,
         ledger_id=EthereumCrypto.identifier,
-        signed_tx=AnyObject(signed_transaction)
+        signed_tx=AnyObject(signed_transaction),
     )
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)
@@ -133,9 +132,11 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert type(response_message.digest.startswith("0x"))
 
     # check that the transaction is valid
-    is_valid = api.is_transaction_valid(response_message.digest, crypto2.address,
-                             crypto1.address, tx_nonce, amount)
+    is_valid = api.is_transaction_valid(
+        response_message.digest, crypto2.address, crypto1.address, tx_nonce, amount
+    )
     assert is_valid, "Transaction not valid."
+
 
 # @pytest.mark.asyncio
 # @ledger_ids

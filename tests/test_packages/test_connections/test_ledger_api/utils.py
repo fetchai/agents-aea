@@ -18,23 +18,23 @@
 # ------------------------------------------------------------------------------
 
 """This module contains some utilities for the ledger API connection tests."""
-from typing import Dict
+from typing import Dict, Optional
 
 from aea.crypto.base import Crypto
-from aea.crypto.ethereum import EthereumApi, GAS_ID, DEFAULT_GAS_PRICE
+from aea.crypto.ethereum import DEFAULT_GAS_PRICE, EthereumApi, GAS_ID
 from aea.mail.base import Address
 
 
 def make_ethereum_transaction(
-        crypto: Crypto,
-        api: EthereumApi,
-        destination_address: Address,
-        amount: int,
-        tx_fee: int,
-        tx_nonce: str,
-        chain_id: int = 1,
-        **kwargs,
-) -> Dict:
+    crypto: Crypto,
+    api: EthereumApi,
+    destination_address: Address,
+    amount: int,
+    tx_fee: int,
+    tx_nonce: str,
+    chain_id: int = 1,
+    **kwargs,
+) -> Optional[Dict]:
     tx_digest = None
     try:
         nonce = api.api.eth.getTransactionCount(  # pylint: disable=no-member

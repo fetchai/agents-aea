@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
-import pickle
+import pickle  # nosec
 from typing import Any
 
 

@@ -22,7 +22,7 @@ import asyncio
 from asyncio import Task
 from collections import deque
 from concurrent.futures import Executor
-from typing import Callable, Deque, List, Optional, cast, Dict
+from typing import Callable, Deque, Dict, List, Optional, cast
 
 import aea
 from aea.configurations.base import ConnectionConfig, PublicId
@@ -158,7 +158,7 @@ class _RequestDispatcher:
         self.executor = executor
 
     async def run_async(
-        self, func: Callable[[LedgerApi, LedgerApiMessage], LedgerApiMessage], *args
+        self, func: Callable[[LedgerApi, LedgerApiMessage], Task], *args
     ):
         """
         Run a function in executor.
