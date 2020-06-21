@@ -21,53 +21,104 @@
 
 from aea.configurations.base import PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.transaction.base import Terms
 
 
 class TestTransaction:
     """Test the transaction module."""
 
+    @classmethod
+    def setup_class(cls):
+        """Setup class for test case."""
+        cls.terms = Terms(
+            sender_addr="pk1",
+            counterparty_addr="pk2",
+            amount_by_currency_id={"FET": -2},
+            is_sender_payable_tx_fee=True,
+            quantities_by_good_id={"good_id": 10},
+            nonce="transaction nonce",
+        )
+        cls.crypto_id = "fetchai"
+        cls.skill_callback_ids = (PublicId("author", "a_skill", "0.1.0"),)
+        cls.skill_callback_info = {"some_string": [1, 2]}
+
     def test_message_consistency(self):
         """Test for an error in consistency of a message."""
-        assert TransactionMessage(
-            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-            skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
-            tx_id="transaction0",
-            tx_sender_addr="pk1",
-            tx_counterparty_addr="pk2",
-            tx_amount_by_currency_id={"FET": -2},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={"GOOD_ID": 10},
-            ledger_id="fetchai",
-            info={"some_string": [1, 2]},
-            tx_digest="some_string",
-        )
         tx_msg = TransactionMessage(
-            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-            skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
-            tx_id="transaction0",
-            tx_sender_addr="pk1",
-            tx_counterparty_addr="pk2",
-            tx_amount_by_currency_id={"FET": -2},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={"GOOD_ID": 10},
-            ledger_id="ethereum",
-            info={"some_string": [1, 2]},
-            tx_digest="some_string",
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=self.skill_callback_ids,
+            skill_callback_info=self.skill_callback_info,
+            terms=self.terms,
+            crypto_id=self.crypto_id,
+            transaction="transaction",
+        )
+        assert tx_msg._is_consistent()
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=self.skill_callback_ids,
+            crypto_id=self.crypto_id,
+            transaction="transaction",
+        )
+        assert tx_msg._is_consistent()
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+            skill_callback_ids=self.skill_callback_ids,
+            skill_callback_info=self.skill_callback_info,
+            terms=self.terms,
+            crypto_id=self.crypto_id,
+            message=b"message",
+        )
+        assert tx_msg._is_consistent()
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+            skill_callback_ids=self.skill_callback_ids,
+            skill_callback_info=self.skill_callback_info,
+            crypto_id=self.crypto_id,
+            message=b"message",
+        )
+        assert tx_msg._is_consistent()
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SIGNED_TRANSACTION,
+            skill_callback_ids=self.skill_callback_ids,
+            skill_callback_info=self.skill_callback_info,
+            crypto_id=self.crypto_id,
+            signed_transaction="signature",
+        )
+        assert tx_msg._is_consistent()
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SIGNED_MESSAGE,
+            skill_callback_ids=self.skill_callback_ids,
+            skill_callback_info=self.skill_callback_info,
+            crypto_id=self.crypto_id,
+            signed_message="signature",
+        )
+        assert tx_msg._is_consistent()
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.ERROR,
+            skill_callback_ids=self.skill_callback_ids,
+            skill_callback_info=self.skill_callback_info,
+            crypto_id=self.crypto_id,
+            error_code=TransactionMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+        )
+        assert tx_msg._is_consistent()
+        assert str(tx_msg.performative) == "error"
+        assert str(tx_msg.error_code) == "unsuccessful_message_signing"
+        assert tx_msg.optional_callback_kwargs == {
+            "skill_callback_info": tx_msg.skill_callback_info
+        }
+
+    def test_message_inconsistency(self):
+        """Test for an error in consistency of a message."""
+
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=self.skill_callback_ids,
+            crypto_id=self.crypto_id,
         )
         assert not tx_msg._is_consistent()
         tx_msg = TransactionMessage(
-            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-            skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
-            tx_id="transaction0",
-            tx_sender_addr="pk",
-            tx_counterparty_addr="pk",
-            tx_amount_by_currency_id={"Unknown": 2},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={"Unknown": 10},
-            ledger_id="fetchai",
-            info={"info": "info_value"},
+            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+            skill_callback_ids=self.skill_callback_ids,
+            crypto_id=self.crypto_id,
         )
         assert not tx_msg._is_consistent()

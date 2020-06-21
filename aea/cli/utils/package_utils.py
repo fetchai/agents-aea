@@ -436,6 +436,9 @@ def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> in
             agent_config.ledger_apis_dict, agent_config.default_ledger
         )
         address = wallet.addresses[type_]
-        return ledger_apis.token_balance(type_, address)
+        balance = ledger_apis.get_balance(type_, address)
+        if balance is None:
+            raise ValueError("No balance returned!")
+        return balance
     except (AssertionError, ValueError) as e:  # pragma: no cover
         raise click.ClickException(str(e))

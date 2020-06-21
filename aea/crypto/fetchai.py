@@ -26,14 +26,15 @@ from pathlib import Path
 from typing import Any, BinaryIO, Optional, Tuple, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
-from fetchai.ledger.api.tx import TxContents, TxStatus
+from fetchai.ledger.api.token import TokenTxFactory
+from fetchai.ledger.api.tx import TxContents  # , TxStatus
 from fetchai.ledger.crypto import Address as FetchaiAddress
 from fetchai.ledger.crypto import Entity, Identity
 from fetchai.ledger.serialisation import sha256_hash
 
 import requests
 
-from aea.crypto.base import Crypto, FaucetApi, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -105,7 +106,7 @@ class FetchAICrypto(Crypto[Entity]):
         :param is_deprecated_mode: if the deprecated signing is used
         :return: signature of the message in string form
         """
-        signature = self.entity.sign(message)
+        signature = self.entity.sign(message).hex()
         return signature
 
     def sign_transaction(self, transaction: Any) -> Any:
@@ -152,7 +153,63 @@ class FetchAICrypto(Crypto[Entity]):
         fp.write(self.entity.private_key_hex.encode("utf-8"))
 
 
-class FetchAIApi(LedgerApi):
+class FetchAIHelper(Helper):
+    """Helper class usable as Mixin for FetchAIApi or as standalone class."""
+
+    @staticmethod
+    def is_transaction_settled(tx_receipt: Any) -> bool:
+        """
+        Check whether a transaction is settled or not.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: True if the transaction has been settled, False o/w.
+        """
+        is_successful = False
+        if tx_receipt is not None:
+            is_successful = tx_receipt.status in SUCCESSFUL_TERMINAL_STATES
+        return is_successful
+
+    @staticmethod
+    def is_transaction_valid(
+        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param tx: the transaction.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :return: True if the random_message is equals to tx['input']
+        """
+        is_valid = False
+        if tx is not None:
+            seller_address = FetchaiAddress(seller)
+            is_valid = (
+                str(tx.from_address) == client
+                and amount == tx.transfers[seller_address]
+                # and self.is_transaction_settled(tx_digest=tx_digest)
+            )
+        return is_valid
+
+    @staticmethod
+    def generate_tx_nonce(seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish txs with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = sha256_hash(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+        return aggregate_hash.hex()
+
+
+class FetchAIApi(LedgerApi, FetchAIHelper):
     """Class to interact with the Fetch ledger APIs."""
 
     identifier = _FETCHAI
@@ -189,35 +246,34 @@ class FetchAIApi(LedgerApi):
             balance = None
         return balance
 
-    def transfer(  # pylint: disable=arguments-differ
+    def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
-        crypto: Crypto,
+        sender_address: Address,
         destination_address: Address,
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        is_waiting_for_confirmation: bool = True,
         **kwargs,
-    ) -> Optional[str]:
-        """Submit a transaction to the ledger."""
-        tx_digest = self._try_transfer_tokens(
-            crypto, destination_address, amount, tx_fee
-        )
-        return tx_digest
+    ) -> Optional[Any]:
+        """
+        Submit a transfer transaction to the ledger.
 
-    def _try_transfer_tokens(
-        self, crypto: Crypto, destination_address: Address, amount: int, tx_fee: int
-    ) -> Optional[str]:
-        """Try transfer tokens."""
-        try:
-            tx_digest = self._api.tokens.transfer(
-                crypto.entity, FetchaiAddress(destination_address), amount, tx_fee
-            )
-            # self._api.sync(tx_digest)
-        except Exception as e:  # pragma: no cover
-            logger.debug("Error when attempting transfering tokens: {}".format(str(e)))
-            tx_digest = None
-        return tx_digest
+        :param sender_address: the sender address of the payer.
+        :param destination_address: the destination address of the payee.
+        :param amount: the amount of wealth to be transferred.
+        :param tx_fee: the transaction fee.
+        :param tx_nonce: verifies the authenticity of the tx
+        :return: the transfer transaction
+        """
+        tx = TokenTxFactory.transfer(
+            FetchaiAddress(sender_address),
+            FetchaiAddress(destination_address),
+            amount,
+            tx_fee,
+            [FetchaiAddress(sender_address)],
+        )
+        self._api._set_validity_period(tx)
+        return tx
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
@@ -226,14 +282,6 @@ class FetchAIApi(LedgerApi):
         :param tx_signed: the signed transaction
         """
         raise NotImplementedError  # pragma: no cover
-
-    def is_transaction_settled(self, tx_digest: str) -> bool:
-        """Check whether a transaction is settled or not."""
-        tx_status = cast(TxStatus, self._try_get_transaction_receipt(tx_digest))
-        is_successful = False
-        if tx_status is not None:
-            is_successful = tx_status.status in SUCCESSFUL_TERMINAL_STATES
-        return is_successful
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
@@ -259,50 +307,15 @@ class FetchAIApi(LedgerApi):
             tx_receipt = None
         return tx_receipt
 
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+    def get_transaction(self, tx_digest: str) -> Optional[Any]:
         """
-        Generate a random str message.
+        Get the transaction for a transaction digest.
 
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx, if present
         """
-        time_stamp = int(time.time())
-        aggregate_hash = sha256_hash(
-            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
-        )
-        return aggregate_hash.hex()
-
-    # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
-    def is_transaction_valid(
-        self,
-        tx_digest: str,
-        seller: Address,
-        client: Address,
-        tx_nonce: str,
-        amount: int,
-    ) -> bool:
-        """
-        Check whether a transaction is valid or not (non-blocking).
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :param tx_nonce: the transaction nonce.
-        :param amount: the amount we expect to get from the transaction.
-        :param tx_digest: the transaction digest.
-
-        :return: True if the random_message is equals to tx['input']
-        """
-        is_valid = False
-        tx_contents = self._try_get_transaction(tx_digest)
-        if tx_contents is not None:
-            seller_address = FetchaiAddress(seller)
-            is_valid = (
-                str(tx_contents.from_address) == client
-                and amount == tx_contents.transfers[seller_address]
-                and self.is_transaction_settled(tx_digest=tx_digest)
-            )
-        return is_valid
+        tx = self._try_get_transaction(tx_digest)
+        return tx
 
     def _try_get_transaction(self, tx_digest: str) -> Optional[TxContents]:
         """

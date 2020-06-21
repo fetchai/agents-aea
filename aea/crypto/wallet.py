@@ -19,10 +19,13 @@
 
 """Module wrapping all the public and private keys cryptography."""
 
-from typing import Dict, Optional, cast
+import logging
+from typing import Any, Dict, Optional, cast
 
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
+
+logger = logging.getLogger(__name__)
 
 
 class CryptoStore:
@@ -120,3 +123,42 @@ class Wallet:
     def connection_cryptos(self) -> CryptoStore:
         """Get the connection crypto store."""
         return self._connection_cryptos
+
+    def sign_message(
+        self, crypto_id: str, tx_hash: bytes, is_deprecated_mode: bool = False
+    ) -> Optional[str]:
+        """
+        Sign a message.
+
+        :param crypto_id: the id of the crypto
+        :param tx_hash: the hash to be signed
+        :param is_deprecated_mode: what signing mode to use
+        :return: the signature of the signing payload
+        """
+        crypto_object = self.crypto_objects.get(crypto_id, None)
+        if crypto_object is None:
+            logger.warning(
+                "No crypto object for crypto_id={} in wallet!".format(crypto_id)
+            )
+            tx_signature = None  # type: Optional[str]
+        else:
+            tx_signature = crypto_object.sign_message(tx_hash, is_deprecated_mode)
+        return tx_signature
+
+    def sign_transaction(self, crypto_id: str, tx: Any) -> Optional[Any]:
+        """
+        Sign a tx.
+
+        :param crypto_id: the id of the crypto
+        :param tx_hash: the hash to be signed
+        :return: the signed tx
+        """
+        crypto_object = self.crypto_objects.get(crypto_id, None)
+        if crypto_object is None:
+            logger.warning(
+                "No crypto object for crypto_id={} in wallet!".format(crypto_id)
+            )
+            tx_signed = None  # type: Optional[Any]
+        else:
+            tx_signed = crypto_object.sign_transaction(tx)
+        return tx_signed

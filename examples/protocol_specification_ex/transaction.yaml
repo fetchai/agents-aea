@@ -1,0 +1,51 @@
+---
+name: transaction
+author: fetchai
+version: 0.1.0
+description: A protocol for communication between skills and decision maker.
+license: Apache-2.0
+aea_version: '>=0.4.0, <0.5.0'
+speech_acts:
+  sign_transaction:
+    skill_callback_ids: pt:list[pt:str]
+    skill_callback_info: pt:dict[pt:str, pt:str]
+    terms: ct:Terms
+    transaction: ct:AnyObject
+  sign_message:
+    skill_callback_ids: pt:list[pt:str]
+    skill_callback_info: pt:dict[pt:str, pt:str]
+    terms: ct:Terms
+    message: pt:bytes
+  signed_transaction:
+    signed_transaction: ct:AnyObject
+  signed_message:
+    signed_message: pt:bytes
+  error:
+    error_code: ct:ErrorCode
+...
+---
+ct:PublicId: |
+  bytes any = 1;
+ct:AnyObject: |
+  bytes any = 1;
+ct:Terms: |
+  bytes any = 1;
+ct:ErrorCode: |
+  enum ErrorCodeEnum {
+      UNSUCCESSFUL_MESSAGE_SIGNING = 0;
+      UNSUCCESSFUL_TRANSACTION_SIGNING = 1;
+    }
+  ErrorCodeEnum error_code = 1;
+...
+---
+initiation: [sign_transaction, sign_message]
+reply:
+  sign_transaction: [signed_transaction, error]
+  sign_message: [signed_message, error]
+  signed_transaction: []
+  signed_message: []
+  error: []
+termination: [signed_transaction, signed_message, error]
+roles: {skill, decision_maker}
+end_states: [successful, failed]
+...

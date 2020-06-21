@@ -21,385 +21,261 @@
 
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, Sequence, cast
+from typing import Any, Dict, Tuple, cast
 
 from aea.configurations.base import PublicId
-from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.base import InternalMessage
-from aea.mail.base import Address
+from aea.helpers.transaction.base import Terms
 
 logger = logging.getLogger(__name__)
 
-TransactionId = str
-LedgerId = str
-OFF_CHAIN = "off_chain"
-SUPPORTED_LEDGER_IDS = SUPPORTED_LEDGER_APIS + [OFF_CHAIN]
+DEFAULT_BODY_SIZE = 3
 
 
 class TransactionMessage(InternalMessage):
-    """The transaction message class."""
+    """A protocol for communication between skills and decision maker."""
+
+    class ErrorCode(Enum):
+        """ErrorCodes for the transaction protocol."""
+
+        UNSUCCESSFUL_MESSAGE_SIGNING = "unsuccessful_message_signing"
+        UNSUCCESSFUL_TRANSACTION_SIGNING = "unsuccessful_transaction_signing"
+
+        def __str__(self):
+            """Get the string representation."""
+            return str(self.value)
 
     class Performative(Enum):
-        """Transaction performative."""
+        """Performatives for the transaction protocol."""
 
-        PROPOSE_FOR_SETTLEMENT = "propose_for_settlement"
-        SUCCESSFUL_SETTLEMENT = "successful_settlement"
-        FAILED_SETTLEMENT = "failed_settlement"
-        REJECTED_SETTLEMENT = "rejected_settlement"
-        PROPOSE_FOR_SIGNING = "propose_for_signing"
-        SUCCESSFUL_SIGNING = "successful_signing"
-        REJECTED_SIGNING = "rejected_signing"
+        ERROR = "error"
+        SIGN_MESSAGE = "sign_message"
+        SIGN_TRANSACTION = "sign_transaction"
+        SIGNED_MESSAGE = "signed_message"
+        SIGNED_TRANSACTION = "signed_transaction"
+
+        def __str__(self):
+            """Get the string representation."""
+            return str(self.value)
 
     def __init__(
         self,
         performative: Performative,
-        skill_callback_ids: Sequence[PublicId],
-        tx_id: TransactionId,
-        tx_sender_addr: Address,
-        tx_counterparty_addr: Address,
-        tx_amount_by_currency_id: Dict[str, int],
-        tx_sender_fee: int,
-        tx_counterparty_fee: int,
-        tx_quantities_by_good_id: Dict[str, int],
-        ledger_id: LedgerId,
-        info: Dict[str, Any],
-        **kwargs
+        skill_callback_ids: Tuple[PublicId, ...],
+        **kwargs,
     ):
         """
-        Instantiate transaction message.
+        Initialise an instance of TransactionMessage.
 
-        :param performative: the performative
-        :param skill_callback_ids: the list public ids of skills to receive the transaction message response
-        :param tx_id: the id of the transaction.
-        :param tx_sender_addr: the sender address of the transaction.
-        :param tx_counterparty_addr: the counterparty address of the transaction.
-        :param tx_amount_by_currency_id: the amount by the currency of the transaction.
-        :param tx_sender_fee: the part of the tx fee paid by the sender
-        :param tx_counterparty_fee: the part of the tx fee paid by the counterparty
-        :param tx_quantities_by_good_id: a map from good id to the quantity of that good involved in the transaction.
-        :param ledger_id: the ledger id
-        :param info: a dictionary for arbitrary information
+        :param performative: the message performative.
+        :param skill_callback_ids: the ids of the skills to respond to.
         """
         super().__init__(
-            performative=performative,
+            performative=TransactionMessage.Performative(performative),
             skill_callback_ids=skill_callback_ids,
-            tx_id=tx_id,
-            tx_sender_addr=tx_sender_addr,
-            tx_counterparty_addr=tx_counterparty_addr,
-            tx_amount_by_currency_id=tx_amount_by_currency_id,
-            tx_sender_fee=tx_sender_fee,
-            tx_counterparty_fee=tx_counterparty_fee,
-            tx_quantities_by_good_id=tx_quantities_by_good_id,
-            ledger_id=ledger_id,
-            info=info,
-            **kwargs
+            **kwargs,
         )
+        self._performatives = {
+            "error",
+            "sign_message",
+            "sign_transaction",
+            "signed_message",
+            "signed_transaction",
+        }
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
-        assert self.is_set("performative"), "Performative is not set."
-        return TransactionMessage.Performative(self.get("performative"))
+        assert self.is_set("performative"), "performative is not set."
+        return cast(TransactionMessage.Performative, self.get("performative"))
 
     @property
-    def skill_callback_ids(self) -> List[PublicId]:
-        """Get the list of skill_callback_ids from the message."""
-        assert self.is_set("skill_callback_ids"), "Skill_callback_ids is not set."
-        return cast(List[PublicId], self.get("skill_callback_ids"))
+    def error_code(self) -> ErrorCode:  # type: ignore # noqa: F821
+        """Get the 'error_code' content from the message."""
+        assert self.is_set("error_code"), "'error_code' content is not set."
+        return cast(TransactionMessage.ErrorCode, self.get("error_code"))
 
     @property
-    def tx_id(self) -> str:
-        """Get the transaction id."""
-        assert self.is_set("tx_id"), "Transaction_id is not set."
-        return cast(str, self.get("tx_id"))
+    def message(self) -> bytes:
+        """Get the 'message' content from the message."""
+        assert self.is_set("message"), "'message' content is not set."
+        return cast(bytes, self.get("message"))
 
     @property
-    def tx_sender_addr(self) -> Address:
-        """Get the address of the sender."""
-        assert self.is_set("tx_sender_addr"), "Tx_sender_addr is not set."
-        return cast(Address, self.get("tx_sender_addr"))
+    def signed_message(self) -> str:
+        """Get the 'signed_message' content from the message."""
+        assert self.is_set("signed_message"), "'signed_message' content is not set."
+        return cast(str, self.get("signed_message"))
 
     @property
-    def tx_counterparty_addr(self) -> Address:
-        """Get the counterparty of the message."""
-        assert self.is_set("tx_counterparty_addr"), "Counterparty is not set."
-        return cast(Address, self.get("tx_counterparty_addr"))
-
-    @property
-    def tx_amount_by_currency_id(self) -> Dict[str, int]:
-        """Get the currency id."""
+    def signed_transaction(self) -> Any:
+        """Get the 'signed_transaction' content from the message."""
         assert self.is_set(
-            "tx_amount_by_currency_id"
-        ), "Tx_amount_by_currency_id is not set."
-        return cast(Dict[str, int], self.get("tx_amount_by_currency_id"))
+            "signed_transaction"
+        ), "'signed_transaction' content is not set."
+        return cast(Any, self.get("signed_transaction"))
 
     @property
-    def tx_sender_fee(self) -> int:
-        """Get the fee for the sender from the messgae."""
-        assert self.is_set("tx_sender_fee"), "Tx_sender_fee is not set."
-        return cast(int, self.get("tx_sender_fee"))
-
-    @property
-    def tx_counterparty_fee(self) -> int:
-        """Get the fee for the counterparty from the messgae."""
-        assert self.is_set("tx_counterparty_fee"), "Tx_counterparty_fee is not set."
-        return cast(int, self.get("tx_counterparty_fee"))
-
-    @property
-    def tx_quantities_by_good_id(self) -> Dict[str, int]:
-        """Get the quantities by good ids."""
+    def skill_callback_ids(self) -> Tuple[PublicId, ...]:
+        """Get the 'skill_callback_ids' content from the message."""
         assert self.is_set(
-            "tx_quantities_by_good_id"
-        ), "Tx_quantities_by_good_id is not set."
-        return cast(Dict[str, int], self.get("tx_quantities_by_good_id"))
+            "skill_callback_ids"
+        ), "'skill_callback_ids' content is not set."
+        return cast(Tuple[PublicId, ...], self.get("skill_callback_ids"))
 
     @property
-    def ledger_id(self) -> LedgerId:
-        """Get the ledger_id."""
-        assert self.is_set("ledger_id"), "Ledger_id is not set."
-        return cast(str, self.get("ledger_id"))
+    def has_skill_callback_info(self) -> bool:
+        """Check if skill_callback_info is set."""
+        return self.is_set("skill_callback_info")
 
     @property
-    def info(self) -> Dict[str, Any]:
-        """Get the infos from the message."""
-        assert self.is_set("info"), "Info is not set."
-        return cast(Dict[str, Any], self.get("info"))
+    def skill_callback_info(self) -> Dict[str, Any]:
+        """Get the 'skill_callback_info' content from the message."""
+        assert self.is_set(
+            "skill_callback_info"
+        ), "'skill_callback_info' content is not set."
+        return cast(Dict[str, Any], self.get("skill_callback_info"))
 
     @property
-    def tx_nonce(self) -> str:
-        """Get the tx_nonce from the message."""
-        assert self.is_set("tx_nonce"), "Tx_nonce is not set."
-        return cast(str, self.get("tx_nonce"))
+    def has_terms(self) -> bool:
+        """Check if terms are set."""
+        return self.is_set("terms")
 
     @property
-    def tx_digest(self) -> str:
-        """Get the transaction digest."""
-        assert self.is_set("tx_digest"), "Tx_digest is not set."
-        return cast(str, self.get("tx_digest"))
+    def terms(self) -> Terms:
+        """Get the 'terms' content from the message."""
+        assert self.is_set("terms"), "'terms' content is not set."
+        return cast(Terms, self.get("terms"))
 
     @property
-    def signing_payload(self) -> Dict[str, Any]:
-        """Get the signing payload."""
-        assert self.is_set("signing_payload"), "signing_payload is not set."
-        return cast(Dict[str, Any], self.get("signing_payload"))
+    def transaction(self) -> Any:
+        """Get the 'transaction' content from the message."""
+        assert self.is_set("transaction"), "'transaction' content is not set."
+        return cast(Any, self.get("transaction"))
 
     @property
-    def signed_payload(self) -> Dict[str, Any]:
-        """Get the signed payload."""
-        assert self.is_set("signed_payload"), "Signed_payload is not set."
-        return cast(Dict[str, Any], self.get("signed_payload"))
+    def is_deprecated_signing_mode(self) -> bool:
+        """Get the 'is_deprecated_signing_mode' content from the message."""
+        if self.is_set("is_deprecated_signing_mode"):
+            return cast(bool, self.get("is_deprecated_signing_mode"))
+        else:
+            return False
 
     @property
-    def amount(self) -> int:
-        """Get the amount."""
-        return list(self.tx_amount_by_currency_id.values())[0]
+    def crypto_id(self) -> str:
+        """Get the 'crypto_id' content from the message."""
+        assert self.is_set("crypto_id"), "'crypto_id' content is not set."
+        return cast(str, self.get("crypto_id"))
 
     @property
-    def currency_id(self) -> str:
-        """Get the currency id."""
-        return list(self.tx_amount_by_currency_id.keys())[0]
-
-    @property
-    def sender_amount(self) -> int:
-        """Get the amount which the sender gets/pays as part of the tx."""
-        return self.amount - self.tx_sender_fee
-
-    @property
-    def counterparty_amount(self) -> int:
-        """Get the amount which the counterparty gets/pays as part of the tx."""
-        return -self.amount - self.tx_counterparty_fee
-
-    @property
-    def fees(self) -> int:
-        """Get the tx fees."""
-        return self.tx_sender_fee + self.tx_counterparty_fee
+    def optional_callback_kwargs(self) -> Dict[str, Dict[str, Any]]:
+        """Get the call back kwargs."""
+        optional_callback_kwargs = {}  # type: Dict[str, Dict[str, Any]]
+        if self.has_skill_callback_info:
+            optional_callback_kwargs["skill_callback_info"] = self.skill_callback_info
+        return optional_callback_kwargs
 
     def _is_consistent(self) -> bool:
-        """
-        Check that the data is consistent.
-
-        :return: bool
-        """
+        """Check that the message follows the transaction protocol."""
         try:
-            assert isinstance(
-                self.performative, TransactionMessage.Performative
-            ), "Performative is not of correct type."
-            assert isinstance(self.skill_callback_ids, list) and all(
-                isinstance(s, (str, PublicId)) for s in self.skill_callback_ids
-            ), "Skill_callback_ids must be of type List[str]."
-            assert isinstance(self.tx_id, str), "Tx_id must of type str."
-            assert isinstance(
-                self.tx_sender_addr, Address
-            ), "Tx_sender_addr must be of type Address."
-            assert isinstance(
-                self.tx_counterparty_addr, Address
-            ), "Tx_counterparty_addr must be of type Address."
-            assert isinstance(self.tx_amount_by_currency_id, dict) and all(
-                (isinstance(key, str) and isinstance(value, int))
-                for key, value in self.tx_amount_by_currency_id.items()
-            ), "Tx_amount_by_currency_id must be of type Dict[str, int]."
+            # Light Protocol Rule 2
+            # Check correct performative
+            extra = 0
             assert (
-                len(self.tx_amount_by_currency_id) <= 1
-            ), "Cannot reference more than one currency."
-            assert isinstance(
-                self.tx_sender_fee, int
-            ), "Tx_sender_fee must be of type int."
+                type(self.performative) == TransactionMessage.Performative
+            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                [e.value for e in TransactionMessage.Performative], self.performative
+            )
             assert (
-                self.tx_sender_fee >= 0
-            ), "Tx_sender_fee must be greater or equal to zero."
-            assert isinstance(
-                self.tx_counterparty_fee, int
-            ), "Tx_counterparty_fee must be of type int."
+                type(self.skill_callback_ids) == tuple
+            ), "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
+                type(self.skill_callback_ids)
+            )
+            assert all(
+                type(element) == PublicId for element in self.skill_callback_ids
+            ), "Invalid type for tuple elements in content 'skill_callback_ids'. Expected 'PublicId'."
             assert (
-                self.tx_counterparty_fee >= 0
-            ), "Tx_counterparty_fee must be greater or equal to zero."
-            assert isinstance(self.tx_quantities_by_good_id, dict) and all(
-                (isinstance(key, str) and isinstance(value, int))
-                for key, value in self.tx_quantities_by_good_id.items()
-            ), "Tx_quantities_by_good_id must be of type Dict[str, int]."
-            assert (
-                isinstance(self.ledger_id, str)
-                and self.ledger_id in SUPPORTED_LEDGER_IDS
-            ), ("Ledger_id must be str and " "must in the supported ledger ids.")
-            assert isinstance(self.info, dict) and all(
-                isinstance(key, str) for key in self.info.keys()
-            ), "Info must be of type Dict[str, Any]."
-            if not self.ledger_id == OFF_CHAIN:
+                type(self.crypto_id) == str
+            ), "Invalid type for content 'crypto_id'. Expected 'str'. Found '{}'.".format(
+                type(self.crypto_id)
+            )
+            if self.has_skill_callback_info:
+                extra = 1
                 assert (
-                    self.currency_id == SUPPORTED_CURRENCIES[self.ledger_id]
-                ), "Inconsistent currency_id given ledger_id."
-            if self.amount >= 0:
-                assert (
-                    self.sender_amount >= 0
-                ), "Sender_amount must be positive when the sender is the payment receiver."
-            else:
-                assert (
-                    self.counterparty_amount >= 0
-                ), "Counterparty_amount must be positive when the counterpary is the payment receiver."
+                    type(self.skill_callback_info) == dict
+                ), "Invalid type for content 'skill_callback_info'. Expected 'dict'. Found '{}'.".format(
+                    type(self.skill_callback_info)
+                )
+                for key_of_skill_callback_info in self.skill_callback_info.keys():
+                    assert (
+                        type(key_of_skill_callback_info) == str
+                    ), "Invalid type for dictionary keys in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_skill_callback_info)
+                    )
+                    # values can be of any type!
 
-            if self.performative in {
-                self.Performative.PROPOSE_FOR_SETTLEMENT,
-                self.Performative.REJECTED_SETTLEMENT,
-                self.Performative.FAILED_SETTLEMENT,
-            }:
-                assert isinstance(self.tx_nonce, str), "Tx_nonce must be of type str."
-                assert len(self.body) == 12
-            elif self.performative == self.Performative.SUCCESSFUL_SETTLEMENT:
-                assert isinstance(self.tx_digest, str), "Tx_digest must be of type str."
-                assert len(self.body) == 12
-            elif self.performative in {
-                self.Performative.PROPOSE_FOR_SIGNING,
-                self.Performative.REJECTED_SIGNING,
-            }:
-                assert isinstance(self.signing_payload, dict) and all(
-                    isinstance(key, str) for key in self.signing_payload.keys()
-                ), "Signing_payload must be of type Dict[str, Any]"
-                assert len(self.body) == 12
-            elif self.performative == self.Performative.SUCCESSFUL_SIGNING:
-                assert isinstance(self.signing_payload, dict) and all(
-                    isinstance(key, str) for key in self.signing_payload.keys()
-                ), "Signing_payload must be of type Dict[str, Any]"
-                assert len(self.body) == 13
-            else:  # pragma: no cover
-                raise ValueError("Performative not recognized.")
+            # Check correct contents
+            actual_nb_of_contents = len(self.body) - (DEFAULT_BODY_SIZE + extra)
+            expected_nb_of_contents = 0
+            if self.performative == TransactionMessage.Performative.SIGN_TRANSACTION:
+                expected_nb_of_contents = 1
+                if self.has_terms:
+                    expected_nb_of_contents += 1
+                    assert (
+                        type(self.terms) == Terms
+                    ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
+                        type(self.terms)
+                    )
+                assert self.transaction
+            elif self.performative == TransactionMessage.Performative.SIGN_MESSAGE:
+                expected_nb_of_contents = 1
+                if self.has_terms:
+                    expected_nb_of_contents += 1
+                    assert (
+                        type(self.terms) == Terms
+                    ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
+                        type(self.terms)
+                    )
+                if self.is_set("is_deprecated_signing_mode"):
+                    expected_nb_of_contents += 1
+                    assert (
+                        type(self.is_deprecated_signing_mode) == bool
+                    ), "Invalid type for content 'is_deprecated_signing_mode'. Expected 'bool'. Found '{}'.".format(
+                        type(self.is_deprecated_signing_mode)
+                    )
+                assert (
+                    type(self.message) == bytes
+                ), "Invalid type for content 'message'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.message)
+                )
+            elif (
+                self.performative == TransactionMessage.Performative.SIGNED_TRANSACTION
+            ):
+                expected_nb_of_contents = 1
+                assert self.signed_transaction
+            elif self.performative == TransactionMessage.Performative.SIGNED_MESSAGE:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.signed_message) == str
+                ), "Invalid type for content 'signed_message'. Expected 'str'. Found '{}'.".format(
+                    type(self.signed_message)
+                )
+            elif self.performative == TransactionMessage.Performative.ERROR:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.error_code) == TransactionMessage.ErrorCode
+                ), "Invalid type for content 'error_code'. Expected 'ErrorCode'. Found '{}'.".format(
+                    type(self.error_code)
+                )
 
+            # Check correct content count
+            assert (
+                expected_nb_of_contents == actual_nb_of_contents
+            ), "Incorrect number of contents. Expected {}. Found {}".format(
+                expected_nb_of_contents, actual_nb_of_contents
+            )
         except (AssertionError, ValueError, KeyError) as e:
             logger.error(str(e))
             return False
 
         return True
-
-    @classmethod
-    def respond_settlement(
-        cls,
-        other: "TransactionMessage",
-        performative: Performative,
-        tx_digest: Optional[str] = None,
-    ) -> "TransactionMessage":
-        """
-        Create response message.
-
-        :param other: TransactionMessage
-        :param performative: the performative
-        :param tx_digest: the transaction digest
-        :return: a transaction message object
-        """
-        if tx_digest is None:
-            tx_msg = TransactionMessage(
-                performative=performative,
-                skill_callback_ids=other.skill_callback_ids,
-                tx_id=other.tx_id,
-                tx_sender_addr=other.tx_sender_addr,
-                tx_counterparty_addr=other.tx_counterparty_addr,
-                tx_amount_by_currency_id=other.tx_amount_by_currency_id,
-                tx_sender_fee=other.tx_sender_fee,
-                tx_counterparty_fee=other.tx_counterparty_fee,
-                tx_quantities_by_good_id=other.tx_quantities_by_good_id,
-                ledger_id=other.ledger_id,
-                info=other.info,
-                tx_nonce=other.tx_nonce,
-            )
-        else:
-            tx_msg = TransactionMessage(
-                performative=performative,
-                skill_callback_ids=other.skill_callback_ids,
-                tx_id=other.tx_id,
-                tx_sender_addr=other.tx_sender_addr,
-                tx_counterparty_addr=other.tx_counterparty_addr,
-                tx_amount_by_currency_id=other.tx_amount_by_currency_id,
-                tx_sender_fee=other.tx_sender_fee,
-                tx_counterparty_fee=other.tx_counterparty_fee,
-                tx_quantities_by_good_id=other.tx_quantities_by_good_id,
-                ledger_id=other.ledger_id,
-                info=other.info,
-                tx_digest=tx_digest,
-            )
-        return tx_msg
-
-    @classmethod
-    def respond_signing(
-        cls,
-        other: "TransactionMessage",
-        performative: Performative,
-        signed_payload: Optional[Dict[str, Any]] = None,
-    ) -> "TransactionMessage":
-        """
-        Create response message.
-
-        :param other: TransactionMessage
-        :param performative: the performative
-        :param signed_payload: the signed payload
-        :return: a transaction message object
-        """
-        if signed_payload is None:
-            tx_msg = TransactionMessage(
-                performative=performative,
-                skill_callback_ids=other.skill_callback_ids,
-                tx_id=other.tx_id,
-                tx_sender_addr=other.tx_sender_addr,
-                tx_counterparty_addr=other.tx_counterparty_addr,
-                tx_amount_by_currency_id=other.tx_amount_by_currency_id,
-                tx_sender_fee=other.tx_sender_fee,
-                tx_counterparty_fee=other.tx_counterparty_fee,
-                tx_quantities_by_good_id=other.tx_quantities_by_good_id,
-                ledger_id=other.ledger_id,
-                info=other.info,
-                signing_payload=other.signing_payload,
-            )
-        else:
-            tx_msg = TransactionMessage(
-                performative=performative,
-                skill_callback_ids=other.skill_callback_ids,
-                tx_id=other.tx_id,
-                tx_sender_addr=other.tx_sender_addr,
-                tx_counterparty_addr=other.tx_counterparty_addr,
-                tx_amount_by_currency_id=other.tx_amount_by_currency_id,
-                tx_sender_fee=other.tx_sender_fee,
-                tx_counterparty_fee=other.tx_counterparty_fee,
-                tx_quantities_by_good_id=other.tx_quantities_by_good_id,
-                ledger_id=other.ledger_id,
-                info=other.info,
-                signing_payload=other.signing_payload,
-                signed_payload=signed_payload,
-            )
-        return tx_msg

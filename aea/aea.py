@@ -117,7 +117,7 @@ class AEA(Agent):
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
         decision_maker_handler = decision_maker_handler_class(
-            identity=identity, wallet=wallet, ledger_apis=ledger_apis
+            identity=identity, wallet=wallet
         )
         self._decision_maker = DecisionMaker(
             decision_maker_handler=decision_maker_handler

@@ -32,9 +32,12 @@ handlers:
     args: {}
     class_name: MyTransactionHandler
 models:
-  dialogues:
+  fipa_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
   strategy:
     args:
       country: UK

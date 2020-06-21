@@ -33,7 +33,7 @@ from ecdsa.util import sigencode_string_canonize
 
 import requests
 
-from aea.crypto.base import Crypto, FaucetApi, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -114,7 +114,27 @@ class CosmosCrypto(Crypto[SigningKey]):
         transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
         transaction_bytes = transaction_str.encode("utf-8")
         signed_transaction = self.sign_message(transaction_bytes)
-        return signed_transaction
+        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
+        pushable_tx = {
+            "tx": {
+                "msg": transaction["msgs"],
+                "fee": transaction["fee"],
+                "memo": transaction["memo"],
+                "signatures": [
+                    {
+                        "signature": signed_transaction,
+                        "pub_key": {
+                            "type": "tendermint/PubKeySecp256k1",
+                            "value": base64_pbk,
+                        },
+                        "account_number": transaction["account_number"],
+                        "sequence": transaction["sequence"],
+                    }
+                ],
+            },
+            "mode": "sync",
+        }
+        return pushable_tx
 
     def recover_message(
         self, message: bytes, signature: str, is_deprecated_mode: bool = False
@@ -172,7 +192,62 @@ class CosmosCrypto(Crypto[SigningKey]):
         fp.write(self.entity.to_string().hex().encode("utf-8"))
 
 
-class CosmosApi(LedgerApi):
+class CosmosHelper(Helper):
+    """Helper class usable as Mixin for CosmosApi or as standalone class."""
+
+    @staticmethod
+    def is_transaction_settled(tx_receipt: Any) -> bool:
+        """
+        Check whether a transaction is settled or not.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: True if the transaction has been settled, False o/w.
+        """
+        if tx_receipt is not None:
+            # TODO: quick fix only, not sure this is reliable
+            is_successful = "code" not in tx_receipt
+        return is_successful
+
+    @staticmethod
+    def is_transaction_valid(
+        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param tx: the transaction.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :return: True if the random_message is equals to tx['input']
+        """
+        try:
+            assert tx is not None
+            _tx = tx.get("tx").get("value").get("msg")[0]
+            recovered_amount = int(_tx.get("value").get("amount")[0].get("amount"))
+            sender = _tx.get("value").get("from_address")
+            recipient = _tx.get("value").get("to_address")
+            is_valid = (
+                recovered_amount == amount and sender == client and recipient == seller
+            )
+        except Exception:  # pragma: no cover
+            is_valid = False
+        return is_valid
+
+    @staticmethod
+    def generate_tx_nonce(seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish txs with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        raise NotImplementedError
+
+
+class CosmosApi(LedgerApi, CosmosHelper):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
 
     identifier = _COSMOS
@@ -215,40 +290,41 @@ class CosmosApi(LedgerApi):
             )
         return balance
 
-    def transfer(  # pylint: disable=arguments-differ
+    def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
-        crypto: Crypto,
+        sender_address: Address,
         destination_address: Address,
         amount: int,
         tx_fee: int,
-        tx_nonce: str = "",
+        tx_nonce: str,
         denom: str = "testfet",
         account_number: int = 0,
         sequence: int = 0,
         gas: int = 80000,
         memo: str = "",
-        sync_mode: str = "sync",
         chain_id: str = "aea-testnet",
         **kwargs,
-    ) -> Optional[str]:
+    ) -> Any:
         """
         Submit a transfer transaction to the ledger.
 
-        :param crypto: the crypto object associated to the payer.
+        :param sender_address: the sender address of the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
-        :return: tx digest if present, otherwise None
+        :return: the transfer transaction
         """
-        result = self._try_get_account_number_and_sequence(crypto.address)
+        result = self._try_get_account_number_and_sequence(sender_address)
         if result is not None:
             account_number, sequence = result
+        else:
+            raise ValueError("Cannot determine account number and sequence.")
         transfer = {
             "type": "cosmos-sdk/MsgSend",
             "value": {
-                "from_address": crypto.address,
+                "from_address": sender_address,
                 "to_address": destination_address,
                 "amount": [{"denom": denom, "amount": str(amount)}],
             },
@@ -264,55 +340,7 @@ class CosmosApi(LedgerApi):
             "memo": memo,
             "msgs": [transfer],
         }
-        signature = crypto.sign_transaction(tx)
-        base64_pbk = base64.b64encode(bytes.fromhex(crypto.public_key)).decode("utf-8")
-        pushable_tx = {
-            "tx": {
-                "msg": [transfer],
-                "fee": {
-                    "gas": str(gas),
-                    "amount": [{"denom": denom, "amount": str(tx_fee)}],
-                },
-                "memo": memo,
-                "signatures": [
-                    {
-                        "signature": signature,
-                        "pub_key": {
-                            "type": "tendermint/PubKeySecp256k1",
-                            "value": base64_pbk,
-                        },
-                        "account_number": str(account_number),
-                        "sequence": str(sequence),
-                    }
-                ],
-            },
-            "mode": sync_mode,
-        }
-        # TODO retrieve, gas dynamically
-        tx_digest = self.send_signed_transaction(tx_signed=pushable_tx)
-        return tx_digest
-
-    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
-        """
-        Send a signed transaction and wait for confirmation.
-
-        :param tx_signed: the signed transaction
-        :return: tx_digest, if present
-        """
-        tx_digest = self._try_send_signed_transaction(tx_signed)
-        return tx_digest
-
-    def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
-        """Try send the signed transaction."""
-        tx_digest = None  # type: Optional[str]
-        try:
-            url = self.network_address + "/txs"
-            response = requests.post(url=url, json=tx_signed)
-            if response.status_code == 200:
-                tx_digest = response.json()["txhash"]
-        except Exception as e:  # pragma: no cover
-            logger.warning("Encountered exception when trying to send tx: {}".format(e))
-        return tx_digest
+        return tx
 
     def _try_get_account_number_and_sequence(
         self, address: Address
@@ -335,19 +363,27 @@ class CosmosApi(LedgerApi):
             )
         return result
 
-    def is_transaction_settled(self, tx_digest: str) -> bool:
+    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
-        Check whether a transaction is settled or not.
+        Send a signed transaction and wait for confirmation.
 
-        :param tx_digest: the digest associated to the transaction.
-        :return: True if the transaction has been settled, False o/w.
+        :param tx_signed: the signed transaction
+        :return: tx_digest, if present
         """
-        is_successful = False
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
-        if tx_receipt is not None:
-            # TODO: quick fix only, not sure this is reliable
-            is_successful = "code" not in tx_receipt
-        return is_successful
+        tx_digest = self._try_send_signed_transaction(tx_signed)
+        return tx_digest
+
+    def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+        """Try send the signed transaction."""
+        tx_digest = None  # type: Optional[str]
+        try:
+            url = self.network_address + "/txs"
+            response = requests.post(url=url, json=tx_signed)
+            if response.status_code == 200:
+                tx_digest = response.json()["txhash"]
+        except Exception as e:  # pragma: no cover
+            logger.warning("Encountered exception when trying to send tx: {}".format(e))
+        return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
@@ -380,47 +416,14 @@ class CosmosApi(LedgerApi):
             )
         return result
 
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+    def get_transaction(self, tx_digest: str) -> Optional[Any]:
         """
-        Generate a unique hash to distinguish txs with the same terms.
+        Get the transaction for a transaction digest.
 
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx, if present
         """
-        raise NotImplementedError  # pragma: no cover
-
-    def is_transaction_valid(
-        self,
-        tx_digest: str,
-        seller: Address,
-        client: Address,
-        tx_nonce: str,
-        amount: int,
-    ) -> bool:
-        """
-        Check whether a transaction is valid or not (non-blocking).
-
-        :param tx_digest: the transaction digest.
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :param tx_nonce: the transaction nonce.
-        :param amount: the amount we expect to get from the transaction.
-        :return: True if the random_message is equals to tx['input']
-        """
-        tx_receipt = self.get_transaction_receipt(tx_digest)
-        try:
-            assert tx_receipt is not None
-            tx = tx_receipt.get("tx").get("value").get("msg")[0]
-            recovered_amount = int(tx.get("value").get("amount")[0].get("amount"))
-            sender = tx.get("value").get("from_address")
-            recipient = tx.get("value").get("to_address")
-            is_valid = (
-                recovered_amount == amount and sender == client and recipient == seller
-            )
-        except Exception:  # pragma: no cover
-            is_valid = False
-        return is_valid
+        raise NotImplementedError
 
 
 class CosmosFaucetApi(FaucetApi):

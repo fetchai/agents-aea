@@ -21,7 +21,6 @@
 
 from typing import Any, Dict
 
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
 from aea.decision_maker.messages.base import InternalMessage
@@ -31,22 +30,20 @@ from aea.identity.base import Identity
 class DecisionMakerHandler(BaseDecisionMakerHandler):
     """This class implements the decision maker."""
 
-    def __init__(self, identity: Identity, wallet: Wallet, ledger_apis: LedgerApis):
+    def __init__(self, identity: Identity, wallet: Wallet):
         """
         Initialize the decision maker.
 
         :param identity: the identity
         :param wallet: the wallet
-        :param ledger_apis: the ledger apis
         """
-        # TODO: remove ledger_api from constructor
         kwargs = {
             # Add your objects here, they will be accessible in the `handle` method via `self.context`.
             # They will also be accessible from the skill context.
         }  # type: Dict[str, Any]
         # You MUST NOT modify the constructor below:
         super().__init__(
-            identity=identity, wallet=wallet, ledger_apis=ledger_apis, **kwargs,
+            identity=identity, wallet=wallet, **kwargs,
         )
 
     def handle(self, message: InternalMessage) -> None:
