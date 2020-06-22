@@ -10,9 +10,6 @@ fingerprint:
   behaviours.py: QmUErSz1FXfsX7VyQU9YcxteS3j7CpDBAELz4yGEdzdEw1
   handlers.py: Qma2xG1pf5o19uumuQuThEEuWutBpMUbKgdPCb1VVxQAvu
 fingerprint_ignore_patterns: []
-contracts: []
-protocols: []
-skills: []
 behaviours:
   aries_demo_faber:
     args:

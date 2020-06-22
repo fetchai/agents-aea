@@ -9,11 +9,9 @@ fingerprint:
   __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
   handlers.py: Qmf27rceAx3bwYjm1UXTXHnXratBPz9JwmLb5emqpruqyi
 fingerprint_ignore_patterns: []
-contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/http:0.3.0
-skills: []
 behaviours: {}
 handlers:
   aries_demo_default:

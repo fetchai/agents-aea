@@ -1124,7 +1124,7 @@ class SkillConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -1143,6 +1143,14 @@ class SkillConfig(ComponentConfiguration):
                 "dependencies": self.dependencies,
             }
         )
+
+        if len(self.contracts) == 0:
+            result.pop("contracts")
+        if len(self.protocols) == 0:
+            result.pop("protocols")
+        if len(self.skills) == 0:
+            result.pop("skills")
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):

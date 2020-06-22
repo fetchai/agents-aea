@@ -11,12 +11,10 @@ fingerprint:
   handlers.py: QmQ2t7YYwiNkCo1nVicVX13yhp3dUw6QyZc6MCzLeoupHH
   strategy.py: QmcuqouWhqSzYpaNe8nHcah6JBue5ejHEJTx88B4TckyDj
 fingerprint_ignore_patterns: []
-contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
-skills: []
 behaviours:
   search:
     args:

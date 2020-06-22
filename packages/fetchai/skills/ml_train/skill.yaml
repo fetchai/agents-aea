@@ -14,11 +14,9 @@ fingerprint:
   strategy.py: Qmc7UAYYhXERsTCJBKYg3p7toa7HEfnzxZtA2H8xcYPc53
   tasks.py: QmS5pGbxvMXSh1Vmuvq26e5APnheQJJ3r3BK6GEyUBUpAf
 fingerprint_ignore_patterns: []
-contracts: []
 protocols:
 - fetchai/ml_trade:0.3.0
 - fetchai/oef_search:0.3.0
-skills: []
 behaviours:
   search:
     args:

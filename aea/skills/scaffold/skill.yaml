@@ -10,9 +10,6 @@ fingerprint:
   handlers.py: QmZYyTENRr6ecnxx1FeBdgjLiBhFLVn9mqarzUtFQmNUFn
   my_model.py: QmPaZ6G37Juk63mJj88nParaEp71XyURts8AmmX1axs24V
 fingerprint_ignore_patterns: []
-contracts: []
-protocols: []
-skills: []
 behaviours:
   scaffold:
     args:

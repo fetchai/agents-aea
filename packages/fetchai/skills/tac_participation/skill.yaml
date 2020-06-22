@@ -17,7 +17,6 @@ contracts:
 protocols:
 - fetchai/oef_search:0.3.0
 - fetchai/tac:0.3.0
-skills: []
 behaviours:
   tac:
     args:

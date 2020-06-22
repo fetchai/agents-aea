@@ -8,10 +8,8 @@ fingerprint:
   __init__.py: QmYm7UaWVmRy2i35MBKZRnBrpWBJswLdEH6EY1QQKXdQES
   handlers.py: QmV1yRiqVZr5fKd6xbDVxtE68kjcWvrH7UEcxKd82jLM68
 fingerprint_ignore_patterns: []
-contracts: []
 protocols:
 - fetchai/default:0.3.0
-skills: []
 behaviours: {}
 handlers:
   error_handler:

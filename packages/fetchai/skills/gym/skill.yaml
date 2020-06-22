@@ -11,10 +11,8 @@ fingerprint:
   rl_agent.py: QmU9qMEamGZCTcX28zzY8G7gBeCdTttHnnZJWu7JqPhN7y
   tasks.py: QmURSaDncmKj9Ri6JM4eBwWkEg2JEJrMdxMygKiBNiD2cf
 fingerprint_ignore_patterns: []
-contracts: []
 protocols:
 - fetchai/gym:0.3.0
-skills: []
 behaviours: {}
 handlers:
   gym:

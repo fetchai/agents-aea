@@ -9,10 +9,8 @@ fingerprint:
   behaviours.py: QmXARXRvJkpzuqnYNhJhv42Sk6J4KzRW2AKvC6FJWLU9JL
   handlers.py: Qmez6kjFaP3BfeD474gDZCt71KL3sEipoh67osf4urzRFM
 fingerprint_ignore_patterns: []
-contracts: []
 protocols:
 - fetchai/default:0.3.0
-skills: []
 behaviours:
   echo:
     args:
