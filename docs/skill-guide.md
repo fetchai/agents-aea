@@ -183,6 +183,7 @@ fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - 'fetchai/oef_search:0.3.0'
+skills: []
 behaviours:
   my_search_behaviour:
     args:
