@@ -1116,10 +1116,21 @@ class SkillConfig(ComponentConfiguration):
     @property
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the connection dependencies."""
-        return {
-            ComponentId(ComponentType.PROTOCOL, protocol_id)
-            for protocol_id in self.protocols
-        }
+        return (
+            {
+                ComponentId(ComponentType.PROTOCOL, protocol_id)
+                for protocol_id in self.protocols
+            }
+            .union(
+                {
+                    ComponentId(ComponentType.CONTRACT, contract_id)
+                    for contract_id in self.contracts
+                }
+            )
+            .union(
+                {ComponentId(ComponentType.SKILL, skill_id) for skill_id in self.skills}
+            )
+        )
 
     @property
     def json(self) -> Dict:
