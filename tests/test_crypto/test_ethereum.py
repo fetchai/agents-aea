@@ -23,11 +23,17 @@ import hashlib
 import time
 from unittest.mock import MagicMock
 
+import eth_account
+
 import pytest
 
-from aea.crypto.ethereum import EthereumApi, EthereumCrypto
+from aea.crypto.ethereum import EthereumApi, EthereumCrypto, EthereumFaucetApi
 
-from ..conftest import ETHEREUM_PRIVATE_KEY_PATH, ETHEREUM_TESTNET_CONFIG
+from ..conftest import (
+    ETHEREUM_PRIVATE_KEY_PATH,
+    ETHEREUM_TESTNET_CONFIG,
+    MAX_FLAKY_RERUNS,
+)
 
 
 def test_creation():
@@ -54,7 +60,7 @@ def test_initialization():
 def test_derive_address():
     """Test the get_address_from_public_key method"""
     account = EthereumCrypto()
-    address = account.get_address_from_public_key(account.public_key)
+    address = EthereumApi.get_address_from_public_key(account.public_key)
     assert account.address == address, "Address derivation incorrect"
 
 
@@ -63,7 +69,7 @@ def test_sign_and_recover_message():
     account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addresses = account.recover_message(
+    recovered_addresses = EthereumApi.recover_message(
         message=b"hello", signature=sign_bytes
     )
     assert len(recovered_addresses) == 1, "Wrong number of addresses recovered."
@@ -79,7 +85,7 @@ def test_sign_and_recover_message_deprecated():
     message_hash = hashlib.sha256(message).digest()
     sign_bytes = account.sign_message(message=message_hash, is_deprecated_mode=True)
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addresses = account.recover_message(
+    recovered_addresses = EthereumApi.recover_message(
         message=message_hash, signature=sign_bytes, is_deprecated_mode=True
     )
     assert len(recovered_addresses) == 1, "Wrong number of addresses recovered."
@@ -117,29 +123,62 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
-@pytest.mark.unstable
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
-def test_transfer():
-    """Test transfer of wealth."""
-    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
-    ec1 = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
+def test_construct_sign_and_submit_transfer_transaction():
+    """Test the construction, signing and submitting of a transfer transaction."""
+    account = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+
     amount = 40000
-    fee = 30000
-    tx_nonce = ethereum_api.generate_tx_nonce(ec2.address, ec1.address)
-    tx_digest = ethereum_api.transfer(
-        ec1, ec2.address, amount, fee, tx_nonce, chain_id=3
+    tx_nonce = ethereum_api.generate_tx_nonce(ec2.address, account.address)
+    transfer_transaction = ethereum_api.get_transfer_transaction(
+        sender_address=account.address,
+        destination_address=ec2.address,
+        amount=amount,
+        tx_fee=30000,
+        tx_nonce=tx_nonce,
+        chain_id=3,
     )
-    assert tx_digest is not None, "Failed to submit transfer!"
+    assert (
+        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 7
+    ), "Incorrect transfer_transaction constructed."
+
+    signed_transaction = account.sign_transaction(transfer_transaction)
+    assert (
+        isinstance(signed_transaction, eth_account.datastructures.AttributeDict)
+        and len(signed_transaction) == 5
+    ), "Incorrect signed_transaction constructed."
+
+    transaction_digest = ethereum_api.send_signed_transaction(signed_transaction)
+    assert transaction_digest is not None, "Failed to submit transfer transaction!"
+
     not_settled = True
     elapsed_time = 0
-    while not_settled and elapsed_time < 180:
-        elapsed_time += 2
+    while not_settled and elapsed_time < 20:
+        elapsed_time += 1
         time.sleep(2)
-        is_settled = ethereum_api.is_transaction_settled(tx_digest)
+        transaction_receipt = ethereum_api.get_transaction_receipt(transaction_digest)
+        if transaction_receipt is None:
+            continue
+        is_settled = ethereum_api.is_transaction_settled(transaction_receipt)
         not_settled = not is_settled
-    assert is_settled, "Failed to complete tx!"
+    assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
+    assert is_settled, "Failed to verify tx!"
+
+    tx = ethereum_api.get_transaction(transaction_digest)
     is_valid = ethereum_api.is_transaction_valid(
-        tx_digest, ec2.address, ec1.address, tx_nonce, amount
+        tx, ec2.address, account.address, tx_nonce, amount
     )
     assert is_valid, "Failed to settle tx correctly!"
+    assert tx != transaction_receipt, "Should not be same!"
+
+
+@pytest.mark.network
+def test_get_wealth_positive(caplog):
+    """Test the balance is zero for a new account."""
+    ethereum_faucet_api = EthereumFaucetApi()
+    ec = EthereumCrypto()
+    ethereum_faucet_api.get_wealth(ec.address)
+    assert "Response: " in caplog.text

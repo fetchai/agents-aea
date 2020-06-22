@@ -101,11 +101,13 @@ class Strategy(Model):
         :return: whether it is affordable
         """
         if self.is_ledger_tx:
+            result = False
             payable = proposal.values["price"] + self.max_buyer_tx_fee
             ledger_id = proposal.values["ledger_id"]
             address = cast(str, self.context.agent_addresses.get(ledger_id))
-            balance = self.context.ledger_apis.token_balance(ledger_id, address)
-            result = balance >= payable
+            balance = self.context.ledger_apis.get_balance(ledger_id, address)
+            if balance is not None:
+                result = balance >= payable
         else:
             result = True
         return result

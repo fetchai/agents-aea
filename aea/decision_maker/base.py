@@ -32,6 +32,7 @@ from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
+from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def _hash(access_code: str) -> str:
 
 
 class OwnershipState(ABC):
-    """Represent the ownership state of an agent."""
+    """Represent the ownership state of an agent (can proxy a ledger)."""
 
     @abstractmethod
     def set(self, **kwargs) -> None:
@@ -77,46 +78,26 @@ class OwnershipState(ABC):
         """Get the initialization status."""
 
     @abstractmethod
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
+    def is_affordable_transaction(self, terms: Terms) -> bool:
         """
         Check if the transaction is affordable (and consistent).
 
-        :param tx_message: the transaction message
+        :param terms: the transaction terms
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
 
     @abstractmethod
-    def apply_transactions(
-        self, transactions: List[TransactionMessage]
-    ) -> "OwnershipState":
+    def apply_transactions(self, list_of_terms: List[Terms]) -> "OwnershipState":
         """
         Apply a list of transactions to (a copy of) the current state.
 
-        :param transactions: the sequence of transaction messages.
+        :param list_of_terms: the sequence of transaction terms.
         :return: the final state.
         """
 
     @abstractmethod
     def __copy__(self) -> "OwnershipState":
         """Copy the object."""
-
-
-class LedgerStateProxy(ABC):
-    """Class to represent a proxy to a ledger state."""
-
-    @property
-    @abstractmethod
-    def is_initialized(self) -> bool:
-        """Get the initialization status."""
-
-    @abstractmethod
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the transaction is affordable on the default ledger.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction is affordable on the ledger
-        """
 
 
 class Preferences(ABC):
@@ -151,13 +132,13 @@ class Preferences(ABC):
 
     @abstractmethod
     def utility_diff_from_transaction(
-        self, ownership_state: OwnershipState, tx_message: TransactionMessage
+        self, ownership_state: OwnershipState, terms: Terms
     ) -> float:
         """
         Simulate a transaction and get the resulting utility difference (taking into account the fee).
 
         :param ownership_state: the ownership state against which to apply the transaction.
-        :param tx_message: a transaction message.
+        :param terms: the transaction terms.
         :return: the score.
         """
 
@@ -397,7 +378,7 @@ class DecisionMaker:
 
             if message.protocol_id == InternalMessage.protocol_id:
                 self.handle(message)
-            else:
+            else:  # pragma: no cover
                 logger.warning(
                     "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
                         self._agent_name
