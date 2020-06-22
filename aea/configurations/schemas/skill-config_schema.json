@@ -9,7 +9,9 @@
     "version",
     "license",
     "aea_version",
-    "protocols"
+    "protocols",
+    "contracts",
+    "skills"
   ],
   "properties": {
     "name": {
