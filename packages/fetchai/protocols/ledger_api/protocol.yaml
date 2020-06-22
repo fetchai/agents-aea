@@ -6,11 +6,12 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: Qmct8jVx6ndWwaa5HXJAJgMraVuZ8kMeyx6rnEeHAYHwDJ
+  custom_types.py: QmUemuiDnpWzFtpHy592m3PjDML1TsAWKsvMsXpEyF2obz
   dialogues.py: QmTUGT6DkMaFG3TvJxjnfhnDsXuE9TBvC62iYWKQpcd1YK
-  ledger_api.proto: QmNRUfZqhqyxUen8DsQhR9Dqm3uCFHmZ8q8AjMaUTC88So
-  ledger_api_pb2.py: QmRRd8dKgX6qzmG8RMbZ2SiJ58EQgoHxgtKgXBDuCf3rXG
-  message.py: QmeGUi8evyLbx2Q4BSsdqXBGjZvGM3CQPR2qgh4WGynu3o
-  serialization.py: QmfZkhyoB6K61vVjFPpjTUBArGWGfkkAbGwiZR1tNVSJLt
+  ledger_api.proto: QmRphpzLJjGUkCnQzYwwMZ4yTdZ6ZAHQ2vNnWnHPYhaTS3
+  ledger_api_pb2.py: QmZgwZfo16T6jbtkwheg45PzuqpngywFvi3qJY721Livao
+  message.py: QmbzYB6fmbGdFz5F1uzJtFUQpkNoH2T8aPeHvjp57K4FwM
+  serialization.py: QmZqjMa766Kp3XUBMaqyA5iB7tMBFeKrqykzj6aaWzsR9s
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

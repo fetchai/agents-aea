@@ -32,7 +32,7 @@ from ecdsa.util import sigencode_string_canonize
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.token import TokenTxFactory
-from fetchai.ledger.api.tx import TxContents  # , TxStatus
+from fetchai.ledger.api.tx import TxContents
 from fetchai.ledger.crypto import Address as FetchaiAddress
 from fetchai.ledger.crypto import Entity, Identity
 from fetchai.ledger.serialisation import sha256_hash, transaction
@@ -294,7 +294,7 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
             FetchaiAddress(destination_address),
             amount,
             tx_fee,
-            [],
+            [],  # we don't add signer here as we would need the public key for this
         )
         self._api.set_validity_period(tx)
         return tx

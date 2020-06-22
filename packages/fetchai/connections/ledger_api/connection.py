@@ -22,7 +22,7 @@ import asyncio
 from asyncio import Task
 from collections import deque
 from concurrent.futures import Executor
-from typing import Callable, Deque, List, Optional, cast
+from typing import Callable, Deque, Dict, List, Optional, cast
 
 import aea
 from aea.configurations.base import ConnectionConfig, PublicId
@@ -60,6 +60,7 @@ class LedgerApiConnection(Connection):
         self._dispatcher = _RequestDispatcher(self.loop)
 
         self.receiving_tasks: List[asyncio.Future] = []
+        self.task_to_request: Dict[asyncio.Future, Envelope] = {}
         self.done_tasks: Deque[asyncio.Future] = deque()
 
     async def connect(self) -> None:
@@ -88,6 +89,7 @@ class LedgerApiConnection(Connection):
         api = aea.crypto.registries.make_ledger_api(message.ledger_id)
         task = self._dispatcher.dispatch(api, message)
         self.receiving_tasks.append(task)
+        self.task_to_request[task] = envelope
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -97,35 +99,47 @@ class LedgerApiConnection(Connection):
         """
         # if there are done tasks, return the result
         if len(self.done_tasks) > 0:
-            message = self.done_tasks.pop().result()
-            envelope = Envelope(
-                to=self.address,
-                sender="",
-                protocol_id=message.protocol_id,
-                message=message,
-            )
-            return envelope
+            done_task = self.done_tasks.pop()
+            return self._handle_done_task(done_task)
 
         # wait for completion of at least one receiving task
         done, pending = await asyncio.wait(
             self.receiving_tasks, return_when=asyncio.FIRST_COMPLETED
         )
 
+        if len(done) == 0:
+            return None
+
         # pick one done task
-        message = done.pop().result() if len(done) > 0 else None
+        done_task = done.pop()
 
         # update done tasks
         self.done_tasks.extend([*done])
         # update receiving tasks
         self.receiving_tasks[:] = pending
 
-        envelope = Envelope(
-            to=self.address,
-            sender="",
-            protocol_id=message.protocol_id,
-            message=message,
-        )
-        return envelope
+        return self._handle_done_task(done_task)
+
+    def _handle_done_task(self, task: asyncio.Future) -> Optional[Envelope]:
+        """
+        Process a done receiving task.
+
+        :param task: the done task.
+        :return: the reponse envelope.
+        """
+        request = self.task_to_request.pop(task)
+        request_message = cast(LedgerApiMessage, request.message)
+        response_message: Optional[LedgerApiMessage] = task.result()
+
+        response_envelope = None
+        if response_message is not None:
+            response_envelope = Envelope(
+                to=self.address,
+                sender=request_message.ledger_id,
+                protocol_id=response_message.protocol_id,
+                message=response_message,
+            )
+        return response_envelope
 
 
 class _RequestDispatcher:
@@ -143,7 +157,9 @@ class _RequestDispatcher:
         self.loop = loop if loop is not None else asyncio.get_event_loop()
         self.executor = executor
 
-    async def run_async(self, func: Callable, *args):
+    async def run_async(
+        self, func: Callable[[LedgerApi, LedgerApiMessage], Task], *args
+    ):
         """
         Run a function in executor.
 
@@ -151,7 +167,11 @@ class _RequestDispatcher:
         :param args: the arguments to pass to the function.
         :return: the return value of the function.
         """
-        return await self.loop.run_in_executor(self.executor, func, *args)
+        try:
+            response = await self.loop.run_in_executor(self.executor, func, *args)
+            return response
+        except Exception as e:
+            return self.get_error_message(e, *args)
 
     def get_handler(
         self, performative: LedgerApiMessage.Performative
@@ -163,6 +183,8 @@ class _RequestDispatcher:
         :return: the method that will send the request.
         """
         handler = getattr(self, performative.value, lambda *args, **kwargs: None)
+        if handler is None:
+            raise Exception("Performative not recognized.")
         return handler
 
     def dispatch(self, api: LedgerApi, message: LedgerApiMessage) -> Task:
@@ -177,7 +199,9 @@ class _RequestDispatcher:
         handler = self.get_handler(performative)
         return self.loop.create_task(self.run_async(handler, api, message))
 
-    def get_balance(self, api: LedgerApi, message: LedgerApiMessage):
+    def get_balance(
+        self, api: LedgerApi, message: LedgerApiMessage
+    ) -> LedgerApiMessage:
         """
         Send the request 'get_balance'.
 
@@ -185,13 +209,15 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        # TODO wrapping synchronous calls with multithreading to make it asynchronous.
-        #   LedgerApi async APIs would solve that.
         balance = api.get_balance(message.address)
-        result = LedgerApiMessage(LedgerApiMessage.Performative.BALANCE, amount=balance)
-        return result
+        response = LedgerApiMessage(
+            LedgerApiMessage.Performative.BALANCE, amount=balance,
+        )
+        return response
 
-    def get_transaction_receipt(self, api: LedgerApi, message: LedgerApiMessage):
+    def get_transaction_receipt(
+        self, api: LedgerApi, message: LedgerApiMessage
+    ) -> LedgerApiMessage:
         """
         Send the request 'get_transaction_receipt'.
 
@@ -199,41 +225,38 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        # TODO what is a receipt? needs better data structures
-        # result = api.get_transaction_receipt(message.tx_digest)
-        return LedgerApiMessage(performative=LedgerApiMessage.Performative.TX_RECEIPT)
-
-    def send_signed_transaction(self, api: LedgerApi, message: LedgerApiMessage):
-        """
-        Send the request 'send_signed_transaction'.
-
-        :param api: the API object.
-        :param message: the Ledger API message
-        :return: None
-        """
-        tx_digest = api.send_signed_transaction(message.signed_tx)
+        tx_receipt = api.get_transaction_receipt(message.tx_digest)
         return LedgerApiMessage(
-            performative=LedgerApiMessage.Performative.TX_DIGEST, tx_digest=tx_digest
+            performative=LedgerApiMessage.Performative.TX_RECEIPT, data=tx_receipt,
         )
 
-    def is_transaction_settled(self, api: LedgerApi, message: LedgerApiMessage):
+    def send_signed_tx(
+        self, api: LedgerApi, message: LedgerApiMessage
+    ) -> LedgerApiMessage:
         """
-        Send the request 'is_transaction_settled'.
+        Send the request 'send_signed_tx'.
 
         :param api: the API object.
         :param message: the Ledger API message
         :return: None
         """
-        # TODO remove?
-        # is_transaction_settled = api.is_transaction_settled(message.tx_digest)
+        tx_digest = api.send_signed_transaction(message.signed_tx.any)
+        return LedgerApiMessage(
+            performative=LedgerApiMessage.Performative.TX_DIGEST, digest=tx_digest,
+        )
 
-    def is_transaction_valid(self, api: LedgerApi, message: LedgerApiMessage):
+    def get_error_message(
+        self, e: Exception, api: LedgerApi, message: LedgerApiMessage
+    ) -> LedgerApiMessage:
         """
-        Send the request 'is_transaction_valid'.
+        Build an error message.
 
-        :param api: the API object.
-        :param message: the Ledger API message
-        :return: None
+        :param e: the exception.
+        :param api: the Ledger API.
+        :param message: the request message.
+        :return: an error message response.
         """
-        # TODO remove?
-        # return api.is_transaction_valid(message.tx_digest)
+        response = LedgerApiMessage(
+            performative=LedgerApiMessage.Performative.ERROR, message=str(e)
+        )
+        return response

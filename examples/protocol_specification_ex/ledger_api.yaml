@@ -11,7 +11,7 @@ speech_acts:
     address: pt:str
   send_signed_tx:
     ledger_id: pt:str
-    signed_tx: pt:bytes
+    signed_tx: ct:AnyObject
   get_tx_receipt:
     ledger_id: pt:str
     tx_digest: pt:str
@@ -20,7 +20,15 @@ speech_acts:
   tx_digest:
     digest: pt:str
   tx_receipt:
-    data: pt:dict[pt:str,pt:str]
+    data: ct:AnyObject
+  error:
+    code: pt:optional[pt:int]
+    message: pt:optional[pt:str]
+    data: ct:AnyObject
+...
+---
+ct:AnyObject: |
+  bytes any = 1;
 ...
 ---
 initiation: [get_balance, send_signed_tx, get_tx_receipt]
