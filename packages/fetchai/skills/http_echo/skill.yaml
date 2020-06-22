@@ -12,6 +12,7 @@ fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/http:0.3.0
+skills: []
 behaviours: {}
 handlers:
   http_handler:

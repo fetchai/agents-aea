@@ -12,6 +12,7 @@ fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.3.0
+skills: []
 behaviours:
   echo:
     args:
