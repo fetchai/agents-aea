@@ -312,6 +312,23 @@ class BaseAEATestCase(ABC):
         return process
 
     @classmethod
+    def run_interaction(cls) -> subprocess.Popen:
+        """
+        Run interaction as subprocess.
+        Run from agent's directory.
+
+        :param args: CLI args
+
+        :return: subprocess object.
+        """
+        process = cls._run_python_subprocess(
+            "-m", "aea.cli", "interact", cwd=cls._get_cwd()
+        )
+        cls._start_output_read_thread(process)
+        cls._start_error_read_thread(process)
+        return process
+
+    @classmethod
     def terminate_agents(
         cls,
         *subprocesses: subprocess.Popen,
