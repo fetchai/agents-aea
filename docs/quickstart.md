@@ -1,5 +1,5 @@
 If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective,
-you can use the Fetch.ai AEA framework. 
+you can use the Fetch.ai AEA framework.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -37,9 +37,9 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
   <p>For the purpose of the quickstart only, you can skip installation of docker.</p>
 </div>
 
-At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
+At some point, you will need [Docker](https://www.docker.com/) installed on your machine
 (e.g. to run an [OEF search and communication node](../oef-ledger)).
- 
+
 ### Download the scripts and examples directories
 
 <div class="admonition note">
@@ -62,23 +62,23 @@ The following installs the entire AEA package which also includes a [command-lin
 pip install aea[all]
 ```
 
-If you are using `zsh` rather than `bash` type 
+If you are using `zsh` rather than `bash` type
 ``` zsh
 pip install 'aea[all]'
 ```
 
 ### Known issues
 
-If the installation steps fail, it might be a dependency issue. 
+If the installation steps fail, it might be a dependency issue.
 
 The following hints can help:
 
 - Ubuntu/Debian systems only: install Python 3.7 headers.
 ``` bash
 sudo apt-get install python3.7-dev
-``` 
+```
 
-- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target=_blank>tools for Visual Studio</a>. 
+- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target=_blank>tools for Visual Studio</a>.
 
 ## Setup Author name
 
@@ -98,12 +98,12 @@ Email: hello@fetch.ai
 Password:
 Please make sure that passwords are equal.
 Confirm password:
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
+
 v0.4.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
@@ -116,7 +116,7 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 
 ## Echo skill demo
 
-The echo skill is a simple demo that introduces you to the main business logic components of an AEA. The fastest way to create your first AEA is to fetch it! 
+The echo skill is a simple demo that introduces you to the main business logic components of an AEA. The fastest way to create your first AEA is to fetch it!
 
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
@@ -129,32 +129,32 @@ To learn more about the folder structure of an AEA project read on [here](../pac
 
 <details><summary>Alternatively: step by step install</summary>
 
-<b> Create a new AEA </b>   
-<br>    
-First, create a new AEA project and enter it.   
-``` bash    
+<b> Create a new AEA </b>
+<br>
+First, create a new AEA project and enter it.
+``` bash
 aea create my_first_aea
 cd my_first_aea
 ```
-<br>  
-<b>Add the echo skill</b>     
-<br>    
-Second, add the echo skill to the project. 
+<br>
+<b>Add the echo skill</b>
+<br>
+Second, add the echo skill to the project.
 ``` bash
 aea add skill fetchai/echo:0.3.0
-```   
-This copies the `fetchai/echo:0.3.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.3.0` consists of the name of the author of the skill, followed by the skill name and its version.   
+```
+This copies the `fetchai/echo:0.3.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.3.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
-## Usage of the stub connection	
+## Usage of the stub connection
 
-AEAs use envelopes containing messages for communication. We use a stub connection to send envelopes to and receive envelopes from the AEA.		
+AEAs use envelopes containing messages for communication. We use a stub connection to send envelopes to and receive envelopes from the AEA.
 
-The stub connection is already added to the AEA by default.		
+The stub connection is already added to the AEA by default.
 
 A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
 
-The AEA waits for a new envelope posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.		
+The AEA waits for a new envelope posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.
 
 The format of each envelope is the following:
 
@@ -170,27 +170,27 @@ recipient_aea,sender_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,
 
 ## Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.5.0` connection.
+Run the AEA with the default `fetchai/stub:0.6.0` connection.
 
 ``` bash
 aea run
 ```
 
-or 
+or
 
 ``` bash
-aea run --connections fetchai/stub:0.5.0
+aea run --connections fetchai/stub:0.6.0
 ```
 
 You will see the echo skill running in the terminal window.
 
 ``` bash
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
+
 v0.4.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
@@ -289,7 +289,7 @@ class TestEchoSkill(AEATestCase):
             protocol_id=message.protocol_id,
             message=DefaultSerializer().encode(message),
         )
-        
+
         self.send_envelope_to_agent(sent_envelope, self.agent_name)
 
         time.sleep(2.0)
@@ -344,8 +344,7 @@ To gain an understanding of the core components of the framework, please continu
 For more demos, use cases or step by step guides, please check the following:
 
 - <a href="../generic-skills">Generic skill use case</a>
-- <a href='../weather-skills/'>Weather skill demo</a> 
+- <a href='../weather-skills/'>Weather skill demo</a>
 - <a href='../thermometer-skills-step-by-step/'> Thermometer step by step guide </a>
 
 <br />
-

@@ -90,6 +90,8 @@ class TestStubConnectionReception:
             f.write(encoded_envelope)
             f.flush()
 
+        time.sleep(3)
+        print(44444444444444, self.multiplexer.in_queue, flush=True)
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope.to == actual_envelope.to
         assert expected_envelope.sender == actual_envelope.sender

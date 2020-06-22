@@ -13,7 +13,7 @@ aea_name/
   protocols/            Directory containing all the protocols developed as part of the given project.
     protocol_1/         First protocol
     ...                 ...
-    protocol_m/         mth protocol 
+    protocol_m/         mth protocol
   skills/               Directory containing all the skills developed as part of the given project.
     skill_1/            First skill
     ...                 ...
@@ -29,5 +29,5 @@ aea_name/
 ```
 ``` yaml
 connections:
-- fetchai/stub:0.5.0
+- fetchai/stub:0.6.0
 ```

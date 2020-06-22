@@ -21,7 +21,7 @@ aea_version: '>=0.4.0, <0.5.0'                  # AEA framework version(s) compa
 fingerprint: {}                                 # Fingerprint of AEA project components.
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 connections:                                    # The list of connection public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX)
-- fetchai/stub:0.5.0
+- fetchai/stub:0.6.0
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 - fetchai/default:0.3.0
@@ -136,12 +136,12 @@ behaviours:                                     # The dictionary describing the 
       foo: bar
     class_name: MyScaffoldBehaviour             # The class name of the class implementing the behaviour interface.
 handlers:                                       # The dictionary describing the handlers immplemented in the package (including their configuration)
-  scaffold:                                     # Name of the handler under which it is made available on the skill 
+  scaffold:                                     # Name of the handler under which it is made available on the skill
     args:                                       # Keyword arguments provided to the skill component on instantiation.
       foo: bar
     class_name: MyScaffoldHandler               # The class name of the class implementing the handler interface.
 models:                                         # The dictionary describing the models immplemented in the package (including their configuration)
-  scaffold:                                     # Name of the model under which it is made available on the skill 
+  scaffold:                                     # Name of the model under which it is made available on the skill
     args:                                       # Keyword arguments provided to the skill component on instantiation.
       foo: bar
     class_name: MyModel                         # The class name of the class implementing the model interface.

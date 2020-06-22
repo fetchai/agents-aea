@@ -1,18 +1,18 @@
 <details><summary>What is the Open Economic Framework (OEF)?</summary>
-The 'Open Economic Framework' (OEF) is a node that enables search, discovery and communicate with possible clients or services. 
+The 'Open Economic Framework' (OEF) is a node that enables search, discovery and communicate with possible clients or services.
 <br><br>
 You can read more about the ledgers and the OEF <a href="/oef-ledger/"> here </a>
 </details>
 
 <details><summary>What is the AEA?</summary>
 AEA is short for Autonomous Economic Agents. AEAs act independently of constant user input and autonomously execute actions to achieve their objective.
-Their goal is to create economic value for you, their owner. 
+Their goal is to create economic value for you, their owner.
 <br><br>
 You can read more about the AEAs <a href="/app-areas/"> here </a>
 </details>
 
 <details><summary>How do agents talk to others when they don't know each other?</summary>
-For the Autonomous Economic Agents (AEAs) to be able to talk to others, firstly they need to find them, 
+For the Autonomous Economic Agents (AEAs) to be able to talk to others, firstly they need to find them,
 and then, implement the same protocols in order to be able to deserialize the envelops they receive.
 <br><br>
 You can read more about the Search and Discovery <a href="/oef-ledger/">here</a> and more about envelops and protocols <a href="/core-components/">here</a>
@@ -21,7 +21,7 @@ You can read more about the Search and Discovery <a href="/oef-ledger/">here</a>
 
 <details><summary>How does an AEA use blockchain?</summary>
 The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
-two different networks natively: the `Fetch.ai` network and the `Ethereum` network. 
+two different networks natively: the `Fetch.ai` network and the `Ethereum` network.
 <br><br>
 You can read more about the intergration of ledger <a href="/ledger-integration/">here</a>
 
@@ -37,7 +37,7 @@ You have two options to connect to a database:
 - Creating a wrapper that communicates with the database and imports a Model. You can find an example implementation in the `weather_station` package
 - Using an ORM (object-relational mapping) library, and implementing the logic inside a class that inherits from the Model abstract class.
 <br><br>
-For a detailed example of how to use an ORM follow the <a href='/orm-integration/'>ORM use case</a>  
+For a detailed example of how to use an ORM follow the <a href='/orm-integration/'>ORM use case</a>
 </details>
 
 <details><summary>How does one connect to a live-stream of data?</summary>
@@ -57,7 +57,7 @@ You can find a more detailed approach <a href="/connect-a-frontend/">here</a>
 </details>
 
 <details><summary>Is the AEA framework ideal for agent-based modeling?</summary>
-The goal of agent-based modeling is to search for explanatory insight into the collective behavior of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems. 
+The goal of agent-based modeling is to search for explanatory insight into the collective behavior of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems.
 Although it would be potentially possible, it would be inefficient to use the AEA framework for that kind of problem.
 <br><br>
 You can find more details <a href="/app-areas/">here</a>
@@ -72,7 +72,7 @@ You can find more details about the CLI commands <a href="/cli-commands/">here</
 </details>
 
 <details><summary>When a new AEA is created, is the `vendor` folder populated with some default packages?</summary>
-All AEA projects by default hold the `fetchai/stub:0.5.0` connection, the `fetchai/default:0.3.0` protocol and the `fetchai/error:0.3.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+All AEA projects by default hold the `fetchai/stub:0.6.0` connection, the `fetchai/default:0.3.0` protocol and the `fetchai/error:0.3.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
 <br><br>
 You can find more details about the file structure <a href="/package-imports/">here</a>
 </details>
