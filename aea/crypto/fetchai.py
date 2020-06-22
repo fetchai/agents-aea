@@ -19,18 +19,23 @@
 
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
+import base64
+import hashlib
 import json
 import logging
 import time
 from pathlib import Path
 from typing import Any, BinaryIO, Optional, Tuple, cast
 
+from ecdsa import SECP256k1, VerifyingKey
+from ecdsa.util import sigencode_string_canonize
+
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.token import TokenTxFactory
 from fetchai.ledger.api.tx import TxContents  # , TxStatus
 from fetchai.ledger.crypto import Address as FetchaiAddress
 from fetchai.ledger.crypto import Entity, Identity
-from fetchai.ledger.serialisation import sha256_hash
+from fetchai.ledger.serialisation import sha256_hash, transaction
 
 import requests
 
@@ -106,8 +111,11 @@ class FetchAICrypto(Crypto[Entity]):
         :param is_deprecated_mode: if the deprecated signing is used
         :return: signature of the message in string form
         """
-        signature = self.entity.sign(message).hex()
-        return signature
+        signature_compact = self.entity.signing_key.sign_deterministic(
+            message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
+        )
+        signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
+        return signature_base64_str
 
     def sign_transaction(self, transaction: Any) -> Any:
         """
@@ -116,32 +124,10 @@ class FetchAICrypto(Crypto[Entity]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-        raise NotImplementedError  # pragma: no cover
-
-    def recover_message(
-        self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[Address, ...]:
-        """
-        Recover the addresses from the hash.
-
-        :param message: the message we expect
-        :param signature: the transaction signature
-        :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered addresses
-        """
-        raise NotImplementedError  # praggma: no cover
-
-    @classmethod
-    def get_address_from_public_key(cls, public_key: str) -> Address:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-        identity = Identity.from_hex(public_key)
-        address = str(FetchaiAddress(identity))
-        return address
+        identity = Identity.from_hex(self.public_key)
+        transaction.add_signer(identity)
+        transaction.sign(self.entity)
+        return transaction
 
     def dump(self, fp: BinaryIO) -> None:
         """
@@ -208,6 +194,44 @@ class FetchAIHelper(Helper):
         )
         return aggregate_hash.hex()
 
+    @staticmethod
+    def get_address_from_public_key(public_key: str) -> Address:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        identity = Identity.from_hex(public_key)
+        address = str(FetchaiAddress(identity))
+        return address
+
+    @staticmethod
+    def recover_message(
+        message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
+        """
+        Recover the addresses from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
+        """
+        signature_b64 = base64.b64decode(signature)
+        verifying_keys = VerifyingKey.from_public_key_recovery(
+            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
+        )
+        public_keys = [
+            verifying_key.to_string("compressed").hex()
+            for verifying_key in verifying_keys
+        ]
+        addresses = [
+            FetchAIHelper.get_address_from_public_key(public_key)
+            for public_key in public_keys
+        ]
+        return tuple(addresses)
+
 
 class FetchAIApi(LedgerApi, FetchAIHelper):
     """Class to interact with the Fetch ledger APIs."""
@@ -270,9 +294,9 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
             FetchaiAddress(destination_address),
             amount,
             tx_fee,
-            [FetchaiAddress(sender_address)],
+            [],
         )
-        self._api._set_validity_period(tx)
+        self._api.set_validity_period(tx)
         return tx
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
@@ -281,7 +305,9 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
 
         :param tx_signed: the signed transaction
         """
-        raise NotImplementedError  # pragma: no cover
+        encoded_tx = transaction.encode_transaction(tx_signed)
+        endpoint = "transfer" if tx_signed.transfers is not None else "create"
+        return self.api.tokens._post_tx_json(encoded_tx, endpoint)
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """

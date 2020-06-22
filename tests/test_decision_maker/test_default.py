@@ -177,8 +177,14 @@ class TestDecisionMaker:
             crypto_id="fetchai",
             transaction=tx,
         )
-        with pytest.raises(NotImplementedError):
+        with mock.patch.object(
+            self.decision_maker_handler.wallet,
+            "sign_transaction",
+            return_value="signed_tx",
+        ):
             self.decision_maker_handler.handle(tx_message)
+            tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
+        assert tx_message_response.signed_transaction == "signed_tx"
 
     def test_handle_tx_sigining_ethereum(self):
         """Test tx signing for ethereum."""

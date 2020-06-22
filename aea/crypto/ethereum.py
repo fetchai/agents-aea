@@ -23,7 +23,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple, cast
+from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
 
 from eth_account import Account
 from eth_account.datastructures import AttributeDict
@@ -126,47 +126,11 @@ class EthereumCrypto(Crypto[Account]):
         #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction
         return signed_transaction
 
-    def recover_message(
-        self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[Address, ...]:
-        """
-        Recover the addresses from the hash.
-
-        :param message: the message we expect
-        :param signature: the transaction signature
-        :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered addresses
-        """
-        if is_deprecated_mode:
-            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
-            address = Account.recoverHash(  # pylint: disable=no-value-for-parameter
-                message_hash=message, signature=signature
-            )
-        else:
-            signable_message = encode_defunct(primitive=message)
-            address = Account.recover_message(  # pylint: disable=no-value-for-parameter
-                signable_message=signable_message, signature=signature
-            )
-        return (address,)
-
     @classmethod
     def generate_private_key(cls) -> Account:
         """Generate a key pair for ethereum network."""
         account = Account.create()  # pylint: disable=no-value-for-parameter
         return account
-
-    @classmethod
-    def get_address_from_public_key(cls, public_key: str) -> str:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-        keccak_hash = Web3.keccak(hexstr=public_key)
-        raw_address = keccak_hash[-20:].hex().upper()
-        address = Web3.toChecksumAddress(raw_address)
-        return address
 
     def dump(self, fp: BinaryIO) -> None:
         """
@@ -233,6 +197,43 @@ class EthereumHelper(Helper):
         )
         return aggregate_hash.hex()
 
+    @staticmethod
+    def get_address_from_public_key(public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        keccak_hash = Web3.keccak(hexstr=public_key)
+        raw_address = keccak_hash[-20:].hex().upper()
+        address = Web3.toChecksumAddress(raw_address)
+        return address
+
+    @staticmethod
+    def recover_message(
+        message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
+        """
+        Recover the addresses from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
+        """
+        if is_deprecated_mode:
+            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
+            address = Account.recoverHash(  # pylint: disable=no-value-for-parameter
+                message_hash=message, signature=signature
+            )
+        else:
+            signable_message = encode_defunct(primitive=message)
+            address = Account.recover_message(  # pylint: disable=no-value-for-parameter
+                signable_message=signable_message, signature=signature
+            )
+        return (address,)
+
 
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""
@@ -261,7 +262,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Get the balance of a given account."""
         try:
             balance = self._api.eth.getBalance(address)  # pylint: disable=no-member
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Unable to retrieve balance: {}".format(str(e)))
             balance = None
         return balance
@@ -288,8 +289,6 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the transfer transaction
         """
         nonce = self._try_get_transaction_count(sender_address)
-        if nonce is None:
-            nonce = 1
 
         transaction = {
             "nonce": nonce,
@@ -323,7 +322,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
             nonce = None
         return nonce
 
-    def _try_get_gas_estimate(self, transaction: Dict[str, str]) -> Optional[int]:
+    def _try_get_gas_estimate(
+        self, transaction: Dict[str, Union[str, int, None]]
+    ) -> Optional[int]:
         """Try get the gas estimate."""
         try:
             gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
@@ -440,23 +441,23 @@ class EthereumFaucetApi(FaucetApi):
         """
         try:
             response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
-            if response.status_code // 100 == 5:
+            if response.status_code // 100 == 5:  # pragma: no cover
                 logger.error("Response: {}".format(response.status_code))
-            elif response.status_code // 100 in [3, 4]:
+            elif response.status_code // 100 in [3, 4]:  # pragma: no cover
                 response_dict = json.loads(response.text)
                 logger.warning(
                     "Response: {}\nMessage: {}".format(
                         response.status_code, response_dict.get("message")
                     )
                 )
-            elif response.status_code // 100 == 2:
+            elif response.status_code // 100 == 2:  # pragma: no cover
                 response_dict = json.loads(response.text)
                 logger.info(
                     "Response: {}\nMessage: {}".format(
                         response.status_code, response_dict.get("message")
                     )
-                )  # pragma: no cover
-        except Exception as e:
+                )
+        except Exception as e:  # pragma: no cover
             logger.warning(
                 "An error occured while attempting to generate wealth:\n{}".format(e)
             )

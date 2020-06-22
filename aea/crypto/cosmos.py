@@ -23,6 +23,7 @@ import base64
 import hashlib
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Any, BinaryIO, Optional, Tuple
 
@@ -56,7 +57,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         """
         super().__init__(private_key_path=private_key_path)
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
-        self._address = self.get_address_from_public_key(self.public_key)
+        self._address = CosmosHelper.get_address_from_public_key(self.public_key)
 
     @property
     def public_key(self) -> str:
@@ -132,55 +133,15 @@ class CosmosCrypto(Crypto[SigningKey]):
                     }
                 ],
             },
-            "mode": "sync",
+            "mode": "async",
         }
         return pushable_tx
-
-    def recover_message(
-        self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[Address, ...]:
-        """
-        Recover the addresses from the hash.
-
-        :param message: the message we expect
-        :param signature: the transaction signature
-        :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered addresses
-        """
-        signature_b64 = base64.b64decode(signature)
-        verifying_keys = VerifyingKey.from_public_key_recovery(
-            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
-        )
-        public_keys = [
-            verifying_key.to_string("compressed").hex()
-            for verifying_key in verifying_keys
-        ]
-        addresses = [
-            self.get_address_from_public_key(public_key) for public_key in public_keys
-        ]
-        return tuple(addresses)
 
     @classmethod
     def generate_private_key(cls) -> SigningKey:
         """Generate a key pair for cosmos network."""
         signing_key = SigningKey.generate(curve=SECP256k1)
         return signing_key
-
-    @classmethod
-    def get_address_from_public_key(cls, public_key: str) -> str:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-        public_key_bytes = bytes.fromhex(public_key)
-        s = hashlib.new("sha256", public_key_bytes).digest()
-        r = hashlib.new("ripemd160", s).digest()
-        five_bit_r = convertbits(r, 8, 5)
-        assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
-        address = bech32_encode("cosmos", five_bit_r)
-        return address
 
     def dump(self, fp: BinaryIO) -> None:
         """
@@ -203,9 +164,10 @@ class CosmosHelper(Helper):
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
+        is_successful = False
         if tx_receipt is not None:
             # TODO: quick fix only, not sure this is reliable
-            is_successful = "code" not in tx_receipt
+            is_successful = True
         return is_successful
 
     @staticmethod
@@ -244,7 +206,53 @@ class CosmosHelper(Helper):
         :param client: the address of the client.
         :return: return the hash in hex.
         """
-        raise NotImplementedError
+        time_stamp = int(time.time())
+        aggregate_hash = hashlib.sha256(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+        return aggregate_hash.hexdigest()
+
+    @staticmethod
+    def get_address_from_public_key(public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        public_key_bytes = bytes.fromhex(public_key)
+        s = hashlib.new("sha256", public_key_bytes).digest()
+        r = hashlib.new("ripemd160", s).digest()
+        five_bit_r = convertbits(r, 8, 5)
+        assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
+        address = bech32_encode("cosmos", five_bit_r)
+        return address
+
+    @staticmethod
+    def recover_message(
+        message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
+        """
+        Recover the addresses from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
+        """
+        signature_b64 = base64.b64decode(signature)
+        verifying_keys = VerifyingKey.from_public_key_recovery(
+            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
+        )
+        public_keys = [
+            verifying_key.to_string("compressed").hex()
+            for verifying_key in verifying_keys
+        ]
+        addresses = [
+            CosmosHelper.get_address_from_public_key(public_key)
+            for public_key in public_keys
+        ]
+        return tuple(addresses)
 
 
 class CosmosApi(LedgerApi, CosmosHelper):
@@ -316,11 +324,9 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
         :return: the transfer transaction
         """
-        result = self._try_get_account_number_and_sequence(sender_address)
-        if result is not None:
-            account_number, sequence = result
-        else:
-            raise ValueError("Cannot determine account number and sequence.")
+        account_number, sequence = self._try_get_account_number_and_sequence(
+            sender_address
+        )
         transfer = {
             "type": "cosmos-sdk/MsgSend",
             "value": {
@@ -342,12 +348,15 @@ class CosmosApi(LedgerApi, CosmosHelper):
         }
         return tx
 
-    def _try_get_account_number_and_sequence(
-        self, address: Address
-    ) -> Optional[Tuple[int, int]]:
-        """Try send the signed transaction."""
-        result = None  # type: Optional[Tuple[int, int]]
+    def _try_get_account_number_and_sequence(self, address: Address) -> Tuple[int, int]:
+        """
+        Try get account number and sequence for an address.
+
+        :param address: the address
+        :return: a tuple of account number and sequence
+        """
         try:
+            result = None  # type: Optional[Tuple[int, int]]
             url = self.network_address + f"/auth/accounts/{address}"
             response = requests.get(url=url)
             if response.status_code == 200:
@@ -355,13 +364,18 @@ class CosmosApi(LedgerApi, CosmosHelper):
                     int(response.json()["result"]["value"]["account_number"]),
                     int(response.json()["result"]["value"]["sequence"]),
                 )
+            if result is None:
+                raise ValueError(
+                    "Cannot determine account number and sequence."
+                )  # pragma: no cover
+            return result
         except Exception as e:  # pragma: no cover
             logger.warning(
                 "Encountered exception when trying to get account number and sequence: {}".format(
                     e
                 )
             )
-        return result
+            raise e
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
@@ -374,7 +388,12 @@ class CosmosApi(LedgerApi, CosmosHelper):
         return tx_digest
 
     def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
-        """Try send the signed transaction."""
+        """
+        Try send the signed transaction.
+
+        :param tx_signed: the signed transaction
+        :return: tx_digest, if present
+        """
         tx_digest = None  # type: Optional[str]
         try:
             url = self.network_address + "/txs"
@@ -387,7 +406,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction receipt for a transaction digest (non-blocking).
+        Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
@@ -397,7 +416,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
     def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Try get the transaction receipt for a transaction digest (non-blocking).
+        Try get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
@@ -423,7 +442,9 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx, if present
         """
-        raise NotImplementedError
+        # Cosmos does not distinguis between transaction receipt and transaction
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        return tx_receipt
 
 
 class CosmosFaucetApi(FaucetApi):
@@ -455,11 +476,11 @@ class CosmosFaucetApi(FaucetApi):
             if response.status_code == 200:
                 tx_hash = response.text
                 logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
-            else:
+            else:  # pragma: no cover
                 logger.warning(
                     "Response: {}, Text: {}".format(response.status_code, response.text)
                 )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning(
                 "An error occured while attempting to generate wealth:\n{}".format(e)
             )

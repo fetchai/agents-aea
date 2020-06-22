@@ -125,32 +125,32 @@ class Wallet:
         return self._connection_cryptos
 
     def sign_message(
-        self, crypto_id: str, tx_hash: bytes, is_deprecated_mode: bool = False
+        self, crypto_id: str, message: bytes, is_deprecated_mode: bool = False
     ) -> Optional[str]:
         """
         Sign a message.
 
         :param crypto_id: the id of the crypto
-        :param tx_hash: the hash to be signed
+        :param message: the message to be signed
         :param is_deprecated_mode: what signing mode to use
-        :return: the signature of the signing payload
+        :return: the signature of the message
         """
         crypto_object = self.crypto_objects.get(crypto_id, None)
         if crypto_object is None:
             logger.warning(
                 "No crypto object for crypto_id={} in wallet!".format(crypto_id)
             )
-            tx_signature = None  # type: Optional[str]
+            signature = None  # type: Optional[str]
         else:
-            tx_signature = crypto_object.sign_message(tx_hash, is_deprecated_mode)
-        return tx_signature
+            signature = crypto_object.sign_message(message, is_deprecated_mode)
+        return signature
 
-    def sign_transaction(self, crypto_id: str, tx: Any) -> Optional[Any]:
+    def sign_transaction(self, crypto_id: str, transaction: Any) -> Optional[Any]:
         """
         Sign a tx.
 
         :param crypto_id: the id of the crypto
-        :param tx_hash: the hash to be signed
+        :param transaction: the transaction to be signed
         :return: the signed tx
         """
         crypto_object = self.crypto_objects.get(crypto_id, None)
@@ -158,7 +158,7 @@ class Wallet:
             logger.warning(
                 "No crypto object for crypto_id={} in wallet!".format(crypto_id)
             )
-            tx_signed = None  # type: Optional[Any]
+            signed_transaction = None  # type: Optional[Any]
         else:
-            tx_signed = crypto_object.sign_transaction(tx)
-        return tx_signed
+            signed_transaction = crypto_object.sign_transaction(transaction)
+        return signed_transaction

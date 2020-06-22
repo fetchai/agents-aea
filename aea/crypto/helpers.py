@@ -74,7 +74,7 @@ def try_validate_private_key_path(
         if exit_on_error:
             sys.exit(1)
         else:
-            raise
+            raise  # pragma: no cover
 
 
 def create_private_key(ledger_id: str, private_key_file: Optional[str] = None) -> None:

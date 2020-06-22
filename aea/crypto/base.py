@@ -100,16 +100,6 @@ class Crypto(Generic[EntityClass], ABC):
         :return: an address string
         """
 
-    @classmethod
-    @abstractmethod
-    def get_address_from_public_key(cls, public_key: str) -> str:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-
     @abstractmethod
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
@@ -127,19 +117,6 @@ class Crypto(Generic[EntityClass], ABC):
 
         :param transaction: the transaction to be signed
         :return: signed transaction
-        """
-
-    @abstractmethod
-    def recover_message(
-        self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[Address, ...]:
-        """
-        Recover the addresses from the hash.
-
-        :param message: the message we expect
-        :param signature: the transaction signature
-        :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered addresses
         """
 
     @abstractmethod
@@ -190,6 +167,30 @@ class Helper(ABC):
         :param seller: the address of the seller.
         :param client: the address of the client.
         :return: return the hash in hex.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_address_from_public_key(public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+
+    @staticmethod
+    @abstractmethod
+    def recover_message(
+        message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
+        """
+        Recover the addresses from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
         """
 
 
