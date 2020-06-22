@@ -131,8 +131,8 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     if not is_fingerprint_correct(package_path, item_config):  # pragma: no cover
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
-    register_item(ctx, item_type, item_public_id)
     _add_item_deps(ctx, item_type, item_config)
+    register_item(ctx, item_type, item_public_id)
 
 
 def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
