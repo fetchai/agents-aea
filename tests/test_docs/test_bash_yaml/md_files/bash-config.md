@@ -104,6 +104,7 @@ fingerprint:                                    # Fingerprint of package compone
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 contracts: []                                   # The list of contract public ids the package depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols: []                                   # The list of protocol public ids the package depends on (each public id must satisfy PUBLIC_ID_REGEX).
+skills: []                                      # The list of skill public ids the package depends on (each public id must satisfy PUBLIC_ID_REGEX).
 behaviours:                                     # The dictionary describing the behaviours immplemented in the package (including their configuration)
   scaffold:                                     # Name of the behaviour under which it is made available on the skill context.
     args:                                       # Keyword arguments provided to the skill component on instantiation.

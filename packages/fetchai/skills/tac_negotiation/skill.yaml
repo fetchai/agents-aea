@@ -22,6 +22,7 @@ contracts:
 protocols:
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
+skills: []
 behaviours:
   clean_up:
     args:

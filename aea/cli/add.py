@@ -131,8 +131,8 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     if not is_fingerprint_correct(package_path, item_config):  # pragma: no cover
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
-    register_item(ctx, item_type, item_public_id)
     _add_item_deps(ctx, item_type, item_config)
+    register_item(ctx, item_type, item_public_id)
 
 
 def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
@@ -156,3 +156,8 @@ def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:
                 add_item(ctx, "contract", contract_public_id)
+
+        # add missing skill
+        for skill_public_id in item_config.skills:
+            if skill_public_id not in ctx.agent_config.skills:
+                add_item(ctx, "skill", skill_public_id)
