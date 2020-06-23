@@ -81,9 +81,6 @@ func New(opts ...Option) (*DHTClient, error) {
 
 	dhtClient.closing = make(chan struct{})
 
-	dhtClient.setupLogger()
-	_, _, linfo, ldebug := dhtClient.getLoggers()
-
 	/* check correct configuration */
 
 	// private key
@@ -105,6 +102,9 @@ func New(opts ...Option) (*DHTClient, error) {
 	rand.Seed(time.Now().Unix())
 	index := rand.Intn(len(dhtClient.bootstrapPeers))
 	dhtClient.relayPeer = dhtClient.bootstrapPeers[index].ID
+
+	dhtClient.setupLogger()
+	_, _, linfo, ldebug := dhtClient.getLoggers()
 	linfo().Msg("INFO Using as relay")
 
 	/* setup libp2p node */
@@ -136,26 +136,28 @@ func New(opts ...Option) (*DHTClient, error) {
 
 	// make the routed host
 	dhtClient.routedHost = routedhost.Wrap(basicHost, dhtClient.dht)
+	dhtClient.setupLogger()
 
 	// connect to the booststrap nodes
 	err = utils.BootstrapConnect(ctx, dhtClient.routedHost, dhtClient.bootstrapPeers)
 	if err != nil {
+		dhtClient.Close()
 		return nil, err
 	}
 
 	// bootstrap the host
 	err = dhtClient.dht.Bootstrap(ctx)
 	if err != nil {
+		dhtClient.Close()
 		return nil, err
 	}
 
 	// register my address to relay peer
 	err = dhtClient.registerAgentAddress()
 	if err != nil {
+		dhtClient.Close()
 		return nil, err
 	}
-
-	dhtClient.setupLogger()
 
 	/* setup DHTClient message handlers */
 
@@ -177,7 +179,6 @@ func (dhtClient *DHTClient) setupLogger() {
 		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
 			With().Timestamp().
 			Str("process", "DHTClient").
-			Str("peerid", "nil").
 			Str("relayid", dhtClient.relayPeer.Pretty()).
 			Logger()
 	} else {

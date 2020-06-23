@@ -114,9 +114,6 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.closing = make(chan struct{})
 	dhtPeer.goroutines = &sync.WaitGroup{}
 
-	dhtPeer.setupLogger()
-	lerror, _, linfo, ldebug := dhtPeer.getLoggers()
-
 	/* check correct configuration */
 
 	// private key
@@ -169,11 +166,16 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	// make the routed host
 	dhtPeer.routedHost = routedhost.Wrap(basicHost, dhtPeer.dht)
+	dhtPeer.setupLogger()
+
+	lerror, _, linfo, ldebug := dhtPeer.getLoggers()
 
 	// connect to the booststrap nodes
 	if len(dhtPeer.bootstrapPeers) > 0 {
+		linfo().Msgf("Bootstrapping from %s", dhtPeer.bootstrapPeers)
 		err = utils.BootstrapConnect(ctx, dhtPeer.routedHost, dhtPeer.bootstrapPeers)
 		if err != nil {
+			dhtPeer.Close()
 			return nil, err
 		}
 	}
@@ -181,6 +183,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	// bootstrap the dht
 	err = dhtPeer.dht.Bootstrap(ctx)
 	if err != nil {
+		dhtPeer.Close()
 		return nil, err
 	}
 
@@ -197,8 +200,6 @@ func New(opts ...Option) (*DHTPeer, error) {
 	fmt.Println("MULTIADDRS_LIST_END") // NOTE: keyword
 
 	linfo().Msg("successfully created libp2p node!")
-
-	dhtPeer.setupLogger()
 
 	/* setup DHTPeer message handlers and services */
 
@@ -220,11 +221,13 @@ func New(opts ...Option) (*DHTPeer, error) {
 		s, err := dhtPeer.routedHost.NewStream(ctx, bPeer.ID, "/aea-notif/0.1.0")
 		if err != nil {
 			lerror(err).Msgf("failed to open stream to notify bootstrap peer %s", bPeer.ID)
+			dhtPeer.Close()
 			return nil, err
 		}
 		_, err = s.Write([]byte("/aea-notif/0.1.0"))
 		if err != nil {
 			lerror(err).Msgf("failed to notify bootstrap peer %s", bPeer.ID)
+			dhtPeer.Close()
 			return nil, err
 		}
 		s.Close()
@@ -234,6 +237,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	if len(dhtPeer.bootstrapPeers) > 0 && dhtPeer.myAgentAddress != "" {
 		err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
 		if err != nil {
+			dhtPeer.Close()
 			return nil, err
 		}
 		dhtPeer.addressAnnounced = true
@@ -266,7 +270,6 @@ func (dhtPeer *DHTPeer) setupLogger() {
 		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
 			With().Timestamp().
 			Str("process", "DHTPeer").
-			Str("peerid", "nil").
 			Logger()
 	} else {
 		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
