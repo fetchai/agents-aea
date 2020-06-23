@@ -47,6 +47,7 @@ import (
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
 	aea "libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
 	utils "libp2p_node/utils"
 )
 
@@ -187,17 +188,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 		return nil, err
 	}
 
-	// print the multiaddress for aea python connection
-	hostAddr, _ := multiaddr.NewMultiaddr(
-		fmt.Sprintf("/p2p/%s", dhtPeer.routedHost.ID().Pretty()))
-	addrs := dhtPeer.routedHost.Addrs()
-	//linfo().Str("peerid", dhtPeer.routedHost.ID().Pretty()).Msg("INFO My ID is ")
 	linfo().Msg("INFO My ID is ")
-	fmt.Println("MULTIADDRS_LIST_START") // NOTE: keyword
-	for _, addr := range addrs {
-		fmt.Println(addr.Encapsulate(hostAddr))
-	}
-	fmt.Println("MULTIADDRS_LIST_END") // NOTE: keyword
 
 	linfo().Msg("successfully created libp2p node!")
 
@@ -207,24 +198,24 @@ func New(opts ...Option) (*DHTPeer, error) {
 	if dhtPeer.enableRelay {
 		// Allow clients to register their agents addresses
 		ldebug().Msg("Setting /aea-register/0.1.0 stream...")
-		dhtPeer.routedHost.SetStreamHandler("/aea-register/0.1.0",
+		dhtPeer.routedHost.SetStreamHandler(dhtnode.AeaRegisterRelayStream,
 			dhtPeer.handleAeaRegisterStream)
 	}
 
 	// new peers connection notification, so that this peer can register its addresses
-	dhtPeer.routedHost.SetStreamHandler("/aea-notif/0.1.0",
+	dhtPeer.routedHost.SetStreamHandler(dhtnode.AeaNotifStream,
 		dhtPeer.handleAeaNotifStream)
 
 	// Notify bootstrap peers if any
 	for _, bPeer := range dhtPeer.bootstrapPeers {
 		ctx := context.Background()
-		s, err := dhtPeer.routedHost.NewStream(ctx, bPeer.ID, "/aea-notif/0.1.0")
+		s, err := dhtPeer.routedHost.NewStream(ctx, bPeer.ID, dhtnode.AeaNotifStream)
 		if err != nil {
 			lerror(err).Msgf("failed to open stream to notify bootstrap peer %s", bPeer.ID)
 			dhtPeer.Close()
 			return nil, err
 		}
-		_, err = s.Write([]byte("/aea-notif/0.1.0"))
+		_, err = s.Write([]byte(dhtnode.AeaNotifStream))
 		if err != nil {
 			lerror(err).Msgf("failed to notify bootstrap peer %s", bPeer.ID)
 			dhtPeer.Close()
@@ -245,11 +236,11 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	// aea addresses lookup
 	ldebug().Msg("Setting /aea-address/0.1.0 stream...")
-	dhtPeer.routedHost.SetStreamHandler("/aea-address/0.1.0", dhtPeer.handleAeaAddressStream)
+	dhtPeer.routedHost.SetStreamHandler(dhtnode.AeaAddressStream, dhtPeer.handleAeaAddressStream)
 
 	// incoming envelopes stream
 	ldebug().Msg("Setting /aea/0.1.0 stream...")
-	dhtPeer.routedHost.SetStreamHandler("/aea/0.1.0", dhtPeer.handleAeaEnvelopeStream)
+	dhtPeer.routedHost.SetStreamHandler(dhtnode.AeaEnvelopeStream, dhtPeer.handleAeaEnvelopeStream)
 
 	// setup delegate service
 	if dhtPeer.delegatePort != 0 {
@@ -502,7 +493,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 			Msgf("opening stream to target %s...", peerID.Pretty())
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-		stream, err := dhtPeer.routedHost.NewStream(ctx, peerID, "/aea/0.1.0")
+		stream, err := dhtPeer.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
 		if err != nil {
 			lerror(err).Str("op", "route").Str("addr", target).
 				Msgf("timeout, couldn't open stream to target %s", peerID.Pretty())
@@ -550,7 +541,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msgf("opening stream to the address provider %s...", provider)
 	ctx = context.Background()
-	s, err := dhtPeer.routedHost.NewStream(ctx, provider.ID, "/aea-address/0.1.0")
+	s, err := dhtPeer.routedHost.NewStream(ctx, provider.ID, dhtnode.AeaAddressStream)
 	if err != nil {
 		return "", err
 	}

@@ -40,6 +40,7 @@ import (
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
 	aea "libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
 	utils "libp2p_node/utils"
 )
 
@@ -163,12 +164,12 @@ func New(opts ...Option) (*DHTClient, error) {
 
 	// aea address lookup
 	ldebug().Msg("DEBUG Setting /aea-address/0.1.0 stream...")
-	dhtClient.routedHost.SetStreamHandler("/aea-address/0.1.0",
+	dhtClient.routedHost.SetStreamHandler(dhtnode.AeaAddressStream,
 		dhtClient.handleAeaAddressStream)
 
 	// incoming envelopes stream
 	ldebug().Msg("DEBUG Setting /aea/0.1.0 stream...")
-	dhtClient.routedHost.SetStreamHandler("/aea/0.1.0",
+	dhtClient.routedHost.SetStreamHandler(dhtnode.AeaEnvelopeStream,
 		dhtClient.handleAeaEnvelopeStream)
 
 	return dhtClient, nil
@@ -268,7 +269,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
 	// client can get addresses only through bootstrap peer
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, "/aea-address/0.1.0")
+	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaAddressStream)
 	if err != nil {
 		lerror(err).
 			Str("op", "route").
@@ -348,7 +349,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
 		Msgf("opening stream to target %s", peerID)
 	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	stream, err = dhtClient.routedHost.NewStream(ctx, peerID, "/aea/0.1.0")
+	stream, err = dhtClient.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
 	if err != nil {
 		lerror(err).
 			Str("op", "route").
@@ -446,7 +447,7 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, "/aea-register/0.1.0")
+	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaRegisterRelayStream)
 	if err != nil {
 		lerror(err).
 			Str("op", "register").
