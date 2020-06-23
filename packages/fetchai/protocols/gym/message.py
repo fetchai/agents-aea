@@ -21,7 +21,7 @@
 
 import logging
 from enum import Enum
-from typing import Set, Tuple, cast
+from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = ProtocolId("fetchai", "gym", "0.2.0")
+    protocol_id = ProtocolId("fetchai", "gym", "0.3.0")
 
     AnyObject = CustomAnyObject
 
@@ -47,6 +47,7 @@ class GymMessage(Message):
         CLOSE = "close"
         PERCEPT = "percept"
         RESET = "reset"
+        STATUS = "status"
 
         def __str__(self):
             """Get the string representation."""
@@ -75,7 +76,7 @@ class GymMessage(Message):
             performative=GymMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"act", "close", "percept", "reset"}
+        self._performatives = {"act", "close", "percept", "reset", "status"}
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -95,7 +96,7 @@ class GymMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(GymMessage.Performative, self.get("performative"))
@@ -111,6 +112,12 @@ class GymMessage(Message):
         """Get the 'action' content from the message."""
         assert self.is_set("action"), "'action' content is not set."
         return cast(CustomAnyObject, self.get("action"))
+
+    @property
+    def content(self) -> Dict[str, str]:
+        """Get the 'content' content from the message."""
+        assert self.is_set("content"), "'content' content is not set."
+        return cast(Dict[str, str], self.get("content"))
 
     @property
     def done(self) -> bool:
@@ -221,6 +228,24 @@ class GymMessage(Message):
                 ), "Invalid type for content 'info'. Expected 'AnyObject'. Found '{}'.".format(
                     type(self.info)
                 )
+            elif self.performative == GymMessage.Performative.STATUS:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.content) == dict
+                ), "Invalid type for content 'content'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content)
+                )
+                for key_of_content, value_of_content in self.content.items():
+                    assert (
+                        type(key_of_content) == str
+                    ), "Invalid type for dictionary keys in content 'content'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_content)
+                    )
+                    assert (
+                        type(value_of_content) == str
+                    ), "Invalid type for dictionary values in content 'content'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_content)
+                    )
             elif self.performative == GymMessage.Performative.RESET:
                 expected_nb_of_contents = 0
             elif self.performative == GymMessage.Performative.CLOSE:

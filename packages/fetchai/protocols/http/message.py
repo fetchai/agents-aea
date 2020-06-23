@@ -34,7 +34,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = ProtocolId("fetchai", "http", "0.2.0")
+    protocol_id = ProtocolId("fetchai", "http", "0.3.0")
 
     class Performative(Enum):
         """Performatives for the http protocol."""
@@ -89,7 +89,7 @@ class HttpMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(HttpMessage.Performative, self.get("performative"))

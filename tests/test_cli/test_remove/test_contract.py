@@ -34,7 +34,7 @@ class RemoveContractCommandTestCase(TestCase):
         """Set the test up."""
         self.runner = CliRunner()
 
-    @mock.patch("aea.cli.remove._remove_item")
+    @mock.patch("aea.cli.remove.remove_item")
     def test_remove_contract_positive(self, *mocks):
         """Test remove contract command positive result."""
         result = self.runner.invoke(

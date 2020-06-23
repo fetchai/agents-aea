@@ -42,7 +42,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = ProtocolId("fetchai", "oef_search", "0.2.0")
+    protocol_id = ProtocolId("fetchai", "oef_search", "0.3.0")
 
     Description = CustomDescription
 
@@ -112,7 +112,7 @@ class OefSearchMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(OefSearchMessage.Performative, self.get("performative"))

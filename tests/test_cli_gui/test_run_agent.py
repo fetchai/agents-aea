@@ -28,7 +28,10 @@ from pathlib import Path
 import pytest
 
 import aea
+from aea.cli.create import create_aea
+from aea.cli.utils.context import Context
 from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from .test_base import TempCWD, create_app
 from ..conftest import CUR_PATH, skip_test_windows
@@ -50,18 +53,17 @@ def test_create_and_run_agent():
         agent_id = "test_agent"
 
         # Make an agent
-        response_create = app.post(
-            "api/agent", content_type="application/json", data=json.dumps(agent_id)
-        )
-        assert response_create.status_code == 201
-        data = json.loads(response_create.get_data(as_text=True))
-        assert data == agent_id
+        # We do it programmatically as we need to create an agent with default author
+        # that was prevented from GUI.
+        ctx = Context(cwd=temp_cwd.temp_dir)
+        ctx.set_config("is_local", True)
+        create_aea(ctx, agent_id, local=True, author=DEFAULT_AUTHOR)
 
         # Add the local connection
         response_add = app.post(
             "api/agent/" + agent_id + "/connection",
             content_type="application/json",
-            data=json.dumps("fetchai/local:0.2.0"),
+            data=json.dumps("fetchai/local:0.3.0"),
         )
         assert response_add.status_code == 201
 
@@ -101,7 +103,7 @@ def test_create_and_run_agent():
         assert response_stop.status_code == 200
         time.sleep(2)
 
-        # run the agent with stub connection (as no OEF node is running)
+        # run the agent with stub connection
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",

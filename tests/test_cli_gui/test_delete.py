@@ -20,35 +20,29 @@
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import sys
-import unittest.mock
+from unittest.mock import patch
 
-from .test_base import create_app
+from tests.test_cli.tools_for_testing import raise_click_exception
+from tests.test_cli_gui.test_base import create_app
 
 
-def test_delete_agent():
+@patch("aea.cli_gui.cli_delete_aea")
+def test_delete_agent(*mocks):
     """Test creating an agent."""
     app = create_app()
     agent_name = "test_agent_id"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "delete"
-        assert param_list[4] == agent_name
-        return 0
-
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_delete = app.delete(
-            "api/agent/" + agent_name, data=None, content_type="application/json"
-        )
+    # Ensure there is now one agent
+    response_delete = app.delete(
+        "api/agent/" + agent_name, data=None, content_type="application/json"
+    )
     assert response_delete.status_code == 200
     data = json.loads(response_delete.get_data(as_text=True))
     assert data == "Agent {} deleted".format(agent_name)
 
 
-def test_delete_agent_fail():
+@patch("aea.cli_gui.cli_delete_aea", raise_click_exception)
+def test_delete_agent_fail(*mocks):
     """Test creating an agent and failing."""
     app = create_app()
     agent_name = "test_agent_id"
@@ -61,7 +55,7 @@ def test_delete_agent_fail():
         assert param_list[4] == agent_name
         return 1
 
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
+    with patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_delete = app.delete(
             "api/agent/" + agent_name, data=None, content_type="application/json"

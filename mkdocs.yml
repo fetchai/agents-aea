@@ -62,6 +62,7 @@ nav:
         - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
         - AEAs vs agents: 'agent-vs-aea.md'
         - Upgrading versions: 'upgrading.md'
+        - Modes of running an AEA: 'modes.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
         - Front-end intergration: 'connect-a-frontend.md'
@@ -79,6 +80,7 @@ nav:
         - Contracts: 'contract.md'
         - Decision Maker: 'decision-maker.md'
         - Ledger & Crypto APIs: 'ledger-integration.md'
+        - Message routing: 'message-routing.md'
         - Configurations: 'config.md'
       - Search & Discovery:
         - Defining Data Models: 'defining-data-models.md'
@@ -167,8 +169,8 @@ nav:
           - Behaviors: 'api/skills/behaviours.md'
           - Task: 'api/skills/tasks.md'
         - Test Tools: 'api/test_tools/generic.md'
-    - Simple OEF: 'simple-oef.md'
     - Q&A: 'questions-and-answers.md'
+  - Simple OEF: 'simple-oef.md'
 
 plugins:
     - markdownmermaid

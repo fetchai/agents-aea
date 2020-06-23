@@ -25,6 +25,7 @@ from typing import Optional, Union
 
 import click
 
+from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.configurations.base import (
     ConnectionConfig,
@@ -44,7 +45,9 @@ from aea.protocols.default.message import DefaultMessage
 
 
 @click.command()
-def interact():
+@click.pass_context
+@check_aea_project
+def interact(click_context: click.core.Context):
     """Interact with a running AEA via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
@@ -114,14 +117,14 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
     try:
-        # click.echo("Provide performative of protocol fetchai/default:0.2.0:")
+        # click.echo("Provide performative of protocol fetchai/default:0.3.0:")
         # performative_str = input()  # nosec
         # if performative_str == "":
         #     raise InterruptInputException
         performative_str = "bytes"
         performative = DefaultMessage.Performative(performative_str)
         click.echo(
-            "Provide message of protocol fetchai/default:0.2.0 for performative {}:".format(
+            "Provide message of protocol fetchai/default:0.3.0 for performative {}:".format(
                 performative_str
             )
         )

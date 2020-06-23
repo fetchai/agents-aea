@@ -19,11 +19,14 @@
 
 """Implementation of the 'aea delete' subcommand."""
 
+import os
 import shutil
+from typing import cast
 
 import click
 
 from aea.cli.utils.click_utils import AgentDirectory
+from aea.cli.utils.context import Context
 
 
 @click.command()
@@ -34,10 +37,11 @@ from aea.cli.utils.click_utils import AgentDirectory
 def delete(click_context, agent_name):
     """Delete an agent."""
     click.echo("Deleting AEA project directory './{}'...".format(agent_name))
-    _delete_aea(agent_name)
+    ctx = cast(Context, click_context.obj)
+    delete_aea(ctx, agent_name)
 
 
-def _delete_aea(agent_name: str) -> None:
+def delete_aea(ctx: Context, agent_name: str) -> None:
     """
     Delete agent's directory.
 
@@ -46,8 +50,9 @@ def _delete_aea(agent_name: str) -> None:
     :return: None
     :raises: ClickException if OSError occurred.
     """
+    agent_path = os.path.join(ctx.cwd, agent_name)
     try:
-        shutil.rmtree(agent_name, ignore_errors=False)
+        shutil.rmtree(agent_path, ignore_errors=False)
     except OSError:
         raise click.ClickException(
             "An error occurred while deleting the agent directory. Aborting..."

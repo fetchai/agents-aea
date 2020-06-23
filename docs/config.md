@@ -24,10 +24,10 @@ connections:                                    # The list of connection public 
 - fetchai/stub:0.5.0
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:0.2.0
+- fetchai/default:0.3.0
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/error:0.2.0
-default_connection: fetchai/oef:0.4.0           # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+- fetchai/error:0.3.0
+default_connection: fetchai/oef:0.5.0           # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 ledger_apis: {}                                 # The ledger api configurations the AEA project uses (keys must satisfy LEDGER_ID_REGEX, values must be dictionaries)
 logging_config:                                 # The logging configurations the AEA project uses
@@ -129,6 +129,7 @@ fingerprint:                                    # Fingerprint of package compone
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 contracts: []                                   # The list of contract public ids the package depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols: []                                   # The list of protocol public ids the package depends on (each public id must satisfy PUBLIC_ID_REGEX).
+skills: []                                      # The list of skill public ids the package depends on (each public id must satisfy PUBLIC_ID_REGEX).
 behaviours:                                     # The dictionary describing the behaviours immplemented in the package (including their configuration)
   scaffold:                                     # Name of the behaviour under which it is made available on the skill context.
     args:                                       # Keyword arguments provided to the skill component on instantiation.

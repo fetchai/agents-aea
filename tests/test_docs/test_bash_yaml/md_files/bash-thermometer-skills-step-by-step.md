@@ -5,6 +5,18 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
+aea fetch fetchai/thermometer_aea:0.3.0
+cd thermometer_aea
+aea eject fetchai/thermometer:0.4.0
+cd ..
+```
+``` bash
+aea fetch fetchai/thermometer_client:0.3.0
+cd thermometer_client
+aea eject fetchai/thermometer_client:0.3.0
+cd ..
+```
+``` bash
 aea create my_thermometer
 cd my_thermometer
 ```
@@ -35,20 +47,20 @@ aea add-key fetchai fet_private_key.txt
 aea generate-wealth fetchai
 ```
 ``` bash
-aea add connection fetchai/oef:0.4.0
+aea add connection fetchai/oef:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
-aea run --connections fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
+aea run --connections fetchai/oef:0.5.0
 ```
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 ``` bash
-aea add connection fetchai/oef:0.4.0
+aea add connection fetchai/oef:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
-aea run --connections fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
+aea run --connections fetchai/oef:0.5.0
 ```
 ``` bash
 cd ..
@@ -85,7 +97,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.3.0', 'fetchai/oef_search:0.2.0', 'fetchai/default:0.2.0']
+protocols: ['fetchai/fipa:0.4.0', 'fetchai/oef_search:0.3.0', 'fetchai/default:0.3.0']
 ledgers: ['fetchai']
 dependencies:
   pyserial: {}
@@ -127,7 +139,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.3.0','fetchai/default:0.2.0','fetchai/oef_search:0.2.0']
+protocols: ['fetchai/fipa:0.4.0','fetchai/default:0.3.0','fetchai/oef_search:0.3.0']
 ledgers: ['fetchai']
 ```
 ``` yaml

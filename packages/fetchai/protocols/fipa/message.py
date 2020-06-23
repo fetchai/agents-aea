@@ -39,7 +39,7 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = ProtocolId("fetchai", "fipa", "0.3.0")
+    protocol_id = ProtocolId("fetchai", "fipa", "0.4.0")
 
     Description = CustomDescription
 
@@ -113,7 +113,7 @@ class FipaMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(FipaMessage.Performative, self.get("performative"))

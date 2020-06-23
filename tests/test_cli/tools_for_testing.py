@@ -31,7 +31,7 @@ from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 from ..conftest import AUTHOR
 
 
-def raise_click_exception(*args):
+def raise_click_exception(*args, **kwargs):
     """Raise ClickException."""
     raise ClickException("Message")
 

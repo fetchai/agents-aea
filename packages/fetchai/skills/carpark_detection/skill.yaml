@@ -1,6 +1,6 @@
 name: carpark_detection
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
@@ -17,9 +17,10 @@ fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
 protocols:
-- fetchai/default:0.2.0
-- fetchai/fipa:0.3.0
-- fetchai/oef_search:0.2.0
+- fetchai/default:0.3.0
+- fetchai/fipa:0.4.0
+- fetchai/oef_search:0.3.0
+skills: []
 behaviours:
   car_park_detection:
     args:

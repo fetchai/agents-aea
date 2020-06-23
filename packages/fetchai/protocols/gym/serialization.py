@@ -69,6 +69,11 @@ class GymSerializer(Serializer):
             info = msg.info
             AnyObject.encode(performative.info, info)
             gym_msg.percept.CopyFrom(performative)
+        elif performative_id == GymMessage.Performative.STATUS:
+            performative = gym_pb2.GymMessage.Status_Performative()  # type: ignore
+            content = msg.content
+            performative.content.update(content)
+            gym_msg.status.CopyFrom(performative)
         elif performative_id == GymMessage.Performative.RESET:
             performative = gym_pb2.GymMessage.Reset_Performative()  # type: ignore
             gym_msg.reset.CopyFrom(performative)
@@ -120,6 +125,10 @@ class GymSerializer(Serializer):
             pb2_info = gym_pb.percept.info
             info = AnyObject.decode(pb2_info)
             performative_content["info"] = info
+        elif performative_id == GymMessage.Performative.STATUS:
+            content = gym_pb.status.content
+            content_dict = dict(content)
+            performative_content["content"] = content_dict
         elif performative_id == GymMessage.Performative.RESET:
             pass
         elif performative_id == GymMessage.Performative.CLOSE:
