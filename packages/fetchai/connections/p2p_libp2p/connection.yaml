@@ -10,12 +10,14 @@ fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   aea/api.go: QmfMwcvi7ZH551vK7xETbSSCUhTsdccfSBheA1RLksyBQR
   connection.py: QmbPuwgAYed7JVptHXfybt6xVjLFqXdYsN3mqbHmnP1hh2
-  dht/dhtclient/dhtclient.go: QmWFduzGSvPZCvXxJdzHwxg6xDmMK8Uhc6uzB4A9XaBzay
+  dht/dhtclient/dhtclient.go: QmduPb1cpwhaB3QT2FW7xDBHZFwMZ2cW6U54CaxrWmNjid
   dht/dhtclient/dhtclient_test.go: QmbZHW716CbzgYTnqPSQwZn3f4E89aa63fT2B3EZi2B1uk
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
+  dht/dhtnetwork_test.go: QmVippiyJpeygqiFQ5JuRRUERDHE2pSQcjaoZx7MyLFA5m
   dht/dhtnode/dhtnode.go: QmP8vp7CERi6rq3CBLJRwy3Zw5cYUJH9nus5Am8EzoS1D4
-  dht/dhtpeer/dhtpeer.go: QmdXb2WM5osJhvsTY4ofFR35x6SsDCWcuugzNW8HfMe5ht
-  dht/dhtpeer/dhtpeer_test.go: QmW8xwWTNLpHtzzhi9NP1hmYnnMcGbuASN34NKC2qRN7EV
+  dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
+  dht/dhtpeer/dhtpeer.go: QmUfYLtCPZUA3HBrxHE5Uv6P1FHhxdSt6QL8Q2KxMGVtc3
+  dht/dhtpeer/dhtpeer_test.go: Qma9VDuwE41uZnAi35R5q9ch8QP9fv45iPq6wqDkc8g8j1
   dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
   dht/dhttests/dhttests.go: QmTuUCjHcK4ks8Rh77FD49h26pY61b4NiRWvsHAi32WuQm
   go.mod: QmPSF8jdE9qjj9jE726zBDro19ASYGBebYpCV7JAMJNNzQ

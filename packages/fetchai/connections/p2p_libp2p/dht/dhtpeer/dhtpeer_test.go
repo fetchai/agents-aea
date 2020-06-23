@@ -27,7 +27,8 @@ import (
 	"libp2p_node/aea"
 )
 
-//
+// TOFIX(LR) how to share test helpers between packages tests without having circular dependencies
+
 const (
 	DefaultLocalHost    = "127.0.0.1"
 	DefaultLocalPort    = 2000
@@ -167,10 +168,13 @@ func TestRoutingTwoDHTPeers(t *testing.T) {
 		return nil
 	})
 
-	dhtPeer2.RouteEnvelope(aea.Envelope{
+	err = dhtPeer2.RouteEnvelope(aea.Envelope{
 		To:     AgentsTestAddresses[0],
 		Sender: AgentsTestAddresses[1],
 	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer 2 to peer 1:", err)
+	}
 
 	expectEnvelope(t, rxPeer1)
 	expectEnvelope(t, rxPeer2)
@@ -220,10 +224,13 @@ func TestRoutingTwoDHTPeersIndirect(t *testing.T) {
 		return nil
 	})
 
-	dhtPeer2.RouteEnvelope(aea.Envelope{
+	err = dhtPeer2.RouteEnvelope(aea.Envelope{
 		To:     AgentsTestAddresses[1],
 		Sender: AgentsTestAddresses[2],
 	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer 2 to peer 1:", err)
+	}
 
 	expectEnvelope(t, rxPeer1)
 	expectEnvelope(t, rxPeer2)
