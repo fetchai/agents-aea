@@ -18,7 +18,7 @@ The AEA will “live” inside the Raspberry Pi and will read the data from a se
 
 If you simply want to follow the software part of the guide then you only require the dependencies listed in the <a href="#dependencies">Dependencies</a> section.
 
-### Setup the environment
+### Setup the environment (Optional)
 
 You can follow the guide <a href=../raspberry-set-up> here </a> in order to setup your environment and prepare your Raspberry Pi.
 
@@ -32,9 +32,27 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 this assigns all devices coming out of the hidraw subsystem in the kernel to the group `plugdev` and sets the permissions to `r/w r/w r` (for root [the default owner], plugdev, and everyone else respectively).
 
-## Dependencies
+## Dependencies (Required)
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+
+## Reference (Optional)
+
+This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
+
+``` bash
+aea fetch fetchai/thermometer_aea:0.3.0
+cd thermometer_aea
+aea eject fetchai/thermometer:0.4.0
+cd ..
+```
+
+``` bash
+aea fetch fetchai/thermometer_client:0.3.0
+cd thermometer_client
+aea eject fetchai/thermometer_client:0.3.0
+cd ..
+```
 
 ## Thermometer AEA
 
@@ -1667,6 +1685,8 @@ This will hash each file and save the hash in the fingerprint. This way, in the 
 
 ## Run the AEAs
 
+<details><summary>Additional steps for Raspberry Pi only!</summary>
+
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>If you are using the Raspberry Pi, make sure that your thermometer sensor is connected to the Raspberry Pi's USB port.</p>
@@ -1681,12 +1701,17 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
 and replace it with your IP (the IP of the machine that runs the [OEF search and communication node](../oef-ledger) image.)
 
+</details>
+
+
 In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
-### Fetch.ai ledger payment
+You can run the demo either on Fetch.ai ledger or Ethereum ledger.
+
+### Option 1: Fetch.ai ledger payment
 
 Create the private key for the weather client AEA.
 
@@ -1723,7 +1748,7 @@ aea run --connections fetchai/oef:0.5.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
-### Ethereum ledger payment
+### Option 2: Ethereum ledger payment
 
 A demo to run the same scenario but with a true ledger transaction on the Ethereum Ropsten testnet. 
 This demo assumes the temperature client trusts our AEA to send the temperature data upon successful payment.
