@@ -34,7 +34,7 @@ class TestInteractCommand(AEATestCaseMany):
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_interact_command_positive(self):
-        """Run the weather skills sequence."""
+        """Run interaction."""
         agent_name = "test_iteraction_agent"
         self.create_agents(agent_name)
 
