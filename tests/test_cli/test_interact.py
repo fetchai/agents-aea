@@ -26,13 +26,14 @@ from aea.cli.interact import _construct_message, _try_construct_envelope
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import MAX_FLAKY_RERUNS
+from tests.conftest import MAX_FLAKY_RERUNS, skip_test_windows
 
 
 class TestInteractCommand(AEATestCaseMany):
     """Test that interact command work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    @skip_test_windows
     def test_interact_command_positive(self):
         """Run interaction."""
         agent_name = "test_iteraction_agent"
