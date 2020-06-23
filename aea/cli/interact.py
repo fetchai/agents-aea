@@ -74,25 +74,21 @@ def _run_interaction_channel():
 
     try:
         multiplexer.connect()
-        is_running = True
-        while is_running:
-            try:
-                envelope = _try_construct_envelope(agent_name, identity_stub.name)
-                if envelope is None and not inbox.empty():
-                    envelope = inbox.get_nowait()
-                    assert (
-                        envelope is not None
-                    ), "Could not recover envelope from inbox."
-                    click.echo(_construct_message("received", envelope))
-                elif envelope is None and inbox.empty():
-                    click.echo("Received no new envelope!")
-                else:
-                    outbox.put(envelope)
-                    click.echo(_construct_message("sending", envelope))
-            except KeyboardInterrupt:
-                is_running = False
-            except Exception as e:
-                click.echo(e)
+        while True:
+            envelope = _try_construct_envelope(agent_name, identity_stub.name)
+            if envelope is None and not inbox.empty():
+                envelope = inbox.get_nowait()
+                assert envelope is not None, "Could not recover envelope from inbox."
+                click.echo(_construct_message("received", envelope))
+            elif envelope is None and inbox.empty():
+                click.echo("Received no new envelope!")
+            else:
+                outbox.put(envelope)
+                click.echo(_construct_message("sending", envelope))
+    except KeyboardInterrupt:
+        click.echo("Interaction interrupted!")
+    except Exception as e:
+        click.echo(e)
     finally:
         multiplexer.disconnect()
 
