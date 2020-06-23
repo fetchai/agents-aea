@@ -16,13 +16,16 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of multiple AEA configs launcher."""
+import logging
 import multiprocessing
 from asyncio.events import AbstractEventLoop
+from concurrent.futures.process import BrokenProcessPool
 from multiprocessing.synchronize import Event
 from os import PathLike
 from threading import Thread
-from typing import Any, Awaitable, Callable, Dict, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Type, Union
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -36,9 +39,13 @@ from aea.helpers.multiple_executor import (
     AsyncExecutor,
     ExecutorExceptionPolicies,
     ProcessExecutor,
+    TaskAwaitable,
     ThreadExecutor,
 )
 from aea.runtime import AsyncRuntime
+
+
+logger = logging.getLogger(__name__)
 
 
 def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
@@ -53,30 +60,56 @@ def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
         return AEABuilder.from_aea_project(".").build()
 
 
-def _run_agent(agent_dir: Union[PathLike, str], stop_event: Event) -> None:
+def _set_logger(log_level: Optional[str]):
+    from aea.cli.utils.loggers import (  # pylint: disable=import-outside-toplevel
+        default_logging_config,  # pylint: disable=import-outside-toplevel
+    )
+
+    logger = logging.getLogger("aea")
+    logger = default_logging_config(logger)
+    if log_level is not None:
+        level = logging.getLevelName(log_level)
+        logger.setLevel(level)
+
+
+def _run_agent(
+    agent_dir: Union[PathLike, str], stop_event: Event, log_level: Optional[str] = None
+) -> None:
     """
     Load and run agent in a dedicated process.
 
     :param agent_dir: agent configuration directory
     :param stop_event: multithreading Event to stop agent run.
+    :param log_level: debug level applied for AEA in subprocess
 
     :return: None
     """
+    _set_logger(log_level=log_level)
+
     agent = load_agent(agent_dir)
 
     def stop_event_thread():
-        stop_event.wait()
-        agent.stop()
+        try:
+            stop_event.wait()
+        except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:
+            logger.error(
+                f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
+            )
+        finally:
+            agent.stop()
 
     Thread(target=stop_event_thread, daemon=True).start()
     try:
         agent.start()
-    except Exception as e:
+    except KeyboardInterrupt:
+        logger.debug("_run_agent: keyboard interrupt")
+    except BaseException as e:
+        logger.exception("exception in _run_agent")
         exc = AEAException(f"Raised {type(e)}({e})")
         exc.__traceback__ = e.__traceback__
         raise exc
     finally:
-        stop_event.set()
+        agent.stop()
 
 
 class AEADirTask(AbstractExecutorTask):
@@ -102,7 +135,7 @@ class AEADirTask(AbstractExecutorTask):
             raise Exception("Task was not started!")
         self._agent.stop()
 
-    def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
+    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
         """Return asyncio Task for task run in asyncio loop."""
         self._agent.runtime.set_loop(loop)
         if not isinstance(self._agent.runtime, AsyncRuntime):
@@ -124,29 +157,56 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
     Version for multiprocess executor mode.
     """
 
-    def __init__(self, agent_dir: Union[PathLike, str]):
+    def __init__(
+        self, agent_dir: Union[PathLike, str], log_level: Optional[str] = None
+    ):
         """
         Init aea config dir task.
 
         :param agent_dir: direcory with aea config.
+        :param log_level: debug level applied for AEA in subprocess
         """
         self._agent_dir = agent_dir
         self._manager = multiprocessing.Manager()
         self._stop_event = self._manager.Event()
+        self._log_level = log_level
         super().__init__()
 
     def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Return function and arguments to call within subprocess."""
-        return (_run_agent, (self._agent_dir, self._stop_event))
+        return (_run_agent, (self._agent_dir, self._stop_event, self._log_level))
 
     def stop(self):
         """Stop task."""
-        self._stop_event.set()
+        if self._future.done():
+            logger.debug("Stop called, but task is already done.")
+            return
+        try:
+            self._stop_event.set()
+        except (FileNotFoundError, BrokenPipeError, EOFError) as e:
+            logger.error(
+                f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
+            )
 
     @property
     def id(self) -> Union[PathLike, str]:
         """Return agent_dir."""
         return self._agent_dir
+
+    @property
+    def failed(self) -> bool:
+        """
+        Return was exception failed or not.
+
+        If it's running it's not failed.
+
+        :rerurn: bool
+        """
+        if not self._future or not super().failed:
+            return False
+        if isinstance(self._future.exception(), BrokenProcessPool):
+            return False
+        return True
 
 
 class AEALauncher(AbstractMultipleRunner):
@@ -163,6 +223,7 @@ class AEALauncher(AbstractMultipleRunner):
         agent_dirs: Sequence[Union[PathLike, str]],
         mode: str,
         fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
+        log_level: Optional[str] = None,
     ) -> None:
         """
         Init AEARunner.
@@ -170,13 +231,18 @@ class AEALauncher(AbstractMultipleRunner):
         :param agent_dirs: sequence of AEA config directories.
         :param mode: executor name to use.
         :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
+        :param log_level: debug level applied for AEA in subprocesses
         """
         self._agent_dirs = agent_dirs
+        self._log_level = log_level
         super().__init__(mode=mode, fail_policy=fail_policy)
 
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
         """Make tasks to run with executor."""
         if self._mode == "multiprocess":
-            return [AEADirMultiprocessTask(agent_dir) for agent_dir in self._agent_dirs]
+            return [
+                AEADirMultiprocessTask(agent_dir, log_level=self._log_level)
+                for agent_dir in self._agent_dirs
+            ]
         else:
             return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]

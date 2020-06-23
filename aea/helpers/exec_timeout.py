@@ -223,7 +223,8 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
 
             if cls._start_count <= 0 or force:
                 cls._loop.call_soon_threadsafe(cls._stopped_future.set_result, True)  # type: ignore
-                cls._supervisor_thread.join()
+                if cls._supervisor_thread and cls._supervisor_thread.is_alive():
+                    cls._supervisor_thread.join()
                 cls._supervisor_thread = None
 
     @classmethod
