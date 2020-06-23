@@ -90,11 +90,11 @@ def lock_file(file_descriptor: IO[bytes]):
     """
     try:
         file_lock.lock(file_descriptor, file_lock.LOCK_EX)
-    except OSError as e:
+    except Exception as e:
         logger.error(
             "Couldn't acquire lock for file {}: {}".format(file_descriptor.name, e)
         )
-        raise e
+        raise
     try:
         yield
     finally:
@@ -164,6 +164,8 @@ class StubConnection(Connection):
         (b"[^" + SEPARATOR + b"]*" + SEPARATOR) * 3 + b".*,[\n]?", re.DOTALL
     )
 
+    read_delay = 0.001
+
     def __init__(self, **kwargs):
         """Initialize a stub connection."""
         super().__init__(**kwargs)
@@ -188,42 +190,38 @@ class StubConnection(Connection):
             max_workers=1, thread_name_prefix="stub_connection_writer_"
         )  # sequential write only! but threaded!
 
-    async def _file_read(self, delay: float = 0.1) -> AsyncIterable[bytes]:
+    async def _file_read_and_trunc(self, delay: float = 0.001) -> AsyncIterable[bytes]:
         """
-        Generate input file read chunks.
+        Generate input file read chunks and trunc data already read.
 
         :param delay: float, delay on empty read.
 
         :return: async generator return file read bytes.
         """
-        cnt = 0
         while True:
-            curr_position = self.input_file.tell()
             with lock_file(self.input_file):
                 data = self.input_file.read()
-            if not data:
-                self.input_file.seek(curr_position)
-                await asyncio.sleep(delay)
-            else:
-                cnt += 1
+                if data:
+                    self.input_file.truncate(0)
+                    self.input_file.seek(0)
+
+            if data:
                 yield data
-                if cnt >= 10:
-                    await asyncio.sleep(
-                        delay / 100
-                    )  # release loop every 10 lines, in case of file quite big
-                    cnt = 0
+            else:
+                await asyncio.sleep(delay)
 
     async def read_envelopes(self) -> None:
         """Read envelopes from inptut file, decode and put into in_queue."""
         assert self.in_queue is not None, "Input queue not initialized."
         assert self._loop is not None, "Loop not initialized."
 
-        async for data in self._file_read(0.1):
+        logger.debug("Read messages!")
+        async for data in self._file_read_and_trunc(delay=self.read_delay):
             lines = self._split_messages(data)
             for line in lines:
                 envelope = _process_line(line)
 
-                if not envelope:
+                if envelope is None:
                     continue
 
                 logger.debug(f"Add envelope {envelope}")
@@ -275,7 +273,7 @@ class StubConnection(Connection):
         Cancel task and wait for completed.
         """
         if not self._read_envelopes_task:
-            return
+            return  # pragma: nocover
 
         if not self._read_envelopes_task.done():
             self._read_envelopes_task.cancel()
@@ -283,9 +281,11 @@ class StubConnection(Connection):
         try:
             await self._read_envelopes_task
         except CancelledError:
-            pass
-        except BaseException:
-            logger.exception("during evnvelop read")
+            pass  # task was cancelled, that was expected
+        except BaseException:  # pragma: nocover
+            logger.exception(
+                "during envelop read"
+            )  # do not raise exception cause it's on task stop
 
     async def disconnect(self) -> None:
         """

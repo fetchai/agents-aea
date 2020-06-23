@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC
-  connection.py: QmfJwpme8zrAQGBWsnofRet3dmJ4pj3SJrrN2Xrn21EcpL
+  connection.py: Qmd8AKUVZc4r9pG7EUBUKcRS6JSWsA8ikU4FUCfqvNaz1K
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: StubConnection

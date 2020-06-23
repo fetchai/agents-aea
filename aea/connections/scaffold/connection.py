@@ -46,7 +46,7 @@ class MyScaffoldConnection(Connection):
         :param crypto_store: object to access the connection crypto objects.
         :param identity: the identity object.
         """
-        super().__init__(
+        super().__init__(  # pragma: no cover
             configuration=configuration, crypto_store=crypto_store, identity=identity
         )
 
