@@ -99,6 +99,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "is_abstract": {
+      "type": "boolean"
     }
   },
   "definitions": {

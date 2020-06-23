@@ -751,6 +751,11 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             self.public_id.author, self.component_type.to_plural(), self.public_id.name
         )
 
+    @property
+    def is_abstract_component(self) -> bool:
+        """Check whether the component is abstract."""
+        return False
+
     @staticmethod
     def load(
         component_type: ComponentType,
@@ -1087,6 +1092,7 @@ class SkillConfig(ComponentConfiguration):
         skills: List[PublicId] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        is_abstract: bool = False,
     ):
         """Initialize a skill configuration."""
         super().__init__(
@@ -1107,6 +1113,8 @@ class SkillConfig(ComponentConfiguration):
         self.handlers = CRUDCollection[SkillComponentConfiguration]()
         self.behaviours = CRUDCollection[SkillComponentConfiguration]()
         self.models = CRUDCollection[SkillComponentConfiguration]()
+
+        self.is_abstract = is_abstract
 
     @property
     def component_type(self) -> ComponentType:
@@ -1133,6 +1141,11 @@ class SkillConfig(ComponentConfiguration):
         )
 
     @property
+    def is_abstract_component(self) -> bool:
+        """Check whether the component is abstract."""
+        return self.is_abstract
+
+    @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         result = OrderedDict(
@@ -1152,8 +1165,12 @@ class SkillConfig(ComponentConfiguration):
                 "handlers": {key: h.json for key, h in self.handlers.read_all()},
                 "models": {key: m.json for key, m in self.models.read_all()},
                 "dependencies": self.dependencies,
+                "is_abstract": self.is_abstract,
             }
         )
+        if result["is_abstract"] is False:
+            result.pop("is_abstract")
+
         return result
 
     @classmethod
@@ -1194,6 +1211,7 @@ class SkillConfig(ComponentConfiguration):
             skills=skills,
             dependencies=dependencies,
             description=description,
+            is_abstract=obj.get("is_abstract", False),
         )
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
