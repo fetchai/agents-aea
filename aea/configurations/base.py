@@ -1084,6 +1084,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         protocols: List[PublicId] = None,
         contracts: List[PublicId] = None,
+        skills: List[PublicId] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         is_abstract: bool = False,
@@ -1099,12 +1100,9 @@ class SkillConfig(ComponentConfiguration):
             fingerprint_ignore_patterns,
             dependencies,
         )
-        self.protocols = (
-            protocols if protocols is not None else []
-        )  # type: List[PublicId]
-        self.contracts = (
-            contracts if contracts is not None else []
-        )  # type: List[PublicId]
+        self.protocols: List[PublicId] = (protocols if protocols is not None else [])
+        self.contracts: List[PublicId] = (contracts if contracts is not None else [])
+        self.skills: List[PublicId] = (skills if skills is not None else [])
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.handlers = CRUDCollection[SkillComponentConfiguration]()
@@ -1120,11 +1118,22 @@ class SkillConfig(ComponentConfiguration):
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
-        """Get the connection dependencies."""
-        return {
-            ComponentId(ComponentType.PROTOCOL, protocol_id)
-            for protocol_id in self.protocols
-        }
+        """Get the skill dependencies."""
+        return (
+            {
+                ComponentId(ComponentType.PROTOCOL, protocol_id)
+                for protocol_id in self.protocols
+            }
+            .union(
+                {
+                    ComponentId(ComponentType.CONTRACT, contract_id)
+                    for contract_id in self.contracts
+                }
+            )
+            .union(
+                {ComponentId(ComponentType.SKILL, skill_id) for skill_id in self.skills}
+            )
+        )
 
     @property
     def json(self) -> Dict:
@@ -1141,6 +1150,7 @@ class SkillConfig(ComponentConfiguration):
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "contracts": sorted(map(str, self.contracts)),
                 "protocols": sorted(map(str, self.protocols)),
+                "skills": sorted(map(str, self.skills)),
                 "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
                 "handlers": {key: h.json for key, h in self.handlers.read_all()},
                 "models": {key: m.json for key, m in self.models.read_all()},
@@ -1150,6 +1160,7 @@ class SkillConfig(ComponentConfiguration):
         )
         if result["is_abstract"] is False:
             result.pop("is_abstract")
+
         return result
 
     @classmethod
@@ -1172,6 +1183,9 @@ class SkillConfig(ComponentConfiguration):
             List[PublicId],
             [PublicId.from_str(id_) for id_ in obj.get("contracts", [])],
         )
+        skills = cast(
+            List[PublicId], [PublicId.from_str(id_) for id_ in obj.get("skills", [])],
+        )
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
@@ -1184,6 +1198,7 @@ class SkillConfig(ComponentConfiguration):
             fingerprint_ignore_patterns=fingerprint_ignore_patterns,
             protocols=protocols,
             contracts=contracts,
+            skills=skills,
             dependencies=dependencies,
             description=description,
             is_abstract=obj.get("is_abstract", False),

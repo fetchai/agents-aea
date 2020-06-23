@@ -15,6 +15,7 @@ contracts: []
 protocols:
 - fetchai/ml_trade:0.3.0
 - fetchai/oef_search:0.3.0
+skills: []
 behaviours:
   service_registration:
     args:

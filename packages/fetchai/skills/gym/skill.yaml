@@ -14,6 +14,7 @@ fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/gym:0.3.0
+skills: []
 behaviours: {}
 handlers:
   gym:

@@ -9,7 +9,9 @@
     "version",
     "license",
     "aea_version",
-    "protocols"
+    "protocols",
+    "contracts",
+    "skills"
   ],
   "properties": {
     "name": {
@@ -42,6 +44,14 @@
       }
     },
     "contracts": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
+    "skills": {
       "type": "array",
       "additionalProperties": false,
       "uniqueItems": true,
