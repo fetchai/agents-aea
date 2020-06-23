@@ -1115,7 +1115,7 @@ class SkillConfig(ComponentConfiguration):
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
-        """Get the connection dependencies."""
+        """Get the skill dependencies."""
         return (
             {
                 ComponentId(ComponentType.PROTOCOL, protocol_id)
