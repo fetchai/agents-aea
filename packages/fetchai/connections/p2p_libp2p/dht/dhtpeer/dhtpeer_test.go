@@ -36,7 +36,7 @@ const (
 	DefaultAgentAddress = "2FRCqDBo7Yw3E2VJc1tAkggppWzLnCCYjPN9zHrQrj8Fupzmkr"
 	DefaultDelegatePort = 3000
 
-	EnvelopeDeliveryTimeout = 1 * time.Second
+	EnvelopeDeliveryTimeout = 5 * time.Second
 )
 
 var (
