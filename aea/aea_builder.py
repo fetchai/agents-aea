@@ -68,7 +68,7 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_module
+from aea.helpers.base import load_aea_package, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
@@ -1300,6 +1300,11 @@ class AEABuilder:
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
             else:
+                if component_type == ComponentType.SKILL:
+                    is_skill_abstract = cast(SkillConfig, configuration).is_abstract
+                    if is_skill_abstract:
+                        load_aea_package(configuration)
+                        continue
                 configuration = deepcopy(configuration)
                 component = load_component_from_config(
                     component_type, configuration, **kwargs
