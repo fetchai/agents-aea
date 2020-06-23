@@ -22,6 +22,7 @@ package dhtclient
 
 import (
 	"testing"
+	"time"
 
 	"libp2p_node/aea"
 	"libp2p_node/dht/dhttests"
@@ -36,7 +37,7 @@ const (
 // TestNew dht client peer
 func TestNew(t *testing.T) {
 
-	var rxEnvelopesPeer []aea.Envelope
+	rxEnvelopesPeer := make(chan aea.Envelope)
 	dhtPeer, cleanup, err := dhttests.NewDHTPeerWithDefaults(rxEnvelopesPeer)
 	if err != nil {
 		t.Fatal("Failed to create DHTPeer (required for DHTClient):", err)
@@ -55,19 +56,20 @@ func TestNew(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
 	}
+	defer dhtClient.Close()
 
-	var rxEnvelopesClient []aea.Envelope
+	rxEnvelopesClient := make(chan aea.Envelope)
 	dhtClient.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxEnvelopesClient = append(rxEnvelopesClient, envel)
+		rxEnvelopesClient <- envel
 		return nil
 	})
 
 }
 
 // TestRouteEnvelopeToPeerAgent send envelope from DHTClient agent to DHTPeer agent
-func iTestRouteEnvelopeToPeerAgent(t *testing.T) {
+func TestRouteEnvelopeToPeerAgent(t *testing.T) {
 
-	var rxEnvelopesPeer []aea.Envelope
+	rxEnvelopesPeer := make(chan aea.Envelope)
 	dhtPeer, cleanup, err := dhttests.NewDHTPeerWithDefaults(rxEnvelopesPeer)
 	if err != nil {
 		t.Fatal("Failed to create DHTPeer (required for DHTClient):", err)
@@ -86,10 +88,11 @@ func iTestRouteEnvelopeToPeerAgent(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
 	}
+	defer dhtClient.Close()
 
-	var rxEnvelopesClient []aea.Envelope
+	rxEnvelopesClient := make(chan aea.Envelope)
 	dhtClient.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxEnvelopesClient = append(rxEnvelopesClient, envel)
+		rxEnvelopesClient <- envel
 		return nil
 	})
 
@@ -105,7 +108,11 @@ func iTestRouteEnvelopeToPeerAgent(t *testing.T) {
 		t.Error("Failed to Route envelope to DHTPeer agent:", err)
 	}
 
-	if len(rxEnvelopesPeer) == 0 {
+	timeout := time.After(3 * time.Second)
+	select {
+	case envel := <-rxEnvelopesPeer:
+		t.Log("DHT received envelope", envel)
+	case <-timeout:
 		t.Error("Failed to Route envelope to DHTPeer agent")
 	}
 

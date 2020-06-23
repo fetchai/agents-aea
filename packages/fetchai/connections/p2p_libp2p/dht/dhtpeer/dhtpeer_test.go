@@ -37,7 +37,6 @@ const (
 
 // TestNewWithAeaAgent dht peer with agent attached
 func TestNewWithAeaAgent(t *testing.T) {
-	t.Log("Starting testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
 	opts := []Option{
 		LocalURI(DefaultLocalHost, DefaultLocalPort),
 		PublicURI(DefaultLocalHost, DefaultLocalPort),
@@ -51,6 +50,7 @@ func TestNewWithAeaAgent(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed at DHTPeer initialization:", err)
 	}
+	defer dhtPeer.Close()
 
 	var rxEnvelopes []aea.Envelope
 	dhtPeer.ProcessEnvelope(func(envel aea.Envelope) error {
@@ -69,10 +69,4 @@ func TestNewWithAeaAgent(t *testing.T) {
 		t.Error("Failed to Route & Process envelope to local Agent")
 	}
 
-	t.Cleanup(func() {
-		t.Log("Cleaning testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
-		dhtPeer.Close()
-	})
-	t.Log("Ending testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
-	defer dhtPeer.Close()
 }

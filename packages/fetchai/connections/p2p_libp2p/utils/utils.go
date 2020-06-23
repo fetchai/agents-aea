@@ -39,8 +39,8 @@ import (
 	"github.com/multiformats/go-multiaddr"
 	"github.com/multiformats/go-multihash"
 
-	host "github.com/libp2p/go-libp2p-host"
-	peerstore "github.com/libp2p/go-libp2p-peerstore"
+	host "github.com/libp2p/go-libp2p-core/host"
+	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
 
 	btcec "github.com/btcsuite/btcd/btcec"
 	proto "github.com/golang/protobuf/proto"

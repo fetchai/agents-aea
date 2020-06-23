@@ -25,7 +25,10 @@ import (
 	"errors"
 	"log"
 	"math/rand"
+	"os"
 	"time"
+
+	"github.com/rs/zerolog"
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
@@ -39,13 +42,6 @@ import (
 	aea "libp2p_node/aea"
 	utils "libp2p_node/utils"
 )
-
-// panics if err is not nil
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
 
 func ignore(err error) {
 	if err != nil {
@@ -67,6 +63,9 @@ type DHTClient struct {
 	myAgentAddress  string
 	myAgentReady    func() bool
 	processEnvelope func(aea.Envelope) error
+
+	closing chan struct{}
+	logger  zerolog.Logger
 }
 
 // New creates a new DHTClient
@@ -79,6 +78,11 @@ func New(opts ...Option) (*DHTClient, error) {
 			return nil, err
 		}
 	}
+
+	dhtClient.closing = make(chan struct{})
+
+	dhtClient.setupLogger()
+	_, _, linfo, ldebug := dhtClient.getLoggers()
 
 	/* check correct configuration */
 
@@ -101,7 +105,7 @@ func New(opts ...Option) (*DHTClient, error) {
 	rand.Seed(time.Now().Unix())
 	index := rand.Intn(len(dhtClient.bootstrapPeers))
 	dhtClient.relayPeer = dhtClient.bootstrapPeers[index].ID
-	log.Println("INFO Using as relay:", dhtClient.relayPeer.Pretty())
+	linfo().Msg("INFO Using as relay")
 
 	/* setup libp2p node */
 	ctx := context.Background()
@@ -151,29 +155,95 @@ func New(opts ...Option) (*DHTClient, error) {
 		return nil, err
 	}
 
+	dhtClient.setupLogger()
+
 	/* setup DHTClient message handlers */
 
 	// aea address lookup
-	log.Println("DEBUG Setting /aea-address/0.1.0 stream...")
+	ldebug().Msg("DEBUG Setting /aea-address/0.1.0 stream...")
 	dhtClient.routedHost.SetStreamHandler("/aea-address/0.1.0",
 		dhtClient.handleAeaAddressStream)
 
 	// incoming envelopes stream
-	log.Println("DEBUG Setting /aea/0.1.0 stream...")
+	ldebug().Msg("DEBUG Setting /aea/0.1.0 stream...")
 	dhtClient.routedHost.SetStreamHandler("/aea/0.1.0",
 		dhtClient.handleAeaEnvelopeStream)
 
 	return dhtClient, nil
 }
 
+func (dhtClient *DHTClient) setupLogger() {
+	if dhtClient.routedHost == nil {
+		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
+			With().Timestamp().
+			Str("process", "DHTClient").
+			Str("peerid", "nil").
+			Str("relayid", dhtClient.relayPeer.Pretty()).
+			Logger()
+	} else {
+		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
+			With().Timestamp().
+			Str("process", "DHTClient").
+			Str("peerid", dhtClient.routedHost.ID().Pretty()).
+			Str("relayid", dhtClient.relayPeer.Pretty()).
+			Logger()
+	}
+}
+
+func (dhtClient *DHTClient) getLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {
+	ldebug := dhtClient.logger.Debug
+	linfo := dhtClient.logger.Info
+	lwarn := dhtClient.logger.Warn
+	lerror := func(err error) *zerolog.Event {
+		if err == nil {
+			return dhtClient.logger.Error().Str("err", "nil")
+		}
+		return dhtClient.logger.Error().Str("err", err.Error())
+	}
+
+	return lerror, lwarn, linfo, ldebug
+}
+
+// Close stops the DHTClient
+func (dhtClient *DHTClient) Close() []error {
+	var err error
+	var status []error
+
+	_, _, linfo, _ := dhtClient.getLoggers()
+
+	linfo().Msg("Stopping DHTClient...")
+	close(dhtClient.closing)
+
+	errappend := func(err error) {
+		if err != nil {
+			status = append(status, err)
+		}
+	}
+
+	err = dhtClient.dht.Close()
+	errappend(err)
+	err = dhtClient.routedHost.Close()
+	errappend(err)
+
+	return status
+}
+
 // RouteEnvelope to its destination
 func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
+	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
+
 	target := envel.To
 
 	if target == dhtClient.myAgentAddress {
-		log.Println("DEBUG route - envelope destinated to my local agent...")
+		ldebug().
+			Str("op", "route").
+			Str("target", target).
+			Msg("envelope destinated to my local agent...")
 		for !dhtClient.myAgentReady() {
-			log.Println("DEBUG route agent not ready yet, sleeping for some time ...")
+			ldebug().
+				Str("op", "route").
+				Str("target", target).
+				Msg("agent not ready yet, sleeping for some time ...")
 			time.Sleep(time.Duration(100) * time.Millisecond)
 		}
 		if dhtClient.processEnvelope != nil {
@@ -182,48 +252,75 @@ func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
 				return err
 			}
 		} else {
-			log.Println("WARN route ProcessEnvelope not set, ignoring envelope", envel)
+			lwarn().
+				Str("op", "route").
+				Str("target", target).
+				Msgf("ProcessEnvelope not set, ignoring envelope %s", envel.String())
 			return nil
 		}
 	}
 
-	log.Println("DEBUG route - looking up peer ID for agent Address", target)
+	ldebug().
+		Str("op", "route").
+		Str("target", target).
+		Msg("looking up peer ID for agent Address")
 	// client can get addresses only through bootstrap peer
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, "/aea-address/0.1.0")
 	if err != nil {
-		log.Println("ERROR route - couldn't open stream to relay", dhtClient.relayPeer.Pretty())
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("couldn't open stream to relay")
 		return err
 	}
 
-	log.Println("DEBUG route - requesting peer ID from relay...")
+	ldebug().
+		Str("op", "route").
+		Str("target", target).
+		Msg("requesting peer ID from relay...")
 
 	err = utils.WriteBytes(stream, []byte(target))
 	if err != nil {
-		log.Println("ERROR route - While sending address to relay:", err)
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msg("while sending address to relay")
 		return errors.New("ERROR route - While sending address to relay:" + err.Error())
 	}
 
 	msg, err := utils.ReadString(stream)
 	if err != nil {
-		log.Println("ERROR route - While reading target peer id from relay:", err)
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("while reading target peer id from relay")
 		return errors.New("ERROR route - While reading target peer id from relay:" + err.Error())
 	}
 	stream.Close()
 
 	peerID, err := peer.Decode(msg)
 	if err != nil {
-		log.Println("CRITICAL route - couldn't get peer ID from message", msg, ":", err)
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("CRITICAL couldn't get peer ID from message %s", msg)
 		return errors.New("CRITICAL route - couldn't get peer ID from message:" + err.Error())
 	}
 
-	log.Println("DEBUG route - got peer ID for agent Address", target, ":", peerID.Pretty())
+	ldebug().
+		Str("op", "route").
+		Str("target", target).
+		Msgf("got peer ID %s for agent Address", peerID.Pretty())
 
 	multiAddr := "/p2p/" + dhtClient.relayPeer.Pretty() + "/p2p-circuit/p2p/" + peerID.Pretty()
 	relayMultiaddr, err := multiaddr.NewMultiaddr(multiAddr)
 	if err != nil {
-		log.Println("ERROR route - while creating relay multiaddress ", multiAddr, err)
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("while creating relay multiaddress %s", multiAddr)
 		return err
 	}
 	peerRelayInfo := peer.AddrInfo{
@@ -231,23 +328,38 @@ func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
 		Addrs: []multiaddr.Multiaddr{relayMultiaddr},
 	}
 
-	log.Println("DEBUG route - connecting to target through relay ", relayMultiaddr)
+	ldebug().
+		Str("op", "route").
+		Str("target", target).
+		Msgf("connecting to target through relay %s", relayMultiaddr)
 
 	if err = dhtClient.routedHost.Connect(context.Background(), peerRelayInfo); err != nil {
-		log.Println("ERROR route - couldn't connect to target", peerID)
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("couldn't connect to target %s", peerID)
 		return err
 	}
 
-	log.Println("DEBUG route - opening stream to target ", peerID)
+	ldebug().
+		Str("op", "route").
+		Str("target", target).
+		Msgf("opening stream to target %s", peerID)
 	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	stream, err = dhtClient.routedHost.NewStream(ctx, peerID, "/aea/0.1.0")
 	if err != nil {
-		log.Println("ERROR route - timeout, couldn't open stream to target ", peerID)
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("timeout, couldn't open stream to target %s", peerID)
 		return err
 	}
 
-	log.Println("DEBUG route - sending envelope to target...")
+	ldebug().
+		Str("op", "route").
+		Str("target", target).
+		Msg("sending envelope to target...")
 	err = utils.WriteEnvelope(envel, stream)
 	if err != nil {
 		errReset := stream.Reset()
@@ -260,68 +372,92 @@ func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
 }
 
 func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
-	log.Println("DEBUG Got a new aea envelope stream")
+	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
+
+	ldebug().Msgf("Got a new aea envelope stream")
 
 	envel, err := utils.ReadEnvelope(stream)
 	if err != nil {
-		log.Println("ERROR While reading envelope from stream:", err)
+		lerror(err).Msg("while reading envelope from stream")
 		err = stream.Reset()
 		ignore(err)
 		return
 	}
 	stream.Close()
 
-	log.Println("DEBUG Received envelope from peer:", envel)
+	ldebug().Msgf("Received envelope from peer %s", envel.String())
 
 	if envel.To == dhtClient.myAgentAddress && dhtClient.processEnvelope != nil {
 		err = dhtClient.processEnvelope(*envel)
 		if err != nil {
-			log.Println("ERROR While processing envelope by agent:", err)
+			lerror(err).Msgf("while processing envelope by agent")
 		}
 	} else {
-		log.Println("WARN ignored envelope", *envel)
+		lwarn().Msgf("ignored envelope %s", envel.String())
 	}
 }
 
 func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
-	log.Println("DEBUG Got a new aea address stream")
+	lerror, _, _, ldebug := dhtClient.getLoggers()
+
+	ldebug().Msg("Got a new aea address stream")
 
 	reqAddress, err := utils.ReadString(stream)
 	if err != nil {
-		log.Println("ERROR While reading Address from stream:", err)
+		lerror(err).
+			Str("op", "resolve").
+			Str("target", reqAddress).
+			Msg("while reading Address from stream")
 		err = stream.Reset()
 		ignore(err)
 		return
 	}
 
-	log.Println("DEBUG Received query for addr:", reqAddress)
+	ldebug().
+		Str("op", "resolve").
+		Str("target", reqAddress).
+		Msg("Received query for addr")
 	if reqAddress != dhtClient.myAgentAddress {
-		log.Println("ERROR requested address different from advertised one",
-			reqAddress, dhtClient.myAgentAddress)
+		lerror(err).
+			Str("op", "resolve").
+			Str("target", reqAddress).
+			Msgf("requested address different from advertised one %s", dhtClient.myAgentAddress)
 		stream.Close()
 	} else {
 		err = utils.WriteBytes(stream, []byte(dhtClient.routedHost.ID().Pretty()))
 		if err != nil {
-			log.Println("ERROR While sending peerID to peer:", err)
+			lerror(err).
+				Str("op", "resolve").
+				Str("target", reqAddress).
+				Msg("While sending peerID to peer")
 		}
 	}
 
 }
 
 func (dhtClient *DHTClient) registerAgentAddress() error {
-	log.Println("DEBUG opening stream aea-register to bootsrap peer ", dhtClient.relayPeer)
+	lerror, _, _, ldebug := dhtClient.getLoggers()
+
+	ldebug().
+		Str("op", "register").
+		Str("addr", dhtClient.myAgentAddress).
+		Msg("opening stream aea-register to relay peer...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, "/aea-register/0.1.0")
 	if err != nil {
-		log.Println("ERROR timeout, couldn't open stream to target",
-			dhtClient.relayPeer, ":", err)
+		lerror(err).
+			Str("op", "register").
+			Str("addr", dhtClient.myAgentAddress).
+			Msg("timeout, couldn't open stream to relay peer")
 		return err
 	}
 
-	log.Println("DEBUG sending addr and peerID to bootstrap peer",
-		dhtClient.myAgentAddress, dhtClient.routedHost.ID().Pretty())
+	ldebug().
+		Str("op", "register").
+		Str("addr", dhtClient.myAgentAddress).
+		Msgf("sending addr and peerID to relay peer")
 	err = utils.WriteBytes(stream, []byte(dhtClient.myAgentAddress))
 	if err != nil {
 		errReset := stream.Reset()
