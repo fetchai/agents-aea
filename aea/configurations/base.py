@@ -1154,8 +1154,6 @@ class SkillConfig(ComponentConfiguration):
                 "dependencies": self.dependencies,
             }
         )
-        if len(self.skills) == 0:
-            result.pop("skills")
         return result
 
     @classmethod
