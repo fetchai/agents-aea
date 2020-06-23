@@ -8,15 +8,20 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: Qmf8boGbjiGpQseDsWL3jLktTxC7Mkm7CVsGL1No5Zo5Qw
-  aea/dhtclient/dhtclient.go: QmW2Y9sf1rr9WByfJJMFnQsi3uwtjPJD2kuTBcsZqoqthn
-  aea/dhtpeer/dhtpeer.go: QmZDBxKfHszwrdxxX4Kobd6aTJNx8q8FkBz2dFJ1KEg3gC
-  aea/dhtpeer/dhtpeer_test.go: QmSRU6NwKgyiVtWkomML9rCbnD3GHmZKkGnfhRrUGnh75n
-  aea/dhtpeer/options.go: QmaKHkMzmMbokm9Li9fuBJ36ZGou6hFYMdSWwBcU72Vz61
+  aea/api.go: Qmf4gFDDxYKDgki7Spex86LDBv7o5knPUkLLc4x9ahs8ot
   connection.py: QmbPuwgAYed7JVptHXfybt6xVjLFqXdYsN3mqbHmnP1hh2
-  go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
-  go.sum: QmUS2gw2ogZVi4z6zVUpG3wtKLBC3edXjHsKCtPbmKzz9G
-  libp2p_node.go: Qmbr2GgVBLKyFuSx9TN2JeHK8yXZmtoVuaAMXShvWX3wjT
+  dht/dhtclient/dhtclient.go: QmWFduzGSvPZCvXxJdzHwxg6xDmMK8Uhc6uzB4A9XaBzay
+  dht/dhtclient/dhtclient_test.go: QmbZHW716CbzgYTnqPSQwZn3f4E89aa63fT2B3EZi2B1uk
+  dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
+  dht/dhtnode/dhtnode.go: QmP8vp7CERi6rq3CBLJRwy3Zw5cYUJH9nus5Am8EzoS1D4
+  dht/dhtpeer/dhtpeer.go: QmdXb2WM5osJhvsTY4ofFR35x6SsDCWcuugzNW8HfMe5ht
+  dht/dhtpeer/dhtpeer_test.go: QmW8xwWTNLpHtzzhi9NP1hmYnnMcGbuASN34NKC2qRN7EV
+  dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
+  dht/dhttests/dhttests.go: QmTuUCjHcK4ks8Rh77FD49h26pY61b4NiRWvsHAi32WuQm
+  go.mod: QmPSF8jdE9qjj9jE726zBDro19ASYGBebYpCV7JAMJNNzQ
+  go.sum: QmSaqaa5FRHxT7p5htzUpzxt34r93XrC5pXf9KFLJGoBKS
+  libp2p_node.go: Qmaa9b9v6BFE9UwAPAUcPHgUw8yDGhFyLzWXer3BhiXdkU
+  utils/utils.go: Qmc4QHJTHW8NHQwfwTuxUTrJU8HcLiBoPYUhr967TvxaPV
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PLibp2pConnection
