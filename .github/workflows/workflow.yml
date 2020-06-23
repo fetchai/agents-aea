@@ -207,5 +207,5 @@ jobs:
     - if: matrix.python-version == '3.6'
       name: Golang unit tests
       working-directory: ./packages/fetchai/connections/p2p_libp2p
-      run: go test -v ./...
+      run: go test -p 1 -count 2 -v ./...
         
