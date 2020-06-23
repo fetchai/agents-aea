@@ -18,6 +18,9 @@
 * ------------------------------------------------------------------------------
  */
 
+// Package dhtpeer provides implementation of an Agent Communication Network node
+// using libp2p. It participates in data storage and routing for the network.
+// It offers RelayService for dhtclient and DelegateService for tcp clients.
 package dhtpeer
 
 import (

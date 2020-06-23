@@ -18,6 +18,7 @@
 * ------------------------------------------------------------------------------
  */
 
+// Package dhttests offers utilities to facilitate tests of dhtpeer, dhtclient, and dhtnetwork packages
 package dhttests
 
 import (

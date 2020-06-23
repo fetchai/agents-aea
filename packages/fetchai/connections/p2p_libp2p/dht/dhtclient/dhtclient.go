@@ -18,6 +18,9 @@
 * ------------------------------------------------------------------------------
  */
 
+// Package dhtclient provides implementation of a lightweight Agent Communication Network
+// node. It doesn't particiapate in network maintenance. It doesn't require a public
+// address as well, as it relays on a DHTPeer to communicate with other peers
 package dhtclient
 
 import (

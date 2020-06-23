@@ -18,6 +18,7 @@
 * ------------------------------------------------------------------------------
  */
 
+// Package dhtnode (in progress) contains the common interface between dhtpeer and dhtclient
 package dhtnode
 
 /*

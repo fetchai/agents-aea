@@ -18,6 +18,8 @@
 * ------------------------------------------------------------------------------
  */
 
+// Package dhtnetwok (in progress) contains tests of fully-fledge deployment of the Agent Communication Network
+// It includes DHTPeers, DHTClients, and tcp delegate clients.
 package dhtnetwork
 
 /*
