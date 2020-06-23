@@ -751,6 +751,11 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             self.public_id.author, self.component_type.to_plural(), self.public_id.name
         )
 
+    @property
+    def is_abstract_component(self) -> bool:
+        """Check whether the component is abstract."""
+        return False
+
     @staticmethod
     def load(
         component_type: ComponentType,
@@ -1134,6 +1139,11 @@ class SkillConfig(ComponentConfiguration):
                 {ComponentId(ComponentType.SKILL, skill_id) for skill_id in self.skills}
             )
         )
+
+    @property
+    def is_abstract_component(self) -> bool:
+        """Check whether the component is abstract."""
+        return self.is_abstract
 
     @property
     def json(self) -> Dict:

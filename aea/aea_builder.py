@@ -1299,17 +1299,15 @@ class AEABuilder:
         ).values():
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
+                resources.add_component(component)
+            elif configuration.is_abstract_component:
+                load_aea_package(configuration)
             else:
-                if component_type == ComponentType.SKILL:
-                    is_skill_abstract = cast(SkillConfig, configuration).is_abstract
-                    if is_skill_abstract:
-                        load_aea_package(configuration)
-                        continue
                 configuration = deepcopy(configuration)
                 component = load_component_from_config(
                     component_type, configuration, **kwargs
                 )
-            resources.add_component(component)
+                resources.add_component(component)
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:
