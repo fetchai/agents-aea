@@ -1086,6 +1086,7 @@ class SkillConfig(ComponentConfiguration):
         contracts: List[PublicId] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        is_abstract: bool = False,
     ):
         """Initialize a skill configuration."""
         super().__init__(
@@ -1110,6 +1111,8 @@ class SkillConfig(ComponentConfiguration):
         self.behaviours = CRUDCollection[SkillComponentConfiguration]()
         self.models = CRUDCollection[SkillComponentConfiguration]()
 
+        self.is_abstract = is_abstract
+
     @property
     def component_type(self) -> ComponentType:
         """Get the component type."""
@@ -1126,7 +1129,7 @@ class SkillConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -1142,8 +1145,12 @@ class SkillConfig(ComponentConfiguration):
                 "handlers": {key: h.json for key, h in self.handlers.read_all()},
                 "models": {key: m.json for key, m in self.models.read_all()},
                 "dependencies": self.dependencies,
+                "is_abstract": self.is_abstract,
             }
         )
+        if result["is_abstract"] is False:
+            result.pop("is_abstract")
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -1179,6 +1186,7 @@ class SkillConfig(ComponentConfiguration):
             contracts=contracts,
             dependencies=dependencies,
             description=description,
+            is_abstract=obj.get("is_abstract", False),
         )
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
