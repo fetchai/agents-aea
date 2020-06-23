@@ -17,4 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the dialogue helper module."""
+"""This module contains the tests for the ipfs helper module."""
+
+import os
+
+from aea.helpers.ipfs.base import IPFSHashOnly
+
+from ...conftest import CUR_PATH
+
+FILE_PATH = "__init__.py"
+
+
+def test_get_hash():
+    """Test get hash IPFSHashOnly."""
+    ipfs_hash = IPFSHashOnly().get(file_path=os.path.join(CUR_PATH, FILE_PATH))
+    assert ipfs_hash == "QmWeMu9JFPUcYdz4rwnWiJuQ6QForNFRsjBiN5PtmkEg4A"

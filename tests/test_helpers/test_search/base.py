@@ -17,4 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the dialogue helper module."""
+"""This module contains the tests for the search helper module."""
+
+from aea.helpers.search.models import Location
+
+
+def test_location_init():
+    """Test the initialization of the location model"""
+    latitude = 51.507351
+    longitude = -0.127758
+    loc = Location(latitude, longitude)
+    latitude_2 = 48.856613
+    longitude_2 = 2.352222
+    loc2 = Location(latitude_2, longitude_2)
+    assert loc != loc2, "Locations should not be the same."
+    assert loc.distance(loc2) > 0.0, "Locations should be positive."

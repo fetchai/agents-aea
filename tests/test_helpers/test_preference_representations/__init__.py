@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the dialogue helper module."""
+"""This module contains the tests for the preference representations helper module."""

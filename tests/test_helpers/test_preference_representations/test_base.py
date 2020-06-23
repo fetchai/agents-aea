@@ -17,4 +17,31 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the dialogue helper module."""
+"""This module contains the tests for the preference representations helper module."""
+
+from aea.helpers.preference_representations.base import (
+    linear_utility,
+    logarithmic_utility,
+)
+
+
+def test_logarithmic_utility():
+    """Test logarithmic utlity."""
+    assert (
+        logarithmic_utility(
+            utility_params_by_good_id={"good_1": 0.2, "good_2": 0.8},
+            quantities_by_good_id={"good_1": 2, "good_2": 1},
+        )
+        > 0
+    ), "Utility should be positive."
+
+
+def test_linear_utility():
+    """Test logarithmic utlity."""
+    assert (
+        linear_utility(
+            exchange_params_by_currency_id={"cur_1": 0.2, "cur_2": 0.8},
+            balance_by_currency_id={"cur_1": 20, "cur_2": 100},
+        )
+        > 0
+    ), "Utility should be positive."
