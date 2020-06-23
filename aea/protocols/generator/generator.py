@@ -26,12 +26,11 @@ import re
 from datetime import date
 from os import path
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Optional, Tuple
 
-from aea.configurations.base import (
-    ProtocolSpecification,
-    ProtocolSpecificationParseError,
-)
+from aea.configurations.base import ProtocolSpecification
+from aea.protocols.generator.common import _get_sub_types_of_compositional_types
+from aea.protocols.generator.extract_specification import extract
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
@@ -44,27 +43,6 @@ DIALOGUE_DOT_PY_FILE_NAME = "dialogues.py"
 CUSTOM_TYPES_DOT_PY_FILE_NAME = "custom_types.py"
 SERIALIZATION_DOT_PY_FILE_NAME = "serialization.py"
 
-CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
-SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
-PYTHON_PRIMITIVE_TYPES = [
-    "bytes",
-    "int",
-    "float",
-    "bool",
-    "str",
-    "FrozenSet",
-    "Tuple",
-    "Dict",
-    "Union",
-    "Optional",
-]
-BASIC_FIELDS_AND_TYPES = {
-    "name": str,
-    "author": str,
-    "version": str,
-    "license": str,
-    "description": str,
-}
 PYTHON_TYPE_TO_PROTO_TYPE = {
     "bytes": "bytes",
     "int": "int32",
@@ -72,7 +50,6 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
     "bool": "bool",
     "str": "string",
 }
-RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "performative"}
 
 logger = logging.getLogger(__name__)
 
@@ -129,237 +106,6 @@ def _camel_case_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
-def _is_composition_type_with_custom_type(content_type: str) -> bool:
-    """
-    Evaluate whether the content_type is a composition type (FrozenSet, Tuple, Dict) and contains a custom type as a sub-type.
-
-    :param: the content type
-    :return: Boolean result
-    """
-    if content_type.startswith("Optional"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        result = _is_composition_type_with_custom_type(sub_type)
-    elif content_type.startswith("Union"):
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-        result = False
-        for sub_type in sub_types:
-            if _is_composition_type_with_custom_type(sub_type):
-                result = True
-                break
-    elif content_type.startswith("Dict"):
-        sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
-        sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
-
-        result = (sub_type_1 not in PYTHON_TYPE_TO_PROTO_TYPE.keys()) or (
-            sub_type_2 not in PYTHON_TYPE_TO_PROTO_TYPE.keys()
-        )
-    elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        result = sub_type not in PYTHON_TYPE_TO_PROTO_TYPE.keys()
-    else:
-        result = False
-    return result
-
-
-def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
-    """
-    Extract the sub-types of compositional types.
-
-    This method handles both specification types (e.g. pt:set[], pt:dict[]) as well as python types (e.g. FrozenSet[], Union[]).
-
-    :param compositional_type: the compositional type string whose sub-types are to be extracted.
-    :return: tuple containing all extracted sub-types.
-    """
-    sub_types_list = list()
-    if compositional_type.startswith("Optional") or compositional_type.startswith(
-        "pt:optional"
-    ):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_types_list.append(sub_type1)
-    if (
-        compositional_type.startswith("FrozenSet")
-        or compositional_type.startswith("pt:set")
-        or compositional_type.startswith("pt:list")
-    ):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_types_list.append(sub_type1)
-    if compositional_type.startswith("Tuple"):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_type1 = sub_type1[:-5]
-        sub_types_list.append(sub_type1)
-    if compositional_type.startswith("Dict") or compositional_type.startswith(
-        "pt:dict"
-    ):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.index(",")
-        ].strip()
-        sub_type2 = compositional_type[
-            compositional_type.index(",") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_types_list.extend([sub_type1, sub_type2])
-    if compositional_type.startswith("Union") or compositional_type.startswith(
-        "pt:union"
-    ):
-        inside_union = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        while inside_union != "":
-            if inside_union.startswith("Dict") or inside_union.startswith("pt:dict"):
-                sub_type = inside_union[: inside_union.index("]") + 1].strip()
-                rest_of_inside_union = inside_union[
-                    inside_union.index("]") + 1 :
-                ].strip()
-                if rest_of_inside_union.find(",") == -1:
-                    # it is the last sub-type
-                    inside_union = rest_of_inside_union.strip()
-                else:
-                    # it is not the last sub-type
-                    inside_union = rest_of_inside_union[
-                        rest_of_inside_union.index(",") + 1 :
-                    ].strip()
-            elif inside_union.startswith("Tuple"):
-                sub_type = inside_union[: inside_union.index("]") + 1].strip()
-                rest_of_inside_union = inside_union[
-                    inside_union.index("]") + 1 :
-                ].strip()
-                if rest_of_inside_union.find(",") == -1:
-                    # it is the last sub-type
-                    inside_union = rest_of_inside_union.strip()
-                else:
-                    # it is not the last sub-type
-                    inside_union = rest_of_inside_union[
-                        rest_of_inside_union.index(",") + 1 :
-                    ].strip()
-            else:
-                if inside_union.find(",") == -1:
-                    # it is the last sub-type
-                    sub_type = inside_union.strip()
-                    inside_union = ""
-                else:
-                    # it is not the last sub-type
-                    sub_type = inside_union[: inside_union.index(",")].strip()
-                    inside_union = inside_union[inside_union.index(",") + 1 :].strip()
-            sub_types_list.append(sub_type)
-    return tuple(sub_types_list)
-
-
-def _ct_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a custom specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    python_type = specification_type[3:]
-    return python_type
-
-
-def _pt_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a primitive specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    python_type = specification_type[3:]
-    return python_type
-
-
-def _pct_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a primitive collection specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    element_type = _get_sub_types_of_compositional_types(specification_type)[0]
-    element_type_in_python = _specification_type_to_python_type(element_type)
-    if specification_type.startswith("pt:set"):
-        python_type = "FrozenSet[{}]".format(element_type_in_python)
-    else:
-        python_type = "Tuple[{}, ...]".format(element_type_in_python)
-    return python_type
-
-
-def _pmt_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a primitive mapping specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    element_types = _get_sub_types_of_compositional_types(specification_type)
-    element1_type_in_python = _specification_type_to_python_type(element_types[0])
-    element2_type_in_python = _specification_type_to_python_type(element_types[1])
-    python_type = "Dict[{}, {}]".format(
-        element1_type_in_python, element2_type_in_python
-    )
-    return python_type
-
-
-def _mt_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a 'pt:union' specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    sub_types = _get_sub_types_of_compositional_types(specification_type)
-    python_type = "Union["
-    for sub_type in sub_types:
-        python_type += "{}, ".format(_specification_type_to_python_type(sub_type))
-    python_type = python_type[:-2]
-    python_type += "]"
-    return python_type
-
-
-def _optional_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a 'pt:optional' specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    element_type = _get_sub_types_of_compositional_types(specification_type)[0]
-    element_type_in_python = _specification_type_to_python_type(element_type)
-    python_type = "Optional[{}]".format(element_type_in_python)
-    return python_type
-
-
-def _specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a data type in protocol specification into its Python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    if specification_type.startswith("pt:optional"):
-        python_type = _optional_specification_type_to_python_type(specification_type)
-    elif specification_type.startswith("pt:union"):
-        python_type = _mt_specification_type_to_python_type(specification_type)
-    elif specification_type.startswith("ct:"):
-        python_type = _ct_specification_type_to_python_type(specification_type)
-    elif specification_type in SPECIFICATION_PRIMITIVE_TYPES:
-        python_type = _pt_specification_type_to_python_type(specification_type)
-    elif specification_type.startswith("pt:set"):
-        python_type = _pct_specification_type_to_python_type(specification_type)
-    elif specification_type.startswith("pt:list"):
-        python_type = _pct_specification_type_to_python_type(specification_type)
-    elif specification_type.startswith("pt:dict"):
-        python_type = _pmt_specification_type_to_python_type(specification_type)
-    else:
-        raise ProtocolSpecificationParseError(
-            "Unsupported type: '{}'".format(specification_type)
-        )
-    return python_type
-
-
 def _union_sub_type_to_protobuf_variable_name(
     content_name: str, content_type: str
 ) -> str:
@@ -400,10 +146,6 @@ def _python_pt_or_ct_type_to_proto_type(content_type: str) -> str:
     else:
         proto_type = content_type
     return proto_type
-
-
-def _is_valid_content_name(content_name: str) -> bool:
-    return content_name not in RESERVED_NAMES
 
 
 def _includes_custom_type(content_type: str) -> bool:
@@ -466,146 +208,12 @@ class ProtocolGenerator:
             )
         )
 
-        self._imports = {
-            "Set": True,
-            "Tuple": True,
-            "cast": True,
-            "FrozenSet": False,
-            "Dict": False,
-            "Union": False,
-            "Optional": False,
-        }
-
-        self._speech_acts = dict()  # type: Dict[str, Dict[str, str]]
-        self._all_performatives = list()  # type: List[str]
-        self._all_unique_contents = dict()  # type: Dict[str, str]
-        self._all_custom_types = list()  # type: List[str]
-        self._custom_custom_types = dict()  # type: Dict[str, str]
-
-        # dialogue config
-        self._initial_performatives = list()  # type: List[str]
-        self._reply = dict()  # type: Dict[str, List[str]]
-        self._terminal_performatives = list()  # type: List[str]
-        self._roles = list()  # type: List[str]
-        self._end_states = list()  # type: List[str]
-
         self.indent = ""
 
         try:
-            self._setup()
+            self.spec = extract(protocol_specification)
         except Exception:
             raise
-
-    def _setup(self) -> None:
-        """
-        Extract all relevant data structures from the specification.
-
-        :return: None
-        """
-        all_performatives_set = set()
-        all_custom_types_set = set()
-
-        for (
-            performative,
-            speech_act_content_config,
-        ) in self.protocol_specification.speech_acts.read_all():
-            all_performatives_set.add(performative)
-            self._speech_acts[performative] = {}
-            for content_name, content_type in speech_act_content_config.args.items():
-                # check content's name is valid
-                if not _is_valid_content_name(content_name):
-                    raise ProtocolSpecificationParseError(
-                        "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-                            content_name, performative,
-                        )
-                    )
-
-                # determine necessary imports from typing
-                if len(re.findall("pt:set\\[", content_type)) >= 1:
-                    self._imports["FrozenSet"] = True
-                if len(re.findall("pt:dict\\[", content_type)) >= 1:
-                    self._imports["Dict"] = True
-                if len(re.findall("pt:union\\[", content_type)) >= 1:
-                    self._imports["Union"] = True
-                if len(re.findall("pt:optional\\[", content_type)) >= 1:
-                    self._imports["Optional"] = True
-
-                # specification type --> python type
-                pythonic_content_type = _specification_type_to_python_type(content_type)
-
-                # check composition type does not include custom type
-                if _is_composition_type_with_custom_type(pythonic_content_type):
-                    raise ProtocolSpecificationParseError(
-                        "Invalid type for content '{}' of performative '{}'. A custom type cannot be used in the following composition types: [pt:set, pt:list, pt:dict].".format(
-                            content_name, performative,
-                        )
-                    )
-
-                self._all_unique_contents[content_name] = pythonic_content_type
-                self._speech_acts[performative][content_name] = pythonic_content_type
-                if content_type.startswith("ct:"):
-                    all_custom_types_set.add(pythonic_content_type)
-
-        # sort the sets
-        self._all_performatives = sorted(all_performatives_set)
-        self._all_custom_types = sorted(all_custom_types_set)
-
-        # "XXX" custom type --> "CustomXXX"
-        self._custom_custom_types = {
-            pure_custom_type: "Custom" + pure_custom_type
-            for pure_custom_type in self._all_custom_types
-        }
-
-        # Dialogue attributes
-        if (
-            self.protocol_specification.dialogue_config != {}
-            and self.protocol_specification.dialogue_config is not None
-        ):
-            self._initial_performatives = [
-                initial_performative.upper()
-                for initial_performative in cast(
-                    List[str], self.protocol_specification.dialogue_config["initiation"]
-                )
-            ]
-            self._reply = cast(
-                Dict[str, List[str]],
-                self.protocol_specification.dialogue_config["reply"],
-            )
-            self._terminal_performatives = [
-                terminal_performative.upper()
-                for terminal_performative in cast(
-                    List[str],
-                    self.protocol_specification.dialogue_config["termination"],
-                )
-            ]
-            roles_set = cast(
-                Dict[str, None], self.protocol_specification.dialogue_config["roles"]
-            )
-            self._roles = sorted(roles_set, reverse=True)
-            self._end_states = cast(
-                List[str], self.protocol_specification.dialogue_config["end_states"]
-            )
-
-            # # infer initial performative
-            # set_of_all_performatives = set(self._reply.keys())
-            # set_of_all_replies = set()
-            # for _, list_of_replies in self._reply.items():
-            #     set_of_replies = set(list_of_replies)
-            #     set_of_all_replies.update(set_of_replies)
-            # initial_performative_set = set_of_all_performatives.difference(
-            #     set_of_all_replies
-            # )
-            # initial_performative_list = list(initial_performative_set)
-            # if len(initial_performative_list) != 1:
-            #     raise ProtocolSpecificationParseError(
-            #         "Invalid reply structure. There must be a single speech-act which is not a valid reply to any other speech-acts so it can be designated as the inital speech-act. Found {} of such speech-acts in the specification".format(
-            #             len(initial_performative_list),
-            #         )
-            #     )
-            # else:
-            #     initial_performative = initial_performative_list[0].upper()
-
-            # self._initial_performative = initial_performative
 
     def _change_indent(self, number: int, mode: str = None) -> None:
         """
@@ -655,7 +263,7 @@ class ProtocolGenerator:
         ]
         import_str = "from typing import "
         for package in ordered_packages:
-            if self._imports[package]:
+            if self.spec.typing_imports[package]:
                 import_str += "{}, ".format(package)
         import_str = import_str[:-2]
         return import_str
@@ -667,10 +275,10 @@ class ProtocolGenerator:
         :return: import statement for the custom_types module
         """
         import_str = ""
-        if len(self._all_custom_types) == 0:
+        if len(self.spec.all_custom_types) == 0:
             pass
         else:
-            for custom_class in self._all_custom_types:
+            for custom_class in self.spec.all_custom_types:
                 import_str += "from {}.custom_types import {} as Custom{}\n".format(
                     self.path_to_protocol_package, custom_class, custom_class,
                 )
@@ -684,7 +292,7 @@ class ProtocolGenerator:
         :return: the performatives set string
         """
         performatives_str = "{"
-        for performative in self._all_performatives:
+        for performative in self.spec.all_performatives:
             performatives_str += '"{}", '.format(performative)
         performatives_str = performatives_str[:-2]
         performatives_str += "}"
@@ -701,7 +309,7 @@ class ProtocolGenerator:
         enum_str += self.indent + '"""Performatives for the {} protocol."""\n\n'.format(
             self.protocol_specification.name
         )
-        for performative in self._all_performatives:
+        for performative in self.spec.all_performatives:
             enum_str += self.indent + '{} = "{}"\n'.format(
                 performative.upper(), performative
             )
@@ -1078,7 +686,7 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.version,
         )
-        for custom_type in self._all_custom_types:
+        for custom_type in self.spec.all_custom_types:
             cls_str += "\n"
             cls_str += self.indent + "{} = Custom{}\n".format(custom_type, custom_type)
 
@@ -1180,8 +788,8 @@ class ProtocolGenerator:
         cls_str += self.indent + 'return cast(int, self.get("target"))\n\n'
         self._change_indent(-1)
 
-        for content_name in sorted(self._all_unique_contents.keys()):
-            content_type = self._all_unique_contents[content_name]
+        for content_name in sorted(self.spec.all_unique_contents.keys()):
+            content_type = self.spec.all_unique_contents[content_name]
             cls_str += self.indent + "@property\n"
             cls_str += self.indent + "def {}(self) -> {}:\n".format(
                 content_name, self._to_custom_custom(content_type)
@@ -1262,7 +870,7 @@ class ProtocolGenerator:
         )
         cls_str += self.indent + "expected_nb_of_contents = 0\n"
         counter = 1
-        for performative, contents in self._speech_acts.items():
+        for performative, contents in self.spec.speech_acts.items():
             if counter == 1:
                 cls_str += self.indent + "if "
             else:
@@ -1325,18 +933,18 @@ class ProtocolGenerator:
         """
         valid_replies_str = self.indent + "VALID_REPLIES = {\n"
         self._change_indent(1)
-        for performative in sorted(self._reply.keys()):
+        for performative in sorted(self.spec.reply.keys()):
             valid_replies_str += (
                 self.indent
                 + "{}Message.Performative.{}: frozenset(".format(
                     self.protocol_specification_in_camel_case, performative.upper()
                 )
             )
-            if len(self._reply[performative]) > 0:
+            if len(self.spec.reply[performative]) > 0:
                 valid_replies_str += "\n"
                 self._change_indent(1)
                 valid_replies_str += self.indent + "{"
-                for reply in self._reply[performative]:
+                for reply in self.spec.reply[performative]:
                     valid_replies_str += "{}Message.Performative.{}, ".format(
                         self.protocol_specification_in_camel_case, reply.upper()
                     )
@@ -1364,7 +972,7 @@ class ProtocolGenerator:
             )
         )
         tag = 0
-        for end_state in self._end_states:
+        for end_state in self.spec.end_states:
             enum_str += self.indent + "{} = {}\n".format(end_state.upper(), tag)
             tag += 1
         self._change_indent(-1)
@@ -1384,7 +992,7 @@ class ProtocolGenerator:
                 self.protocol_specification.name
             )
         )
-        for role in self._roles:
+        for role in self.spec.roles:
             enum_str += self.indent + '{} = "{}"\n'.format(role.upper(), role)
         self._change_indent(-1)
         return enum_str
@@ -1455,7 +1063,7 @@ class ProtocolGenerator:
                 "{}Message.Performative.{}".format(
                     self.protocol_specification_in_camel_case, initial_performative
                 )
-                for initial_performative in self._initial_performatives
+                for initial_performative in self.spec.initial_performatives
             ]
         )
         terminal_performatives_str = ", ".join(
@@ -1463,7 +1071,7 @@ class ProtocolGenerator:
                 "{}Message.Performative.{}".format(
                     self.protocol_specification_in_camel_case, terminal_performative
                 )
-                for terminal_performative in self._terminal_performatives
+                for terminal_performative in self.spec.terminal_performatives
             ]
         )
         cls_str += (
@@ -1576,7 +1184,7 @@ class ProtocolGenerator:
                 "{}Dialogue.EndState.{}".format(
                     self.protocol_specification_in_camel_case, end_state.upper()
                 )
-                for end_state in self._end_states
+                for end_state in self.spec.end_states
             ]
         )
         cls_str += self.indent + "END_STATES = frozenset(\n"
@@ -1647,11 +1255,11 @@ class ProtocolGenerator:
         # Module docstring
         cls_str += '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n'
 
-        if len(self._all_custom_types) == 0:
+        if len(self.spec.all_custom_types) == 0:
             return cls_str
 
         # class code per custom type
-        for custom_type in self._all_custom_types:
+        for custom_type in self.spec.all_custom_types:
             cls_str += self.indent + "\n\nclass {}:\n".format(custom_type)
             self._change_indent(1)
             cls_str += (
@@ -1833,7 +1441,6 @@ class ProtocolGenerator:
         :param performative: the performative to which the content belongs
         :param content_name: the name of the content to be decoded
         :param content_type: the type of the content to be decoded
-        :param no_indents: the number of indents based on the previous sections of the code
         :return: the decoding string
         """
         decoding_str = ""
@@ -1956,9 +1563,9 @@ class ProtocolGenerator:
         """
         new_content_type = content_type
         if _includes_custom_type(content_type):
-            for custom_type in self._all_custom_types:
+            for custom_type in self.spec.all_custom_types:
                 new_content_type = new_content_type.replace(
-                    custom_type, self._custom_custom_types[custom_type]
+                    custom_type, self.spec.custom_custom_types[custom_type]
                 )
         return new_content_type
 
@@ -1988,7 +1595,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "from {} import (\n    {}_pb2,\n)\n".format(
             self.path_to_protocol_package, self.protocol_specification.name,
         )
-        for custom_type in self._all_custom_types:
+        for custom_type in self.spec.all_custom_types:
             cls_str += (
                 self.indent
                 + "from {}.custom_types import (\n    {},\n)\n".format(
@@ -2051,7 +1658,7 @@ class ProtocolGenerator:
         )
         cls_str += self.indent + "performative_id = msg.performative\n"
         counter = 1
-        for performative, contents in self._speech_acts.items():
+        for performative, contents in self.spec.speech_acts.items():
             if counter == 1:
                 cls_str += self.indent + "if "
             else:
@@ -2143,7 +1750,7 @@ class ProtocolGenerator:
             self.indent + "performative_content = dict()  # type: Dict[str, Any]\n"
         )
         counter = 1
-        for performative, contents in self._speech_acts.items():
+        for performative, contents in self.spec.speech_acts.items():
             if counter == 1:
                 cls_str += self.indent + "if "
             else:
@@ -2261,12 +1868,12 @@ class ProtocolGenerator:
 
         # custom types
         if (
-            (len(self._all_custom_types) != 0)
+            (len(self.spec.all_custom_types) != 0)
             and (self.protocol_specification.protobuf_snippets is not None)
             and (self.protocol_specification.protobuf_snippets != "")
         ):
             proto_buff_schema_str += self.indent + "// Custom Types\n"
-            for custom_type in self._all_custom_types:
+            for custom_type in self.spec.all_custom_types:
                 proto_buff_schema_str += self.indent + "message {}{{\n".format(
                     custom_type
                 )
@@ -2292,7 +1899,7 @@ class ProtocolGenerator:
 
         # performatives
         proto_buff_schema_str += self.indent + "// Performatives and contents\n"
-        for performative, contents in self._speech_acts.items():
+        for performative, contents in self.spec.speech_acts.items():
             proto_buff_schema_str += self.indent + "message {}_Performative{{".format(
                 performative.title()
             )
@@ -2331,7 +1938,7 @@ class ProtocolGenerator:
         proto_buff_schema_str += self.indent + "oneof performative{\n"
         self._change_indent(1)
         tag_no = 5
-        for performative in self._all_performatives:
+        for performative in self.spec.all_performatives:
             proto_buff_schema_str += self.indent + "{}_Performative {} = {};\n".format(
                 performative.title(), performative, tag_no
             )
@@ -2405,10 +2012,17 @@ class ProtocolGenerator:
         with open(pathname, "w") as file:
             file.write(file_content)
 
-    def generate(self) -> None:
+    def generate(self, protobuf_only: bool = False) -> None:
         """
-        Create the protocol package with Message, Serialization, __init__, protocol.yaml files.
+        Run the generator. If in "full" mode (protobuf_only is False), it:
+        a) validates the protocol specification.
+        b) creates the protocol buffer schema file.
+        c) generates python modules.
+        d) applies black formatting
 
+        If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
+
+        :param protobuf_only: mode of running the generator.
         :return: None
         """
         # Create the output folder
@@ -2416,39 +2030,43 @@ class ProtocolGenerator:
         if not output_folder.exists():
             os.mkdir(output_folder)
 
-        # Generate the protocol files
-        self._generate_file(INIT_FILE_NAME, self._init_str())
-        self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
-        self._generate_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
-        if (
-            self.protocol_specification.dialogue_config is not None
-            and self.protocol_specification.dialogue_config != {}
-        ):
-            self._generate_file(DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str())
-        if len(self._all_custom_types) > 0:
-            self._generate_file(
-                CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
-            )
-        self._generate_file(
-            SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
-        )
         self._generate_file(
             "{}.proto".format(self.protocol_specification.name),
             self._protocol_buffer_schema_str(),
         )
 
-        # Warn if specification has custom types
-        if len(self._all_custom_types) > 0:
-            incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
-                self._all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
+        if not protobuf_only:
+            # Generate Python files
+            self._generate_file(INIT_FILE_NAME, self._init_str())
+            self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
+            self._generate_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
+            if (
+                self.protocol_specification.dialogue_config is not None
+                and self.protocol_specification.dialogue_config != {}
+            ):
+                self._generate_file(
+                    DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str()
+                )
+            if len(self.spec.all_custom_types) > 0:
+                self._generate_file(
+                    CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
+                )
+            self._generate_file(
+                SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
             )
-            logger.warning(incomplete_generation_warning_msg)
 
-        # Compile protobuf schema
-        cmd = "protoc -I={} --python_out={} {}/{}.proto".format(
-            self.output_folder_path,
-            self.output_folder_path,
-            self.output_folder_path,
-            self.protocol_specification.name,
-        )
-        os.system(cmd)  # nosec
+            # Warn if specification has custom types
+            if len(self.spec.all_custom_types) > 0:
+                incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
+                    self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
+                )
+                logger.warning(incomplete_generation_warning_msg)
+
+            # Compile protobuf schema
+            cmd = "protoc -I={} --python_out={} {}/{}.proto".format(
+                self.output_folder_path,
+                self.output_folder_path,
+                self.output_folder_path,
+                self.protocol_specification.name,
+            )
+            os.system(cmd)  # nosec
