@@ -26,10 +26,9 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"net"
+	"os"
 	"sync"
 
 	"github.com/ipfs/go-cid"
@@ -38,6 +37,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
 	"github.com/multiformats/go-multihash"
+	"github.com/rs/zerolog"
 
 	host "github.com/libp2p/go-libp2p-core/host"
 	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
@@ -47,6 +47,10 @@ import (
 
 	"libp2p_node/aea"
 )
+
+var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
+	With().Timestamp().
+	Logger()
 
 /*
 	Helpers
@@ -71,19 +75,19 @@ func BootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) 
 		wg.Add(1)
 		go func(p peer.AddrInfo) {
 			defer wg.Done()
-			defer log.Println(ctx, "bootstrapDial", ph.ID(), p.ID)
-			log.Printf("%s bootstrapping to %s", ph.ID(), p.ID)
+			defer logger.Debug().Msgf("%s bootstrapDial %s %s", ctx, ph.ID(), p.ID)
+			logger.Debug().Msgf("%s bootstrapping to %s", ph.ID(), p.ID)
 
 			ph.Peerstore().AddAddrs(p.ID, p.Addrs, peerstore.PermanentAddrTTL)
 			if err := ph.Connect(ctx, p); err != nil {
-				log.Println(ctx, "bootstrapDialFailed", p.ID)
-				log.Printf("failed to bootstrap with %v: %s", p.ID, err)
+				logger.Error().
+					Str("err", err.Error()).
+					Msgf("failed to bootstrap with %v", p.ID)
 				errs <- err
 				return
 			}
 
-			log.Println(ctx, "bootstrapDialSuccess", p.ID)
-			log.Printf("bootstrapped with %v", p.ID)
+			logger.Debug().Msgf("bootstrapped with %v", p.ID)
 		}(p)
 	}
 	wg.Wait()
@@ -99,7 +103,7 @@ func BootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) 
 		}
 	}
 	if count == len(peers) {
-		return fmt.Errorf("failed to bootstrap. %s", err)
+		return errors.New("failed to bootstrap: " + err.Error())
 	}
 	return nil
 }
@@ -234,12 +238,14 @@ func ReadBytes(s network.Stream) ([]byte, error) {
 	buf := make([]byte, 4)
 	_, err := io.ReadFull(rstream, buf)
 	if err != nil {
-		log.Println("ERROR while receiving size:", err)
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("while receiving size")
 		return buf, err
 	}
 
 	size := binary.BigEndian.Uint32(buf)
-	log.Println("DEBUG expecting", size)
+	logger.Debug().Msgf("expecting %d", size)
 
 	buf = make([]byte, size)
 	_, err = io.ReadFull(rstream, buf)
@@ -257,11 +263,13 @@ func WriteBytes(s network.Stream, data []byte) error {
 
 	_, err := wstream.Write(buf)
 	if err != nil {
-		log.Println("ERROR while sending size:", err)
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("while sending size")
 		return err
 	}
 
-	log.Println("DEBUG writing", len(data))
+	logger.Debug().Msgf("writing %d", len(data))
 	_, err = wstream.Write(data)
 	wstream.Flush()
 	return err
@@ -309,16 +317,20 @@ func ReadEnvelope(s network.Stream) (*aea.Envelope, error) {
 	_, err := io.ReadFull(rstream, buf)
 
 	if err != nil {
-		log.Println("ERROR while reading size")
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("while reading size")
 		return envel, err
 	}
 
 	size := binary.BigEndian.Uint32(buf)
-	fmt.Println("DEBUG received size:", size, buf)
+	logger.Debug().Msgf("received size: %d %x", size, buf)
 	buf = make([]byte, size)
 	_, err = io.ReadFull(rstream, buf)
 	if err != nil {
-		log.Println("ERROR while reading data")
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("while reading data")
 		return envel, err
 	}
 
