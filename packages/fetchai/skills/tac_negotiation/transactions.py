@@ -27,7 +27,6 @@ from typing import Deque, Dict, Tuple
 from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
 from aea.decision_maker.messages.transaction import (
-    OFF_CHAIN,
     TransactionId,
     TransactionMessage,
 )
@@ -166,7 +165,7 @@ class Transactions(Model):
             tx_sender_fee=sender_tx_fee,
             tx_counterparty_fee=counterparty_tx_fee,
             tx_quantities_by_good_id=goods_component,
-            ledger_id=OFF_CHAIN,
+            ledger_id="ethereum",
             info={"dialogue_label": dialogue_label.json, "tx_nonce": tx_nonce},
             signing_payload={"tx_hash": tx_hash},
         )

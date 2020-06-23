@@ -63,7 +63,7 @@ def get_aea_extras() -> Dict[str, List[str]]:
 
 def get_all_extras() -> Dict:
 
-    fetch_ledger_deps = ["fetchai-ledger-api==1.0.3"]
+    fetch_ledger_deps = ["fetchai-ledger-api==1.1.0"]
 
     ethereum_ledger_deps = ["web3==5.2.2", "eth-account==0.4.0"]
 

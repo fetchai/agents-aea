@@ -14,6 +14,8 @@ In short, "software that generates economic value for you".
 
 AEAs act independently of constant user input and autonomously execute actions to achieve their goal. Their goal is to create economic value for you, their owner. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="car-park-skills">demo guides</a> for some examples.
 
+Autonomous Economic Agents are digital entities that run complex dynamic decision-making algorithms for application owners and clients.
+
 AEAs are not:
 
 * just any agents: AEAs have an express purpose to generate economic value.
