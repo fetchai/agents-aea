@@ -237,8 +237,7 @@ func TestRoutingTwoDHTPeersIndirect(t *testing.T) {
 	expectEnvelope(t, rxPeer2)
 }
 
-/*
-func SkipTestRoutingStarFullConnectivity(t *testing.T) {
+func TestRoutingStarFullConnectivity(t *testing.T) {
 	peers := []*DHTPeer{}
 	rxs := []chan aea.Envelope{}
 
@@ -277,6 +276,7 @@ func SkipTestRoutingStarFullConnectivity(t *testing.T) {
 		defer cleanup()
 	}
 
+	time.Sleep(1 * time.Second)
 	for i := range peers {
 		for j := range peers {
 			if i == j {
@@ -298,4 +298,3 @@ func SkipTestRoutingStarFullConnectivity(t *testing.T) {
 		}
 	}
 }
-*/
