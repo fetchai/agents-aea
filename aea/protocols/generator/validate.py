@@ -16,7 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module enables the validation of a protocol specification."""
+"""This module validates a protocol specification."""
+
 # pylint: skip-file
 
 from typing import Tuple
@@ -34,7 +35,7 @@ def _is_composition_type_with_custom_type(content_type: str) -> bool:
     """
     Evaluate whether the content_type is a composition type (FrozenSet, Tuple, Dict) and contains a custom type as a sub-type.
 
-    :param: the content type
+    :param content_type: the content type
     :return: Boolean result
     """
     if content_type.startswith("pt:optional"):
@@ -63,6 +64,12 @@ def _is_composition_type_with_custom_type(content_type: str) -> bool:
 
 
 def _is_valid_content_name(content_name: str) -> bool:
+    """
+    Evaluate whether a content name is a reserved name or not.
+
+    :param content_name: a content name
+    :return: Boolean result
+    """
     return content_name not in RESERVED_NAMES
 
 
@@ -70,6 +77,12 @@ def _is_valid_content_name(content_name: str) -> bool:
 
 
 def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]:
+    """
+    Evaluate whether a protocol specification is valid or not.
+
+    :param protocol_specification: a protocol specification
+    :return: Boolean result
+    """
     for (
         performative,
         speech_act_content_config,

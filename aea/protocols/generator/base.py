@@ -114,6 +114,7 @@ def _union_sub_type_to_protobuf_variable_name(
 
     :param content_name: the name of the content
     :param content_type: the sub-type of a union type
+
     :return: The variable name
     """
     if content_type.startswith("FrozenSet"):
@@ -191,6 +192,8 @@ class ProtocolGenerator:
 
         :param protocol_specification: the protocol specification object
         :param output_path: the path to the location in which the protocol module is to be generated.
+        :param path_to_protocol_package: the path to the protocol package
+
         :return: None
         """
         self.protocol_specification = protocol_specification
@@ -227,6 +230,7 @@ class ProtocolGenerator:
 
         :param number: the number of indentation levels to set/increment/decrement
         :param mode: the mode of indentation change
+
         :return: None
         """
         if mode and mode == "s":
@@ -345,6 +349,7 @@ class ProtocolGenerator:
 
         :param content_name: the name of the content to be checked
         :param content_type: the type of the content to be checked
+
         :return: the string containing the checks.
         """
         check_str = ""
@@ -940,7 +945,7 @@ class ProtocolGenerator:
 
         return cls_str
 
-    def _valid_replies_str(self):
+    def _valid_replies_str(self) -> str:
         """
         Generate the `valid replies` dictionary.
 
@@ -1378,6 +1383,7 @@ class ProtocolGenerator:
 
         :param content_name: the name of the content to be encoded
         :param content_type: the type of the content to be encoded
+
         :return: the encoding string
         """
         encoding_str = ""
@@ -1456,6 +1462,8 @@ class ProtocolGenerator:
         :param performative: the performative to which the content belongs
         :param content_name: the name of the content to be decoded
         :param content_type: the type of the content to be decoded
+        :param variable_name_in_protobuf: the name of the variable in the protobuf schema
+
         :return: the decoding string
         """
         decoding_str = ""
@@ -1799,8 +1807,9 @@ class ProtocolGenerator:
 
         :param content_name: the name of the content
         :param content_type: the type of the content
-        :param content_type: the tag number
-        :return: the content in protocol buffer schema
+        :param tag_no: the tag number
+
+        :return: the content in protocol buffer schema and the next tag number to be used
         """
         entry = ""
 
@@ -2001,9 +2010,12 @@ class ProtocolGenerator:
 
         return init_str
 
-    def _generate_file(self, file_name: str, file_content: str) -> None:
+    def _create_file(self, file_name: str, file_content: str) -> None:
         """
-        Create a protocol file.
+        Create a file.
+
+        :param file_name: the name of the file
+        :param file_content: the content of the file
 
         :return: None
         """
@@ -2026,7 +2038,7 @@ class ProtocolGenerator:
             os.mkdir(output_folder)
 
         # Generate protocol buffer schema file
-        self._generate_file(
+        self._create_file(
             "{}.proto".format(self.protocol_specification.name),
             self._protocol_buffer_schema_str(),
         )
@@ -2045,21 +2057,19 @@ class ProtocolGenerator:
         self.generate_protobuf_only_mode()
 
         # Generate Python protocol package
-        self._generate_file(INIT_FILE_NAME, self._init_str())
-        self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
-        self._generate_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
+        self._create_file(INIT_FILE_NAME, self._init_str())
+        self._create_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
+        self._create_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
         if (
-                self.protocol_specification.dialogue_config is not None
-                and self.protocol_specification.dialogue_config != {}
+            self.protocol_specification.dialogue_config is not None
+            and self.protocol_specification.dialogue_config != {}
         ):
-            self._generate_file(
-                DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str()
-            )
+            self._create_file(DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str())
         if len(self.spec.all_custom_types) > 0:
-            self._generate_file(
+            self._create_file(
                 CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
             )
-        self._generate_file(
+        self._create_file(
             SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
         )
 

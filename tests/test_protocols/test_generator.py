@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the protocol generator."""
+
 import inspect
 import logging
 import os
@@ -46,12 +47,12 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.protocols.generator.extract_specification import (
-    _specification_type_to_python_type,
-)
 from aea.protocols.generator.base import (
     ProtocolGenerator,
     _union_sub_type_to_protobuf_variable_name,
+)
+from aea.protocols.generator.extract_specification import (
+    _specification_type_to_python_type,
 )
 from aea.protocols.generator.validate import _is_composition_type_with_custom_type
 from aea.skills.base import Handler, Skill, SkillContext

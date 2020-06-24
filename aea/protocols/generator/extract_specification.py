@@ -149,7 +149,7 @@ class PythonicProtocolSpecification:
 
     def __init__(self) -> None:
         """
-        Instantiate a protocol generator.
+        Instantiate a Pythonic protocol specification.
 
         :return: None
         """
