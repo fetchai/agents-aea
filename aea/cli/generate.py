@@ -38,7 +38,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.protocols.generator.generator import ProtocolGenerator
+from aea.protocols.generator.base import ProtocolGenerator
 
 
 @click.group()

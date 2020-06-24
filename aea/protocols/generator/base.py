@@ -324,6 +324,21 @@ class ProtocolGenerator:
 
         return enum_str
 
+    def _to_custom_custom(self, content_type: str) -> str:
+        """
+        Evaluate whether a content type is a custom type or has a custom type as a sub-type.
+
+        :param content_type: the content type.
+        :return: Boolean result
+        """
+        new_content_type = content_type
+        if _includes_custom_type(content_type):
+            for custom_type in self.spec.all_custom_types:
+                new_content_type = new_content_type.replace(
+                    custom_type, self.spec.custom_custom_types[custom_type]
+                )
+        return new_content_type
+
     def _check_content_type_str(self, content_name: str, content_type: str) -> str:
         """
         Produce the checks of elements of compositional types.
@@ -1554,21 +1569,6 @@ class ProtocolGenerator:
             )
         return decoding_str
 
-    def _to_custom_custom(self, content_type: str) -> str:
-        """
-        Evaluate whether a content type is a custom type or has a custom type as a sub-type.
-
-        :param content_type: the content type.
-        :return: Boolean result
-        """
-        new_content_type = content_type
-        if _includes_custom_type(content_type):
-            for custom_type in self.spec.all_custom_types:
-                new_content_type = new_content_type.replace(
-                    custom_type, self.spec.custom_custom_types[custom_type]
-                )
-        return new_content_type
-
     def _serialization_class_str(self) -> str:
         """
         Produce the content of the Serialization class.
@@ -2012,6 +2012,73 @@ class ProtocolGenerator:
         with open(pathname, "w") as file:
             file.write(file_content)
 
+    def generate_protobuf_only_mode(self) -> None:
+        """
+        Run the generator in "protobuf only" mode:
+        a) validate the protocol specification.
+        b) create the protocol buffer schema file.
+
+        :return: None
+        """
+        # Create the output folder
+        output_folder = Path(self.output_folder_path)
+        if not output_folder.exists():
+            os.mkdir(output_folder)
+
+        # Generate protocol buffer schema file
+        self._generate_file(
+            "{}.proto".format(self.protocol_specification.name),
+            self._protocol_buffer_schema_str(),
+        )
+
+    def generate_full_mode(self) -> None:
+        """
+        Run the generator in "full" mode:
+        a) validates the protocol specification.
+        b) creates the protocol buffer schema file.
+        c) generates python modules.
+        d) applies black formatting
+
+        :return: None
+        """
+        # Run protobuf only mode
+        self.generate_protobuf_only_mode()
+
+        # Generate Python protocol package
+        self._generate_file(INIT_FILE_NAME, self._init_str())
+        self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
+        self._generate_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
+        if (
+                self.protocol_specification.dialogue_config is not None
+                and self.protocol_specification.dialogue_config != {}
+        ):
+            self._generate_file(
+                DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str()
+            )
+        if len(self.spec.all_custom_types) > 0:
+            self._generate_file(
+                CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
+            )
+        self._generate_file(
+            SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
+        )
+
+        # Warn if specification has custom types
+        if len(self.spec.all_custom_types) > 0:
+            incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
+                self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
+            )
+            logger.warning(incomplete_generation_warning_msg)
+
+        # Compile protobuf schema
+        cmd = "protoc -I={} --python_out={} {}/{}.proto".format(
+            self.output_folder_path,
+            self.output_folder_path,
+            self.output_folder_path,
+            self.protocol_specification.name,
+        )
+        os.system(cmd)  # nosec
+
     def generate(self, protobuf_only: bool = False) -> None:
         """
         Run the generator. If in "full" mode (protobuf_only is False), it:
@@ -2025,48 +2092,7 @@ class ProtocolGenerator:
         :param protobuf_only: mode of running the generator.
         :return: None
         """
-        # Create the output folder
-        output_folder = Path(self.output_folder_path)
-        if not output_folder.exists():
-            os.mkdir(output_folder)
-
-        self._generate_file(
-            "{}.proto".format(self.protocol_specification.name),
-            self._protocol_buffer_schema_str(),
-        )
-
-        if not protobuf_only:
-            # Generate Python files
-            self._generate_file(INIT_FILE_NAME, self._init_str())
-            self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
-            self._generate_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
-            if (
-                self.protocol_specification.dialogue_config is not None
-                and self.protocol_specification.dialogue_config != {}
-            ):
-                self._generate_file(
-                    DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str()
-                )
-            if len(self.spec.all_custom_types) > 0:
-                self._generate_file(
-                    CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
-                )
-            self._generate_file(
-                SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
-            )
-
-            # Warn if specification has custom types
-            if len(self.spec.all_custom_types) > 0:
-                incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
-                    self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
-                )
-                logger.warning(incomplete_generation_warning_msg)
-
-            # Compile protobuf schema
-            cmd = "protoc -I={} --python_out={} {}/{}.proto".format(
-                self.output_folder_path,
-                self.output_folder_path,
-                self.output_folder_path,
-                self.protocol_specification.name,
-            )
-            os.system(cmd)  # nosec
+        if protobuf_only:
+            self.generate_protobuf_only_mode()
+        else:
+            self.generate_full_mode()

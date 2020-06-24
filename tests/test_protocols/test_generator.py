@@ -49,7 +49,7 @@ from aea.protocols.base import Message
 from aea.protocols.generator.extract_specification import (
     _specification_type_to_python_type,
 )
-from aea.protocols.generator.generator import (
+from aea.protocols.generator.base import (
     ProtocolGenerator,
     _union_sub_type_to_protobuf_variable_name,
 )
