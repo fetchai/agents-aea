@@ -63,7 +63,7 @@ def _launch_agents(
         else:
             failed = _launch_subprocesses(click_context, agents_directories)
     except BaseException:
-        logger.exception(f"Exception in launch agents.")
+        logger.exception("Exception in launch agents.")
         failed = -1
     finally:
         logger.debug(f"Exit cli. code: {failed}")
@@ -74,7 +74,7 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]) -> in
     """
     Launch many agents using subprocesses.
 
-    :param agents: the click context.
+    :param click_context: the click context.
     :param agents: list of paths to agent projects.
     :return: execution status
     """
@@ -107,7 +107,7 @@ def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
     """
     Launch many agents, multithreaded.
 
-    :param agents: the click context.
+    :param click_context: the click context.
     :param agents: list of paths to agent projects.
     :return: exit status
     """
