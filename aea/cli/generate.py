@@ -20,9 +20,6 @@
 """Implementation of the 'aea generate' subcommand."""
 
 import os
-import shutil
-import subprocess  # nosec
-import sys
 from typing import cast
 
 import click
@@ -33,12 +30,11 @@ from aea.cli.utils.decorators import check_aea_project, clean_after
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
-    ProtocolSpecification,
     ProtocolSpecificationParseError,
     PublicId,
 )
-from aea.configurations.loader import ConfigLoader
 from aea.protocols.generator.base import ProtocolGenerator
+from aea.protocols.generator.common import load_protocol_specification
 
 
 @click.group()
@@ -59,20 +55,7 @@ def protocol(click_context, protocol_specification_path: str):
 @clean_after
 def _generate_item(click_context, item_type, specification_path):
     """Generate an item based on a specification and add it to the configuration file and agent."""
-    # check protocol buffer compiler is installed
     ctx = cast(Context, click_context.obj)
-    res = shutil.which("protoc")
-    if res is None:
-        raise click.ClickException(
-            "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
-        )
-
-    # check black code formatter is installed
-    res = shutil.which("black")
-    if res is None:
-        raise click.ClickException(
-            "Please install black code formater first! See the following link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
-        )
 
     # Get existing items
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
@@ -82,12 +65,7 @@ def _generate_item(click_context, item_type, specification_path):
 
     # Load item specification yaml file
     try:
-        config_loader = ConfigLoader(
-            "protocol-specification_schema.json", ProtocolSpecification
-        )
-        protocol_spec = config_loader.load_protocol_specification(
-            open(specification_path)
-        )
+        protocol_spec = load_protocol_specification(specification_path)
     except Exception as e:
         raise click.ClickException(str(e))
 
@@ -125,7 +103,7 @@ def _generate_item(click_context, item_type, specification_path):
         )
 
         output_path = os.path.join(ctx.cwd, item_type_plural)
-        protocol_generator = ProtocolGenerator(protocol_spec, output_path)
+        protocol_generator = ProtocolGenerator(specification_path, output_path)
         protocol_generator.generate()
 
         # Add the item to the configurations
@@ -151,29 +129,8 @@ def _generate_item(click_context, item_type, specification_path):
         )
     except Exception as e:
         raise click.ClickException(
-            "There was an error while generating the protocol. The protocol is NOT generated. Exception: "
+            "There was an error while generating the protocol. The protocol is NOT generated. Exception:\n"
             + str(e)
         )
 
-    _run_black_formatting(os.path.join(item_type_plural, protocol_spec.name))
     _fingerprint_item(click_context, "protocol", protocol_spec.public_id)
-
-
-def _run_black_formatting(path: str) -> None:
-    """
-    Run Black code formatting as subprocess.
-
-    :param path: a path where formatting should be applied.
-
-    :return: None
-    """
-    try:
-        subp = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "black", path, "--quiet"]
-        )
-        subp.wait(10.0)
-    finally:
-        poll = subp.poll()
-        if poll is None:  # pragma: no cover
-            subp.terminate()
-            subp.wait(5)

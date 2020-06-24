@@ -23,13 +23,19 @@ import itertools
 import logging
 import os
 import re
+import shutil
 from datetime import date
 from os import path
 from pathlib import Path
 from typing import Optional, Tuple
 
-from aea.configurations.base import ProtocolSpecification
-from aea.protocols.generator.common import _get_sub_types_of_compositional_types
+from aea.protocols.generator.common import (
+    _get_sub_types_of_compositional_types,
+    check_protobuf_using_protoc,
+    load_protocol_specification,
+    run_black_formatting,
+    run_protoc,
+)
 from aea.protocols.generator.extract_specification import extract
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
@@ -183,24 +189,50 @@ class ProtocolGenerator:
 
     def __init__(
         self,
-        protocol_specification: ProtocolSpecification,
+        path_to_protocol_specification: str,
         output_path: str = ".",
         path_to_protocol_package: Optional[str] = None,
     ) -> None:
         """
         Instantiate a protocol generator.
 
-        :param protocol_specification: the protocol specification object
+        :param path_to_protocol_specification: path to protocol specification file
         :param output_path: the path to the location in which the protocol module is to be generated.
         :param path_to_protocol_package: the path to the protocol package
 
         :return: None
         """
-        self.protocol_specification = protocol_specification
+        self.path_to_protocol_specification = path_to_protocol_specification
+
+        # check protocol buffer compiler is installed
+        res = shutil.which("protoc")
+        if res is None:
+            raise FileNotFoundError(
+                "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
+            )
+
+        # check black code formatter is installed
+        res = shutil.which("black")
+        if res is None:
+            raise FileNotFoundError(
+                "Cannot find black code formatter. To install, please follow this link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
+            )
+
+        # Try to load protocol specification
+        try:
+            self.protocol_specification = load_protocol_specification(
+                path_to_protocol_specification
+            )
+        except Exception:
+            raise
+
+        # Helper fields
         self.protocol_specification_in_camel_case = _to_camel_case(
             self.protocol_specification.name
         )
-        self.output_folder_path = os.path.join(output_path, protocol_specification.name)
+        self.path_to_generated_protocol_package = os.path.join(
+            output_path, self.protocol_specification.name
+        )
         self.path_to_protocol_package = (
             path_to_protocol_package + self.protocol_specification.name
             if path_to_protocol_package is not None
@@ -210,11 +242,10 @@ class ProtocolGenerator:
                 self.protocol_specification.name,
             )
         )
-
         self.indent = ""
 
         try:
-            self.spec = extract(protocol_specification)
+            self.spec = extract(self.protocol_specification)
         except Exception:
             raise
 
@@ -2019,7 +2050,7 @@ class ProtocolGenerator:
 
         :return: None
         """
-        pathname = path.join(self.output_folder_path, file_name)
+        pathname = path.join(self.path_to_generated_protocol_package, file_name)
 
         with open(pathname, "w") as file:
             file.write(file_content)
@@ -2033,7 +2064,7 @@ class ProtocolGenerator:
         :return: None
         """
         # Create the output folder
-        output_folder = Path(self.output_folder_path)
+        output_folder = Path(self.path_to_generated_protocol_package)
         if not output_folder.exists():
             os.mkdir(output_folder)
 
@@ -2042,6 +2073,18 @@ class ProtocolGenerator:
             "{}.proto".format(self.protocol_specification.name),
             self._protocol_buffer_schema_str(),
         )
+
+        # Check protobuf schema file is valid
+        is_valid_protobuf_schema, msg = check_protobuf_using_protoc(
+            self.path_to_generated_protocol_package, self.protocol_specification.name
+        )
+
+        if is_valid_protobuf_schema:
+            pass
+        else:
+            # Remove the generated folder and files
+            shutil.rmtree(output_folder)
+            raise SyntaxError("Error in the protocol buffer schema code:\n" + msg)
 
     def generate_full_mode(self) -> None:
         """
@@ -2073,21 +2116,20 @@ class ProtocolGenerator:
             SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
         )
 
+        # Run black formatting
+        run_black_formatting(self.path_to_generated_protocol_package)
+
+        # Run protocol buffer compiler
+        run_protoc(
+            self.path_to_generated_protocol_package, self.protocol_specification.name
+        )
+
         # Warn if specification has custom types
         if len(self.spec.all_custom_types) > 0:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
                 self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
             )
             logger.warning(incomplete_generation_warning_msg)
-
-        # Compile protobuf schema
-        cmd = "protoc -I={} --python_out={} {}/{}.proto".format(
-            self.output_folder_path,
-            self.output_folder_path,
-            self.output_folder_path,
-            self.protocol_specification.name,
-        )
-        os.system(cmd)  # nosec
 
     def generate(self, protobuf_only: bool = False) -> None:
         """

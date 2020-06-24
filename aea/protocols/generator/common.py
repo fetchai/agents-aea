@@ -16,8 +16,16 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains code common for multiple modules in the generator package."""
-# pylint: skip-file
+"""This module contains utility code for generator modules."""
+
+import os
+import re
+import subprocess  # nosec
+import sys
+from typing import Tuple
+
+from aea.configurations.base import ProtocolSpecification
+from aea.configurations.loader import ConfigLoader
 
 SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
 
@@ -108,3 +116,90 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
                     inside_union = inside_union[inside_union.index(",") + 1 :].strip()
             sub_types_list.append(sub_type)
     return tuple(sub_types_list)
+
+
+def load_protocol_specification(specification_path: str) -> ProtocolSpecification:
+    """
+    Load a protocol specification.
+
+    :param specification_path: path to the protocol specification yaml file.
+    :return: A ProtocolSpecification object
+    """
+    config_loader = ConfigLoader(
+        "protocol-specification_schema.json", ProtocolSpecification
+    )
+    protocol_spec = config_loader.load_protocol_specification(open(specification_path))
+    return protocol_spec
+
+
+def run_black_formatting(path_to_protocol_package: str) -> None:
+    """
+    Run Black code formatting via subprocess.
+
+    :param path_to_protocol_package: a path where formatting should be applied.
+    :return: None
+    """
+    try:
+        subp = subprocess.Popen(  # nosec
+            [sys.executable, "-m", "black", path_to_protocol_package, "--quiet"]
+        )
+        subp.wait(10.0)
+    finally:
+        poll = subp.poll()
+        if poll is None:  # pragma: no cover
+            subp.terminate()
+            subp.wait(5)
+
+
+def check_protobuf_using_protoc(
+    path_to_generated_protocol_package, name
+) -> Tuple[bool, str]:
+    """
+    Check whether a protocol buffer schema file is valid.
+
+    Validation is via trying to compile the schema file. If successfully compiled it is valid, otherwise invalid.
+    If valid, return True and a 'protobuf file is valid' message, otherwise return False and the error thrown by the compiler.
+
+    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+
+    :return: Boolean result and an accompanying message
+    """
+    try:
+        run_protoc(path_to_generated_protocol_package, name)
+        os.remove(os.path.join(path_to_generated_protocol_package, name + "_pb2.py"))
+        return True, "protobuf file is valid"
+    except subprocess.CalledProcessError as e:
+        pattern = name + ".proto:[0-9]+:[0-9]+: "
+        error_message = re.sub(pattern, "", e.stderr[:-1])
+        return False, error_message
+    except Exception:
+        raise
+
+
+def run_protoc(path_to_generated_protocol_package, name) -> subprocess.CompletedProcess:
+    """
+    Run 'protoc' protocol buffer compiler via subprocess.
+
+    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+
+    :return: A completed process object.
+    """
+    try:
+        # command: "protoc -I={} --python_out={} {}/{}.proto"
+        protoc_process = subprocess.run(  # nosec
+            [
+                "protoc",
+                "-I={}".format(path_to_generated_protocol_package),
+                "--python_out={}".format(path_to_generated_protocol_package),
+                "{}/{}.proto".format(path_to_generated_protocol_package, name),
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            env=os.environ.copy(),
+        )
+    except Exception:
+        raise
+    return protoc_process

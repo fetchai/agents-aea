@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module extracts a valid protocol specification into pythonic objects."""
-# pylint: skip-file
 
 import re
 from typing import Dict, List, cast
