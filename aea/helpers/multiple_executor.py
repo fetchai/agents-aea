@@ -184,6 +184,8 @@ class AbstractMultipleExecutor(ABC):
             self._loop.run_until_complete(
                 self._wait_tasks_complete(skip_exceptions=True)
             )
+        if self._executor_pool:
+            self._executor_pool.shutdown(wait=True)
 
         if self._executor_pool:
             self._executor_pool.shutdown(wait=True)
@@ -390,6 +392,7 @@ class AbstractMultipleRunner:
         """
         self._is_running = False
         self._executor.stop()
+
         if self._thread is not None:
             self._thread.join(timeout=timeout)
 

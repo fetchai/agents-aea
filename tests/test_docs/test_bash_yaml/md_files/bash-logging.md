@@ -12,13 +12,13 @@ aea_version: 0.4.1
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.5.0
+- fetchai/stub:0.6.0
 contracts: []
 protocols:
 - fetchai/default:0.3.0
 skills:
 - fetchai/error:0.3.0
-default_connection: fetchai/stub:0.5.0
+default_connection: fetchai/stub:0.6.0
 default_ledger: fetchai
 ledger_apis: {}
 logging_config:

@@ -118,7 +118,7 @@ class Connection(Component, ABC):
         self._loop = loop
 
     @property
-    def address(self) -> "Address":
+    def address(self) -> "Address":  # pragma: nocover
         """Get the address."""
         assert (
             self._identity is not None
@@ -126,18 +126,18 @@ class Connection(Component, ABC):
         return self._identity.address
 
     @property
-    def crypto_store(self) -> CryptoStore:
+    def crypto_store(self) -> CryptoStore:  # pragma: nocover
         """Get the crypto store."""
         assert self._crypto_store is not None, "CryptoStore not available."
         return self._crypto_store
 
     @property
-    def has_crypto_store(self) -> bool:
+    def has_crypto_store(self) -> bool:  # pragma: nocover
         """Check if the connection has the crypto store."""
         return self._crypto_store is not None
 
     @property
-    def component_type(self) -> ComponentType:
+    def component_type(self) -> ComponentType:  # pragma: nocover
         """Get the component type."""
         return ComponentType.CONNECTION
 
@@ -148,7 +148,7 @@ class Connection(Component, ABC):
         return cast(ConnectionConfig, super().configuration)
 
     @property
-    def restricted_to_protocols(self) -> Set[PublicId]:
+    def restricted_to_protocols(self) -> Set[PublicId]:  # pragma: nocover
         """Get the ids of the protocols this connection is restricted to."""
         if self._configuration is None:
             return self._restricted_to_protocols
@@ -156,7 +156,7 @@ class Connection(Component, ABC):
             return self.configuration.restricted_to_protocols
 
     @property
-    def excluded_protocols(self) -> Set[PublicId]:
+    def excluded_protocols(self) -> Set[PublicId]:  # pragma: nocover
         """Get the ids of the excluded protocols for this connection."""
         if self._configuration is None:
             return self._excluded_protocols

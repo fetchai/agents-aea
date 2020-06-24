@@ -195,15 +195,16 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
 
         :return: None
         """
-        cls._start_count += 1
+        with cls._lock:
+            cls._start_count += 1
 
-        if cls._supervisor_thread:
-            return
+            if cls._supervisor_thread:
+                return
 
-        cls._loop = asyncio.new_event_loop()
-        cls._stopped_future = Future(loop=cls._loop)
-        cls._supervisor_thread = threading.Thread(target=cls._supervisor_event_loop)
-        cls._supervisor_thread.start()
+            cls._loop = asyncio.new_event_loop()
+            cls._stopped_future = Future(loop=cls._loop)
+            cls._supervisor_thread = threading.Thread(target=cls._supervisor_event_loop)
+            cls._supervisor_thread.start()
 
     @classmethod
     def stop(cls, force: bool = False) -> None:
