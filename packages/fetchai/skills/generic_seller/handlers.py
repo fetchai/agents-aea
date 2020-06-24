@@ -30,10 +30,10 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.skills.generic_seller.dialogues import Dialogue, Dialogues
-from packages.fetchai.skills.generic_seller.strategy import Strategy
+from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
-class FIPAHandler(Handler):
+class GenericFipaHandler(Handler):
     """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
@@ -119,7 +119,7 @@ class FIPAHandler(Handler):
             )
         )
         query = cast(Query, msg.query)
-        strategy = cast(Strategy, self.context.strategy)
+        strategy = cast(GenericStrategy, self.context.strategy)
 
         if strategy.is_matching_supply(query):
             proposal, data_for_sale = strategy.generate_proposal_and_data(
@@ -232,7 +232,7 @@ class FIPAHandler(Handler):
             )
         )
 
-        strategy = cast(Strategy, self.context.strategy)
+        strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_ledger_tx and ("transaction_digest" in msg.info.keys()):
             is_valid = False
             tx_digest = msg.info["transaction_digest"]

@@ -58,3 +58,4 @@ models:
       total_price: 10
     class_name: Strategy
 dependencies: {}
+is_abstract: True

@@ -42,7 +42,7 @@ DEFAULT_DATA_MODEL = {
 DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
 
 
-class Strategy(Model):
+class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:
@@ -146,6 +146,6 @@ class Strategy(Model):
         )
         return proposal, self._data_for_sale
 
-    def collect_from_data_source(self):
+    def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to communicate with the sensor."""
         raise NotImplementedError

@@ -36,7 +36,7 @@ DEFAULT_SEARCH_QUERY = {
 }
 
 
-class Strategy(Model):
+class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

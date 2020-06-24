@@ -17,7 +17,8 @@ protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
-skills: []
+skills:
+- fetchai/generic_buyer:0.6.0
 behaviours:
   service_registration:
     args:
@@ -26,7 +27,7 @@ behaviours:
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
+    class_name: FipaHandler
 models:
   dialogues:
     args: {}

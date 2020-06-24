@@ -33,10 +33,10 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import Dialogue, Dialogues
-from packages.fetchai.skills.generic_buyer.strategy import Strategy
+from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-class FIPAHandler(Handler):
+class GenericFipaHandler(Handler):
     """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
@@ -120,7 +120,7 @@ class FIPAHandler(Handler):
                 self.context.agent_name, proposal.values, msg.counterparty[-5:]
             )
         )
-        strategy = cast(Strategy, self.context.strategy)
+        strategy = cast(GenericStrategy, self.context.strategy)
         acceptable = strategy.is_acceptable_proposal(proposal)
         affordable = strategy.is_affordable_proposal(proposal)
         if acceptable and affordable:
@@ -188,7 +188,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
+        strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_ledger_tx:
             self.context.logger.info(
                 "[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(
@@ -273,7 +273,7 @@ class FIPAHandler(Handler):
             )
 
 
-class OEFSearchHandler(Handler):
+class GenericOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
@@ -316,7 +316,7 @@ class OEFSearchHandler(Handler):
                     self.context.agent_name, list(map(lambda x: x[-5:], agents))
                 )
             )
-            strategy = cast(Strategy, self.context.strategy)
+            strategy = cast(GenericStrategy, self.context.strategy)
             # stopping search
             strategy.is_searching = False
             # pick first agent found
@@ -346,7 +346,7 @@ class OEFSearchHandler(Handler):
             )
 
 
-class MyTransactionHandler(Handler):
+class GenericTransactionHandler(Handler):
     """Implement the transaction handler."""
 
     SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]

@@ -86,7 +86,7 @@ class Dialogues(Model, FipaDialogues):
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
     ) -> Dialogue:
         """
-        Create an instance of dialogue.
+        Create an instance of fipa dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

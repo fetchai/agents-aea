@@ -17,33 +17,37 @@ protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
-skills: []
+skills:
+- fetchai/generic_buyer:0.5.0
 behaviours:
   search:
     args:
       search_interval: 5
-    class_name: MySearchBehaviour
+    class_name: SearchBehaviour
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
+    class_name: FipaHandler
   oef:
     args: {}
-    class_name: OEFSearchHandler
+    class_name: OefSearchHandler
   transaction:
     args: {}
-    class_name: MyTransactionHandler
+    class_name: TransactionHandler
 models:
   dialogues:
     args: {}
     class_name: Dialogues
   strategy:
     args:
-      country: UK
       currency_id: FET
       is_ledger_tx: true
       ledger_id: fetchai
-      max_row_price: 4
-      max_tx_fee: 2000000
+      max_buyer_tx_fee: 1
+      max_price: 20
+      search_query:
+        constraint_type: ==
+        search_term: country
+        search_value: UK
     class_name: Strategy
 dependencies: {}

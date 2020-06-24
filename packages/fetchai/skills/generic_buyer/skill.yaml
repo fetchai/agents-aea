@@ -21,17 +21,17 @@ behaviours:
   search:
     args:
       search_interval: 5
-    class_name: MySearchBehaviour
+    class_name: GenericSearchBehaviour
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
+    class_name: GenericFipaHandler
   oef:
     args: {}
-    class_name: OEFSearchHandler
+    class_name: GenericOefSearchHandler
   transaction:
     args: {}
-    class_name: MyTransactionHandler
+    class_name: GenericTransactionHandler
 models:
   dialogues:
     args: {}
@@ -47,5 +47,6 @@ models:
         constraint_type: ==
         search_term: country
         search_value: UK
-    class_name: Strategy
+    class_name: GenericStrategy
 dependencies: {}
+is_abstract: True

@@ -25,13 +25,13 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.generic_seller.strategy import Strategy
+from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 
-class ServiceRegistrationBehaviour(TickerBehaviour):
+class GenericServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
     def __init__(self, **kwargs):
@@ -48,7 +48,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
+        strategy = cast(GenericStrategy, self.context.strategy)
         if self.context.ledger_apis.has_ledger(strategy.ledger_id):
             balance = self.context.ledger_apis.token_balance(
                 strategy.ledger_id,
@@ -84,7 +84,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
+        strategy = cast(GenericStrategy, self.context.strategy)
         if self.context.ledger_apis.has_ledger(strategy.ledger_id):
             balance = self.context.ledger_apis.token_balance(
                 strategy.ledger_id,
@@ -104,7 +104,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
+        strategy = cast(GenericStrategy, self.context.strategy)
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
@@ -116,7 +116,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         msg.counterparty = self.context.search_service_address
         self.context.outbox.put_message(message=msg)
         self.context.logger.info(
-            "[{}]: updating generic seller services on OEF service directory.".format(
+            "[{}]: updating services on OEF service directory.".format(
                 self.context.agent_name
             )
         )
@@ -128,7 +128,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         if self._registered_service_description is not None:
-            strategy = cast(Strategy, self.context.strategy)
+            strategy = cast(GenericStrategy, self.context.strategy)
             oef_msg_id = strategy.get_next_oef_msg_id()
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
@@ -138,7 +138,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             msg.counterparty = self.context.search_service_address
             self.context.outbox.put_message(message=msg)
             self.context.logger.info(
-                "[{}]: unregistering generic seller services from OEF service directory.".format(
+                "[{}]: unregistering services from OEF service directory.".format(
                     self.context.agent_name
                 )
             )
