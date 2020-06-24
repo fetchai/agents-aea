@@ -29,7 +29,7 @@ from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Set, cast
+from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -44,6 +44,7 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
 from aea.mail.base import Address
 from aea.multiplexer import OutBox
@@ -544,6 +545,7 @@ class Model(SkillComponent, ABC):
             )
             models.extend(filtered_classes)
 
+        _check_duplicate_classes(models)
         name_to_class = dict(models)
         _print_warning_message_for_non_declared_skill_components(
             set(name_to_class.keys()),
@@ -572,6 +574,25 @@ class Model(SkillComponent, ABC):
                 instances[model_id] = model_instance
                 setattr(skill_context, model_id, model_instance)
         return instances
+
+
+def _check_duplicate_classes(name_class_pairs: Sequence[Tuple[str, Type]]):
+    """
+    Given a sequence of pairs (class_name, class_obj), check
+    whether there are duplicates in the class names.
+
+    :param name_class_pairs: the sequence of pairs (class_name, class_obj)
+    :return: None
+    :raises AEAException: if there are more than one definition of the same class.
+    """
+    names_to_path: Dict[str, str] = {}
+    for class_name, class_obj in name_class_pairs:
+        module_path = class_obj.__module__
+        if class_name in names_to_path:
+            raise AEAException(
+                f"Model '{class_name}' present both in {names_to_path[class_name]} and {module_path}. Remove one of them."
+            )
+        names_to_path[class_name] = module_path
 
 
 class Skill(Component):
