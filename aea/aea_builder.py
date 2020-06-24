@@ -1295,9 +1295,6 @@ class AEABuilder:
             for dependency in configuration.skills:
                 supports[dependency].add(skill_id)
 
-        if len(roots) == 0:
-            raise AEAException("Cannot load skill, there is a cyclic dependency.")
-
         # find topological order (Kahn's algorithm)
         queue = deque()
         order = []
@@ -1309,6 +1306,10 @@ class AEABuilder:
                 depends_on[node].discard(current)
                 if len(depends_on[node]) == 0:
                     queue.append(node)
+
+        if any(len(edges) > 0 for edges in depends_on.values()):
+            raise AEAException("Cannot load skills, there is a cyclic dependency.")
+
         return order
 
     @classmethod
