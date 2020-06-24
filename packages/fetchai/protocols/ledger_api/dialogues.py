@@ -40,27 +40,37 @@ class LedgerApiDialogue(Dialogue):
     INITIAL_PERFORMATIVES = frozenset(
         {
             LedgerApiMessage.Performative.GET_BALANCE,
-            LedgerApiMessage.Performative.SEND_SIGNED_TX,
-            LedgerApiMessage.Performative.GET_TX_RECEIPT,
+            LedgerApiMessage.Performative.GET_TRANSFER_TRANSACTION,
+            LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         }
     )
     TERMINAL_PERFORMATIVES = frozenset(
         {
             LedgerApiMessage.Performative.BALANCE,
-            LedgerApiMessage.Performative.TX_DIGEST,
-            LedgerApiMessage.Performative.TX_RECEIPT,
+            LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
         }
     )
     VALID_REPLIES = {
+        LedgerApiMessage.Performative.BALANCE: frozenset(),
         LedgerApiMessage.Performative.GET_BALANCE: frozenset(
             {LedgerApiMessage.Performative.BALANCE}
         ),
-        LedgerApiMessage.Performative.GET_TX_RECEIPT: frozenset(
-            {LedgerApiMessage.Performative.TX_RECEIPT}
+        LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT: frozenset(
+            {LedgerApiMessage.Performative.TRANSACTION_RECEIPT}
         ),
-        LedgerApiMessage.Performative.SEND_SIGNED_TX: frozenset(
-            {LedgerApiMessage.Performative.TX_DIGEST}
+        LedgerApiMessage.Performative.GET_TRANSFER_TRANSACTION: frozenset(
+            {LedgerApiMessage.Performative.TRANSACTION}
         ),
+        LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION: frozenset(
+            {LedgerApiMessage.Performative.TRANSACTION_DIGEST}
+        ),
+        LedgerApiMessage.Performative.TRANSACTION: frozenset(
+            {LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION}
+        ),
+        LedgerApiMessage.Performative.TRANSACTION_DIGEST: frozenset(
+            {LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT}
+        ),
+        LedgerApiMessage.Performative.TRANSACTION_RECEIPT: frozenset(),
     }
 
     class AgentRole(Dialogue.Role):

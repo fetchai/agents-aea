@@ -11,7 +11,7 @@ speech_acts:
     address: pt:str
   get_transfer_transaction:
     ledger_id: pt:str
-    transfer: 
+    transfer: ct:AnyObject 
   send_signed_transaction:
     ledger_id: pt:str
     signed_transaction: ct:AnyObject

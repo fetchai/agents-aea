@@ -48,10 +48,12 @@ class LedgerApiMessage(Message):
         BALANCE = "balance"
         ERROR = "error"
         GET_BALANCE = "get_balance"
-        GET_TX_RECEIPT = "get_tx_receipt"
-        SEND_SIGNED_TX = "send_signed_tx"
-        TX_DIGEST = "tx_digest"
-        TX_RECEIPT = "tx_receipt"
+        GET_TRANSACTION_RECEIPT = "get_transaction_receipt"
+        GET_TRANSFER_TRANSACTION = "get_transfer_transaction"
+        SEND_SIGNED_TRANSACTION = "send_signed_transaction"
+        TRANSACTION = "transaction"
+        TRANSACTION_DIGEST = "transaction_digest"
+        TRANSACTION_RECEIPT = "transaction_receipt"
 
         def __str__(self):
             """Get the string representation."""
@@ -84,10 +86,12 @@ class LedgerApiMessage(Message):
             "balance",
             "error",
             "get_balance",
-            "get_tx_receipt",
-            "send_signed_tx",
-            "tx_digest",
-            "tx_receipt",
+            "get_transaction_receipt",
+            "get_transfer_transaction",
+            "send_signed_transaction",
+            "transaction",
+            "transaction_digest",
+            "transaction_receipt",
         }
 
     @property
@@ -143,12 +147,6 @@ class LedgerApiMessage(Message):
         return cast(CustomAnyObject, self.get("data"))
 
     @property
-    def digest(self) -> str:
-        """Get the 'digest' content from the message."""
-        assert self.is_set("digest"), "'digest' content is not set."
-        return cast(str, self.get("digest"))
-
-    @property
     def ledger_id(self) -> str:
         """Get the 'ledger_id' content from the message."""
         assert self.is_set("ledger_id"), "'ledger_id' content is not set."
@@ -160,16 +158,40 @@ class LedgerApiMessage(Message):
         return cast(Optional[str], self.get("message"))
 
     @property
-    def signed_tx(self) -> CustomAnyObject:
-        """Get the 'signed_tx' content from the message."""
-        assert self.is_set("signed_tx"), "'signed_tx' content is not set."
-        return cast(CustomAnyObject, self.get("signed_tx"))
+    def signed_transaction(self) -> CustomAnyObject:
+        """Get the 'signed_transaction' content from the message."""
+        assert self.is_set(
+            "signed_transaction"
+        ), "'signed_transaction' content is not set."
+        return cast(CustomAnyObject, self.get("signed_transaction"))
 
     @property
-    def tx_digest(self) -> str:
-        """Get the 'tx_digest' content from the message."""
-        assert self.is_set("tx_digest"), "'tx_digest' content is not set."
-        return cast(str, self.get("tx_digest"))
+    def transaction(self) -> CustomAnyObject:
+        """Get the 'transaction' content from the message."""
+        assert self.is_set("transaction"), "'transaction' content is not set."
+        return cast(CustomAnyObject, self.get("transaction"))
+
+    @property
+    def transaction_digest(self) -> str:
+        """Get the 'transaction_digest' content from the message."""
+        assert self.is_set(
+            "transaction_digest"
+        ), "'transaction_digest' content is not set."
+        return cast(str, self.get("transaction_digest"))
+
+    @property
+    def transaction_receipt(self) -> CustomAnyObject:
+        """Get the 'transaction_receipt' content from the message."""
+        assert self.is_set(
+            "transaction_receipt"
+        ), "'transaction_receipt' content is not set."
+        return cast(CustomAnyObject, self.get("transaction_receipt"))
+
+    @property
+    def transfer(self) -> CustomAnyObject:
+        """Get the 'transfer' content from the message."""
+        assert self.is_set("transfer"), "'transfer' content is not set."
+        return cast(CustomAnyObject, self.get("transfer"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the ledger_api protocol."""
@@ -223,7 +245,10 @@ class LedgerApiMessage(Message):
                 ), "Invalid type for content 'address'. Expected 'str'. Found '{}'.".format(
                     type(self.address)
                 )
-            elif self.performative == LedgerApiMessage.Performative.SEND_SIGNED_TX:
+            elif (
+                self.performative
+                == LedgerApiMessage.Performative.GET_TRANSFER_TRANSACTION
+            ):
                 expected_nb_of_contents = 2
                 assert (
                     type(self.ledger_id) == str
@@ -231,11 +256,14 @@ class LedgerApiMessage(Message):
                     type(self.ledger_id)
                 )
                 assert (
-                    type(self.signed_tx) == CustomAnyObject
-                ), "Invalid type for content 'signed_tx'. Expected 'AnyObject'. Found '{}'.".format(
-                    type(self.signed_tx)
+                    type(self.transfer) == CustomAnyObject
+                ), "Invalid type for content 'transfer'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.transfer)
                 )
-            elif self.performative == LedgerApiMessage.Performative.GET_TX_RECEIPT:
+            elif (
+                self.performative
+                == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION
+            ):
                 expected_nb_of_contents = 2
                 assert (
                     type(self.ledger_id) == str
@@ -243,9 +271,24 @@ class LedgerApiMessage(Message):
                     type(self.ledger_id)
                 )
                 assert (
-                    type(self.tx_digest) == str
-                ), "Invalid type for content 'tx_digest'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_digest)
+                    type(self.signed_transaction) == CustomAnyObject
+                ), "Invalid type for content 'signed_transaction'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.signed_transaction)
+                )
+            elif (
+                self.performative
+                == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
+            ):
+                expected_nb_of_contents = 2
+                assert (
+                    type(self.ledger_id) == str
+                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.ledger_id)
+                )
+                assert (
+                    type(self.transaction_digest) == str
+                ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
+                    type(self.transaction_digest)
                 )
             elif self.performative == LedgerApiMessage.Performative.BALANCE:
                 expected_nb_of_contents = 1
@@ -254,19 +297,26 @@ class LedgerApiMessage(Message):
                 ), "Invalid type for content 'amount'. Expected 'int'. Found '{}'.".format(
                     type(self.amount)
                 )
-            elif self.performative == LedgerApiMessage.Performative.TX_DIGEST:
+            elif self.performative == LedgerApiMessage.Performative.TRANSACTION:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.digest) == str
-                ), "Invalid type for content 'digest'. Expected 'str'. Found '{}'.".format(
-                    type(self.digest)
+                    type(self.transaction) == CustomAnyObject
+                ), "Invalid type for content 'transaction'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.transaction)
                 )
-            elif self.performative == LedgerApiMessage.Performative.TX_RECEIPT:
+            elif self.performative == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.data) == CustomAnyObject
-                ), "Invalid type for content 'data'. Expected 'AnyObject'. Found '{}'.".format(
-                    type(self.data)
+                    type(self.transaction_digest) == str
+                ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
+                    type(self.transaction_digest)
+                )
+            elif self.performative == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.transaction_receipt) == CustomAnyObject
+                ), "Invalid type for content 'transaction_receipt'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.transaction_receipt)
                 )
             elif self.performative == LedgerApiMessage.Performative.ERROR:
                 expected_nb_of_contents = 1
