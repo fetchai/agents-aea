@@ -108,7 +108,7 @@ class HTTPClientAsyncChannel:
 
         :return: None
         """
-        if not self._loop:
+        if not self._loop:  # pragma: nocover
             raise ValueError("Channel is not connected")
 
         try:
@@ -133,6 +133,7 @@ class HTTPClientAsyncChannel:
                 status_text="HTTPConnection request error.",
                 bodyy=format_exc().encode("utf-8"),
             )
+
         if self._in_queue is not None:
             await self._in_queue.put(envelope)
 
@@ -196,7 +197,9 @@ class HTTPClientAsyncChannel:
 
         request_http_message = cast(HttpMessage, request_envelope.message)
 
-        if request_http_message.performative != HttpMessage.Performative.REQUEST:
+        if (
+            request_http_message.performative != HttpMessage.Performative.REQUEST
+        ):  # pragma: nocover
             logger.warning(
                 "The HTTPMessage performative must be a REQUEST. Envelop dropped."
             )
@@ -230,7 +233,7 @@ class HTTPClientAsyncChannel:
 
         try:
             return await self._in_queue.get()
-        except CancelledError:
+        except CancelledError:  # pragma: nocover
             return None
 
     def to_envelope(
@@ -278,19 +281,17 @@ class HTTPClientAsyncChannel:
     async def _cancel_tasks(self) -> None:
         """Cancel all requests tasks pending."""
         for task in list(self._tasks):
-            if task.done():
+            if task.done():  # pragma: nocover
                 continue
             task.cancel()
 
         for task in list(self._tasks):
             try:
                 await task
-            except CancelledError:
-                pass  # nosec
-            except KeyboardInterrupt:
+            except KeyboardInterrupt:  # pragma: nocover
                 raise
-            except Exception:  # nosec
-                pass  # nosec  # error should be handled in done callback
+            except BaseException:  # pragma: nocover
+                pass  # nosec
 
     async def disconnect(self) -> None:
         """Disconnect."""
