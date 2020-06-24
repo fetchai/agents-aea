@@ -26,11 +26,11 @@ behaviours:
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
+    class_name: FipaHandler
 models:
-  dialogues:
+  fipa_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: FipaDialogues
   strategy:
     args:
       currency_id: FET

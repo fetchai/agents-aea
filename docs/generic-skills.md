@@ -29,7 +29,7 @@ This diagram shows the communication between the various entities as data is suc
         activate Blockchain
         
         Seller_AEA->>Search: register_service
-        Buyer_AEA->>Search: search
+        Buyer_AEA->>Search: search_agents
         Search-->>Buyer_AEA: list_of_agents
         Buyer_AEA->>Seller_AEA: call_for_proposal
         Seller_AEA->>Buyer_AEA: propose

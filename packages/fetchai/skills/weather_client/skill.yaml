@@ -6,15 +6,16 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
-  dialogues.py: QmZprXPVdtUwvnzyZh71QHyeDmKzckaxWELVxSELUxziqF
-  handlers.py: QmQu6ytjjxprh5yrE49P9y6Puk84rkimkmR3ak8Etkak5o
-  strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
+  behaviours.py: QmcSjQb5sFFFMdh4LchmfcNNSFM4ZChhX27ZjsaucCKZkw
+  dialogues.py: Qmd7dABghdUAEWdNNMHz99C3Uv8FueAL6PQCSu1U22GFWW
+  handlers.py: QmPVVmGzmtjBhapaEMvLsJPpvkg8n9n6jBTGySZq2gBGx1
+  strategy.py: QmT5JsNs8XATa6bPTJsTENyQDdgjXBdPYsVLifNmKHB6bo
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
 skills:
 - fetchai/generic_buyer:0.5.0
@@ -22,20 +23,20 @@ behaviours:
   search:
     args:
       search_interval: 5
-    class_name: SearchBehaviour
+    class_name: GenericSearchBehaviour
 handlers:
   fipa:
     args: {}
-    class_name: FipaHandler
+    class_name: GenericFipaHandler
   ledger_api:
     args: {}
-    class_name: LedgerApiHandler
+    class_name: GenericLedgerApiHandler
   oef_search:
     args: {}
-    class_name: OefSearchHandler
+    class_name: GenericOefSearchHandler
   transaction:
     args: {}
-    class_name: TransactionHandler
+    class_name: GenericTransactionHandler
 models:
   fipa_dialogues:
     args: {}
@@ -54,5 +55,5 @@ models:
         constraint_type: ==
         search_term: country
         search_value: UK
-    class_name: Strategy
+    class_name: GenericStrategy
 dependencies: {}

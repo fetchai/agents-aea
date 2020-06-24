@@ -13,9 +13,11 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
 skills:
 - fetchai/error:0.3.0
+- fetchai/generic_buyer:0.5.0
 - fetchai/weather_client:0.4.0
 default_connection: fetchai/oef:0.5.0
 default_ledger: fetchai

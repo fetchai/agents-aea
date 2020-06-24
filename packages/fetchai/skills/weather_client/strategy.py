@@ -20,6 +20,3 @@
 """This module contains the strategy class."""
 
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
-
-
-Strategy = GenericStrategy

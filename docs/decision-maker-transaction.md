@@ -15,6 +15,7 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.skills.base import Handler, Skill, SkillContext
@@ -102,18 +103,19 @@ Next, we are creating the transaction message and we send it to the decision-mak
     )
 
     tx_msg = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[skill_config.public_id],
-        tx_id="transaction0",
-        tx_sender_addr=my_aea.identity.address,
-        tx_counterparty_addr=counterparty_identity.address,
-        tx_amount_by_currency_id={"FET": -1},
-        tx_sender_fee=1,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={},
-        ledger_id=FetchAICrypto.identifier,
-        info={"some_info_key": "some_info_value"},
-        tx_nonce=tx_nonce,
+        performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        skill_callback_ids=(skill_config.public_id),
+        skill_callback_info={"some_info_key": "some_info_value"},
+        terms=Terms(
+            sender_addr=my_aea.identity.address,
+            counterparty_addr=counterparty_identity.address,
+            amount_by_currency_id={"FET": -1},
+            is_sender_payable_tx_fee=True,
+            quantities_by_good_id={},
+            nonce=tx_nonce,
+        ),
+        crypto_id=FetchAICrypto.identifier,
+        transaction={},
     )
     my_aea.context.decision_maker_message_queue.put_nowait(tx_msg)
 ```
@@ -160,14 +162,13 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         logger.info(tx_msg_response)
         if (
-            tx_msg_response is not None
-            and tx_msg_response.performative
-            == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
+            tx_msg_response.performative
+            == TransactionMessage.Performative.SIGNED_TRANSACTION
         ):
-            logger.info("Transaction was successful.")
-            logger.info(tx_msg_response.tx_digest)
+            logger.info("Transaction signing was successful.")
+            logger.info(tx_msg_response.signed_transaction)
         else:
-            logger.info("Transaction was not successful.")
+            logger.info("Transaction signing was not successful.")
 
     def teardown(self) -> None:
         """
@@ -194,6 +195,7 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.skills.base import Handler, Skill, SkillContext
@@ -258,18 +260,19 @@ def run():
     )
 
     tx_msg = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[skill_config.public_id],
-        tx_id="transaction0",
-        tx_sender_addr=my_aea.identity.address,
-        tx_counterparty_addr=counterparty_identity.address,
-        tx_amount_by_currency_id={"FET": -1},
-        tx_sender_fee=1,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={},
-        ledger_id=FetchAICrypto.identifier,
-        info={"some_info_key": "some_info_value"},
-        tx_nonce=tx_nonce,
+        performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        skill_callback_ids=(skill_config.public_id),
+        skill_callback_info={"some_info_key": "some_info_value"},
+        terms=Terms(
+            sender_addr=my_aea.identity.address,
+            counterparty_addr=counterparty_identity.address,
+            amount_by_currency_id={"FET": -1},
+            is_sender_payable_tx_fee=True,
+            quantities_by_good_id={},
+            nonce=tx_nonce,
+        ),
+        crypto_id=FetchAICrypto.identifier,
+        transaction={},
     )
     my_aea.context.decision_maker_message_queue.put_nowait(tx_msg)
 
@@ -307,14 +310,13 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         logger.info(tx_msg_response)
         if (
-            tx_msg_response is not None
-            and tx_msg_response.performative
-            == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
+            tx_msg_response.performative
+            == TransactionMessage.Performative.SIGNED_TRANSACTION
         ):
-            logger.info("Transaction was successful.")
-            logger.info(tx_msg_response.tx_digest)
+            logger.info("Transaction signing was successful.")
+            logger.info(tx_msg_response.signed_transaction)
         else:
-            logger.info("Transaction was not successful.")
+            logger.info("Transaction signing was not successful.")
 
     def teardown(self) -> None:
         """

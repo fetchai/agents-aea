@@ -23,9 +23,4 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from packages.fetchai.skills.generic_seller.dialogues import (
-    FipaDialogues as GenericFipaDialogues,
-)
-
-
-FipaDialogues = GenericFipaDialogues
+from packages.fetchai.skills.generic_seller.dialogues import FipaDialogues
