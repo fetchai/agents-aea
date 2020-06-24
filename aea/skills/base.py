@@ -539,7 +539,8 @@ class Model(SkillComponent, ABC):
                 filter(
                     lambda x: any(re.match(shared, x[0]) for shared in model_names)
                     and Model in inspect.getmro(x[1])
-                    and not str.startswith(x[1].__module__, "aea."),
+                    and not str.startswith(x[1].__module__, "aea.")
+                    and not str.startswith(x[1].__module__, "packages."),
                     classes,
                 )
             )
