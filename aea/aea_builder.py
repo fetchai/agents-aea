@@ -1247,6 +1247,10 @@ class AEABuilder:
             ComponentId(ComponentType.SKILL, p_id)
             for p_id in agent_configuration.skills
         ]
+
+        if len(skill_ids) == 0:
+            return
+
         skill_import_order = self._find_import_order(skill_ids, aea_project_path)
         for skill_id in skill_import_order:
             component_path = self._find_component_directory_from_component_id(
