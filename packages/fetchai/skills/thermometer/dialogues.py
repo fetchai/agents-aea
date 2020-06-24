@@ -24,8 +24,8 @@ This module contains the classes required for dialogue management.
 """
 
 from packages.fetchai.skills.generic_seller.dialogues import (
-    Dialogues as GenericDialogues,
+    FipaDialogues as GenericFipaDialogues,
 )
 
 
-Dialogues = GenericDialogues
+FipaDialogues = GenericFipaDialogues

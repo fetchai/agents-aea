@@ -78,15 +78,16 @@ class Strategy(Model):
         self.db = DetectionDatabase(db_dir, False)
 
         if self.is_ledger_tx:
-            balance = self.context.ledger_apis.token_balance(
+            balance = self.context.ledger_apis.get_balance(
                 self.ledger_id,
                 cast(str, self.context.agent_addresses.get(self.ledger_id)),
             )
-            self.db.set_system_status(
-                "ledger-status",
-                self.context.ledger_apis.last_tx_statuses[self.ledger_id],
-            )
-            self.record_balance(balance)
+            # self.db.set_system_status(
+            #     "ledger-status",
+            #     self.context.ledger_apis.last_tx_statuses[self.ledger_id],
+            # )
+            if balance is not None:
+                self.record_balance(balance)
         self.other_carpark_processes_running = False
 
     @property

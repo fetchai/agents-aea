@@ -20,13 +20,18 @@
 """
 This module contains the classes required for dialogue management.
 
-- Dialogue: The dialogue class maintains state of a dialogue and manages it.
-- Dialogues: The dialogues class keeps track of all dialogues.
+- FipaDialogues: The dialogues class keeps track of all dialogues of type fipa.
+- LedgerApiDialogues: The dialogues class keeps track of all dialogues of type ledger_api.
 """
 
 from packages.fetchai.skills.generic_buyer.dialogues import (
-    Dialogues as GenericDialogues,
+    FipaDialogues as GenericFipaDialogues,
+)
+from packages.fetchai.skills.generic_buyer.dialogues import (
+    LedgerApiDialogues as GenericLedgerApiDialogues,
 )
 
 
-Dialogues = GenericDialogues
+FipaDialogues = GenericFipaDialogues
+
+LedgerApiDialogues = GenericLedgerApiDialogues

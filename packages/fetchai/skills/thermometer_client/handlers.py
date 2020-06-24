@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This package contains the handlers of the agent."""
 
 from packages.fetchai.skills.generic_buyer.handlers import (
     GenericFipaHandler,
+    GenericLedgerApiHandler,
     GenericOefSearchHandler,
     GenericTransactionHandler,
 )
@@ -31,3 +32,5 @@ FipaHandler = GenericFipaHandler
 OefSearchHandler = GenericOefSearchHandler
 
 TransactionHandler = GenericTransactionHandler
+
+LedgerApiHandler = GenericLedgerApiHandler

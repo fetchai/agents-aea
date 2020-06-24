@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a behaviour."""
+"""This module contains the behaviours of the agent."""
 
 from packages.fetchai.skills.generic_seller.behaviours import (
     GenericServiceRegistrationBehaviour,

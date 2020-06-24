@@ -17,79 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a behaviour."""
+"""This package contains the behaviours of the agent."""
 
-from typing import cast
-
-from aea.skills.behaviours import TickerBehaviour
-
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.carpark_client.strategy import Strategy
+from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
 
 
-class MySearchBehaviour(TickerBehaviour):
-    """This class scaffolds a behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialise the class."""
-        super().__init__(**kwargs)
-        self._search_id = 0
-
-    def setup(self) -> None:
-        """Implement the setup for the behaviour."""
-        strategy = cast(Strategy, self.context.strategy)
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.token_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-            )
-            if balance > 0:
-                self.context.logger.info(
-                    "[{}]: starting balance on {} ledger={}.".format(
-                        self.context.agent_name, strategy.ledger_id, balance
-                    )
-                )
-            else:
-                self.context.logger.warning(
-                    "[{}]: you have no starting balance on {} ledger!".format(
-                        self.context.agent_name, strategy.ledger_id
-                    )
-                )
-                self.context.is_active = False
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_searching:
-            strategy.on_submit_search()
-            self._search_id += 1
-            query = strategy.get_service_query()
-            search_request = OefSearchMessage(
-                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                dialogue_reference=(str(self._search_id), ""),
-                query=query,
-            )
-            search_request.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=search_request,)
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.token_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-            )
-            self.context.logger.info(
-                "[{}]: ending balance on {} ledger={}.".format(
-                    self.context.agent_name, strategy.ledger_id, balance
-                )
-            )
+SearchBehaviour = GenericSearchBehaviour

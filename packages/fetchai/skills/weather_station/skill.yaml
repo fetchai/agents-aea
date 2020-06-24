@@ -30,19 +30,37 @@ behaviours:
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
+    class_name: FipaHandler
 models:
-  dialogues:
+  fipa_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: FipaDialogues
   strategy:
     args:
       currency_id: FET
-      date_one: 1/10/2019
-      date_two: 1/12/2019
+      data_for_sale:
+        pressure: 20
+        temperature: 26
+        wind: 10
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      has_data_source: false
       is_ledger_tx: true
       ledger_id: fetchai
-      price_per_row: 1
       seller_tx_fee: 0
+      service_data:
+        city: Cambridge
+        country: UK
+      total_price: 10
+      date_one: 1/10/2019
+      date_two: 1/12/2019
     class_name: Strategy
 dependencies: {}

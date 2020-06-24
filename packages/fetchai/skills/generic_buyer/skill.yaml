@@ -26,16 +26,22 @@ handlers:
   fipa:
     args: {}
     class_name: GenericFipaHandler
-  oef:
+  oef_search:
     args: {}
     class_name: GenericOefSearchHandler
   transaction:
     args: {}
     class_name: GenericTransactionHandler
-models:
-  dialogues:
+  ledger_api:
     args: {}
-    class_name: Dialogues
+    class_name: GenericLedgerApiHandler
+models:
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
   strategy:
     args:
       currency_id: FET

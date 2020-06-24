@@ -274,7 +274,7 @@ class FIPAHandler(Handler):
             time_elapsed = 0
             # TODO: fix blocking code; move into behaviour!
             while not_settled and time_elapsed < 60:
-                is_valid = self.context.ledger_apis.is_tx_valid(
+                is_valid = self.context.ledger_apis.is_transaction_valid(
                     ledger_id,
                     tx_digest,
                     self.context.agent_addresses[ledger_id],
@@ -287,18 +287,20 @@ class FIPAHandler(Handler):
                     time.sleep(2)
                     time_elapsed += 2
             if is_valid:
-                token_balance = self.context.ledger_apis.token_balance(
+                balance = self.context.ledger_apis.get_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
                 )
-
+                if balance is None:
+                    self.context.logger.info("Unable to retrieve balance.")
+                    return
                 strategy = cast(Strategy, self.context.strategy)
-                strategy.record_balance(token_balance)
+                strategy.record_balance(balance)
 
                 self.context.logger.info(
                     "[{}]: transaction={} settled, new balance={}. Sending data to sender={}".format(
                         self.context.agent_name,
                         tx_digest,
-                        token_balance,
+                        balance,
                         msg.counterparty[-5:],
                     )
                 )
