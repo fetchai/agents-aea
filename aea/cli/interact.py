@@ -130,7 +130,7 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
             )
             message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         else:
-            message = message_escaped
+            message = message_escaped # pragma: no cover
         msg = DefaultMessage(performative=performative, content=message)
         envelope = Envelope(
             to=agent_name,
