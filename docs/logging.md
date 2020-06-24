@@ -22,13 +22,13 @@ aea_version: 0.4.1
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.5.0
+- fetchai/stub:0.6.0
 contracts: []
 protocols:
 - fetchai/default:0.3.0
 skills:
 - fetchai/error:0.3.0
-default_connection: fetchai/stub:0.5.0
+default_connection: fetchai/stub:0.6.0
 default_ledger: fetchai
 ledger_apis: {}
 logging_config:
@@ -42,7 +42,7 @@ By updating the `logging_config` section, you can configure the loggers of your 
 
 The format of this section is specified in the <a href="https://docs.python.org/3/library/logging.config.html" target=_blank>`logging.config`</a> module.
 
-At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target=_blank>this section</a> 
+At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target=_blank>this section</a>
 you'll find the definition of the configuration dictionary schema.
 
 Below is an example of the `logging_config` value.

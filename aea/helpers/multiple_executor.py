@@ -21,16 +21,30 @@ import asyncio
 import logging
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
-from asyncio.tasks import FIRST_EXCEPTION
-from concurrent.futures._base import Executor
+from asyncio.tasks import FIRST_EXCEPTION, Task
+from concurrent.futures._base import Executor, Future
 from concurrent.futures.process import ProcessPoolExecutor
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum
 from threading import Thread
-from typing import Any, Awaitable, Callable, Dict, Optional, Sequence, Tuple, Type
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 
 logger = logging.getLogger(__name__)
+
+
+TaskAwaitable = Union[Task, Future]
 
 
 class ExecutorExceptionPolicies(Enum):
@@ -46,15 +60,15 @@ class AbstractExecutorTask(ABC):
 
     def __init__(self):
         """Init task."""
-        self._future: Optional[Awaitable] = None
+        self._future: Optional[TaskAwaitable] = None
 
     @property
-    def future(self) -> Optional[Awaitable]:
+    def future(self) -> Optional[TaskAwaitable]:
         """Return awaitable to get result of task execution."""
         return self._future
 
     @future.setter
-    def future(self, future: Awaitable) -> None:
+    def future(self, future: TaskAwaitable) -> None:
         """Set awaitable to get result of task execution."""
         self._future = future
 
@@ -67,7 +81,7 @@ class AbstractExecutorTask(ABC):
         """Implement stop task function here."""
 
     @abstractmethod
-    def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
+    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
         """
         Create asyncio task for task run in asyncio loop.
 
@@ -80,6 +94,29 @@ class AbstractExecutorTask(ABC):
         """Return task id."""
         return id(self)
 
+    @property
+    def failed(self) -> bool:
+        """
+        Return was exception failed or not.
+
+        If it's running it's not failed.
+
+        :rerurn: bool
+        """
+        if not self._future:
+            return False
+
+        if not self._future.done():
+            return False
+
+        if not self._future.exception():
+            return False
+
+        if isinstance(self._future.exception(), KeyboardInterrupt):
+            return False
+
+        return True
+
 
 class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
     """Task for multiprocess executor."""
@@ -88,7 +125,7 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
     def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Return function and arguments to call within subprocess."""
 
-    def create_async_task(self, loop: AbstractEventLoop) -> Awaitable:
+    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
         """
         Create asyncio task for task run in asyncio loop.
 
@@ -119,7 +156,7 @@ class AbstractMultipleExecutor(ABC):
         self._task_fail_policy: ExecutorExceptionPolicies = task_fail_policy
         self._tasks: Sequence[AbstractExecutorTask] = tasks
         self._is_running: bool = False
-        self._future_task: Dict[Awaitable, AbstractExecutorTask] = {}
+        self._future_task: Dict[TaskAwaitable, AbstractExecutorTask] = {}
         self._loop: AbstractEventLoop = asyncio.new_event_loop()
         self._executor_pool: Optional[Executor] = None
         self._set_executor_pool()
@@ -134,16 +171,24 @@ class AbstractMultipleExecutor(ABC):
         self._is_running = True
         self._start_tasks()
         self._loop.run_until_complete(self._wait_tasks_complete())
+        self._is_running = False
 
     def stop(self) -> None:
         """Stop tasks."""
         self._is_running = False
+
         for task in self._tasks:
             self._stop_task(task)
+
         if not self._loop.is_running():
             self._loop.run_until_complete(
                 self._wait_tasks_complete(skip_exceptions=True)
             )
+        if self._executor_pool:
+            self._executor_pool.shutdown(wait=True)
+
+        if self._executor_pool:
+            self._executor_pool.shutdown(wait=True)
 
     def _start_tasks(self) -> None:
         """Schedule tasks."""
@@ -158,24 +203,24 @@ class AbstractMultipleExecutor(ABC):
 
         :param skip_exceptions: skip exceptions if raised in tasks
         """
-        done, pending = await asyncio.wait(
-            self._future_task.keys(), return_when=FIRST_EXCEPTION
-        )
+        pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
         async def wait_future(future):
             try:
                 await future
+            except KeyboardInterrupt:
+                logger.exception("KeyboardInterrupt in task!")
+                if not skip_exceptions:
+                    raise
             except Exception as e:
+                logger.exception("Exception in task!")
                 if not skip_exceptions:
                     await self._handle_exception(self._future_task[future], e)
 
-        for future in done:
-            await wait_future(future)
-
-        if pending:
-            done, _ = await asyncio.wait(pending)
-            for task in done:
-                await wait_future(task)
+        while pending:
+            done, pending = await asyncio.wait(pending, return_when=FIRST_EXCEPTION)
+            for future in done:
+                await wait_future(future)
 
     async def _handle_exception(
         self, task: AbstractExecutorTask, exc: Exception
@@ -190,6 +235,7 @@ class AbstractMultipleExecutor(ABC):
         :return: None
         """
         logger.exception(f"Exception raised during {task.id} running.")
+        logger.info(f"Exception raised during {task.id} running.")
         if self._task_fail_policy == ExecutorExceptionPolicies.propagate:
             raise exc
         elif self._task_fail_policy == ExecutorExceptionPolicies.log_only:
@@ -204,7 +250,7 @@ class AbstractMultipleExecutor(ABC):
             raise ValueError(f"Unknown fail policy: {self._task_fail_policy}")
 
     @abstractmethod
-    def _start_task(self, task: AbstractExecutorTask) -> Awaitable:
+    def _start_task(self, task: AbstractExecutorTask) -> TaskAwaitable:
         """
         Start particular task.
 
@@ -225,6 +271,21 @@ class AbstractMultipleExecutor(ABC):
         """
         task.stop()
 
+    @property
+    def num_failed(self) -> int:
+        """Return number of failed tasks."""
+        return len(self.failed_tasks)
+
+    @property
+    def failed_tasks(self) -> Sequence[AbstractExecutorTask]:
+        """Return sequence failed tasks."""
+        return [task for task in self._tasks if task.failed]
+
+    @property
+    def not_failed_tasks(self) -> Sequence[AbstractExecutorTask]:
+        """Return sequence successful tasks."""
+        return [task for task in self._tasks if not task.failed]
+
 
 class ThreadExecutor(AbstractMultipleExecutor):
     """Thread based executor to run multiple agents in threads."""
@@ -233,14 +294,16 @@ class ThreadExecutor(AbstractMultipleExecutor):
         """Set thread pool pool to be used."""
         self._executor_pool = ThreadPoolExecutor(max_workers=len(self._tasks))
 
-    def _start_task(self, task: AbstractExecutorTask) -> Awaitable:
+    def _start_task(self, task: AbstractExecutorTask) -> TaskAwaitable:
         """
         Start particular task.
 
         :param task: AbstractExecutorTask instance to start.
         :return: awaitable object(future) to get result or exception
         """
-        return self._loop.run_in_executor(self._executor_pool, task.start)
+        return cast(
+            TaskAwaitable, self._loop.run_in_executor(self._executor_pool, task.start)
+        )
 
 
 class ProcessExecutor(ThreadExecutor):
@@ -250,7 +313,7 @@ class ProcessExecutor(ThreadExecutor):
         """Set thread pool pool to be used."""
         self._executor_pool = ProcessPoolExecutor(max_workers=len(self._tasks))
 
-    def _start_task(self, task: AbstractExecutorTask) -> Awaitable:
+    def _start_task(self, task: AbstractExecutorTask) -> TaskAwaitable:
         """
         Start particular task.
 
@@ -258,7 +321,9 @@ class ProcessExecutor(ThreadExecutor):
         :return: awaitable object(future) to get result or exception
         """
         fn, args = task.start()
-        return self._loop.run_in_executor(self._executor_pool, fn, *args)
+        return cast(
+            TaskAwaitable, self._loop.run_in_executor(self._executor_pool, fn, *args)
+        )
 
 
 class AsyncExecutor(AbstractMultipleExecutor):
@@ -267,7 +332,7 @@ class AsyncExecutor(AbstractMultipleExecutor):
     def _set_executor_pool(self) -> None:
         """Do nothing, cause we run tasks in asyncio event loop and do not need an executor pool."""
 
-    def _start_task(self, task: AbstractExecutorTask) -> Awaitable:
+    def _start_task(self, task: AbstractExecutorTask) -> TaskAwaitable:
         """
         Start particular task.
 
@@ -327,6 +392,7 @@ class AbstractMultipleRunner:
         """
         self._is_running = False
         self._executor.stop()
+
         if self._thread is not None:
             self._thread.join(timeout=timeout)
 
@@ -348,3 +414,26 @@ class AbstractMultipleRunner:
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
         """Make tasks to run with executor."""
         raise NotImplementedError
+
+    @property
+    def num_failed(self):
+        """Return number of failed tasks."""
+        return self._executor.num_failed
+
+    @property
+    def failed(self):
+        """Return sequence failed tasks."""
+        return [i.id for i in self._executor.failed_tasks]
+
+    @property
+    def not_failed(self):
+        """Return sequence successful tasks."""
+        return [i.id for i in self._executor.not_failed_tasks]
+
+    def join_thread(self) -> None:
+        """Join thread if running in thread mode."""
+        if self._thread is None:
+            raise ValueError("Not started in thread mode.")
+        # do not block with join, helpful to catch Keyboardiinterrupted exception
+        while self._thread.is_alive():
+            self._thread.join(0.1)

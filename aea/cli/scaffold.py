@@ -177,16 +177,13 @@ def _scaffold_dm_handler(ctx: Context):
             "A decision maker handler specification already exists. Aborting..."
         )
 
+    dest = Path("decision_maker.py")
+    agent_name = ctx.agent_config.agent_name
+    click.echo("Adding decision maker scaffold to the agent '{}'...".format(agent_name))
+
+    # create the file name
+    dotted_path = ".decision_maker::DecisionMakerHandler"
     try:
-        agent_name = ctx.agent_config.agent_name
-        click.echo(
-            "Adding decision maker scaffold to the agent '{}'...".format(agent_name)
-        )
-
-        # create the file name
-        dest = Path("decision_maker.py")
-        dotted_path = ".decision_maker::DecisionMakerHandler"
-
         # copy the item package into the agent project.
         src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
         logger.debug("Copying decision maker. src={} dst={}".format(src, dest))

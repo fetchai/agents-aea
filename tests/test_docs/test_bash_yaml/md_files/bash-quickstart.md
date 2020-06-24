@@ -30,12 +30,12 @@ Email: hello@fetch.ai
 Password:
 Please make sure that passwords are equal.
 Confirm password:
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
+
 v0.4.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
@@ -61,15 +61,15 @@ recipient_aea,sender_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.5.0
+aea run --connections fetchai/stub:0.6.0
 ```
 ``` bash
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
+
 v0.4.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...

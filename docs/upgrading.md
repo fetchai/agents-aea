@@ -70,3 +70,7 @@ As a result of this feature, you are now able to pass key-pairs to your connecti
 You must update your connections as the old implementation is no longer supported.
 </li>
 </ul>
+
+## v0.4.1 to v0.5.0
+
+- Add `skill: []` to existing `skill.yaml` files.

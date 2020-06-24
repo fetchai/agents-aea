@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea runner."""
 import time
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
@@ -122,8 +122,8 @@ class TestThreadedRunner:
         with patch.object(executor_logger, "exception") as mock:
             runner.start(threaded=True)
             time.sleep(1)
-        mock.assert_called_with(
-            f"Exception raised during {self.failing_aea.name} running."
+        mock.assert_has_calls(
+            [call(f"Exception raised during {self.failing_aea.name} running.")]
         )
         assert not runner.is_running
         runner.stop()

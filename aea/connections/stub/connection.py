@@ -16,32 +16,24 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the stub connection."""
 
 import asyncio
 import codecs
 import logging
-import os
 import re
+from asyncio import CancelledError
+from asyncio.tasks import Task
+from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
-from typing import IO, List, Optional, Union
-
-from watchdog.events import FileModifiedEvent, FileSystemEventHandler
-from watchdog.utils import platform
+from typing import AsyncIterable, IO, List, Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers import file_lock
 from aea.mail.base import Envelope
-
-
-if platform.is_darwin():
-    """Cause fsevent fails on multithreading on macos."""
-    # pylint: disable=ungrouped-imports
-    from watchdog.observers.kqueue import KqueueObserver as Observer
-else:
-    from watchdog.observers import Observer  # pylint: disable=ungrouped-imports
 
 
 logger = logging.getLogger(__name__)
@@ -52,18 +44,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.5.0")
-
-
-class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
-    def __init__(self, connection, file_to_observe: Union[str, Path]):
-        self._connection = connection
-        self._file_to_observe = Path(file_to_observe).absolute()
-
-    def on_modified(self, event: FileModifiedEvent):
-        modified_file_path = Path(event.src_path).absolute()
-        if modified_file_path == self._file_to_observe:
-            self._connection.read_envelopes()
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.6.0")
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
@@ -109,41 +90,15 @@ def lock_file(file_descriptor: IO[bytes]):
     """
     try:
         file_lock.lock(file_descriptor, file_lock.LOCK_EX)
-    except OSError as e:
+    except Exception as e:
         logger.error(
             "Couldn't acquire lock for file {}: {}".format(file_descriptor.name, e)
         )
-        raise e
+        raise
     try:
         yield
     finally:
         file_lock.unlock(file_descriptor)
-
-
-def read_envelopes(file_pointer: IO[bytes]) -> List[Envelope]:
-    """Receive new envelopes, if any."""
-    envelopes = []  # type: List[Envelope]
-    with lock_file(file_pointer):
-        lines = file_pointer.read()
-        if len(lines) > 0:
-            file_pointer.truncate(0)
-            file_pointer.seek(0)
-
-    if len(lines) == 0:
-        return envelopes
-
-    # get messages
-    # match with b"[^,]*,[^,]*,[^,]*,.*,[\n]?"
-    regex = re.compile(
-        (b"[^" + SEPARATOR + b"]*" + SEPARATOR) * 3 + b".*,[\n]?", re.DOTALL
-    )
-    messages = [m.group(0) for m in regex.finditer(lines)]
-    for msg in messages:
-        logger.debug("processing: {!r}".format(msg))
-        envelope = _process_line(msg)
-        if envelope is not None:
-            envelopes.append(envelope)
-    return envelopes
 
 
 def write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None:
@@ -164,6 +119,7 @@ def _process_line(line: bytes) -> Optional[Envelope]:
     :return: Envelope
     :raise: Exception
     """
+    logger.debug("processing: {!r}".format(line))
     envelope = None  # type: Optional[Envelope]
     try:
         envelope = _decode(line, separator=SEPARATOR)
@@ -204,6 +160,12 @@ class StubConnection(Connection):
 
     connection_id = PUBLIC_ID
 
+    message_regex = re.compile(
+        (b"[^" + SEPARATOR + b"]*" + SEPARATOR) * 3 + b".*,[\n]?", re.DOTALL
+    )
+
+    read_delay = 0.001
+
     def __init__(self, **kwargs):
         """Initialize a stub connection."""
         super().__init__(**kwargs)
@@ -223,27 +185,58 @@ class StubConnection(Connection):
 
         self.in_queue = None  # type: Optional[asyncio.Queue]
 
-        self._observer = Observer()
+        self._read_envelopes_task: Optional[Task] = None
+        self._write_pool = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="stub_connection_writer_"
+        )  # sequential write only! but threaded!
 
-        directory = os.path.dirname(input_file_path.absolute())
-        self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
-        self._observer.schedule(self._event_handler, directory)
-
-    def read_envelopes(self) -> None:
-        """Receive new envelopes, if any."""
-        envelopes = read_envelopes(self.input_file)
-        self._put_envelopes(envelopes)
-
-    def _put_envelopes(self, envelopes: List[Envelope]) -> None:
+    async def _file_read_and_trunc(self, delay: float = 0.001) -> AsyncIterable[bytes]:
         """
-        Put the envelopes in the inqueue.
+        Generate input file read chunks and trunc data already read.
 
-        :param envelopes: the list of envelopes
+        :param delay: float, delay on empty read.
+
+        :return: async generator return file read bytes.
         """
+        while True:
+            with lock_file(self.input_file):
+                data = self.input_file.read()
+                if data:
+                    self.input_file.truncate(0)
+                    self.input_file.seek(0)
+
+            if data:
+                yield data
+            else:
+                await asyncio.sleep(delay)
+
+    async def read_envelopes(self) -> None:
+        """Read envelopes from inptut file, decode and put into in_queue."""
         assert self.in_queue is not None, "Input queue not initialized."
         assert self._loop is not None, "Loop not initialized."
-        for envelope in envelopes:
-            asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
+
+        logger.debug("Read messages!")
+        async for data in self._file_read_and_trunc(delay=self.read_delay):
+            lines = self._split_messages(data)
+            for line in lines:
+                envelope = _process_line(line)
+
+                if envelope is None:
+                    continue
+
+                logger.debug(f"Add envelope {envelope}")
+                await self.in_queue.put(envelope)
+
+    @classmethod
+    def _split_messages(cls, data: bytes) -> List[bytes]:
+        """
+        Split binary data on messages.
+
+        :param data: bytes
+
+        :return: list of bytes
+        """
+        return [m.group(0) for m in cls.message_regex.finditer(data)]
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
@@ -259,24 +252,40 @@ class StubConnection(Connection):
         """Set up the connection."""
         if self.connection_status.is_connected:
             return
-
+        self._loop = asyncio.get_event_loop()
         try:
             # initialize the queue here because the queue
             # must be initialized with the right event loop
             # which is known only at connection time.
             self.in_queue = asyncio.Queue()
-            self._observer.start()
+            self._read_envelopes_task = self._loop.create_task(self.read_envelopes())
         except Exception as e:  # pragma: no cover
-            self._observer.stop()
-            self._observer.join()
             raise e
         finally:
             self.connection_status.is_connected = False
 
         self.connection_status.is_connected = True
 
-        # do a first processing of messages.
-        #  self.read_envelopes()
+    async def _stop_read_envelopes(self) -> None:
+        """
+        Stop read envelopes task.
+
+        Cancel task and wait for completed.
+        """
+        if not self._read_envelopes_task:
+            return  # pragma: nocover
+
+        if not self._read_envelopes_task.done():
+            self._read_envelopes_task.cancel()
+
+        try:
+            await self._read_envelopes_task
+        except CancelledError:
+            pass  # task was cancelled, that was expected
+        except BaseException:  # pragma: nocover
+            logger.exception(
+                "during envelop read"
+            )  # do not raise exception cause it's on task stop
 
     async def disconnect(self) -> None:
         """
@@ -288,16 +297,18 @@ class StubConnection(Connection):
             return
 
         assert self.in_queue is not None, "Input queue not initialized."
-        self._observer.stop()
-        self._observer.join()
+        await self._stop_read_envelopes()
+        self._write_pool.shutdown(wait=False)
         self.in_queue.put_nowait(None)
-
         self.connection_status.is_connected = False
 
-    async def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 
         :return: None
         """
-        write_envelope(envelope, self.output_file)
+        assert self.loop is not None, "Loop not initialized."
+        self.loop.run_in_executor(
+            self._write_pool, write_envelope, envelope, self.output_file
+        )

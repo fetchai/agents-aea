@@ -13,6 +13,7 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/http:0.3.0
+skills: []
 behaviours: {}
 handlers:
   aries_demo_default:

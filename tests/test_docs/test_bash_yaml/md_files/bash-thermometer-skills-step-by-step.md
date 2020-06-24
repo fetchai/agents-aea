@@ -5,6 +5,18 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
+aea fetch fetchai/thermometer_aea:0.3.0
+cd thermometer_aea
+aea eject fetchai/thermometer:0.4.0
+cd ..
+```
+``` bash
+aea fetch fetchai/thermometer_client:0.3.0
+cd thermometer_client
+aea eject fetchai/thermometer_client:0.3.0
+cd ..
+```
+``` bash
 aea create my_thermometer
 cd my_thermometer
 ```

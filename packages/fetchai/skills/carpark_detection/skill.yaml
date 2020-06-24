@@ -20,6 +20,7 @@ protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
+skills: []
 behaviours:
   car_park_detection:
     args:

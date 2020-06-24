@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,16 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Module to declare constants."""
-
-from aea.configurations.base import DEFAULT_LICENSE as DL
-from aea.configurations.base import DEFAULT_REGISTRY_PATH as DRP
-from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FetchAICrypto
-
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.6.0")
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.3.0")
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.3.0")
-DEFAULT_LEDGER = FetchAICrypto.identifier
-DEFAULT_REGISTRY_PATH = DRP
-DEFAULT_LICENSE = DL
+"""This package contains the protocol generator modules."""

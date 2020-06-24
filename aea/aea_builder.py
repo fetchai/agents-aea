@@ -68,7 +68,7 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_module
+from aea.helpers.base import load_aea_package, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
@@ -1299,10 +1299,15 @@ class AEABuilder:
         ).values():
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
+                resources.add_component(component)
+            elif configuration.is_abstract_component:
+                load_aea_package(configuration)
             else:
                 configuration = deepcopy(configuration)
-                component = load_component_from_config(configuration, **kwargs)
-            resources.add_component(component)
+                component = load_component_from_config(
+                    configuration, **kwargs
+                )
+                resources.add_component(component)
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:

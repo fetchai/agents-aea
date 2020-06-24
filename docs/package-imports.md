@@ -23,7 +23,7 @@ aea_name/
   protocols/            Directory containing all the protocols developed as part of the given project.
     protocol_1/         First protocol
     ...                 ...
-    protocol_m/         mth protocol 
+    protocol_m/         mth protocol
   skills/               Directory containing all the skills developed as part of the given project.
     skill_1/            First skill
     ...                 ...
@@ -47,7 +47,7 @@ The `aea-config.yaml` is the top level configuration file of an AEA. It defines 
 For the AEA to use a package, the `public_id` for the package must be listed in the `aea-config.yaml` file, e.g.
 ``` yaml
 connections:
-- fetchai/stub:0.5.0
+- fetchai/stub:0.6.0
 ```
 
 The above shows a part of the `aea-config.yaml`. If you see the connections, you will see that we follow a pattern of `author/name_package:version` to identify each package, also referred to as `public_id`. Here the `author` is the author of the package.

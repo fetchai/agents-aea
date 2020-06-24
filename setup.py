@@ -106,7 +106,6 @@ base_deps = [
     "semver>=2.9.1",
     "protobuf",
     "pyyaml>=4.2b1",
-    "watchdog",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -161,7 +160,7 @@ setup(
     install_requires=base_deps,
     tests_require=["tox"],
     extras_require=all_extras,
-    entry_points={"console_scripts": ["aea=aea.cli:cli"],},
+    entry_points={"console_scripts": ["aea=aea.cli:cli"]},
     zip_safe=False,
     include_package_data=True,
     license=about["__license__"],
