@@ -225,9 +225,10 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        tx_receipt = api.get_transaction_receipt(message.tx_digest)
+        tx_receipt = api.get_transaction_receipt(message.transaction_digest)
         return LedgerApiMessage(
-            performative=LedgerApiMessage.Performative.TX_RECEIPT, data=tx_receipt,
+            performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+            data=tx_receipt,
         )
 
     def send_signed_tx(
@@ -240,9 +241,10 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        tx_digest = api.send_signed_transaction(message.signed_tx.any)
+        tx_digest = api.send_signed_transaction(message.signed_transaction.any)
         return LedgerApiMessage(
-            performative=LedgerApiMessage.Performative.TX_DIGEST, digest=tx_digest,
+            performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
+            digest=tx_digest,
         )
 
     def get_error_message(

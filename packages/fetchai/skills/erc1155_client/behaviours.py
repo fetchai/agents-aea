@@ -43,11 +43,11 @@ class MySearchBehaviour(TickerBehaviour):
         """Implement the setup for the behaviour."""
         strategy = cast(Strategy, self.context.strategy)
         if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.token_balance(
+            balance = self.context.ledger_apis.get_balance(
                 strategy.ledger_id,
                 cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
-            if balance > 0:
+            if balance is not None and balance > 0:
                 self.context.logger.info(
                     "[{}]: starting balance on {} ledger={}.".format(
                         self.context.agent_name, strategy.ledger_id, balance
@@ -87,12 +87,13 @@ class MySearchBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.token_balance(
+            balance = self.context.ledger_apis.get_balance(
                 strategy.ledger_id,
                 cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
-            self.context.logger.info(
-                "[{}]: ending balance on {} ledger={}.".format(
-                    self.context.agent_name, strategy.ledger_id, balance
+            if balance is not None:
+                self.context.logger.info(
+                    "[{}]: ending balance on {} ledger={}.".format(
+                        self.context.agent_name, strategy.ledger_id, balance
+                    )
                 )
-            )

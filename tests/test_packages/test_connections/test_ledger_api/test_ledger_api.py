@@ -114,9 +114,9 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     signed_transaction = crypto1.sign_transaction(tx)
     request = LedgerApiMessage(
-        LedgerApiMessage.Performative.SEND_SIGNED_TX,
+        LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         ledger_id=EthereumCrypto.identifier,
-        signed_tx=AnyObject(signed_transaction),
+        signed_transaction=AnyObject(signed_transaction),
     )
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)
@@ -126,14 +126,21 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert response is not None
     assert type(response.message) == LedgerApiMessage
     response_message = cast(LedgerApiMessage, response.message)
-    assert response_message.performative == LedgerApiMessage.Performative.TX_DIGEST
-    assert response_message.digest is not None
-    assert type(response_message.digest) == str
-    assert type(response_message.digest.startswith("0x"))
+    assert (
+        response_message.performative
+        == LedgerApiMessage.Performative.TRANSACTION_DIGEST
+    )
+    assert response_message.transaction_digest is not None
+    assert type(response_message.transaction_digest) == str
+    assert type(response_message.transaction_digest.startswith("0x"))
 
     # check that the transaction is valid
     is_valid = api.is_transaction_valid(
-        response_message.digest, crypto2.address, crypto1.address, tx_nonce, amount
+        response_message.transaction_digest,
+        crypto2.address,
+        crypto1.address,
+        tx_nonce,
+        amount,
     )
     assert is_valid, "Transaction not valid."
 

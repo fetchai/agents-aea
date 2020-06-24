@@ -398,7 +398,7 @@ class TransactionHandler(Handler):
         tx_message = cast(TransactionMessage, message)
         if (
             tx_message.performative
-            == TransactionMessage.Performative.SUCCESSFUL_SIGNING
+            == TransactionMessage.Performative.SIGNED_TRANSACTION
         ):
 
             # TODO: Need to modify here and add the contract option in case we are using one.
@@ -410,9 +410,11 @@ class TransactionHandler(Handler):
             )
             game = cast(Game, self.context.game)
             tx_counterparty_signature = cast(
-                str, tx_message.info.get("tx_counterparty_signature")
+                str, tx_message.skill_callback_info.get("tx_counterparty_signature")
             )
-            tx_counterparty_id = cast(str, tx_message.info.get("tx_counterparty_id"))
+            tx_counterparty_id = cast(
+                str, tx_message.skill_callback_info.get("tx_counterparty_id")
+            )
             if (tx_counterparty_signature is not None) and (
                 tx_counterparty_id is not None
             ):
@@ -420,17 +422,16 @@ class TransactionHandler(Handler):
                 msg = TacMessage(
                     performative=TacMessage.Performative.TRANSACTION,
                     tx_id=tx_id,
-                    tx_sender_addr=tx_message.tx_sender_addr,
-                    tx_counterparty_addr=tx_message.tx_counterparty_addr,
-                    amount_by_currency_id=tx_message.tx_amount_by_currency_id,
-                    tx_sender_fee=tx_message.tx_sender_fee,
-                    tx_counterparty_fee=tx_message.tx_counterparty_fee,
-                    quantities_by_good_id=tx_message.tx_quantities_by_good_id,
-                    tx_sender_signature=tx_message.signed_payload.get("tx_signature"),
-                    tx_counterparty_signature=tx_message.info.get(
+                    tx_sender_addr=tx_message.terms.sender_addr,
+                    tx_counterparty_addr=tx_message.terms.counterparty_addr,
+                    amount_by_currency_id=tx_message.terms.amount_by_currency_id,
+                    is_sender_payable_tx_fee=tx_message.terms.is_sender_payable_tx_fee,
+                    quantities_by_good_id=tx_message.terms.quantities_by_good_id,
+                    tx_sender_signature=tx_message.signed_transaction,
+                    tx_counterparty_signature=tx_message.skill_callback_info.get(
                         "tx_counterparty_signature"
                     ),
-                    tx_nonce=tx_message.info.get("tx_nonce"),
+                    tx_nonce=tx_message.skill_callback_info.get("tx_nonce"),
                 )
                 msg.counterparty = game.conf.controller_addr
                 self.context.outbox.put_message(message=msg)

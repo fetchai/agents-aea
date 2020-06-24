@@ -351,7 +351,9 @@ class Strategy(Model):
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
         )
-        if not ownership_state_after_locks.is_affordable_transaction(transaction_msg):
+        if not ownership_state_after_locks.is_affordable_transaction(
+            transaction_msg.terms
+        ):
             return False
         proposal_delta_score = self.context.decision_maker_handler_context.preferences.utility_diff_from_transaction(
             ownership_state_after_locks, transaction_msg

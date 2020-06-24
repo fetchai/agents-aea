@@ -31,6 +31,7 @@ from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumCrypto
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
@@ -102,7 +103,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_DEPLOY.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing the transaction to deploy the smart contract.
@@ -111,7 +113,8 @@ class ERC1155Contract(Contract):
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
         :param transaction_id: the transaction id
-        :param info: optional info to pass with the transaction message
+        :param skill_callback_info: optional info to pass with the transaction message
+        :param nonce: a nonce to distinguish the tx framework side
         :return: the transaction message for the decision maker
         """
         assert not self.is_deployed, "The contract is already deployed!"
@@ -124,18 +127,21 @@ class ERC1155Contract(Contract):
             )
         )
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=deployer_address,
-            tx_counterparty_addr=deployer_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
-            tx_sender_fee=0,  # TODO: provide tx_sender_fee
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx": tx},
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info
+            if skill_callback_info is not None
+            else {},
+            terms=Terms(
+                sender_addr=deployer_address,
+                counterparty_addr=deployer_address,
+                amount_by_currency_id={ETHEREUM_CURRENCY: 0},
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id={},
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            transaction=tx,
         )
         return tx_message
 
@@ -174,7 +180,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_CREATE_BATCH.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing the transaction to create a batch of tokens.
@@ -184,7 +191,7 @@ class ERC1155Contract(Contract):
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
         :param transaction_id: the transaction id
-        :param info: optional info to pass with the transaction message
+        :param skill_callback_info: optional info to pass with the transaction message
         :return: the transaction message for the decision maker
         """
         tx = self.get_create_batch_transaction(
@@ -198,18 +205,21 @@ class ERC1155Contract(Contract):
             )
         )
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=deployer_address,
-            tx_counterparty_addr=deployer_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx": tx},
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info
+            if skill_callback_info is not None
+            else {},
+            terms=Terms(
+                sender_addr=deployer_address,
+                counterparty_addr=deployer_address,
+                amount_by_currency_id={ETHEREUM_CURRENCY: 0},
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id={},
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            transaction=tx,
         )
         return tx_message
 
@@ -248,7 +258,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_CREATE_SINGLE.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing the transaction to create a single token.
@@ -270,18 +281,21 @@ class ERC1155Contract(Contract):
             )
         )
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=deployer_address,
-            tx_counterparty_addr=deployer_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx": tx},
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info
+            if skill_callback_info is not None
+            else {},
+            terms=Terms(
+                sender_addr=deployer_address,
+                counterparty_addr=deployer_address,
+                amount_by_currency_id={ETHEREUM_CURRENCY: 0},
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id={},
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            transaction=tx,
         )
         return tx_message
 
@@ -322,7 +336,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_MINT_BATCH.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing the transaction to mint a batch of tokens.
@@ -355,20 +370,22 @@ class ERC1155Contract(Contract):
             for token_id, quantity in zip(token_ids, mint_quantities)
         }
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=deployer_address,
-            tx_counterparty_addr=recipient_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id=tx_quantities_by_good_id,
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx": tx},
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info
+            if skill_callback_info is not None
+            else {},
+            terms=Terms(
+                sender_addr=deployer_address,
+                counterparty_addr=recipient_address,
+                amount_by_currency_id={ETHEREUM_CURRENCY: 0},
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id=tx_quantities_by_good_id,
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            transaction=tx,
         )
-
         return tx_message
 
     def get_mint_batch_transaction(
@@ -424,7 +441,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_MINT_SINGLE.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing the transaction to mint a batch of tokens.
@@ -452,18 +470,21 @@ class ERC1155Contract(Contract):
             )
         )
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=deployer_address,
-            tx_counterparty_addr=recipient_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={str(token_id): mint_quantity},
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx": tx},
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info
+            if skill_callback_info is not None
+            else {},
+            terms=Terms(
+                sender_addr=deployer_address,
+                counterparty_addr=recipient_address,
+                amount_by_currency_id={ETHEREUM_CURRENCY: 0},
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id={str(token_id): mint_quantity},
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            transaction=tx,
         )
         return tx_message
 
@@ -530,7 +551,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing the transaction for a trustless trade between two agents for a single token.
@@ -574,18 +596,21 @@ class ERC1155Contract(Contract):
             )
         )
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=from_address,
-            tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id={"ETH": value},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx": tx},
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info
+            if skill_callback_info is not None
+            else {},
+            terms=Terms(
+                sender_addr=from_address,
+                counterparty_addr=to_address,
+                amount_by_currency_id={ETHEREUM_CURRENCY: value},
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id={},
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            transaction=tx,
         )
         return tx_message
 
@@ -670,7 +695,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_ATOMIC_SWAP_BATCH.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing the transaction for a trustless trade between two agents for a batch of tokens.
@@ -728,18 +754,21 @@ class ERC1155Contract(Contract):
             else:
                 ValueError("Should not be here!")
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=from_address,
-            tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id=tx_amount_by_currency_id,  # {ETHEREUM_CURRENCY: value}, temporary hack
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id=tx_quantities_by_good_id,
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx": tx},
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info
+            if skill_callback_info is not None
+            else {},
+            terms=Terms(
+                sender_addr=from_address,
+                counterparty_addr=to_address,
+                amount_by_currency_id=tx_amount_by_currency_id,
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id=tx_quantities_by_good_id,
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            transaction=tx,
         )
         return tx_message
 
@@ -810,7 +839,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_SIGN_HASH_SINGLE.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing a hash for a trustless trade between two agents for a single token.
@@ -850,18 +880,21 @@ class ERC1155Contract(Contract):
             )
         )
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=from_address,
-            tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id={ETHEREUM_CURRENCY: value},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={str(token_id): -from_supply + to_supply},
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx_hash": tx_hash, "is_deprecated_mode": True},
+            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info.update({"is_deprecated_mode": True})
+            if skill_callback_info is not None
+            else {"is_deprecated_mode": True},
+            terms=Terms(
+                sender_addr=from_address,
+                counterparty_addr=to_address,
+                amount_by_currency_id={ETHEREUM_CURRENCY: value},
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id={str(token_id): -from_supply + to_supply},
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            message=tx_hash,
         )
         return tx_message
 
@@ -926,7 +959,8 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         transaction_id: str = Performative.CONTRACT_SIGN_HASH_BATCH.value,
-        info: Optional[Dict[str, Any]] = None,
+        skill_callback_info: Optional[Dict[str, Any]] = None,
+        nonce="",
     ) -> TransactionMessage:
         """
         Get the transaction message containing a hash for a trustless trade between two agents for a batch of tokens.
@@ -981,18 +1015,21 @@ class ERC1155Contract(Contract):
             else:
                 ValueError("Should not be here!")
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[skill_callback_id],
-            tx_id=transaction_id,
-            tx_sender_addr=from_address,
-            tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id=tx_amount_by_currency_id,  # {ETHEREUM_CURRENCY: value}, temporary hack
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id=tx_quantities_by_good_id,
-            info=info if info is not None else {},
-            ledger_id=EthereumCrypto.identifier,
-            signing_payload={"tx_hash": tx_hash, "is_deprecated_mode": True},
+            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+            skill_callback_ids=(skill_callback_id,),
+            skill_callback_info=skill_callback_info.update({"is_deprecated_mode": True})
+            if skill_callback_info is not None
+            else {"is_deprecated_mode": True},
+            terms=Terms(
+                sender_addr=from_address,
+                counterparty_addr=to_address,
+                amount_by_currency_id=tx_amount_by_currency_id,
+                is_sender_payable_tx_fee=True,
+                nonce=nonce,
+                quantities_by_good_id=tx_quantities_by_good_id,
+            ),
+            crypto_id=EthereumCrypto.identifier,
+            message=tx_hash,
         )
         return tx_message
 

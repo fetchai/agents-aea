@@ -214,7 +214,7 @@ class TransactionHandler(Handler):
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         strategy = cast(Strategy, self.context.strategy)
         if tx_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            tx_signed = tx_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
@@ -253,7 +253,7 @@ class TransactionHandler(Handler):
                 )
 
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            tx_signed = tx_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
@@ -288,7 +288,7 @@ class TransactionHandler(Handler):
                     )
                 )
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            tx_signed = tx_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
@@ -333,7 +333,7 @@ class TransactionHandler(Handler):
             tx_msg_response.tx_id
             == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
         ):
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            tx_signed = tx_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)

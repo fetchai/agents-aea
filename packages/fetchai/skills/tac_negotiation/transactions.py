@@ -26,12 +26,10 @@ from typing import Deque, Dict, Tuple
 
 from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
-from aea.decision_maker.messages.transaction import (
-    TransactionId,
-    TransactionMessage,
-)
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
+from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
@@ -57,13 +55,13 @@ class Transactions(Model):
             lambda: {}
         )  # type: Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]
 
-        self._locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
-        self._locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]
-        self._locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
+        self._locked_txs = {}  # type: Dict[str, TransactionMessage]
+        self._locked_txs_as_buyer = {}  # type: Dict[str, TransactionMessage]
+        self._locked_txs_as_seller = {}  # type: Dict[str, TransactionMessage]
 
         self._last_update_for_transactions = (
             deque()
-        )  # type: Deque[Tuple[datetime.datetime, TransactionId]]
+        )  # type: Deque[Tuple[datetime.datetime, str]]
         self._tx_nonce = 0
         self._tx_id = 0
 
@@ -86,7 +84,7 @@ class Transactions(Model):
         self._tx_nonce += 1
         return self._tx_nonce
 
-    def get_internal_tx_id(self) -> TransactionId:
+    def get_internal_tx_id(self) -> str:
         """Get an id for internal reference of the tx."""
         self._tx_id += 1
         return str(self._tx_id)
@@ -110,16 +108,16 @@ class Transactions(Model):
         """
         is_seller = role == Dialogue.AgentRole.SELLER
 
-        sender_tx_fee = (
-            proposal_description.values["seller_tx_fee"]
-            if is_seller
-            else proposal_description.values["buyer_tx_fee"]
-        )
-        counterparty_tx_fee = (
-            proposal_description.values["buyer_tx_fee"]
-            if is_seller
-            else proposal_description.values["seller_tx_fee"]
-        )
+        # sender_tx_fee = (
+        #     proposal_description.values["seller_tx_fee"]
+        #     if is_seller
+        #     else proposal_description.values["buyer_tx_fee"]
+        # )
+        # counterparty_tx_fee = (
+        #     proposal_description.values["buyer_tx_fee"]
+        #     if is_seller
+        #     else proposal_description.values["seller_tx_fee"]
+        # )
         goods_component = copy.copy(proposal_description.values)
         [
             goods_component.pop(key)
@@ -151,23 +149,25 @@ class Transactions(Model):
             tx_nonce=tx_nonce,
         )
         skill_callback_ids = (
-            [PublicId.from_str("fetchai/tac_participation:0.4.0")]
-            if performative == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT
-            else [PublicId.from_str("fetchai/tac_negotiation:0.4.0")]
+            (PublicId.from_str("fetchai/tac_participation:0.4.0"),)
+            if performative == TransactionMessage.Performative.SIGN_MESSAGE
+            else (PublicId.from_str("fetchai/tac_negotiation:0.4.0"),)
         )
         transaction_msg = TransactionMessage(
             performative=performative,
             skill_callback_ids=skill_callback_ids,
-            tx_id=self.get_internal_tx_id(),
-            tx_sender_addr=agent_addr,
-            tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
-            tx_amount_by_currency_id=tx_amount_by_currency_id,
-            tx_sender_fee=sender_tx_fee,
-            tx_counterparty_fee=counterparty_tx_fee,
-            tx_quantities_by_good_id=goods_component,
-            ledger_id="ethereum",
-            info={"dialogue_label": dialogue_label.json, "tx_nonce": tx_nonce},
-            signing_payload={"tx_hash": tx_hash},
+            # tx_id=self.get_internal_tx_id(),
+            terms=Terms(
+                sender_addr=agent_addr,
+                counterparty_addr=dialogue_label.dialogue_opponent_addr,
+                amount_by_currency_id=tx_amount_by_currency_id,
+                is_sender_payable_tx_fee=True,  # TODO: check!
+                quantities_by_good_id=goods_component,
+                nonce=tx_nonce,
+            ),
+            crypto_id="ethereum",
+            skill_callback_info={"dialogue_label": dialogue_label.json},
+            message=tx_hash,
         )
         return transaction_msg
 
@@ -292,7 +292,7 @@ class Transactions(Model):
         )
         return transaction_msg
 
-    def _register_transaction_with_time(self, transaction_id: TransactionId) -> None:
+    def _register_transaction_with_time(self, transaction_id: str) -> None:
         """
         Register a transaction with a creation datetime.
 
@@ -317,7 +317,7 @@ class Transactions(Model):
         """
         as_seller = role == Dialogue.AgentRole.SELLER
 
-        transaction_id = transaction_msg.tx_id
+        transaction_id = transaction_msg.tx_id  # TODO: fix
         assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)
         self._locked_txs[transaction_id] = transaction_msg

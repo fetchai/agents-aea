@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmeWFX1WyXqE3gcU43ZsNaz1dU1z3kJSwFKfdmvdRyXr3i
-  dialogues.py: QmfXc9VBAosqtr28jrJnuGQAdK1vbsT4crSN8gczK3RCKX
-  handlers.py: QmQ2t7YYwiNkCo1nVicVX13yhp3dUw6QyZc6MCzLeoupHH
-  strategy.py: QmcuqouWhqSzYpaNe8nHcah6JBue5ejHEJTx88B4TckyDj
+  behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
+  dialogues.py: QmZprXPVdtUwvnzyZh71QHyeDmKzckaxWELVxSELUxziqF
+  handlers.py: QmQu6ytjjxprh5yrE49P9y6Puk84rkimkmR3ak8Etkak5o
+  strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -27,15 +27,15 @@ handlers:
   fipa:
     args: {}
     class_name: FipaHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
   oef_search:
     args: {}
     class_name: OefSearchHandler
   transaction:
     args: {}
     class_name: TransactionHandler
-  ledger_api:
-    args: {}
-    class_name: LedgerApiHandler
 models:
   fipa_dialogues:
     args: {}

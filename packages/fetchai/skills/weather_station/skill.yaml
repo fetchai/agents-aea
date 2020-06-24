@@ -7,12 +7,12 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmWdv9BWgBLt9Y7T3U8Wd4KhTMScXANVY7A2pB5kqfBnaP
+  behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
-  dialogues.py: QmUVgQaBaAUB9cFKkyYGQmtYXNiXh53AGkcrCfcmDm6f1z
+  dialogues.py: QmSM9g252NkF1Toe1djAa8sytJDmCnwJDGG3otJ44F6Sr1
   dummy_weather_station_data.py: QmUD52fXy9DW2FgivyP1VMhk3YbvRVUWUEuZVftXmkNymR
-  handlers.py: QmeYB2f5yLV474GVH1jJC2zCAGV5R1QmPsc3TPUMCnYjAg
-  strategy.py: Qmeh8PVR6sukZiaGsCWacZz5u9kwd6FKZocoGqg3LW3ZCQ
+  handlers.py: QmZGMN3h1tnab5gYKwv6dcMruWvaj2ituQEyDRgrnn1oCA
+  strategy.py: Qme6MeZP4qkSfEBtk8XPgkdyvc73wjqAZHwo27C5N3jQAh
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:
 - '*.db'
@@ -52,6 +52,8 @@ models:
           name: city
           type: str
       data_model_name: location
+      date_one: 1/10/2019
+      date_two: 1/12/2019
       has_data_source: false
       is_ledger_tx: true
       ledger_id: fetchai
@@ -60,7 +62,5 @@ models:
         city: Cambridge
         country: UK
       total_price: 10
-      date_one: 1/10/2019
-      date_two: 1/12/2019
     class_name: Strategy
 dependencies: {}

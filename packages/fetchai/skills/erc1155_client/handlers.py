@@ -144,7 +144,7 @@ class FIPAHandler(Handler):
                 trade_nonce=int(data["trade_nonce"]),
                 ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 skill_callback_id=self.context.skill_id,
-                info={"dialogue_label": dialogue.dialogue_label.json},
+                skill_callback_info={"dialogue_label": dialogue.dialogue_label.json},
             )
             self.context.logger.debug(
                 "[{}]: sending transaction to decision maker for signing. tx_msg={}".format(
@@ -252,13 +252,13 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         if (
             tx_msg_response.performative
-            == TransactionMessage.Performative.SUCCESSFUL_SIGNING
+            == TransactionMessage.Performative.SIGNED_TRANSACTION
             and (
                 tx_msg_response.tx_id
                 == ERC1155Contract.Performative.CONTRACT_SIGN_HASH_SINGLE.value
             )
         ):
-            tx_signature = tx_msg_response.signed_payload.get("tx_signature")
+            tx_signature = tx_msg_response.signed_transaction
             dialogue_label = DialogueLabel.from_json(
                 cast(Dict[str, str], tx_msg_response.info.get("dialogue_label"))
             )

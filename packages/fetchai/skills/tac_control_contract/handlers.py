@@ -261,7 +261,7 @@ class TransactionHandler(Handler):
                     self.context.agent_name
                 )
             )
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            tx_signed = tx_msg_response.signed_transaction
             tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
             if tx_digest is None:
                 self.context.logger.warning(
@@ -279,7 +279,7 @@ class TransactionHandler(Handler):
                     self.context.agent_name
                 )
             )
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            tx_signed = tx_msg_response.signed_transaction
             tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
             if tx_digest is None:
                 self.context.logger.warning(
@@ -297,8 +297,8 @@ class TransactionHandler(Handler):
                     self.context.agent_name
                 )
             )
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            agent_addr = tx_msg_response.tx_counterparty_addr
+            tx_signed = tx_msg_response.signed_transaction
+            agent_addr = tx_msg_response.terms.counterparty_addr
             tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
             if tx_digest is None:
                 self.context.logger.warning(

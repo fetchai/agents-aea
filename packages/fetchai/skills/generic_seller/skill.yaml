@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmRcbkDFZoFRvheDXQj71FR8qW4hkCM1uVjN4rg6TaZdgs
+  behaviours.py: QmdLcE3TQNDXD9CS5EPNW9UFf3oiYmag81pR3EEgLQUAR1
   dialogues.py: QmYox8f4LBUQAEJjUELTFA7xgLqiFuk8mFCStMj2mgqxV1
-  handlers.py: QmRoQqFQFUYYdaq77S9319Xn329n1f9drFKGxwLg57Tm35
-  strategy.py: QmTQgnXKzAuoXAiU6JnYzhLswo2g15fxV73yguXMbHXQvf
+  handlers.py: QmaYSmtQSAgTcenytjZgQnzuAaie45z5En83UfqS7Y46ec
+  strategy.py: QmT2EfXLA47gBvRVJe45kSXkaZoLRweKWypfmnH4MfqGzL
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -58,4 +58,4 @@ models:
       total_price: 10
     class_name: Strategy
 dependencies: {}
-is_abstract: True
+is_abstract: true

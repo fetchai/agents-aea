@@ -9,13 +9,13 @@ fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: QmSgtvb4rD4RZ5H2zQQqPUwBzAeoR6ZBTJ1p33YqL5XjMe
   dialogues.py: QmSVqtbxZvy3R5oJXATHpkjnNekMqHbPY85dTf3f6LqHYs
-  handlers.py: QmapDkx39VBUsNxcUwjUj1tyPuVnPxE9huNvHhbgcge4QM
+  handlers.py: QmRsmhuiw5uJqHCUcKL5DEk5PzqewKNVVAF2YGRjFG9syw
   helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmTK9wqubsgBm18Us3UzKNFckmjSprC1dtV7JtFPWGKVgz
+  strategy.py: QmUbqg3kpm4drMy6W9Bh99bXLqrzneoeZaQwZdemLYxr2k
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
-  transactions.py: QmdD4b9Zzh5QoZpPtPNvfU5RmbsYdFFwhS9z5qprsiBt4z
+  transactions.py: QmRjtxucmjMBCwTay8YGnMB63KXc6xB37o9Z1THpo9L9fF
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.5.0

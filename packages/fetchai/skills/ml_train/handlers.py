@@ -26,6 +26,7 @@ from typing import Optional, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
+from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -91,20 +92,25 @@ class TrainHandler(Handler):
         if strategy.is_ledger_tx:
             # propose the transaction to the decision maker for settlement on the ledger
             tx_msg = TransactionMessage(
-                performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=[self.context.skill_id],
-                tx_id=strategy.get_next_transition_id(),
-                tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
-                tx_counterparty_addr=terms.values["address"],
-                tx_amount_by_currency_id={
-                    terms.values["currency_id"]: -terms.values["price"]
+                performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+                skill_callback_ids=(self.context.skill_id,),
+                tx_id=strategy.get_next_transition_id(),  # TODO: replace with dialogues model
+                terms=Terms(
+                    sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
+                    counterparty_addr=terms.values["address"],
+                    amount_by_currency_id={
+                        terms.values["currency_id"]: -terms.values["price"]
+                    },
+                    is_sender_payable_tx_fee=True,
+                    quantities_by_good_id={"ml_training_data": 1},
+                    nonce=uuid.uuid4().hex,
+                ),
+                crypto_id=terms.values["ledger_id"],
+                skill_callback_info={
+                    "terms": terms,
+                    "counterparty_addr": ml_trade_msg.counterparty,
                 },
-                tx_sender_fee=terms.values["buyer_tx_fee"],
-                tx_counterparty_fee=terms.values["seller_tx_fee"],
-                tx_quantities_by_good_id={},
-                ledger_id=terms.values["ledger_id"],
-                info={"terms": terms, "counterparty_addr": ml_trade_msg.counterparty},
-                tx_nonce=uuid.uuid4().hex,
+                transaction={},
             )  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             self.context.logger.info(
@@ -249,25 +255,24 @@ class MyTransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         if (
             tx_msg_response.performative
-            == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
+            == TransactionMessage.Performative.SIGNED_TRANSACTION
         ):
             self.context.logger.info(
                 "[{}]: transaction was successful.".format(self.context.agent_name)
             )
-            info = tx_msg_response.info
-            terms = cast(Description, info.get("terms"))
+            terms = cast(Description, tx_msg_response.skill_callback_info.get("terms"))
             ml_accept = MlTradeMessage(
                 performative=MlTradeMessage.Performative.ACCEPT,
-                tx_digest=tx_msg_response.tx_digest,
+                tx_digest=tx_msg_response.signed_transaction,
                 terms=terms,
             )
-            ml_accept.counterparty = tx_msg_response.tx_counterparty_addr
+            ml_accept.counterparty = tx_msg_response.terms.counterparty_addr
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info(
                 "[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}.".format(
                     self.context.agent_name,
-                    tx_msg_response.tx_counterparty_addr[-5:],
-                    tx_msg_response.tx_digest,
+                    tx_msg_response.terms.counterparty_addr[-5:],
+                    tx_msg_response.signed_transaction,
                     terms.values,
                 )
             )
