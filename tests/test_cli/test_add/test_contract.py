@@ -18,12 +18,16 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea add contract` sub-command."""
 
+import os
 from unittest import TestCase, mock
+
+import pytest
 
 from aea.cli import cli
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, MAX_FLAKY_RERUNS
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
@@ -50,3 +54,18 @@ class AddContractCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+@pytest.mark.integration
+class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
+    """Test case for add contract from Registry command."""
+
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_add_contract_from_remote_registry_positive(self):
+        """Test add contract from Registry positive result."""
+        self.add_item("contract", "fetchai/erc1155:0.1.0", local=False)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
+        items_folders = os.listdir(items_path)
+        item_name = "erc1155"
+        assert item_name in items_folders

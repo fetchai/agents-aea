@@ -371,17 +371,21 @@ class BaseAEATestCase(ABC):
         cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
-    def add_item(cls, item_type: str, public_id: str) -> None:
+    def add_item(cls, item_type: str, public_id: str, local: bool = True) -> None:
         """
         Add an item to the agent.
         Run from agent's directory.
 
         :param item_type: str item type.
         :param public_id: public id of the item.
+        :param local: a flag for local folder add True by default.
 
         :return: None
         """
-        cls.run_cli_command("add", "--local", item_type, public_id, cwd=cls._get_cwd())
+        cli_args = ["add", "--local", item_type, public_id]
+        if not local:
+            cli_args.remove("--local")
+        cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
     def scaffold_item(cls, item_type: str, name: str) -> None:

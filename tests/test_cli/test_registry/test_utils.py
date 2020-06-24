@@ -19,6 +19,7 @@
 """This test module contains tests for CLI Registry utils."""
 
 import os
+from json.decoder import JSONDecodeError
 from unittest import TestCase, mock
 
 from click import ClickException
@@ -43,6 +44,10 @@ def _raise_connection_error(*args, **kwargs):
 
 def _raise_config_exception(*args):
     raise AEAConfigException()
+
+
+def _raise_json_decode_error(*args):
+    raise JSONDecodeError(None, "None", 1)  # args requied for JSONDecodeError raising
 
 
 @mock.patch("aea.cli.registry.utils.requests.request")
@@ -127,7 +132,8 @@ class RequestAPITestCase(TestCase):
     def test_request_api_unexpected_response(self, request_mock):
         """Test for request_api method unexpected server response."""
         resp_mock = mock.Mock()
-        resp_mock.status_code = 500
+        resp_mock.status_code = 501  # not implemented status
+        resp_mock.json = _raise_json_decode_error
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api("GET", "/path")

@@ -74,7 +74,7 @@ def _run_interaction_channel():
 
     try:
         multiplexer.connect()
-        while True:
+        while True:  # pragma: no cover
             envelope = _try_construct_envelope(agent_name, identity_stub.name)
             if envelope is None and not inbox.empty():
                 envelope = inbox.get_nowait()
@@ -87,7 +87,7 @@ def _run_interaction_channel():
                 click.echo(_construct_message("sending", envelope))
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         click.echo(e)
     finally:
         multiplexer.disconnect()
