@@ -8,7 +8,9 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmfMwcvi7ZH551vK7xETbSSCUhTsdccfSBheA1RLksyBQR
+  aea/api.go: QmNUm9tnK3DFiG7jCb2ZVhFibiLjWWdAdS66Bbwn9Wbksf
+  aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
+  aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
   connection.py: QmbPuwgAYed7JVptHXfybt6xVjLFqXdYsN3mqbHmnP1hh2
   dht/dhtclient/dhtclient.go: QmPNMfDY65bChfbF9gUC5jzPaC3uvaaytzyDxPNvT1jUfD
   dht/dhtclient/dhtclient_test.go: QmbZHW716CbzgYTnqPSQwZn3f4E89aa63fT2B3EZi2B1uk
@@ -17,11 +19,11 @@ fingerprint:
   dht/dhtnode/dhtnode.go: QmTB2yf7M6ZtUeAidxVrthUF68jzCDA4n8gZ1iN5BxEL5m
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtpeer/dhtpeer.go: QmVso8oNtwTK8eHAmvAzLGJRXk9jucXLESehpibs7SYrjq
-  dht/dhtpeer/dhtpeer_test.go: QmPxYycazXxQe5rcScWhQV78tqN4vMLZ8zf2oR4veMsUoh
+  dht/dhtpeer/dhtpeer_test.go: QmdoVt6RTsHMPzYi8bK131MjNRrdp98MSwHJ86mQvbBUTR
   dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
   dht/dhttests/dhttests.go: Qmf5YbYcUKZn7QExhs6y6vi2m7egUsRMaAgjRVabxwhzGc
-  go.mod: QmPSF8jdE9qjj9jE726zBDro19ASYGBebYpCV7JAMJNNzQ
-  go.sum: QmSaqaa5FRHxT7p5htzUpzxt34r93XrC5pXf9KFLJGoBKS
+  go.mod: QmacqAAxC3dkydmfbEyVWVkMDmZECTWKZcBoPyRSnheQzD
+  go.sum: Qmbu57aSPSqanJ1xHNmMHAqLL8nvCV61URknizsKJDvenG
   libp2p_node.go: Qmaa9b9v6BFE9UwAPAUcPHgUw8yDGhFyLzWXer3BhiXdkU
   utils/utils.go: QmcN5oN482ZQ7cDWZ9yV8sSNWucGYeQdWAifFkPAeGGaMu
 fingerprint_ignore_patterns: []
