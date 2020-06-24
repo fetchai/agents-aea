@@ -237,7 +237,8 @@ func TestRoutingTwoDHTPeersIndirect(t *testing.T) {
 	expectEnvelope(t, rxPeer2)
 }
 
-func skipTestRoutingStarFullConnectivity(t *testing.T) {
+/*
+func SkipTestRoutingStarFullConnectivity(t *testing.T) {
 	peers := []*DHTPeer{}
 	rxs := []chan aea.Envelope{}
 
@@ -297,3 +298,4 @@ func skipTestRoutingStarFullConnectivity(t *testing.T) {
 		}
 	}
 }
+*/
