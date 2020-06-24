@@ -21,13 +21,14 @@
 package dhtpeer
 
 import (
+	"net"
+	"strconv"
 	"testing"
 	"time"
 
 	"libp2p_node/aea"
+	"libp2p_node/utils"
 )
-
-// TOFIX(LR) how to share test helpers between packages tests without having circular dependencies
 
 const (
 	DefaultLocalHost    = "127.0.0.1"
@@ -67,6 +68,11 @@ var (
 	}
 )
 
+/*
+	TOFIX(LR) how to share test helpers between packages tests
+	 without having circular dependencies
+*/
+
 func SetupLocalDHTPeer(key string, addr string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
 	opts := []Option{
 		LocalURI(DefaultLocalHost, dhtPort),
@@ -85,6 +91,51 @@ func SetupLocalDHTPeer(key string, addr string, dhtPort uint16, delegatePort uin
 
 	return dhtPeer, func() { dhtPeer.Close() }, nil
 
+}
+
+// Delegate tcp client for tests only
+
+type DelegateClient struct {
+	AgentAddress string
+	Rx           chan aea.Envelope
+	Conn         net.Conn
+}
+
+func (client *DelegateClient) Close() error {
+	return client.Conn.Close()
+}
+
+func (client *DelegateClient) Send(envel aea.Envelope) error {
+	return utils.WriteEnvelopeConn(client.Conn, envel)
+}
+
+func SetupDelegateClient(address string, host string, port uint16) (*DelegateClient, func(), error) {
+	var err error
+	client := &DelegateClient{}
+	client.AgentAddress = address
+	client.Rx = make(chan aea.Envelope)
+	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	utils.WriteBytesConn(client.Conn, []byte(address))
+	_, err = utils.ReadBytesConn(client.Conn)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	go func() {
+		for {
+			envel, err := utils.ReadEnvelopeConn(client.Conn)
+			if err != nil {
+				break
+			}
+			client.Rx <- *envel
+		}
+	}()
+
+	return client, func() { client.Close() }, nil
 }
 
 func expectEnvelope(t *testing.T, rx chan aea.Envelope) {
@@ -297,4 +348,44 @@ func TestRoutingStarFullConnectivity(t *testing.T) {
 			expectEnvelope(t, rxs[i])
 		}
 	}
+}
+
+func TestRoutingDelegateClientPeer(t *testing.T) {
+	peer, peerCleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup()
+
+	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[1], DefaultLocalHost, DefaultLocalPort)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup()
+
+	rxPeer := make(chan aea.Envelope)
+	peer.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer <- envel
+		return nil
+	})
+
+	err = peer.RouteEnvelope(aea.Envelope{
+		To:     AgentsTestAddresses[1],
+		Sender: AgentsTestAddresses[0],
+	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
+	}
+
+	expectEnvelope(t, client.Rx)
+
+	err = client.Send(aea.Envelope{
+		To:     AgentsTestAddresses[0],
+		Sender: AgentsTestAddresses[1],
+	})
+
+	expectEnvelope(t, rxPeer)
 }
