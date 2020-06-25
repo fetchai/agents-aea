@@ -49,7 +49,7 @@ import (
 
 func ignore(err error) {
 	if err != nil {
-		log.Println("TRACE", err)
+		log.Println("IGNORED", err)
 	}
 }
 
@@ -66,7 +66,7 @@ type DHTClient struct {
 
 	myAgentAddress  string
 	myAgentReady    func() bool
-	processEnvelope func(aea.Envelope) error
+	processEnvelope func(*aea.Envelope) error
 
 	closing chan struct{}
 	logger  zerolog.Logger
@@ -182,13 +182,13 @@ func (dhtClient *DHTClient) setupLogger() {
 	if dhtClient.routedHost == nil {
 		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
 			With().Timestamp().
-			Str("process", "DHTClient").
+			Str("package", "DHTClient").
 			Str("relayid", dhtClient.relayPeer.Pretty()).
 			Logger()
 	} else {
 		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
 			With().Timestamp().
-			Str("process", "DHTClient").
+			Str("package", "DHTClient").
 			Str("peerid", dhtClient.routedHost.ID().Pretty()).
 			Str("relayid", dhtClient.relayPeer.Pretty()).
 			Logger()
@@ -239,7 +239,7 @@ func (dhtClient *DHTClient) MultiAddr() string {
 }
 
 // RouteEnvelope to its destination
-func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
+func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
 
 	target := envel.To
@@ -398,7 +398,7 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	ldebug().Msgf("Received envelope from peer %s", envel.String())
 
 	if envel.To == dhtClient.myAgentAddress && dhtClient.processEnvelope != nil {
-		err = dhtClient.processEnvelope(*envel)
+		err = dhtClient.processEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while processing envelope by agent")
 		}
@@ -489,6 +489,6 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 }
 
 //ProcessEnvelope register a callback function
-func (dhtClient *DHTClient) ProcessEnvelope(fn func(aea.Envelope) error) {
+func (dhtClient *DHTClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	dhtClient.processEnvelope = fn
 }

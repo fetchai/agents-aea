@@ -23,16 +23,21 @@ package aea
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 
-	proto "github.com/golang/protobuf/proto"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	proto "google.golang.org/protobuf/proto"
 )
+
+var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
+	With().Timestamp().
+	Str("package", "AeaApi").
+	Logger()
 
 /*
 
@@ -117,7 +122,7 @@ func (aea *AeaApi) Init() error {
 	aea.connected = false
 
 	env_file := os.Args[1]
-	fmt.Println("[aea-api  ][debug] env_file:", env_file)
+	logger.Debug().Msgf("env_file: %s", env_file)
 
 	// get config
 	err := godotenv.Load(env_file)
@@ -132,25 +137,27 @@ func (aea *AeaApi) Init() error {
 	uri := os.Getenv("AEA_P2P_URI")
 	uri_public := os.Getenv("AEA_P2P_URI_PUBLIC")
 	uri_delegate := os.Getenv("AEA_P2P_DELEGATE_URI")
-	fmt.Println("[aea-api  ][debug] msgin_path:", aea.msgin_path)
-	fmt.Println("[aea-api  ][debug] msgout_path:", aea.msgout_path)
-	fmt.Println("[aea-api  ][debug] id:", aea.id)
-	fmt.Println("[aea-api  ][debug] addr:", aea.agent_addr)
-	fmt.Println("[aea-api  ][debug] entry_peers:", entry_peers)
-	fmt.Println("[aea-api  ][debug] uri:", uri)
-	fmt.Println("[aea-api  ][debug] uri public:", uri_public)
-	fmt.Println("[aea-api  ][debug] uri delegate service:", uri_delegate)
+	logger.Debug().Msgf("msgin_path: %s", aea.msgin_path)
+	logger.Debug().Msgf("msgout_path: %s", aea.msgout_path)
+	logger.Debug().Msgf("id: %s", aea.id)
+	logger.Debug().Msgf("addr: %s", aea.agent_addr)
+	logger.Debug().Msgf("entry_peers: %s", entry_peers)
+	logger.Debug().Msgf("uri: %s", uri)
+	logger.Debug().Msgf("uri public: %s", uri_public)
+	logger.Debug().Msgf("uri delegate service: %s", uri_delegate)
 
 	if aea.msgin_path == "" || aea.msgout_path == "" || aea.id == "" || uri == "" {
-		fmt.Println("[aea-api  ][error] couldn't get configuration")
-		return errors.New("Couldn't get AEA configuration.")
+		err := errors.New("couldn't get AEA configuration")
+		logger.Error().Str("err", err.Error()).Msg("")
+		return err
 	}
 
 	// parse uri
 	parts := strings.SplitN(uri, ":", -1)
 	if len(parts) < 2 {
-		fmt.Println("[aea-api  ][error] malformed Uri:", uri)
-		return errors.New("Malformed Uri.")
+		err := errors.New("malformed Uri " + uri)
+		logger.Error().Str("err", err.Error()).Msg("")
+		return err
 	}
 	aea.host = parts[0]
 	port, _ := strconv.ParseUint(parts[1], 10, 16)
@@ -162,7 +169,7 @@ func (aea *AeaApi) Init() error {
 	}
 	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] Uri already taken", uri)
+		logger.Error().Str("err", err.Error()).Msgf("Uri already taken %s", uri)
 		return err
 	}
 	listener.Close()
@@ -171,8 +178,9 @@ func (aea *AeaApi) Init() error {
 	if uri_public != "" {
 		parts = strings.SplitN(uri_public, ":", -1)
 		if len(parts) < 2 {
-			fmt.Println("[aea-api  ][error] malformed Uri:", uri_public)
-			return errors.New("Malformed Uri.")
+			err := errors.New("malformed Uri " + uri_public)
+			logger.Error().Str("err", err.Error()).Msg("")
+			return err
 		}
 		aea.host_public = parts[0]
 		port, _ = strconv.ParseUint(parts[1], 10, 16)
@@ -186,8 +194,9 @@ func (aea *AeaApi) Init() error {
 	if uri_delegate != "" {
 		parts = strings.SplitN(uri_delegate, ":", -1)
 		if len(parts) < 2 {
-			fmt.Println("[aea-api  ][error] malformed Uri:", uri_delegate)
-			return errors.New("Malformed Uri.")
+			err := errors.New("malformed Uri " + uri_delegate)
+			logger.Error().Str("err", err.Error()).Msg("")
+			return err
 		}
 		aea.host_delegate = parts[0]
 		port, _ = strconv.ParseUint(parts[1], 10, 16)
@@ -212,7 +221,8 @@ func (aea *AeaApi) Connect() error {
 	aea.msgin, erri = os.OpenFile(aea.msgin_path, os.O_RDONLY, os.ModeNamedPipe)
 
 	if erri != nil || erro != nil {
-		fmt.Println("[aea-api  ][error] while opening pipes", erri, erro)
+		logger.Error().Str("err", erri.Error()).Str("err", erro.Error()).
+			Msgf("while opening pipes %s %s", aea.msgin_path, aea.msgout_path)
 		if erri != nil {
 			return erri
 		}
@@ -223,7 +233,7 @@ func (aea *AeaApi) Connect() error {
 	//TOFIX(LR) trade-offs between bufferd vs unbuffered channel
 	aea.out_queue = make(chan *Envelope, 10)
 	go aea.listen_for_envelopes()
-	fmt.Println("[aea-api  ][info] connected to agent")
+	logger.Info().Msg("connected to agent")
 
 	aea.connected = true
 
@@ -243,10 +253,10 @@ func (aea *AeaApi) WithSandbox() *AeaApi {
 }
 */
 
-func UnmarshalEnvelope(buf []byte) (Envelope, error) {
+func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
 	envelope := &Envelope{}
 	err := proto.Unmarshal(buf, envelope)
-	return *envelope, err
+	return envelope, err
 }
 
 func (aea *AeaApi) listen_for_envelopes() {
@@ -254,15 +264,15 @@ func (aea *AeaApi) listen_for_envelopes() {
 	for {
 		envel, err := read_envelope(aea.msgin)
 		if err != nil {
-			fmt.Println("[aea-api  ][error] while receiving envelope:", err)
-			fmt.Println("[aea-api  ][info] disconnecting")
+			logger.Error().Str("err", err.Error()).Msg("while receiving envelope")
+			logger.Info().Msg("disconnecting")
 			// TOFIX(LR) see above
 			if !aea.closing {
 				aea.stop()
 			}
 			return
 		}
-		fmt.Println("[aea-api  ][debug] received envelope from agent")
+		logger.Debug().Msgf("received envelope from agent")
 		aea.out_queue <- envel
 		if aea.closing {
 			return
@@ -287,15 +297,15 @@ func write(pipe *os.File, data []byte) error {
 	binary.BigEndian.PutUint32(buf, size)
 	_, err := pipe.Write(buf)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while writing size to pipe:", size, buf, ":", err, err == os.ErrInvalid)
+		logger.Error().Str("err", err.Error()).Msgf("while writing size to pipe: %d %x", size, buf)
 		return err
 	}
-	fmt.Println("[aea-api  ][debug] writing size to pipe:", size, buf, ":", err)
+	logger.Debug().Msgf("writing size to pipe %d %x", size, buf)
 	_, err = pipe.Write(data)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while writing data to pipe ", data, ":", err)
+		logger.Error().Str("err", err.Error()).Msgf("while writing data to pipe %x", data)
 	}
-	fmt.Println("[aea-api  ][debug] writing data to pipe len ", size, ":", err)
+	logger.Debug().Msgf("writing data to pipe len %d", size)
 	return err
 }
 
@@ -303,7 +313,7 @@ func read(pipe *os.File) ([]byte, error) {
 	buf := make([]byte, 4)
 	_, err := pipe.Read(buf)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while receiving size:", err)
+		logger.Error().Str("err", err.Error()).Msg("while receiving size")
 		return buf, err
 	}
 	size := binary.BigEndian.Uint32(buf)
@@ -316,7 +326,7 @@ func read(pipe *os.File) ([]byte, error) {
 func write_envelope(pipe *os.File, envelope *Envelope) error {
 	data, err := proto.Marshal(envelope)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while serializing envelope:", envelope, ":", err)
+		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
 		return err
 	}
 	return write(pipe, data)
@@ -326,7 +336,7 @@ func read_envelope(pipe *os.File) (*Envelope, error) {
 	envelope := &Envelope{}
 	data, err := read(pipe)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while receiving data:", err)
+		logger.Error().Str("err", err.Error()).Msg("while receiving data")
 		return envelope, err
 	}
 	err = proto.Unmarshal(data, envelope)

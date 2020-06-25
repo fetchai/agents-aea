@@ -25,11 +25,16 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/rs/zerolog"
+
 	aea "libp2p_node/aea"
 	"libp2p_node/dht/dhtclient"
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhtpeer"
+	"libp2p_node/utils"
 )
+
+var logger zerolog.Logger = utils.NewDefaultLogger()
 
 // panics if err is not nil
 func check(err error) {
@@ -40,7 +45,7 @@ func check(err error) {
 
 func ignore(err error) {
 	if err != nil {
-		log.Println("TRACE", err)
+		log.Println("IGNORED", err)
 	}
 }
 
@@ -105,13 +110,13 @@ func main() {
 
 	// Connect to the agent
 	check(agent.Connect())
-	log.Println("successfully connected to AEA!")
+	logger.Info().Msg("successfully connected to AEA!")
 
 	// Receive envelopes from agent and forward to peer
 	go func() {
 		for envel := range agent.Queue() {
-			envelope := *envel
-			log.Println("INFO Received envelope from agent:", envelope)
+			envelope := envel
+			logger.Info().Msgf("received envelope from agent: %s", envelope)
 			go func() {
 				err := node.RouteEnvelope(envelope)
 				ignore(err)
@@ -120,8 +125,8 @@ func main() {
 	}()
 
 	// Deliver envelopes received fro DHT to agent
-	node.ProcessEnvelope(func(envel aea.Envelope) error {
-		return agent.Put(&envel)
+	node.ProcessEnvelope(func(envel *aea.Envelope) error {
+		return agent.Put(envel)
 	})
 
 	// Wait until Ctrl+C or a termination call is done.
@@ -129,5 +134,5 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	<-c
 
-	log.Println("node stopped")
+	logger.Info().Msg("node stopped")
 }

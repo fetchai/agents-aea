@@ -63,7 +63,7 @@ func check(err error) {
 
 func ignore(err error) {
 	if err != nil {
-		log.Println("TRACE", err)
+		log.Println("IGNORED", err)
 	}
 }
 
@@ -94,7 +94,7 @@ type DHTPeer struct {
 	myAgentReady     func() bool
 	dhtAddresses     map[string]string
 	tcpAddresses     map[string]net.Conn
-	processEnvelope  func(aea.Envelope) error
+	processEnvelope  func(*aea.Envelope) error
 
 	closing    chan struct{}
 	goroutines *sync.WaitGroup
@@ -263,12 +263,12 @@ func (dhtPeer *DHTPeer) setupLogger() {
 	if dhtPeer.routedHost == nil {
 		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
 			With().Timestamp().
-			Str("process", "DHTPeer").
+			Str("package", "DHTPeer").
 			Logger()
 	} else {
 		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
 			With().Timestamp().
-			Str("process", "DHTPeer").
+			Str("package", "DHTPeer").
 			Str("peerid", dhtPeer.routedHost.ID().Pretty()).
 			Logger()
 	}
@@ -421,7 +421,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		dhtPeer.goroutines.Add(1)
 		go func() {
 			defer dhtPeer.goroutines.Done()
-			err := dhtPeer.RouteEnvelope(*envel)
+			err := dhtPeer.RouteEnvelope(envel)
 			ignore(err)
 		}()
 	}
@@ -429,7 +429,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 }
 
 // ProcessEnvelope register callback function
-func (dhtPeer *DHTPeer) ProcessEnvelope(fn func(aea.Envelope) error) {
+func (dhtPeer *DHTPeer) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	dhtPeer.processEnvelope = fn
 }
 
@@ -445,7 +445,7 @@ func (dhtPeer *DHTPeer) MultiAddr() string {
 }
 
 // RouteEnvelope to its destination
-func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
+func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, linfo, _ := dhtPeer.getLoggers()
 
 	target := envel.To
@@ -600,13 +600,13 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 	// check if destination is a tcp client
 	if conn, exists := dhtPeer.tcpAddresses[envel.To]; exists {
 		linfo().Msgf("Sending envelope to tcp delegate client %s...", conn.RemoteAddr().String())
-		err = utils.WriteEnvelopeConn(conn, *envel)
+		err = utils.WriteEnvelopeConn(conn, envel)
 		if err != nil {
 			lerror(err).Msgf("while sending envelope to tcp client %s", conn.RemoteAddr().String())
 		}
 	} else if envel.To == dhtPeer.myAgentAddress && dhtPeer.processEnvelope != nil {
 		linfo().Msg("Processing envelope by local agent...")
-		err = dhtPeer.processEnvelope(*envel)
+		err = dhtPeer.processEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while processing envelope by agent")
 		}

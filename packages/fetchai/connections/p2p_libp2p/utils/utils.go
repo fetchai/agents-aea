@@ -43,14 +43,19 @@ import (
 	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
 
 	btcec "github.com/btcsuite/btcd/btcec"
-	proto "github.com/golang/protobuf/proto"
+	proto "google.golang.org/protobuf/proto"
 
 	"libp2p_node/aea"
 )
 
-var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-	With().Timestamp().
-	Logger()
+var logger zerolog.Logger = NewDefaultLogger()
+
+// NewDefaultLogger basic zerolog console writer
+func NewDefaultLogger() zerolog.Logger {
+	return zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
+		With().Timestamp().
+		Logger()
+}
 
 /*
 	Helpers
@@ -212,8 +217,8 @@ func ReadBytesConn(conn net.Conn) ([]byte, error) {
 }
 
 // WriteEnvelopeConn send envelope to `conn`
-func WriteEnvelopeConn(conn net.Conn, envelope aea.Envelope) error {
-	data, err := proto.Marshal(&envelope)
+func WriteEnvelopeConn(conn net.Conn, envelope *aea.Envelope) error {
+	data, err := proto.Marshal(envelope)
 	if err != nil {
 		return err
 	}
@@ -282,9 +287,9 @@ func ReadString(s network.Stream) (string, error) {
 }
 
 // WriteEnvelope to a network stream
-func WriteEnvelope(envel aea.Envelope, s network.Stream) error {
+func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
 	wstream := bufio.NewWriter(s)
-	data, err := proto.Marshal(&envel)
+	data, err := proto.Marshal(envel)
 	if err != nil {
 		return err
 	}

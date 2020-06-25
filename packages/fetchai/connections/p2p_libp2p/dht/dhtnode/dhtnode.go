@@ -25,8 +25,8 @@ import "libp2p_node/aea"
 
 // DHTNode libp2p node interface
 type DHTNode interface {
-	RouteEnvelope(aea.Envelope) error
-	ProcessEnvelope(func(aea.Envelope) error)
+	RouteEnvelope(*aea.Envelope) error
+	ProcessEnvelope(func(*aea.Envelope) error)
 	MultiAddr() string
 	Close() []error
 }
