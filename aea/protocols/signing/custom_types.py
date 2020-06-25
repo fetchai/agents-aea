@@ -19,9 +19,9 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-
 from enum import Enum
 
+from aea.helpers.transaction.base import RawMessage as BaseRawMessage
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
 from aea.helpers.transaction.base import SignedTransaction as BaseSignedTransaction
 from aea.helpers.transaction.base import Terms as BaseTerms
@@ -60,6 +60,7 @@ class ErrorCode(Enum):
         return ErrorCode(enum_value_from_pb2)
 
 
+RawMessage = BaseRawMessage
 RawTransaction = BaseRawTransaction
 SignedTransaction = BaseSignedTransaction
 Terms = BaseTerms

@@ -22,10 +22,10 @@
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -233,10 +233,10 @@ class OEFSearchHandler(Handler):
             )
 
 
-class TransactionHandler(Handler):
+class SigningHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -249,18 +249,21 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
+        signing_msg_response = cast(SigningMessage, message)
         if (
-            tx_msg_response.performative
-            == TransactionMessage.Performative.SIGNED_TRANSACTION
+            signing_msg_response.performative
+            == SigningMessage.Performative.SIGNED_TRANSACTION
             and (
-                tx_msg_response.tx_id
+                signing_msg_response.tx_id
                 == ERC1155Contract.Performative.CONTRACT_SIGN_HASH_SINGLE.value
             )
         ):
-            tx_signature = tx_msg_response.signed_transaction
+            tx_signature = signing_msg_response.signed_transaction
             dialogue_label = DialogueLabel.from_json(
-                cast(Dict[str, str], tx_msg_response.info.get("dialogue_label"))
+                cast(
+                    Dict[str, str],
+                    signing_msg_response.skill_callback_info.get("dialogue_label"),
+                )
             )
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
@@ -284,8 +287,8 @@ class TransactionHandler(Handler):
             self.context.outbox.put_message(message=inform_msg)
         else:
             self.context.logger.info(
-                "[{}]: signing failed: tx_msg_response={}".format(
-                    self.context.agent_name, tx_msg_response
+                "[{}]: signing failed: signing_msg_response={}".format(
+                    self.context.agent_name, signing_msg_response
                 )
             )
 

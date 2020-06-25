@@ -30,9 +30,9 @@ from aea.configurations.base import ContractConfig, ContractId
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumCrypto
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
+from aea.protocols.signing.message import SigningMessage
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 
@@ -105,7 +105,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_DEPLOY.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing the transaction to deploy the smart contract.
 
@@ -126,8 +126,8 @@ class ERC1155Contract(Contract):
                 deployer_address, tx,
             )
         )
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info
             if skill_callback_info is not None
@@ -182,7 +182,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_CREATE_BATCH.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing the transaction to create a batch of tokens.
 
@@ -204,8 +204,8 @@ class ERC1155Contract(Contract):
                 deployer_address, token_ids, tx,
             )
         )
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info
             if skill_callback_info is not None
@@ -260,7 +260,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_CREATE_SINGLE.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing the transaction to create a single token.
 
@@ -280,8 +280,8 @@ class ERC1155Contract(Contract):
                 deployer_address, token_id, tx,
             )
         )
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info
             if skill_callback_info is not None
@@ -338,7 +338,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_MINT_BATCH.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing the transaction to mint a batch of tokens.
 
@@ -369,8 +369,8 @@ class ERC1155Contract(Contract):
             str(token_id): quantity
             for token_id, quantity in zip(token_ids, mint_quantities)
         }
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info
             if skill_callback_info is not None
@@ -443,7 +443,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_MINT_SINGLE.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing the transaction to mint a batch of tokens.
 
@@ -469,8 +469,8 @@ class ERC1155Contract(Contract):
                 deployer_address, recipient_address, token_id, mint_quantity, tx,
             )
         )
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info
             if skill_callback_info is not None
@@ -553,7 +553,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing the transaction for a trustless trade between two agents for a single token.
 
@@ -595,8 +595,8 @@ class ERC1155Contract(Contract):
                 tx,
             )
         )
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info
             if skill_callback_info is not None
@@ -697,7 +697,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_ATOMIC_SWAP_BATCH.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing the transaction for a trustless trade between two agents for a batch of tokens.
 
@@ -753,8 +753,8 @@ class ERC1155Contract(Contract):
                 )
             else:
                 ValueError("Should not be here!")
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info
             if skill_callback_info is not None
@@ -841,7 +841,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_SIGN_HASH_SINGLE.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing a hash for a trustless trade between two agents for a single token.
 
@@ -879,8 +879,8 @@ class ERC1155Contract(Contract):
                 tx_hash,
             )
         )
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info.update({"is_deprecated_mode": True})
             if skill_callback_info is not None
@@ -961,7 +961,7 @@ class ERC1155Contract(Contract):
         transaction_id: str = Performative.CONTRACT_SIGN_HASH_BATCH.value,
         skill_callback_info: Optional[Dict[str, Any]] = None,
         nonce="",
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Get the transaction message containing a hash for a trustless trade between two agents for a batch of tokens.
 
@@ -1014,8 +1014,8 @@ class ERC1155Contract(Contract):
                 )
             else:
                 ValueError("Should not be here!")
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+        tx_message = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
             skill_callback_ids=(skill_callback_id,),
             skill_callback_info=skill_callback_info.update({"is_deprecated_mode": True})
             if skill_callback_info is not None

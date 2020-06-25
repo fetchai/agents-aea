@@ -23,8 +23,8 @@ import datetime
 from typing import List, Optional, cast
 
 from aea.crypto.base import LedgerApi
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Attribute, DataModel, Description
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.behaviours import SimpleBehaviour, TickerBehaviour
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -324,7 +324,7 @@ class TACBehaviour(SimpleBehaviour):
         configuration: Configuration,
         ledger_api: LedgerApi,
         contract: ERC1155Contract,
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         token_ids = [
             int(good_id) for good_id in configuration.good_id_to_name.keys()
         ] + [
@@ -340,7 +340,7 @@ class TACBehaviour(SimpleBehaviour):
 
     def _get_mint_goods_and_currency_tx_msg(
         self, agent_state: AgentState, ledger_api: LedgerApi, contract: ERC1155Contract,
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         token_ids = []  # type: List[int]
         mint_quantities = []  # type: List[int]
         for good_id, quantity in agent_state.quantities_by_good_id.items():

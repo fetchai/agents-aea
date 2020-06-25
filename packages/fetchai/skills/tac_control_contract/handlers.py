@@ -21,8 +21,8 @@
 
 from typing import cast
 
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -234,10 +234,10 @@ class OEFRegistrationHandler(Handler):
         pass
 
 
-class TransactionHandler(Handler):
+class SigningHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -250,18 +250,18 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
+        signing_msg_response = cast(SigningMessage, message)
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
-        if tx_msg_response.tx_id == "contract_deploy":
+        if signing_msg_response.tx_id == "contract_deploy":
             game.phase = Phase.CONTRACT_DEPLOYING
             self.context.logger.info(
                 "[{}]: Sending deployment transaction to the ledger...".format(
                     self.context.agent_name
                 )
             )
-            tx_signed = tx_msg_response.signed_transaction
+            tx_signed = signing_msg_response.signed_transaction
             tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
             if tx_digest is None:
                 self.context.logger.warning(
@@ -272,14 +272,14 @@ class TransactionHandler(Handler):
                 self.context.is_active = False
             else:
                 game.contract_manager.deploy_tx_digest = tx_digest
-        elif tx_msg_response.tx_id == "contract_create_batch":
+        elif signing_msg_response.tx_id == "contract_create_batch":
             game.phase = Phase.TOKENS_CREATING
             self.context.logger.info(
                 "[{}]: Sending creation transaction to the ledger...".format(
                     self.context.agent_name
                 )
             )
-            tx_signed = tx_msg_response.signed_transaction
+            tx_signed = signing_msg_response.signed_transaction
             tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
             if tx_digest is None:
                 self.context.logger.warning(
@@ -290,15 +290,15 @@ class TransactionHandler(Handler):
                 self.context.is_active = False
             else:
                 game.contract_manager.create_tokens_tx_digest = tx_digest
-        elif tx_msg_response.tx_id == "contract_mint_batch":
+        elif signing_msg_response.tx_id == "contract_mint_batch":
             game.phase = Phase.TOKENS_MINTING
             self.context.logger.info(
                 "[{}]: Sending minting transaction to the ledger...".format(
                     self.context.agent_name
                 )
             )
-            tx_signed = tx_msg_response.signed_transaction
-            agent_addr = tx_msg_response.terms.counterparty_addr
+            tx_signed = signing_msg_response.signed_transaction
+            agent_addr = signing_msg_response.terms.counterparty_addr
             tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
             if tx_digest is None:
                 self.context.logger.warning(

@@ -29,10 +29,10 @@ from aea.configurations.base import ProtocolId, SkillConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler, Skill, SkillContext
 
 logger = logging.getLogger("aea")
@@ -67,11 +67,11 @@ def run():
     # add a simple skill with handler
     skill_context = SkillContext(my_aea.context)
     skill_config = SkillConfig(name="simple_skill", author="fetchai", version="0.1.0")
-    tx_handler = TransactionHandler(
+    signing_handler = SigningHandler(
         skill_context=skill_context, name="transaction_handler"
     )
     simple_skill = Skill(
-        skill_config, skill_context, handlers={tx_handler.name: tx_handler}
+        skill_config, skill_context, handlers={signing_handler.name: signing_handler}
     )
     my_aea.resources.add_skill(simple_skill)
 
@@ -94,8 +94,8 @@ def run():
         my_aea.identity.address, counterparty_identity.address
     )
 
-    tx_msg = TransactionMessage(
-        performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+    signing_msg = SigningMessage(
+        performative=SigningMessage.Performative.SIGN_TRANSACTION,
         skill_callback_ids=(skill_config.public_id),
         skill_callback_info={"some_info_key": "some_info_value"},
         terms=Terms(
@@ -109,7 +109,7 @@ def run():
         crypto_id=FetchAICrypto.identifier,
         transaction={},
     )
-    my_aea.context.decision_maker_message_queue.put_nowait(tx_msg)
+    my_aea.context.decision_maker_message_queue.put_nowait(signing_msg)
 
     # Set the AEA running in a different thread
     try:
@@ -126,10 +126,10 @@ def run():
         t.join()
 
 
-class TransactionHandler(Handler):
+class SigningHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -142,14 +142,14 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
-        logger.info(tx_msg_response)
+        signing_msg_response = cast(SigningMessage, message)
+        logger.info(signing_msg_response)
         if (
-            tx_msg_response.performative
-            == TransactionMessage.Performative.SIGNED_TRANSACTION
+            signing_msg_response.performative
+            == SigningMessage.Performative.SIGNED_TRANSACTION
         ):
             logger.info("Transaction signing was successful.")
-            logger.info(tx_msg_response.signed_transaction)
+            logger.info(signing_msg_response.signed_transaction)
         else:
             logger.info("Transaction signing was not successful.")
 

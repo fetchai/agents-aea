@@ -24,10 +24,10 @@ import uuid
 from typing import Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
@@ -91,8 +91,8 @@ class TrainHandler(Handler):
 
         if strategy.is_ledger_tx:
             # propose the transaction to the decision maker for settlement on the ledger
-            tx_msg = TransactionMessage(
-                performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            tx_msg = SigningMessage(
+                performative=SigningMessage.Performative.SIGN_TRANSACTION,
                 skill_callback_ids=(self.context.skill_id,),
                 tx_id=strategy.get_next_transition_id(),  # TODO: replace with dialogues model
                 terms=Terms(
@@ -236,10 +236,10 @@ class OEFSearchHandler(Handler):
             self.context.outbox.put_message(message=cft_msg)
 
 
-class MyTransactionHandler(Handler):
+class SigningHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -252,10 +252,10 @@ class MyTransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
+        tx_msg_response = cast(SigningMessage, message)
         if (
             tx_msg_response.performative
-            == TransactionMessage.Performative.SIGNED_TRANSACTION
+            == SigningMessage.Performative.SIGNED_TRANSACTION
         ):
             self.context.logger.info(
                 "[{}]: transaction was successful.".format(self.context.agent_name)

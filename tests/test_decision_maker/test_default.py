@@ -35,9 +35,9 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
 from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
+from aea.protocols.signing.message import SigningMessage
 
 from ..conftest import CUR_PATH
 
@@ -171,8 +171,8 @@ class TestDecisionMaker:
     def test_handle_tx_sigining_fetchai(self):
         """Test tx signing for fetchai."""
         tx = {}
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(PublicId("author", "a_skill", "0.1.0"),),
             crypto_id="fetchai",
             transaction=tx,
@@ -182,36 +182,36 @@ class TestDecisionMaker:
             "sign_transaction",
             return_value="signed_tx",
         ):
-            self.decision_maker_handler.handle(tx_message)
-            tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
-        assert tx_message_response.signed_transaction == "signed_tx"
+            self.decision_maker_handler.handle(signing_msg)
+            signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        assert signing_msg_response.signed_transaction == "signed_tx"
 
     def test_handle_tx_sigining_ethereum(self):
         """Test tx signing for ethereum."""
         tx = {"gasPrice": 30, "nonce": 1, "gas": 20000}
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(PublicId("author", "a_skill", "0.1.0"),),
             crypto_id="ethereum",
             transaction=tx,
         )
-        self.decision_maker.message_in_queue.put_nowait(tx_message)
-        tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert (
-            tx_message_response.performative
-            == TransactionMessage.Performative.SIGNED_TRANSACTION
+            signing_msg_response.performative
+            == SigningMessage.Performative.SIGNED_TRANSACTION
         )
-        assert tx_message_response.skill_callback_ids == tx_message.skill_callback_ids
+        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
-            type(tx_message_response.signed_transaction)
+            type(signing_msg_response.signed_transaction)
             == eth_account.datastructures.AttributeDict
         )
 
     def test_handle_tx_signing_unknown(self):
         """Test tx signing for unknown."""
         tx = {}
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(PublicId("author", "a_skill", "0.1.0"),),
             terms=Terms(
                 sender_addr="pk1",
@@ -224,86 +224,86 @@ class TestDecisionMaker:
             crypto_id="unknown",
             transaction=tx,
         )
-        self.decision_maker.message_in_queue.put_nowait(tx_message)
-        tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
-        assert tx_message_response.performative == TransactionMessage.Performative.ERROR
-        assert tx_message_response.skill_callback_ids == tx_message.skill_callback_ids
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        assert signing_msg_response.performative == SigningMessage.Performative.ERROR
+        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
-            tx_message_response.error_code
-            == TransactionMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING
+            signing_msg_response.error_code
+            == SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING
         )
 
     def test_handle_message_signing_fetchai(self):
         """Test message signing for fetchai."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
             skill_callback_ids=(PublicId("author", "a_skill", "0.1.0"),),
             crypto_id="fetchai",
             message=message,
         )
-        self.decision_maker.message_in_queue.put_nowait(tx_message)
-        tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert (
-            tx_message_response.performative
-            == TransactionMessage.Performative.SIGNED_MESSAGE
+            signing_msg_response.performative
+            == SigningMessage.Performative.SIGNED_MESSAGE
         )
-        assert tx_message_response.skill_callback_ids == tx_message.skill_callback_ids
-        assert type(tx_message_response.signed_message) == str
+        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
+        assert type(signing_msg_response.signed_message) == str
 
     def test_handle_message_signing_ethereum(self):
         """Test message signing for ethereum."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
             skill_callback_ids=(PublicId("author", "a_skill", "0.1.0"),),
             crypto_id="ethereum",
             message=message,
         )
-        self.decision_maker.message_in_queue.put_nowait(tx_message)
-        tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert (
-            tx_message_response.performative
-            == TransactionMessage.Performative.SIGNED_MESSAGE
+            signing_msg_response.performative
+            == SigningMessage.Performative.SIGNED_MESSAGE
         )
-        assert tx_message_response.skill_callback_ids == tx_message.skill_callback_ids
-        assert type(tx_message_response.signed_message) == str
+        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
+        assert type(signing_msg_response.signed_message) == str
 
     def test_handle_message_signing_ethereum_deprecated(self):
         """Test message signing for ethereum deprecated."""
         message = b"0x11f3f9487724404e3a1fb7252a3226"
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
             skill_callback_ids=(PublicId("author", "a_skill", "0.1.0"),),
             crypto_id="ethereum",
             is_deprecated_signing_mode=True,
             message=message,
         )
-        self.decision_maker.message_in_queue.put_nowait(tx_message)
-        tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert (
-            tx_message_response.performative
-            == TransactionMessage.Performative.SIGNED_MESSAGE
+            signing_msg_response.performative
+            == SigningMessage.Performative.SIGNED_MESSAGE
         )
-        assert tx_message_response.skill_callback_ids == tx_message.skill_callback_ids
-        assert type(tx_message_response.signed_message) == str
+        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
+        assert type(signing_msg_response.signed_message) == str
 
     def test_handle_message_signing_unknown(self):
         """Test message signing for unknown."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_MESSAGE,
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
             skill_callback_ids=(PublicId("author", "a_skill", "0.1.0"),),
             crypto_id="unknown",
             message=message,
         )
-        self.decision_maker.message_in_queue.put_nowait(tx_message)
-        tx_message_response = self.decision_maker.message_out_queue.get(timeout=2)
-        assert tx_message_response.performative == TransactionMessage.Performative.ERROR
-        assert tx_message_response.skill_callback_ids == tx_message.skill_callback_ids
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        assert signing_msg_response.performative == SigningMessage.Performative.ERROR
+        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
-            tx_message_response.error_code
-            == TransactionMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING
+            signing_msg_response.error_code
+            == SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING
         )
 
     @classmethod

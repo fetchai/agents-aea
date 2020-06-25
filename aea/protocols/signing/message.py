@@ -26,6 +26,7 @@ from typing import Dict, Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.protocols.signing.custom_types import ErrorCode as CustomErrorCode
+from aea.protocols.signing.custom_types import RawMessage as CustomRawMessage
 from aea.protocols.signing.custom_types import RawTransaction as CustomRawTransaction
 from aea.protocols.signing.custom_types import (
     SignedTransaction as CustomSignedTransaction,
@@ -43,6 +44,8 @@ class SigningMessage(Message):
     protocol_id = ProtocolId("fetchai", "signing", "0.1.0")
 
     ErrorCode = CustomErrorCode
+
+    RawMessage = CustomRawMessage
 
     RawTransaction = CustomRawTransaction
 
@@ -124,16 +127,22 @@ class SigningMessage(Message):
         return cast(int, self.get("target"))
 
     @property
+    def crypto_id(self) -> str:
+        """Get the 'crypto_id' content from the message."""
+        assert self.is_set("crypto_id"), "'crypto_id' content is not set."
+        return cast(str, self.get("crypto_id"))
+
+    @property
     def error_code(self) -> CustomErrorCode:
         """Get the 'error_code' content from the message."""
         assert self.is_set("error_code"), "'error_code' content is not set."
         return cast(CustomErrorCode, self.get("error_code"))
 
     @property
-    def message(self) -> bytes:
-        """Get the 'message' content from the message."""
-        assert self.is_set("message"), "'message' content is not set."
-        return cast(bytes, self.get("message"))
+    def raw_message(self) -> CustomRawMessage:
+        """Get the 'raw_message' content from the message."""
+        assert self.is_set("raw_message"), "'raw_message' content is not set."
+        return cast(CustomRawMessage, self.get("raw_message"))
 
     @property
     def raw_transaction(self) -> CustomRawTransaction:
@@ -218,7 +227,7 @@ class SigningMessage(Message):
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == SigningMessage.Performative.SIGN_TRANSACTION:
-                expected_nb_of_contents = 4
+                expected_nb_of_contents = 5
                 assert (
                     type(self.skill_callback_ids) == tuple
                 ), "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
@@ -250,6 +259,11 @@ class SigningMessage(Message):
                     type(self.terms) == CustomTerms
                 ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
                     type(self.terms)
+                )
+                assert (
+                    type(self.crypto_id) == str
+                ), "Invalid type for content 'crypto_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.crypto_id)
                 )
                 assert (
                     type(self.raw_transaction) == CustomRawTransaction
@@ -257,7 +271,7 @@ class SigningMessage(Message):
                     type(self.raw_transaction)
                 )
             elif self.performative == SigningMessage.Performative.SIGN_MESSAGE:
-                expected_nb_of_contents = 4
+                expected_nb_of_contents = 5
                 assert (
                     type(self.skill_callback_ids) == tuple
                 ), "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
@@ -291,9 +305,14 @@ class SigningMessage(Message):
                     type(self.terms)
                 )
                 assert (
-                    type(self.message) == bytes
-                ), "Invalid type for content 'message'. Expected 'bytes'. Found '{}'.".format(
-                    type(self.message)
+                    type(self.crypto_id) == str
+                ), "Invalid type for content 'crypto_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.crypto_id)
+                )
+                assert (
+                    type(self.raw_message) == CustomRawMessage
+                ), "Invalid type for content 'raw_message'. Expected 'RawMessage'. Found '{}'.".format(
+                    type(self.raw_message)
                 )
             elif self.performative == SigningMessage.Performative.SIGNED_TRANSACTION:
                 expected_nb_of_contents = 3

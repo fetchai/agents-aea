@@ -6,7 +6,7 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: Qmct8jVx6ndWwaa5HXJAJgMraVuZ8kMeyx6rnEeHAYHwDJ
-  custom_types.py: Qme6TJj2GDd321afsBPC3ghF26CbwujEXXefPJPrR7sddx
+  custom_types.py: QmY4L1UGkjX92mM5WdqYXCa9yLCCXAThA2xb6mUR83A2LE
   dialogues.py: QmQBShDyvyMaXo2yWRgAUJo6QzWdYe6zvHcuMnmi4jrfdF
   ledger_api.proto: QmRAw47Aq2s8QjS9fX7MGQgggCnkaWxbPKws2hiK3WDTiP
   ledger_api_pb2.py: QmZddJYvhSpch846JFzdKrTA7692ZL1nWyCjCf7AqALdUw

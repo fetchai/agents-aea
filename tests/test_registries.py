@@ -37,10 +37,10 @@ from aea.contracts.base import Contract
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.signing.message import SigningMessage
 from aea.registries.base import AgentComponentRegistry
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
@@ -449,8 +449,8 @@ class TestFilter:
 
     def test_handle_internal_messages(self):
         """Test that the internal messages are handled."""
-        t = TransactionMessage(
-            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+        t = SigningMessage(
+            performative=SigningMessage.Performative.SUCCESSFUL_SETTLEMENT,
             tx_id="transaction0",
             skill_callback_ids=[PublicId("dummy_author", "dummy", "0.1.0")],
             tx_sender_addr="pk1",

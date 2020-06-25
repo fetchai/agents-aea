@@ -33,6 +33,8 @@ from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import Description
 from aea.mail.base import Address
 from aea.protocols.base import Message
+from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
+from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.skills.base import Model
 
 
@@ -256,6 +258,48 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: the created dialogue
         """
         dialogue = OefSearchDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+
+SigningDialogue = BaseSigningDialogue
+
+
+class SigningDialogues(Model, BaseSigningDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+        BaseSigningDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return BaseSigningDialogue.AgentRole.SKILL
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> SigningDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = SigningDialogue(
             dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue

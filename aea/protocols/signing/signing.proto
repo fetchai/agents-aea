@@ -13,6 +13,10 @@ message SigningMessage{
         ErrorCodeEnum error_code = 1;
     }
 
+    message RawMessage{
+        bytes raw_message = 1;
+    }
+
     message RawTransaction{
         bytes raw_transaction = 1;
     }
@@ -31,14 +35,16 @@ message SigningMessage{
         repeated string skill_callback_ids = 1;
         map<string, string> skill_callback_info = 2;
         Terms terms = 3;
-        RawTransaction raw_transaction = 4;
+        string crypto_id = 4;
+        RawTransaction raw_transaction = 5;
     }
 
     message Sign_Message_Performative{
         repeated string skill_callback_ids = 1;
         map<string, string> skill_callback_info = 2;
         Terms terms = 3;
-        bytes message = 4;
+        string crypto_id = 4;
+        RawMessage raw_message = 5;
     }
 
     message Signed_Transaction_Performative{

@@ -23,10 +23,10 @@ import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -197,7 +197,7 @@ class FIPAHandler(Handler):
 class TransactionHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -210,11 +210,11 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
+        signing_msg_response = cast(SigningMessage, message)
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         strategy = cast(Strategy, self.context.strategy)
-        if tx_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
-            tx_signed = tx_msg_response.signed_transaction
+        if signing_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
+            tx_signed = signing_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
@@ -252,8 +252,11 @@ class TransactionHandler(Handler):
                     )
                 )
 
-        elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
-            tx_signed = tx_msg_response.signed_transaction
+        elif (
+            signing_msg_response.tx_id
+            == contract.Performative.CONTRACT_CREATE_BATCH.value
+        ):
+            tx_signed = signing_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
@@ -287,8 +290,11 @@ class TransactionHandler(Handler):
                         self.context.agent_name, tx_digest
                     )
                 )
-        elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
-            tx_signed = tx_msg_response.signed_transaction
+        elif (
+            signing_msg_response.tx_id
+            == contract.Performative.CONTRACT_MINT_BATCH.value
+        ):
+            tx_signed = signing_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
@@ -330,10 +336,10 @@ class TransactionHandler(Handler):
                     "[{}]: Current balances: {}".format(self.context.agent_name, result)
                 )
         elif (
-            tx_msg_response.tx_id
+            signing_msg_response.tx_id
             == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
         ):
-            tx_signed = tx_msg_response.signed_transaction
+            tx_signed = signing_msg_response.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)

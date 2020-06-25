@@ -24,11 +24,11 @@ import time
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -164,7 +164,7 @@ class FIPANegotiationHandler(Handler):
         else:
             transactions = cast(Transactions, self.context.transactions)
             transaction_msg = transactions.generate_transaction_message(
-                TransactionMessage.Performative.SIGN_MESSAGE,
+                SigningMessage.Performative.SIGN_MESSAGE,
                 proposal_description,
                 dialogue.dialogue_label,
                 cast(Dialogue.AgentRole, dialogue.role),
@@ -217,7 +217,7 @@ class FIPANegotiationHandler(Handler):
         )
         transactions = cast(Transactions, self.context.transactions)
         transaction_msg = transactions.generate_transaction_message(
-            TransactionMessage.Performative.SIGN_MESSAGE,
+            SigningMessage.Performative.SIGN_MESSAGE,
             proposal_description,
             dialogue.dialogue_label,
             cast(Dialogue.AgentRole, dialogue.role),
@@ -528,10 +528,10 @@ class FIPANegotiationHandler(Handler):
             )
 
 
-class TransactionHandler(Handler):
+class SigningHandler(Handler):
     """This class implements the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """
@@ -548,8 +548,8 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_message = cast(TransactionMessage, message)
-        if tx_message.performative == TransactionMessage.Performative.SIGNED_MESSAGE:
+        tx_message = cast(SigningMessage, message)
+        if tx_message.performative == SigningMessage.Performative.SIGNED_MESSAGE:
             self.context.logger.info(
                 "[{}]: transaction confirmed by decision maker".format(
                     self.context.agent_name

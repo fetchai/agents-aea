@@ -23,9 +23,9 @@ from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 from aea.protocols.base import Message
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -375,10 +375,10 @@ class TACHandler(Handler):
         self.context.shared_state["confirmed_tx_ids"].append(message.tx_id)
 
 
-class TransactionHandler(Handler):
+class SigningHandler(Handler):
     """This class implements the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """
@@ -395,11 +395,8 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_message = cast(TransactionMessage, message)
-        if (
-            tx_message.performative
-            == TransactionMessage.Performative.SIGNED_TRANSACTION
-        ):
+        tx_message = cast(SigningMessage, message)
+        if tx_message.performative == SigningMessage.Performative.SIGNED_TRANSACTION:
 
             # TODO: Need to modify here and add the contract option in case we are using one.
 

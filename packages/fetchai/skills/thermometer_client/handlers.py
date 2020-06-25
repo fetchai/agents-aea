@@ -23,11 +23,11 @@ from packages.fetchai.skills.generic_buyer.handlers import (
     GenericFipaHandler,
     GenericLedgerApiHandler,
     GenericOefSearchHandler,
-    GenericTransactionHandler,
+    GenericSigningHandler,
 )
 
 
 FipaHandler = GenericFipaHandler
 LedgerApiHandler = GenericLedgerApiHandler
 OefSearchHandler = GenericOefSearchHandler
-TransactionHandler = GenericTransactionHandler
+SigningHandler = GenericSigningHandler

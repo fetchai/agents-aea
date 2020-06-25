@@ -24,8 +24,8 @@ import random
 from enum import Enum
 from typing import Dict, Optional, cast
 
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description, Query
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
@@ -330,7 +330,7 @@ class Strategy(Model):
         return proposals
 
     def is_profitable_transaction(
-        self, transaction_msg: TransactionMessage, role: Dialogue.AgentRole
+        self, transaction_msg: SigningMessage, role: Dialogue.AgentRole
     ) -> bool:
         """
         Check if a transaction is profitable.

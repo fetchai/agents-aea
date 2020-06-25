@@ -7,8 +7,8 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
-  dialogues.py: QmR3k4Vub22NEJomhSEk4xXcXnZed3Vvk4od53WfBZ6wc7
-  handlers.py: QmXF4C7KNx1PEq1Dqa5n3eiya4Sa4YSB4BxdjgGfU2xBUS
+  dialogues.py: QmTyEP3mdRLBNZWAkbp6E1veaxYcumkp6tuU52AWcZqMxs
+  handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
 contracts: []
@@ -34,9 +34,9 @@ handlers:
   oef_search:
     args: {}
     class_name: OefSearchHandler
-  transaction:
+  signing:
     args: {}
-    class_name: TransactionHandler
+    class_name: SigningHandler
 models:
   fipa_dialogues:
     args: {}
@@ -47,6 +47,9 @@ models:
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       currency_id: FET
@@ -63,5 +66,5 @@ models:
           constraint_type: ==
           search_term: city
           search_value: Cambridge
-    class_name: GenericStrategy
+    class_name: Strategy
 dependencies: {}

@@ -34,8 +34,11 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.dialogues import (
     OefSearchDialogues as GenericOefSearchDialogues,
 )
-
+from packages.fetchai.skills.generic_buyer.dialogues import (
+    SigningDialogues as GenericSigningDialogues,
+)
 
 FipaDialogues = GenericFipaDialogues
 LedgerApiDialogues = GenericLedgerApiDialogues
 OefSearchDialogues = GenericOefSearchDialogues
+SigningDialogues = GenericSigningDialogues

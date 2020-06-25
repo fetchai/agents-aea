@@ -579,8 +579,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         if self._is_acceptable_for_signing(signing_msg):
             signed_message = self.wallet.sign_message(
                 signing_msg.crypto_id,
-                signing_msg.message,
-                signing_msg.is_deprecated_signing_mode,
+                signing_msg.raw_message.body,
+                signing_msg.raw_message.is_deprecated_mode,
             )
             if signed_message is not None:
                 signing_msg_response = SigningMessage(
@@ -627,13 +627,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_msg: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        if signing_msg.has_terms:
-            result = self.context.preferences.is_utility_enhancing(
-                self.context.ownership_state, signing_msg.terms
-            ) and self.context.ownership_state.is_affordable(signing_msg.terms)
-        else:
-            logger.warning(
-                "Cannot verify whether transaction improves utility and is affordable as no terms are provided. Assuming it does!"
-            )
-            result = True
+        result = self.context.preferences.is_utility_enhancing(
+            self.context.ownership_state, signing_msg.terms
+        ) and self.context.ownership_state.is_affordable(signing_msg.terms)
         return result

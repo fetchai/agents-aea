@@ -23,11 +23,11 @@ import pprint
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -408,10 +408,10 @@ class GenericOefSearchHandler(Handler):
             )
 
 
-class GenericTransactionHandler(Handler):
-    """Implement the transaction handler."""
+class GenericSigningHandler(Handler):
+    """Implement the signing handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -424,10 +424,10 @@ class GenericTransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
+        tx_msg_response = cast(SigningMessage, message)
         if (
             tx_msg_response.performative
-            == TransactionMessage.Performative.SIGNED_TRANSACTION
+            == SigningMessage.Performative.SIGNED_TRANSACTION
         ):
             self.context.logger.info(
                 "[{}]: transaction signing was successful.".format(
@@ -453,7 +453,7 @@ class GenericTransactionHandler(Handler):
         """
         pass
 
-    def _send_transaction_to_ledger(self, tx_msg: TransactionMessage) -> None:
+    def _send_transaction_to_ledger(self, tx_msg: SigningMessage) -> None:
         """
         Send the transaction message to the ledger.
 
@@ -575,8 +575,8 @@ class GenericLedgerApiHandler(Handler):
             )
             return
         fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
-        tx_msg = TransactionMessage(
-            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+        tx_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=(self.context.skill_id,),
             crypto_id=ledger_api_msg.ledger_id,
             transaction=ledger_api_msg.raw_transaction,

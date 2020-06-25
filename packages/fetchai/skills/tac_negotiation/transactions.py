@@ -26,11 +26,11 @@ from typing import Deque, Dict, Tuple
 
 from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
@@ -50,14 +50,14 @@ class Transactions(Model):
         super().__init__(**kwargs)
         self._pending_proposals = defaultdict(
             lambda: {}
-        )  # type: Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]
+        )  # type: Dict[DialogueLabel, Dict[MessageId, SigningMessage]]
         self._pending_initial_acceptances = defaultdict(
             lambda: {}
-        )  # type: Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]
+        )  # type: Dict[DialogueLabel, Dict[MessageId, SigningMessage]]
 
-        self._locked_txs = {}  # type: Dict[str, TransactionMessage]
-        self._locked_txs_as_buyer = {}  # type: Dict[str, TransactionMessage]
-        self._locked_txs_as_seller = {}  # type: Dict[str, TransactionMessage]
+        self._locked_txs = {}  # type: Dict[str, SigningMessage]
+        self._locked_txs_as_buyer = {}  # type: Dict[str, SigningMessage]
+        self._locked_txs_as_seller = {}  # type: Dict[str, SigningMessage]
 
         self._last_update_for_transactions = (
             deque()
@@ -68,14 +68,14 @@ class Transactions(Model):
     @property
     def pending_proposals(
         self,
-    ) -> Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]:
+    ) -> Dict[DialogueLabel, Dict[MessageId, SigningMessage]]:
         """Get the pending proposals."""
         return self._pending_proposals
 
     @property
     def pending_initial_acceptances(
         self,
-    ) -> Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]:
+    ) -> Dict[DialogueLabel, Dict[MessageId, SigningMessage]]:
         """Get the pending initial acceptances."""
         return self._pending_initial_acceptances
 
@@ -91,12 +91,12 @@ class Transactions(Model):
 
     def generate_transaction_message(
         self,
-        performative: TransactionMessage.Performative,
+        performative: SigningMessage.Performative,
         proposal_description: Description,
         dialogue_label: DialogueLabel,
         role: Dialogue.AgentRole,
         agent_addr: Address,
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Generate the transaction message from the description and the dialogue.
 
@@ -150,10 +150,10 @@ class Transactions(Model):
         )
         skill_callback_ids = (
             (PublicId.from_str("fetchai/tac_participation:0.4.0"),)
-            if performative == TransactionMessage.Performative.SIGN_MESSAGE
+            if performative == SigningMessage.Performative.SIGN_MESSAGE
             else (PublicId.from_str("fetchai/tac_negotiation:0.4.0"),)
         )
-        transaction_msg = TransactionMessage(
+        transaction_msg = SigningMessage(
             performative=performative,
             skill_callback_ids=skill_callback_ids,
             # tx_id=self.get_internal_tx_id(),
@@ -212,7 +212,7 @@ class Transactions(Model):
         self,
         dialogue_label: DialogueLabel,
         proposal_id: int,
-        transaction_msg: TransactionMessage,
+        transaction_msg: SigningMessage,
     ) -> None:
         """
         Add a proposal (in the form of a transaction) to the pending list.
@@ -232,7 +232,7 @@ class Transactions(Model):
 
     def pop_pending_proposal(
         self, dialogue_label: DialogueLabel, proposal_id: int
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Remove a proposal (in the form of a transaction) from the pending list.
 
@@ -253,7 +253,7 @@ class Transactions(Model):
         self,
         dialogue_label: DialogueLabel,
         proposal_id: int,
-        transaction_msg: TransactionMessage,
+        transaction_msg: SigningMessage,
     ) -> None:
         """
         Add an acceptance (in the form of a transaction) to the pending list.
@@ -273,7 +273,7 @@ class Transactions(Model):
 
     def pop_pending_initial_acceptance(
         self, dialogue_label: DialogueLabel, proposal_id: int
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Remove an acceptance (in the form of a transaction) from the pending list.
 
@@ -304,7 +304,7 @@ class Transactions(Model):
         self._last_update_for_transactions.append((now, transaction_id))
 
     def add_locked_tx(
-        self, transaction_msg: TransactionMessage, role: Dialogue.AgentRole
+        self, transaction_msg: SigningMessage, role: Dialogue.AgentRole
     ) -> None:
         """
         Add a lock (in the form of a transaction).
@@ -326,7 +326,7 @@ class Transactions(Model):
         else:
             self._locked_txs_as_buyer[transaction_id] = transaction_msg
 
-    def pop_locked_tx(self, transaction_msg: TransactionMessage) -> TransactionMessage:
+    def pop_locked_tx(self, transaction_msg: SigningMessage) -> SigningMessage:
         """
         Remove a lock (in the form of a transaction).
 

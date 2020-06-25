@@ -8,8 +8,8 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmPZ4bRmXpsDKD7ogCJHEMrtm67hpA5aqxvujgfQD1PtMd
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
-  dialogues.py: QmR3k4Vub22NEJomhSEk4xXcXnZed3Vvk4od53WfBZ6wc7
-  handlers.py: QmXF4C7KNx1PEq1Dqa5n3eiya4Sa4YSB4BxdjgGfU2xBUS
+  dialogues.py: QmQwhJv2ARUQyZw7Pa6g8UVvZQ1p6Ufk7jvu4SijXrLnAh
+  handlers.py: QmVeCVsgMM9j63NSfEPhxb718k9h6u2WgNstsaXv5mTS14
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
 contracts: []
@@ -48,6 +48,9 @@ models:
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       currency_id: FET
