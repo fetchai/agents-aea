@@ -12,14 +12,15 @@ fingerprint:
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
   connection.py: QmbPuwgAYed7JVptHXfybt6xVjLFqXdYsN3mqbHmnP1hh2
+  coverage.out: QmcDCx5VfyD9pzBS9VyGwTmsshAsEb4Bxc9PbnGzejVaom
   dht/dhtclient/dhtclient.go: QmPNMfDY65bChfbF9gUC5jzPaC3uvaaytzyDxPNvT1jUfD
   dht/dhtclient/dhtclient_test.go: QmbZHW716CbzgYTnqPSQwZn3f4E89aa63fT2B3EZi2B1uk
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
   dht/dhtnetwork_test.go: QmcrLh1ebq8x4MQQjSb3isHb268pnRazT147gpN6cz9rbY
   dht/dhtnode/dhtnode.go: QmTB2yf7M6ZtUeAidxVrthUF68jzCDA4n8gZ1iN5BxEL5m
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  dht/dhtpeer/dhtpeer.go: QmVso8oNtwTK8eHAmvAzLGJRXk9jucXLESehpibs7SYrjq
-  dht/dhtpeer/dhtpeer_test.go: QmdoVt6RTsHMPzYi8bK131MjNRrdp98MSwHJ86mQvbBUTR
+  dht/dhtpeer/dhtpeer.go: QmXAbY8WaujsrpwYmFejZNmXhShWEGiFs6AD8tHGu5c4PX
+  dht/dhtpeer/dhtpeer_test.go: QmaY4FCRxNf5VKJ4DpQKnC7F4V35A6kGTpuPe3SY1shZ7i
   dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
   dht/dhttests/dhttests.go: Qmf5YbYcUKZn7QExhs6y6vi2m7egUsRMaAgjRVabxwhzGc
   go.mod: QmacqAAxC3dkydmfbEyVWVkMDmZECTWKZcBoPyRSnheQzD
