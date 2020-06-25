@@ -99,12 +99,13 @@ def _process_envelopes(
     :return: None.
     """
     envelope = _try_construct_envelope(agent_name, identity_stub.name)
-    if envelope is None and not inbox.empty():
-        envelope = inbox.get_nowait()
-        assert envelope is not None, "Could not recover envelope from inbox."
-        click.echo(_construct_message("received", envelope))
-    elif envelope is None and inbox.empty():
-        click.echo("Received no new envelope!")
+    if envelope is None:
+        if not inbox.empty():
+            envelope = inbox.get_nowait()
+            assert envelope is not None, "Could not recover envelope from inbox."
+            click.echo(_construct_message("received", envelope))
+        else:
+            click.echo("Received no new envelope!")
     else:
         outbox.put(envelope)
         click.echo(_construct_message("sending", envelope))
