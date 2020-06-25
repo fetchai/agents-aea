@@ -90,7 +90,7 @@ async def test_get_balance(ledger_id, address, ledger_apis_connection: Connectio
     assert response is not None
     assert type(response.message) == LedgerApiMessage
     message = cast(LedgerApiMessage, response.message)
-    actual_balance_amount = message.amount
+    actual_balance_amount = message.balance
     expected_balance_amount = aea.crypto.registries.make_ledger_api(
         ledger_id
     ).get_balance(address)
