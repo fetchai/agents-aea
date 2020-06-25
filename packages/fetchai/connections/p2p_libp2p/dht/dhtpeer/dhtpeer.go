@@ -385,8 +385,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		lerror(err).Msg("while receiving agent's Address")
 		return
 	}
-	err = utils.WriteBytesConn(conn, []byte("DONE"))
-	ignore(err)
 
 	addr := string(buf)
 	linfo().Msgf("connection from %s established for Address %s",
@@ -402,6 +400,9 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			return
 		}
 	}
+
+	err = utils.WriteBytesConn(conn, []byte("DONE"))
+	ignore(err)
 
 	for {
 		// read envelopes
