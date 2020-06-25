@@ -958,15 +958,15 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 */
 
 /*
-								Network topology
+                                    Network topology
 
-	DHTClient -------                                                 -- DelegateClient
-	                |                                                 |
-	DHTClient -------                                                 -- DelegateClient
-					|                                                 |
-					|-- DHTPeer --- DHTPeeer -- DHTPeer --- DHTPeer --|
-				    |                                                 |
-	DelegateClient --                                                 ------- DHTClient
+   DHTClient -------                                                 -- DelegateClient
+                   |                                                 |
+   DHTClient -------                                                 -- DelegateClient
+                   |                                                 |
+                   |-- DHTPeer --- DHTPeeer -- DHTPeer --- DHTPeer --|
+                   |                                                 |
+   DelegateClient --                                                 ------- DHTClient
 */
 
 // TestRoutingAlltoAll
