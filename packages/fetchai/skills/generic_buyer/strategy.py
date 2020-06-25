@@ -52,22 +52,12 @@ class GenericStrategy(Model):
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         super().__init__(**kwargs)
-        self._search_id = 0
-        self.is_searching = True
+        self.is_searching = False
 
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
-
-    def get_next_search_id(self) -> int:
-        """
-        Get the next search id and set the search time.
-
-        :return: the next search id
-        """
-        self._search_id += 1
-        return self._search_id
 
     def get_service_query(self) -> Query:
         """

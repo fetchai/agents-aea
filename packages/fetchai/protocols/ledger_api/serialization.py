@@ -56,13 +56,13 @@ class LedgerApiSerializer(Serializer):
             address = msg.address
             performative.address = address
             ledger_api_msg.get_balance.CopyFrom(performative)
-        elif performative_id == LedgerApiMessage.Performative.GET_TRANSFER_TRANSACTION:
-            performative = ledger_api_pb2.LedgerApiMessage.Get_Transfer_Transaction_Performative()  # type: ignore
+        elif performative_id == LedgerApiMessage.Performative.GET_RAW_TRANSACTION:
+            performative = ledger_api_pb2.LedgerApiMessage.Get_Raw_Transaction_Performative()  # type: ignore
             ledger_id = msg.ledger_id
             performative.ledger_id = ledger_id
-            transfer = msg.transfer
-            AnyObject.encode(performative.transfer, transfer)
-            ledger_api_msg.get_transfer_transaction.CopyFrom(performative)
+            terms = msg.terms
+            AnyObject.encode(performative.terms, terms)
+            ledger_api_msg.get_raw_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION:
             performative = ledger_api_pb2.LedgerApiMessage.Send_Signed_Transaction_Performative()  # type: ignore
             ledger_id = msg.ledger_id
@@ -79,14 +79,14 @@ class LedgerApiSerializer(Serializer):
             ledger_api_msg.get_transaction_receipt.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.BALANCE:
             performative = ledger_api_pb2.LedgerApiMessage.Balance_Performative()  # type: ignore
-            amount = msg.amount
-            performative.amount = amount
+            balance = msg.balance
+            performative.balance = balance
             ledger_api_msg.balance.CopyFrom(performative)
-        elif performative_id == LedgerApiMessage.Performative.TRANSACTION:
-            performative = ledger_api_pb2.LedgerApiMessage.Transaction_Performative()  # type: ignore
-            transaction = msg.transaction
-            AnyObject.encode(performative.transaction, transaction)
-            ledger_api_msg.transaction.CopyFrom(performative)
+        elif performative_id == LedgerApiMessage.Performative.RAW_TRANSACTION:
+            performative = ledger_api_pb2.LedgerApiMessage.Raw_Transaction_Performative()  # type: ignore
+            raw_transaction = msg.raw_transaction
+            AnyObject.encode(performative.raw_transaction, raw_transaction)
+            ledger_api_msg.raw_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
             performative = ledger_api_pb2.LedgerApiMessage.Transaction_Digest_Performative()  # type: ignore
             transaction_digest = msg.transaction_digest
@@ -141,12 +141,12 @@ class LedgerApiSerializer(Serializer):
             performative_content["ledger_id"] = ledger_id
             address = ledger_api_pb.get_balance.address
             performative_content["address"] = address
-        elif performative_id == LedgerApiMessage.Performative.GET_TRANSFER_TRANSACTION:
-            ledger_id = ledger_api_pb.get_transfer_transaction.ledger_id
+        elif performative_id == LedgerApiMessage.Performative.GET_RAW_TRANSACTION:
+            ledger_id = ledger_api_pb.get_raw_transaction.ledger_id
             performative_content["ledger_id"] = ledger_id
-            pb2_transfer = ledger_api_pb.get_transfer_transaction.transfer
-            transfer = AnyObject.decode(pb2_transfer)
-            performative_content["transfer"] = transfer
+            pb2_terms = ledger_api_pb.get_raw_transaction.terms
+            terms = AnyObject.decode(pb2_terms)
+            performative_content["terms"] = terms
         elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION:
             ledger_id = ledger_api_pb.send_signed_transaction.ledger_id
             performative_content["ledger_id"] = ledger_id
@@ -163,12 +163,12 @@ class LedgerApiSerializer(Serializer):
             )
             performative_content["transaction_digest"] = transaction_digest
         elif performative_id == LedgerApiMessage.Performative.BALANCE:
-            amount = ledger_api_pb.balance.amount
-            performative_content["amount"] = amount
-        elif performative_id == LedgerApiMessage.Performative.TRANSACTION:
-            pb2_transaction = ledger_api_pb.transaction.transaction
-            transaction = AnyObject.decode(pb2_transaction)
-            performative_content["transaction"] = transaction
+            balance = ledger_api_pb.balance.balance
+            performative_content["balance"] = balance
+        elif performative_id == LedgerApiMessage.Performative.RAW_TRANSACTION:
+            pb2_raw_transaction = ledger_api_pb.raw_transaction.raw_transaction
+            raw_transaction = AnyObject.decode(pb2_raw_transaction)
+            performative_content["raw_transaction"] = raw_transaction
         elif performative_id == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
             transaction_digest = ledger_api_pb.transaction_digest.transaction_digest
             performative_content["transaction_digest"] = transaction_digest

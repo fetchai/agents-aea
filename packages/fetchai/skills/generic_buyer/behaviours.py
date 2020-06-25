@@ -23,7 +23,12 @@ from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.generic_buyer.dialogues import (
+    LedgerApiDialogues,
+    OefSearchDialogues,
+)
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -42,24 +47,19 @@ class GenericSearchBehaviour(TickerBehaviour):
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
         strategy = cast(GenericStrategy, self.context.strategy)
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.get_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
+        if strategy.is_ledger_tx:
+            ledger_api_dialogues = cast(
+                LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            if balance is not None and balance > 0:
-                self.context.logger.info(
-                    "[{}]: starting balance on {} ledger={}.".format(
-                        self.context.agent_name, strategy.ledger_id, balance
-                    )
-                )
-            else:
-                self.context.logger.warning(
-                    "[{}]: you have no starting balance on {} ledger!".format(
-                        self.context.agent_name, strategy.ledger_id
-                    )
-                )
-                self.context.is_active = False
+            ledger_api_msg = LedgerApiMessage(
+                performative=LedgerApiMessage.Performative.GET_BALANCE,
+                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
+                ledger_id=strategy.ledger_id,
+                address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
+            )
+            ledger_api_msg.counterparty = strategy.ledger_id
+            ledger_api_dialogues.update(ledger_api_msg)
+            self.context.outbox.put_message(message=ledger_api_msg)
 
     def act(self) -> None:
         """
@@ -70,14 +70,17 @@ class GenericSearchBehaviour(TickerBehaviour):
         strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_searching:
             query = strategy.get_service_query()
-            search_id = strategy.get_next_search_id()
-            oef_msg = OefSearchMessage(
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                dialogue_reference=(str(search_id), ""),
+                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            oef_msg.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=oef_msg)
+            oef_search_msg.counterparty = self.context.search_service_address
+            oef_search_dialogues.update(oef_search_msg)
+            self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
         """
@@ -85,14 +88,4 @@ class GenericSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.get_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-            )
-            self.context.logger.info(
-                "[{}]: ending balance on {} ledger={}.".format(
-                    self.context.agent_name, strategy.ledger_id, balance
-                )
-            )
+        pass

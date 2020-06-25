@@ -70,7 +70,6 @@ class GenericStrategy(Model):
 
         super().__init__(**kwargs)
 
-        self._oef_msg_id = 0
         # Read the data from the sensor if the bool is set to True.
         # Enables us to let the user implement his data collection logic without major changes.
         if self._has_data_source:
@@ -82,15 +81,6 @@ class GenericStrategy(Model):
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
-
-    def get_next_oef_msg_id(self) -> int:
-        """
-        Get the next oef msg id.
-
-        :return: the next oef msg id
-        """
-        self._oef_msg_id += 1
-        return self._oef_msg_id
 
     def get_service_description(self) -> Description:
         """

@@ -44,6 +44,12 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue as BaseOefSearchDialogue,
+)
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogues as BaseOefSearchDialogues,
+)
 
 
 class FipaDialogue(BaseFipaDialogue):
@@ -208,6 +214,48 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :return: the created dialogue
         """
         dialogue = LedgerApiDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+
+OefSearchDialogue = BaseOefSearchDialogue
+
+
+class OefSearchDialogues(Model, BaseOefSearchDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return BaseOefSearchDialogue.AgentRole.AGENT
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> OefSearchDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = OefSearchDialogue(
             dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue

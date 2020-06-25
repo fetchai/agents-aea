@@ -20,3 +20,6 @@
 """This package contains the behaviours of the agent."""
 
 from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
+
+
+SearchBehaviour = GenericSearchBehaviour

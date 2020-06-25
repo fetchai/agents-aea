@@ -29,7 +29,16 @@ from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.skills.generic_seller.dialogues import Dialogue, Dialogues
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.generic_seller.dialogues import (
+    FipaDialogue,
+    FipaDialogues,
+    LedgerApiDialogue,
+    LedgerApiDialogues,
+    OefSearchDialogue,
+    OefSearchDialogues,
+)
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
@@ -52,8 +61,8 @@ class GenericFipaHandler(Handler):
         fipa_msg = cast(FipaMessage, message)
 
         # recover dialogue
-        dialogues = cast(Dialogues, self.context.dialogues)
-        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+        fipa_dialogue = cast(FipaDialogue, fipa_dialogues.update(fipa_msg))
         if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
@@ -67,6 +76,8 @@ class GenericFipaHandler(Handler):
             self._handle_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, fipa_dialogue)
+        else:
+            self._handle_invalid(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -101,7 +112,7 @@ class GenericFipaHandler(Handler):
         default_msg.counterparty = msg.counterparty
         self.context.outbox.put_message(message=default_msg)
 
-    def _handle_cfp(self, msg: FipaMessage, dialogue: Dialogue) -> None:
+    def _handle_cfp(self, msg: FipaMessage, dialogue: FipaDialogue) -> None:
         """
         Handle the CFP.
 
@@ -158,7 +169,7 @@ class GenericFipaHandler(Handler):
             dialogue.update(decline_msg)
             self.context.outbox.put_message(message=decline_msg)
 
-    def _handle_decline(self, msg: FipaMessage, dialogue: Dialogue) -> None:
+    def _handle_decline(self, msg: FipaMessage, dialogue: FipaDialogue) -> None:
         """
         Handle the DECLINE.
 
@@ -173,12 +184,12 @@ class GenericFipaHandler(Handler):
                 self.context.agent_name, msg.counterparty[-5:]
             )
         )
-        dialogues = cast(Dialogues, self.context.dialogues)
-        dialogues.dialogue_stats.add_dialogue_endstate(
-            Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated
+        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+        fipa_dialogues.dialogue_stats.add_dialogue_endstate(
+            FipaDialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated
         )
 
-    def _handle_accept(self, msg: FipaMessage, dialogue: Dialogue) -> None:
+    def _handle_accept(self, msg: FipaMessage, dialogue: FipaDialogue) -> None:
         """
         Handle the ACCEPT.
 
@@ -213,7 +224,7 @@ class GenericFipaHandler(Handler):
         dialogue.update(match_accept_msg)
         self.context.outbox.put_message(message=match_accept_msg)
 
-    def _handle_inform(self, msg: FipaMessage, dialogue: Dialogue) -> None:
+    def _handle_inform(self, msg: FipaMessage, dialogue: FipaDialogue) -> None:
         """
         Handle the INFORM.
 
@@ -282,9 +293,9 @@ class GenericFipaHandler(Handler):
                 inform_msg.counterparty = msg.counterparty
                 dialogue.update(inform_msg)
                 self.context.outbox.put_message(message=inform_msg)
-                dialogues = cast(Dialogues, self.context.dialogues)
-                dialogues.dialogue_stats.add_dialogue_endstate(
-                    Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
+                fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+                fipa_dialogues.dialogue_stats.add_dialogue_endstate(
+                    FipaDialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
                 )
             else:
                 self.context.logger.info(
@@ -303,9 +314,9 @@ class GenericFipaHandler(Handler):
             inform_msg.counterparty = msg.counterparty
             dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
-            dialogues = cast(Dialogues, self.context.dialogues)
-            dialogues.dialogue_stats.add_dialogue_endstate(
-                Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
+            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
+                FipaDialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
             )
         else:
             self.context.logger.warning(
@@ -313,3 +324,130 @@ class GenericFipaHandler(Handler):
                     self.context.agent_name, msg.counterparty[-5:]
                 )
             )
+
+    def _handle_invalid(self, msg: FipaMessage, dialogue: FipaDialogue) -> None:
+        """
+        Handle a fipa message of invalid performative.
+
+        :param msg: the message
+        :param dialogue: the dialogue object
+        :return: None
+        """
+        self.context.logger.warning(
+            "[{}]: cannot handle fipa message of performative={}.".format(
+                self.context.agent_name, msg.performative
+            )
+        )
+
+
+class GenericLedgerApiHandler(Handler):
+    """Implement the ledger handler."""
+
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        ledger_api_msg = cast(LedgerApiMessage, message)
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_dialogue = cast(
+            Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
+        )
+        if ledger_api_dialogue is None:
+            self.context.logger.info(
+                "[{}]: received invalid ledger_api message={}.".format(
+                    self.context.agent_name, ledger_api_msg
+                )
+            )
+            return
+
+        strategy = cast(GenericStrategy, self.context.strategy)
+        if ledger_api_msg.performative == LedgerApiMessage.Performative.BALANCE:
+            self.context.logger.info(
+                "[{}]: starting balance on {} ledger={}.".format(
+                    self.context.agent_name, strategy.ledger_id, ledger_api_msg.balance,
+                )
+            )
+        elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
+            self.context.logger.info(
+                "[{}]: received ledger_api error message={}.".format(
+                    self.context.agent_name, ledger_api_msg
+                )
+            )
+        else:
+            self.context.logger.warning(
+                "[{}]: cannot handle ledger_api message of performative={}.".format(
+                    self.context.agent_name, ledger_api_msg.performative
+                )
+            )
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+
+class GenericOefSearchHandler(Handler):
+    """This class implements an OEF search handler."""
+
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Call to setup the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        oef_search_msg = cast(OefSearchMessage, message)
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_dialogue = cast(
+            Optional[OefSearchDialogue], oef_search_dialogues.update(oef_search_msg)
+        )
+        if oef_search_dialogue is None:
+            self.context.logger.info(
+                "[{}]: received invalid oef_search message={}.".format(
+                    self.context.agent_name, oef_search_msg
+                )
+            )
+            return
+
+        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+            self.context.logger.info(
+                "[{}]: received oef_search error message={}.".format(
+                    self.context.agent_name, oef_search_msg
+                )
+            )
+        else:
+            self.context.logger.warning(
+                "[{}]: cannot handle oef_search message of performative={}.".format(
+                    self.context.agent_name, oef_search_msg.performative
+                )
+            )
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass

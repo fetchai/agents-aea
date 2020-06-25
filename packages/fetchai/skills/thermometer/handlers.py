@@ -19,7 +19,13 @@
 
 """This package contains the handlers of a thermometer AEA."""
 
-from packages.fetchai.skills.generic_seller.handlers import GenericFipaHandler
+from packages.fetchai.skills.generic_seller.handlers import (
+    GenericFipaHandler,
+    GenericLedgerApiHandler,
+    GenericOefSearchHandler,
+)
 
 
 FipaHandler = GenericFipaHandler
+LedgerApiHandler = GenericLedgerApiHandler
+OefSearchHandler = GenericOefSearchHandler

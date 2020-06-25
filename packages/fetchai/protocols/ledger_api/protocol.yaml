@@ -7,11 +7,11 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: Qmct8jVx6ndWwaa5HXJAJgMraVuZ8kMeyx6rnEeHAYHwDJ
   custom_types.py: QmUemuiDnpWzFtpHy592m3PjDML1TsAWKsvMsXpEyF2obz
-  dialogues.py: Qma8mjyov1EDqcQwznBKMvUG9utihRVyAPzskzCVWEFuYY
-  ledger_api.proto: Qmcirmhvs6xg9cJjmJoQkwLmBijY93DzpX25J9NZgSGC3p
-  ledger_api_pb2.py: QmedHWwSz9n2ghtKWt2qn3fv7ccyozcfFvFXzq1efYX53m
-  message.py: QmX4R7UuXkF3myf4PNjaQMqK9KNDBnGS9jhneaSHKwGing
-  serialization.py: QmRWTX4YnjoLi8HeJDwVZetGigmC8ZGWJ393MXkTrKfBF4
+  dialogues.py: QmQBShDyvyMaXo2yWRgAUJo6QzWdYe6zvHcuMnmi4jrfdF
+  ledger_api.proto: Qmeq4jgkugLjoB18EhcWxJ2e5bTz1yHGhmYJ4MMHMhcQBY
+  ledger_api_pb2.py: QmefwZyqt38RrqxJJcgsHsNFTrqN6MiZPSTm3aPvKwRytB
+  message.py: QmU98Qn8pMRN6pFeMaQkzhivJ7pSDaogoKqwYcFkWyHHvo
+  serialization.py: Qme8AcdGvmNh4T5Hntq6yiNmw2N79ADvxEYs2epKuKNw94
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

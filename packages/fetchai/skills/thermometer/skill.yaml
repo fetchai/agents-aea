@@ -7,17 +7,18 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
-  dialogues.py: QmSM9g252NkF1Toe1djAa8sytJDmCnwJDGG3otJ44F6Sr1
-  handlers.py: QmZGMN3h1tnab5gYKwv6dcMruWvaj2ituQEyDRgrnn1oCA
+  dialogues.py: QmPKMbUTyQRQmess9ZnhjAvLmjPhta9FUtQyxAMomUYGk1
+  handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
   strategy.py: QmVU9n2WSz6F7NJD4nj8oHDh4epFzA6HBqCvr6T2nSun2L
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
 skills:
-- fetchai/generic_buyer:0.6.0
+- fetchai/generic_seller:0.6.0
 behaviours:
   service_registration:
     args:
@@ -27,10 +28,22 @@ handlers:
   fipa:
     args: {}
     class_name: FipaHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
 models:
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   strategy:
     args:
       currency_id: FET

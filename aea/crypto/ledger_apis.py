@@ -164,7 +164,7 @@ class LedgerApis:
         tx_fee: int,
         tx_nonce: str,
         **kwargs
-    ) -> Optional[str]:
+    ) -> Optional[Any]:
         """
         Get a transaction to transfer from self to destination.
 
@@ -249,7 +249,7 @@ class LedgerApis:
         Check whether the transaction is valid.
 
         :param identifier: Ledger identifier
-        :param tx_digest:  the transaction digest
+        :param tx:  the transaction
         :param seller: the address of the seller.
         :param client: the address of the client.
         :param tx_nonce: the transaction nonce.

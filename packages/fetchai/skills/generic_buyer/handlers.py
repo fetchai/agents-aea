@@ -25,7 +25,7 @@ from typing import Dict, Optional, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
-from aea.helpers.transaction.base import Transfer
+from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -38,6 +38,8 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     FipaDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
+    OefSearchDialogue,
+    OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
@@ -80,6 +82,8 @@ class GenericFipaHandler(Handler):
             self._handle_match_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, fipa_dialogue)
+        else:
+            self._handle_invalid(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -203,7 +207,7 @@ class GenericFipaHandler(Handler):
             transfer_address = msg.info.get("address", None)
             if transfer_address is None or not isinstance(transfer_address, str):
                 transfer_address = msg.counterparty
-            transfer = Transfer(
+            terms = Terms(
                 sender_addr=self.context.address,
                 counterparty_addr=transfer_address,
                 amount_by_currency_id={
@@ -211,16 +215,17 @@ class GenericFipaHandler(Handler):
                         "currency_id"
                     ]: -fipa_dialogue.proposal.values["price"]
                 },
+                is_sender_payable_tx_fee=True,
+                quantities_by_good_id={"weather_data_purchase": 1},
                 nonce=fipa_dialogue.proposal.values["tx_nonce"],
-                service_reference="weather_data_purchase",
             )
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
             ledger_api_msg = LedgerApiMessage(
-                performative=LedgerApiMessage.Performative.GET_TRANSFER_TRANSACTION,
+                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
                 dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
-                transfer=transfer,
+                terms=terms,
                 ledger_id=fipa_dialogue.proposal.values["ledger_id"],
             )
             ledger_api_dialogue = ledger_api_dialogues.update(ledger_api_msg)
@@ -288,6 +293,20 @@ class GenericFipaHandler(Handler):
                 )
             )
 
+    def _handle_invalid(self, msg: FipaMessage, dialogue: FipaDialogue) -> None:
+        """
+        Handle a fipa message of invalid performative.
+
+        :param msg: the message
+        :param dialogue: the dialogue object
+        :return: None
+        """
+        self.context.logger.warning(
+            "[{}]: cannot handle fipa message of performative={}.".format(
+                self.context.agent_name, msg.performative
+            )
+        )
+
 
 class GenericOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
@@ -305,11 +324,36 @@ class GenericOefSearchHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
-        oef_msg = cast(OefSearchMessage, message)
-        if oef_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
-            agents = oef_msg.agents
+        oef_search_msg = cast(OefSearchMessage, message)
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_dialogue = cast(
+            Optional[OefSearchDialogue], oef_search_dialogues.update(oef_search_msg)
+        )
+        if oef_search_dialogue is None:
+            self.context.logger.info(
+                "[{}]: received invalid oef_search message={}.".format(
+                    self.context.agent_name, oef_search_msg
+                )
+            )
+            return
+
+        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+            self.context.logger.info(
+                "[{}]: received oef_search error message={}.".format(
+                    self.context.agent_name, oef_search_msg
+                )
+            )
+        elif oef_search_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
+            agents = oef_search_msg.agents
             self._handle_search(agents)
+        else:
+            self.context.logger.warning(
+                "[{}]: cannot handle oef_search message of performative={}.".format(
+                    self.context.agent_name, oef_search_msg.performative
+                )
+            )
 
     def teardown(self) -> None:
         """
@@ -467,67 +511,116 @@ class GenericLedgerApiHandler(Handler):
             LedgerApiDialogues, self.context.ledger_api_dialogues
         )
         ledger_api_dialogue = cast(
-            LedgerApiDialogue, ledger_api_dialogues.update(ledger_api_msg)
+            Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
         )
-        if (
-            ledger_api_dialogue is None
-            or ledger_api_dialogue.associated_fipa_dialogue is None
-        ):
+        if ledger_api_dialogue is None:
             self.context.logger.info(
+                "[{}]: received invalid ledger_api message={}.".format(
+                    self.context.agent_name, ledger_api_msg
+                )
+            )
+            return
+
+        strategy = cast(GenericStrategy, self.context.strategy)
+        if ledger_api_msg.performative == LedgerApiMessage.Performative.BALANCE:
+            if ledger_api_msg.balance > 0:
+                self.context.logger.info(
+                    "[{}]: starting balance on {} ledger={}.".format(
+                        self.context.agent_name,
+                        strategy.ledger_id,
+                        ledger_api_msg.balance,
+                    )
+                )
+                strategy.is_searching = True
+            else:
+                self.context.logger.warning(
+                    "[{}]: you have no starting balance on {} ledger!".format(
+                        self.context.agent_name, strategy.ledger_id
+                    )
+                )
+                self.context.is_active = False
+        elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
+            self.context.logger.info(
+                "[{}]: received ledger_api error message={}.".format(
+                    self.context.agent_name, ledger_api_msg
+                )
+            )
+        elif (
+            ledger_api_msg.performative == LedgerApiMessage.Performative.RAW_TRANSACTION
+        ):
+            self._handle_raw_transaction(ledger_api_msg, ledger_api_dialogue)
+        elif (
+            ledger_api_msg.performative
+            == LedgerApiMessage.Performative.TRANSACTION_DIGEST
+        ):
+            self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+        else:
+            self.context.logger.warning(
+                "[{}]: cannot handle ledger_api message of performative={}.".format(
+                    self.context.agent_name, ledger_api_msg.performative
+                )
+            )
+
+    def _handle_raw_transaction(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """Handle the raw transaction."""
+        if ledger_api_dialogue.associated_fipa_dialogue is None:
+            self.context.logger.warning(
                 "[{}]: cannot recover associate fipa dialogue.".format(
                     self.context.agent_name
                 )
             )
             return
         fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
-        if ledger_api_msg.performative == LedgerApiMessage.Performative.TRANSACTION:
-            tx_msg = TransactionMessage(
-                performative=TransactionMessage.Performative.SIGN_TRANSACTION,
-                skill_callback_ids=(self.context.skill_id,),
-                crypto_id=ledger_api_msg.ledger_id,
-                transaction=ledger_api_msg.transaction,
-                skill_callback_info={
-                    "dialogue_label": fipa_dialogue.dialogue_label.json
-                },
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SIGN_TRANSACTION,
+            skill_callback_ids=(self.context.skill_id,),
+            crypto_id=ledger_api_msg.ledger_id,
+            transaction=ledger_api_msg.raw_transaction,
+            skill_callback_info={"dialogue_label": fipa_dialogue.dialogue_label.json},
+        )
+        self.context.decision_maker_message_queue.put_nowait(tx_msg)
+        self.context.logger.info(
+            "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
+                self.context.agent_name
             )
-            self.context.decision_maker_message_queue.put_nowait(tx_msg)
-            self.context.logger.info(
-                "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
+        )
+
+    def _handle_transaction_digest(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """Handle a transaction digest."""
+        if ledger_api_dialogue.associated_fipa_dialogue is None:
+            self.context.logger.warning(
+                "[{}]: cannot recover associate fipa dialogue.".format(
                     self.context.agent_name
                 )
             )
-        elif (
-            ledger_api_msg.performative
-            == LedgerApiMessage.Performative.TRANSACTION_DIGEST
-        ):
-            self.context.logger.info(
-                "[{}]: transaction was successful. Transaction digest={}".format(
-                    self.context.agent_name, ledger_api_msg.transaction_digest
-                )
+            return
+        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
+        self.context.logger.info(
+            "[{}]: transaction was successfully submitted. Transaction digest={}".format(
+                self.context.agent_name, ledger_api_msg.transaction_digest
             )
-            fipa_msg = cast(FipaMessage, fipa_dialogue.last_incoming_message)
-            inform_msg = FipaMessage(
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
-                performative=FipaMessage.Performative.INFORM,
-                info={"transaction_digest": ledger_api_msg.transaction_digest},
+        )
+        fipa_msg = cast(FipaMessage, fipa_dialogue.last_incoming_message)
+        inform_msg = FipaMessage(
+            message_id=fipa_msg.message_id + 1,
+            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
+            target=fipa_msg.message_id,
+            performative=FipaMessage.Performative.INFORM,
+            info={"transaction_digest": ledger_api_msg.transaction_digest},
+        )
+        inform_msg.counterparty = fipa_dialogue.dialogue_label.dialogue_opponent_addr
+        fipa_dialogue.update(inform_msg)
+        self.context.outbox.put_message(message=inform_msg)
+        self.context.logger.info(
+            "[{}]: informing counterparty={} of transaction digest.".format(
+                self.context.agent_name,
+                fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
             )
-            inform_msg.counterparty = (
-                fipa_dialogue.dialogue_label.dialogue_opponent_addr
-            )
-            fipa_dialogue.update(inform_msg)
-            self.context.outbox.put_message(message=inform_msg)
-            self.context.logger.info(
-                "[{}]: informing counterparty={} of transaction digest.".format(
-                    self.context.agent_name,
-                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
-                )
-            )
-        else:
-            self.context.logger.info(
-                "[{}]: transaction was not successful.".format(self.context.agent_name)
-            )
+        )
 
     def teardown(self) -> None:
         """

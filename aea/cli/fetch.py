@@ -126,7 +126,7 @@ def _fetch_agent_deps(click_context: click.core.Context) -> None:
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", True)
 
-    for item_type in ("skill", "connection", "contract", "protocol"):
+    for item_type in ("protocol", "connection", "contract", "skill"):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:

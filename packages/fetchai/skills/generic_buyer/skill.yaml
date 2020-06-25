@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmapxULoKMZbh8qptwF9aYh832dFAy4xSCueZMDzV9JnNH
-  dialogues.py: QmZL9HQaw7y8XKsamx2o83bRHrv3v2VSXGzFFSxzSnL1rN
-  handlers.py: QmYAD2oB13dmC9uokX182Qx8A7ffX6M6jDHgCbFLFmz4nj
-  strategy.py: Qmcuxi6obz7Cm5QFz4kyDxr6tonAB6uqu11MxJWc9eFCNE
+  behaviours.py: QmZELZ9dTqwz4CSaEEWMnESXiMXsAHeKwnrmLA32qCaBtP
+  dialogues.py: QmVCG8RT246Uv1jouRkheCBoFR9CPSe5RLh1qu4aRx2q8L
+  handlers.py: QmaKrxJBCevGttkUgvbKpYRxD3TCpeVT2in5k6qcgQmcaY
+  strategy.py: Qmb63KbfVw2jF7QYENaiYARAzExLXJxEirjVehdMhpYMrp
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -43,6 +43,9 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   strategy:
     args:
       currency_id: FET

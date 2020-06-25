@@ -65,6 +65,7 @@ class LedgerApiConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
+        self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:
         """Tear down the connection."""

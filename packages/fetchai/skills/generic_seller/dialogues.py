@@ -33,10 +33,23 @@ from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogue as BaseLedgerApiDialogue,
+)
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue as BaseOefSearchDialogue,
+)
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogues as BaseOefSearchDialogues,
+)
 
 
-class Dialogue(FipaDialogue):
+class FipaDialogue(BaseFipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     def __init__(
@@ -54,14 +67,26 @@ class Dialogue(FipaDialogue):
 
         :return: None
         """
-        FipaDialogue.__init__(
+        BaseFipaDialogue.__init__(
             self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
         )
         self.data_for_sale = None  # type: Optional[Dict[str, str]]
-        self.proposal = None  # type: Optional[Description]
+        self._proposal = None  # type: Optional[Description]
+
+    @property
+    def proposal(self) -> Description:
+        """Get proposal."""
+        assert self._proposal is not None, "Proposal not set!"
+        return self._proposal
+
+    @proposal.setter
+    def proposal(self, proposal: Description) -> None:
+        """Set proposal"""
+        assert self._proposal is None, "Proposal already set!"
+        self._proposal = proposal
 
 
-class Dialogues(Model, FipaDialogues):
+class FipaDialogues(Model, BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -71,7 +96,7 @@ class Dialogues(Model, FipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self, self.context.agent_address)
+        BaseFipaDialogues.__init__(self, self.context.agent_address)
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
@@ -85,7 +110,7 @@ class Dialogues(Model, FipaDialogues):
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> Dialogue:
+    ) -> FipaDialogue:
         """
         Create an instance of dialogue.
 
@@ -94,7 +119,90 @@ class Dialogues(Model, FipaDialogues):
 
         :return: the created dialogue
         """
-        dialogue = Dialogue(
+        dialogue = FipaDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+
+LedgerApiDialogue = BaseLedgerApiDialogue
+
+
+class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+        BaseLedgerApiDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return BaseLedgerApiDialogue.AgentRole.AGENT
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> LedgerApiDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = LedgerApiDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+
+OefSearchDialogue = BaseOefSearchDialogue
+
+
+class OefSearchDialogues(Model, BaseOefSearchDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return BaseOefSearchDialogue.AgentRole.AGENT
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> OefSearchDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = OefSearchDialogue(
             dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue
