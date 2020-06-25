@@ -1,3 +1,23 @@
+/* -*- coding: utf-8 -*-
+* ------------------------------------------------------------------------------
+*
+*   Copyright 2018-2019 Fetch.AI Limited
+*
+*   Licensed under the Apache License, Version 2.0 (the "License");
+*   you may not use this file except in compliance with the License.
+*   You may obtain a copy of the License at
+*
+*       http://www.apache.org/licenses/LICENSE-2.0
+*
+*   Unless required by applicable law or agreed to in writing, software
+*   distributed under the License is distributed on an "AS IS" BASIS,
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*   See the License for the specific language governing permissions and
+*   limitations under the License.
+*
+* ------------------------------------------------------------------------------
+ */
+
 package aea
 
 import (
@@ -6,13 +26,10 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
-	"time"
 
 	proto "github.com/golang/protobuf/proto"
 	"github.com/joho/godotenv"
@@ -214,6 +231,7 @@ func (aea *AeaApi) Connect() error {
 	return nil
 }
 
+/*
 func (aea *AeaApi) WithSandbox() *AeaApi {
 	var err error
 	fmt.Println("[aea-api  ][warning] running in sandbox mode")
@@ -224,6 +242,7 @@ func (aea *AeaApi) WithSandbox() *AeaApi {
 	aea.sandbox = true
 	return aea
 }
+*/
 
 func UnmarshalEnvelope(buf []byte) (Envelope, error) {
 	envelope := &Envelope{}
@@ -318,9 +337,11 @@ func read_envelope(pipe *os.File) (*Envelope, error) {
 /*
 
   Sandbox
+  - DISABLED
 
 */
 
+/*
 func setup_aea_sandbox() (string, string, string, string, uint16, error) {
 	// setup id
 	id := ""
@@ -347,7 +368,12 @@ func setup_aea_sandbox() (string, string, string, string, uint16, error) {
 		}
 		return "", "", "", "", 0, erro
 	}
-	go run_aea_sandbox(msgin_path, msgout_path)
+	// TOFIX(LR) should use channels
+	go func() {
+		err := run_aea_sandbox(msgin_path, msgout_path)
+		if err != nil {
+		}
+	}()
 	return msgin_path, msgout_path, id, host, port, nil
 }
 
@@ -393,6 +419,7 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
 
 	return nil
 }
+*/
 
 /*
 
