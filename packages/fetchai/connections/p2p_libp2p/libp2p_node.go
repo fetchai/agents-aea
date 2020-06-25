@@ -21,6 +21,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -109,6 +110,10 @@ func main() {
 	defer node.Close()
 
 	// Connect to the agent
+	fmt.Println("MULTIADDRS_LIST_START") // keyword
+	fmt.Println(node.MultiAddr())
+	fmt.Println("MULTIADDRS_LIST_END") // keyword
+
 	check(agent.Connect())
 	logger.Info().Msg("successfully connected to AEA!")
 
