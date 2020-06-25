@@ -47,6 +47,7 @@ from aea.protocols.generator.base import (
     ProtocolGenerator,
     _union_sub_type_to_protobuf_variable_name,
 )
+from aea.protocols.generator.common import check_prerequisites
 from aea.protocols.generator.extract_specification import (
     _specification_type_to_python_type,
 )
@@ -86,6 +87,11 @@ class TestEndToEndGenerator(UseOef):
 
     def test_compare_latest_generator_output_with_test_protocol(self):
         """Test that the "t_protocol" test protocol matches with what the latest generator generates based on the specification."""
+        # Skip if prerequisite applications are not installed
+        try:
+            check_prerequisites()
+        except FileNotFoundError:
+            pytest.skip("Some prerequisite applications are not installed. Skipping this test.")
 
         # Specification
         # protocol_name = "t_protocol"
