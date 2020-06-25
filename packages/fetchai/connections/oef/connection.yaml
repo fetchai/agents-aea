@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez
-  connection.py: QmaXwA4WgnNtYHo86ZzxtGHJrzoJHejY2V3ML6en1j7Zwq
+  connection.py: QmP54XwMNm1HRwRAy95iZTwrEC3rpPAyAxFPAyUYrBMoCg
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/default:0.3.0
@@ -15,8 +15,8 @@ protocols:
 - fetchai/oef_search:0.3.0
 class_name: OEFConnection
 config:
-  addr: ${OEF_ADDR:127.0.0.1}
-  port: ${OEF_PORT:10000}
+  addr: 127.0.0.1
+  port: '10000'
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:

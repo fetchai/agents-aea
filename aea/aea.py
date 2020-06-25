@@ -281,9 +281,9 @@ class AEA(Agent):
                 msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
             msg.is_incoming = True
-        except Exception as e:
-            error_handler.send_decoding_error(envelope)
+        except Exception as e:  # pylint: disable=broad-except  # thats ok, cause sen decoding error back
             logger.warning("Decoding error. Exception: {}".format(str(e)))
+            error_handler.send_decoding_error(envelope)
             return
 
         handlers = self.filter.get_active_handlers(

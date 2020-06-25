@@ -101,7 +101,7 @@ class TCPServerConnection(TCPConnection):
         except asyncio.CancelledError:
             logger.debug("Receiving loop cancelled.")
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error("Error in the receiving loop: {}".format(str(e)))
             return None
 

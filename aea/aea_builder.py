@@ -424,6 +424,7 @@ class AEABuilder:
         """
         dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
         module = load_module(dotted_path, file_path)
+
         try:
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
@@ -433,6 +434,8 @@ class AEABuilder:
                     dotted_path, class_name, file_path, e
                 )
             )
+            raise  # log and reraise cause looks we should not build an agent from invalid configuraion
+
         return self
 
     def set_skill_exception_policy(

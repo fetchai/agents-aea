@@ -65,15 +65,15 @@ def try_validate_private_key_path(
         # to validate the file, we just try to create a crypto object
         # with private_key_path as parameter
         aea.crypto.make(ledger_id, private_key_path=private_key_path)
-    except Exception as e:
-        logger.error(
-            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
-                private_key_path, e
-            )
+    except Exception as e:  # pylint: disable=broad-except  # thats ok, will exit or reraise
+        error_msg = "This is not a valid private key file: '{}'\n Exception: '{}'".format(
+            private_key_path, e
         )
         if exit_on_error:
+            logger.exception(error_msg)  # show exception traceback on exit
             sys.exit(1)
         else:
+            logger.error(error_msg)
             raise
 
 

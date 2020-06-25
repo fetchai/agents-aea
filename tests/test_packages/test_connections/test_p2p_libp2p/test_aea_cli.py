@@ -44,7 +44,6 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         )  # TOFIX(LR) not sure is needed
 
         process = self.run_agent()
-
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 

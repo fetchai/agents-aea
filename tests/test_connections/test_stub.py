@@ -162,7 +162,7 @@ class TestStubConnectionReception:
         ):
             _process_line(b"")
             mocked_logger_error.assert_called_with(
-                "Error when processing a line. Message: an error."
+                "Error when processing a line. Message: an error.", exc_info=True
             )
 
         patch.stop()

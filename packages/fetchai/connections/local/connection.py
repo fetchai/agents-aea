@@ -372,5 +372,5 @@ class OEFLocalConnection(Connection):
                 return None
             logger.debug("Received envelope {}".format(envelope))
             return envelope
-        except Exception:
+        except Exception:  # pragma: nocover # pylint: disable=broad-except
             return None

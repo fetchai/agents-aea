@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Key pieces of functionality for CLI GUI."""
 
 import glob
@@ -111,9 +110,9 @@ def _call_subprocess(*args, timeout=None, **kwargs):
     ret = -1
     try:
         ret = process.wait(timeout=timeout)
-    except BaseException:
+    except subprocess.TimeoutExpired:
         logging.exception(
-            "An exception occurred when calling with args={} and kwargs={}".format(
+            "TimeoutError occurred when calling with args={} and kwargs={}".format(
                 args, kwargs
             )
         )

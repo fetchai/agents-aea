@@ -34,6 +34,7 @@ from ecdsa.util import sigencode_string_canonize
 import requests
 
 from aea.crypto.base import Crypto, FaucetApi, LedgerApi
+from aea.helpers.base import try_decorator
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -197,22 +198,21 @@ class CosmosApi(LedgerApi):
         balance = self._try_get_balance(address)
         return balance
 
+    @try_decorator(
+        "Encountered exception when trying get balance: {}",
+        logger_method=logger.warning,
+    )
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Try get the balance of a given account."""
         balance = None  # type: Optional[int]
-        try:
-            url = self.network_address + f"/bank/balances/{address}"
-            response = requests.get(url=url)
-            if response.status_code == 200:
-                result = response.json()["result"]
-                if len(result) == 0:
-                    balance = 0
-                else:
-                    balance = int(result[0]["amount"])
-        except Exception as e:  # pragma: no cover
-            logger.warning(
-                "Encountered exception when trying get balance: {}".format(e)
-            )
+        url = self.network_address + f"/bank/balances/{address}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = response.json()["result"]
+            if len(result) == 0:
+                balance = 0
+            else:
+                balance = int(result[0]["amount"])
         return balance
 
     def transfer(  # pylint: disable=arguments-differ
@@ -302,36 +302,33 @@ class CosmosApi(LedgerApi):
         tx_digest = self._try_send_signed_transaction(tx_signed)
         return tx_digest
 
+    @try_decorator(
+        "Encountered exception when trying to send tx: {}", logger_method=logger.warning
+    )
     def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """Try send the signed transaction."""
         tx_digest = None  # type: Optional[str]
-        try:
-            url = self.network_address + "/txs"
-            response = requests.post(url=url, json=tx_signed)
-            if response.status_code == 200:
-                tx_digest = response.json()["txhash"]
-        except Exception as e:  # pragma: no cover
-            logger.warning("Encountered exception when trying to send tx: {}".format(e))
+        url = self.network_address + "/txs"
+        response = requests.post(url=url, json=tx_signed)
+        if response.status_code == 200:
+            tx_digest = response.json()["txhash"]
         return tx_digest
 
+    @try_decorator(
+        "Encountered exception when trying to get account number and sequence: {}",
+        logger_method=logger.warning,
+    )
     def _try_get_account_number_and_sequence(
         self, address: Address
     ) -> Optional[Tuple[int, int]]:
         """Try send the signed transaction."""
         result = None  # type: Optional[Tuple[int, int]]
-        try:
-            url = self.network_address + f"/auth/accounts/{address}"
-            response = requests.get(url=url)
-            if response.status_code == 200:
-                result = (
-                    int(response.json()["result"]["value"]["account_number"]),
-                    int(response.json()["result"]["value"]["sequence"]),
-                )
-        except Exception as e:  # pragma: no cover
-            logger.warning(
-                "Encountered exception when trying to get account number and sequence: {}".format(
-                    e
-                )
+        url = self.network_address + f"/auth/accounts/{address}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = (
+                int(response.json()["result"]["value"]["account_number"]),
+                int(response.json()["result"]["value"]["sequence"]),
             )
         return result
 
@@ -359,6 +356,10 @@ class CosmosApi(LedgerApi):
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
         return tx_receipt
 
+    @try_decorator(
+        "Encountered exception when trying to get transaction receipt: {}",
+        logger_method=logger.warning,
+    )
     def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
         Try get the transaction receipt for a transaction digest (non-blocking).
@@ -367,17 +368,10 @@ class CosmosApi(LedgerApi):
         :return: the tx receipt, if present
         """
         result = None  # type: Optional[Any]
-        try:
-            url = self.network_address + f"/txs/{tx_digest}"
-            response = requests.get(url=url)
-            if response.status_code == 200:
-                result = response.json()
-        except Exception as e:  # pragma: no cover
-            logger.warning(
-                "Encountered exception when trying to get transaction receipt: {}".format(
-                    e
-                )
-            )
+        url = self.network_address + f"/txs/{tx_digest}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = response.json()
         return result
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
@@ -409,8 +403,11 @@ class CosmosApi(LedgerApi):
         :return: True if the random_message is equals to tx['input']
         """
         tx_receipt = self.get_transaction_receipt(tx_digest)
+
+        if tx_receipt is None:
+            return False
+
         try:
-            assert tx_receipt is not None
             tx = tx_receipt.get("tx").get("value").get("msg")[0]
             recovered_amount = int(tx.get("value").get("amount")[0].get("amount"))
             sender = tx.get("value").get("from_address")
@@ -418,7 +415,7 @@ class CosmosApi(LedgerApi):
             is_valid = (
                 recovered_amount == amount and sender == client and recipient == seller
             )
-        except Exception:  # pragma: no cover
+        except (KeyError, IndexError):  # pragma: no cover
             is_valid = False
         return is_valid
 
@@ -438,6 +435,10 @@ class CosmosFaucetApi(FaucetApi):
         self._try_get_wealth(address)
 
     @staticmethod
+    @try_decorator(
+        "An error occured while attempting to generate wealth:\n{}",
+        logger_method=logger.error,
+    )
     def _try_get_wealth(address: Address) -> None:
         """
         Get wealth from the faucet for the provided address.
@@ -445,18 +446,14 @@ class CosmosFaucetApi(FaucetApi):
         :param address: the address.
         :return: None
         """
-        try:
-            response = requests.post(
-                url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
-            )
-            if response.status_code == 200:
-                tx_hash = response.text
-                logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
-            else:
-                logger.warning(
-                    "Response: {}, Text: {}".format(response.status_code, response.text)
-                )
-        except Exception as e:
+        response = requests.post(
+            url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
+        )
+        if response.status_code == 200:
+            tx_hash = response.text
+            logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
+        else:
             logger.warning(
-                "An error occured while attempting to generate wealth:\n{}".format(e)
+                "Response: {}, Text: {}".format(response.status_code, response.text)
             )
+        return None

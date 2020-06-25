@@ -124,7 +124,7 @@ def setup_search_ctx(ctx: Context, local: bool) -> None:
             # fp = open(str(path), mode="r", encoding="utf-8")
             # agent_config = ctx.agent_loader.load(fp)
             registry_directory = ctx.agent_config.registry_path
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
 
         ctx.set_config("registry_directory", registry_directory)

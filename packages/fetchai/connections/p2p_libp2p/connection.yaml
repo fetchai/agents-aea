@@ -9,7 +9,7 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   aea/api.go: QmfMwcvi7ZH551vK7xETbSSCUhTsdccfSBheA1RLksyBQR
-  connection.py: QmbPuwgAYed7JVptHXfybt6xVjLFqXdYsN3mqbHmnP1hh2
+  connection.py: QmRZbfTn21VtM9Z8sP779a3Y4u9VFXZpQjURQGk3fUeqHa
   dht/dhtclient/dhtclient.go: QmPNMfDY65bChfbF9gUC5jzPaC3uvaaytzyDxPNvT1jUfD
   dht/dhtclient/dhtclient_test.go: QmbZHW716CbzgYTnqPSQwZn3f4E89aa63fT2B3EZi2B1uk
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s

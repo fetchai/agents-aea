@@ -339,7 +339,7 @@ class ComponentRegistry(
             for _, item in items.items():
                 try:
                     item.teardown()
-                except Exception as e:
+                except Exception as e:  # pragma: nocover # pylint: disable=broad-except
                     logger.warning(
                         "An error occurred while tearing down item {}/{}: {}".format(
                             skill_id, type(item).__name__, str(e)

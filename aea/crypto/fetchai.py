@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
 import json
@@ -34,6 +33,7 @@ from fetchai.ledger.serialisation import sha256_hash
 import requests
 
 from aea.crypto.base import Crypto, FaucetApi, LedgerApi
+from aea.helpers.base import try_decorator
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -180,14 +180,10 @@ class FetchAIApi(LedgerApi):
         balance = self._try_get_balance(address)
         return balance
 
+    @try_decorator("Unable to retrieve balance: {}", logger_method="debug")
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Try get the balance."""
-        try:
-            balance = self._api.tokens.balance(FetchaiAddress(address))
-        except Exception as e:  # pragma: no cover
-            logger.debug("Unable to retrieve balance: {}".format(str(e)))
-            balance = None
-        return balance
+        return self._api.tokens.balance(FetchaiAddress(address))
 
     def transfer(  # pylint: disable=arguments-differ
         self,
@@ -205,19 +201,16 @@ class FetchAIApi(LedgerApi):
         )
         return tx_digest
 
+    @try_decorator(
+        "Error when attempting transfering tokens: {}", logger_method="debug"
+    )
     def _try_transfer_tokens(
         self, crypto: Crypto, destination_address: Address, amount: int, tx_fee: int
     ) -> Optional[str]:
         """Try transfer tokens."""
-        try:
-            tx_digest = self._api.tokens.transfer(
-                crypto.entity, FetchaiAddress(destination_address), amount, tx_fee
-            )
-            # self._api.sync(tx_digest)
-        except Exception as e:  # pragma: no cover
-            logger.debug("Error when attempting transfering tokens: {}".format(str(e)))
-            tx_digest = None
-        return tx_digest
+        return self._api.tokens.transfer(
+            crypto.entity, FetchaiAddress(destination_address), amount, tx_fee
+        )
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
@@ -245,6 +238,9 @@ class FetchAIApi(LedgerApi):
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
         return tx_receipt
 
+    @try_decorator(
+        "Error when attempting getting tx receipt: {}", logger_method="debug"
+    )
     def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
         Get the transaction receipt (non-blocking).
@@ -252,12 +248,7 @@ class FetchAIApi(LedgerApi):
         :param tx_digest: the transaction digest.
         :return: the transaction receipt, if found
         """
-        try:
-            tx_receipt = self._api.tx.status(tx_digest)
-        except Exception as e:  # pragma: no cover
-            logger.debug("Error when attempting getting tx receipt: {}".format(str(e)))
-            tx_receipt = None
-        return tx_receipt
+        return self._api.tx.status(tx_digest)
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -304,6 +295,7 @@ class FetchAIApi(LedgerApi):
             )
         return is_valid
 
+    @try_decorator("Error when attempting getting tx: {}", logger_method="debug")
     def _try_get_transaction(self, tx_digest: str) -> Optional[TxContents]:
         """
         Try get the transaction (non-blocking).
@@ -311,12 +303,7 @@ class FetchAIApi(LedgerApi):
         :param tx_digest: the transaction digest.
         :return: the tx, if found
         """
-        try:
-            tx = cast(TxContents, self._api.tx.contents(tx_digest))
-        except Exception as e:  # pragma: no cover
-            logger.debug("Error when attempting getting tx: {}".format(str(e)))
-            tx = None
-        return tx
+        return cast(TxContents, self._api.tx.contents(tx_digest))
 
 
 class FetchAIFaucetApi(FaucetApi):
@@ -334,6 +321,10 @@ class FetchAIFaucetApi(FaucetApi):
         self._try_get_wealth(address)
 
     @staticmethod
+    @try_decorator(
+        "An error occured while attempting to generate wealth:\n{}",
+        logger_method="error",
+    )
     def _try_get_wealth(address: Address) -> None:
         """
         Get wealth from the faucet for the provided address.
@@ -341,28 +332,23 @@ class FetchAIFaucetApi(FaucetApi):
         :param address: the address.
         :return: None
         """
-        try:
-            payload = json.dumps({"address": address})
-            response = requests.post(FETCHAI_TESTNET_FAUCET_URL, data=payload)
-            if response.status_code // 100 == 5:
-                logger.error("Response: {}".format(response.status_code))
-            else:
-                response_dict = json.loads(response.text)
-                if response_dict.get("error_message") is not None:
-                    logger.warning(
-                        "Response: {}\nMessage: {}".format(
-                            response.status_code, response_dict.get("error_message")
-                        )
+        payload = json.dumps({"address": address})
+        response = requests.post(FETCHAI_TESTNET_FAUCET_URL, data=payload)
+        if response.status_code // 100 == 5:
+            logger.error("Response: {}".format(response.status_code))
+        else:
+            response_dict = json.loads(response.text)
+            if response_dict.get("error_message") is not None:
+                logger.warning(
+                    "Response: {}\nMessage: {}".format(
+                        response.status_code, response_dict.get("error_message")
                     )
-                else:
-                    logger.info(
-                        "Response: {}\nMessage: {}\nDigest: {}".format(
-                            response.status_code,
-                            response_dict.get("message"),
-                            response_dict.get("digest"),
-                        )
-                    )  # pragma: no cover
-        except Exception as e:
-            logger.warning(
-                "An error occured while attempting to generate wealth:\n{}".format(e)
-            )
+                )
+            else:
+                logger.info(
+                    "Response: {}\nMessage: {}\nDigest: {}".format(
+                        response.status_code,
+                        response_dict.get("message"),
+                        response_dict.get("digest"),
+                    )
+                )  # pragma: no cover
