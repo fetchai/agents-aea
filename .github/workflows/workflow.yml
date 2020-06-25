@@ -216,6 +216,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6]
 
     continue-on-error: false
 
