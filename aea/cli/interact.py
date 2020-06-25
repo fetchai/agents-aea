@@ -75,22 +75,39 @@ def _run_interaction_channel():
     try:
         multiplexer.connect()
         while True:  # pragma: no cover
-            envelope = _try_construct_envelope(agent_name, identity_stub.name)
-            if envelope is None and not inbox.empty():
-                envelope = inbox.get_nowait()
-                assert envelope is not None, "Could not recover envelope from inbox."
-                click.echo(_construct_message("received", envelope))
-            elif envelope is None and inbox.empty():
-                click.echo("Received no new envelope!")
-            else:
-                outbox.put(envelope)
-                click.echo(_construct_message("sending", envelope))
+            _process_envelopes(agent_name, identity_stub, inbox, outbox)
+
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
     except Exception as e:  # pragma: no cover
         click.echo(e)
     finally:
         multiplexer.disconnect()
+
+
+def _process_envelopes(
+    agent_name: str, identity_stub: Identity, inbox: InBox, outbox: OutBox
+) -> None:
+    """
+    Process envelopes.
+
+    :param agent_name: name of an agent.
+    :param identity_stub: stub identity.
+    :param inbox: an inbox object.
+    :param outbox: an outbox object.
+
+    :return: None.
+    """
+    envelope = _try_construct_envelope(agent_name, identity_stub.name)
+    if envelope is None and not inbox.empty():
+        envelope = inbox.get_nowait()
+        assert envelope is not None, "Could not recover envelope from inbox."
+        click.echo(_construct_message("received", envelope))
+    elif envelope is None and inbox.empty():
+        click.echo("Received no new envelope!")
+    else:
+        outbox.put(envelope)
+        click.echo(_construct_message("sending", envelope))
 
 
 def _construct_message(action_name, envelope):
@@ -130,7 +147,7 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
             )
             message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         else:
-            message = message_escaped # pragma: no cover
+            message = message_escaped  # pragma: no cover
         msg = DefaultMessage(performative=performative, content=message)
         envelope = Envelope(
             to=agent_name,

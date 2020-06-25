@@ -472,6 +472,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
 
 @pytest.mark.integration
+@pytest.mark.unstable
 class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add protocol from Registry command."""
 

@@ -22,7 +22,11 @@ from unittest import TestCase, mock
 
 import pytest
 
-from aea.cli.interact import _construct_message, _try_construct_envelope
+from aea.cli.interact import (
+    _construct_message,
+    _process_envelopes,
+    _try_construct_envelope,
+)
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseMany
 
@@ -131,3 +135,56 @@ class TryConstructEnvelopeTestCase(TestCase):
         """Test _try_construct_envelope for exception raised result."""
         envelope = _try_construct_envelope("agent_name", "sender")
         self.assertEqual(envelope, None)
+
+
+class ProcessEnvelopesTestCase(TestCase):
+    """Test case for _process_envelopes method."""
+
+    @mock.patch("aea.cli.interact.click.echo")
+    @mock.patch("aea.cli.interact._construct_message")
+    @mock.patch("aea.cli.interact._try_construct_envelope")
+    def test__process_envelopes_positive(
+        self, try_construct_envelope_mock, construct_message_mock, click_echo_mock
+    ):
+        """Test _process_envelopes method for positive result."""
+        agent_name = "agent_name"
+        identity_stub = mock.Mock()
+        identity_stub.name = "identity-stub-name"
+        inbox = mock.Mock()
+        inbox.empty = lambda: False
+        inbox.get_nowait = lambda: "Not None"
+        outbox = mock.Mock()
+
+        try_construct_envelope_mock.return_value = None
+        constructed_message = "Constructed message"
+        construct_message_mock.return_value = constructed_message
+
+        # no envelope and inbox not empty behaviour
+        _process_envelopes(agent_name, identity_stub, inbox, outbox)
+        click_echo_mock.assert_called_once_with(constructed_message)
+
+        # no envelope and inbox empty behaviour
+        inbox.empty = lambda: True
+        _process_envelopes(agent_name, identity_stub, inbox, outbox)
+        click_echo_mock.assert_called_with("Received no new envelope!")
+
+        # present envelope behaviour
+        try_construct_envelope_mock.return_value = "Not None envelope"
+        outbox.put = mock.Mock()
+        _process_envelopes(agent_name, identity_stub, inbox, outbox)
+        outbox.put.assert_called_once_with("Not None envelope")
+        click_echo_mock.assert_called_with(constructed_message)
+
+    @mock.patch("aea.cli.interact._try_construct_envelope", return_value=None)
+    def test__process_envelopes_couldnt_recover(self, *mocks):
+        """Test _process_envelopes for couldn't recover envelope result."""
+        agent_name = "agent_name"
+        identity_stub = mock.Mock()
+        identity_stub.name = "identity-stub-name"
+        inbox = mock.Mock()
+        inbox.empty = lambda: False
+        inbox.get_nowait = lambda: None
+        outbox = mock.Mock()
+
+        with self.assertRaises(AssertionError):
+            _process_envelopes(agent_name, identity_stub, inbox, outbox)

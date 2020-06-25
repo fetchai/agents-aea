@@ -497,6 +497,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
 
 @pytest.mark.integration
+@pytest.mark.unstable
 class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add skill from Registry command."""
 

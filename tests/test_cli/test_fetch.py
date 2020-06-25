@@ -144,6 +144,7 @@ class IsVersionCorrectTestCase(TestCase):
 
 
 @pytest.mark.integration
+@pytest.mark.unstable
 class TestFetchFromRemoteRegistry(AEATestCaseMany):
     """Test case for fetch agent command from Registry."""
 
