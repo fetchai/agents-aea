@@ -91,7 +91,9 @@ class TestEndToEndGenerator(UseOef):
         try:
             check_prerequisites()
         except FileNotFoundError:
-            pytest.skip("Some prerequisite applications are not installed. Skipping this test.")
+            pytest.skip(
+                "Some prerequisite applications are not installed. Skipping this test."
+            )
 
         # Specification
         # protocol_name = "t_protocol"
