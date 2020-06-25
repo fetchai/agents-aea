@@ -344,11 +344,15 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
+	done := false
 	for {
 		select {
 		default:
 			linfo().Msg("DelegateService listening for new connections...")
-			ready.Done()
+			if !done {
+				done = true
+				ready.Done()
+			}
 			conn, err := dhtPeer.tcpListener.Accept()
 			if err != nil {
 				if strings.Contains(err.Error(), "use of closed network connection") {
@@ -520,7 +524,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 }
 
 func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
-	_, _, linfo, _ := dhtPeer.getLoggers()
+	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
 	addressCID, err := utils.ComputeCID(address)
 	if err != nil {
@@ -535,6 +539,11 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	start := time.Now()
 	provider := <-providers
 	elapsed := time.Since(start)
+	if provider.ID == "" {
+		err = errors.New("didn't found any provider for address within timeout")
+		lerror(err).Str("op", "lookup").Str("addr", address).Msg("")
+		return "", err
+	}
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msgf("found provider %s after %s", provider, elapsed.String())
 

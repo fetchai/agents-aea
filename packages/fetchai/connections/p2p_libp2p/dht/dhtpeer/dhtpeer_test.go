@@ -30,6 +30,10 @@ import (
 	"libp2p_node/utils"
 )
 
+/*
+	DHTPeer and DHT network routing tests
+*/
+
 const (
 	DefaultLocalHost    = "127.0.0.1"
 	DefaultLocalPort    = 2000
@@ -69,6 +73,571 @@ var (
 )
 
 /*
+	DHT Network: DHTPeer-to-DHTPeer
+*/
+
+// TestRoutingDHTPeerToSelf dht peer with agent attached
+func TestRoutingDHTPeerToSelf(t *testing.T) {
+	opts := []Option{
+		LocalURI(DefaultLocalHost, DefaultLocalPort),
+		PublicURI(DefaultLocalHost, DefaultLocalPort),
+		IdentityFromFetchAIKey(DefaultFetchAIKey),
+		RegisterAgentAddress(DefaultAgentAddress, func() bool { return true }),
+		EnableRelayService(),
+		EnableDelegateService(DefaultDelegatePort),
+	}
+
+	dhtPeer, err := New(opts...)
+	if err != nil {
+		t.Fatal("Failed at DHTPeer initialization:", err)
+	}
+	defer dhtPeer.Close()
+
+	var rxEnvelopes []aea.Envelope
+	dhtPeer.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxEnvelopes = append(rxEnvelopes, envel)
+		return nil
+	})
+
+	err = dhtPeer.RouteEnvelope(aea.Envelope{
+		To: DefaultAgentAddress,
+	})
+	if err != nil {
+		t.Error("Failed to Route envelope to local Agent")
+	}
+
+	if len(rxEnvelopes) == 0 {
+		t.Error("Failed to Route & Process envelope to local Agent")
+	}
+
+}
+
+// TestRoutingDHTPeerToDHTPeerDirect from a dht peer to its bootstrap peer
+func TestRoutingDHTPeerToDHTPeerDirect(t *testing.T) {
+	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup1()
+
+	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
+		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		[]string{dhtPeer1.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup2()
+
+	rxPeer1 := make(chan aea.Envelope)
+	dhtPeer1.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer1 <- envel
+		err := dhtPeer1.RouteEnvelope(aea.Envelope{
+			To:     envel.Sender,
+			Sender: envel.To,
+		})
+		return err
+	})
+
+	rxPeer2 := make(chan aea.Envelope)
+	dhtPeer2.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer2 <- envel
+		return nil
+	})
+
+	err = dhtPeer2.RouteEnvelope(aea.Envelope{
+		To:     AgentsTestAddresses[0],
+		Sender: AgentsTestAddresses[1],
+	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer 2 to peer 1:", err)
+	}
+
+	expectEnvelope(t, rxPeer1)
+	expectEnvelope(t, rxPeer2)
+}
+
+// TestRoutingDHTPeerToDHTPeerIndirect two dht peers connected to the same peer
+func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
+	entryPeer, cleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup()
+
+	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
+		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		[]string{entryPeer.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup1()
+
+	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
+		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
+		[]string{entryPeer.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup2()
+
+	rxPeer1 := make(chan aea.Envelope)
+	dhtPeer1.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer1 <- envel
+		err := dhtPeer1.RouteEnvelope(aea.Envelope{
+			To:     envel.Sender,
+			Sender: envel.To,
+		})
+		return err
+	})
+
+	rxPeer2 := make(chan aea.Envelope)
+	dhtPeer2.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer2 <- envel
+		return nil
+	})
+
+	time.Sleep(1 * time.Second)
+	err = dhtPeer2.RouteEnvelope(aea.Envelope{
+		To:     AgentsTestAddresses[1],
+		Sender: AgentsTestAddresses[2],
+	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer 2 to peer 1:", err)
+	}
+
+	expectEnvelope(t, rxPeer1)
+	expectEnvelope(t, rxPeer2)
+}
+
+// TestRoutingDHTPeerToDHTPeerIndirectTwoHops two dht peers connected to different peers
+func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
+	entryPeer1, cleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup()
+
+	entryPeer2, cleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		[]string{entryPeer1.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup()
+
+	time.Sleep(1 * time.Second)
+	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
+		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
+		[]string{entryPeer1.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup1()
+
+	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
+		FetchAITestKeys[3], AgentsTestAddresses[3], DefaultLocalPort+3, DefaultDelegatePort+3,
+		[]string{entryPeer2.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer cleanup2()
+
+	rxPeer1 := make(chan aea.Envelope)
+	dhtPeer1.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer1 <- envel
+		err := dhtPeer1.RouteEnvelope(aea.Envelope{
+			To:     envel.Sender,
+			Sender: envel.To,
+		})
+		return err
+	})
+
+	rxPeer2 := make(chan aea.Envelope)
+	dhtPeer2.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer2 <- envel
+		return nil
+	})
+
+	time.Sleep(1 * time.Second)
+	err = dhtPeer2.RouteEnvelope(aea.Envelope{
+		To:     AgentsTestAddresses[2],
+		Sender: AgentsTestAddresses[3],
+	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer 2 to peer 1:", err)
+	}
+
+	expectEnvelope(t, rxPeer1)
+	expectEnvelope(t, rxPeer2)
+}
+
+// TestRoutingDHTPeerToDHTPeerFullConnectivity fully connected dht peers network
+func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
+	peers := []*DHTPeer{}
+	rxs := []chan aea.Envelope{}
+
+	for i := range FetchAITestKeys {
+		peer, cleanup, err := SetupLocalDHTPeer(
+			FetchAITestKeys[i], AgentsTestAddresses[i],
+			DefaultLocalPort+uint16(i), DefaultDelegatePort+uint16(i),
+			func() []string {
+				multiaddrs := []string{}
+				for _, entryPeer := range peers {
+					multiaddrs = append(multiaddrs, entryPeer.MultiAddr())
+				}
+				return multiaddrs
+			}(),
+		)
+		if err != nil {
+			t.Fatal("Failed to initialize DHTPeer", i, ":", err)
+		}
+
+		rx := make(chan aea.Envelope)
+		peer.ProcessEnvelope(func(envel aea.Envelope) error {
+			rx <- envel
+			if string(envel.Message) == "ping" {
+				err := peer.RouteEnvelope(aea.Envelope{
+					To:      envel.Sender,
+					Sender:  envel.To,
+					Message: []byte("ack"),
+				})
+				return err
+			}
+			return nil
+		})
+
+		peers = append(peers, peer)
+		rxs = append(rxs, rx)
+		defer cleanup()
+	}
+
+	time.Sleep(1 * time.Second)
+	for i := range peers {
+		for j := range peers {
+			from := len(peers) - 1 - i
+			target := j
+
+			// Should be able to route to self though
+			if from == target {
+				continue
+			}
+
+			err := peers[from].RouteEnvelope(aea.Envelope{
+				To:      AgentsTestAddresses[target],
+				Sender:  AgentsTestAddresses[from],
+				Message: []byte("ping"),
+			})
+
+			if err != nil {
+				t.Error("Failed to RouteEnvelope from ", from, "to", target)
+			}
+
+			expectEnvelope(t, rxs[target])
+			expectEnvelope(t, rxs[from])
+		}
+	}
+}
+
+/*
+	DHT network: DHTClient
+*/
+
+// TestRoutingDHTClientToDHTPeer
+// TestRoutingDHTClientToDHTPeerIndirect
+// TestRoutingDHTClientToDHTPeerIndirectTwoHops
+// TestRoutingDHTClientToDHTClientDirect
+// TestRoutingDHTClientToDHTClientIndirect
+
+/*
+	DHT network: DelegateClient
+*/
+
+// TestRoutingDelegateClientToDHTPeer
+func TestRoutingDelegateClientToDHTPeer(t *testing.T) {
+	peer, peerCleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup()
+
+	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[1], DefaultLocalHost, DefaultDelegatePort)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup()
+
+	rxPeer := make(chan aea.Envelope)
+	peer.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer <- envel
+		return nil
+	})
+
+	err = client.Send(aea.Envelope{
+		To:     AgentsTestAddresses[0],
+		Sender: AgentsTestAddresses[1],
+	})
+	if err != nil {
+		t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
+	}
+
+	expectEnvelope(t, rxPeer)
+
+	err = peer.RouteEnvelope(aea.Envelope{
+		To:     AgentsTestAddresses[1],
+		Sender: AgentsTestAddresses[0],
+	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
+	}
+
+	expectEnvelope(t, client.Rx)
+}
+
+// TestRoutingDelegateClientToDHTPeerIndirect
+func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
+	peer1, peerCleanup1, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup1()
+
+	_, peerCleanup2, err := SetupLocalDHTPeer(
+		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		[]string{peer1.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup2()
+
+	time.Sleep(1 * time.Second)
+	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[2], DefaultLocalHost, DefaultDelegatePort+1)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup()
+
+	rxPeer1 := make(chan aea.Envelope)
+	peer1.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer1 <- envel
+		return nil
+	})
+
+	err = client.Send(aea.Envelope{
+		To:     AgentsTestAddresses[0],
+		Sender: AgentsTestAddresses[2],
+	})
+	if err != nil {
+		t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
+	}
+
+	expectEnvelope(t, rxPeer1)
+
+	err = peer1.RouteEnvelope(aea.Envelope{
+		To:     AgentsTestAddresses[2],
+		Sender: AgentsTestAddresses[0],
+	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
+	}
+
+	expectEnvelope(t, client.Rx)
+}
+
+// TestRoutingDelegateClientToDHTPeerIndirectTwoHops
+func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
+	entryPeer, entryPeerCleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer entryPeerCleanup()
+
+	peer1, peerCleanup1, err := SetupLocalDHTPeer(
+		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		[]string{entryPeer.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup1()
+
+	_, peerCleanup2, err := SetupLocalDHTPeer(
+		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
+		[]string{entryPeer.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup2()
+
+	time.Sleep(1 * time.Second)
+	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[3], DefaultLocalHost, DefaultDelegatePort+2)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup()
+
+	rxPeer1 := make(chan aea.Envelope)
+	peer1.ProcessEnvelope(func(envel aea.Envelope) error {
+		rxPeer1 <- envel
+		return nil
+	})
+
+	err = client.Send(aea.Envelope{
+		To:     AgentsTestAddresses[1],
+		Sender: AgentsTestAddresses[3],
+	})
+	if err != nil {
+		t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
+	}
+
+	expectEnvelope(t, rxPeer1)
+
+	err = peer1.RouteEnvelope(aea.Envelope{
+		To:     AgentsTestAddresses[3],
+		Sender: AgentsTestAddresses[1],
+	})
+	if err != nil {
+		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
+	}
+
+	expectEnvelope(t, client.Rx)
+}
+
+// TestRoutingDelegateClientToDelegateClient
+func TestRoutingDelegateClientToDelegateClient(t *testing.T) {
+	_, peerCleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup()
+
+	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestAddresses[1], DefaultLocalHost, DefaultDelegatePort)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup1()
+
+	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestAddresses[2], DefaultLocalHost, DefaultDelegatePort)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup2()
+
+	time.Sleep(1 * time.Second)
+	err = client1.Send(aea.Envelope{
+		To:     AgentsTestAddresses[2],
+		Sender: AgentsTestAddresses[1],
+	})
+	if err != nil {
+		t.Error("Failed to Send envelope from DelegateClient to DelegateClient:", err)
+	}
+
+	expectEnvelope(t, client2.Rx)
+
+	err = client2.Send(aea.Envelope{
+		To:     AgentsTestAddresses[1],
+		Sender: AgentsTestAddresses[2],
+	})
+	if err != nil {
+		t.Error("Failed to Send envelope from DelegateClient to DelegateClient:", err)
+	}
+
+	expectEnvelope(t, client1.Rx)
+}
+
+// TestRoutingDelegateClientToDelegateClientIndirect
+func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
+	peer1, peer1Cleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peer1Cleanup()
+
+	_, peer2Cleanup, err := SetupLocalDHTPeer(
+		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		[]string{peer1.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peer2Cleanup()
+
+	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestAddresses[2], DefaultLocalHost, DefaultDelegatePort)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup1()
+
+	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestAddresses[3], DefaultLocalHost, DefaultDelegatePort+1)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup2()
+
+	time.Sleep(1 * time.Second)
+	err = client1.Send(aea.Envelope{
+		To:     AgentsTestAddresses[3],
+		Sender: AgentsTestAddresses[2],
+	})
+	if err != nil {
+		t.Error("Failed to Send envelope from DelegateClient to DelegateClient:", err)
+	}
+
+	expectEnvelope(t, client2.Rx)
+
+	err = client2.Send(aea.Envelope{
+		To:     AgentsTestAddresses[2],
+		Sender: AgentsTestAddresses[3],
+	})
+	if err != nil {
+		t.Error("Failed to Send envelope from DelegateClient to DelegateClient:", err)
+	}
+
+	expectEnvelope(t, client1.Rx)
+}
+
+// TestRoutingDelegateClientToDHTClientDirect
+// TestRoutingDelegateClientToDHTClientIndirect
+
+/*
+	DHT network: all-to-all
+*/
+
+// TestRoutingAlltoAll
+
+/*
+	Helpers
 	TOFIX(LR) how to share test helpers between packages tests
 	 without having circular dependencies
 */
@@ -146,246 +715,4 @@ func expectEnvelope(t *testing.T, rx chan aea.Envelope) {
 	case <-timeout:
 		t.Error("Failed to receive envelope before timeout")
 	}
-}
-
-// TestNewWithAeaAgent dht peer with agent attached
-func TestNewWithAeaAgent(t *testing.T) {
-	opts := []Option{
-		LocalURI(DefaultLocalHost, DefaultLocalPort),
-		PublicURI(DefaultLocalHost, DefaultLocalPort),
-		IdentityFromFetchAIKey(DefaultFetchAIKey),
-		RegisterAgentAddress(DefaultAgentAddress, func() bool { return true }),
-		EnableRelayService(),
-		EnableDelegateService(DefaultDelegatePort),
-	}
-
-	dhtPeer, err := New(opts...)
-	if err != nil {
-		t.Fatal("Failed at DHTPeer initialization:", err)
-	}
-	defer dhtPeer.Close()
-
-	var rxEnvelopes []aea.Envelope
-	dhtPeer.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxEnvelopes = append(rxEnvelopes, envel)
-		return nil
-	})
-
-	err = dhtPeer.RouteEnvelope(aea.Envelope{
-		To: DefaultAgentAddress,
-	})
-	if err != nil {
-		t.Error("Failed to Route envelope to local Agent")
-	}
-
-	if len(rxEnvelopes) == 0 {
-		t.Error("Failed to Route & Process envelope to local Agent")
-	}
-
-}
-
-func TestRoutingTwoDHTPeers(t *testing.T) {
-	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
-		[]string{},
-	)
-	if err != nil {
-		t.Fatal("Failed to initialize DHTPeer:", err)
-	}
-	defer cleanup1()
-
-	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
-		[]string{dhtPeer1.MultiAddr()},
-	)
-	if err != nil {
-		t.Fatal("Failed to initialize DHTPeer:", err)
-	}
-	defer cleanup2()
-
-	rxPeer1 := make(chan aea.Envelope)
-	dhtPeer1.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxPeer1 <- envel
-		err := dhtPeer1.RouteEnvelope(aea.Envelope{
-			To:     envel.Sender,
-			Sender: envel.To,
-		})
-		return err
-	})
-
-	rxPeer2 := make(chan aea.Envelope)
-	dhtPeer2.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxPeer2 <- envel
-		return nil
-	})
-
-	err = dhtPeer2.RouteEnvelope(aea.Envelope{
-		To:     AgentsTestAddresses[0],
-		Sender: AgentsTestAddresses[1],
-	})
-	if err != nil {
-		t.Error("Failed to RouteEnvelope from peer 2 to peer 1:", err)
-	}
-
-	expectEnvelope(t, rxPeer1)
-	expectEnvelope(t, rxPeer2)
-}
-
-func TestRoutingTwoDHTPeersIndirect(t *testing.T) {
-	entryPeer, cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
-		[]string{},
-	)
-	if err != nil {
-		t.Fatal("Failed to initialize DHTPeer:", err)
-	}
-	defer cleanup()
-
-	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
-		[]string{entryPeer.MultiAddr()},
-	)
-	if err != nil {
-		t.Fatal("Failed to initialize DHTPeer:", err)
-	}
-	defer cleanup1()
-
-	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
-		[]string{entryPeer.MultiAddr()},
-	)
-	if err != nil {
-		t.Fatal("Failed to initialize DHTPeer:", err)
-	}
-	defer cleanup2()
-
-	rxPeer1 := make(chan aea.Envelope)
-	dhtPeer1.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxPeer1 <- envel
-		err := dhtPeer1.RouteEnvelope(aea.Envelope{
-			To:     envel.Sender,
-			Sender: envel.To,
-		})
-		return err
-	})
-
-	rxPeer2 := make(chan aea.Envelope)
-	dhtPeer2.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxPeer2 <- envel
-		return nil
-	})
-
-	time.Sleep(1 * time.Second)
-	err = dhtPeer2.RouteEnvelope(aea.Envelope{
-		To:     AgentsTestAddresses[1],
-		Sender: AgentsTestAddresses[2],
-	})
-	if err != nil {
-		t.Error("Failed to RouteEnvelope from peer 2 to peer 1:", err)
-	}
-
-	expectEnvelope(t, rxPeer1)
-	expectEnvelope(t, rxPeer2)
-}
-
-func TestRoutingStarFullConnectivity(t *testing.T) {
-	peers := []*DHTPeer{}
-	rxs := []chan aea.Envelope{}
-
-	for i := range FetchAITestKeys {
-		peer, cleanup, err := SetupLocalDHTPeer(
-			FetchAITestKeys[i], AgentsTestAddresses[i],
-			DefaultLocalPort+uint16(i), DefaultDelegatePort+uint16(i),
-			func() []string {
-				multiaddrs := []string{}
-				for _, entryPeer := range peers {
-					multiaddrs = append(multiaddrs, entryPeer.MultiAddr())
-				}
-				return multiaddrs
-			}(),
-		)
-		if err != nil {
-			t.Fatal("Failed to initialize DHTPeer", i, ":", err)
-		}
-
-		rx := make(chan aea.Envelope)
-		peer.ProcessEnvelope(func(envel aea.Envelope) error {
-			rx <- envel
-			if string(envel.Message) == "ping" {
-				err := peer.RouteEnvelope(aea.Envelope{
-					To:      envel.Sender,
-					Sender:  envel.To,
-					Message: []byte("ack"),
-				})
-				return err
-			}
-			return nil
-		})
-
-		peers = append(peers, peer)
-		rxs = append(rxs, rx)
-		defer cleanup()
-	}
-
-	time.Sleep(1 * time.Second)
-	for i := range peers {
-		for j := range peers {
-			if i == j {
-				continue
-			}
-
-			err := peers[i].RouteEnvelope(aea.Envelope{
-				To:      AgentsTestAddresses[j],
-				Sender:  AgentsTestAddresses[i],
-				Message: []byte("ping"),
-			})
-
-			if err != nil {
-				t.Error("Failed to RouteEnvelope from ", i, "to", j)
-			}
-
-			expectEnvelope(t, rxs[j])
-			expectEnvelope(t, rxs[i])
-		}
-	}
-}
-
-func TestRoutingDelegateClientPeer(t *testing.T) {
-	peer, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
-		[]string{},
-	)
-	if err != nil {
-		t.Fatal("Failed to initialize DHTPeer:", err)
-	}
-	defer peerCleanup()
-
-	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[1], DefaultLocalHost, DefaultLocalPort)
-	if err != nil {
-		t.Fatal("Failed to initialize DelegateClient:", err)
-	}
-	defer clientCleanup()
-
-	rxPeer := make(chan aea.Envelope)
-	peer.ProcessEnvelope(func(envel aea.Envelope) error {
-		rxPeer <- envel
-		return nil
-	})
-
-	err = peer.RouteEnvelope(aea.Envelope{
-		To:     AgentsTestAddresses[1],
-		Sender: AgentsTestAddresses[0],
-	})
-	if err != nil {
-		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
-	}
-
-	expectEnvelope(t, client.Rx)
-
-	err = client.Send(aea.Envelope{
-		To:     AgentsTestAddresses[0],
-		Sender: AgentsTestAddresses[1],
-	})
-
-	expectEnvelope(t, rxPeer)
 }
