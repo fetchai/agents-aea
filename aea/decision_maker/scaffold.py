@@ -23,8 +23,8 @@ from typing import Any, Dict
 
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
-from aea.decision_maker.messages.base import InternalMessage
 from aea.identity.base import Identity
+from aea.protocols.base import Message
 
 
 class DecisionMakerHandler(BaseDecisionMakerHandler):
@@ -46,7 +46,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             identity=identity, wallet=wallet, **kwargs,
         )
 
-    def handle(self, message: InternalMessage) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle an internal message from the skills.
 
@@ -54,7 +54,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             - update the ownership state
             - check transactions satisfy the preferences
 
-        :param message: the internal message
+        :param message: the message
         :return: None
         """
         raise NotImplementedError

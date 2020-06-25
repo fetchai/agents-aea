@@ -35,7 +35,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.protocols.ledger_api import LedgerApiMessage
-from packages.fetchai.protocols.ledger_api.custom_types import AnyObject
+from packages.fetchai.protocols.ledger_api.custom_types import SignedTransaction
 
 from tests.conftest import (
     COSMOS_ADDRESS_ONE,
@@ -116,7 +116,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     request = LedgerApiMessage(
         LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         ledger_id=EthereumCrypto.identifier,
-        signed_transaction=AnyObject(signed_transaction),
+        signed_transaction=SignedTransaction(signed_transaction),
     )
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)

@@ -29,10 +29,224 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.crypto.base import LedgerApi
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+from aea.protocols.base import Message
 
-from packages.fetchai.protocols.ledger_api import LedgerApiMessage
+from packages.fetchai.protocols.ledger_api.custom_types import TransactionReceipt
+from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+
+
+class LedgerApiDialogues(BaseLedgerApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        BaseLedgerApiDialogues.__init__(self, str(LedgerApiConnection.connection_id))
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return LedgerApiDialogue.AgentRole.LEDGER
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> LedgerApiDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = LedgerApiDialogue(
+            dialogue_label=dialogue_label,
+            agent_address=str(LedgerApiConnection.connection_id),
+            role=role,
+        )
+        return dialogue
+
+
+class _RequestDispatcher:
+    def __init__(
+        self,
+        loop: Optional[asyncio.AbstractEventLoop],
+        executor: Optional[Executor] = None,
+    ):
+        """
+        Initialize the request dispatcher.
+
+        :param loop: the asyncio loop.
+        :param executor: an executor.
+        """
+        self.loop = loop if loop is not None else asyncio.get_event_loop()
+        self.executor = executor
+        self.ledger_api_dialogues = LedgerApiDialogues()
+
+    async def run_async(
+        self,
+        func: Callable[[LedgerApi, LedgerApiMessage, LedgerApiDialogue], Task],
+        *args
+    ):
+        """
+        Run a function in executor.
+
+        :param func: the function to execute.
+        :param args: the arguments to pass to the function.
+        :return: the return value of the function.
+        """
+        try:
+            response = await self.loop.run_in_executor(self.executor, func, *args)
+            return response
+        except Exception as e:
+            return self.get_error_message(e, *args)
+
+    def get_handler(
+        self, performative: LedgerApiMessage.Performative
+    ) -> Callable[[LedgerApi, LedgerApiMessage, LedgerApiDialogue], Task]:
+        """
+        Get the handler method, given the message performative.
+
+        :param performative: the message performative.
+        :return: the method that will send the request.
+        """
+        handler = getattr(self, performative.value, lambda *args, **kwargs: None)
+        if handler is None:
+            raise Exception("Performative not recognized.")
+        return handler
+
+    def dispatch(self, api: LedgerApi, message: LedgerApiMessage) -> Task:
+        """
+        Dispatch the request to the right sender handler.
+
+        :param api: the ledger api.
+        :param message: the request message.
+        :return: an awaitable.
+        """
+        dialogue = self.ledger_api_dialogues.update(message)
+        performative = cast(LedgerApiMessage.Performative, message.performative)
+        handler = self.get_handler(performative)
+        return self.loop.create_task(self.run_async(handler, api, message, dialogue))
+
+    def get_balance(
+        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Send the request 'get_balance'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :return: None
+        """
+        balance = api.get_balance(message.address)
+        if balance is None:
+            response = self.get_error_message(
+                ValueError("No balance returned"), api, message, dialogue
+            )
+        else:
+            response = LedgerApiMessage(
+                performative=LedgerApiMessage.Performative.BALANCE,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                balance=balance,
+            )
+        dialogue.update(response)
+        return response
+
+    def get_transaction_receipt(
+        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Send the request 'get_transaction_receipt'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :return: None
+        """
+        transaction_receipt = api.get_transaction_receipt(message.transaction_digest)
+        if transaction_receipt is None:
+            response = self.get_error_message(
+                ValueError("No transaction_receipt returned"), api, message, dialogue
+            )
+        else:
+            response = LedgerApiMessage(
+                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                transaction_receipt=TransactionReceipt(transaction_receipt),
+            )
+        dialogue.update(response)
+        return response
+
+    def send_signed_transaction(
+        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Send the request 'send_signed_tx'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :return: None
+        """
+        transaction_digest = api.send_signed_transaction(
+            message.signed_transaction.body
+        )
+        if transaction_digest is None:
+            response = self.get_error_message(
+                ValueError("No transaction_digest returned"), api, message, dialogue
+            )
+        else:
+            response = LedgerApiMessage(
+                performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                transaction_digest=transaction_digest,
+            )
+        dialogue.update(response)
+        return response
+
+    def get_error_message(
+        self,
+        e: Exception,
+        api: LedgerApi,
+        message: LedgerApiMessage,
+        dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Build an error message.
+
+        :param e: the exception.
+        :param api: the Ledger API.
+        :param message: the request message.
+        :return: an error message response.
+        """
+        response = LedgerApiMessage(
+            performative=LedgerApiMessage.Performative.ERROR,
+            message_id=message.message_id + 1,
+            target=message.message_id,
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            message=str(e),
+        )
+        dialogue.update(response)
+        return response
 
 
 class LedgerApiConnection(Connection):
@@ -57,14 +271,21 @@ class LedgerApiConnection(Connection):
             configuration=configuration, crypto_store=crypto_store, identity=identity
         )
 
-        self._dispatcher = _RequestDispatcher(self.loop)
+        self._dispatcher = None  # type: Optional[_RequestDispatcher]
 
         self.receiving_tasks: List[asyncio.Future] = []
         self.task_to_request: Dict[asyncio.Future, Envelope] = {}
         self.done_tasks: Deque[asyncio.Future] = deque()
 
+    @property
+    def dispatcher(self) -> _RequestDispatcher:
+        """Get the dispatcher."""
+        assert self._dispatcher is not None, "_RequestDispatcher not set!"
+        return self._dispatcher
+
     async def connect(self) -> None:
         """Set up the connection."""
+        self._dispatcher = _RequestDispatcher(self.loop)
         self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:
@@ -72,6 +293,8 @@ class LedgerApiConnection(Connection):
         for task in self.receiving_tasks:
             if not task.cancelled():
                 task.cancel()
+        self.connection_status.is_connected = False
+        self._dispatcher = None
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -88,7 +311,7 @@ class LedgerApiConnection(Connection):
         else:
             message = cast(LedgerApiMessage, envelope.message)
         api = aea.crypto.registries.make_ledger_api(message.ledger_id)
-        task = self._dispatcher.dispatch(api, message)
+        task = self.dispatcher.dispatch(api, message)
         self.receiving_tasks.append(task)
         self.task_to_request[task] = envelope
 
@@ -141,125 +364,3 @@ class LedgerApiConnection(Connection):
                 message=response_message,
             )
         return response_envelope
-
-
-class _RequestDispatcher:
-    def __init__(
-        self,
-        loop: Optional[asyncio.AbstractEventLoop],
-        executor: Optional[Executor] = None,
-    ):
-        """
-        Initialize the request dispatcher.
-
-        :param loop: the asyncio loop.
-        :param executor: an executor.
-        """
-        self.loop = loop if loop is not None else asyncio.get_event_loop()
-        self.executor = executor
-
-    async def run_async(
-        self, func: Callable[[LedgerApi, LedgerApiMessage], Task], *args
-    ):
-        """
-        Run a function in executor.
-
-        :param func: the function to execute.
-        :param args: the arguments to pass to the function.
-        :return: the return value of the function.
-        """
-        try:
-            response = await self.loop.run_in_executor(self.executor, func, *args)
-            return response
-        except Exception as e:
-            return self.get_error_message(e, *args)
-
-    def get_handler(
-        self, performative: LedgerApiMessage.Performative
-    ) -> Callable[[LedgerApi, LedgerApiMessage], Task]:
-        """
-        Get the handler method, given the message performative.
-
-        :param performative: the message performative.
-        :return: the method that will send the request.
-        """
-        handler = getattr(self, performative.value, lambda *args, **kwargs: None)
-        if handler is None:
-            raise Exception("Performative not recognized.")
-        return handler
-
-    def dispatch(self, api: LedgerApi, message: LedgerApiMessage) -> Task:
-        """
-        Dispatch the request to the right sender handler.
-
-        :param api: the ledger api.
-        :param message: the request message.
-        :return: an awaitable.
-        """
-        performative = cast(LedgerApiMessage.Performative, message.performative)
-        handler = self.get_handler(performative)
-        return self.loop.create_task(self.run_async(handler, api, message))
-
-    def get_balance(
-        self, api: LedgerApi, message: LedgerApiMessage
-    ) -> LedgerApiMessage:
-        """
-        Send the request 'get_balance'.
-
-        :param api: the API object.
-        :param message: the Ledger API message
-        :return: None
-        """
-        balance = api.get_balance(message.address)
-        response = LedgerApiMessage(
-            LedgerApiMessage.Performative.BALANCE, amount=balance,
-        )
-        return response
-
-    def get_transaction_receipt(
-        self, api: LedgerApi, message: LedgerApiMessage
-    ) -> LedgerApiMessage:
-        """
-        Send the request 'get_transaction_receipt'.
-
-        :param api: the API object.
-        :param message: the Ledger API message
-        :return: None
-        """
-        tx_receipt = api.get_transaction_receipt(message.transaction_digest)
-        return LedgerApiMessage(
-            performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-            data=tx_receipt,
-        )
-
-    def send_signed_tx(
-        self, api: LedgerApi, message: LedgerApiMessage
-    ) -> LedgerApiMessage:
-        """
-        Send the request 'send_signed_tx'.
-
-        :param api: the API object.
-        :param message: the Ledger API message
-        :return: None
-        """
-        tx_digest = api.send_signed_transaction(message.signed_transaction.any)
-        return LedgerApiMessage(
-            performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
-            digest=tx_digest,
-        )
-
-    def get_error_message(
-        self, e: Exception, api: LedgerApi, message: LedgerApiMessage
-    ) -> LedgerApiMessage:
-        """
-        Build an error message.
-
-        :param e: the exception.
-        :param api: the Ledger API.
-        :param message: the request message.
-        :return: an error message response.
-        """
-        response = LedgerApiMessage(
-            performative=LedgerApiMessage.Performative.ERROR, message=str(e)
-        )
-        return response

@@ -27,7 +27,14 @@ from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.ledger_api.custom_types import (
-    AnyObject as CustomAnyObject,
+    RawTransaction as CustomRawTransaction,
+)
+from packages.fetchai.protocols.ledger_api.custom_types import (
+    SignedTransaction as CustomSignedTransaction,
+)
+from packages.fetchai.protocols.ledger_api.custom_types import Terms as CustomTerms
+from packages.fetchai.protocols.ledger_api.custom_types import (
+    TransactionReceipt as CustomTransactionReceipt,
 )
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
@@ -40,7 +47,13 @@ class LedgerApiMessage(Message):
 
     protocol_id = ProtocolId("fetchai", "ledger_api", "0.1.0")
 
-    AnyObject = CustomAnyObject
+    RawTransaction = CustomRawTransaction
+
+    SignedTransaction = CustomSignedTransaction
+
+    Terms = CustomTerms
+
+    TransactionReceipt = CustomTransactionReceipt
 
     class Performative(Enum):
         """Performatives for the ledger_api protocol."""
@@ -141,10 +154,10 @@ class LedgerApiMessage(Message):
         return cast(Optional[int], self.get("code"))
 
     @property
-    def data(self) -> CustomAnyObject:
+    def data(self) -> bytes:
         """Get the 'data' content from the message."""
         assert self.is_set("data"), "'data' content is not set."
-        return cast(CustomAnyObject, self.get("data"))
+        return cast(bytes, self.get("data"))
 
     @property
     def ledger_id(self) -> str:
@@ -158,24 +171,24 @@ class LedgerApiMessage(Message):
         return cast(Optional[str], self.get("message"))
 
     @property
-    def raw_transaction(self) -> CustomAnyObject:
+    def raw_transaction(self) -> CustomRawTransaction:
         """Get the 'raw_transaction' content from the message."""
         assert self.is_set("raw_transaction"), "'raw_transaction' content is not set."
-        return cast(CustomAnyObject, self.get("raw_transaction"))
+        return cast(CustomRawTransaction, self.get("raw_transaction"))
 
     @property
-    def signed_transaction(self) -> CustomAnyObject:
+    def signed_transaction(self) -> CustomSignedTransaction:
         """Get the 'signed_transaction' content from the message."""
         assert self.is_set(
             "signed_transaction"
         ), "'signed_transaction' content is not set."
-        return cast(CustomAnyObject, self.get("signed_transaction"))
+        return cast(CustomSignedTransaction, self.get("signed_transaction"))
 
     @property
-    def terms(self) -> CustomAnyObject:
+    def terms(self) -> CustomTerms:
         """Get the 'terms' content from the message."""
         assert self.is_set("terms"), "'terms' content is not set."
-        return cast(CustomAnyObject, self.get("terms"))
+        return cast(CustomTerms, self.get("terms"))
 
     @property
     def transaction_digest(self) -> str:
@@ -186,12 +199,12 @@ class LedgerApiMessage(Message):
         return cast(str, self.get("transaction_digest"))
 
     @property
-    def transaction_receipt(self) -> CustomAnyObject:
+    def transaction_receipt(self) -> CustomTransactionReceipt:
         """Get the 'transaction_receipt' content from the message."""
         assert self.is_set(
             "transaction_receipt"
         ), "'transaction_receipt' content is not set."
-        return cast(CustomAnyObject, self.get("transaction_receipt"))
+        return cast(CustomTransactionReceipt, self.get("transaction_receipt"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the ledger_api protocol."""
@@ -253,8 +266,8 @@ class LedgerApiMessage(Message):
                     type(self.ledger_id)
                 )
                 assert (
-                    type(self.terms) == CustomAnyObject
-                ), "Invalid type for content 'terms'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.terms) == CustomTerms
+                ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
                     type(self.terms)
                 )
             elif (
@@ -268,8 +281,8 @@ class LedgerApiMessage(Message):
                     type(self.ledger_id)
                 )
                 assert (
-                    type(self.signed_transaction) == CustomAnyObject
-                ), "Invalid type for content 'signed_transaction'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.signed_transaction) == CustomSignedTransaction
+                ), "Invalid type for content 'signed_transaction'. Expected 'SignedTransaction'. Found '{}'.".format(
                     type(self.signed_transaction)
                 )
             elif (
@@ -297,8 +310,8 @@ class LedgerApiMessage(Message):
             elif self.performative == LedgerApiMessage.Performative.RAW_TRANSACTION:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.raw_transaction) == CustomAnyObject
-                ), "Invalid type for content 'raw_transaction'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.raw_transaction) == CustomRawTransaction
+                ), "Invalid type for content 'raw_transaction'. Expected 'RawTransaction'. Found '{}'.".format(
                     type(self.raw_transaction)
                 )
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
@@ -311,8 +324,8 @@ class LedgerApiMessage(Message):
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.transaction_receipt) == CustomAnyObject
-                ), "Invalid type for content 'transaction_receipt'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.transaction_receipt) == CustomTransactionReceipt
+                ), "Invalid type for content 'transaction_receipt'. Expected 'TransactionReceipt'. Found '{}'.".format(
                     type(self.transaction_receipt)
                 )
             elif self.performative == LedgerApiMessage.Performative.ERROR:
@@ -334,8 +347,8 @@ class LedgerApiMessage(Message):
                         type(message)
                     )
                 assert (
-                    type(self.data) == CustomAnyObject
-                ), "Invalid type for content 'data'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.data) == bytes
+                ), "Invalid type for content 'data'. Expected 'bytes'. Found '{}'.".format(
                     type(self.data)
                 )
 

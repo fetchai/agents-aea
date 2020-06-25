@@ -11,29 +11,35 @@ speech_acts:
     address: pt:str
   get_raw_transaction:
     ledger_id: pt:str
-    terms: ct:AnyObject 
+    terms: ct:Terms 
   send_signed_transaction:
     ledger_id: pt:str
-    signed_transaction: ct:AnyObject
+    signed_transaction: ct:SignedTransaction
   get_transaction_receipt:
     ledger_id: pt:str
     transaction_digest: pt:str
   balance:
     balance: pt:int
   raw_transaction:
-    raw_transaction: ct:AnyObject
+    raw_transaction: ct:RawTransaction
   transaction_digest:
     transaction_digest: pt:str
   transaction_receipt:
-    transaction_receipt: ct:AnyObject
+    transaction_receipt: ct:TransactionReceipt
   error:
     code: pt:optional[pt:int]
     message: pt:optional[pt:str]
-    data: ct:AnyObject
+    data: pt:bytes
 ...
 ---
-ct:AnyObject: |
-  bytes any = 1;
+ct:Terms: |
+  bytes terms = 1;
+ct:SignedTransaction: |
+  bytes signed_transaction = 1;
+ct:RawTransaction: |
+  bytes raw_transaction = 1;
+ct:TransactionReceipt: |
+  bytes transaction_receipt = 1;
 ...
 ---
 initiation: [get_balance, get_raw_transaction, send_signed_transaction]

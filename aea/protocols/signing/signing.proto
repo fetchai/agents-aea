@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package fetch.aea.Signing;
+
+message SigningMessage{
+
+    // Custom Types
+    message ErrorCode{
+        enum ErrorCodeEnum {
+            UNSUCCESSFUL_MESSAGE_SIGNING = 0;
+            UNSUCCESSFUL_TRANSACTION_SIGNING = 1;
+          }
+        ErrorCodeEnum error_code = 1;
+    }
+
+    message RawTransaction{
+        bytes raw_transaction = 1;
+    }
+
+    message SignedTransaction{
+        bytes signed_transaction = 1;
+    }
+
+    message Terms{
+        bytes terms = 1;
+    }
+
+
+    // Performatives and contents
+    message Sign_Transaction_Performative{
+        repeated string skill_callback_ids = 1;
+        map<string, string> skill_callback_info = 2;
+        Terms terms = 3;
+        RawTransaction raw_transaction = 4;
+    }
+
+    message Sign_Message_Performative{
+        repeated string skill_callback_ids = 1;
+        map<string, string> skill_callback_info = 2;
+        Terms terms = 3;
+        bytes message = 4;
+    }
+
+    message Signed_Transaction_Performative{
+        repeated string skill_callback_ids = 1;
+        map<string, string> skill_callback_info = 2;
+        SignedTransaction signed_transaction = 3;
+    }
+
+    message Signed_Message_Performative{
+        repeated string skill_callback_ids = 1;
+        map<string, string> skill_callback_info = 2;
+        bytes signed_message = 3;
+    }
+
+    message Error_Performative{
+        repeated string skill_callback_ids = 1;
+        map<string, string> skill_callback_info = 2;
+        ErrorCode error_code = 3;
+    }
+
+
+    // Standard SigningMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Error_Performative error = 5;
+        Sign_Message_Performative sign_message = 6;
+        Sign_Transaction_Performative sign_transaction = 7;
+        Signed_Message_Performative signed_message = 8;
+        Signed_Transaction_Performative signed_transaction = 9;
+    }
+}

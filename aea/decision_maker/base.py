@@ -28,12 +28,10 @@ from types import SimpleNamespace
 from typing import List, Optional
 
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
+from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +158,7 @@ class ProtectedQueue(Queue):
         self._access_code_hash = _hash(access_code)
 
     def put(
-        self, internal_message: Optional[InternalMessage], block=True, timeout=None
+        self, internal_message: Optional[Message], block=True, timeout=None
     ) -> None:
         """
         Put an internal message on the queue.
@@ -177,15 +175,11 @@ class ProtectedQueue(Queue):
         :raises: ValueError, if the item is not an internal message
         :return: None
         """
-        if not (
-            type(internal_message)
-            in {InternalMessage, TransactionMessage, StateUpdateMessage}
-            or internal_message is None
-        ):
-            raise ValueError("Only internal messages are allowed!")
+        if not (isinstance(internal_message, Message) or internal_message is None):
+            raise ValueError("Only messages are allowed!")
         super().put(internal_message, block=True, timeout=None)
 
-    def put_nowait(self, internal_message: Optional[InternalMessage]) -> None:
+    def put_nowait(self, internal_message: Optional[Message]) -> None:
         """
         Put an internal message on the queue.
 
@@ -195,12 +189,8 @@ class ProtectedQueue(Queue):
         :raises: ValueError, if the item is not an internal message
         :return: None
         """
-        if not (
-            type(internal_message)
-            in {InternalMessage, TransactionMessage, StateUpdateMessage}
-            or internal_message is None
-        ):
-            raise ValueError("Only internal messages are allowed!")
+        if not (isinstance(internal_message, Message) or internal_message is None):
+            raise ValueError("Only messages are allowed!")
         super().put_nowait(internal_message)
 
     def get(self, block=True, timeout=None) -> None:
@@ -223,7 +213,7 @@ class ProtectedQueue(Queue):
 
     def protected_get(
         self, access_code: str, block=True, timeout=None
-    ) -> Optional[InternalMessage]:
+    ) -> Optional[Message]:
         """
         Access protected get method.
 
@@ -237,7 +227,7 @@ class ProtectedQueue(Queue):
             raise ValueError("Wrong code, access not permitted!")
         internal_message = super().get(
             block=block, timeout=timeout
-        )  # type: Optional[InternalMessage]
+        )  # type: Optional[Message]
         return internal_message
 
 
@@ -283,7 +273,7 @@ class DecisionMakerHandler(ABC):
         return self._message_out_queue
 
     @abstractmethod
-    def handle(self, message: InternalMessage) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle an internal message from the skills.
 
@@ -366,7 +356,7 @@ class DecisionMaker:
         while not self._stopped:
             message = self.message_in_queue.protected_get(
                 self._queue_access_code, block=True
-            )  # type: Optional[InternalMessage]
+            )  # type: Optional[Message]
 
             if message is None:
                 logger.debug(
@@ -376,7 +366,7 @@ class DecisionMaker:
                 )
                 continue
 
-            if message.protocol_id == InternalMessage.protocol_id:
+            if message.protocol_id == Message.protocol_id:
                 self.handle(message)
             else:  # pragma: no cover
                 logger.warning(
@@ -385,7 +375,7 @@ class DecisionMaker:
                     )
                 )
 
-    def handle(self, message: InternalMessage) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle an internal message from the skills.
 

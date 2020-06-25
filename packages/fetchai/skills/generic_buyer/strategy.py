@@ -19,8 +19,9 @@
 
 """This module contains the strategy class."""
 
-from typing import cast
+from typing import Any, Dict, Optional, cast
 
+from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.skills.base import Model
 
@@ -30,10 +31,22 @@ DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_SEARCH_QUERY = {
-    "search_term": "country",
-    "search_value": "UK",
-    "constraint_type": "==",
+    "constraint_one": {
+        "search_term": "country",
+        "search_value": "UK",
+        "constraint_type": "==",
+    },
+    "constraint_two": {
+        "search_term": "city",
+        "search_value": "Cambridge",
+        "constraint_type": "==",
+    },
 }
+DEFAULT_DATA_MODEL_NAME = "location"
+DEFAULT_DATA_MODEL = {
+    "attribute_one": {"name": "country", "type": "str", "is_required": True},
+    "attribute_two": {"name": "city", "type": "str", "is_required": True},
+}  # type: Optional[Dict[str, Any]]
 
 
 class GenericStrategy(Model):
@@ -51,6 +64,8 @@ class GenericStrategy(Model):
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
+        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
         super().__init__(**kwargs)
         self.is_searching = False
 
@@ -68,14 +83,14 @@ class GenericStrategy(Model):
         query = Query(
             [
                 Constraint(
-                    self.search_query["search_term"],
+                    constraint["search_term"],
                     ConstraintType(
-                        self.search_query["constraint_type"],
-                        self.search_query["search_value"],
+                        constraint["constraint_type"], constraint["search_value"],
                     ),
                 )
+                for constraint in self.search_query.values()
             ],
-            model=None,
+            model=GenericDataModel(self._data_model_name, self._data_model),
         )
         return query
 

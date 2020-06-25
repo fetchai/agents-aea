@@ -21,9 +21,8 @@
 
 import asyncio
 import logging
-import pickle  # nosec
 from asyncio import AbstractEventLoop, CancelledError
-from typing import Dict, List, Optional, Set, Tuple, cast
+from typing import Dict, List, Optional, Set, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -57,6 +56,8 @@ from oef.schema import (
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
     And,
     Attribute,
@@ -72,9 +73,13 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.mail.base import Address, Envelope
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 
-from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogues as BaseOefSearchDialogues,
+)
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
@@ -87,6 +92,45 @@ STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
 PUBLIC_ID = PublicId.from_str("fetchai/oef:0.5.0")
+
+
+class OefSearchDialogues(BaseOefSearchDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        BaseOefSearchDialogues.__init__(self, str(OEFConnection.connection_id))
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return OefSearchDialogue.AgentRole.OEF_NODE
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> OefSearchDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = OefSearchDialogue(
+            dialogue_label=dialogue_label,
+            agent_address=str(OEFConnection.connection_id),
+            role=role,
+        )
+        return dialogue
 
 
 class OEFObjectTranslator:
@@ -365,8 +409,9 @@ class OEFChannel(OEFAgent):
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[AbstractEventLoop]
         self.excluded_protocols = excluded_protocols
+        self.oef_search_dialogues = OefSearchDialogues()
         self.oef_msg_id = 0
-        self.oef_msg_it_to_dialogue_reference = {}  # type: Dict[int, Tuple[str, str]]
+        self.oef_msg_it_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
 
     def on_message(
         self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
@@ -410,34 +455,10 @@ class OEFChannel(OEFAgent):
         assert self.in_queue is not None
         assert self.loop is not None
         logger.warning(
-            "Accepting on_cfp from deprecated API: msg_id={}, dialogue_id={}, origin={}, target={}. Continuing dialogue via envelopes!".format(
-                msg_id, dialogue_id, origin, target
+            "Dropping incompatible on_cfp: msg_id={}, dialogue_id={}, origin={}, target={}, query={}".format(
+                msg_id, dialogue_id, origin, target, query
             )
         )
-        try:
-            query = pickle.loads(query)  # nosec
-        except Exception as e:
-            logger.debug(
-                "When trying to unpickle the query the following exception occured: {}".format(
-                    e
-                )
-            )
-        msg = FipaMessage(
-            message_id=msg_id,
-            dialogue_reference=(str(dialogue_id), ""),
-            target=target,
-            performative=FipaMessage.Performative.CFP,
-            query=query if query != b"" else None,
-        )
-        envelope = Envelope(
-            to=self.address,
-            sender=origin,
-            protocol_id=FipaMessage.protocol_id,
-            message=msg,
-        )
-        asyncio.run_coroutine_threadsafe(
-            self.in_queue.put(envelope), self.loop
-        ).result()
 
     def on_propose(
         self,
@@ -515,14 +536,22 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        dialogue_reference = self.oef_msg_it_to_dialogue_reference[search_id]
+        oef_search_dialogue = self.oef_msg_it_to_dialogue.pop(search_id, None)
+        if oef_search_dialogue is None:
+            logger.warning("Could not find dialogue for search_id={}".format(search_id))
+            return
+        last_msg = oef_search_dialogue.last_outgoing_message  # TODO: Fix
+        if last_msg is None:
+            logger.warning("Could not find last message.")
+            return
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            dialogue_reference=dialogue_reference,
-            target=RESPONSE_TARGET,
-            message_id=RESPONSE_MESSAGE_ID,
+            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
+            target=last_msg.message_id,
+            message_id=last_msg.message_id + 1,
             agents=tuple(agents),
         )
+        oef_search_dialogue.update(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
@@ -549,14 +578,22 @@ class OEFChannel(OEFAgent):
             operation = OefSearchMessage.OefErrorOperation(operation)
         except ValueError:
             operation = OefSearchMessage.OefErrorOperation.OTHER
-        dialogue_reference = self.oef_msg_it_to_dialogue_reference[answer_id]
+        oef_search_dialogue = self.oef_msg_it_to_dialogue.pop(answer_id, None)
+        if oef_search_dialogue is None:
+            logger.warning("Could not find dialogue for answer_id={}".format(answer_id))
+            return
+        last_msg = oef_search_dialogue.last_incoming_message
+        if last_msg is None:
+            logger.warning("Could not find last message.")
+            return
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.OEF_ERROR,
-            dialogue_reference=dialogue_reference,
-            target=RESPONSE_TARGET,
-            message_id=RESPONSE_MESSAGE_ID,
+            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
+            target=last_msg.message_id,
+            message_id=last_msg.message_id + 1,
             oef_error_operation=operation,
         )
+        oef_search_dialogue.update(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
@@ -636,11 +673,16 @@ class OEFChannel(OEFAgent):
             envelope.message, OefSearchMessage
         ), "Message not of type OefSearchMessage"
         oef_message = cast(OefSearchMessage, envelope.message)
-        self.oef_msg_id += 1
-        self.oef_msg_it_to_dialogue_reference[self.oef_msg_id] = (
-            oef_message.dialogue_reference[0],
-            str(self.oef_msg_id),
+        oef_search_dialogue = cast(
+            OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )
+        if oef_search_dialogue is None:
+            logger.warning(
+                "Could not create dialogue for message={}".format(oef_message)
+            )
+            return
+        self.oef_msg_id += 1
+        self.oef_msg_it_to_dialogue[self.oef_msg_id] = oef_search_dialogue
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             service_description = oef_message.service_description
             oef_service_description = OEFObjectTranslator.to_oef_description(

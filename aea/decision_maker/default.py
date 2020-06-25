@@ -29,15 +29,14 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
 from aea.decision_maker.base import OwnershipState as BaseOwnershipState
 from aea.decision_maker.base import Preferences as BasePreferences
-from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
 from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
+from aea.protocols.base import Message
+from aea.protocols.signing.message import SigningMessage
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -527,23 +526,21 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             identity=identity, wallet=wallet, **kwargs,
         )
 
-    def handle(self, message: InternalMessage) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle an internal message from the skills.
 
         :param message: the internal message
         :return: None
         """
-        if isinstance(message, TransactionMessage):
-            self._handle_tx_message(message)
-        elif isinstance(message, StateUpdateMessage):
-            self._handle_state_update_message(message)
+        if isinstance(message, SigningMessage):
+            self._handle_signing_message(message)
 
-    def _handle_tx_message(self, tx_message: TransactionMessage) -> None:
+    def _handle_signing_message(self, signing_msg: SigningMessage) -> None:
         """
-        Handle a transaction message.
+        Handle a signing message.
 
-        :param tx_message: the transaction message
+        :param signing_msg: the transaction message
         :return: None
         """
         if not self.context.goal_pursuit_readiness.is_ready:
@@ -554,12 +551,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             )
 
         # check if the transaction is acceptable and process it accordingly
-        if tx_message.performative == TransactionMessage.Performative.SIGN_MESSAGE:
-            self._handle_message_signing(tx_message)
-        elif (
-            tx_message.performative == TransactionMessage.Performative.SIGN_TRANSACTION
-        ):
-            self._handle_transaction_signing(tx_message)
+        if signing_msg.performative == SigningMessage.Performative.SIGN_MESSAGE:
+            self._handle_message_signing(signing_msg)
+        elif signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
+            self._handle_transaction_signing(signing_msg)
         else:
             logger.error(
                 "[{}]: Unexpected transaction message performative".format(
@@ -567,115 +562,78 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )  # pragma: no cover
 
-    def _handle_message_signing(self, tx_message: TransactionMessage) -> None:
+    def _handle_message_signing(self, signing_msg: SigningMessage) -> None:
         """
         Handle a message for signing.
 
-        :param tx_message: the transaction message
+        :param signing_msg: the transaction message
         :return: None
         """
-        tx_message_response = TransactionMessage(
-            performative=TransactionMessage.Performative.ERROR,
-            skill_callback_ids=tx_message.skill_callback_ids,
-            crypto_id=tx_message.crypto_id,
-            **tx_message.optional_callback_kwargs,
-            error_code=TransactionMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+        signing_msg_response = SigningMessage(
+            performative=SigningMessage.Performative.ERROR,
+            skill_callback_ids=signing_msg.skill_callback_ids,
+            skill_callback_info=signing_msg.skill_callback_info,
+            crypto_id=signing_msg.crypto_id,
+            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         )
-        if self._is_acceptable_for_signing(tx_message):
+        if self._is_acceptable_for_signing(signing_msg):
             signed_message = self.wallet.sign_message(
-                tx_message.crypto_id,
-                tx_message.message,
-                tx_message.is_deprecated_signing_mode,
+                signing_msg.crypto_id,
+                signing_msg.message,
+                signing_msg.is_deprecated_signing_mode,
             )
             if signed_message is not None:
-                tx_message_response = TransactionMessage(
-                    performative=TransactionMessage.Performative.SIGNED_MESSAGE,
-                    skill_callback_ids=tx_message.skill_callback_ids,
-                    crypto_id=tx_message.crypto_id,
-                    **tx_message.optional_callback_kwargs,
+                signing_msg_response = SigningMessage(
+                    performative=SigningMessage.Performative.SIGNED_MESSAGE,
+                    skill_callback_ids=signing_msg.skill_callback_ids,
+                    skill_callback_info=signing_msg.skill_callback_info,
+                    crypto_id=signing_msg.crypto_id,
                     signed_message=signed_message,
                 )
-        self.message_out_queue.put(tx_message_response)
+        self.message_out_queue.put(signing_msg_response)
 
-    def _handle_transaction_signing(self, tx_message: TransactionMessage) -> None:
+    def _handle_transaction_signing(self, signing_msg: SigningMessage) -> None:
         """
         Handle a transaction for signing.
 
-        :param tx_message: the transaction message
+        :param signing_msg: the transaction message
         :return: None
         """
-        tx_message_response = TransactionMessage(
-            performative=TransactionMessage.Performative.ERROR,
-            skill_callback_ids=tx_message.skill_callback_ids,
-            crypto_id=tx_message.crypto_id,
-            **tx_message.optional_callback_kwargs,
-            error_code=TransactionMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
+        signing_msg_response = SigningMessage(
+            performative=SigningMessage.Performative.ERROR,
+            skill_callback_ids=signing_msg.skill_callback_ids,
+            skill_callback_info=signing_msg.skill_callback_info,
+            crypto_id=signing_msg.crypto_id,
+            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
         )
-        if self._is_acceptable_for_signing(tx_message):
+        if self._is_acceptable_for_signing(signing_msg):
             signed_tx = self.wallet.sign_transaction(
-                tx_message.crypto_id, tx_message.transaction
+                signing_msg.crypto_id, signing_msg.raw_transaction.body
             )
             if signed_tx is not None:
-                tx_message_response = TransactionMessage(
-                    performative=TransactionMessage.Performative.SIGNED_TRANSACTION,
-                    skill_callback_ids=tx_message.skill_callback_ids,
-                    crypto_id=tx_message.crypto_id,
-                    **tx_message.optional_callback_kwargs,
+                signing_msg_response = SigningMessage(
+                    performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                    skill_callback_ids=signing_msg.skill_callback_ids,
+                    skill_callback_info=signing_msg.skill_callback_info,
+                    crypto_id=signing_msg.crypto_id,
                     signed_transaction=signed_tx,
                 )
-        self.message_out_queue.put(tx_message_response)
+        self.message_out_queue.put(signing_msg_response)
 
-    def _is_acceptable_for_signing(self, tx_message: TransactionMessage) -> bool:
+    def _is_acceptable_for_signing(self, signing_msg: SigningMessage) -> bool:
         """
         Check if the tx message is acceptable for signing.
 
-        :param tx_message: the transaction message
+        :param signing_msg: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        if tx_message.has_terms:
+        if signing_msg.has_terms:
             result = self.context.preferences.is_utility_enhancing(
-                self.context.ownership_state, tx_message.terms
-            ) and self.context.ownership_state.is_affordable(tx_message.terms)
+                self.context.ownership_state, signing_msg.terms
+            ) and self.context.ownership_state.is_affordable(signing_msg.terms)
         else:
             logger.warning(
                 "Cannot verify whether transaction improves utility and is affordable as no terms are provided. Assuming it does!"
             )
             result = True
         return result
-
-    def _handle_state_update_message(
-        self, state_update_message: StateUpdateMessage
-    ) -> None:
-        """
-        Handle a state update message.
-
-        :param state_update_message: the state update message
-        :return: None
-        """
-        if (
-            state_update_message.performative
-            == StateUpdateMessage.Performative.INITIALIZE
-        ):
-            logger.warning(
-                "[{}]: Applying ownership_state and preferences initialization!".format(
-                    self.agent_name
-                )
-            )
-            self.context.ownership_state.set(
-                amount_by_currency_id=state_update_message.amount_by_currency_id,
-                quantities_by_good_id=state_update_message.quantities_by_good_id,
-            )
-            self.context.preferences.set(
-                exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id,
-                utility_params_by_good_id=state_update_message.utility_params_by_good_id,
-                tx_fee=state_update_message.tx_fee,
-            )
-            self.context.goal_pursuit_readiness.update(
-                GoalPursuitReadiness.Status.READY
-            )
-        elif state_update_message.performative == StateUpdateMessage.Performative.APPLY:
-            logger.info("[{}]: Applying state update!".format(self.agent_name))
-            self.context.ownership_state.apply_delta(
-                delta_amount_by_currency_id=state_update_message.amount_by_currency_id,
-                delta_quantities_by_good_id=state_update_message.quantities_by_good_id,
-            )

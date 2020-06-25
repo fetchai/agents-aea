@@ -8,8 +8,8 @@ fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
   behaviours.py: QmZELZ9dTqwz4CSaEEWMnESXiMXsAHeKwnrmLA32qCaBtP
   dialogues.py: QmVCG8RT246Uv1jouRkheCBoFR9CPSe5RLh1qu4aRx2q8L
-  handlers.py: QmaKrxJBCevGttkUgvbKpYRxD3TCpeVT2in5k6qcgQmcaY
-  strategy.py: Qmb63KbfVw2jF7QYENaiYARAzExLXJxEirjVehdMhpYMrp
+  handlers.py: QmUno1mLTtuTp2fwsfVPa1hTU2nskPcaJMj9NwNbEvJw9P
+  strategy.py: Qme4WpZESY86NbKpk8YEBVbz95tkcEUedQX6GCMihWBhda
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -54,9 +54,14 @@ models:
       max_buyer_tx_fee: 1
       max_price: 20
       search_query:
-        constraint_type: ==
-        search_term: country
-        search_value: UK
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
     class_name: GenericStrategy
 dependencies: {}
 is_abstract: true

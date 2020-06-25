@@ -208,7 +208,9 @@ class GenericFipaHandler(Handler):
             if transfer_address is None or not isinstance(transfer_address, str):
                 transfer_address = msg.counterparty
             terms = Terms(
-                sender_addr=self.context.address,
+                sender_addr=self.context.agent_addresses[
+                    fipa_dialogue.proposal.values["ledger_id"]
+                ],
                 counterparty_addr=transfer_address,
                 amount_by_currency_id={
                     fipa_dialogue.proposal.values[

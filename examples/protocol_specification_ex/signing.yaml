@@ -1,5 +1,5 @@
 ---
-name: transaction
+name: signing
 author: fetchai
 version: 0.1.0
 description: A protocol for communication between skills and decision maker.
@@ -10,26 +10,36 @@ speech_acts:
     skill_callback_ids: pt:list[pt:str]
     skill_callback_info: pt:dict[pt:str, pt:str]
     terms: ct:Terms
-    transaction: ct:AnyObject
+    crypto_id: pt:str
+    raw_transaction: ct:RawTransaction
   sign_message:
     skill_callback_ids: pt:list[pt:str]
     skill_callback_info: pt:dict[pt:str, pt:str]
     terms: ct:Terms
-    message: pt:bytes
+    crypto_id: pt:str
+    raw_message: ct:RawMessage
   signed_transaction:
-    signed_transaction: ct:AnyObject
+    skill_callback_ids: pt:list[pt:str]
+    skill_callback_info: pt:dict[pt:str, pt:str]
+    signed_transaction: ct:SignedTransaction
   signed_message:
+    skill_callback_ids: pt:list[pt:str]
+    skill_callback_info: pt:dict[pt:str, pt:str]
     signed_message: pt:bytes
   error:
+    skill_callback_ids: pt:list[pt:str]
+    skill_callback_info: pt:dict[pt:str, pt:str]
     error_code: ct:ErrorCode
 ...
 ---
-ct:PublicId: |
-  bytes any = 1;
-ct:AnyObject: |
-  bytes any = 1;
 ct:Terms: |
-  bytes any = 1;
+  bytes terms = 1;
+ct:SignedTransaction: |
+  bytes signed_transaction = 1;
+ct:RawTransaction: |
+  bytes raw_transaction = 1;
+ct:RawMessage: |
+  bytes raw_message = 1;
 ct:ErrorCode: |
   enum ErrorCodeEnum {
       UNSUCCESSFUL_MESSAGE_SIGNING = 0;

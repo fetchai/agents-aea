@@ -18,41 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
-import pickle  # nosec
-from typing import Any
 
 
-class AnyObject:
-    """This class represents an instance of AnyObject."""
+from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
+from aea.helpers.transaction.base import SignedTransaction as BaseSignedTransaction
+from aea.helpers.transaction.base import Terms as BaseTerms
+from aea.helpers.transaction.base import TransactionReceipt as BaseTransactionReceipt
 
-    def __init__(self, _any: Any):
-        """Initialise an instance of AnyObject."""
-        self.any = _any
 
-    @staticmethod
-    def encode(any_object_protobuf_object, any_object_object: "AnyObject") -> None:
-        """
-        Encode an instance of this class into the protocol buffer object.
-
-        The protocol buffer object in the any_object_protobuf_object argument must be matched with the instance of this class in the 'any_object_object' argument.
-
-        :param any_object_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param any_object_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
-        """
-        any_object_protobuf_object.any = pickle.dumps(any_object_object)  # nosec
-
-    @classmethod
-    def decode(cls, any_object_protobuf_object) -> "AnyObject":
-        """
-        Decode a protocol buffer object that corresponds with this class into an instance of this class.
-
-        A new instance of this class must be created that matches the protocol buffer object in the 'any_object_protobuf_object' argument.
-
-        :param any_object_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'any_object_protobuf_object' argument.
-        """
-        return pickle.loads(any_object_protobuf_object.any)  # nosec
-
-    def __eq__(self, other):
-        return self.any == other.any
+RawTransaction = BaseRawTransaction
+SignedTransaction = BaseSignedTransaction
+Terms = BaseTerms
+TransactionReceipt = BaseTransactionReceipt

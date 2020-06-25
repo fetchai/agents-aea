@@ -25,7 +25,10 @@ from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2
-from packages.fetchai.protocols.ledger_api.custom_types import AnyObject
+from packages.fetchai.protocols.ledger_api.custom_types import RawTransaction
+from packages.fetchai.protocols.ledger_api.custom_types import SignedTransaction
+from packages.fetchai.protocols.ledger_api.custom_types import Terms
+from packages.fetchai.protocols.ledger_api.custom_types import TransactionReceipt
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 
@@ -61,14 +64,16 @@ class LedgerApiSerializer(Serializer):
             ledger_id = msg.ledger_id
             performative.ledger_id = ledger_id
             terms = msg.terms
-            AnyObject.encode(performative.terms, terms)
+            Terms.encode(performative.terms, terms)
             ledger_api_msg.get_raw_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION:
             performative = ledger_api_pb2.LedgerApiMessage.Send_Signed_Transaction_Performative()  # type: ignore
             ledger_id = msg.ledger_id
             performative.ledger_id = ledger_id
             signed_transaction = msg.signed_transaction
-            AnyObject.encode(performative.signed_transaction, signed_transaction)
+            SignedTransaction.encode(
+                performative.signed_transaction, signed_transaction
+            )
             ledger_api_msg.send_signed_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT:
             performative = ledger_api_pb2.LedgerApiMessage.Get_Transaction_Receipt_Performative()  # type: ignore
@@ -85,7 +90,7 @@ class LedgerApiSerializer(Serializer):
         elif performative_id == LedgerApiMessage.Performative.RAW_TRANSACTION:
             performative = ledger_api_pb2.LedgerApiMessage.Raw_Transaction_Performative()  # type: ignore
             raw_transaction = msg.raw_transaction
-            AnyObject.encode(performative.raw_transaction, raw_transaction)
+            RawTransaction.encode(performative.raw_transaction, raw_transaction)
             ledger_api_msg.raw_transaction.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
             performative = ledger_api_pb2.LedgerApiMessage.Transaction_Digest_Performative()  # type: ignore
@@ -95,7 +100,9 @@ class LedgerApiSerializer(Serializer):
         elif performative_id == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:
             performative = ledger_api_pb2.LedgerApiMessage.Transaction_Receipt_Performative()  # type: ignore
             transaction_receipt = msg.transaction_receipt
-            AnyObject.encode(performative.transaction_receipt, transaction_receipt)
+            TransactionReceipt.encode(
+                performative.transaction_receipt, transaction_receipt
+            )
             ledger_api_msg.transaction_receipt.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.ERROR:
             performative = ledger_api_pb2.LedgerApiMessage.Error_Performative()  # type: ignore
@@ -108,7 +115,7 @@ class LedgerApiSerializer(Serializer):
                 message = msg.message
                 performative.message = message
             data = msg.data
-            AnyObject.encode(performative.data, data)
+            performative.data = data
             ledger_api_msg.error.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
@@ -145,7 +152,7 @@ class LedgerApiSerializer(Serializer):
             ledger_id = ledger_api_pb.get_raw_transaction.ledger_id
             performative_content["ledger_id"] = ledger_id
             pb2_terms = ledger_api_pb.get_raw_transaction.terms
-            terms = AnyObject.decode(pb2_terms)
+            terms = Terms.decode(pb2_terms)
             performative_content["terms"] = terms
         elif performative_id == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION:
             ledger_id = ledger_api_pb.send_signed_transaction.ledger_id
@@ -153,7 +160,7 @@ class LedgerApiSerializer(Serializer):
             pb2_signed_transaction = (
                 ledger_api_pb.send_signed_transaction.signed_transaction
             )
-            signed_transaction = AnyObject.decode(pb2_signed_transaction)
+            signed_transaction = SignedTransaction.decode(pb2_signed_transaction)
             performative_content["signed_transaction"] = signed_transaction
         elif performative_id == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT:
             ledger_id = ledger_api_pb.get_transaction_receipt.ledger_id
@@ -167,7 +174,7 @@ class LedgerApiSerializer(Serializer):
             performative_content["balance"] = balance
         elif performative_id == LedgerApiMessage.Performative.RAW_TRANSACTION:
             pb2_raw_transaction = ledger_api_pb.raw_transaction.raw_transaction
-            raw_transaction = AnyObject.decode(pb2_raw_transaction)
+            raw_transaction = RawTransaction.decode(pb2_raw_transaction)
             performative_content["raw_transaction"] = raw_transaction
         elif performative_id == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
             transaction_digest = ledger_api_pb.transaction_digest.transaction_digest
@@ -176,7 +183,7 @@ class LedgerApiSerializer(Serializer):
             pb2_transaction_receipt = (
                 ledger_api_pb.transaction_receipt.transaction_receipt
             )
-            transaction_receipt = AnyObject.decode(pb2_transaction_receipt)
+            transaction_receipt = TransactionReceipt.decode(pb2_transaction_receipt)
             performative_content["transaction_receipt"] = transaction_receipt
         elif performative_id == LedgerApiMessage.Performative.ERROR:
             if ledger_api_pb.error.code_is_set:
@@ -185,8 +192,7 @@ class LedgerApiSerializer(Serializer):
             if ledger_api_pb.error.message_is_set:
                 message = ledger_api_pb.error.message
                 performative_content["message"] = message
-            pb2_data = ledger_api_pb.error.data
-            data = AnyObject.decode(pb2_data)
+            data = ledger_api_pb.error.data
             performative_content["data"] = data
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))

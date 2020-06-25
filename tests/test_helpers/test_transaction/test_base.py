@@ -19,7 +19,7 @@
 
 """This module contains the tests for the base module."""
 
-from aea.helpers.transaction.base import Terms, Transfer
+from aea.helpers.transaction.base import Terms  # , Transfer
 
 
 def test_init_terms():
@@ -46,22 +46,22 @@ def test_init_terms():
     assert terms.nonce == nonce
 
 
-def test_init_transfer():
-    """Test the transfer object initialization."""
-    sender_addr = "SenderAddress"
-    counterparty_addr = "CounterpartyAddress"
-    amount_by_currency_id = {"FET": 10}
-    service_reference = "someservice"
-    nonce = "somestring"
-    transfer = Transfer(
-        sender_addr=sender_addr,
-        counterparty_addr=counterparty_addr,
-        amount_by_currency_id=amount_by_currency_id,
-        service_reference=service_reference,
-        nonce=nonce,
-    )
-    assert transfer.sender_addr == sender_addr
-    assert transfer.counterparty_addr == counterparty_addr
-    assert transfer.amount_by_currency_id == amount_by_currency_id
-    assert transfer.service_reference == service_reference
-    assert transfer.nonce == nonce
+# def test_init_transfer():
+#     """Test the transfer object initialization."""
+#     sender_addr = "SenderAddress"
+#     counterparty_addr = "CounterpartyAddress"
+#     amount_by_currency_id = {"FET": 10}
+#     service_reference = "someservice"
+#     nonce = "somestring"
+#     transfer = Transfer(
+#         sender_addr=sender_addr,
+#         counterparty_addr=counterparty_addr,
+#         amount_by_currency_id=amount_by_currency_id,
+#         service_reference=service_reference,
+#         nonce=nonce,
+#     )
+#     assert transfer.sender_addr == sender_addr
+#     assert transfer.counterparty_addr == counterparty_addr
+#     assert transfer.amount_by_currency_id == amount_by_currency_id
+#     assert transfer.service_reference == service_reference
+#     assert transfer.nonce == nonce

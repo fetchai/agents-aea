@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,4 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the decision maker messaging modules."""
+"""This module contains the support resources for the signing protocol."""
+
+from aea.protocols.signing.message import SigningMessage
+from aea.protocols.signing.serialization import SigningSerializer
+
+SigningMessage.serializer = SigningSerializer

@@ -54,10 +54,15 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       max_buyer_tx_fee: 1
-      max_price: 20
+      max_price: 200
       search_query:
-        constraint_type: ==
-        search_term: country
-        search_value: UK
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
     class_name: Strategy
 dependencies: {}
