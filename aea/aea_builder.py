@@ -1262,7 +1262,9 @@ class AEABuilder:
                 skip_consistency_check=skip_consistency_check,
             )
 
-    def _find_import_order(self, skill_ids, aea_project_path):
+    def _find_import_order(
+        self, skill_ids: List[ComponentId], aea_project_path: Path
+    ) -> List[ComponentId]:
         """Find import order for skills.
 
         We need to handle skills separately, since skills can depend on each other.
@@ -1272,9 +1274,9 @@ class AEABuilder:
         - import skills from the leaves of the dependency graph, by finding a topological ordering.
         """
         # the adjacency list for the dependency graph
-        depends_on: Dict[PublicId, Set[PublicId]] = defaultdict(set)
+        depends_on: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
         # the adjacency list for the inverse dependency graph
-        supports: Dict[PublicId, Set[PublicId]] = defaultdict(set)
+        supports: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
         # nodes with no incoming edges
         roots = copy(skill_ids)
 
@@ -1291,12 +1293,17 @@ class AEABuilder:
 
             if len(configuration.skills) != 0:
                 roots.remove(skill_id)
-            depends_on[skill_id].update(configuration.skills)
+            depends_on[skill_id].update(
+                [
+                    ComponentId(ComponentType.SKILL, skill)
+                    for skill in configuration.skills
+                ]
+            )
             for dependency in configuration.skills:
-                supports[dependency].add(skill_id)
+                supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
 
         # find topological order (Kahn's algorithm)
-        queue = deque()
+        queue = deque()  # type: ignore
         order = []
         queue.extend(roots)
         while len(queue) > 0:
