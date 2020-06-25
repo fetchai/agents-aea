@@ -211,3 +211,26 @@ jobs:
       working-directory: ./packages/fetchai/connections/p2p_libp2p
       run: go test -p 1 -count 2 -v ./...
         
+  golang_checks:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8]
+
+    continue-on-error: false
+
+    timeout-minutes: 30
+
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - if: matrix.python-version == '3.6' && matrix.os != 'windows-latest'
+      name: Golang unit tests
+      working-directory: ./packages/fetchai/connections/p2p_libp2p
+      run: go test -p 1 -count 2 -v ./...
