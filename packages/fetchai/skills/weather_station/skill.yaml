@@ -7,9 +7,9 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmZyd9SyRAiwC5KA4RgbDU9XvqPwvZ1bXLDpfqWCjEVCqM
+  behaviours.py: QmeVfMiv9YJ2QLR5gVjPdPwXhVFzcr8MuhdPSdCbbKiYVZ
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
-  dialogues.py: Qmb7fGcZmiztWSpNL9WshYPoi9puBXTxaG63euUs9F6SLW
+  dialogues.py: QmWrso7bHwrcm5KZp4N6mpoLofb3fcAKijmfrEGQUGKU4C
   dummy_weather_station_data.py: QmUD52fXy9DW2FgivyP1VMhk3YbvRVUWUEuZVftXmkNymR
   handlers.py: QmNzmFy74kTNHJc48oX3X2Ue4gW5ng1pXXAVfA3VUqqFV7
   strategy.py: Qme6MeZP4qkSfEBtk8XPgkdyvc73wjqAZHwo27C5N3jQAh
