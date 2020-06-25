@@ -16,15 +16,15 @@ fingerprint:
   dht/dhtclient/dhtclient_test.go: QmbZHW716CbzgYTnqPSQwZn3f4E89aa63fT2B3EZi2B1uk
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
   dht/dhtnetwork_test.go: QmcrLh1ebq8x4MQQjSb3isHb268pnRazT147gpN6cz9rbY
-  dht/dhtnode/dhtnode.go: QmTB2yf7M6ZtUeAidxVrthUF68jzCDA4n8gZ1iN5BxEL5m
+  dht/dhtnode/dhtnode.go: QmXQFb95GLJgZSTwNxSJjg8LLocBqM3jJHd2Nz4PHhd9Jj
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtpeer/dhtpeer.go: QmXAbY8WaujsrpwYmFejZNmXhShWEGiFs6AD8tHGu5c4PX
-  dht/dhtpeer/dhtpeer_test.go: QmaY4FCRxNf5VKJ4DpQKnC7F4V35A6kGTpuPe3SY1shZ7i
+  dht/dhtpeer/dhtpeer_test.go: QmNyfarVuHARvumbe7EcR3s3Z5aBNbjoPS4HcBsrhcJ4sN
   dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
   dht/dhttests/dhttests.go: Qmf5YbYcUKZn7QExhs6y6vi2m7egUsRMaAgjRVabxwhzGc
   go.mod: QmacqAAxC3dkydmfbEyVWVkMDmZECTWKZcBoPyRSnheQzD
   go.sum: Qmbu57aSPSqanJ1xHNmMHAqLL8nvCV61URknizsKJDvenG
-  libp2p_node.go: Qmaa9b9v6BFE9UwAPAUcPHgUw8yDGhFyLzWXer3BhiXdkU
+  libp2p_node.go: QmXGxYffbYfeWD7Kc2vmo3bsF1UxWhq79s7m4Asvx3gstH
   utils/utils.go: QmcN5oN482ZQ7cDWZ9yV8sSNWucGYeQdWAifFkPAeGGaMu
 fingerprint_ignore_patterns: []
 protocols: []

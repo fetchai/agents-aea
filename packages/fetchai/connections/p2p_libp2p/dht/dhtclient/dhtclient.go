@@ -233,6 +233,11 @@ func (dhtClient *DHTClient) Close() []error {
 	return status
 }
 
+// MultiAddr always return empty string
+func (dhtClient *DHTClient) MultiAddr() string {
+	return ""
+}
+
 // RouteEnvelope to its destination
 func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
 	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
