@@ -369,6 +369,7 @@ class AsyncMultiplexer:
                 break
             except Exception as e:  # pylint: disable=broad-except
                 logger.error("Error in the receiving loop: {}".format(str(e)))
+                logger.exception("Error in the receiving loop: {}".format(str(e)))
                 break
 
         # cancel all the receiving tasks.
