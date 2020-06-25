@@ -64,8 +64,8 @@ class GenerateItemTestCase(TestCase):
         with self.assertRaises(ClickException) as cm:
             _generate_item(ctx_mock, "protocol", "path")
         expected_msg = (
-            "There was an error while generating the protocol. The protocol is NOT generated. Exception:\n"
-            "Cannot find black code formatter. To install, please follow this link: "
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            "Cannot find black code formatter! To install, please follow this link: "
             "https://black.readthedocs.io/en/stable/installation_and_usage.html"
         )
         self.assertEqual(cm.exception.message, expected_msg)

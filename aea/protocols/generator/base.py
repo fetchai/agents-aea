@@ -25,16 +25,17 @@ import os
 import re
 import shutil
 from datetime import date
-from os import path
 from pathlib import Path
 from typing import Optional, Tuple
 
 from aea.protocols.generator.common import (
+    _create_protocol_file,
     _get_sub_types_of_compositional_types,
+    check_prerequisites,
     check_protobuf_using_protoc,
     load_protocol_specification,
-    run_black_formatting,
-    run_protoc,
+    try_run_black_formatting,
+    try_run_protoc,
 )
 from aea.protocols.generator.extract_specification import extract
 
@@ -202,23 +203,13 @@ class ProtocolGenerator:
 
         :return: None
         """
-        self.path_to_protocol_specification = path_to_protocol_specification
+        # Check the prerequisite applications are installed
+        try:
+            check_prerequisites()
+        except FileNotFoundError:
+            raise
 
-        # check protocol buffer compiler is installed
-        res = shutil.which("protoc")
-        if res is None:
-            raise FileNotFoundError(
-                "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
-            )
-
-        # check black code formatter is installed
-        res = shutil.which("black")
-        if res is None:
-            raise FileNotFoundError(
-                "Cannot find black code formatter. To install, please follow this link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
-            )
-
-        # Try to load protocol specification
+        # Load protocol specification
         try:
             self.protocol_specification = load_protocol_specification(
                 path_to_protocol_specification
@@ -227,6 +218,7 @@ class ProtocolGenerator:
             raise
 
         # Helper fields
+        self.path_to_protocol_specification = path_to_protocol_specification
         self.protocol_specification_in_camel_case = _to_camel_case(
             self.protocol_specification.name
         )
@@ -244,6 +236,7 @@ class ProtocolGenerator:
         )
         self.indent = ""
 
+        # Extract specification fields
         try:
             self.spec = extract(self.protocol_specification)
         except Exception:
@@ -2041,20 +2034,6 @@ class ProtocolGenerator:
 
         return init_str
 
-    def _create_file(self, file_name: str, file_content: str) -> None:
-        """
-        Create a file.
-
-        :param file_name: the name of the file
-        :param file_content: the content of the file
-
-        :return: None
-        """
-        pathname = path.join(self.path_to_generated_protocol_package, file_name)
-
-        with open(pathname, "w") as file:
-            file.write(file_content)
-
     def generate_protobuf_only_mode(self) -> None:
         """
         Run the generator in "protobuf only" mode:
@@ -2069,7 +2048,8 @@ class ProtocolGenerator:
             os.mkdir(output_folder)
 
         # Generate protocol buffer schema file
-        self._create_file(
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
             "{}.proto".format(self.protocol_specification.name),
             self._protocol_buffer_schema_str(),
         )
@@ -2100,27 +2080,45 @@ class ProtocolGenerator:
         self.generate_protobuf_only_mode()
 
         # Generate Python protocol package
-        self._create_file(INIT_FILE_NAME, self._init_str())
-        self._create_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
-        self._create_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
+        _create_protocol_file(
+            self.path_to_generated_protocol_package, INIT_FILE_NAME, self._init_str()
+        )
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
+            PROTOCOL_YAML_FILE_NAME,
+            self._protocol_yaml_str(),
+        )
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
+            MESSAGE_DOT_PY_FILE_NAME,
+            self._message_class_str(),
+        )
         if (
             self.protocol_specification.dialogue_config is not None
             and self.protocol_specification.dialogue_config != {}
         ):
-            self._create_file(DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str())
-        if len(self.spec.all_custom_types) > 0:
-            self._create_file(
-                CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
+            _create_protocol_file(
+                self.path_to_generated_protocol_package,
+                DIALOGUE_DOT_PY_FILE_NAME,
+                self._dialogue_class_str(),
             )
-        self._create_file(
-            SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
+        if len(self.spec.all_custom_types) > 0:
+            _create_protocol_file(
+                self.path_to_generated_protocol_package,
+                CUSTOM_TYPES_DOT_PY_FILE_NAME,
+                self._custom_types_module_str(),
+            )
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
+            SERIALIZATION_DOT_PY_FILE_NAME,
+            self._serialization_class_str(),
         )
 
         # Run black formatting
-        run_black_formatting(self.path_to_generated_protocol_package)
+        try_run_black_formatting(self.path_to_generated_protocol_package)
 
         # Run protocol buffer compiler
-        run_protoc(
+        try_run_protoc(
             self.path_to_generated_protocol_package, self.protocol_specification.name
         )
 

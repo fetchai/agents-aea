@@ -350,7 +350,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}'
         """
-        s = "There was an error while generating the protocol. The protocol is NOT generated. Exception:\ntest error message"
+        s = "Protocol is NOT generated. The following error happened while generating the protocol:\ntest error message"
         assert self.result.exception.message == s
 
     @classmethod

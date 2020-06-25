@@ -20,6 +20,7 @@
 
 import os
 import re
+import shutil
 import subprocess  # nosec
 import sys
 from typing import Tuple
@@ -118,6 +119,39 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
     return tuple(sub_types_list)
 
 
+def is_installed(programme: str) -> bool:
+    """
+    Check whether a programme is installed on the system.
+
+    :param programme: the name of the programme.
+    :return: True if installed, False otherwise
+    """
+    res = shutil.which(programme)
+    if res is None:
+        return False
+    else:
+        return True
+
+
+def check_prerequisites() -> None:
+    """
+    Check whether a programme is installed on the system.
+
+    :return: None
+    """
+    # check protocol buffer compiler is installed
+    if not is_installed("black"):
+        raise FileNotFoundError(
+            "Cannot find black code formatter! To install, please follow this link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
+        )
+
+    # check black code formatter is installed
+    if not is_installed("protoc"):
+        raise FileNotFoundError(
+            "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
+        )
+
+
 def load_protocol_specification(specification_path: str) -> ProtocolSpecification:
     """
     Load a protocol specification.
@@ -132,7 +166,25 @@ def load_protocol_specification(specification_path: str) -> ProtocolSpecificatio
     return protocol_spec
 
 
-def run_black_formatting(path_to_protocol_package: str) -> None:
+def _create_protocol_file(
+    path_to_protocol_package: str, file_name: str, file_content: str
+) -> None:
+    """
+    Create a file in the generated protocol package.
+
+    :param path_to_protocol_package: path to the file
+    :param file_name: the name of the file
+    :param file_content: the content of the file
+
+    :return: None
+    """
+    pathname = os.path.join(path_to_protocol_package, file_name)
+
+    with open(pathname, "w") as file:
+        file.write(file_content)
+
+
+def try_run_black_formatting(path_to_protocol_package: str) -> None:
     """
     Run Black code formatting via subprocess.
 
@@ -140,15 +192,39 @@ def run_black_formatting(path_to_protocol_package: str) -> None:
     :return: None
     """
     try:
-        subp = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "black", path_to_protocol_package, "--quiet"]
+        subprocess.run(  # nosec
+            [sys.executable, "-m", "black", path_to_protocol_package, "--quiet"],
+            check=True,
         )
-        subp.wait(10.0)
-    finally:
-        poll = subp.poll()
-        if poll is None:  # pragma: no cover
-            subp.terminate()
-            subp.wait(5)
+    except Exception:
+        raise
+
+
+def try_run_protoc(path_to_generated_protocol_package, name) -> None:
+    """
+    Run 'protoc' protocol buffer compiler via subprocess.
+
+    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+
+    :return: A completed process object.
+    """
+    try:
+        # command: "protoc -I={} --python_out={} {}/{}.proto"
+        subprocess.run(  # nosec
+            [
+                "protoc",
+                "-I={}".format(path_to_generated_protocol_package),
+                "--python_out={}".format(path_to_generated_protocol_package),
+                "{}/{}.proto".format(path_to_generated_protocol_package, name),
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            env=os.environ.copy(),
+        )
+    except Exception:
+        raise
 
 
 def check_protobuf_using_protoc(
@@ -166,7 +242,7 @@ def check_protobuf_using_protoc(
     :return: Boolean result and an accompanying message
     """
     try:
-        run_protoc(path_to_generated_protocol_package, name)
+        try_run_protoc(path_to_generated_protocol_package, name)
         os.remove(os.path.join(path_to_generated_protocol_package, name + "_pb2.py"))
         return True, "protobuf file is valid"
     except subprocess.CalledProcessError as e:
@@ -175,31 +251,3 @@ def check_protobuf_using_protoc(
         return False, error_message
     except Exception:
         raise
-
-
-def run_protoc(path_to_generated_protocol_package, name) -> subprocess.CompletedProcess:
-    """
-    Run 'protoc' protocol buffer compiler via subprocess.
-
-    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
-    :param name: name of the protocol buffer schema file.
-
-    :return: A completed process object.
-    """
-    try:
-        # command: "protoc -I={} --python_out={} {}/{}.proto"
-        protoc_process = subprocess.run(  # nosec
-            [
-                "protoc",
-                "-I={}".format(path_to_generated_protocol_package),
-                "--python_out={}".format(path_to_generated_protocol_package),
-                "{}/{}.proto".format(path_to_generated_protocol_package, name),
-            ],
-            capture_output=True,
-            text=True,
-            check=True,
-            env=os.environ.copy(),
-        )
-    except Exception:
-        raise
-    return protoc_process

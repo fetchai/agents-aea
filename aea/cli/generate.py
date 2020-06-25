@@ -129,7 +129,7 @@ def _generate_item(click_context, item_type, specification_path):
         )
     except Exception as e:
         raise click.ClickException(
-            "There was an error while generating the protocol. The protocol is NOT generated. Exception:\n"
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             + str(e)
         )
 
