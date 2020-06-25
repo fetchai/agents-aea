@@ -26,7 +26,19 @@ import pprint
 from collections import defaultdict, deque
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Collection,
+    Deque,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import jsonschema
 
@@ -1300,7 +1312,7 @@ class AEABuilder:
                 supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
 
         # find topological order (Kahn's algorithm)
-        queue = deque()
+        queue: Deque[ComponentId] = deque()
         order = []
         queue.extend(roots)
         while len(queue) > 0:
