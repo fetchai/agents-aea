@@ -134,6 +134,27 @@ class Model{
         })
     }
 
+    fetchAgent(agentId) {
+        var ajax_options = {
+            type: 'POST',
+            url: 'api/fetch-agent',
+            accepts: 'application/json',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(agentId)
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+          var element = {"type": $("#searchItemTypeSelected").html(), "combined": "localSkills"}
+            self.$event_pump.trigger('model_' + element["combined"] + 'AddSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
+
     removeItem(element, agentId, itemId) {
         var propertyName = element["type"] +  "_id"
         var ajax_options = {
@@ -539,6 +560,23 @@ class Controller{
             e.preventDefault();
         });
 
+        $('#searchAgentsFetch').click({el: element}, function(e) {
+            var agentId = $('#searchItemsTableSelectionId').html();
+            // It doesn't matter too much what the combined name is as long as it exists
+            var itemType = {"type": $("#searchItemTypeSelected").html(), "combined": "localSkills"}
+
+            e.preventDefault();
+
+            if (self.validateId(agentId) ) {
+                self.model.fetchAgent(agentId)
+                self.view.setSelectedId("searchItemsTable", "NONE")
+                var tableBody = $(e.target).closest(".searchItemsTableRegisteredTable");
+                self.clearTable(tableBody);
+            } else {
+                alert('Error: Problem with one of the selected ids (either agent or ' + itemType);
+            }
+            e.preventDefault();
+        });
 
 
         this.$event_pump.on('model_error', {el: element}, function(e, xhr, textStatus, errorThrown) {
@@ -616,14 +654,24 @@ class Controller{
         var searchTerm = $('#searchInput').val();
         $('#searchInputButton').prop('disabled', !this.validateId(searchTerm));
         var searchItem = $('#searchItemsTableSelectionId').html();
-        var isDisabled =  !this.validateId(searchItem) || !this.validateId(agentSelectionId);
+        var itemType = $("#searchItemTypeSelected").html();
+        var isDisabled =  !this.validateId(searchItem) || !this.validateId(agentSelectionId) || (itemType == "agent");
         $('#searchItemsAdd').prop('disabled', isDisabled);
         if (isDisabled){
-            $('#searchItemsAdd').html("<< Add " + $("#searchItemTypeSelected").html())
+            $('#searchItemsAdd').html("<< Add " + itemType)
         }
         else{
-            $('#searchItemsAdd').html("<< Add " + searchItem + " "  + $("#searchItemTypeSelected").html() + " to " + agentSelectionId + " agent")
+            $('#searchItemsAdd').html("<< Add " + searchItem + " "  + itemType + " to " + agentSelectionId + " agent")
 //            $('#searchItemsAdd').html("<< Add " + itemSelectionId + " " + elements[j]["type"] + " to " + agentSelectionId + " agent")
+        }
+
+        var isDisabled =  !this.validateId(searchItem) || (itemType != "agent");
+        $('#searchAgentsFetch').prop('disabled', isDisabled);
+        if (isDisabled){
+            $('#searchAgentsFetch').html("<< Fetch agent")
+        }
+        else {
+            $('#searchAgentsFetch').html("<< Fetch agent "  + searchItem)
         }
 
         if (agentSelectionId != "NONE"){

@@ -203,6 +203,30 @@ paths:
           schema:
             type: string
 
+  /fetch-agent:
+    post:
+      operationId: aea.cli_gui.fetch_agent
+      tags:
+      - agents
+      summary: Fetch an agent from the registry
+      parameters:
+        - name: agent_id
+          in: body
+          description: id of agent to fetch
+          schema:
+            type: string
+          required: True
+      responses:
+        201:
+          description: Agent fetched successfully
+          schema:
+            type: string
+
+        400:
+          description: Cannot fetch agent
+          schema:
+            type: string
+
   /{item_type}:
     get:
       operationId: aea.cli_gui.get_registered_items
