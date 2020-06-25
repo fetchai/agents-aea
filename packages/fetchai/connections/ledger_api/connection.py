@@ -103,13 +103,13 @@ class LedgerApiConnection(Connection):
             done_task = self.done_tasks.pop()
             return self._handle_done_task(done_task)
 
+        if not self.receiving_tasks:
+            return None
+
         # wait for completion of at least one receiving task
         done, pending = await asyncio.wait(
             self.receiving_tasks, return_when=asyncio.FIRST_COMPLETED
         )
-
-        if len(done) == 0:
-            return None
 
         # pick one done task
         done_task = done.pop()
