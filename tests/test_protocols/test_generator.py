@@ -22,8 +22,6 @@ import inspect
 import logging
 import os
 import shutil
-import subprocess  # nosec
-import sys
 import tempfile
 import time
 from pathlib import Path
@@ -37,12 +35,10 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import (
     ComponentType,
     ProtocolId,
-    ProtocolSpecification,
     ProtocolSpecificationParseError,
     PublicId,
     SkillConfig,
 )
-from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.mail.base import Envelope
@@ -51,6 +47,7 @@ from aea.protocols.generator.base import (
     ProtocolGenerator,
     _union_sub_type_to_protobuf_variable_name,
 )
+from aea.protocols.generator.common import check_prerequisites
 from aea.protocols.generator.extract_specification import (
     _specification_type_to_python_type,
 )
@@ -90,15 +87,16 @@ class TestEndToEndGenerator(UseOef):
 
     def test_compare_latest_generator_output_with_test_protocol(self):
         """Test that the "t_protocol" test protocol matches with what the latest generator generates based on the specification."""
-        # check protoc is installed
-        res = shutil.which("protoc")
-        if res is None:
+        # Skip if prerequisite applications are not installed
+        try:
+            check_prerequisites()
+        except FileNotFoundError:
             pytest.skip(
-                "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
+                "Some prerequisite applications are not installed. Skipping this test."
             )
 
         # Specification
-        protocol_name = "t_protocol"
+        # protocol_name = "t_protocol"
         path_to_specification = os.path.join(
             ROOT_DIR, "tests", "data", "sample_specification.yaml"
         )
@@ -108,41 +106,15 @@ class TestEndToEndGenerator(UseOef):
         # )
         path_to_package = "tests.data.generator."
 
-        # Load the config
-        config_loader = ConfigLoader(
-            "protocol-specification_schema.json", ProtocolSpecification
-        )
-        protocol_specification = config_loader.load_protocol_specification(
-            open(path_to_specification)
-        )
-
         # Generate the protocol
         protocol_generator = ProtocolGenerator(
-            protocol_specification,
+            path_to_specification,
             path_to_generated_protocol,
             path_to_protocol_package=path_to_package,
         )
         protocol_generator.generate()
 
-        # Apply black
-        try:
-            subp = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "black",
-                    os.path.join(path_to_generated_protocol, protocol_name),
-                    "--quiet",
-                ]
-            )
-            subp.wait(10.0)
-        finally:
-            poll = subp.poll()
-            if poll is None:  # pragma: no cover
-                subp.terminate()
-                subp.wait(5)
-
-        # compare __init__.py
+        # # compare __init__.py
         # init_file_generated = Path(self.t, protocol_name, "__init__.py")
         # init_file_original = Path(path_to_original_protocol, "__init__.py",)
         # assert filecmp.cmp(init_file_generated, init_file_original)

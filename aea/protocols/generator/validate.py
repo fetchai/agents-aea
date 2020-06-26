@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module validates a protocol specification."""
 
-# pylint: skip-file
-
 from typing import Tuple
 
 from aea.configurations.base import ProtocolSpecification

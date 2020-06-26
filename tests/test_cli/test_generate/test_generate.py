@@ -45,7 +45,7 @@ def _raise_psperror(*args, **kwargs):
 
 
 @mock.patch("builtins.open", mock.mock_open())
-@mock.patch("aea.cli.generate.ConfigLoader")
+@mock.patch("aea.protocols.generator.common.ConfigLoader")
 @mock.patch("aea.cli.generate.os.path.join", return_value="joined-path")
 @mock.patch("aea.cli.utils.decorators._cast_ctx")
 class GenerateItemTestCase(TestCase):
@@ -57,20 +57,21 @@ class GenerateItemTestCase(TestCase):
         with self.assertRaises(ClickException):
             _generate_item(ctx_mock, "protocol", "path")
 
-    @mock.patch("aea.cli.generate.shutil.which", _which_mock)
+    @mock.patch("aea.protocols.generator.base.shutil.which", _which_mock)
     def test__generate_item_no_res(self, *mocks):
         """Test for fetch_agent_locally method no black."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
             _generate_item(ctx_mock, "protocol", "path")
         expected_msg = (
-            "Please install black code formater first! See the following link: "
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            "Cannot find black code formatter! To install, please follow this link: "
             "https://black.readthedocs.io/en/stable/installation_and_usage.html"
         )
         self.assertEqual(cm.exception.message, expected_msg)
 
     @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
-    @mock.patch("aea.cli.generate.shutil.which", return_value="some")
+    @mock.patch("aea.protocols.generator.base.shutil.which", return_value="some")
     @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_psperror)
     def test__generate_item_parsing_specs_fail(self, *mocks):
         """Test for fetch_agent_locally method parsing specs fail."""
