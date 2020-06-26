@@ -191,6 +191,19 @@ func New(opts ...Option) (*DHTPeer, error) {
 		return nil, err
 	}
 
+	// workaround: to avoid getting `failed to find any peer in table`
+	//  when calling dht.Provide (happens occasionally)
+	ldebug().Msg("dht pinging entry peers (if any)...")
+	for _, peer := range dhtPeer.bootstrapPeers {
+		ctxDHTBootstrap, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		err := dhtPeer.dht.Ping(ctxDHTBootstrap, peer.ID)
+		if err != nil {
+			lerror(err).Msgf("couldn't ping entry peer %s", peer.ID)
+			check(err)
+		}
+	}
+
 	linfo().Msg("INFO My ID is ")
 
 	linfo().Msg("successfully created libp2p node!")

@@ -1391,6 +1391,11 @@ func SetupDelegateClient(address string, host string, port uint16) (*DelegateCli
 	return client, func() { client.Close() }, nil
 }
 
+func TestFailure(t *testing.T) {
+	rx := make(chan *aea.Envelope)
+	expectEnvelope(t, rx)
+}
+
 func expectEnvelope(t *testing.T, rx chan *aea.Envelope) {
 	timeout := time.After(EnvelopeDeliveryTimeout)
 	select {
