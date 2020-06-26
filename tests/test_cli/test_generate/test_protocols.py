@@ -45,6 +45,7 @@ from ...conftest import (
     skip_test_windows,
 )
 
+
 @skip_test_windows
 class TestGenerateProtocol:
     """Test that the command 'aea generate protocol' works correctly in correct preconditions."""
