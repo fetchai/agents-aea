@@ -102,7 +102,7 @@ class PeerToPeerChannel:
         assert self._httpCall is not None
 
         if self.excluded_protocols is not None:
-            if envelope.protocol_id in self.excluded_protocols:
+            if envelope.protocol_id in self.excluded_protocols:  # pragma: nocover
                 logger.error(
                     "This envelope cannot be sent with the oef connection: protocol_id={}".format(
                         envelope.protocol_id
