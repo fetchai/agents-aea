@@ -101,7 +101,7 @@ func (aea *AeaApi) Queue() <-chan *Envelope {
 	return aea.out_queue
 }
 
-func (aea AeaApi) Connected() bool {
+func (aea *AeaApi) Connected() bool {
 	return aea.connected
 }
 

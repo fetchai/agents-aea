@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: Qme13JFPBbEa59eoZLVNDSbGRNjdLkVuWNEaMJRXnQRQbp
+  aea/api.go: QmSjDwqzGgTChS4ZUun6iSYdZzj4Dv5FwqaGcn43Riuz5f
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
   connection.py: QmbPuwgAYed7JVptHXfybt6xVjLFqXdYsN3mqbHmnP1hh2
