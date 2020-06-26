@@ -143,7 +143,7 @@ func New(opts ...Option) (*DHTClient, error) {
 	dhtClient.setupLogger()
 
 	// connect to the booststrap nodes
-	err = utils.BootstrapConnect(ctx, dhtClient.routedHost, dhtClient.bootstrapPeers)
+	err = utils.BootstrapConnect(ctx, dhtClient.routedHost, dhtClient.dht, dhtClient.bootstrapPeers)
 	if err != nil {
 		dhtClient.Close()
 		return nil, err

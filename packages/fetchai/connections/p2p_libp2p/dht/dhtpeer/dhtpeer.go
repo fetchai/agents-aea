@@ -177,7 +177,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	// connect to the booststrap nodes
 	if len(dhtPeer.bootstrapPeers) > 0 {
 		linfo().Msgf("Bootstrapping from %s", dhtPeer.bootstrapPeers)
-		err = utils.BootstrapConnect(ctx, dhtPeer.routedHost, dhtPeer.bootstrapPeers)
+		err = utils.BootstrapConnect(ctx, dhtPeer.routedHost, dhtPeer.dht, dhtPeer.bootstrapPeers)
 		if err != nil {
 			dhtPeer.Close()
 			return nil, err
@@ -189,19 +189,6 @@ func New(opts ...Option) (*DHTPeer, error) {
 	if err != nil {
 		dhtPeer.Close()
 		return nil, err
-	}
-
-	// workaround: to avoid getting `failed to find any peer in table`
-	//  when calling dht.Provide (happens occasionally)
-	ldebug().Msg("dht pinging entry peers (if any)...")
-	for _, peer := range dhtPeer.bootstrapPeers {
-		ctxDHTBootstrap, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		err := dhtPeer.dht.Ping(ctxDHTBootstrap, peer.ID)
-		if err != nil {
-			lerror(err).Msgf("couldn't ping entry peer %s", peer.ID)
-			check(err)
-		}
 	}
 
 	linfo().Msg("INFO My ID is ")

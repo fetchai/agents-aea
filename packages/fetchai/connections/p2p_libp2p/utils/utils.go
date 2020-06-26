@@ -30,11 +30,13 @@ import (
 	"net"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/ipfs/go-cid"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/multiformats/go-multiaddr"
 	"github.com/multiformats/go-multihash"
 	"github.com/rs/zerolog"
@@ -63,7 +65,7 @@ func NewDefaultLogger() zerolog.Logger {
 
 // BootstrapConnect connect to `peers` at bootstrap
 // This code is borrowed from the go-ipfs bootstrap process
-func BootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) error {
+func BootstrapConnect(ctx context.Context, ph host.Host, kaddht *dht.IpfsDHT, peers []peer.AddrInfo) error {
 	if len(peers) < 1 {
 		return errors.New("not enough bootstrap peers")
 	}
@@ -110,6 +112,22 @@ func BootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) 
 	if count == len(peers) {
 		return errors.New("failed to bootstrap: " + err.Error())
 	}
+
+	// workaround: to avoid getting `failed to find any peer in table`
+	//  when calling dht.Provide (happens occasionally)
+	logger.Debug().Msg("waiting for bootstrap peers to be added to dht routing table...")
+	for _, peer := range peers {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		for kaddht.RoutingTable().Find(peer.ID) == "" {
+			select {
+			case <-ctx.Done():
+				return errors.New("timeout: entry peer haven't been added to DHT routing table " + peer.ID.Pretty())
+			case <-time.After(time.Millisecond * 5):
+			}
+		}
+	}
+
 	return nil
 }
 
