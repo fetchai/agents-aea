@@ -18,15 +18,19 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry fetch methods."""
 
+import os
 from unittest import TestCase, mock
 
 from click import ClickException
 from click.testing import CliRunner
 
+import pytest
+
 from aea.cli import cli
 from aea.cli.fetch import _fetch_agent_locally, _is_version_correct
+from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, MAX_FLAKY_RERUNS
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
@@ -137,3 +141,15 @@ class IsVersionCorrectTestCase(TestCase):
         public_id_mock.version = "incorrect"
         result = _is_version_correct(ctx_mock, public_id_mock)
         self.assertFalse(result)
+
+
+@pytest.mark.integration
+@pytest.mark.unstable
+class TestFetchFromRemoteRegistry(AEATestCaseMany):
+    """Test case for fetch agent command from Registry."""
+
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_fetch_agent_from_remote_registry_positive(self):
+        """Test fetch agent from Registry for positive result."""
+        self.run_cli_command("fetch", "fetchai/my_first_aea:0.1.0")
+        assert "my_first_aea" in os.listdir(self.t)
