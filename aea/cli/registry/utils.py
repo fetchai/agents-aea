@@ -21,6 +21,7 @@
 
 import os
 import tarfile
+from json.decoder import JSONDecodeError
 
 import click
 
@@ -88,10 +89,11 @@ def request_api(
     )
     try:
         resp = requests.request(**request_kwargs)
+        resp_json = resp.json()
     except requests.exceptions.ConnectionError:
         raise click.ClickException("Registry server is not responding.")
-
-    resp_json = resp.json()
+    except JSONDecodeError:
+        resp_json = None
 
     if resp.status_code == 200:
         pass

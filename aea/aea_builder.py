@@ -23,9 +23,22 @@ import logging
 import logging.config
 import os
 import pprint
+from collections import defaultdict, deque
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Collection,
+    Deque,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import jsonschema
 
@@ -1231,10 +1244,6 @@ class AEABuilder:
                 ComponentId(ComponentType.CONNECTION, p_id)
                 for p_id in agent_configuration.connections
             ],
-            [
-                ComponentId(ComponentType.SKILL, p_id)
-                for p_id in agent_configuration.skills
-            ],
         )
         for component_id in component_ids:
             component_path = self._find_component_directory_from_component_id(
@@ -1245,6 +1254,79 @@ class AEABuilder:
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+
+        skill_ids = [
+            ComponentId(ComponentType.SKILL, p_id)
+            for p_id in agent_configuration.skills
+        ]
+
+        if len(skill_ids) == 0:
+            return
+
+        skill_import_order = self._find_import_order(skill_ids, aea_project_path)
+        for skill_id in skill_import_order:
+            component_path = self._find_component_directory_from_component_id(
+                aea_project_path, skill_id
+            )
+            self.add_component(
+                skill_id.component_type,
+                component_path,
+                skip_consistency_check=skip_consistency_check,
+            )
+
+    def _find_import_order(
+        self, skill_ids: List[ComponentId], aea_project_path: Path
+    ) -> List[ComponentId]:
+        """Find import order for skills.        We need to handle skills separately, since skills can depend on each other.
+        That is, we need to:
+        - load the skill configurations to find the import order
+        - detect if there are cycles
+        - import skills from the leaves of the dependency graph, by finding a topological ordering.
+        """
+        # the adjacency list for the dependency graph
+        depends_on: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
+        # the adjacency list for the inverse dependency graph
+        supports: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
+        # nodes with no incoming edges
+        roots = copy(skill_ids)
+        for skill_id in skill_ids:
+            component_path = self._find_component_directory_from_component_id(
+                aea_project_path, skill_id
+            )
+            configuration = cast(
+                SkillConfig,
+                ComponentConfiguration.load(
+                    skill_id.component_type, component_path, False
+                ),
+            )
+
+            if len(configuration.skills) != 0:
+                roots.remove(skill_id)
+            depends_on[skill_id].update(
+                [
+                    ComponentId(ComponentType.SKILL, skill)
+                    for skill in configuration.skills
+                ]
+            )
+            for dependency in configuration.skills:
+                supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
+
+        # find topological order (Kahn's algorithm)
+        queue: Deque[ComponentId] = deque()
+        order = []
+        queue.extend(roots)
+        while len(queue) > 0:
+            current = queue.pop()
+            order.append(current)
+            for node in supports[current]:
+                depends_on[node].discard(current)
+                if len(depends_on[node]) == 0:
+                    queue.append(node)
+
+        if any(len(edges) > 0 for edges in depends_on.values()):
+            raise AEAException("Cannot load skills, there is a cyclic dependency.")
+
+        return order
 
     @classmethod
     def from_aea_project(

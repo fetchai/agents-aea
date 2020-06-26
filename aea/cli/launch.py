@@ -59,10 +59,10 @@ def _launch_agents(
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
     try:
         if multithreaded:
-            failed = _launch_threads(click_context, agents_directories)
+            failed = _launch_threads(agents_directories)
         else:
             failed = _launch_subprocesses(click_context, agents_directories)
-    except BaseException:
+    except BaseException:  # pragma: no cover
         logger.exception("Exception in launch agents.")
         failed = -1
     finally:
@@ -103,7 +103,7 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]) -> in
     return launcher.num_failed
 
 
-def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
+def _launch_threads(agents: List[Path]) -> int:
     """
     Launch many agents, multithreaded.
 

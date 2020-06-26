@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """HTTP server connection, channel, server, and handler."""
 import asyncio
 import email
@@ -40,9 +41,13 @@ from openapi_core.validation.request.datatypes import (
 from openapi_core.validation.request.shortcuts import validate_request
 from openapi_core.validation.request.validators import RequestValidator
 
+from openapi_spec_validator.exceptions import (  # pylint: disable=wrong-import-order
+    OpenAPIValidationError,
+)
 from openapi_spec_validator.schemas import (  # pylint: disable=wrong-import-order
     read_yaml_file,
 )
+
 
 from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
     ImmutableMultiDict,
@@ -214,10 +219,15 @@ class APISpec:
                     api_spec_dict["servers"] = [{"url": server}]
                 api_spec = create_spec(api_spec_dict)
                 self._validator = RequestValidator(api_spec)
-            except Exception:
+            except OpenAPIValidationError as e:  # pragma: nocover
                 logger.error(
+                    f"API specification YAML source file not correctly formatted: {str(e)}"
+                )
+            except Exception:
+                logger.exception(
                     "API specification YAML source file not correctly formatted."
                 )
+                raise
 
     def verify(self, request: Request) -> bool:
         """
@@ -233,7 +243,7 @@ class APISpec:
         try:
             validate_request(self._validator, request)
         except Exception:
-            logger.exception("APISpec verify exception")
+            logger.exception("APISpec verify error")
             return False
         return True
 
@@ -280,7 +290,7 @@ class BaseAsyncChannel(ABC):
 
         try:
             return await self._in_queue.get()
-        except CancelledError:
+        except CancelledError:  # pragma: nocover
             return None
 
     @abstractmethod
@@ -359,12 +369,11 @@ class HTTPChannel(BaseAsyncChannel):
             try:
                 await self._start_http_server()
                 logger.info("HTTP Server has connected to port: {}.".format(self.port))
-            except OSError:
+            except Exception:
                 self.is_stopped = True
-                logger.error(
-                    "{}:{} is already in use, please try another Socket.".format(
-                        self.host, self.port
-                    )
+                self._in_queue = None
+                logger.exception(
+                    "Failed to start server on {}:{}.".format(self.host, self.port)
                 )
 
     async def _http_handler(self, http_request: BaseRequest) -> Response:
@@ -454,6 +463,7 @@ class HTTPChannel(BaseAsyncChannel):
             await self.http_server.stop()
             logger.info("HTTP Server has shutdown on port: {}.".format(self.port))
             self.is_stopped = True
+            self._in_queue = None
 
 
 class HTTPServerConnection(Connection):
@@ -484,8 +494,8 @@ class HTTPServerConnection(Connection):
         :return: None
         """
         if not self.connection_status.is_connected:
-            self.connection_status.is_connected = True
             await self.channel.connect(loop=self.loop)
+            self.connection_status.is_connected = not self.channel.is_stopped
 
     async def disconnect(self) -> None:
         """
