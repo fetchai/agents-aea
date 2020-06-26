@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """HTTP server connection, channel, server, and handler."""
 import asyncio
 import email
@@ -40,9 +41,13 @@ from openapi_core.validation.request.datatypes import (
 from openapi_core.validation.request.shortcuts import validate_request
 from openapi_core.validation.request.validators import RequestValidator
 
+from openapi_spec_validator.exceptions import (  # pylint: disable=wrong-import-order
+    OpenAPIValidationError,
+)
 from openapi_spec_validator.schemas import (  # pylint: disable=wrong-import-order
     read_yaml_file,
 )
+
 
 from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
     ImmutableMultiDict,
@@ -214,8 +219,12 @@ class APISpec:
                     api_spec_dict["servers"] = [{"url": server}]
                 api_spec = create_spec(api_spec_dict)
                 self._validator = RequestValidator(api_spec)
-            except Exception:
+            except OpenAPIValidationError as e:
                 logger.error(
+                    f"API specification YAML source file not correctly formatted: {str(e)}"
+                )
+            except Exception:
+                logger.exception(
                     "API specification YAML source file not correctly formatted."
                 )
 
