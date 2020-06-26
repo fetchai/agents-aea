@@ -22,6 +22,7 @@ import logging
 import os
 from traceback import print_exc
 from typing import cast
+from unittest.mock import Mock, patch
 
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse
@@ -32,11 +33,17 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.http_server.connection import HTTPServerConnection
+from packages.fetchai.connections.http_server.connection import (
+    APISpec,
+    HTTPServerConnection,
+    Response,
+)
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from ....conftest import (
+    HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
     get_host,
     get_unused_tcp_port,
 )
@@ -131,6 +138,37 @@ class TestHTTPServer:
             and response.reason == "Success"
             and await response.text() == "Response body"
         )
+
+    @pytest.mark.asyncio
+    async def test_bad_performative_get_server_error(self):
+        """Test send get request w/ 200 response."""
+        request_task = self.loop.create_task(self.request("get", "/pets"))
+        envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
+        assert envelope
+        incoming_message = cast(HttpMessage, envelope.message)
+        message = HttpMessage(
+            performative=HttpMessage.Performative.REQUEST,
+            dialogue_reference=("", ""),
+            target=incoming_message.message_id,
+            message_id=incoming_message.message_id + 1,
+            version=incoming_message.version,
+            headers=incoming_message.headers,
+            status_code=200,
+            status_text="Success",
+            bodyy=b"Response body",
+        )
+        response_envelope = Envelope(
+            to=envelope.sender,
+            sender=envelope.to,
+            protocol_id=envelope.protocol_id,
+            context=envelope.context,
+            message=message,
+        )
+        await self.http_connection.send(response_envelope)
+
+        response = await asyncio.wait_for(request_task, timeout=20,)
+
+        assert response.status == 500 and await response.text() == "Server error"
 
     @pytest.mark.asyncio
     async def test_post_201(self):
@@ -236,6 +274,98 @@ class TestHTTPServer:
         )
         await self.http_connection.send(envelope)
 
+    @pytest.mark.asyncio
+    async def test_get_message_channel_not_connected(self):
+        """Test error on channel get message if not connected."""
+        await self.http_connection.disconnect()
+        with pytest.raises(ValueError):
+            await self.http_connection.channel.get_message()
+
+    @pytest.mark.asyncio
+    async def test_fail_connect(self):
+        """Test error on server connection."""
+        await self.http_connection.disconnect()
+
+        with patch.object(
+            self.http_connection.channel,
+            "_start_http_server",
+            side_effect=Exception("expected"),
+        ):
+            await self.http_connection.connect()
+        assert not self.http_connection.connection_status.is_connected
+
+    @pytest.mark.asyncio
+    async def test_server_error_on_send_response(self):
+        """Test exception raised on response sending to the client."""
+        request_task = self.loop.create_task(self.request("post", "/pets",))
+        envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
+        assert envelope
+        incoming_message = cast(HttpMessage, envelope.message)
+        message = HttpMessage(
+            performative=HttpMessage.Performative.RESPONSE,
+            dialogue_reference=("", ""),
+            target=incoming_message.message_id,
+            message_id=incoming_message.message_id + 1,
+            version=incoming_message.version,
+            headers=incoming_message.headers,
+            status_code=201,
+            status_text="Created",
+            bodyy=b"Response body",
+        )
+        response_envelope = Envelope(
+            to=envelope.sender,
+            sender=envelope.to,
+            protocol_id=envelope.protocol_id,
+            context=envelope.context,
+            message=message,
+        )
+
+        with patch.object(Response, "from_envelope", side_effect=Exception("expected")):
+            await self.http_connection.send(response_envelope)
+            response = await asyncio.wait_for(request_task, timeout=20,)
+
+        assert response and response.status == 500 and response.reason == "Server Error"
+
+    @pytest.mark.asyncio
+    async def test_send_envelope_restricted_to_protocols_fail(self):
+        """Test fail on send if envelope protocol not supported."""
+        message = HttpMessage(
+            performative=HttpMessage.Performative.RESPONSE,
+            dialogue_reference=("", ""),
+            target=1,
+            message_id=2,
+            version="1.0",
+            headers="",
+            status_code=200,
+            status_text="Success",
+            bodyy=b"Response body",
+        )
+        envelope = Envelope(
+            to="receiver",
+            sender="sender",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            message=message,
+        )
+
+        with patch.object(
+            self.http_connection.channel,
+            "restricted_to_protocols",
+            new=[HTTP_PROTOCOL_PUBLIC_ID],
+        ):
+            with pytest.raises(ValueError):
+                await self.http_connection.send(envelope)
+
     def teardown(self):
         """Teardown the test case."""
         self.loop.run_until_complete(self.http_connection.disconnect())
+
+
+def test_bad_api_spec():
+    """Test error on apispec file is invalid."""
+    with pytest.raises(FileNotFoundError):
+        APISpec("not_exist_file")
+
+
+def test_apispec_verify_if_no_validator_set():
+    """Test api spec ok if no spec file provided."""
+    assert APISpec().verify(Mock())
