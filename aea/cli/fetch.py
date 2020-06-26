@@ -47,7 +47,7 @@ def fetch(click_context, public_id, alias, local):
     """Fetch Agent from Registry."""
     ctx = cast(Context, click_context.obj)
     if local:
-        _fetch_agent_locally(ctx, public_id, alias)
+        fetch_agent_locally(ctx, public_id, alias)
     else:
         fetch_agent(ctx, public_id, alias)
 
@@ -65,7 +65,7 @@ def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
 
 
 @clean_after
-def _fetch_agent_locally(
+def fetch_agent_locally(
     ctx: Context, public_id: PublicId, alias: Optional[str] = None
 ) -> None:
     """
