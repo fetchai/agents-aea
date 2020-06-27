@@ -52,11 +52,34 @@ import (
 
 var logger zerolog.Logger = NewDefaultLogger()
 
+/*
+	Logging
+*/
+
+func newConsoleLogger() zerolog.Logger {
+	zerolog.TimeFieldFormat = time.RFC3339Nano
+	return zerolog.New(zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		NoColor:    false,
+		TimeFormat: "15:04:05.000",
+	})
+}
+
 // NewDefaultLogger basic zerolog console writer
 func NewDefaultLogger() zerolog.Logger {
-	return zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
+	return newConsoleLogger().
 		With().Timestamp().
 		Logger()
+}
+
+// NewDefaultLoggerWithFields zerolog console writer
+func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
+	logger := newConsoleLogger().
+		With().Timestamp()
+	for key, val := range fields {
+		logger = logger.Str(key, val)
+	}
+	return logger.Logger()
 }
 
 /*

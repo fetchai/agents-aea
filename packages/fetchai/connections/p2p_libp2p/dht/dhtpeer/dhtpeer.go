@@ -30,7 +30,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -260,18 +259,13 @@ func New(opts ...Option) (*DHTPeer, error) {
 }
 
 func (dhtPeer *DHTPeer) setupLogger() {
-	if dhtPeer.routedHost == nil {
-		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("package", "DHTPeer").
-			Logger()
-	} else {
-		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("package", "DHTPeer").
-			Str("peerid", dhtPeer.routedHost.ID().Pretty()).
-			Logger()
+	fields := map[string]string{
+		"package": "DHTPeer",
 	}
+	if dhtPeer.routedHost != nil {
+		fields["peerid"] = dhtPeer.routedHost.ID().Pretty()
+	}
+	dhtPeer.logger = utils.NewDefaultLoggerWithFields(fields)
 }
 
 func (dhtPeer *DHTPeer) getLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {

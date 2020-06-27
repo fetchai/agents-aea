@@ -28,7 +28,6 @@ import (
 	"errors"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -179,20 +178,14 @@ func New(opts ...Option) (*DHTClient, error) {
 }
 
 func (dhtClient *DHTClient) setupLogger() {
-	if dhtClient.routedHost == nil {
-		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("package", "DHTClient").
-			Str("relayid", dhtClient.relayPeer.Pretty()).
-			Logger()
-	} else {
-		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("package", "DHTClient").
-			Str("peerid", dhtClient.routedHost.ID().Pretty()).
-			Str("relayid", dhtClient.relayPeer.Pretty()).
-			Logger()
+	fields := map[string]string{
+		"package": "DHTClient",
+		"relayid": dhtClient.relayPeer.Pretty(),
 	}
+	if dhtClient.routedHost != nil {
+		fields["peerid"] = dhtClient.routedHost.ID().Pretty()
+	}
+	dhtClient.logger = utils.NewDefaultLoggerWithFields(fields)
 }
 
 func (dhtClient *DHTClient) getLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {

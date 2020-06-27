@@ -23,21 +23,22 @@ package aea
 import (
 	"encoding/binary"
 	"errors"
+	"libp2p_node/utils"
 	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
 )
 
-var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-	With().Timestamp().
-	Str("package", "AeaApi").
-	Logger()
+var logger zerolog.Logger = utils.NewDefaultLoggerWithFields(map[string]string{
+	"package": "AeaApi",
+})
 
 /*
 
@@ -112,6 +113,8 @@ func (aea *AeaApi) Stop() {
 }
 
 func (aea *AeaApi) Init() error {
+	zerolog.TimeFieldFormat = time.RFC3339Nano
+
 	if aea.sandbox {
 		return nil
 	}
