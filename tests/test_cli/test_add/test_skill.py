@@ -27,6 +27,8 @@ from unittest import mock
 
 from jsonschema import ValidationError
 
+import pytest
+
 import yaml
 
 import aea
@@ -40,10 +42,11 @@ from aea.configurations.base import (
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ...conftest import (
+from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CUR_PATH,
+    MAX_FLAKY_RERUNS,
     ROOT_DIR,
     double_escape_windows_path_separator,
 )
@@ -491,3 +494,19 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
         contracts_folders = os.listdir(contracts_path)
         contract_dependency_name = "erc1155"
         assert contract_dependency_name in contracts_folders
+
+
+@pytest.mark.integration
+@pytest.mark.unstable
+class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
+    """Test case for add skill from Registry command."""
+
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_add_skill_from_remote_registry_positive(self):
+        """Test add skill from Registry positive result."""
+        self.add_item("skill", "fetchai/echo:0.1.0", local=False)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
+        items_folders = os.listdir(items_path)
+        item_name = "echo"
+        assert item_name in items_folders
