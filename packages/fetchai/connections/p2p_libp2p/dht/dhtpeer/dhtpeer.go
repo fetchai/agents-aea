@@ -675,12 +675,28 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 }
 
 func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
-	lerror, _, linfo, _ := dhtPeer.getLoggers()
+	lerror, _, linfo, ldebug := dhtPeer.getLoggers()
 
 	linfo().Str("op", "notif").
 		Msgf("Got a new notif stream")
 
 	if !dhtPeer.addressAnnounced {
+		// workaround: to avoid getting `failed to find any peer in table`
+		//  when calling dht.Provide (happens occasionally)
+		ldebug().Msg("waiting for notifying peer to be added to dht routing table...")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		for dhtPeer.dht.RoutingTable().Find(stream.Conn().RemotePeer()) == "" {
+			select {
+			case <-ctx.Done():
+				lerror(nil).
+					Msgf("timeout: notifying peer %s haven't been added to DHT routing table",
+						stream.Conn().RemotePeer().Pretty())
+				return
+			case <-time.After(time.Millisecond * 5):
+			}
+		}
+
 		if dhtPeer.myAgentAddress != "" {
 			err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
 			if err != nil {
