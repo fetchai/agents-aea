@@ -1251,7 +1251,9 @@ class AEABuilder:
         if len(skill_ids) == 0:
             return
 
-        skill_import_order = self._find_import_order(skill_ids, aea_project_path)
+        skill_import_order = self._find_import_order(
+            skill_ids, aea_project_path, skip_consistency_check
+        )
         for skill_id in skill_import_order:
             component_path = self._find_component_directory_from_component_id(
                 aea_project_path, skill_id
@@ -1263,7 +1265,10 @@ class AEABuilder:
             )
 
     def _find_import_order(
-        self, skill_ids: List[ComponentId], aea_project_path: Path
+        self,
+        skill_ids: List[ComponentId],
+        aea_project_path: Path,
+        skip_consistency_check: bool,
     ) -> List[ComponentId]:
         """Find import order for skills.
 
@@ -1287,7 +1292,7 @@ class AEABuilder:
             configuration = cast(
                 SkillConfig,
                 ComponentConfiguration.load(
-                    skill_id.component_type, component_path, False
+                    skill_id.component_type, component_path, skip_consistency_check
                 ),
             )
 

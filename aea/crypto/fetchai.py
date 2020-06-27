@@ -289,6 +289,7 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
         :param tx_nonce: verifies the authenticity of the tx
         :return: the transfer transaction
         """
+        print("HERE: {}_{}".format(tx_fee, tx_nonce))
         tx = TokenTxFactory.transfer(
             FetchaiAddress(sender_address),
             FetchaiAddress(destination_address),

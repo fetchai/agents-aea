@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmWn7MaimeBBff24XCbbjAX6Uv6XCKMvs4i96r244nXLBh
-  dialogues.py: QmPc7nKtR6avnNQN6gnKYn2UeYBLSzXziEL3WXtqb6DqC3
-  handlers.py: QmdYKQ1oCBBw82i611HXf8tkDnF7Q6Gq8RmzQdN59RmnhA
-  strategy.py: QmbGPhTvCD7askY9f8N6cdX2UButRXSsg43CLM8hhRJY1i
+  behaviours.py: QmTwUHrRrBvadNp4RBBEKcMBUvgv2MuGojz7gDsuYDrauE
+  dialogues.py: QmY44eSrEzaZxtAG1dqbddwouj5iVMEitzpmt2xFC6MDUm
+  handlers.py: QmPvmyyt1LFxtMtuucy11m5pVtHrYk12EqnxHY4LvzCU8D
+  strategy.py: QmX1pi4xx9NBZEN2HkGdhF5zNCkd2z4ZUQPXeHU1ehBxP3
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:

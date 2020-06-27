@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmZELZ9dTqwz4CSaEEWMnESXiMXsAHeKwnrmLA32qCaBtP
-  dialogues.py: Qmf5xNYuu17ejKECmfGwnS7ixueFmPaLfK3xGZ1qU9ajUw
-  handlers.py: QmcbTNHh1niQXtpK6Gu4HXM1k9ujnzJkm6pJey8wDQHEv9
-  strategy.py: Qme4WpZESY86NbKpk8YEBVbz95tkcEUedQX6GCMihWBhda
+  behaviours.py: QmRuiPiHpGopp82JgFVAQa8nUSjPFhnoAiL3Yv3qGvghZ9
+  dialogues.py: QmXe9VAuinv6jgi5So7e25qgWXN16pB6tVG1iD7oAxUZ56
+  handlers.py: QmVMqSqo1JEGBcm7Y1gNnPvWaiQSneqN7PhQqbBxwvbEef
+  strategy.py: QmWfWKtjFSFuXdib9Pjckeu8WfFrV3tVwjEj6SBapKVKSw
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -37,6 +37,9 @@ handlers:
     args: {}
     class_name: GenericSigningHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues

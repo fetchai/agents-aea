@@ -29,13 +29,11 @@ message LedgerApiMessage{
     }
 
     message Get_Raw_Transaction_Performative{
-        string ledger_id = 1;
-        Terms terms = 2;
+        Terms terms = 1;
     }
 
     message Send_Signed_Transaction_Performative{
-        string ledger_id = 1;
-        SignedTransaction signed_transaction = 2;
+        SignedTransaction signed_transaction = 1;
     }
 
     message Get_Transaction_Receipt_Performative{
@@ -44,7 +42,8 @@ message LedgerApiMessage{
     }
 
     message Balance_Performative{
-        int32 balance = 1;
+        string ledger_id = 1;
+        int32 balance = 2;
     }
 
     message Raw_Transaction_Performative{
@@ -52,7 +51,8 @@ message LedgerApiMessage{
     }
 
     message Transaction_Digest_Performative{
-        string transaction_digest = 1;
+        string ledger_id = 1;
+        string transaction_digest = 2;
     }
 
     message Transaction_Receipt_Performative{
@@ -61,10 +61,10 @@ message LedgerApiMessage{
 
     message Error_Performative{
         int32 code = 1;
-        bool code_is_set = 2;
-        string message = 3;
-        bool message_is_set = 4;
-        bytes data = 5;
+        string message = 2;
+        bool message_is_set = 3;
+        bytes data = 4;
+        bool data_is_set = 5;
     }
 
 

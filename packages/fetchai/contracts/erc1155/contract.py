@@ -133,8 +133,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {},
             terms=Terms(
-                sender_addr=deployer_address,
-                counterparty_addr=deployer_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=deployer_address,
+                counterparty_address=deployer_address,
                 amount_by_currency_id={ETHEREUM_CURRENCY: 0},
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -211,8 +212,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {},
             terms=Terms(
-                sender_addr=deployer_address,
-                counterparty_addr=deployer_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=deployer_address,
+                counterparty_address=deployer_address,
                 amount_by_currency_id={ETHEREUM_CURRENCY: 0},
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -287,8 +289,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {},
             terms=Terms(
-                sender_addr=deployer_address,
-                counterparty_addr=deployer_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=deployer_address,
+                counterparty_address=deployer_address,
                 amount_by_currency_id={ETHEREUM_CURRENCY: 0},
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -376,8 +379,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {},
             terms=Terms(
-                sender_addr=deployer_address,
-                counterparty_addr=recipient_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=deployer_address,
+                counterparty_address=recipient_address,
                 amount_by_currency_id={ETHEREUM_CURRENCY: 0},
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -476,8 +480,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {},
             terms=Terms(
-                sender_addr=deployer_address,
-                counterparty_addr=recipient_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=deployer_address,
+                counterparty_address=recipient_address,
                 amount_by_currency_id={ETHEREUM_CURRENCY: 0},
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -602,8 +607,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {},
             terms=Terms(
-                sender_addr=from_address,
-                counterparty_addr=to_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=from_address,
+                counterparty_address=to_address,
                 amount_by_currency_id={ETHEREUM_CURRENCY: value},
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -760,8 +766,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {},
             terms=Terms(
-                sender_addr=from_address,
-                counterparty_addr=to_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=from_address,
+                counterparty_address=to_address,
                 amount_by_currency_id=tx_amount_by_currency_id,
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -886,8 +893,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {"is_deprecated_mode": True},
             terms=Terms(
-                sender_addr=from_address,
-                counterparty_addr=to_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=from_address,
+                counterparty_address=to_address,
                 amount_by_currency_id={ETHEREUM_CURRENCY: value},
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,
@@ -1021,8 +1029,9 @@ class ERC1155Contract(Contract):
             if skill_callback_info is not None
             else {"is_deprecated_mode": True},
             terms=Terms(
-                sender_addr=from_address,
-                counterparty_addr=to_address,
+                ledger_id=EthereumCrypto.identifier,
+                sender_address=from_address,
+                counterparty_address=to_address,
                 amount_by_currency_id=tx_amount_by_currency_id,
                 is_sender_payable_tx_fee=True,
                 nonce=nonce,

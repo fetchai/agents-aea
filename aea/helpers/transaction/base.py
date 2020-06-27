@@ -20,7 +20,7 @@
 """This module contains terms related classes."""
 
 import pickle  #  nosec
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 Address = str
 
@@ -29,10 +29,22 @@ class RawTransaction:
     """This class represents an instance of RawTransaction."""
 
     def __init__(
-        self, body: Any,
+        self, ledger_id: str, body: Any,
     ):
         """Initialise an instance of RawTransaction."""
+        self._ledger_id = ledger_id
         self._body = body
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert self._body is not None, "body must not be None"
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
 
     @property
     def body(self):
@@ -71,18 +83,42 @@ class RawTransaction:
         return raw_transaction
 
     def __eq__(self, other):
-        return isinstance(other, RawTransaction) and self.body == other.body
+        return (
+            isinstance(other, RawTransaction)
+            and self.ledger_id == other.ledger_id
+            and self.body == other.body
+        )
+
+    def __str__(self):
+        return "RawTransaction: ledger_id={}, body={}".format(
+            self.ledger_id, self.body,
+        )
 
 
 class RawMessage:
     """This class represents an instance of RawMessage."""
 
     def __init__(
-        self, body: bytes, is_deprecated_mode: bool = False,
+        self, ledger_id: str, body: bytes, is_deprecated_mode: bool = False,
     ):
         """Initialise an instance of RawMessage."""
+        self._ledger_id = ledger_id
         self._body = body
         self._is_deprecated_mode = is_deprecated_mode
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert self._body is not None, "body must not be None"
+        assert isinstance(
+            self._is_deprecated_mode, bool
+        ), "is_deprecated_mode must be bool"
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
 
     @property
     def body(self):
@@ -126,8 +162,14 @@ class RawMessage:
     def __eq__(self, other):
         return (
             isinstance(other, RawMessage)
+            and self.ledger_id == other.ledger_id
             and self.body == other.body
             and self.is_deprecated_mode == other.is_deprecated_mode
+        )
+
+    def __str__(self):
+        return "RawMessage: ledger_id={}, body={}, is_deprecated_mode={}".format(
+            self.ledger_id, self.body, self.is_deprecated_mode,
         )
 
 
@@ -135,10 +177,22 @@ class SignedTransaction:
     """This class represents an instance of SignedTransaction."""
 
     def __init__(
-        self, body: Any,
+        self, ledger_id: str, body: Any,
     ):
         """Initialise an instance of SignedTransaction."""
+        self._ledger_id = ledger_id
         self._body = body
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert self._body is not None, "body must not be None"
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
 
     @property
     def body(self):
@@ -180,7 +234,16 @@ class SignedTransaction:
         return signed_transaction
 
     def __eq__(self, other):
-        return isinstance(other, SignedTransaction) and self.body == other.body
+        return (
+            isinstance(other, SignedTransaction)
+            and self.ledger_id == other.ledger_id
+            and self.body == other.body
+        )
+
+    def __str__(self):
+        return "SignedTransaction: ledger_id={}, body={}".format(
+            self.ledger_id, self.body,
+        )
 
 
 class Terms:
@@ -188,44 +251,105 @@ class Terms:
 
     def __init__(
         self,
-        sender_addr: Address,
-        counterparty_addr: Address,
+        ledger_id: str,
+        sender_address: Address,
+        counterparty_address: Address,
         amount_by_currency_id: Dict[str, int],
         quantities_by_good_id: Dict[str, int],
         is_sender_payable_tx_fee: bool,
         nonce: str,
+        fee: Optional[int] = None,
     ):
         """
         Instantiate terms.
 
-        :param sender_addr: the sender address of the transaction.
-        :param counterparty_addr: the counterparty address of the transaction.
+        :param ledger_id: the ledger on which the terms are to be settled.
+        :param sender_address: the sender address of the transaction.
+        :param counterparty_address: the counterparty address of the transaction.
         :param amount_by_currency_id: the amount by the currency of the transaction.
         :param quantities_by_good_id: a map from good id to the quantity of that good involved in the transaction.
         :param is_sender_payable_tx_fee: whether the sender or counterparty pays the tx fee.
         :param nonce: nonce to be included in transaction to discriminate otherwise identical transactions
+        :param fee: the fee associated with the transaction
         """
-        self._sender_addr = sender_addr
-        self._counterparty_addr = counterparty_addr
+        self._ledger_id = ledger_id
+        self._sender_address = sender_address
+        self._counterparty_address = counterparty_address
         self._amount_by_currency_id = amount_by_currency_id
         self._quantities_by_good_id = quantities_by_good_id
         self._is_sender_payable_tx_fee = is_sender_payable_tx_fee
         self._nonce = nonce
+        self._fee = fee
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert isinstance(self._sender_address, str), "sender_address must be str"
+        assert isinstance(
+            self._counterparty_address, str
+        ), "counterparty_address must be str"
+        assert isinstance(self._amount_by_currency_id, dict) and all(
+            [
+                isinstance(key, str) and isinstance(value, int)
+                for key, value in self._amount_by_currency_id.items()
+            ]
+        ), "amount_by_currency_id must be a dictionary with str keys and int values."
+        assert isinstance(self._quantities_by_good_id, dict) and all(
+            [
+                isinstance(key, str) and isinstance(value, int)
+                for key, value in self._quantities_by_good_id.items()
+            ]
+        ), "quantities_by_good_id must be a dictionary with str keys and int values."
+        assert isinstance(
+            self._is_sender_payable_tx_fee, bool
+        ), "is_sender_payable_tx_fee must be bool"
+        assert isinstance(self._nonce, str), "nonce must be str"
+        assert self._fee is None or isinstance(
+            self._fee, int
+        ), "fee must be None or int"
 
     @property
-    def sender_addr(self) -> Address:
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
+
+    @property
+    def sender_address(self) -> Address:
         """Get the sender address."""
-        return self._sender_addr
+        return self._sender_address
 
     @property
-    def counterparty_addr(self) -> Address:
+    def counterparty_address(self) -> Address:
         """Get the counterparty address."""
-        return self._counterparty_addr
+        return self._counterparty_address
+
+    @counterparty_address.setter
+    def counterparty_address(self, counterparty_address: Address) -> None:
+        """Set the counterparty address."""
+        assert isinstance(counterparty_address, str), "counterparty_address must be str"
+        self._counterparty_address = counterparty_address
 
     @property
     def amount_by_currency_id(self) -> Dict[str, int]:
         """Get the amount by currency id."""
         return self._amount_by_currency_id
+
+    @property
+    def sender_payable_amount(self) -> int:
+        """Get the amount the sender must pay."""
+        assert (
+            len(self._amount_by_currency_id) == 1
+        ), "More than one currency id, cannot get amount."
+        return -[key for key in self._amount_by_currency_id.values()][0]
+
+    @property
+    def counterparty_payable_amount(self) -> int:
+        """Get the amount the counterparty must pay."""
+        assert (
+            len(self._amount_by_currency_id) == 1
+        ), "More than one currency id, cannot get amount."
+        return [key for key in self._amount_by_currency_id.values()][0]
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
@@ -241,6 +365,17 @@ class Terms:
     def nonce(self) -> str:
         """Get the nonce."""
         return self._nonce
+
+    @property
+    def has_fee(self) -> bool:
+        """Check if fee is set."""
+        return self._fee is not None
+
+    @property
+    def fee(self) -> int:
+        """Get the fee."""
+        assert self._fee is not None, "Fee not set."
+        return self._fee
 
     @staticmethod
     def encode(terms_protobuf_object, terms_object: "Terms") -> None:
@@ -272,12 +407,28 @@ class Terms:
     def __eq__(self, other):
         return (
             isinstance(other, Terms)
-            and self.sender_addr == other.sender_addr
-            and self.counterparty_addr == other.counterparty_addr
+            and self.ledger_id == other.ledger_id
+            and self.sender_address == other.sender_address
+            and self.counterparty_address == other.counterparty_address
             and self.amount_by_currency_id == other.amount_by_currency_id
             and self.quantities_by_good_id == other.quantities_by_good_id
             and self.is_sender_payable_tx_fee == other.is_sender_payable_tx_fee
             and self.nonce == other.nonce
+            and self.fee == other.fee
+            if (self.has_fee and other.has_fee)
+            else self.has_fee == other.has_fee
+        )
+
+    def __str__(self):
+        return "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee={}".format(
+            self.ledger_id,
+            self.sender_address,
+            self.counterparty_address,
+            self.amount_by_currency_id,
+            self.quantities_by_good_id,
+            self.is_sender_payable_tx_fee,
+            self.nonce,
+            self._fee,
         )
 
 
@@ -285,10 +436,22 @@ class TransactionReceipt:
     """This class represents an instance of TransactionReceipt."""
 
     def __init__(
-        self, body: Any,
+        self, ledger_id: str, body: Any,
     ):
         """Initialise an instance of TransactionReceipt."""
+        self._ledger_id = ledger_id
         self._body = body
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert self._body is not None, "body must not be None"
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
 
     @property
     def body(self):
@@ -330,4 +493,13 @@ class TransactionReceipt:
         return transaction_receipt
 
     def __eq__(self, other):
-        return isinstance(other, TransactionReceipt) and self.body == other.body
+        return (
+            isinstance(other, TransactionReceipt)
+            and self.ledger_id == other.ledger_id
+            and self.body == other.body
+        )
+
+    def __str__(self):
+        return "TransactionReceipt: ledger_id={}, body={}".format(
+            self.ledger_id, self.body,
+        )

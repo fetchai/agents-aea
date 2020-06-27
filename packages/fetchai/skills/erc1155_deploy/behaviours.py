@@ -25,11 +25,16 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.erc1155_deploy.dialogues import (
+    LedgerApiDialogues,
+    OefSearchDialogues,
+)
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 
-
 DEFAULT_SERVICES_INTERVAL = 30.0
+LEDGER_API_ADDRESS = "fetchai/ledger_api:0.1.0"
 
 
 class ServiceRegistrationBehaviour(TickerBehaviour):
@@ -52,45 +57,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-
-        strategy = cast(Strategy, self.context.strategy)
-
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.get_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-            )
-            if balance is not None and balance > 0:
-                self.context.logger.info(
-                    "[{}]: starting balance on {} ledger={}.".format(
-                        self.context.agent_name, strategy.ledger_id, balance
-                    )
-                )
-            else:
-                self.context.logger.warning(
-                    "[{}]: you have no starting balance on {} ledger!".format(
-                        self.context.agent_name, strategy.ledger_id
-                    )
-                )
-                self.context.is_active = False
-
+        self._request_balance()
+        self._request_contract_deploy_transaction()
         self._register_service()
-        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-        if strategy.contract_address is None:
-            self.context.logger.info("Preparing contract deployment transaction")
-            contract.set_instance(self.context.ledger_apis.get_api(strategy.ledger_id))  # type: ignore
-            dm_message_for_deploy = contract.get_deploy_transaction_msg(
-                deployer_address=self.context.agent_address,
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                skill_callback_id=self.context.skill_id,
-            )
-            self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
-        else:
-            self.context.logger.info("Setting the address of the deployed contract")
-            contract.set_address(
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),  # type: ignore
-                contract_address=str(strategy.contract_address),
-            )
 
     def act(self) -> None:
         """
@@ -133,20 +102,44 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.get_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-            )
-            if balance is not None:
-                self.context.logger.info(
-                    "[{}]: ending balance on {} ledger={}.".format(
-                        self.context.agent_name, strategy.ledger_id, balance
-                    )
-                )
-
         self._unregister_service()
+
+    def _request_balance(self) -> None:
+        """
+        Request ledger balance.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg = LedgerApiMessage(
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
+            ledger_id=strategy.ledger_id,
+            address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
+        )
+        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+        ledger_api_dialogues.update(ledger_api_msg)
+        self.context.outbox.put_message(message=ledger_api_msg)
+
+    def _request_contract_deploy_transaction(self) -> None:
+        """
+        Request contract deploy transaction
+
+        :return: None
+        """
+        # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+        # if strategy.contract_address is None:
+        #     self.context.logger.info("Preparing contract deployment transaction")
+        #     contract.set_instance(self.context.ledger_apis.get_api(strategy.ledger_id))  # type: ignore
+        #     dm_message_for_deploy = contract.get_deploy_transaction_msg(
+        #         deployer_address=self.context.agent_address,
+        #         ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+        #         skill_callback_id=self.context.skill_id,
+        #     )
+        #     self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
 
     def _register_service(self) -> None:
         """
@@ -155,16 +148,19 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        desc = strategy.get_service_description()
-        self._registered_service_description = desc
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=(str(oef_msg_id), ""),
-            service_description=desc,
+        description = strategy.get_service_description()
+        self._registered_service_description = description
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
-        msg.counterparty = self.context.search_service_address
-        self.context.outbox.put_message(message=msg)
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
             "[{}]: updating erc1155 service on OEF search node.".format(
                 self.context.agent_name
@@ -178,15 +174,17 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         if self._registered_service_description is not None:
-            strategy = cast(Strategy, self.context.strategy)
-            oef_msg_id = strategy.get_next_oef_msg_id()
-            msg = OefSearchMessage(
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                dialogue_reference=(str(oef_msg_id), ""),
+                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 service_description=self._registered_service_description,
             )
-            msg.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=msg)
+            oef_search_msg.counterparty = self.context.search_service_address
+            oef_search_dialogues.update(oef_search_msg)
+            self.context.outbox.put_message(message=oef_search_msg)
             self.context.logger.info(
                 "[{}]: unregistering erc1155 service from OEF search node.".format(
                     self.context.agent_name

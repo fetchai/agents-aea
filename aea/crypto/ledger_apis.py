@@ -22,7 +22,7 @@
 import logging
 import sys
 import time
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Type, Union, cast
 
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import COSMOS_CURRENCY, CosmosApi
@@ -30,11 +30,11 @@ from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumApi
 from aea.crypto.fetchai import FETCHAI_CURRENCY, FetchAIApi
 from aea.mail.base import Address
 
-SUPPORTED_LEDGER_APIS = [
-    CosmosApi.identifier,
-    EthereumApi.identifier,
-    FetchAIApi.identifier,
-]
+SUPPORTED_LEDGER_APIS = {
+    CosmosApi.identifier: CosmosApi,
+    EthereumApi.identifier: EthereumApi,
+    FetchAIApi.identifier: FetchAIApi,
+}  # type: Dict[str, Type[LedgerApi]]
 SUPPORTED_CURRENCIES = {
     CosmosApi.identifier: COSMOS_CURRENCY,
     EthereumApi.identifier: ETHEREUM_CURRENCY,
@@ -58,7 +58,7 @@ def _instantiate_api(identifier: str, config: Dict[str, Union[str, int]]) -> Led
     retry = 0
     is_connected = False
     while retry < MAX_CONNECTION_RETRY:
-        if identifier not in SUPPORTED_LEDGER_APIS:
+        if identifier not in SUPPORTED_LEDGER_APIS.keys():
             raise ValueError(
                 "Unsupported identifier {} in ledger apis.".format(identifier)
             )
@@ -223,7 +223,8 @@ class LedgerApis:
         tx = api.get_transaction(tx_digest)
         return tx
 
-    def is_transaction_settled(self, identifier: str, tx_receipt: Any) -> bool:
+    @staticmethod
+    def is_transaction_settled(identifier: str, tx_receipt: Any) -> bool:
         """
         Check whether the transaction is settled and correct.
 
@@ -231,15 +232,17 @@ class LedgerApis:
         :param tx_receipt: the transaction digest
         :return: True if correctly settled, False otherwise
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
-        is_settled = api.is_transaction_settled(tx_receipt)
+        assert (
+            identifier in SUPPORTED_LEDGER_APIS.keys()
+        ), "Not a registered ledger api identifier."
+        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        is_settled = api_class.is_transaction_settled(tx_receipt)
         return is_settled
 
+    @staticmethod
     def is_transaction_valid(
-        self,
         identifier: str,
-        tx: Any,
+        tx_receipt: Any,
         seller: Address,
         client: Address,
         tx_nonce: str,
@@ -256,14 +259,17 @@ class LedgerApis:
         :param amount: the amount we expect to get from the transaction.
         :return: True if is valid , False otherwise
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
-        is_valid = api.is_transaction_valid(tx, seller, client, tx_nonce, amount)
+        assert (
+            identifier in SUPPORTED_LEDGER_APIS.keys()
+        ), "Not a registered ledger api identifier."
+        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        is_valid = api_class.is_transaction_valid(
+            tx_receipt, seller, client, tx_nonce, amount
+        )
         return is_valid
 
-    def generate_tx_nonce(
-        self, identifier: str, seller: Address, client: Address
-    ) -> str:
+    @staticmethod
+    def generate_tx_nonce(identifier: str, seller: Address, client: Address) -> str:
         """
         Generate a random str message.
 
@@ -272,7 +278,9 @@ class LedgerApis:
         :param client: the address of the client.
         :return: return the hash in hex.
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
-        tx_nonce = api.generate_tx_nonce(seller=seller, client=client)
+        assert (
+            identifier in SUPPORTED_LEDGER_APIS.keys()
+        ), "Not a registered ledger api identifier."
+        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        tx_nonce = api_class.generate_tx_nonce(seller=seller, client=client)
         return tx_nonce

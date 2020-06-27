@@ -149,15 +149,15 @@ class LedgerApiMessage(Message):
         return cast(int, self.get("balance"))
 
     @property
-    def code(self) -> Optional[int]:
+    def code(self) -> int:
         """Get the 'code' content from the message."""
-        return cast(Optional[int], self.get("code"))
+        assert self.is_set("code"), "'code' content is not set."
+        return cast(int, self.get("code"))
 
     @property
-    def data(self) -> bytes:
+    def data(self) -> Optional[bytes]:
         """Get the 'data' content from the message."""
-        assert self.is_set("data"), "'data' content is not set."
-        return cast(bytes, self.get("data"))
+        return cast(Optional[bytes], self.get("data"))
 
     @property
     def ledger_id(self) -> str:
@@ -259,12 +259,7 @@ class LedgerApiMessage(Message):
                     type(self.address)
                 )
             elif self.performative == LedgerApiMessage.Performative.GET_RAW_TRANSACTION:
-                expected_nb_of_contents = 2
-                assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
-                )
+                expected_nb_of_contents = 1
                 assert (
                     type(self.terms) == CustomTerms
                 ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
@@ -274,12 +269,7 @@ class LedgerApiMessage(Message):
                 self.performative
                 == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION
             ):
-                expected_nb_of_contents = 2
-                assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
-                )
+                expected_nb_of_contents = 1
                 assert (
                     type(self.signed_transaction) == CustomSignedTransaction
                 ), "Invalid type for content 'signed_transaction'. Expected 'SignedTransaction'. Found '{}'.".format(
@@ -301,7 +291,12 @@ class LedgerApiMessage(Message):
                     type(self.transaction_digest)
                 )
             elif self.performative == LedgerApiMessage.Performative.BALANCE:
-                expected_nb_of_contents = 1
+                expected_nb_of_contents = 2
+                assert (
+                    type(self.ledger_id) == str
+                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.ledger_id)
+                )
                 assert (
                     type(self.balance) == int
                 ), "Invalid type for content 'balance'. Expected 'int'. Found '{}'.".format(
@@ -315,7 +310,12 @@ class LedgerApiMessage(Message):
                     type(self.raw_transaction)
                 )
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
-                expected_nb_of_contents = 1
+                expected_nb_of_contents = 2
+                assert (
+                    type(self.ledger_id) == str
+                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.ledger_id)
+                )
                 assert (
                     type(self.transaction_digest) == str
                 ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
@@ -330,14 +330,11 @@ class LedgerApiMessage(Message):
                 )
             elif self.performative == LedgerApiMessage.Performative.ERROR:
                 expected_nb_of_contents = 1
-                if self.is_set("code"):
-                    expected_nb_of_contents += 1
-                    code = cast(int, self.code)
-                    assert (
-                        type(code) == int
-                    ), "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
-                        type(code)
-                    )
+                assert (
+                    type(self.code) == int
+                ), "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
+                    type(self.code)
+                )
                 if self.is_set("message"):
                     expected_nb_of_contents += 1
                     message = cast(str, self.message)
@@ -346,11 +343,14 @@ class LedgerApiMessage(Message):
                     ), "Invalid type for content 'message'. Expected 'str'. Found '{}'.".format(
                         type(message)
                     )
-                assert (
-                    type(self.data) == bytes
-                ), "Invalid type for content 'data'. Expected 'bytes'. Found '{}'.".format(
-                    type(self.data)
-                )
+                if self.is_set("data"):
+                    expected_nb_of_contents += 1
+                    data = cast(bytes, self.data)
+                    assert (
+                        type(data) == bytes
+                    ), "Invalid type for content 'data'. Expected 'bytes'. Found '{}'.".format(
+                        type(data)
+                    )
 
             # Check correct content count
             assert (

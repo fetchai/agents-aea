@@ -31,6 +31,7 @@ from aea.crypto.base import LedgerApi
 from aea.crypto.wallet import CryptoStore
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
+from aea.helpers.transaction.base import RawTransaction
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -138,7 +139,9 @@ class _RequestDispatcher:
         :param message: the request message.
         :return: an awaitable.
         """
+        message.is_incoming = True
         dialogue = self.ledger_api_dialogues.update(message)
+        assert dialogue is not None, "No dialogue created."
         performative = cast(LedgerApiMessage.Performative, message.performative)
         handler = self.get_handler(performative)
         return self.loop.create_task(self.run_async(handler, api, message, dialogue))
@@ -166,7 +169,43 @@ class _RequestDispatcher:
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 balance=balance,
             )
-        dialogue.update(response)
+            response.counterparty = message.counterparty
+            dialogue.update(response)
+        return response
+
+    def get_raw_transaction(
+        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Send the request 'get_raw_transaction'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :return: None
+        """
+        raw_transaction = api.get_transfer_transaction(
+            sender_address=message.terms.sender_address,
+            destination_address=message.terms.counterparty_address,
+            amount=message.terms.sender_payable_amount,
+            tx_fee=message.terms.fee,
+            tx_nonce=message.terms.nonce,
+        )
+        if raw_transaction is None:
+            response = self.get_error_message(
+                ValueError("No raw transaction returned"), api, message, dialogue
+            )
+        else:
+            response = LedgerApiMessage(
+                performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                raw_transaction=RawTransaction(
+                    message.terms.ledger_id, raw_transaction
+                ),
+            )
+            response.counterparty = message.counterparty
+            dialogue.update(response)
         return response
 
     def get_transaction_receipt(
@@ -190,9 +229,12 @@ class _RequestDispatcher:
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                transaction_receipt=TransactionReceipt(transaction_receipt),
+                transaction_receipt=TransactionReceipt(
+                    message.ledger_id, transaction_receipt
+                ),
             )
-        dialogue.update(response)
+            response.counterparty = message.counterparty
+            dialogue.update(response)
         return response
 
     def send_signed_transaction(
@@ -220,7 +262,8 @@ class _RequestDispatcher:
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 transaction_digest=transaction_digest,
             )
-        dialogue.update(response)
+            response.counterparty = message.counterparty
+            dialogue.update(response)
         return response
 
     def get_error_message(
@@ -245,6 +288,7 @@ class _RequestDispatcher:
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             message=str(e),
         )
+        response.counterparty = message.counterparty
         dialogue.update(response)
         return response
 

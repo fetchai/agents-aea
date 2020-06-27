@@ -34,6 +34,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 30.0
+LEDGER_API_ADDRESS = "fetchai/ledger_api:0.1.0"
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
@@ -64,7 +65,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
                 ledger_id=strategy.ledger_id,
                 address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
-            ledger_api_msg.counterparty = strategy.ledger_id
+            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
             ledger_api_dialogues.update(ledger_api_msg)
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_service()

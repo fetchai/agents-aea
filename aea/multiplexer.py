@@ -347,7 +347,7 @@ class AsyncMultiplexer:
 
         while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
-                logger.debug("Waiting for incoming envelopes...")
+                # logger.debug("Waiting for incoming envelopes...")
                 done, _pending = await asyncio.wait(
                     task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
                 )

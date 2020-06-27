@@ -22,24 +22,31 @@
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query
+from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_SELLER_TX_FEE = 0
-DEFAULT_TOTAL_PRICE = 10
-DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
-DEFAULT_HAS_DATA_SOURCE = False
-DEFAULT_DATA_FOR_SALE = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
-DEFAULT_DATA_MODEL_NAME = "location"
+
+DEFAULT_CURRENCY_ID = "FET"
+DEFAULT_UNIT_PRICE = 4
+DEFAULT_SERVICE_ID = "generic_service"
+
+DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
 DEFAULT_DATA_MODEL = {
     "attribute_one": {"name": "country", "type": "str", "is_required": True},
     "attribute_two": {"name": "city", "type": "str", "is_required": True},
 }  # type: Optional[Dict[str, Any]]
-DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
+DEFAULT_DATA_MODEL_NAME = "location"
+
+DEFAULT_HAS_DATA_SOURCE = False
+DEFAULT_DATA_FOR_SALE = {
+    "some_generic_data_key": "some_generic_data_value"
+}  # type: Optional[Dict[str, Any]]
 
 
 class GenericStrategy(Model):
@@ -54,33 +61,43 @@ class GenericStrategy(Model):
 
         :return: None
         """
-        self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-        self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
-        self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
-        self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
+        self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
+
+        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
+        self._unit_price = kwargs.pop("unit_price", DEFAULT_UNIT_PRICE)
+        self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
+
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+
+        self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
         data_for_sale_ordered = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
         data_for_sale = {
             str(key): str(value) for key, value in data_for_sale_ordered.items()
         }
 
         super().__init__(**kwargs)
+        assert (
+            self.context.agent_addresses.get(self._ledger_id, None) is not None
+        ), "Wallet does not contain cryptos for provided ledger id."
 
-        # Read the data from the sensor if the bool is set to True.
-        # Enables us to let the user implement his data collection logic without major changes.
         if self._has_data_source:
             self._data_for_sale = self.collect_from_data_source()
         else:
             self._data_for_sale = data_for_sale
+        self._sale_quantity = len(data_for_sale)
 
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
+
+    @property
+    def is_ledger_tx(self) -> bool:
+        """Check whether or not tx are settled on a ledger."""
+        return self._is_ledger_tx
 
     def get_service_description(self) -> Description:
         """
@@ -88,11 +105,11 @@ class GenericStrategy(Model):
 
         :return: a description of the offered services
         """
-        desc = Description(
+        description = Description(
             self._service_data,
             data_model=GenericDataModel(self._data_model_name, self._data_model),
         )
-        return desc
+        return description
 
     def is_matching_supply(self, query: Query) -> bool:
         """
@@ -101,40 +118,49 @@ class GenericStrategy(Model):
         :param query: the query
         :return: bool indiciating whether matches or not
         """
-        # TODO, this is a stub
-        return True
+        return query.check(self.get_service_description())
 
-    def generate_proposal_and_data(
-        self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, str]]:
+    def generate_proposal_terms_and_data(
+        self, query: Query, counterparty_address: Address
+    ) -> Tuple[Description, Terms, Dict[str, str]]:
         """
         Generate a proposal matching the query.
 
-        :param counterparty: the counterparty of the proposal.
         :param query: the query
-        :return: a tuple of proposal and the weather data
+        :param counterparty_address: the counterparty of the proposal.
+        :return: a tuple of proposal, terms and the weather data
         """
+        seller_address = self.context.agent_addresses[self.ledger_id]
+        total_price = self._sale_quantity * self._unit_price
         if self.is_ledger_tx:
-            tx_nonce = self.context.ledger_apis.generate_tx_nonce(
-                identifier=self._ledger_id,
-                seller=self.context.agent_addresses[self._ledger_id],
-                client=counterparty,
+            tx_nonce = LedgerApis.generate_tx_nonce(
+                identifier=self.ledger_id,
+                seller=seller_address,
+                client=counterparty_address,
             )
         else:
             tx_nonce = uuid.uuid4().hex
-        assert (
-            self._total_price - self._seller_tx_fee > 0
-        ), "This sale would generate a loss, change the configs!"
         proposal = Description(
             {
-                "price": self._total_price,
-                "seller_tx_fee": self._seller_tx_fee,
+                "ledger_id": self.ledger_id,
+                "price": total_price,
                 "currency_id": self._currency_id,
-                "ledger_id": self._ledger_id,
+                "service_id": self._service_id,
+                "quantity": self._sale_quantity,
                 "tx_nonce": tx_nonce,
             }
         )
-        return proposal, self._data_for_sale
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=seller_address,
+            counterparty_address=counterparty_address,
+            amount_by_currency_id={self._currency_id: total_price},
+            quantities_by_good_id={self._service_id: self._sale_quantity},
+            is_sender_payable_tx_fee=False,
+            nonce=tx_nonce,
+            fee=0,
+        )
+        return proposal, terms, self._data_for_sale
 
     def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to communicate with the sensor."""
