@@ -19,7 +19,7 @@
 """Methods for CLI fetch functionality."""
 
 import os
-from typing import Optional, cast
+from typing import Optional
 
 import click
 
@@ -32,15 +32,13 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
 @clean_after
-def fetch_agent(
-    click_context, public_id: PublicId, alias: Optional[str] = None
-) -> None:
+def fetch_agent(ctx: Context, public_id: PublicId, alias: Optional[str] = None) -> None:
     """
     Fetch Agent from Registry.
 
     :param ctx: Context
     :param public_id: str public ID of desirable Agent.
-    :param click_context: the click context.
+    :param ctx: a Context object.
     :param alias: an optional alias.
     :return: None
     """
@@ -49,7 +47,6 @@ def fetch_agent(
     resp = request_api("GET", api_path)
     file_url = resp["file"]
 
-    ctx = cast(Context, click_context.obj)
     filepath = download_file(file_url, ctx.cwd)
 
     folder_name = name if alias is None else alias

@@ -39,7 +39,9 @@ import flask
 from aea.cli.add import add_item as cli_add_item
 from aea.cli.create import create_aea as cli_create_aea
 from aea.cli.delete import delete_aea as cli_delete_aea
+from aea.cli.fetch import fetch_agent_locally as cli_fetch_agent_locally
 from aea.cli.list import list_agent_items as cli_list_agent_items
+from aea.cli.registry.fetch import fetch_agent as cli_fetch_agent
 from aea.cli.remove import remove_item as cli_remove_item
 from aea.cli.scaffold import scaffold_item as cli_scaffold_item
 from aea.cli.search import (
@@ -260,6 +262,22 @@ def add_item(agent_id: str, item_type: str, item_id: str):
         )  # 400 Bad request
     else:
         return agent_id, 201  # 200 (OK)
+
+
+def fetch_agent(agent_id: str):
+    """Fetch an agent."""
+    ctx = Context(cwd=app_context.agents_dir)
+    fetch_agent = cli_fetch_agent_locally if app_context.local else cli_fetch_agent
+    try:
+        agent_public_id = PublicId.from_str(agent_id)
+        fetch_agent(ctx, agent_public_id)
+    except ClickException as e:
+        return (
+            {"detail": "Failed to fetch an agent {}. {}".format(agent_id, str(e))},
+            400,
+        )  # 400 Bad request
+    else:
+        return agent_public_id.name, 201  # 200 (OK)
 
 
 def remove_local_item(agent_id: str, item_type: str, item_id: str):
