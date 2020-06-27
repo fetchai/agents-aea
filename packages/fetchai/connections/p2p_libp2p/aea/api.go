@@ -23,7 +23,6 @@ package aea
 import (
 	"encoding/binary"
 	"errors"
-	"libp2p_node/utils"
 	"log"
 	"net"
 	"os"
@@ -36,9 +35,15 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
-var logger zerolog.Logger = utils.NewDefaultLoggerWithFields(map[string]string{
-	"package": "AeaApi",
-})
+// code redandency to avoid import cycle
+var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
+	Out:        os.Stdout,
+	NoColor:    false,
+	TimeFormat: "15:04:05.000",
+}).
+	With().Timestamp().
+	Str("package", "AeaApi").
+	Logger()
 
 /*
 
