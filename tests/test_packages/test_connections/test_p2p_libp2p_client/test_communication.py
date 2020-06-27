@@ -31,7 +31,6 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 from ....conftest import (
-    MAX_FLAKY_RERUNS,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     libp2p_log_on_failure,

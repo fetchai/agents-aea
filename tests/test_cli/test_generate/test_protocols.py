@@ -42,7 +42,6 @@ from ...conftest import (
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
     PROTOCOL_CONFIGURATION_SCHEMA,
-    skip_test_windows,
 )
 
 
