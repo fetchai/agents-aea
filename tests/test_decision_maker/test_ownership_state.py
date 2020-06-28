@@ -54,8 +54,9 @@ def test_is_affordable_for_uninitialized():
     """Test the initialisation of the ownership_state."""
     ownership_state = OwnershipState()
     buyer_terms = Terms(
-        sender_addr="pk1",
-        counterparty_addr="pk2",
+        ledger_id="ethereum",
+        sender_address="pk1",
+        counterparty_address="pk2",
         amount_by_currency_id={"FET": -1},
         is_sender_payable_tx_fee=True,
         quantities_by_good_id={"good_id": 10},
@@ -73,32 +74,37 @@ class TestOwnershipState:
     def setup_class(cls):
         """Setup class for test case."""
         cls.buyer_terms = Terms(
-            sender_addr="pk1",
-            counterparty_addr="pk2",
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
             amount_by_currency_id={"FET": -1},
             is_sender_payable_tx_fee=True,
             quantities_by_good_id={"good_id": 10},
             nonce="transaction nonce",
         )
         cls.neutral_terms = Terms(
-            sender_addr="pk1",
-            counterparty_addr="pk2",
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
             amount_by_currency_id={"FET": 0},
             is_sender_payable_tx_fee=True,
             quantities_by_good_id={"good_id": 0},
             nonce="transaction nonce",
         )
         cls.malformed_terms = Terms(
-            sender_addr="pk1",
-            counterparty_addr="pk2",
-            amount_by_currency_id={"FET": 10},
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
+            amount_by_currency_id={"FET": -10},
             is_sender_payable_tx_fee=True,
             quantities_by_good_id={"good_id": 10},
             nonce="transaction nonce",
         )
+        cls.malformed_terms._amount_by_currency_id = {"FET": 10}
         cls.seller_terms = Terms(
-            sender_addr="pk1",
-            counterparty_addr="pk2",
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
             amount_by_currency_id={"FET": 1},
             is_sender_payable_tx_fee=True,
             quantities_by_good_id={"good_id": -10},

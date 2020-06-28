@@ -403,7 +403,7 @@ class Terms:
         :param terms_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        terms_bytes = pickle.dumps(terms_protobuf_object)  # nosec
+        terms_bytes = pickle.dumps(terms_object)  # nosec
         terms_protobuf_object.terms_bytes = terms_bytes
 
     @classmethod

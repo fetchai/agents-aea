@@ -158,8 +158,9 @@ class Transactions(Model):
             skill_callback_ids=skill_callback_ids,
             # tx_id=self.get_internal_tx_id(),
             terms=Terms(
-                sender_addr=agent_addr,
-                counterparty_addr=dialogue_label.dialogue_opponent_addr,
+                ledger_id="ethereum",
+                sender_address=agent_addr,
+                counterparty_address=dialogue_label.dialogue_opponent_addr,
                 amount_by_currency_id=tx_amount_by_currency_id,
                 is_sender_payable_tx_fee=True,  # TODO: check!
                 quantities_by_good_id=goods_component,

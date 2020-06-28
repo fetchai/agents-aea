@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,17 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the handlers of the agent."""
+"""This module contains the support resources for the state_update protocol."""
 
-from packages.fetchai.skills.generic_buyer.handlers import (
-    GenericFipaHandler,
-    GenericLedgerApiHandler,
-    GenericOefSearchHandler,
-    GenericSigningHandler,
-)
+from aea.protocols.state_update.message import StateUpdateMessage
+from aea.protocols.state_update.serialization import StateUpdateSerializer
 
-
-FipaHandler = GenericFipaHandler
-LedgerApiHandler = GenericLedgerApiHandler
-OefSearchHandler = GenericOefSearchHandler
-SigningHandler = GenericSigningHandler
+StateUpdateMessage.serializer = StateUpdateSerializer

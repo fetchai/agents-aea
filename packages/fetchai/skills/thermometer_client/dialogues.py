@@ -20,11 +20,16 @@
 """
 This module contains the classes required for dialogue management.
 
+- DefaultDialogues: The dialogues class keeps track of all dialogues of type default.
 - FipaDialogues: The dialogues class keeps track of all dialogues of type fipa.
 - LedgerApiDialogues: The dialogues class keeps track of all dialogues of type ledger_api.
 - OefSearchDialogues: The dialogues class keeps track of all dialogues of type oef_search.
+- SigningDialogues: The dialogues class keeps track of all dialogues of type signing.
 """
 
+from packages.fetchai.skills.generic_buyer.dialogues import (
+    DefaultDialogues as GenericDefaultDialogues,
+)
 from packages.fetchai.skills.generic_buyer.dialogues import (
     FipaDialogues as GenericFipaDialogues,
 )
@@ -38,6 +43,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     SigningDialogues as GenericSigningDialogues,
 )
 
+DefaultDialogues = GenericDefaultDialogues
 FipaDialogues = GenericFipaDialogues
 LedgerApiDialogues = GenericLedgerApiDialogues
 OefSearchDialogues = GenericOefSearchDialogues

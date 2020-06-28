@@ -96,8 +96,11 @@ class TrainHandler(Handler):
                 skill_callback_ids=(self.context.skill_id,),
                 tx_id=strategy.get_next_transition_id(),  # TODO: replace with dialogues model
                 terms=Terms(
-                    sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
-                    counterparty_addr=terms.values["address"],
+                    ledger_id=terms.values["ledger_id"],
+                    sender_address=self.context.agent_addresses[
+                        terms.values["ledger_id"]
+                    ],
+                    counterparty_address=terms.values["address"],
                     amount_by_currency_id={
                         terms.values["currency_id"]: -terms.values["price"]
                     },
@@ -266,12 +269,12 @@ class SigningHandler(Handler):
                 tx_digest=tx_msg_response.signed_transaction,
                 terms=terms,
             )
-            ml_accept.counterparty = tx_msg_response.terms.counterparty_addr
+            ml_accept.counterparty = tx_msg_response.terms.counterparty_address
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info(
                 "[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}.".format(
                     self.context.agent_name,
-                    tx_msg_response.terms.counterparty_addr[-5:],
+                    tx_msg_response.terms.counterparty_address[-5:],
                     tx_msg_response.signed_transaction,
                     terms.values,
                 )

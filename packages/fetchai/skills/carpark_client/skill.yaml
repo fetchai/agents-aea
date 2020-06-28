@@ -8,8 +8,8 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmPZ4bRmXpsDKD7ogCJHEMrtm67hpA5aqxvujgfQD1PtMd
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
-  dialogues.py: QmQwhJv2ARUQyZw7Pa6g8UVvZQ1p6Ufk7jvu4SijXrLnAh
-  handlers.py: QmVeCVsgMM9j63NSfEPhxb718k9h6u2WgNstsaXv5mTS14
+  dialogues.py: QmcMynppu7B2nZR21LzxFQMpoRdegpWpwcXti2ba4Vcei5
+  handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
 contracts: []
@@ -35,10 +35,13 @@ handlers:
   oef_search:
     args: {}
     class_name: OefSearchHandler
-  transaction:
+  signing:
     args: {}
-    class_name: TransactionHandler
+    class_name: SigningHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues
@@ -54,18 +57,30 @@ models:
   strategy:
     args:
       currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: latitude
+          type: float
+        attribute_two:
+          is_required: true
+          name: longitude
+          type: float
+      data_model_name: location
       is_ledger_tx: true
       ledger_id: fetchai
-      max_buyer_tx_fee: 1
-      max_price: 200
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 200
       search_query:
         constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
+          constraint_type: '!='
+          search_term: latitude
+          search_value: 0.0
         constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
+          constraint_type: '!='
+          search_term: longitude
+          search_value: 0.0
+      service_id: car_park_service
     class_name: Strategy
 dependencies: {}

@@ -10,6 +10,7 @@ aea install
 aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/thermometer:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -23,6 +24,7 @@ aea install
 aea create my_thermometer_client
 cd my_thermometer_client
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/thermometer_client:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -65,7 +67,7 @@ aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.cur
 aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run
 ```
 ``` bash
 cd ..
@@ -78,9 +80,17 @@ ledger_apis:
     network: testnet
 ```
 ``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+```
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
+```
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 ``` yaml
 ledger_apis:

@@ -163,8 +163,9 @@ def test_score_diff_from_transaction():
         tx_fee=tx_fee,
     )
     terms = Terms(
-        sender_addr="agent_1",
-        counterparty_addr="pk",
+        ledger_id="ethereum",
+        sender_address="agent_1",
+        counterparty_address="pk",
         amount_by_currency_id={"FET": -20},
         is_sender_payable_tx_fee=True,
         quantities_by_good_id={"good_id": 10},
@@ -195,8 +196,9 @@ def test_is_utility_enhancing_uninitialized():
     ownership_state = OwnershipState()
     preferences = Preferences()
     terms = Terms(
-        sender_addr="agent_1",
-        counterparty_addr="pk",
+        ledger_id="ethereum",
+        sender_address="agent_1",
+        counterparty_address="pk",
         amount_by_currency_id={"FET": -20},
         is_sender_payable_tx_fee=True,
         quantities_by_good_id={"good_id": 10},

@@ -44,9 +44,8 @@ class Strategy(GenericStrategy):
         """
         self._date_one = kwargs.pop("date_one", DEFAULT_DATE_ONE)
         self._date_two = kwargs.pop("date_two", DEFAULT_DATE_TWO)
-        super().__init__(**kwargs)
         self.db = DBCommunication()
-        self._oef_msg_id = 0
+        super().__init__(**kwargs)
 
     def collect_from_data_source(self) -> Dict[str, str]:
         """

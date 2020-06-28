@@ -116,7 +116,9 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     request = LedgerApiMessage(
         LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         ledger_id=EthereumCrypto.identifier,
-        signed_transaction=SignedTransaction(signed_transaction),
+        signed_transaction=SignedTransaction(
+            EthereumCrypto.identifier, signed_transaction
+        ),
     )
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)

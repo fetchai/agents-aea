@@ -9,10 +9,10 @@ fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
-  dialogues.py: QmPKMbUTyQRQmess9ZnhjAvLmjPhta9FUtQyxAMomUYGk1
+  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   dummy_weather_station_data.py: QmUD52fXy9DW2FgivyP1VMhk3YbvRVUWUEuZVftXmkNymR
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
-  strategy.py: Qme6MeZP4qkSfEBtk8XPgkdyvc73wjqAZHwo27C5N3jQAh
+  strategy.py: Qmdqw5XB7biCSY8G7dhJZ7nVzy22ffSbGCvQtUD3jqP7ij
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:
 - '*.db'
@@ -69,15 +69,13 @@ models:
           name: city
           type: str
       data_model_name: location
-      date_one: 1/10/2019
-      date_two: 1/12/2019
-      has_data_source: false
+      has_data_source: true
       is_ledger_tx: true
       ledger_id: fetchai
-      seller_tx_fee: 0
       service_data:
         city: Cambridge
         country: UK
-      total_price: 10
+      service_id: generic_service
+      unit_price: 10
     class_name: Strategy
 dependencies: {}

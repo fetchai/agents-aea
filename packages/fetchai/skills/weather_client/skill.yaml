@@ -7,7 +7,7 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
-  dialogues.py: QmTyEP3mdRLBNZWAkbp6E1veaxYcumkp6tuU52AWcZqMxs
+  dialogues.py: QmcMynppu7B2nZR21LzxFQMpoRdegpWpwcXti2ba4Vcei5
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
@@ -38,6 +38,9 @@ handlers:
     args: {}
     class_name: SigningHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues
@@ -53,10 +56,21 @@ models:
   strategy:
     args:
       currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
       is_ledger_tx: true
       ledger_id: fetchai
-      max_buyer_tx_fee: 1
-      max_price: 200
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
       search_query:
         constraint_one:
           constraint_type: ==
@@ -66,5 +80,6 @@ models:
           constraint_type: ==
           search_term: city
           search_value: Cambridge
+      service_id: generic_service
     class_name: Strategy
 dependencies: {}

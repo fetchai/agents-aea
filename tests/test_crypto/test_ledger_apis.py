@@ -153,9 +153,7 @@ class TestLedgerApis:
     def test_is_transaction_settled(self):
         """Test the is_transaction_settled."""
         with mock.patch.object(
-            self.ledger_apis.apis.get(FetchAIApi.identifier),
-            "is_transaction_settled",
-            return_value=True,
+            FetchAIApi, "is_transaction_settled", return_value=True,
         ):
             is_settled = self.ledger_apis.is_transaction_settled(
                 identifier="fetchai", tx_receipt="tx_receipt",
@@ -165,9 +163,7 @@ class TestLedgerApis:
     def test_is_transaction_valid(self):
         """Test the is_transaction_valid."""
         with mock.patch.object(
-            self.ledger_apis.apis.get(FetchAIApi.identifier),
-            "is_transaction_valid",
-            return_value=True,
+            FetchAIApi, "is_transaction_valid", return_value=True,
         ):
             is_valid = self.ledger_apis.is_transaction_valid(
                 identifier="fetchai",

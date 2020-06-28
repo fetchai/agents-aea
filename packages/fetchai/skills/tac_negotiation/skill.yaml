@@ -15,7 +15,7 @@ fingerprint:
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
   strategy.py: QmXdEbb7xbdNeZ85Cs2gvdYRMBB1Rper8B9z9E49bygJ54
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
-  transactions.py: QmVmaBavhJ5xv85JuPWVjquFvw4zKxFfKzoqwhdJBWDPp9
+  transactions.py: QmSR1SYsHCGQkcHBhVeFpFLgRRp5xj1SZB1SDyu7YmEVZ3
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.5.0

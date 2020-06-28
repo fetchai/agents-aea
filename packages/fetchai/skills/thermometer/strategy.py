@@ -19,11 +19,14 @@
 
 """This module contains the strategy class."""
 
+import time
 from typing import Dict
 
 from temper import Temper
 
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
+
+MAX_RETRIES = 10
 
 
 class Strategy(GenericStrategy):
@@ -36,10 +39,14 @@ class Strategy(GenericStrategy):
         :return: the data
         """
         temper = Temper()
-        while True:
+        retries = 0
+        while retries < MAX_RETRIES:
             results = temper.read()
             if "internal temperature" in results[0].keys():
                 degrees = {"thermometer_data": str(results)}
+                break
             else:
                 self.context.logger.debug("Couldn't read the sensor I am re-trying.")
+                time.sleep(0.5)
+                retries += 1
         return degrees

@@ -298,7 +298,7 @@ class SigningHandler(Handler):
                 )
             )
             tx_signed = signing_msg_response.signed_transaction
-            agent_addr = signing_msg_response.terms.counterparty_addr
+            agent_addr = signing_msg_response.terms.counterparty_address
             tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
             if tx_digest is None:
                 self.context.logger.warning(

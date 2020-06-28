@@ -83,6 +83,7 @@ The following steps create the thermometer AEA from scratch:
 aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/thermometer:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -93,6 +94,11 @@ In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the follo
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 
 </p>
@@ -115,6 +121,7 @@ The following steps create the thermometer client from scratch:
 aea create my_thermometer_client
 cd my_thermometer_client
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/thermometer_client:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -127,6 +134,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 
 </p>
@@ -250,7 +262,7 @@ This updates the thermometer client skill config (`my_thermometer_client/vendor/
 
 Finally, run both AEAs from their respective directories:
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run
 ```
 
 You can see that the AEAs find each other, negotiate and eventually trade.

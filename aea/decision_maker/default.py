@@ -21,7 +21,6 @@
 
 import copy
 import logging
-import math
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
@@ -41,6 +40,11 @@ from aea.protocols.base import Message
 from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
+from aea.protocols.state_update.dialogues import StateUpdateDialogue
+from aea.protocols.state_update.dialogues import (
+    StateUpdateDialogues as BaseStateUpdateDialogues,
+)
+from aea.protocols.state_update.message import StateUpdateMessage
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -86,6 +90,44 @@ class SigningDialogues(BaseSigningDialogues):
         :return: the created dialogue
         """
         dialogue = SigningDialogue(
+            dialogue_label=dialogue_label, agent_address="decision_maker", role=role
+        )
+        return dialogue
+
+
+class StateUpdateDialogues(BaseStateUpdateDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        BaseStateUpdateDialogues.__init__(self, "decision_maker")
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return StateUpdateDialogue.AgentRole.DECISION_MAKER
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> StateUpdateDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = StateUpdateDialogue(
             dialogue_label=dialogue_label, agent_address="decision_maker", role=role
         )
         return dialogue
@@ -326,7 +368,6 @@ class Preferences(BasePreferences):
         self,
         exchange_params_by_currency_id: ExchangeParams = None,
         utility_params_by_good_id: UtilityParams = None,
-        tx_fee: int = None,
         **kwargs,
     ) -> None:
         """
@@ -334,12 +375,10 @@ class Preferences(BasePreferences):
 
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
-        :param tx_fee: the acceptable transaction fee.
         """
         assert (
             exchange_params_by_currency_id is not None
             and utility_params_by_good_id is not None
-            and tx_fee is not None
         ), "Must provide values."
         assert (
             not self.is_initialized
@@ -347,7 +386,6 @@ class Preferences(BasePreferences):
 
         self._exchange_params_by_currency_id = copy.copy(exchange_params_by_currency_id)
         self._utility_params_by_good_id = copy.copy(utility_params_by_good_id)
-        self._transaction_fees = self._split_tx_fees(tx_fee)  # TODO: update
 
     @property
     def is_initialized(self) -> bool:
@@ -375,18 +413,6 @@ class Preferences(BasePreferences):
         """Get utility parameter for each good."""
         assert self._utility_params_by_good_id is not None, "UtilityParams not set!"
         return self._utility_params_by_good_id
-
-    @property
-    def seller_transaction_fee(self) -> int:
-        """Get the transaction fee."""
-        assert self._transaction_fees is not None, "Transaction fee not set!"
-        return self._transaction_fees["seller_tx_fee"]
-
-    @property
-    def buyer_transaction_fee(self) -> int:
-        """Get the transaction fee."""
-        assert self._transaction_fees is not None, "Transaction fee not set!"
-        return self._transaction_fees["buyer_tx_fee"]
 
     def logarithmic_utility(self, quantities_by_good_id: GoodHoldings) -> float:
         """
@@ -522,21 +548,6 @@ class Preferences(BasePreferences):
             is_utility_enhancing = True
         return is_utility_enhancing
 
-    @staticmethod
-    def _split_tx_fees(tx_fee: int) -> Dict[str, int]:
-        """
-        Split the transaction fee.
-
-        :param tx_fee: the tx fee
-        :return: the split into buyer and seller part
-        """
-        buyer_part = math.ceil(tx_fee * SENDER_TX_SHARE)
-        seller_part = math.ceil(tx_fee * (1 - SENDER_TX_SHARE))
-        if buyer_part + seller_part > tx_fee:
-            seller_part -= 1
-        tx_fee_split = {"seller_tx_fee": seller_part, "buyer_tx_fee": buyer_part}
-        return tx_fee_split
-
     def __copy__(self) -> "Preferences":
         """Copy the object."""
         preferences = Preferences()
@@ -568,6 +579,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             identity=identity, wallet=wallet, **kwargs,
         )
         self.signing_dialogues = SigningDialogues()
+        self.state_update_dialogues = StateUpdateDialogues()
 
     def handle(self, message: Message) -> None:
         """
@@ -578,6 +590,14 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         """
         if isinstance(message, SigningMessage):
             self._handle_signing_message(message)
+        elif isinstance(message, StateUpdateMessage):
+            self._handle_state_update_message(message)
+        else:
+            logger.error(
+                "[{}]: cannot handle message={} of type={}".format(
+                    self.agent_name, message, type(message)
+                )
+            )
 
     def _handle_signing_message(self, signing_msg: SigningMessage) -> None:
         """
@@ -706,3 +726,48 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             self.context.ownership_state, signing_msg.terms
         ) and self.context.ownership_state.is_affordable(signing_msg.terms)
         return result
+
+    def _handle_state_update_message(
+        self, state_update_msg: StateUpdateMessage
+    ) -> None:
+        """
+        Handle a state update message.
+
+        :param state_update_message: the state update message
+        :return: None
+        """
+        state_update_dialogue = cast(
+            Optional[StateUpdateDialogue],
+            self.state_update_dialogues.update(state_update_msg),
+        )
+        if state_update_dialogue is None:
+            logger.error(
+                "[{}]: Could not construct state_update dialogue. Aborting!".format(
+                    self.agent_name
+                )
+            )  # pragma: no cover
+            return
+
+        if state_update_msg.performative == StateUpdateMessage.Performative.INITIALIZE:
+            logger.warning(
+                "[{}]: Applying ownership_state and preferences initialization!".format(
+                    self.agent_name
+                )
+            )
+            self.context.ownership_state.set(
+                amount_by_currency_id=state_update_msg.amount_by_currency_id,
+                quantities_by_good_id=state_update_msg.quantities_by_good_id,
+            )
+            self.context.preferences.set(
+                exchange_params_by_currency_id=state_update_msg.exchange_params_by_currency_id,
+                utility_params_by_good_id=state_update_msg.utility_params_by_good_id,
+            )
+            self.context.goal_pursuit_readiness.update(
+                GoalPursuitReadiness.Status.READY
+            )
+        elif state_update_msg.performative == StateUpdateMessage.Performative.APPLY:
+            logger.info("[{}]: Applying state update!".format(self.agent_name))
+            self.context.ownership_state.apply_delta(
+                delta_amount_by_currency_id=state_update_msg.amount_by_currency_id,
+                delta_quantities_by_good_id=state_update_msg.quantities_by_good_id,
+            )

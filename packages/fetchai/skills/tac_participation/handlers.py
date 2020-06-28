@@ -22,10 +22,10 @@
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.signing.message import SigningMessage
+from aea.protocols.state_update.message import StateUpdateMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -419,8 +419,8 @@ class SigningHandler(Handler):
                 msg = TacMessage(
                     performative=TacMessage.Performative.TRANSACTION,
                     tx_id=tx_id,
-                    tx_sender_addr=tx_message.terms.sender_addr,
-                    tx_counterparty_addr=tx_message.terms.counterparty_addr,
+                    tx_sender_addr=tx_message.terms.sender_address,
+                    tx_counterparty_addr=tx_message.terms.counterparty_address,
                     amount_by_currency_id=tx_message.terms.amount_by_currency_id,
                     is_sender_payable_tx_fee=tx_message.terms.is_sender_payable_tx_fee,
                     quantities_by_good_id=tx_message.terms.quantities_by_good_id,

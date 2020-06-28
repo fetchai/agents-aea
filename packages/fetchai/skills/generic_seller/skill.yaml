@@ -51,9 +51,7 @@ models:
     args:
       currency_id: FET
       data_for_sale:
-        pressure: 20
-        temperature: 26
-        wind: 10
+        generic: data
       data_model:
         attribute_one:
           is_required: true

@@ -33,46 +33,51 @@ class TestCarPark(AEATestCaseMany, UseOef):
         carpark_client_aea_name = "my_carpark_client_aea"
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger_api:0.1.0"}
+
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/ledger_api:0.1.0")
         self.add_item("skill", "fetchai/carpark_detection:0.5.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
         )
         self.set_config(setting_path, False, "bool")
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/ledger_api:0.1.0")
         self.add_item("skill", "fetchai/carpark_client:0.5.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
         )
         self.set_config(setting_path, False, "bool")
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)
-        carpark_aea_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        carpark_aea_process = self.run_agent()
 
         self.set_agent_context(carpark_client_aea_name)
-        carpark_client_aea_process = self.run_agent(
-            "--connections", "fetchai/oef:0.5.0"
-        )
+        carpark_client_aea_process = self.run_agent()
 
         check_strings = (
-            "updating car park detection services on OEF.",
-            "unregistering car park detection services from OEF.",
+            "updating services on OEF service directory.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
-            "did not receive transaction digest from sender=",
+            "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
             carpark_aea_process, check_strings, is_terminating=False
@@ -87,6 +92,8 @@ class TestCarPark(AEATestCaseMany, UseOef):
             "received proposal=",
             "accepting the proposal from sender=",
             "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
             carpark_client_aea_process, check_strings, is_terminating=False
@@ -112,14 +119,19 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
         carpark_client_aea_name = "my_carpark_client_aea"
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger_api:0.1.0"}
+
         ledger_apis = {"fetchai": {"network": "testnet"}}
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/ledger_api:0.1.0")
         self.add_item("skill", "fetchai/carpark_detection:0.5.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -133,8 +145,11 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(carpark_client_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/ledger_api:0.1.0")
         self.add_item("skill", "fetchai/carpark_client:0.5.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -152,26 +167,24 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)
-        carpark_aea_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        carpark_aea_process = self.run_agent()
 
         self.set_agent_context(carpark_client_aea_name)
-        carpark_client_aea_process = self.run_agent(
-            "--connections", "fetchai/oef:0.5.0"
-        )
+        carpark_client_aea_process = self.run_agent()
 
         check_strings = (
-            "updating car park detection services on OEF.",
-            "unregistering car park detection services from OEF.",
+            "updating services on OEF service directory.",
+            "unregistering services from OEF service directory.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
             "checking whether transaction=",
-            "transaction=",
+            "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, is_terminating=False
+            carpark_aea_process, check_strings, timeout=180, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -183,11 +196,15 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
             "received proposal=",
             "accepting the proposal from sender=",
             "received MATCH_ACCEPT_W_INFORM from sender=",
+            "requesting transfer transaction from ledger api...",
+            "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
-            "Settling transaction on chain!",
+            "transaction signing was successful.",
+            "sending transaction to ledger.",
+            "transaction was successfully submitted. Transaction digest=",
             "informing counterparty=",
             "received INFORM from sender=",
-            "received the following carpark data=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
             carpark_client_aea_process, check_strings, is_terminating=False

@@ -225,14 +225,20 @@ class _RequestDispatcher:
         :return: None
         """
         is_settled = False
-        attemps = 0
-        while not is_settled and attemps < self.MAX_ATTEMPTS:
+        attempts = 0
+        while not is_settled and attempts < self.MAX_ATTEMPTS:
             time.sleep(self.TIMEOUT)
             transaction_receipt = api.get_transaction_receipt(
                 message.transaction_digest
             )
             is_settled = api.is_transaction_settled(transaction_receipt)
+            attempts += 1
+        attempts = 0
         transaction = api.get_transaction(message.transaction_digest)
+        while transaction is None and attempts < self.MAX_ATTEMPTS:
+            time.sleep(self.TIMEOUT)
+            transaction = api.get_transaction(message.transaction_digest)
+            attempts += 1
         if not is_settled:
             response = self.get_error_message(
                 ValueError("Transaction not settled within timeout"),

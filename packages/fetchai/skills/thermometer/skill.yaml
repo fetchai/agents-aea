@@ -7,9 +7,9 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
-  dialogues.py: QmPKMbUTyQRQmess9ZnhjAvLmjPhta9FUtQyxAMomUYGk1
+  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
-  strategy.py: QmVU9n2WSz6F7NJD4nj8oHDh4epFzA6HBqCvr6T2nSun2L
+  strategy.py: QmXUTCSBL7ZcgLZd69ELex3Y7tZu96cYrWDBVRXdQh1f2r
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -35,6 +35,9 @@ handlers:
     args: {}
     class_name: OefSearchHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues
@@ -47,6 +50,8 @@ models:
   strategy:
     args:
       currency_id: FET
+      data_for_sale:
+        temperature: 26
       data_model:
         attribute_one:
           is_required: true
@@ -58,14 +63,13 @@ models:
           type: str
       data_model_name: location
       has_data_source: false
-      has_sensor: false
       is_ledger_tx: true
       ledger_id: fetchai
-      seller_tx_fee: 0
       service_data:
         city: Cambridge
         country: UK
-      total_price: 10
+      service_id: generic_service
+      unit_price: 10
     class_name: Strategy
 dependencies:
   pyserial: {}
