@@ -40,6 +40,9 @@ handlers:
     args: {}
     class_name: OefSearchHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues

@@ -366,14 +366,7 @@ class DecisionMaker:
                 )
                 continue
 
-            if message.protocol_id == Message.protocol_id:
-                self.handle(message)
-            else:  # pragma: no cover
-                logger.warning(
-                    "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
-                        self._agent_name
-                    )
-                )
+            self.handle(message)
 
     def handle(self, message: Message) -> None:
         """
@@ -382,4 +375,5 @@ class DecisionMaker:
         :param message: the internal message
         :return: None
         """
+        message.is_incoming = True
         self.decision_maker_handler.handle(message)

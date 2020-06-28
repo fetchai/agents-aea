@@ -19,6 +19,7 @@
 
 """Scaffold connection and channel."""
 import asyncio
+import time
 from asyncio import Task
 from collections import deque
 from concurrent.futures import Executor
@@ -84,6 +85,10 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 
 
 class _RequestDispatcher:
+
+    TIMEOUT = 3
+    MAX_ATTEMPTS = 120
+
     def __init__(
         self,
         loop: Optional[asyncio.AbstractEventLoop],
@@ -168,6 +173,7 @@ class _RequestDispatcher:
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 balance=balance,
+                ledger_id=message.ledger_id,
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
@@ -218,10 +224,29 @@ class _RequestDispatcher:
         :param message: the Ledger API message
         :return: None
         """
-        transaction_receipt = api.get_transaction_receipt(message.transaction_digest)
-        if transaction_receipt is None:
+        is_settled = False
+        attemps = 0
+        while not is_settled and attemps < self.MAX_ATTEMPTS:
+            time.sleep(self.TIMEOUT)
+            transaction_receipt = api.get_transaction_receipt(
+                message.transaction_digest
+            )
+            is_settled = api.is_transaction_settled(transaction_receipt)
+        transaction = api.get_transaction(message.transaction_digest)
+        if not is_settled:
+            response = self.get_error_message(
+                ValueError("Transaction not settled within timeout"),
+                api,
+                message,
+                dialogue,
+            )
+        elif transaction_receipt is None:
             response = self.get_error_message(
                 ValueError("No transaction_receipt returned"), api, message, dialogue
+            )
+        elif transaction is None:
+            response = self.get_error_message(
+                ValueError("No tx returned"), api, message, dialogue
             )
         else:
             response = LedgerApiMessage(
@@ -230,7 +255,7 @@ class _RequestDispatcher:
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 transaction_receipt=TransactionReceipt(
-                    message.ledger_id, transaction_receipt
+                    message.ledger_id, transaction_receipt, transaction
                 ),
             )
             response.counterparty = message.counterparty
@@ -260,6 +285,7 @@ class _RequestDispatcher:
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                ledger_id=message.signed_transaction.ledger_id,
                 transaction_digest=transaction_digest,
             )
             response.counterparty = message.counterparty
@@ -354,7 +380,16 @@ class LedgerApiConnection(Connection):
             )
         else:
             message = cast(LedgerApiMessage, envelope.message)
-        api = aea.crypto.registries.make_ledger_api(message.ledger_id)
+        if message.performative is LedgerApiMessage.Performative.GET_RAW_TRANSACTION:
+            ledger_id = message.terms.ledger_id
+        elif (
+            message.performative
+            is LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION
+        ):
+            ledger_id = message.signed_transaction.ledger_id
+        else:
+            ledger_id = message.ledger_id
+        api = aea.crypto.registries.make_ledger_api(ledger_id)
         task = self.dispatcher.dispatch(api, message)
         self.receiving_tasks.append(task)
         self.task_to_request[task] = envelope
@@ -396,14 +431,13 @@ class LedgerApiConnection(Connection):
         :return: the reponse envelope.
         """
         request = self.task_to_request.pop(task)
-        request_message = cast(LedgerApiMessage, request.message)
         response_message: Optional[LedgerApiMessage] = task.result()
 
         response_envelope = None
         if response_message is not None:
             response_envelope = Envelope(
-                to=self.address,
-                sender=request_message.ledger_id,
+                to=request.sender,
+                sender=request.to,
                 protocol_id=response_message.protocol_id,
                 message=response_message,
             )

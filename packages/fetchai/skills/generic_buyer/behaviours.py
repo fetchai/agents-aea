@@ -61,6 +61,8 @@ class GenericSearchBehaviour(TickerBehaviour):
             ledger_api_msg.counterparty = LEDGER_API_ADDRESS
             ledger_api_dialogues.update(ledger_api_msg)
             self.context.outbox.put_message(message=ledger_api_msg)
+        else:
+            strategy.is_searching = True
 
     def act(self) -> None:
         """

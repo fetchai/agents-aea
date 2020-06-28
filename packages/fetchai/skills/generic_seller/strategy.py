@@ -155,7 +155,7 @@ class GenericStrategy(Model):
             sender_address=seller_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id={self._currency_id: total_price},
-            quantities_by_good_id={self._service_id: self._sale_quantity},
+            quantities_by_good_id={self._service_id: -self._sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
             fee=0,

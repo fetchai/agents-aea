@@ -242,7 +242,7 @@ class LedgerApis:
     @staticmethod
     def is_transaction_valid(
         identifier: str,
-        tx_receipt: Any,
+        tx: Any,
         seller: Address,
         client: Address,
         tx_nonce: str,
@@ -263,9 +263,7 @@ class LedgerApis:
             identifier in SUPPORTED_LEDGER_APIS.keys()
         ), "Not a registered ledger api identifier."
         api_class = SUPPORTED_LEDGER_APIS[identifier]
-        is_valid = api_class.is_transaction_valid(
-            tx_receipt, seller, client, tx_nonce, amount
-        )
+        is_valid = api_class.is_transaction_valid(tx, seller, client, tx_nonce, amount)
         return is_valid
 
     @staticmethod

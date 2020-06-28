@@ -254,7 +254,7 @@ class LedgerApi(Helper, ABC):
     @abstractmethod
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction receipt for a transaction digest (non-blocking).
+        Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present

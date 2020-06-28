@@ -29,13 +29,17 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
 from aea.decision_maker.base import OwnershipState as BaseOwnershipState
 from aea.decision_maker.base import Preferences as BasePreferences
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
-from aea.helpers.transaction.base import Terms
+from aea.helpers.transaction.base import SignedTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
+from aea.protocols.signing.dialogues import SigningDialogue
+from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -47,6 +51,44 @@ SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
 
 logger = logging.getLogger(__name__)
+
+
+class SigningDialogues(BaseSigningDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        BaseSigningDialogues.__init__(self, "decision_maker")
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return SigningDialogue.AgentRole.DECISION_MAKER
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> SigningDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = SigningDialogue(
+            dialogue_label=dialogue_label, agent_address="decision_maker", role=role
+        )
+        return dialogue
 
 
 class GoalPursuitReadiness:
@@ -525,6 +567,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         super().__init__(
             identity=identity, wallet=wallet, **kwargs,
         )
+        self.signing_dialogues = SigningDialogues()
 
     def handle(self, message: Message) -> None:
         """
@@ -550,11 +593,22 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )
 
+        signing_dialogue = cast(
+            Optional[SigningDialogue], self.signing_dialogues.update(signing_msg)
+        )
+        if signing_dialogue is None:
+            logger.error(
+                "[{}]: Could not construct signing dialogue. Aborting!".format(
+                    self.agent_name
+                )
+            )  # pragma: no cover
+            return
+
         # check if the transaction is acceptable and process it accordingly
         if signing_msg.performative == SigningMessage.Performative.SIGN_MESSAGE:
-            self._handle_message_signing(signing_msg)
+            self._handle_message_signing(signing_msg, signing_dialogue)
         elif signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
-            self._handle_transaction_signing(signing_msg)
+            self._handle_transaction_signing(signing_msg, signing_dialogue)
         else:
             logger.error(
                 "[{}]: Unexpected transaction message performative".format(
@@ -562,18 +616,23 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )  # pragma: no cover
 
-    def _handle_message_signing(self, signing_msg: SigningMessage) -> None:
+    def _handle_message_signing(
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+    ) -> None:
         """
         Handle a message for signing.
 
-        :param signing_msg: the transaction message
+        :param signing_msg: the signing message
+        :param signing_dialogue: the signing dialogue
         :return: None
         """
         signing_msg_response = SigningMessage(
             performative=SigningMessage.Performative.ERROR,
+            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+            target=signing_msg.message_id,
+            message_id=signing_msg.message_id + 1,
             skill_callback_ids=signing_msg.skill_callback_ids,
             skill_callback_info=signing_msg.skill_callback_info,
-            crypto_id=signing_msg.crypto_id,
             error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         )
         if self._is_acceptable_for_signing(signing_msg):
@@ -585,25 +644,35 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             if signed_message is not None:
                 signing_msg_response = SigningMessage(
                     performative=SigningMessage.Performative.SIGNED_MESSAGE,
+                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+                    target=signing_msg.message_id,
+                    message_id=signing_msg.message_id + 1,
                     skill_callback_ids=signing_msg.skill_callback_ids,
                     skill_callback_info=signing_msg.skill_callback_info,
                     crypto_id=signing_msg.crypto_id,
                     signed_message=signed_message,
                 )
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_dialogue.update(signing_msg_response)
         self.message_out_queue.put(signing_msg_response)
 
-    def _handle_transaction_signing(self, signing_msg: SigningMessage) -> None:
+    def _handle_transaction_signing(
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+    ) -> None:
         """
         Handle a transaction for signing.
 
-        :param signing_msg: the transaction message
+        :param signing_msg: the signing message
+        :param signing_dialogue: the signing dialogue
         :return: None
         """
         signing_msg_response = SigningMessage(
             performative=SigningMessage.Performative.ERROR,
+            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+            target=signing_msg.message_id,
+            message_id=signing_msg.message_id + 1,
             skill_callback_ids=signing_msg.skill_callback_ids,
             skill_callback_info=signing_msg.skill_callback_info,
-            crypto_id=signing_msg.crypto_id,
             error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
         )
         if self._is_acceptable_for_signing(signing_msg):
@@ -613,11 +682,17 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             if signed_tx is not None:
                 signing_msg_response = SigningMessage(
                     performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+                    target=signing_msg.message_id,
+                    message_id=signing_msg.message_id + 1,
                     skill_callback_ids=signing_msg.skill_callback_ids,
                     skill_callback_info=signing_msg.skill_callback_info,
-                    crypto_id=signing_msg.crypto_id,
-                    signed_transaction=signed_tx,
+                    signed_transaction=SignedTransaction(
+                        signing_msg.crypto_id, signed_tx
+                    ),
                 )
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_dialogue.update(signing_msg_response)
         self.message_out_queue.put(signing_msg_response)
 
     def _is_acceptable_for_signing(self, signing_msg: SigningMessage) -> bool:

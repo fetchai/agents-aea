@@ -262,7 +262,13 @@ class GenericFipaHandler(Handler):
                 transaction_digest=fipa_msg.info["transaction_digest"],
             )
             ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-            ledger_api_dialogues.update(ledger_api_msg)
+            ledger_api_dialogue = cast(
+                Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
+            )
+            assert (
+                ledger_api_dialogue is not None
+            ), "LedgerApiDialogue construction failed."
+            ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
         elif strategy.is_ledger_tx:
             self.context.logger.warning(
@@ -284,6 +290,13 @@ class GenericFipaHandler(Handler):
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
+            )
+            self.context.logger.info(
+                "[{}]: transaction confirmed, sending data={} to buyer={}.".format(
+                    self.context.agent_name,
+                    fipa_dialogue.data_for_sale,
+                    fipa_msg.counterparty[-5:],
+                )
             )
         else:
             self.context.logger.warning(
@@ -370,17 +383,6 @@ class GenericLedgerApiHandler(Handler):
                 self.context.agent_name, ledger_api_msg
             )
         )
-        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
-            performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
-            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
-            error_msg="Invalid dialogue.",
-            error_data={"ledger_api_message": ledger_api_msg.encode()},
-        )
-        default_msg.counterparty = ledger_api_msg.counterparty
-        default_dialogues.update(default_msg)
-        self.context.outbox.put_message(message=default_msg)
 
     def _handle_balance(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -410,18 +412,20 @@ class GenericLedgerApiHandler(Handler):
         """
         fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
         is_settled = LedgerApis.is_transaction_settled(
-            fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt
+            fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt.receipt
         )
         is_valid = LedgerApis.is_transaction_valid(
             fipa_dialogue.terms.ledger_id,
-            ledger_api_msg.transaction_receipt,
+            ledger_api_msg.transaction_receipt.transaction,
             fipa_dialogue.terms.sender_address,
             fipa_dialogue.terms.counterparty_address,
             fipa_dialogue.terms.nonce,
             fipa_dialogue.terms.counterparty_payable_amount,
         )
         if is_settled and is_valid:
-            last_message = fipa_dialogue.last_incoming_message
+            last_message = cast(
+                Optional[FipaMessage], fipa_dialogue.last_incoming_message
+            )
             assert last_message is not None, "Cannot retrieve last fipa message."
             inform_msg = FipaMessage(
                 message_id=last_message.message_id + 1,
@@ -436,6 +440,13 @@ class GenericLedgerApiHandler(Handler):
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
+            )
+            self.context.logger.info(
+                "[{}]: transaction confirmed, sending data={} to buyer={}.".format(
+                    self.context.agent_name,
+                    fipa_dialogue.data_for_sale,
+                    last_message.counterparty[-5:],
+                )
             )
         else:
             self.context.logger.info(
@@ -531,17 +542,6 @@ class GenericOefSearchHandler(Handler):
                 self.context.agent_name, oef_search_msg
             )
         )
-        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
-            performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
-            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
-            error_msg="Invalid dialogue.",
-            error_data={"oef_search_message": oef_search_msg.encode()},
-        )
-        default_msg.counterparty = oef_search_msg.counterparty
-        default_dialogues.update(default_msg)
-        self.context.outbox.put_message(message=default_msg)
 
     def _handle_error(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

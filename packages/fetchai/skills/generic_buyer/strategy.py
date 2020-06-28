@@ -200,7 +200,7 @@ class GenericStrategy(Model):
             sender_address=buyer_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id={
-                proposal.values["currency_id"]: proposal.values["price"]
+                proposal.values["currency_id"]: -proposal.values["price"]
             },
             quantities_by_good_id={
                 proposal.values["service_id"]: proposal.values["quantity"]

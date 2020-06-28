@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmRuiPiHpGopp82JgFVAQa8nUSjPFhnoAiL3Yv3qGvghZ9
+  behaviours.py: QmYfAMPG5Rnm9fGp7frZLky6cV6Z7qAhtsPNhfwtVYRuEx
   dialogues.py: QmXe9VAuinv6jgi5So7e25qgWXN16pB6tVG1iD7oAxUZ56
-  handlers.py: QmVMqSqo1JEGBcm7Y1gNnPvWaiQSneqN7PhQqbBxwvbEef
-  strategy.py: QmWfWKtjFSFuXdib9Pjckeu8WfFrV3tVwjEj6SBapKVKSw
+  handlers.py: QmX9Pphv5VkfKgYriUkzqnVBELLkpdfZd6KzEQKkCG6Da3
+  strategy.py: Qmd1tzYTTsB2UijJbAmj7iYNSzceFMHwjFkpbrrgY7VbRJ
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -55,10 +55,21 @@ models:
   strategy:
     args:
       currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
       is_ledger_tx: true
       ledger_id: fetchai
-      max_buyer_tx_fee: 1
-      max_price: 20
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
       search_query:
         constraint_one:
           constraint_type: ==
@@ -68,6 +79,7 @@ models:
           constraint_type: ==
           search_term: city
           search_value: Cambridge
+      service_id: generic_service
     class_name: GenericStrategy
 dependencies: {}
 is_abstract: true

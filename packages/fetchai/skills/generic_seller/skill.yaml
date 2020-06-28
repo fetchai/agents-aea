@@ -9,8 +9,8 @@ fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
   behaviours.py: QmTwUHrRrBvadNp4RBBEKcMBUvgv2MuGojz7gDsuYDrauE
   dialogues.py: QmY44eSrEzaZxtAG1dqbddwouj5iVMEitzpmt2xFC6MDUm
-  handlers.py: QmPvmyyt1LFxtMtuucy11m5pVtHrYk12EqnxHY4LvzCU8D
-  strategy.py: QmX1pi4xx9NBZEN2HkGdhF5zNCkd2z4ZUQPXeHU1ehBxP3
+  handlers.py: QmSiquvAA4ULXPEJfmT3Z85Lqm9Td2H2uXXKuXrZjcZcPK
+  strategy.py: QmYt74ucz8GfddfwP5dFgQBbD1dkcWvydUyEZ8jn9uxEDK
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -23,7 +23,7 @@ behaviours:
   service_registration:
     args:
       services_interval: 20
-    class_name: ServiceRegistrationBehaviour
+    class_name: GenericServiceRegistrationBehaviour
 handlers:
   fipa:
     args: {}
@@ -35,6 +35,9 @@ handlers:
     args: {}
     class_name: GenericOefSearchHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues
@@ -64,11 +67,11 @@ models:
       has_data_source: false
       is_ledger_tx: true
       ledger_id: fetchai
-      seller_tx_fee: 0
       service_data:
         city: Cambridge
         country: UK
-      total_price: 10
-    class_name: Strategy
+      service_id: generic_service
+      unit_price: 10
+    class_name: GenericStrategy
 dependencies: {}
 is_abstract: true

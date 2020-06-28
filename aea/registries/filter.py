@@ -118,7 +118,9 @@ class Filter:
     def _process_internal_message(self, internal_message: Optional[Message]) -> None:
         if internal_message is None:
             logger.warning("Got 'None' while processing internal messages.")
-        elif isinstance(internal_message, SigningMessage):
+        elif isinstance(
+            internal_message, SigningMessage
+        ):  # TODO: remove; all messages allowed
             internal_message = cast(SigningMessage, internal_message)
             self._handle_signing_message(internal_message)
         else:
@@ -147,11 +149,14 @@ class Filter:
             for skill_id in signing_message.skill_callback_ids
         ]
         for skill_id in skill_callback_ids:
-            handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
+            handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+                signing_message.protocol_id, skill_id
+            )
             if handler is not None:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)
                 )
+                signing_message.is_incoming = True
                 handler.handle(cast(Message, signing_message))
             else:
                 logger.warning(

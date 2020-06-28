@@ -301,6 +301,21 @@ class Terms:
                 for key, value in self._quantities_by_good_id.items()
             ]
         ), "quantities_by_good_id must be a dictionary with str keys and int values."
+        pos_amounts = all(
+            [amount >= 0 for amount in self._amount_by_currency_id.values()]
+        )
+        neg_amounts = all(
+            [amount <= 0 for amount in self._amount_by_currency_id.values()]
+        )
+        pos_quantities = all(
+            [quantity >= 0 for quantity in self._quantities_by_good_id.values()]
+        )
+        neg_quantities = all(
+            [quantity <= 0 for quantity in self._quantities_by_good_id.values()]
+        )
+        assert (pos_amounts and neg_quantities) or (
+            neg_amounts and pos_quantities
+        ), "quantities and amounts do not constitute valid terms."
         assert isinstance(
             self._is_sender_payable_tx_fee, bool
         ), "is_sender_payable_tx_fee must be bool"
@@ -435,18 +450,18 @@ class Terms:
 class TransactionReceipt:
     """This class represents an instance of TransactionReceipt."""
 
-    def __init__(
-        self, ledger_id: str, body: Any,
-    ):
+    def __init__(self, ledger_id: str, receipt: Any, transaction: Any):
         """Initialise an instance of TransactionReceipt."""
         self._ledger_id = ledger_id
-        self._body = body
+        self._receipt = receipt
+        self._transaction = transaction
         self._check_consistency()
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert self._body is not None, "body must not be None"
+        assert self._receipt is not None, "receipt must not be None"
+        assert self._transaction is not None, "transaction must not be None"
 
     @property
     def ledger_id(self) -> str:
@@ -454,9 +469,14 @@ class TransactionReceipt:
         return self._ledger_id
 
     @property
-    def body(self):
-        """Get the body."""
-        return self._body
+    def receipt(self):
+        """Get the receipt."""
+        return self._receipt
+
+    @property
+    def transaction(self):
+        """Get the transaction."""
+        return self._transaction
 
     @staticmethod
     def encode(
@@ -496,10 +516,11 @@ class TransactionReceipt:
         return (
             isinstance(other, TransactionReceipt)
             and self.ledger_id == other.ledger_id
-            and self.body == other.body
+            and self.receipt == other.receipt
+            and self.transaction == other.transaction
         )
 
     def __str__(self):
-        return "TransactionReceipt: ledger_id={}, body={}".format(
-            self.ledger_id, self.body,
+        return "TransactionReceipt: ledger_id={}, receipt={}, transaction={}".format(
+            self.ledger_id, self.receipt, self.transaction
         )

@@ -371,17 +371,6 @@ class GenericOefSearchHandler(Handler):
                 self.context.agent_name, oef_search_msg
             )
         )
-        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
-            performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
-            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
-            error_msg="Invalid dialogue.",
-            error_data={"oef_search_message": oef_search_msg.encode()},
-        )
-        default_msg.counterparty = oef_search_msg.counterparty
-        default_dialogues.update(default_msg)
-        self.context.outbox.put_message(message=default_msg)
 
     def _handle_error(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -512,21 +501,10 @@ class GenericSigningHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
+            "[{}]: received invalid signing message={}, unidentified dialogue.".format(
                 self.context.agent_name, signing_msg
             )
         )
-        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
-            performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
-            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
-            error_msg="Invalid dialogue.",
-            error_data={"signing_msg_message": signing_msg.encode()},
-        )
-        default_msg.counterparty = signing_msg.counterparty
-        default_dialogues.update(default_msg)
-        self.context.outbox.put_message(message=default_msg)
 
     def _handle_signed_transaction(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -549,11 +527,10 @@ class GenericSigningHandler(Handler):
         ), "Could not retrieve last message in ledger api dialogue"
         ledger_api_msg = LedgerApiMessage(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-            dialogue_reference=last_ledger_api_msg.dialogue_reference,
+            dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
             target=last_ledger_api_msg.message_id,
             message_id=last_ledger_api_msg.message_id + 1,
-            ledger_id=signing_msg.crypto_id,
-            signed_tx=signing_msg.signed_transaction,
+            signed_transaction=signing_msg.signed_transaction,
         )
         ledger_api_msg.counterparty = LEDGER_API_ADDRESS
         ledger_api_dialogue.update(ledger_api_msg)
@@ -661,17 +638,6 @@ class GenericLedgerApiHandler(Handler):
                 self.context.agent_name, ledger_api_msg
             )
         )
-        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
-            performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
-            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
-            error_msg="Invalid dialogue.",
-            error_data={"ledger_api_message": ledger_api_msg.encode()},
-        )
-        default_msg.counterparty = ledger_api_msg.counterparty
-        default_dialogues.update(default_msg)
-        self.context.outbox.put_message(message=default_msg)
 
     def _handle_balance(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -708,15 +674,22 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
+        self.context.logger.info(
+            "[{}]: received raw transaction={}".format(
+                self.context.agent_name, ledger_api_msg
+            )
+        )
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(self.context.skill_id,),
-            crypto_id=ledger_api_msg.ledger_id,
-            transaction=ledger_api_msg.raw_transaction,
+            skill_callback_ids=(str(self.context.skill_id),),
+            crypto_id=ledger_api_msg.raw_transaction.ledger_id,
+            raw_transaction=ledger_api_msg.raw_transaction,
+            terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
             skill_callback_info={},
         )
+        signing_msg.counterparty = "decision_maker"
         signing_dialogue = cast(
             Optional[SigningDialogue], signing_dialogues.update(signing_msg)
         )

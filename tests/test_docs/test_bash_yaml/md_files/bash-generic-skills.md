@@ -10,6 +10,7 @@ aea install
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/generic_seller:0.6.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -23,6 +24,7 @@ aea install
 aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/generic_buyer:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -65,7 +67,15 @@ aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.currency
 aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+cd my_seller_aea
+aea config set vendor.fetchai.skills.generic_seller.is_abstract false --type bool
+```
+``` bash
+cd my_buyer_aea
+aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
+```
+``` bash
+aea run
 ```
 ``` bash
 cd ..
@@ -78,9 +88,17 @@ ledger_apis:
     network: testnet
 ```
 ``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+```
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
+```
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 ``` yaml
 ledger_apis:
@@ -117,12 +135,12 @@ models:
       has_data_source: false
       is_ledger_tx: true
       ledger_id: fetchai
-      seller_tx_fee: 0
       service_data:
         city: Cambridge
         country: UK
-      total_price: 10
-    class_name: Strategy 
+      service_id: generic_service
+      unit_price: 10
+    class_name: GenericStrategy 
 ```
 ``` yaml
 models:
@@ -130,13 +148,30 @@ models:
   strategy:
     args:
       currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
       is_ledger_tx: true
       ledger_id: fetchai
-      max_buyer_tx_fee: 1
-      max_price: 4
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
       search_query:
-        constraint_type: ==
-        search_term: country
-        search_value: UK
-    class_name: Strategy
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: GenericStrategy
 ```
