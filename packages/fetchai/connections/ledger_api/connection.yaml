@@ -11,8 +11,7 @@ fingerprint_ignore_patterns: []
 protocols:
 - fetchai/ledger_api:0.1.0
 class_name: LedgerApiConnection
-config:
-  foo: bar
+config: {}
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/ledger_api:0.1.0

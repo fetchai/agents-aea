@@ -82,6 +82,7 @@ async def test_get_balance(ledger_id, address, ledger_apis_connection: Connectio
     request = LedgerApiMessage(
         LedgerApiMessage.Performative.GET_BALANCE, ledger_id=ledger_id, address=address
     )
+    request.counterparty = "fetchai/ledger_api:0.1.0"
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -120,6 +121,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
             EthereumCrypto.identifier, signed_transaction
         ),
     )
+    request.counterparty = "fetchai/ledger_api:0.1.0"
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)

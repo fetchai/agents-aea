@@ -36,6 +36,7 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
+from packages.fetchai.connections.ledger_api.connection import LedgerApiConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
@@ -60,6 +61,10 @@ def run():
         addr=HOST, port=PORT, connection_id=OEFConnection.connection_id
     )
     oef_connection = OEFConnection(configuration=configuration, identity=identity)
+    configuration = ConnectionConfig(connection_id=LedgerApiConnection.connection_id)
+    ledger_api_connection = LedgerApiConnection(
+        configuration=configuration, identity=identity
+    )
     ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
     resources = Resources()
 
@@ -69,6 +74,12 @@ def run():
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
     resources.add_protocol(default_protocol)
+
+    # Add the ledger_api protocol (which is part of the AEA distribution)
+    ledger_api_protocol = Protocol.from_dir(
+        os.path.join(AEA_DIR, "protocols", "ledger_api")
+    )
+    resources.add_protocol(ledger_api_protocol)
 
     # Add the oef search protocol (which is a package)
     oef_protocol = Protocol.from_dir(
@@ -81,6 +92,9 @@ def run():
         os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "fipa",)
     )
     resources.add_protocol(fipa_protocol)
+
+    # Add the OEF connection
+    resources.add_connection(ledger_api_connection)
 
     # Add the OEF connection
     resources.add_connection(oef_connection)
