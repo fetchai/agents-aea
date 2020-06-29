@@ -126,15 +126,15 @@ def locate(path: str) -> Any:
         else:
             break
     if module:
-        object = module
+        object_ = module
     else:
-        object = builtins
+        object_ = builtins
     for part in parts[n:]:
         try:
-            object = getattr(object, part)
+            object_ = getattr(object_, part)
         except AttributeError:
             return None
-    return object
+    return object_
 
 
 def load_aea_package(configuration: ComponentConfiguration) -> None:
@@ -146,8 +146,8 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     :param configuration: the configuration object.
     :return: None
     """
-    dir = configuration.directory
-    assert dir is not None
+    dir_ = configuration.directory
+    assert dir_ is not None
 
     # patch sys.modules with dummy modules
     prefix_root = "packages"
@@ -158,9 +158,9 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     sys.modules[prefix_author] = types.ModuleType(prefix_author)
     sys.modules[prefix_pkg_type] = types.ModuleType(prefix_pkg_type)
 
-    for subpackage_init_file in dir.rglob("__init__.py"):
+    for subpackage_init_file in dir_.rglob("__init__.py"):
         parent_dir = subpackage_init_file.parent
-        relative_parent_dir = parent_dir.relative_to(dir)
+        relative_parent_dir = parent_dir.relative_to(dir_)
         if relative_parent_dir == Path("."):
             # this handles the case when 'subpackage_init_file'
             # is path/to/package/__init__.py

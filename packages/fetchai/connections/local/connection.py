@@ -290,7 +290,7 @@ class LocalNode:
         """Send a message."""
         destination = envelope.to
         destination_queue = self._out_queues[destination]
-        destination_queue._loop.call_soon_threadsafe(destination_queue.put_nowait, envelope)  # type: ignore
+        destination_queue._loop.call_soon_threadsafe(destination_queue.put_nowait, envelope)  # type: ignore  # pylint: disable=protected-access
         logger.debug("Send envelope {}".format(envelope))
 
     async def disconnect(self, address: Address) -> None:
@@ -352,7 +352,7 @@ class OEFLocalConnection(Connection):
             raise AEAConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )
-        self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore
+        self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore  # pylint: disable=protected-access
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """

@@ -293,7 +293,7 @@ class Transaction:
 
     def __init__(
         self,
-        id: TransactionId,
+        id_: TransactionId,
         sender_addr: Address,
         counterparty_addr: Address,
         amount_by_currency_id: Dict[str, int],
@@ -319,7 +319,7 @@ class Transaction:
         :param counterparty_signature: the signature of the transaction counterparty
         :return: None
         """
-        self._id = id
+        self._id = id_
         self._sender_addr = sender_addr
         self._counterparty_addr = counterparty_addr
         self._amount_by_currency_id = amount_by_currency_id

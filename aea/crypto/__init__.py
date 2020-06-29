@@ -21,8 +21,8 @@
 
 from aea.crypto.registry import make, register  # noqa
 
-register(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
+register(id_="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
 
-register(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
+register(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
 
-register(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
+register(id_="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")

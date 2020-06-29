@@ -154,7 +154,9 @@ class P2PLibp2pClientConnection(Connection):
 
             # connect the tcp socket
             self._reader, self._writer = await asyncio.open_connection(
-                self.node_uri.host, self.node_uri._port, loop=self._loop
+                self.node_uri.host,
+                self.node_uri._port,  # pylint: disable=protected-access
+                loop=self._loop,
             )
 
             # send agent address to node

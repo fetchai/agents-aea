@@ -122,7 +122,9 @@ class HTTPClientAsyncChannel:
                 status_code=resp.status,
                 headers=resp.headers,
                 status_text=resp.reason,
-                bodyy=resp._body if resp._body is not None else b"",
+                bodyy=resp._body  # pylint: disable=protected-access
+                if resp._body is not None  # pylint: disable=protected-access
+                else b"",
             )
         except Exception:  # pragma: nocover # pylint: disable=broad-except
             envelope = self.to_envelope(

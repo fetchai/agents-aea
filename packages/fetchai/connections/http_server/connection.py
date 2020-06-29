@@ -93,9 +93,9 @@ class Request(OpenAPIRequest):
         return self._id
 
     @id.setter
-    def id(self, id: RequestId) -> None:
+    def id(self, value: RequestId) -> None:
         """Set the request id."""
-        self._id = id
+        self._id = value
 
     @classmethod
     async def create(cls, http_request: BaseRequest) -> "Request":

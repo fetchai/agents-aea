@@ -43,7 +43,7 @@ class GenericDataModel(DataModel):
             self.attributes.append(
                 Attribute(
                     name=values["name"],  # type: ignore
-                    type=SUPPORTED_TYPES[values["type"]],
+                    type_=SUPPORTED_TYPES[values["type"]],
                     is_required=values["is_required"],
                 )
             )
