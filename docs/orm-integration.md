@@ -81,6 +81,7 @@ The following steps create the seller from scratch:
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/generic_seller:0.6.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
@@ -91,6 +92,11 @@ In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following 
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 
 </p>
@@ -114,6 +120,7 @@ The following steps create the car data client from scratch:
 aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/generic_buyer:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
@@ -126,6 +133,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 
 </p>
@@ -207,31 +219,33 @@ aea generate-wealth cosmos
 In `my_seller_aea/vendor/fetchai/skills/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
 ``` yaml
 models:
-  dialogues:
-    args: {}
-    class_name: Dialogues
+  ...
   strategy:
-    class_name: Strategy
     args:
-      total_price: 10
-      seller_tx_fee: 0
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: True
-      has_data_source: True
-      data_for_sale: {}
-      search_schema:
+      currency_id: FET
+      data_for_sale:
+        pressure: 20
+        temperature: 26
+        wind: 10
+      data_model:
         attribute_one:
+          is_required: true
           name: country
           type: str
-          is_required: True
         attribute_two:
+          is_required: true
           name: city
           type: str
-          is_required: True
-      search_data:
-        country: UK
+      data_model_name: location
+      has_data_source: false
+      is_ledger_tx: true
+      ledger_id: fetchai
+      service_data:
         city: Cambridge
+        country: UK
+      service_id: generic_service
+      unit_price: 10
+    class_name: GenericStrategy
 dependencies:
   SQLAlchemy: {}
 ```
@@ -241,22 +255,36 @@ In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_b
 
 ``` yaml
 models:
-  dialogues:
-    args: {}
-    class_name: Dialogues
+  ...
   strategy:
-    class_name: Strategy
     args:
-      max_price: 40
-      max_buyer_tx_fee: 100
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: True
+      currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      is_ledger_tx: true
+      ledger_id: fetchai
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
       search_query:
-        search_term: country
-        search_value: UK
-        constraint_type: '=='
-ledgers: ['fetchai']
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: GenericStrategy
 ```
 
 <details><summary>Alternatively, configure skills for other test networks.</summary>
@@ -266,53 +294,69 @@ ledgers: ['fetchai']
 <br>
 ``` yaml
 models:
-  dialogues:
-    args: {}
-    class_name: Dialogues
+  ...
   strategy:
-    class_name: Strategy
     args:
-      total_price: 10
-      seller_tx_fee: 0
-      currency_id: 'ETH'
-      ledger_id: 'ethereum'
-      is_ledger_tx: True
-      has_data_source: True
-      data_for_sale: {}
-      search_schema:
+      currency_id: ETH
+      data_for_sale:
+        pressure: 20
+        temperature: 26
+        wind: 10
+      data_model:
         attribute_one:
+          is_required: true
           name: country
           type: str
-          is_required: True
         attribute_two:
+          is_required: true
           name: city
           type: str
-          is_required: True
-      search_data:
-        country: UK
+      data_model_name: location
+      has_data_source: false
+      is_ledger_tx: true
+      ledger_id: ethereum
+      service_data:
         city: Cambridge
+        country: UK
+      service_id: generic_service
+      unit_price: 10
+    class_name: GenericStrategy
 dependencies:
   SQLAlchemy: {}
 ```
 
 ``` yaml
 models:
-  dialogues:
-    args: {}
-    class_name: Dialogues
+  ...
   strategy:
-    class_name: Strategy
     args:
-      max_price: 40
-      max_buyer_tx_fee: 20000
-      currency_id: 'ETH'
-      ledger_id: 'ethereum'
-      is_ledger_tx: True
+      currency_id: ETH
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      is_ledger_tx: true
+      ledger_id: ethereum
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
       search_query:
-        search_term: country
-        search_value: UK
-        constraint_type: '=='
-ledgers: ['ethereum']
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: GenericStrategy
 ```
 
 </p>
@@ -419,12 +463,26 @@ After modifying the skill we need to fingerprint it:
 aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
 ```
 
+### Update the skill configs
+
+Both skills are abstract skills, make them instantiatable:
+
+``` bash
+cd my_seller_aea
+aea config set vendor.fetchai.skills.generic_seller.is_abstract false --type bool
+```
+
+``` bash
+cd my_buyer_aea
+aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
+```
+
 ## Run the AEAs
 
 Run both AEAs from their respective terminals
 
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run
 ```
 You will see that the AEAs negotiate and then transact using the configured testnet.
 

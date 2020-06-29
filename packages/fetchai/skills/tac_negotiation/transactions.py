@@ -318,7 +318,7 @@ class Transactions(Model):
         """
         as_seller = role == Dialogue.AgentRole.SELLER
 
-        transaction_id = transaction_msg.tx_id  # TODO: fix
+        transaction_id = transaction_msg.dialogue_reference[0]  # TODO: fix
         assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)
         self._locked_txs[transaction_id] = transaction_msg
@@ -336,7 +336,7 @@ class Transactions(Model):
 
         :return: the transaction
         """
-        transaction_id = transaction_msg.tx_id
+        transaction_id = transaction_msg.dialogue_reference[0]  # TODO: fix
         assert transaction_id in self._locked_txs
         transaction_msg = self._locked_txs.pop(transaction_id)
         self._locked_txs_as_buyer.pop(transaction_id, None)

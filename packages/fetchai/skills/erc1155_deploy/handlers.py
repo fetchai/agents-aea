@@ -296,7 +296,10 @@ class SigningHandler(Handler):
         """
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         strategy = cast(Strategy, self.context.strategy)
-        if signing_msg.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
+        if (
+            signing_msg.dialogue_reference[0]
+            == contract.Performative.CONTRACT_DEPLOY.value
+        ):
             tx_signed = signing_msg.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
@@ -335,7 +338,10 @@ class SigningHandler(Handler):
                     )
                 )
 
-        elif signing_msg.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
+        elif (
+            signing_msg.dialogue_reference[0]
+            == contract.Performative.CONTRACT_CREATE_BATCH.value
+        ):
             tx_signed = signing_msg.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
@@ -370,7 +376,10 @@ class SigningHandler(Handler):
                         self.context.agent_name, tx_digest
                     )
                 )
-        elif signing_msg.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
+        elif (
+            signing_msg.dialogue_reference[0]
+            == contract.Performative.CONTRACT_MINT_BATCH.value
+        ):
             tx_signed = signing_msg.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
@@ -413,7 +422,8 @@ class SigningHandler(Handler):
                     "[{}]: Current balances: {}".format(self.context.agent_name, result)
                 )
         elif (
-            signing_msg.tx_id == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
+            signing_msg.dialogue_reference[0]
+            == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
         ):
             tx_signed = signing_msg.signed_transaction
             tx_digest = self.context.ledger_apis.get_api(

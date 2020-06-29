@@ -30,3 +30,6 @@ DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.3.0")
 DEFAULT_LEDGER = FetchAICrypto.identifier
 DEFAULT_REGISTRY_PATH = DRP
 DEFAULT_LICENSE = DL
+SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.1.0")
+STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.1.0")
+LOCAL_PROTOCOLS = [DEFAULT_PROTOCOL, SIGNING_PROTOCOL, STATE_UPDATE_PROTOCOL]

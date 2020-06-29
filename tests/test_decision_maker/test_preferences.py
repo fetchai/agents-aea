@@ -40,17 +40,13 @@ def test_preferences_init():
     """Test the preferences init()."""
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
-    tx_fee = 9
     preferences = Preferences()
     preferences.set(
         exchange_params_by_currency_id=exchange_params,
         utility_params_by_good_id=utility_params,
-        tx_fee=tx_fee,
     )
     assert preferences.utility_params_by_good_id is not None
     assert preferences.exchange_params_by_currency_id is not None
-    assert preferences.seller_transaction_fee == 4
-    assert preferences.buyer_transaction_fee == 5
     assert preferences.is_initialized
     copied_preferences = copy.copy(preferences)
     assert (
@@ -68,12 +64,10 @@ def test_logarithmic_utility():
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
     good_holdings = {"good_id": 2}
-    tx_fee = 9
     preferences = Preferences()
     preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
-        tx_fee=tx_fee,
     )
     log_utility = preferences.logarithmic_utility(quantities_by_good_id=good_holdings)
     assert log_utility is not None, "Log_utility must not be none."
@@ -84,12 +78,10 @@ def test_linear_utility():
     currency_holdings = {"FET": 100}
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
-    tx_fee = 9
     preferences = Preferences()
     preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
-        tx_fee=tx_fee,
     )
     linear_utility = preferences.linear_utility(amount_by_currency_id=currency_holdings)
     assert linear_utility is not None, "Linear utility must not be none."
@@ -101,12 +93,10 @@ def test_utility():
     exchange_params = {"FET": 10.0}
     currency_holdings = {"FET": 100}
     good_holdings = {"good_id": 2}
-    tx_fee = 9
     preferences = Preferences()
     preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
-        tx_fee=tx_fee,
     )
     score = preferences.utility(
         quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings,
@@ -124,12 +114,10 @@ def test_marginal_utility():
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
     good_holdings = {"good_id": 2}
-    tx_fee = 9
     preferences = Preferences()
     preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
-        tx_fee=tx_fee,
     )
     delta_good_holdings = {"good_id": 1}
     delta_currency_holdings = {"FET": -5}
@@ -151,7 +139,6 @@ def test_score_diff_from_transaction():
     currency_holdings = {"FET": 100}
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
-    tx_fee = 3
     ownership_state = OwnershipState()
     ownership_state.set(
         amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings
@@ -160,7 +147,6 @@ def test_score_diff_from_transaction():
     preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
-        tx_fee=tx_fee,
     )
     terms = Terms(
         ledger_id="ethereum",

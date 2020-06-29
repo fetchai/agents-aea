@@ -361,7 +361,6 @@ class Preferences(BasePreferences):
         """Instantiate an agent preference object."""
         self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
-        self._transaction_fees = None  # type: Optional[Dict[str, int]]
         self._quantity_shift = QUANTITY_SHIFT
 
     def set(
@@ -394,10 +393,8 @@ class Preferences(BasePreferences):
 
         Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
         """
-        return (
-            (self._exchange_params_by_currency_id is not None)
-            and (self._utility_params_by_good_id is not None)
-            and (self._transaction_fees is not None)
+        return (self._exchange_params_by_currency_id is not None) and (
+            self._utility_params_by_good_id is not None
         )
 
     @property
@@ -556,7 +553,6 @@ class Preferences(BasePreferences):
                 self.exchange_params_by_currency_id
             )
             preferences._utility_params_by_good_id = self.utility_params_by_good_id
-            preferences._transaction_fees = self._transaction_fees
         return preferences
 
 
@@ -592,7 +588,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             self._handle_signing_message(message)
         elif isinstance(message, StateUpdateMessage):
             self._handle_state_update_message(message)
-        else:
+        else:  # pragma: no cover
             logger.error(
                 "[{}]: cannot handle message={} of type={}".format(
                     self.agent_name, message, type(message)
@@ -616,12 +612,12 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         signing_dialogue = cast(
             Optional[SigningDialogue], self.signing_dialogues.update(signing_msg)
         )
-        if signing_dialogue is None:
+        if signing_dialogue is None:  # pragma: no cover
             logger.error(
                 "[{}]: Could not construct signing dialogue. Aborting!".format(
                     self.agent_name
                 )
-            )  # pragma: no cover
+            )
             return
 
         # check if the transaction is acceptable and process it accordingly
@@ -629,12 +625,12 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             self._handle_message_signing(signing_msg, signing_dialogue)
         elif signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
             self._handle_transaction_signing(signing_msg, signing_dialogue)
-        else:
+        else:  # pragma: no cover
             logger.error(
                 "[{}]: Unexpected transaction message performative".format(
                     self.agent_name
                 )
-            )  # pragma: no cover
+            )
 
     def _handle_message_signing(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -740,12 +736,12 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             Optional[StateUpdateDialogue],
             self.state_update_dialogues.update(state_update_msg),
         )
-        if state_update_dialogue is None:
+        if state_update_dialogue is None:  # pragma: no cover
             logger.error(
                 "[{}]: Could not construct state_update dialogue. Aborting!".format(
                     self.agent_name
                 )
-            )  # pragma: no cover
+            )
             return
 
         if state_update_msg.performative == StateUpdateMessage.Performative.INITIALIZE:

@@ -31,11 +31,18 @@ from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
+from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+from aea.protocols.base import Message
 
-from packages.fetchai.protocols.ledger_api import LedgerApiMessage
-from packages.fetchai.protocols.ledger_api.custom_types import SignedTransaction
+from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
     COSMOS_ADDRESS_ONE,
@@ -43,9 +50,6 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_ADDRESS_ONE,
     ROOT_DIR,
-)
-from tests.test_packages.test_connections.test_ledger_api.utils import (
-    make_ethereum_transaction,
 )
 
 logger = logging.getLogger(__name__)
@@ -59,6 +63,43 @@ ledger_ids = pytest.mark.parametrize(
         (CosmosCrypto.identifier, COSMOS_ADDRESS_ONE),
     ],
 )
+
+
+class LedgerApiDialogues(BaseLedgerApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, agent_address: str) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        BaseLedgerApiDialogues.__init__(self, agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return LedgerApiDialogue.AgentRole.LEDGER
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> LedgerApiDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = LedgerApiDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role,
+        )
+        return dialogue
 
 
 @pytest.fixture()
@@ -79,22 +120,34 @@ async def ledger_apis_connection(request):
 @ledger_ids
 async def test_get_balance(ledger_id, address, ledger_apis_connection: Connection):
     """Test get balance."""
+    ledger_api_dialogues = LedgerApiDialogues(address)
     request = LedgerApiMessage(
-        LedgerApiMessage.Performative.GET_BALANCE,
-        dialogue_reference=(address, ""),
+        performative=LedgerApiMessage.Performative.GET_BALANCE,
+        dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ledger_id,
         address=address,
     )
-    request.counterparty = ledger_id
-    envelope = Envelope(address, "", request.protocol_id, message=request)
+
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    ledger_api_dialogue = ledger_api_dialogues.update(request)
+    assert ledger_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    message = cast(LedgerApiMessage, response.message)
-    actual_balance_amount = message.balance
+    response_msg = cast(LedgerApiMessage, response.message)
+    response_dialogue = ledger_api_dialogues.update(response_msg)
+    assert response_dialogue == ledger_api_dialogue
+    actual_balance_amount = response_msg.balance
     expected_balance_amount = aea.crypto.registries.make_ledger_api(
         ledger_id
     ).get_balance(address)
@@ -108,25 +161,39 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     crypto2 = EthereumCrypto()
     api = aea.crypto.registries.make_ledger_api(EthereumCrypto.identifier)
     api = cast(EthereumApi, api)
+    ledger_api_dialogues = LedgerApiDialogues(crypto1.address)
 
     amount = 40000
     fee = 30000
     tx_nonce = api.generate_tx_nonce(crypto1.address, crypto2.address)
-    tx = make_ethereum_transaction(
-        crypto1, api, crypto2.address, amount, fee, tx_nonce, chain_id=3
+
+    raw_tx = api.get_transfer_transaction(
+        sender_address=crypto1.address,
+        destination_address=crypto2.address,
+        amount=amount,
+        tx_fee=fee,
+        tx_nonce=tx_nonce,
+        chain_id=3,
     )
 
-    signed_transaction = crypto1.sign_transaction(tx)
+    signed_transaction = crypto1.sign_transaction(raw_tx)
     request = LedgerApiMessage(
-        LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-        dialogue_reference=(crypto1.address, ""),
+        performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+        dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=EthereumCrypto.identifier,
         signed_transaction=SignedTransaction(
             EthereumCrypto.identifier, signed_transaction
         ),
     )
-    request.counterparty = EthereumCrypto.identifier
-    envelope = Envelope("", "", request.protocol_id, message=request)
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    ledger_api_dialogue = ledger_api_dialogues.update(request)
+    assert ledger_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=crypto1.address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -138,9 +205,21 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         response_message.performative
         == LedgerApiMessage.Performative.TRANSACTION_DIGEST
     )
+    response_dialogue = ledger_api_dialogues.update(response_message)
+    assert response_dialogue == ledger_api_dialogue
     assert response_message.transaction_digest is not None
     assert type(response_message.transaction_digest) == str
     assert type(response_message.transaction_digest.startswith("0x"))
+
+    # check that the transaction is settled (to update nonce!)
+    is_settled = False
+    attempts = 0
+    while not is_settled and attempts < 60:
+        attempts += 1
+        tx_receipt = api.get_transaction_receipt(response_message.transaction_digest)
+        is_settled = api.is_transaction_settled(tx_receipt,)
+        await asyncio.sleep(4.0)
+    assert is_settled, "Transaction not settled."
 
 
 # @pytest.mark.asyncio

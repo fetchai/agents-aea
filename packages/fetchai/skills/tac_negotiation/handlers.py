@@ -581,7 +581,7 @@ class SigningHandler(Handler):
                     target=last_fipa_message.message_id,
                     info={
                         "tx_signature": tx_message.signed_transaction,
-                        "tx_id": tx_message.tx_id,
+                        "tx_id": tx_message.dialogue_reference[0],
                     },
                 )
                 fipa_msg.counterparty = dialogue.dialogue_label.dialogue_opponent_addr

@@ -26,6 +26,7 @@ from queue import Queue
 from threading import Thread
 from types import SimpleNamespace
 from typing import List, Optional
+from uuid import uuid4
 
 from aea.crypto.wallet import Wallet
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
@@ -375,5 +376,6 @@ class DecisionMaker:
         :param message: the internal message
         :return: None
         """
+        message.counterparty = uuid4().hex  # TODO: temporary fix only
         message.is_incoming = True
         self.decision_maker_handler.handle(message)

@@ -254,7 +254,7 @@ class SigningHandler(Handler):
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_TRANSACTION
             and (
-                signing_msg_response.tx_id
+                signing_msg_response.dialogue_reference[0]
                 == ERC1155Contract.Performative.CONTRACT_SIGN_HASH_SINGLE.value
             )
         ):

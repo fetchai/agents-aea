@@ -273,7 +273,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             dialogue.update(response)
         return response
 
-    def get_error_message(
+    def get_error_message(  # type: ignore
         self,
         e: Exception,
         api: LedgerApi,

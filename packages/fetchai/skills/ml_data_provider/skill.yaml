@@ -7,15 +7,19 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
-  behaviours.py: QmSQh4urPybtBNk2nhZBYxC9T1i1Vge4xEXq6JEMzsguSK
-  handlers.py: QmVkA54M8VAhQygB9HKs3RJpVixUdjCwByTukr1hWzYR5c
-  strategy.py: QmWgJCoGuDucunjQBHTQ4gUrFxwgCCL9DtQ5zfurums7yn
+  behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
+  dialogues.py: QmXKW1i7VouuwSMQUvmHyATudHph9QWtSp2SzDVPzgbPiY
+  handlers.py: QmRqLnNjTqzKm8L8JkbHqUWv5yTdjH3J38mjMiQdxnqnKm
+  strategy.py: Qma9H4dramyaXa6Y6R5cGTgf8qhq6J7PFYXN1k8qyE61Ji
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
+- fetchai/default:0.3.0
+- fetchai/ledger_api:0.1.0
 - fetchai/ml_trade:0.3.0
 - fetchai/oef_search:0.3.0
-skills: []
+skills:
+- fetchai/generic_seller:0.6.0
 behaviours:
   service_registration:
     args:
@@ -24,14 +28,27 @@ behaviours:
 handlers:
   ml_trade:
     args: {}
-    class_name: MLTradeHandler
+    class_name: MlTradeHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  ml_trade_dialogues:
+    args: {}
+    class_name: MlTradeDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   strategy:
     args:
       batch_size: 2
       buyer_tx_fee: 10
       currency_id: FET
       dataset_id: fmnist
+      is_ledger_tx: true
       ledger_id: fetchai
       price_per_data_batch: 100
       seller_tx_fee: 0

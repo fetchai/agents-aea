@@ -37,6 +37,7 @@ from aea.contracts.base import Contract
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
@@ -450,25 +451,16 @@ class TestFilter:
     def test_handle_internal_messages(self):
         """Test that the internal messages are handled."""
         t = SigningMessage(
-            performative=SigningMessage.Performative.SUCCESSFUL_SETTLEMENT,
-            tx_id="transaction0",
-            skill_callback_ids=[PublicId("dummy_author", "dummy", "0.1.0")],
-            tx_sender_addr="pk1",
-            tx_counterparty_addr="pk2",
-            tx_amount_by_currency_id={"FET": 2},
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
-            tx_quantities_by_good_id={"Unknown": 10},
-            ledger_id="fetchai",
-            info={},
-            tx_digest="some_tx_digest",
+            performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+            skill_callback_ids=[str(PublicId("dummy_author", "dummy", "0.1.0"))],
+            skill_callback_info={},
+            crypto_id="ledger_id",
+            signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea._filter.handle_internal_messages()
 
-        internal_handlers_list = self.aea.resources.get_handlers(
-            PublicId.from_str("fetchai/internal:0.1.0")
-        )
+        internal_handlers_list = self.aea.resources.get_handlers(t.protocol_id)
         assert len(internal_handlers_list) == 1
         internal_handler = internal_handlers_list[0]
         assert len(internal_handler.handled_internal_messages) == 1

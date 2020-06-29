@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
-  behaviours.py: QmeKWfS3kQJ3drc8zTms2mPNpq7yNHj6eoYgd5edS9R5HN
+  behaviours.py: QmbTf28S46E5w1ytYAcRCZnrVxZ8DcVYAWn1QdNnHvZVLL
+  dialogues.py: QmQx34AzBsGFPhu46LxNS9YT9xdAQHr7gCuR2cxrqWd9z7
   game.py: QmNxw6Ca7iTQTCU2fZ6ftJfDQpwTBtCCwMPRL1WvT5CzW9
-  handlers.py: QmaDPFbNuvvSWtxFs7y8NvwkcM1qdRp7XPNkFNtpV2e6Jm
-  search.py: QmYsFDh6BY8ENi3dPiZs1DSvkrCw2wgjBQjNfJXxRQf9us
+  handlers.py: QmZtnLZSeUffgzQTMQnbygaz4k1hgYDoR3QRreLq4uE7Sx
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.5.0
@@ -22,17 +22,17 @@ behaviours:
   tac:
     args:
       tick_interval: 5
-    class_name: TACBehaviour
+    class_name: TacSearchBehaviour
 handlers:
   oef:
     args: {}
-    class_name: OEFSearchHandler
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
   tac:
     args: {}
-    class_name: TACHandler
-  transaction:
-    args: {}
-    class_name: TransactionHandler
+    class_name: TacHandler
 models:
   game:
     args:
@@ -40,7 +40,13 @@ models:
       is_using_contract: false
       ledger_id: ethereum
     class_name: Game
-  search:
+  oef_search_dialogues:
     args: {}
-    class_name: Search
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  tac_dialogues:
+    args: {}
+    class_name: TacDialogues
 dependencies: {}
