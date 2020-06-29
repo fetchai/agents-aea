@@ -219,7 +219,7 @@ def try_run_protoc(path_to_generated_protocol_package, name) -> None:
                 "{}/{}.proto".format(path_to_generated_protocol_package, name),
             ],
             stderr=subprocess.PIPE,
-            text=True,
+            encoding='utf-8',
             check=True,
             env=os.environ.copy(),
         )
