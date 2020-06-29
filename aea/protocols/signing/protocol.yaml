@@ -5,11 +5,11 @@ description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
-  __init__.py: QmYDVCPKAeoS9R5zJy2UhtZtPJmhmqNC6cUdLSVLeUwpj2
-  custom_types.py: QmYwu85XJbHPVsqZQ4nW8TnWAopwignNybBbqxbvSZggTp
-  dialogues.py: QmXCGmE4rhtyGyUUwsXbxSy6oBgskEcxhmn4swVtmQUMee
-  message.py: QmNchPywqTpnnVcWYukVCYNu1shPzqz8zEYkuGrMo2Q9xr
-  serialization.py: QmT7DmWGP1G6CJcddT18qNq9om7n9sktTLjvynSNhoSKqT
+  __init__.py: QmcCL3TTdvd8wxYKzf2d3cgKEtY9RzLjPCn4hex4wmb6h6
+  custom_types.py: QmQ9mPpkKkiWvGCJ58NH22AHDesRY6bpvxfNcKbvEFsPqA
+  dialogues.py: QmZCscy8gLBTpFJeZNs3CEQLFhVdzhrJdZhdSZgZYewE5S
+  message.py: QmbVhcXVsL3A2CwTsup1rh9QDFC6x4LrwT2dW8mywPw1Pv
+  serialization.py: QmPg4s1d6DmU7e1xAZ2eq3smusRTvexPSDqWAD4NYopCBR
   signing.proto: QmeX85LiGpbV8oSjxVrY4zDFh5cwL1yEJ4H1r6ZVs26HrA
   signing_pb2.py: QmXoYqAu7LpnBgjRgwzNDZU1w7EDDgC4fMrZbBhuC7bGeG
 fingerprint_ignore_patterns: []

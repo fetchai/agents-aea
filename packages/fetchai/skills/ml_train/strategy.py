@@ -19,7 +19,6 @@
 
 """This module contains the strategy class."""
 
-import datetime
 from typing import cast
 
 from aea.helpers.search.models import (
@@ -37,6 +36,7 @@ DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_LEDGER_ID = "None"
+DEFAULT_MAX_NEGOTIATIONS = 1
 
 
 class Strategy(Model):
@@ -49,11 +49,12 @@ class Strategy(Model):
         self._max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_TX_FEE)
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-        self.is_ledger_tx = kwargs.pop("is_ledger_tx", False)
+        self._is_ledger_tx = kwargs.pop("is_ledger_tx", False)
+        self._max_negotiations = kwargs.pop(
+            "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
+        )
         super().__init__(**kwargs)
-        self._search_id = 0
-        self.is_searching = True
-        self._last_search_time = datetime.datetime.now()
+        self._is_searching = False
         self._tx_id = 0
 
     @property
@@ -61,17 +62,28 @@ class Strategy(Model):
         """Get the ledger id."""
         return self._ledger_id
 
-    def get_next_search_id(self) -> int:
-        """
-        Get the next search id and set the search time.
+    @property
+    def is_ledger_tx(self) -> str:
+        """Get the is_ledger_tx."""
+        return self._is_ledger_tx
 
-        :return: the next search id
-        """
-        self._search_id += 1
-        self._last_search_time = datetime.datetime.now()
-        return self._search_id
+    @property
+    def max_negotiations(self) -> int:
+        """Get the max negotiations."""
+        return self._max_negotiations
 
-    def get_next_transition_id(self) -> str:
+    @property
+    def is_searching(self) -> bool:
+        """Check if the agent is searching."""
+        return self._is_searching
+
+    @is_searching.setter
+    def is_searching(self, is_searching: bool) -> None:
+        """Check if the agent is searching."""
+        assert isinstance(is_searching, bool), "Can only set bool on is_searching!"
+        self._is_searching = is_searching
+
+    def get_next_transaction_id(self) -> str:
         """
         Get the next transaction id.
 

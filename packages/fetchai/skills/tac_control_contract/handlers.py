@@ -254,7 +254,7 @@ class SigningHandler(Handler):
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
-        if signing_msg_response.tx_id == "contract_deploy":
+        if signing_msg_response.dialogue_reference[0] == "contract_deploy":
             game.phase = Phase.CONTRACT_DEPLOYING
             self.context.logger.info(
                 "[{}]: Sending deployment transaction to the ledger...".format(
@@ -272,7 +272,7 @@ class SigningHandler(Handler):
                 self.context.is_active = False
             else:
                 game.contract_manager.deploy_tx_digest = tx_digest
-        elif signing_msg_response.tx_id == "contract_create_batch":
+        elif signing_msg_response.dialogue_reference[0] == "contract_create_batch":
             game.phase = Phase.TOKENS_CREATING
             self.context.logger.info(
                 "[{}]: Sending creation transaction to the ledger...".format(
@@ -290,7 +290,7 @@ class SigningHandler(Handler):
                 self.context.is_active = False
             else:
                 game.contract_manager.create_tokens_tx_digest = tx_digest
-        elif signing_msg_response.tx_id == "contract_mint_batch":
+        elif signing_msg_response.dialogue_reference[0] == "contract_mint_batch":
             game.phase = Phase.TOKENS_MINTING
             self.context.logger.info(
                 "[{}]: Sending minting transaction to the ledger...".format(

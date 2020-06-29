@@ -84,6 +84,7 @@ The following steps create the data provider from scratch:
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/ml_data_provider:0.5.0
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
@@ -94,6 +95,11 @@ In `ml_data_provider/aea-config.yaml` replace `ledger_apis: {}` with the followi
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 
 </p>
@@ -116,6 +122,7 @@ The following steps create the model trainer from scratch:
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/ml_train:0.5.0
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
@@ -128,6 +135,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 
 </p>
@@ -251,7 +263,7 @@ This updates the ml_nodel_trainer skill config (`ml_model_trainer/vendor/fetchai
 
 Finally, run both AEAs from their respective directories:
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run
 ```
 
 You can see that the AEAs find each other, negotiate and eventually trade.

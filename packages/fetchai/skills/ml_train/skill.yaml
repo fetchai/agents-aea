@@ -7,38 +7,60 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
-  behaviours.py: QmetnLHjaJmyfFnEPhrrqMmmbcZtA96Jz77oVCVLV7CL5Z
-  handlers.py: QmY8bGweSxFxkK8fLnc1jgRqLjSLMgNR3huCUZMo7PFzM3
+  behaviours.py: QmQiBzKV5rEFpMQbSjfjzAJ7SqwwGmso6TozWkjdytucLR
+  dialogues.py: QmZeg6FahXWZnQJS1Xfoeztasq9UmrLWYcVssnptF2CQGN
+  handlers.py: QmZ3vC5PqAyrKLr1GdDToBzQFds2CJXytHGrnsoXHb71jZ
+  ml_model.py: QmS2o3zp1BZMnZMci7EHrTKhoD1dVToy3wrPTbMU7YHP9h
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
-  model.py: QmS2o3zp1BZMnZMci7EHrTKhoD1dVToy3wrPTbMU7YHP9h
-  strategy.py: QmWohbZZgYY93PhChSnhdLyx8yWfvWa2qtqPc5sPDWcBiY
+  strategy.py: QmVkziZsEFhpaK6U7JYyPgVwUHwJyhwj17k1TwBLmjmKXi
   tasks.py: QmS5pGbxvMXSh1Vmuvq26e5APnheQJJ3r3BK6GEyUBUpAf
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
+- fetchai/default:0.3.0
+- fetchai/ledger_api:0.1.0
 - fetchai/ml_trade:0.3.0
 - fetchai/oef_search:0.3.0
-skills: []
+skills:
+- fetchai/generic_buyer:0.5.0
 behaviours:
   search:
     args:
       search_interval: 10
-    class_name: MySearchBehaviour
+    class_name: SearchBehaviour
 handlers:
-  oef:
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  ml_trade:
+    args: {}
+    class_name: MlTradeHandler
+  oef_search:
     args: {}
     class_name: OEFSearchHandler
-  train:
+  signing:
     args: {}
-    class_name: TrainHandler
-  transaction:
-    args: {}
-    class_name: MyTransactionHandler
+    class_name: SigningHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
   ml_model:
     args:
       model_config_path: ./skills/ml_train/model.json
     class_name: MLModel
+  ml_trade_dialogues:
+    args: {}
+    class_name: MlTradeDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       currency_id: FET
@@ -46,6 +68,7 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       max_buyer_tx_fee: 20
+      max_negotiations: 1
       max_unit_price: 70
     class_name: Strategy
 dependencies:

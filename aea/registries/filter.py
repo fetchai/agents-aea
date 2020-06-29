@@ -156,6 +156,7 @@ class Filter:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)
                 )
+                signing_message.counterparty = "decision_maker"  # TODO: temp fix
                 signing_message.is_incoming = True
                 handler.handle(cast(Message, signing_message))
             else:

@@ -112,9 +112,8 @@ class GenericStrategy(Model):
         return self._balance
 
     @balance.setter
-    def balance(self, balance) -> None:
-        """Get the balance."""
-        assert isinstance(balance, int), "Can only set int on balance!"
+    def balance(self, balance: int) -> None:
+        """Set the balance."""
         self._balance = balance
 
     @property

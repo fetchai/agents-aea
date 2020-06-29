@@ -40,8 +40,8 @@ from aea.cli.utils.package_utils import (
 from aea.configurations.base import PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
+    LOCAL_PROTOCOLS,
 )
 
 
@@ -116,7 +116,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     is_local = ctx.config.get("is_local")
 
     ctx.clean_paths.append(dest_path)
-    if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
+    if item_public_id in [DEFAULT_CONNECTION, *LOCAL_PROTOCOLS, DEFAULT_SKILL]:
         source_path = find_item_in_distribution(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
     elif is_local:
