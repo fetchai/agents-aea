@@ -10,10 +10,10 @@ speech_acts:
     ledger_id: pt:str
     contract_address: pt:str
     callable: pt:str
-    kwargs: pt:dict
+    kwargs: pt:dict[pt:str, pt:str]
   get_raw_transaction:
     ledger_id: pt:str
-    terms: ct:Terms 
+    terms: ct:Terms
   send_signed_transaction:
     ledger_id: pt:str
     signed_transaction: ct:SignedTransaction
@@ -59,31 +59,28 @@ roles: {agent, ledger}
 end_states: [successful]
 ...
 
-
-speech_acts:
-  get_state:
-    ledger_id: pt:str
-    address: pt:str
-  get_contract_transaction:
-    ledger_id: pt:str
-    transfer: ct:AnyObject 
-  send_signed_transaction:
-    ledger_id: pt:str
-    signed_transaction: ct:AnyObject
-  get_transaction_receipt:
-    ledger_id: pt:str
-    transaction_digest: pt:str
-  state:
-    data: ct:AnyObject
-  transaction:
-    transaction: ct:AnyObject
-  transaction_digest:
-    transaction_digest: pt:str
-  transaction_receipt:
-    transaction_receipt: ct:AnyObject
-  error:
-    code: pt:optional[pt:int]
-    message: pt:optional[pt:str]
-    data: ct:AnyObject
-...
----
+#speech_acts:
+#  get_state:
+#    ledger_id: pt:str
+#    address: pt:str
+#  get_contract_transaction:
+#    ledger_id: pt:str
+#    transfer: ct:AnyObject
+#  send_signed_transaction:
+#    ledger_id: pt:str
+#    signed_transaction: ct:AnyObject
+#  get_transaction_receipt:
+#    ledger_id: pt:str
+#    transaction_digest: pt:str
+#  state:
+#    data: ct:AnyObject
+#  transaction:
+#    transaction: ct:AnyObject
+#  transaction_digest:
+#    transaction_digest: pt:str
+#  transaction_receipt:
+#    transaction_receipt: ct:AnyObject
+#  error:
+#    code: pt:optional[pt:int]
+#    message: pt:optional[pt:str]
+#    data: ct:AnyObject
