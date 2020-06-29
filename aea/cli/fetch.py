@@ -45,10 +45,11 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 @click.pass_context
 def fetch(click_context, public_id, alias, local):
     """Fetch Agent from Registry."""
+    ctx = cast(Context, click_context.obj)
     if local:
-        _fetch_agent_locally(click_context, public_id, alias)
+        fetch_agent_locally(ctx, public_id, alias)
     else:
-        fetch_agent(click_context, public_id, alias)
+        fetch_agent(ctx, public_id, alias)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -64,15 +65,14 @@ def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
 
 
 @clean_after
-def _fetch_agent_locally(
-    click_context, public_id: PublicId, alias: Optional[str] = None
+def fetch_agent_locally(
+    ctx: Context, public_id: PublicId, alias: Optional[str] = None
 ) -> None:
     """
     Fetch Agent from local packages.
 
-    :param click_context: click context object.
+    :param ctx: a Context object.
     :param public_id: public ID of agent to be fetched.
-    :param click_context: the click context.
     :param alias: an optional alias.
     :return: None
     """
@@ -80,7 +80,6 @@ def _fetch_agent_locally(
     source_path = try_get_item_source_path(
         packages_path, public_id.author, "agents", public_id.name
     )
-    ctx = cast(Context, click_context.obj)
 
     try_to_load_agent_config(ctx, agent_src_path=source_path)
     if not _is_version_correct(ctx, public_id):
@@ -110,11 +109,11 @@ def _fetch_agent_locally(
         )
 
     # add dependencies
-    _fetch_agent_deps(click_context)
+    _fetch_agent_deps(ctx)
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 
 
-def _fetch_agent_deps(click_context: click.core.Context) -> None:
+def _fetch_agent_deps(ctx: Context) -> None:
     """
     Fetch agent dependencies.
 
@@ -123,7 +122,6 @@ def _fetch_agent_deps(click_context: click.core.Context) -> None:
     :return: None
     :raises: ClickException re-raises if occures in add_item call.
     """
-    ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", True)
 
     for item_type in ("skill", "connection", "contract", "protocol"):
