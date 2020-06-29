@@ -434,7 +434,7 @@ class AEABuilder:
                     dotted_path, class_name, file_path, e
                 )
             )
-            raise  # log and reraise cause looks we should not build an agent from invalid configuraion
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
 
         return self
 
@@ -1204,7 +1204,7 @@ class AEABuilder:
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
 
-        if agent_configuration.default_connection is None:
+        if agent_configuration._default_connection is None:  # pylint: disable=
             self.set_default_connection(DEFAULT_CONNECTION)
         else:
             self.set_default_connection(

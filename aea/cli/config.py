@@ -61,8 +61,8 @@ def get(ctx: Context, json_path: List[str]):
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx
 def set_command(
-    ctx: Context, json_path: List[str], value, type
-):  # pylint: disable=redefined-builtin
+    ctx: Context, json_path: List[str], value: str, type: str  # pylint: disable=redefined-builtin
+):
     """Set a field."""
     _set_config(ctx, json_path, value, type)
 
@@ -83,7 +83,7 @@ def _get_config_value(ctx: Context, json_path: List[str]):
     return parent_object.get(attribute_name)
 
 
-def _set_config(ctx: Context, json_path: List[str], value, type_str) -> None:
+def _set_config(ctx: Context, json_path: List[str], value: str, type_str: str) -> None:
     config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
