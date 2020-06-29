@@ -102,7 +102,7 @@ def lock_file(file_descriptor: IO[bytes]):
 def write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None:
     """Write envelope to file."""
     encoded_envelope = _encode(envelope, separator=SEPARATOR)
-    logger.debug("write {}".format(encoded_envelope))
+    logger.debug("write {}: to {}".format(encoded_envelope, file_pointer.name))
 
     with lock_file(file_pointer):
         file_pointer.write(encoded_envelope)
@@ -308,6 +308,6 @@ class StubConnection(Connection):
         :return: None
         """
         assert self.loop is not None, "Loop not initialized."
-        self.loop.run_in_executor(
+        await self.loop.run_in_executor(
             self._write_pool, write_envelope, envelope, self.output_file
         )
