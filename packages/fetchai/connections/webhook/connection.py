@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Webhook connection and channel"""
+"""Webhook connection and channel."""
 
 import asyncio
 import json
@@ -82,7 +82,7 @@ class WebhookChannel:
 
     async def connect(self) -> None:
         """
-        Connect the webhook
+        Connect the webhook.
 
         Connects the webhook via the webhook_address and webhook_port parameters
         :return: None
@@ -125,7 +125,7 @@ class WebhookChannel:
 
     async def _receive_webhook(self, request: web.Request) -> web.Response:
         """
-        Receive a webhook request
+        Receive a webhook request.
 
         Get webhook request, turn it to envelop and send it to the agent to be picked up.
 
@@ -136,7 +136,7 @@ class WebhookChannel:
         self.in_queue.put_nowait(webhook_envelop)  # type: ignore
         return web.Response(status=200)
 
-    def send(self, envelope: Envelope) -> None:
+    async def send(self, envelope: Envelope) -> None:
         """
         Send an envelope.
 
@@ -152,12 +152,11 @@ class WebhookChannel:
 
     async def to_envelope(self, request: web.Request) -> Envelope:
         """
-        Convert a webhook request object into an Envelope containing an HttpMessage (from the 'http' Protocol).
+        Convert a webhook request object into an Envelope containing an HttpMessage `from the 'http' Protocol`.
 
         :param request: the webhook request
         :return: The envelop representing the webhook request
         """
-
         payload_bytes = await request.read()
         version = str(request.version[0]) + "." + str(request.version[1])
 
@@ -227,12 +226,17 @@ class WebhookConnection(Connection):
 
     async def send(self, envelope: "Envelope") -> None:
         """
-        The webhook connection does not support send. Webhooks only receive.
+        Send does nothing. Webhooks only receive.
 
         :param envelope: the envelop
         :return: None
         """
-        pass
+        if not self.connection_status.is_connected:
+            raise ConnectionError(
+                "Connection not established yet. Please use 'connect()'."
+            )  # pragma: no cover
+        assert self.channel.in_queue is not None
+        await self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
         """
