@@ -6,12 +6,12 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZodYjNqoMgGAGKfkCU4zU9t1Cx9MAownqSy4wyVdwaHF
-  contract_api.proto: QmUazWPQSdknoaMRZbL6gC29M4aHfz9hiPrScgyKok3hGm
-  contract_api_pb2.py: QmPHzzaV7GnMcVvtUuvLkBLDXK74UvchN74dTefsSWamUJ
-  custom_types.py: Qme6TJj2GDd321afsBPC3ghF26CbwujEXXefPJPrR7sddx
-  dialogues.py: QmWvNu8GHabjidZ3ZGo6wRQoaWaufP7w7zpciJsigyqzgu
-  message.py: QmWEFgPGQTQT6RXvZ5d2poVX3w5w8KxRsQCGhRh1rRS1T4
-  serialization.py: QmScP8tB7d7LjM5kHUzQ22LYmfVLowCSqHvL7kYuKSjCYu
+  contract_api.proto: Qmd3C27NwdFEVQFP2QSfzsr8KRi8bWMcednsbMcJcUSBJv
+  contract_api_pb2.py: QmUCuikMgxikT9244RzuQP2rixS57BYqvdy8DckYrVS8sx
+  custom_types.py: QmUMtnQeyL4MqRfSSaNYXR5N6g1Nc5z8P5C1qhr5jeK5SW
+  dialogues.py: Qmbqm3pEou7Cy5R6H1xByPtWFFgucDGU1xMP5rzWPYimWV
+  message.py: QmQAgZKxS93omZvR4Vg22jFYGikdVRoqLEjd8Ec7VcDbtZ
+  serialization.py: QmTtaVDiYQDRmX6xgkAZCKMATFu5eLsEcWGG6vL96DB2CM
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

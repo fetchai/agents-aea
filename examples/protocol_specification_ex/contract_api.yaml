@@ -20,8 +20,8 @@ speech_acts:
   get_transaction_receipt:
     ledger_id: pt:str
     transaction_digest: pt:str
-  balance:
-    balance: pt:int
+  state:
+    state_data: ct:State
   raw_transaction:
     raw_transaction: ct:RawTransaction
   transaction_digest:
@@ -34,6 +34,8 @@ speech_acts:
     data: pt:bytes
 ...
 ---
+ct:State: |
+  bytes state = 1;
 ct:Terms: |
   bytes terms = 1;
 ct:SignedTransaction: |
@@ -44,17 +46,17 @@ ct:TransactionReceipt: |
   bytes transaction_receipt = 1;
 ...
 ---
-initiation: [get_balance, get_raw_transaction, send_signed_transaction]
+initiation: [get_state, get_raw_transaction, send_signed_transaction]
 reply:
-  get_balance: [balance]
-  balance: []
+  get_state: [state]
+  state: []
   get_raw_transaction: [raw_transaction]
   send_signed_transaction: [transaction_digest]
   get_transaction_receipt: [transaction_receipt]
   raw_transaction: [send_signed_transaction]
   transaction_digest: [get_transaction_receipt]
   transaction_receipt: []
-termination: [balance, transaction_receipt]
+termination: [state, transaction_receipt]
 roles: {agent, ledger}
 end_states: [successful]
 ...

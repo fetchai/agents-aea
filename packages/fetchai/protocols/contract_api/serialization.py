@@ -27,6 +27,7 @@ from aea.protocols.base import Serializer
 from packages.fetchai.protocols.contract_api import contract_api_pb2
 from packages.fetchai.protocols.contract_api.custom_types import RawTransaction
 from packages.fetchai.protocols.contract_api.custom_types import SignedTransaction
+from packages.fetchai.protocols.contract_api.custom_types import State
 from packages.fetchai.protocols.contract_api.custom_types import Terms
 from packages.fetchai.protocols.contract_api.custom_types import TransactionReceipt
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -86,11 +87,11 @@ class ContractApiSerializer(Serializer):
             transaction_digest = msg.transaction_digest
             performative.transaction_digest = transaction_digest
             contract_api_msg.get_transaction_receipt.CopyFrom(performative)
-        elif performative_id == ContractApiMessage.Performative.BALANCE:
-            performative = contract_api_pb2.ContractApiMessage.Balance_Performative()  # type: ignore
-            balance = msg.balance
-            performative.balance = balance
-            contract_api_msg.balance.CopyFrom(performative)
+        elif performative_id == ContractApiMessage.Performative.STATE:
+            performative = contract_api_pb2.ContractApiMessage.State_Performative()  # type: ignore
+            state_data = msg.state_data
+            State.encode(performative.state_data, state_data)
+            contract_api_msg.state.CopyFrom(performative)
         elif performative_id == ContractApiMessage.Performative.RAW_TRANSACTION:
             performative = contract_api_pb2.ContractApiMessage.Raw_Transaction_Performative()  # type: ignore
             raw_transaction = msg.raw_transaction
@@ -178,9 +179,10 @@ class ContractApiSerializer(Serializer):
                 contract_api_pb.get_transaction_receipt.transaction_digest
             )
             performative_content["transaction_digest"] = transaction_digest
-        elif performative_id == ContractApiMessage.Performative.BALANCE:
-            balance = contract_api_pb.balance.balance
-            performative_content["balance"] = balance
+        elif performative_id == ContractApiMessage.Performative.STATE:
+            pb2_state_data = contract_api_pb.state.state_data
+            state_data = State.decode(pb2_state_data)
+            performative_content["state_data"] = state_data
         elif performative_id == ContractApiMessage.Performative.RAW_TRANSACTION:
             pb2_raw_transaction = contract_api_pb.raw_transaction.raw_transaction
             raw_transaction = RawTransaction.decode(pb2_raw_transaction)

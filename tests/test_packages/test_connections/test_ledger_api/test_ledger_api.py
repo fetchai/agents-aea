@@ -80,9 +80,13 @@ async def ledger_apis_connection(request):
 async def test_get_balance(ledger_id, address, ledger_apis_connection: Connection):
     """Test get balance."""
     request = LedgerApiMessage(
-        LedgerApiMessage.Performative.GET_BALANCE, ledger_id=ledger_id, address=address
+        LedgerApiMessage.Performative.GET_BALANCE,
+        dialogue_reference=(address, ""),
+        ledger_id=ledger_id,
+        address=address,
     )
-    envelope = Envelope("", "", request.protocol_id, message=request)
+    request.counterparty = ledger_id
+    envelope = Envelope(address, "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -115,11 +119,13 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     signed_transaction = crypto1.sign_transaction(tx)
     request = LedgerApiMessage(
         LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+        dialogue_reference=(crypto1.address, ""),
         ledger_id=EthereumCrypto.identifier,
         signed_transaction=SignedTransaction(
             EthereumCrypto.identifier, signed_transaction
         ),
     )
+    request.counterparty = EthereumCrypto.identifier
     envelope = Envelope("", "", request.protocol_id, message=request)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -135,16 +141,6 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert response_message.transaction_digest is not None
     assert type(response_message.transaction_digest) == str
     assert type(response_message.transaction_digest.startswith("0x"))
-
-    # check that the transaction is valid
-    is_valid = api.is_transaction_valid(
-        response_message.transaction_digest,
-        crypto2.address,
-        crypto1.address,
-        tx_nonce,
-        amount,
-    )
-    assert is_valid, "Transaction not valid."
 
 
 # @pytest.mark.asyncio

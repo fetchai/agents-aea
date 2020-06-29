@@ -32,6 +32,7 @@ from packages.fetchai.protocols.contract_api.custom_types import (
 from packages.fetchai.protocols.contract_api.custom_types import (
     SignedTransaction as CustomSignedTransaction,
 )
+from packages.fetchai.protocols.contract_api.custom_types import State as CustomState
 from packages.fetchai.protocols.contract_api.custom_types import Terms as CustomTerms
 from packages.fetchai.protocols.contract_api.custom_types import (
     TransactionReceipt as CustomTransactionReceipt,
@@ -51,6 +52,8 @@ class ContractApiMessage(Message):
 
     SignedTransaction = CustomSignedTransaction
 
+    State = CustomState
+
     Terms = CustomTerms
 
     TransactionReceipt = CustomTransactionReceipt
@@ -58,13 +61,13 @@ class ContractApiMessage(Message):
     class Performative(Enum):
         """Performatives for the contract_api protocol."""
 
-        BALANCE = "balance"
         ERROR = "error"
         GET_RAW_TRANSACTION = "get_raw_transaction"
         GET_STATE = "get_state"
         GET_TRANSACTION_RECEIPT = "get_transaction_receipt"
         RAW_TRANSACTION = "raw_transaction"
         SEND_SIGNED_TRANSACTION = "send_signed_transaction"
+        STATE = "state"
         TRANSACTION_DIGEST = "transaction_digest"
         TRANSACTION_RECEIPT = "transaction_receipt"
 
@@ -96,13 +99,13 @@ class ContractApiMessage(Message):
             **kwargs,
         )
         self._performatives = {
-            "balance",
             "error",
             "get_raw_transaction",
             "get_state",
             "get_transaction_receipt",
             "raw_transaction",
             "send_signed_transaction",
+            "state",
             "transaction_digest",
             "transaction_receipt",
         }
@@ -135,12 +138,6 @@ class ContractApiMessage(Message):
         """Get the target of the message."""
         assert self.is_set("target"), "target is not set."
         return cast(int, self.get("target"))
-
-    @property
-    def balance(self) -> int:
-        """Get the 'balance' content from the message."""
-        assert self.is_set("balance"), "'balance' content is not set."
-        return cast(int, self.get("balance"))
 
     @property
     def callable(self) -> str:
@@ -195,6 +192,12 @@ class ContractApiMessage(Message):
             "signed_transaction"
         ), "'signed_transaction' content is not set."
         return cast(CustomSignedTransaction, self.get("signed_transaction"))
+
+    @property
+    def state_data(self) -> CustomState:
+        """Get the 'state_data' content from the message."""
+        assert self.is_set("state_data"), "'state_data' content is not set."
+        return cast(CustomState, self.get("state_data"))
 
     @property
     def terms(self) -> CustomTerms:
@@ -335,12 +338,12 @@ class ContractApiMessage(Message):
                 ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
                     type(self.transaction_digest)
                 )
-            elif self.performative == ContractApiMessage.Performative.BALANCE:
+            elif self.performative == ContractApiMessage.Performative.STATE:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.balance) == int
-                ), "Invalid type for content 'balance'. Expected 'int'. Found '{}'.".format(
-                    type(self.balance)
+                    type(self.state_data) == CustomState
+                ), "Invalid type for content 'state_data'. Expected 'State'. Found '{}'.".format(
+                    type(self.state_data)
                 )
             elif self.performative == ContractApiMessage.Performative.RAW_TRANSACTION:
                 expected_nb_of_contents = 1

@@ -39,24 +39,23 @@ class ContractApiDialogue(Dialogue):
 
     INITIAL_PERFORMATIVES = frozenset(
         {
-            ContractApiMessage.Performative.GET_BALANCE,
+            ContractApiMessage.Performative.GET_STATE,
             ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ContractApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         }
     )
     TERMINAL_PERFORMATIVES = frozenset(
         {
-            ContractApiMessage.Performative.BALANCE,
+            ContractApiMessage.Performative.STATE,
             ContractApiMessage.Performative.TRANSACTION_RECEIPT,
         }
     )
     VALID_REPLIES = {
-        ContractApiMessage.Performative.BALANCE: frozenset(),
-        ContractApiMessage.Performative.GET_BALANCE: frozenset(
-            {ContractApiMessage.Performative.BALANCE}
-        ),
         ContractApiMessage.Performative.GET_RAW_TRANSACTION: frozenset(
             {ContractApiMessage.Performative.RAW_TRANSACTION}
+        ),
+        ContractApiMessage.Performative.GET_STATE: frozenset(
+            {ContractApiMessage.Performative.STATE}
         ),
         ContractApiMessage.Performative.GET_TRANSACTION_RECEIPT: frozenset(
             {ContractApiMessage.Performative.TRANSACTION_RECEIPT}
@@ -67,6 +66,7 @@ class ContractApiDialogue(Dialogue):
         ContractApiMessage.Performative.SEND_SIGNED_TRANSACTION: frozenset(
             {ContractApiMessage.Performative.TRANSACTION_DIGEST}
         ),
+        ContractApiMessage.Performative.STATE: frozenset(),
         ContractApiMessage.Performative.TRANSACTION_DIGEST: frozenset(
             {ContractApiMessage.Performative.GET_TRANSACTION_RECEIPT}
         ),
