@@ -28,6 +28,16 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from aea.protocols.generator.common import (
+    CUSTOM_TYPES_DOT_PY_FILE_NAME,
+    DIALOGUE_DOT_PY_FILE_NAME,
+    INIT_FILE_NAME,
+    MESSAGE_DOT_PY_FILE_NAME,
+    MESSAGE_IMPORT,
+    PATH_TO_PACKAGES,
+    PROTOCOL_YAML_FILE_NAME,
+    PYTHON_TYPE_TO_PROTO_TYPE,
+    SERIALIZATION_DOT_PY_FILE_NAME,
+    SERIALIZER_IMPORT,
     _camel_case_to_snake_case,
     _create_protocol_file,
     _get_sub_types_of_compositional_types,
@@ -40,16 +50,6 @@ from aea.protocols.generator.common import (
     load_protocol_specification,
     try_run_black_formatting,
     try_run_protoc,
-    MESSAGE_IMPORT,
-    SERIALIZER_IMPORT,
-    PATH_TO_PACKAGES,
-    INIT_FILE_NAME,
-    PROTOCOL_YAML_FILE_NAME,
-    MESSAGE_DOT_PY_FILE_NAME,
-    DIALOGUE_DOT_PY_FILE_NAME,
-    CUSTOM_TYPES_DOT_PY_FILE_NAME,
-    SERIALIZATION_DOT_PY_FILE_NAME,
-    PYTHON_TYPE_TO_PROTO_TYPE,
 )
 from aea.protocols.generator.extract_specification import extract
 

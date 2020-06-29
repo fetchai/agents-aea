@@ -29,7 +29,13 @@ from aea.configurations.base import ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
 
 SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
-SPECIFICATION_COMPOSITIONAL_TYPES = ["pt:set", "pt:list", "pt:dict", "pt:union", "pt:optional"]
+SPECIFICATION_COMPOSITIONAL_TYPES = [
+    "pt:set",
+    "pt:list",
+    "pt:dict",
+    "pt:union",
+    "pt:optional",
+]
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"

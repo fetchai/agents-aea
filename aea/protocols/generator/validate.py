@@ -62,7 +62,7 @@ def _is_valid_regex(regex_pattern: str, text: str) -> bool:
     :return: Boolean result
     """
     match = re.match(regex_pattern, text)
-    if match:
+    if match is not None:
         return True
     else:
         return False
@@ -71,14 +71,14 @@ def _is_valid_regex(regex_pattern: str, text: str) -> bool:
 def _has_brackets(content_type: str) -> bool:
     for compositional_type in SPECIFICATION_COMPOSITIONAL_TYPES:
         if content_type.startswith(compositional_type):
-            content_type = content_type[len(compositional_type):]
-            return content_type[0] == "[" and content_type[len(content_type)-1] == "]"
+            content_type = content_type[len(compositional_type) :]
+            return content_type[0] == "[" and content_type[len(content_type) - 1] == "]"
     raise SyntaxError("Content type must be a compositional type!")
 
 
 def _is_valid_ct(content_type: str) -> bool:
     content_type = content_type.strip()
-    return _is_valid_regex(content_type, CT_CONTENT_REGEX_PATTERN)
+    return _is_valid_regex(CT_CONTENT_REGEX_PATTERN, content_type)
 
 
 def _is_valid_pt(content_type: str) -> bool:
@@ -150,11 +150,11 @@ def _is_valid_union(content_type: str) -> bool:
     sub_types = _get_sub_types_of_compositional_types(content_type)
     for sub_type in sub_types:
         if not (
-                _is_valid_ct(sub_type)
-                or _is_valid_pt(sub_type)
-                or _is_valid_set(sub_type)
-                or _is_valid_list(sub_type)
-                or _is_valid_dict(sub_type)
+            _is_valid_ct(sub_type)
+            or _is_valid_pt(sub_type)
+            or _is_valid_set(sub_type)
+            or _is_valid_list(sub_type)
+            or _is_valid_dict(sub_type)
         ):
             return False
 
@@ -176,24 +176,24 @@ def _is_valid_optional(content_type: str) -> bool:
 
     sub_type = sub_types[0]
     return (
-            _is_valid_ct(sub_type)
-            or _is_valid_pt(sub_type)
-            or _is_valid_set(sub_type)
-            or _is_valid_list(sub_type)
-            or _is_valid_dict(sub_type)
-            or _is_valid_union(sub_type)
+        _is_valid_ct(sub_type)
+        or _is_valid_pt(sub_type)
+        or _is_valid_set(sub_type)
+        or _is_valid_list(sub_type)
+        or _is_valid_dict(sub_type)
+        or _is_valid_union(sub_type)
     )
 
 
 def _is_valid_content_type_format(content_type: str) -> bool:
     return (
-            _is_valid_ct(content_type)
-            or _is_valid_pt(content_type)
-            or _is_valid_set(content_type)
-            or _is_valid_list(content_type)
-            or _is_valid_dict(content_type)
-            or _is_valid_union(content_type)
-            or _is_valid_optional(content_type)
+        _is_valid_ct(content_type)
+        or _is_valid_pt(content_type)
+        or _is_valid_set(content_type)
+        or _is_valid_list(content_type)
+        or _is_valid_dict(content_type)
+        or _is_valid_union(content_type)
+        or _is_valid_optional(content_type)
     )
 
 
@@ -265,8 +265,8 @@ def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]:
 
     # Validate protocol buffer schema code snippets
     if (
-            protocol_specification.protobuf_snippets is not None
-            and protocol_specification.protobuf_snippets != ""
+        protocol_specification.protobuf_snippets is not None
+        and protocol_specification.protobuf_snippets != ""
     ):
         custom_types_set_2 = custom_types_set.copy()
         for custom_type in protocol_specification.protobuf_snippets.keys():
@@ -289,11 +289,13 @@ def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]:
 
     # Validate dialogue section
     if (
-            protocol_specification.dialogue_config != {}
-            and protocol_specification.dialogue_config is not None
+        protocol_specification.dialogue_config != {}
+        and protocol_specification.dialogue_config is not None
     ):
         # Validate initiation
-        for performative in cast(List[str], protocol_specification.dialogue_config["initiation"]):
+        for performative in cast(
+            List[str], protocol_specification.dialogue_config["initiation"]
+        ):
             if performative not in performatives_set:
                 return (
                     False,
@@ -308,7 +310,7 @@ def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]:
             if performative not in performatives_set_2:
                 return (
                     False,
-                    "Performative {} specified in \"reply\" is not defined in the protocol's speech-acts.".format(
+                    'Performative {} specified in "reply" is not defined in the protocol\'s speech-acts.'.format(
                         performative,
                     ),
                 )
@@ -323,7 +325,9 @@ def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]:
             )
 
         # Validate termination
-        for performative in cast(List[str], protocol_specification.dialogue_config["termination"]):
+        for performative in cast(
+            List[str], protocol_specification.dialogue_config["termination"]
+        ):
             if performative not in performatives_set:
                 return (
                     False,
@@ -333,7 +337,9 @@ def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]:
                 )
 
         # Validate roles
-        for role in cast(Dict[str, None], protocol_specification.dialogue_config["roles"]):
+        for role in cast(
+            Dict[str, None], protocol_specification.dialogue_config["roles"]
+        ):
             if not _is_valid_regex(ROLE_REGEX_PATTERN, role):
                 return (
                     False,
@@ -343,7 +349,9 @@ def validate(protocol_specification: ProtocolSpecification) -> Tuple[bool, str]:
                 )
 
         # Validate end_state
-        for end_state in cast(List[str], protocol_specification.dialogue_config["end_states"]):
+        for end_state in cast(
+            List[str], protocol_specification.dialogue_config["end_states"]
+        ):
             if not _is_valid_regex(END_STATE_REGEX_PATTERN, end_state):
                 return (
                     False,
