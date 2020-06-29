@@ -58,22 +58,28 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.2.0")
 MultiAddr = str
 
 
-# TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
-async def _async_golang_get_deps(
-    src: str, loop: AbstractEventLoop
-) -> asyncio.subprocess.Process:  # pylint: disable=no-member
+async def _golang_module_build_async(
+    path: str, log_file_desc: IO[str], loop: AbstractEventLoop
+) -> asyncio.subprocess.Process:
     """
-    Downloads dependencies of go 'src' file - asynchronous
+    Builds go module located at `path`, downloads necessary dependencies
     """
-    cmd = ["go", "get", "-d", "-v", "./..."]
+    cmd = ["go", "build"]
+
+    env = os.environ
 
     try:
-        logger.debug(cmd, loop)
+        logger.debug(cmd)
         proc = await asyncio.create_subprocess_exec(
-            *cmd, cwd=os.path.dirname(src), loop=loop
-        )  # nosec
+            *cmd,
+            env=env,
+            cwd=path,
+            stdout=log_file_desc,
+            stderr=log_file_desc,
+            loop=loop,
+        )
     except Exception as e:
-        logger.error("While executing go get : {}".format(str(e)))
+        logger.error("While executing go build {} : {}".format(path, str(e)))
         raise e
 
     return proc
@@ -269,15 +275,17 @@ class Libp2pNode:
         self._log_file_desc = open(self.log_file, "a", 1)
 
         # build the node
-        # TOFIX(LR) fix async version
         logger.info("Downloading golang dependencies. This may take a while...")
-        proc = _golang_module_build(self.source, self._log_file_desc)
-        proc.wait()
-        with open(self.log_file, "r") as f:
-            logger.debug(f.read())
+        proc = await _golang_module_build_async(
+            self.source, self._log_file_desc, self._loop
+        )
+        await proc.wait()
+
         node_log = ""
         with open(self.log_file, "r") as f:
             node_log = f.read()
+        logger.debug(node_log)
+
         if proc.returncode != 0:
             raise Exception(
                 "Error while downloading golang dependencies and building it: {}, {}".format(
