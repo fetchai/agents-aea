@@ -9,11 +9,13 @@ fingerprint:
   connection.py: QmaXZt2TZWLRUQJjN7F8pVW5jzXaoVmc6J2F1REEczH5qq
 fingerprint_ignore_patterns: []
 protocols:
+- fetchai/contract_api:0.1.0
 - fetchai/ledger_api:0.1.0
 class_name: LedgerApiConnection
 config:
   foo: bar
 excluded_protocols: []
 restricted_to_protocols:
+- fetchai/contract_api:0.1.0
 - fetchai/ledger_api:0.1.0
 dependencies: {}
