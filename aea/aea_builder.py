@@ -434,7 +434,7 @@ class AEABuilder:
                     dotted_path, class_name, file_path, e
                 )
             )
-            raise  # log and reraise cause looks we should not build an agent from invalid configuraion
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
 
         return self
 
