@@ -207,10 +207,6 @@ jobs:
         name: codecov-umbrella
         yml: ./codecov.yml
         fail_ci_if_error: false
-    - if: matrix.python-version == '3.6' && matrix.os != 'windows-latest'
-      name: Golang unit tests
-      working-directory: ./packages/fetchai/connections/p2p_libp2p
-      run: go test -p 1 -timeout 0 -count 1 -v ./...
         
   golang_checks:
     runs-on: ${{ matrix.os }}

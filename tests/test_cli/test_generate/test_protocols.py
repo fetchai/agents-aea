@@ -45,7 +45,7 @@ from ...conftest import (
 )
 
 
-class failingTestGenerateProtocol:
+class TestGenerateProtocol:
     """Test that the command 'aea generate protocol' works correctly in correct preconditions."""
 
     @classmethod
@@ -121,7 +121,7 @@ class failingTestGenerateProtocol:
             pass
 
 
-class failingTestGenerateProtocolFailsWhenDirectoryAlreadyExists:
+class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
     """Test that the command 'aea generate protocol' fails when a directory with the same name as the name of the protocol being generated already exists."""
 
     @classmethod
@@ -199,7 +199,7 @@ class failingTestGenerateProtocolFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class failingTestGenerateProtocolFailsWhenProtocolAlreadyExists:
+class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
     """Test that the command 'aea add protocol' fails when the protocol already exists."""
 
     @classmethod
@@ -286,7 +286,7 @@ class failingTestGenerateProtocolFailsWhenProtocolAlreadyExists:
             pass
 
 
-class failingTestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
+class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
     """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
 
     @classmethod
@@ -363,7 +363,7 @@ class failingTestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
             pass
 
 
-class failingTestGenerateProtocolFailsWhenExceptionOccurs:
+class TestGenerateProtocolFailsWhenExceptionOccurs:
     """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
 
     @classmethod
