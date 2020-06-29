@@ -411,7 +411,7 @@ class OEFChannel(OEFAgent):
         self.excluded_protocols = excluded_protocols
         self.oef_search_dialogues = OefSearchDialogues()
         self.oef_msg_id = 0
-        self.oef_msg_it_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
+        self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
 
     def on_message(
         self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
@@ -536,11 +536,11 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        oef_search_dialogue = self.oef_msg_it_to_dialogue.pop(search_id, None)
+        oef_search_dialogue = self.oef_msg_id_to_dialogue.pop(search_id, None)
         if oef_search_dialogue is None:
             logger.warning("Could not find dialogue for search_id={}".format(search_id))
             return
-        last_msg = oef_search_dialogue.last_outgoing_message  # TODO: Fix
+        last_msg = oef_search_dialogue.last_incoming_message
         if last_msg is None:
             logger.warning("Could not find last message.")
             return
@@ -551,6 +551,7 @@ class OEFChannel(OEFAgent):
             message_id=last_msg.message_id + 1,
             agents=tuple(agents),
         )
+        msg.counterparty = last_msg.counterparty
         oef_search_dialogue.update(msg)
         envelope = Envelope(
             to=self.address,
@@ -578,7 +579,7 @@ class OEFChannel(OEFAgent):
             operation = OefSearchMessage.OefErrorOperation(operation)
         except ValueError:
             operation = OefSearchMessage.OefErrorOperation.OTHER
-        oef_search_dialogue = self.oef_msg_it_to_dialogue.pop(answer_id, None)
+        oef_search_dialogue = self.oef_msg_id_to_dialogue.pop(answer_id, None)
         if oef_search_dialogue is None:
             logger.warning("Could not find dialogue for answer_id={}".format(answer_id))
             return
@@ -593,6 +594,7 @@ class OEFChannel(OEFAgent):
             message_id=last_msg.message_id + 1,
             oef_error_operation=operation,
         )
+        msg.counterparty = last_msg.counterparty
         oef_search_dialogue.update(msg)
         envelope = Envelope(
             to=self.address,
@@ -673,6 +675,7 @@ class OEFChannel(OEFAgent):
             envelope.message, OefSearchMessage
         ), "Message not of type OefSearchMessage"
         oef_message = cast(OefSearchMessage, envelope.message)
+        oef_message.is_incoming = True  # TODO: fix
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )
@@ -682,7 +685,7 @@ class OEFChannel(OEFAgent):
             )
             return
         self.oef_msg_id += 1
-        self.oef_msg_it_to_dialogue[self.oef_msg_id] = oef_search_dialogue
+        self.oef_msg_id_to_dialogue[self.oef_msg_id] = oef_search_dialogue
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             service_description = oef_message.service_description
             oef_service_description = OEFObjectTranslator.to_oef_description(

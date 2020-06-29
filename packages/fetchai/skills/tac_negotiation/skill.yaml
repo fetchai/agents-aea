@@ -14,7 +14,6 @@ fingerprint:
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
   strategy.py: QmXdEbb7xbdNeZ85Cs2gvdYRMBB1Rper8B9z9E49bygJ54
-  tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
   transactions.py: QmSR1SYsHCGQkcHBhVeFpFLgRRp5xj1SZB1SDyu7YmEVZ3
 fingerprint_ignore_patterns: []
 contracts:

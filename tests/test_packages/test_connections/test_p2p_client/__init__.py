@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,33 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a class representing the search state."""
-
-from typing import Set
-
-from aea.skills.base import Model
-
-
-class Search(Model):
-    """This class deals with the search state."""
-
-    def __init__(self, **kwargs):
-        """Instantiate the search class."""
-        super().__init__(**kwargs)
-        self._id = 0
-        self.ids_for_tac = set()  # type: Set[int]
-
-    @property
-    def id(self) -> int:
-        """Get the search id."""
-        return self._id
-
-    def get_next_id(self) -> int:
-        """
-        Generate the next search id and stores it.
-
-        :return: a search id
-        """
-        self._id += 1
-        self.ids_for_tac.add(self._id)
-        return self._id
+"""This module contains the tests of the p2p_client connection implementation."""

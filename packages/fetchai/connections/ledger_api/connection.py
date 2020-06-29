@@ -379,13 +379,7 @@ class LedgerApiConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        if isinstance(envelope.message, bytes):
-            message = cast(
-                LedgerApiMessage,
-                LedgerApiMessage.serializer.decode(envelope.message_bytes),
-            )
-        else:
-            message = cast(LedgerApiMessage, envelope.message)
+        message = cast(LedgerApiMessage, envelope.message)
         if message.performative is LedgerApiMessage.Performative.GET_RAW_TRANSACTION:
             ledger_id = message.terms.ledger_id
         elif (
