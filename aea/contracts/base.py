@@ -43,15 +43,15 @@ class Contract(Component, ABC):
     """Abstract definition of a contract."""
 
     def __init__(
-        self, config: ContractConfig, contract_interface: Dict[str, Any],
+        self, contract_config: ContractConfig, contract_interface: Dict[str, Any],
     ):
         """
         Initialize the contract.
 
-        :param config: the contract configurations.
+        :param contract_config: the contract configurations.
         :param contract_interface: the contract interface
         """
-        super().__init__(config)
+        super().__init__(contract_config)
         self._contract_interface = contract_interface  # type: Dict[str, Any]
 
     @property

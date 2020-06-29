@@ -19,6 +19,7 @@
 
 """This module contains utilities for building an AEA."""
 import itertools
+import json
 import logging
 import logging.config
 import os
@@ -56,6 +57,7 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.contracts import contract_registry
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     create_private_key,
@@ -902,6 +904,7 @@ class AEABuilder:
             ComponentType.SKILL, resources, agent_context=aea.context
         )
         self._build_called = True
+        self._populate_contract_registry()
         return aea
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
@@ -1384,6 +1387,27 @@ class AEABuilder:
                 configuration = deepcopy(configuration)
                 component = load_component_from_config(configuration, **kwargs)
                 resources.add_component(component)
+
+    def _populate_contract_registry(self):
+        """Populate contract registry."""
+        for configuration in self._package_dependency_manager.get_components_by_type(
+            ComponentType.CONTRACT
+        ).values():
+            configuration = cast(ContractConfig, configuration)
+
+            # load contract interface
+            path = Path(
+                configuration.directory, configuration.path_to_contract_interface
+            )
+            with open(path, "r") as interface_file:
+                contract_interface = json.load(interface_file)
+
+            contract_registry.register(
+                id=str(configuration.public_id),
+                entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+                contract_config=configuration,
+                contract_interface=contract_interface,
+            )
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:

@@ -28,6 +28,7 @@ from aea.helpers.base import RegexConstrainedString
 
 """A regex to match a Python identifier (i.e. a module/class name)."""
 PY_ID_REGEX = r"[^\d\W]\w*"
+ITEM_ID_REGEX = r"[:/.A-Za-z0-9]+"
 ItemType = TypeVar("ItemType")
 
 
@@ -42,7 +43,7 @@ def _handle_malformed_string(class_name: str, malformed_id: str):
 class ItemId(RegexConstrainedString):
     """The identifier of an item class."""
 
-    REGEX = re.compile(r"^({})$".format(PY_ID_REGEX))
+    REGEX = re.compile(r"^({})$".format(ITEM_ID_REGEX))
 
     def __init__(self, seq):
         """Initialize the item id."""
