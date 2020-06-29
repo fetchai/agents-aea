@@ -336,8 +336,8 @@ def try_run_protoc(path_to_generated_protocol_package, name) -> None:
                 "--python_out={}".format(path_to_generated_protocol_package),
                 "{}/{}.proto".format(path_to_generated_protocol_package, name),
             ],
-            capture_output=True,
-            text=True,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
             check=True,
             env=os.environ.copy(),
         )
