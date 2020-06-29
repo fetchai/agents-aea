@@ -35,6 +35,7 @@ CONNECTION_ID = PublicId.from_str("fetchai/ledger_api:0.1.0")
 
 
 class RequestDispatcher(ABC):
+    """Base class for a request dispatcher."""
 
     TIMEOUT = 3
     MAX_ATTEMPTS = 120
