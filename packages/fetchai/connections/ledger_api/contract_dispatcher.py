@@ -138,3 +138,55 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         response.counterparty = message.counterparty
         dialogue.update(response)
         return response
+
+    def get_state(
+        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
+    ) -> ContractApiMessage:
+        """
+        Send the request 'get_state'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :param dialogue: the contract API dialogue
+        :return: None
+        """
+        raise NotImplementedError
+
+    def get_raw_transaction(
+        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
+    ) -> ContractApiMessage:
+        """
+        Send the request 'get_raw_transaction'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :param dialogue: the contract API dialogue
+        :return: None
+        """
+        raise NotImplementedError
+
+    def send_signed_transaction(
+        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
+    ) -> ContractApiMessage:
+        """
+        Send the request 'send_signed_transaction'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :param dialogue: the contract API dialogue
+        :return: None
+        """
+        raise NotImplementedError
+
+    def get_transaction_receipt(
+        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
+    ) -> ContractApiMessage:
+        """
+        Send the request 'get_transaction_receipt'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :param dialogue: the contract API dialogue
+        :return: None
+        """
+        raise NotImplementedError

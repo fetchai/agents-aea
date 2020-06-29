@@ -36,6 +36,10 @@ from ...data.custom_crypto import CustomCrypto
 
 logger = logging.getLogger(__name__)
 
+forbidden_special_characters = "".join(
+    filter(lambda c: c not in "_:/.", string.punctuation)
+)
+
 
 def test_make_fetchai():
     """Test the 'make' method for 'fetchai' crypto."""
@@ -156,7 +160,7 @@ class TestRegisterWithMalformedId:
                 "malformed id", "path.to.module:CryptoClass"
             )
 
-    @pytest.mark.parametrize("special_character", string.punctuation.replace("_", ""))
+    @pytest.mark.parametrize("special_character", forbidden_special_characters)
     def test_special_characters(self, special_character):
         """Special characters are not allowed (only underscore)."""
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
@@ -164,13 +168,13 @@ class TestRegisterWithMalformedId:
                 "malformed_id" + special_character, "path.to.module:CryptoClass"
             )
 
-    @pytest.mark.parametrize("digit", string.digits)
-    def test_beginning_digit(self, digit):
-        """Digits in the beginning are not allowed."""
-        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.registries.register_crypto(
-                digit + "malformed_id", "path.to.module:CryptoClass"
-            )
+    # @pytest.mark.parametrize("digit", string.digits)
+    # def test_beginning_digit(self, digit):
+    #     """Digits in the beginning are not allowed."""
+    #     with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+    #         aea.crypto.registries.register_crypto(
+    #             digit + "malformed_id", "path.to.module:CryptoClass"
+    #         )
 
 
 class TestRegisterWithMalformedEntryPoint:
@@ -198,7 +202,7 @@ class TestRegisterWithMalformedEntryPoint:
                 "crypto_id", "path.to .module:CryptoClass"
             )
 
-    @pytest.mark.parametrize("special_character", string.punctuation.replace("_", ""))
+    @pytest.mark.parametrize("special_character", forbidden_special_characters)
     def test_special_characters(self, special_character):
         """Special characters are not allowed (only underscore)."""
         with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
@@ -206,10 +210,10 @@ class TestRegisterWithMalformedEntryPoint:
                 "crypto_id", "path" + special_character + ".to.module:CryptoClass"
             )
 
-    @pytest.mark.parametrize("digit", string.digits)
-    def test_beginning_digit(self, digit):
-        """Digits in the beginning are not allowed."""
-        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-            aea.crypto.registries.register_crypto(
-                "crypto_id", "path." + digit + "to.module:CryptoClass"
-            )
+    # @pytest.mark.parametrize("digit", string.digits)
+    # def test_beginning_digit(self, digit):
+    #     """Digits in the beginning are not allowed."""
+    #     with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+    #         aea.crypto.registries.register_crypto(
+    #             "crypto_id", "path." + digit + "to.module:CryptoClass"
+    #         )

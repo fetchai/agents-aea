@@ -28,7 +28,7 @@ from aea.helpers.base import RegexConstrainedString
 
 """A regex to match a Python identifier (i.e. a module/class name)."""
 PY_ID_REGEX = r"[^\d\W]\w*"
-ITEM_ID_REGEX = r"[:/.A-Za-z0-9]+"
+ITEM_ID_REGEX = r"[:/._A-Za-z0-9]+"
 ItemType = TypeVar("ItemType")
 
 
@@ -212,5 +212,5 @@ class Registry(Generic[ItemType]):
                 )
 
         if id not in self.specs:
-            raise AEAException("Crypto not registered with id '{}'.".format(id))
+            raise AEAException("Item not registered with id '{}'.".format(id))
         return self.specs[id]
