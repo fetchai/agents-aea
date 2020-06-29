@@ -18,6 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the contract API request dispatcher."""
+from typing import cast
+
+import aea
+from aea.contracts import Contract
 from aea.crypto.registries import Registry
 from aea.helpers.dialogue.base import (
     Dialogue as BaseDialogue,
@@ -31,6 +35,7 @@ from packages.fetchai.connections.ledger_api.base import (
     CONNECTION_ID,
     RequestDispatcher,
 )
+from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
@@ -87,15 +92,49 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """Get the dialouges."""
         return self._contract_api_dialogues
 
-    def get_error_message(self, *args) -> Message:
-        pass
-
     @property
     def registry(self) -> Registry:
-        pass
+        return aea.contracts.contract_registry
 
     def get_message(self, envelope: Envelope) -> Message:
-        pass
+        if isinstance(envelope.message, bytes):
+            message = cast(
+                ContractApiMessage,
+                ContractApiMessage.serializer.decode(envelope.message_bytes),
+            )
+        else:
+            message = cast(ContractApiMessage, envelope.message)
+        return message
 
     def get_ledger_id(self, message: Message) -> str:
-        pass
+        assert isinstance(
+            message, ContractApiMessage
+        ), "argument is not a ContractApiMessage instance."
+        message = cast(ContractApiMessage, message)
+        return message.ledger_id
+
+    def get_error_message(  # type: ignore
+        self,
+        e: Exception,
+        api: Contract,
+        message: ContractApiMessage,
+        dialogue: ContractApiDialogue,
+    ) -> ContractApiMessage:
+        """
+        Build an error message.
+
+        :param e: the exception.
+        :param api: the Ledger API.
+        :param message: the request message.
+        :return: an error message response.
+        """
+        response = ContractApiMessage(
+            performative=ContractApiMessage.Performative.ERROR,
+            message_id=message.message_id + 1,
+            target=message.message_id,
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            message=str(e),
+        )
+        response.counterparty = message.counterparty
+        dialogue.update(response)
+        return response
