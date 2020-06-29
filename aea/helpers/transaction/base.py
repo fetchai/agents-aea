@@ -19,7 +19,7 @@
 
 """This module contains terms related classes."""
 
-import pickle  #  nosec
+import pickle  # nosec
 from typing import Any, Dict, Optional
 
 Address = str
@@ -77,9 +77,9 @@ class RawTransaction:
         :param raw_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
         """
-        raw_transaction = pickle.loads(
+        raw_transaction = pickle.loads(  # nosec
             raw_transaction_protobuf_object.raw_transaction_bytes
-        )  # nosec
+        )
         return raw_transaction
 
     def __eq__(self, other):
@@ -154,9 +154,9 @@ class RawMessage:
         :param raw_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'raw_message_protobuf_object' argument.
         """
-        raw_message = pickle.loads(
+        raw_message = pickle.loads(  # nosec
             raw_message_protobuf_object.raw_message_bytes
-        )  # nosec
+        )
         return raw_message
 
     def __eq__(self, other):
@@ -228,9 +228,9 @@ class SignedTransaction:
         :param signed_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
         """
-        signed_transaction = pickle.loads(
+        signed_transaction = pickle.loads(  # nosec
             signed_transaction_protobuf_object.signed_transaction_bytes
-        )  # nosec
+        )
         return signed_transaction
 
     def __eq__(self, other):
@@ -507,9 +507,9 @@ class TransactionReceipt:
         :param transaction_receipt_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'transaction_receipt_protobuf_object' argument.
         """
-        transaction_receipt = pickle.loads(
+        transaction_receipt = pickle.loads(  # nosec
             transaction_receipt_protobuf_object.transaction_receipt_bytes
-        )  # nosec
+        )
         return transaction_receipt
 
     def __eq__(self, other):
