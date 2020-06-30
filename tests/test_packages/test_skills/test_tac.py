@@ -36,6 +36,7 @@ from ...conftest import (
 class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
+    @pytest.mark.unstable
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
@@ -167,6 +168,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
 class TestTacSkillsContract(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
+    @pytest.mark.unstable
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""

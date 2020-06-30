@@ -35,7 +35,6 @@ from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.configurations.constants import DEFAULT_PROTOCOL, DEFAULT_SKILL
 from aea.contracts.base import Contract
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
@@ -430,7 +429,6 @@ class TestFilter:
         connection = _make_dummy_connection()
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FetchAICrypto.identifier: private_key_path})
-        ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
         identity = Identity(
             cls.agent_name, address=wallet.addresses[FetchAICrypto.identifier]
         )
@@ -445,7 +443,7 @@ class TestFilter:
 
         resources.add_connection(connection)
 
-        cls.aea = AEA(identity, wallet, ledger_apis, resources=resources,)
+        cls.aea = AEA(identity, wallet, resources=resources,)
         cls.aea.setup()
 
     def test_handle_internal_messages(self):

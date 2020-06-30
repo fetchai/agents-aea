@@ -72,7 +72,7 @@ def load_erc1155_contract():
         contract_interface = json.load(interface_file)
 
     contract_registry.register(
-        id=str(configuration.public_id),
+        id_=str(configuration.public_id),
         entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
         contract_config=configuration,
         contract_interface=contract_interface,

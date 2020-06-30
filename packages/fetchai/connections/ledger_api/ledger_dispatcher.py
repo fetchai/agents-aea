@@ -294,6 +294,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             target=message.message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             message=str(e),
+            data=b"",
         )
         response.counterparty = message.counterparty
         dialogue.update(response)

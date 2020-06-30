@@ -106,6 +106,4 @@ class TestWealthCommands(AEATestCaseMany):
         with pytest.raises(AEATestingException) as excinfo:
             self.generate_wealth()
 
-        assert "Crypto not registered with id 'unsupported_crypto'." in str(
-            excinfo.value
-        )
+        assert "Item not registered with id 'unsupported_crypto'." in str(excinfo.value)

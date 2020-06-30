@@ -1383,12 +1383,20 @@ class AEABuilder:
             with open(path, "r") as interface_file:
                 contract_interface = json.load(interface_file)
 
-            contract_registry.register(
-                id_=str(configuration.public_id),
-                entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-                contract_config=configuration,
-                contract_interface=contract_interface,
-            )
+            try:
+                contract_registry.register(
+                    id_=str(configuration.public_id),
+                    entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+                    contract_config=configuration,
+                    contract_interface=contract_interface,
+                )
+            except AEAException as e:
+                if "Cannot re-register id:" in str(e):
+                    logger.warning(
+                        "Already registered: {}".format(configuration.class_name)
+                    )
+                else:
+                    raise e
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:

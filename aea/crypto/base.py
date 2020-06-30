@@ -229,7 +229,7 @@ class LedgerApi(Helper, ABC):
         tx_fee: int,
         tx_nonce: str,
         **kwargs,
-    ) -> Optional[str]:
+    ) -> Optional[Any]:
         """
         Submit a transfer transaction to the ledger.
 
