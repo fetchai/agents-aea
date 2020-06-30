@@ -88,7 +88,11 @@ class Testp2pStubConnectionReception:
         envelope = make_test_envelope(to_="con2")
         await self.connection1.send(envelope)
 
-        await asyncio.wait_for(self.connection2.receive(), timeout=5)
+        received_envelope = await asyncio.wait_for(
+            self.connection2.receive(), timeout=5
+        )
+        assert received_envelope
+        assert received_envelope.message == envelope.message.encode()
 
     def teardown(self):
         """Clean up after tests."""
