@@ -42,7 +42,7 @@ from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.interact import interact
 from aea.cli.launch import launch
-from aea.cli.list import list as _list
+from aea.cli.list import list_command as _list
 from aea.cli.login import login
 from aea.cli.logout import logout
 from aea.cli.publish import publish

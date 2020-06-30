@@ -416,7 +416,7 @@ class OEFChannel(OEFAgent):
         )
         try:
             query = pickle.loads(query)  # nosec
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.debug(
                 "When trying to unpickle the query the following exception occured: {}".format(
                     e
@@ -784,7 +784,7 @@ class OEFConnection(Connection):
         except CancelledError:
             logger.debug("Receive cancelled.")
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.exception(e)
             return None
 

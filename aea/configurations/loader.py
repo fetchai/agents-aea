@@ -137,10 +137,9 @@ class ConfigLoader(Generic[T]):
             raise ValueError(
                 "Incorrect number of Yaml documents in the protocol specification."
             )
-        try:
-            self.validator.validate(instance=configuration_file_json)
-        except Exception:
-            raise
+
+        self.validator.validate(instance=configuration_file_json)
+
         protocol_specification = self.configuration_class.from_json(
             configuration_file_json
         )
@@ -157,10 +156,9 @@ class ConfigLoader(Generic[T]):
         :raises
         """
         configuration_file_json = yaml_load(file_pointer)
-        try:
-            self.validator.validate(instance=configuration_file_json)
-        except Exception:
-            raise
+
+        self.validator.validate(instance=configuration_file_json)
+
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
         configuration_obj._key_order = key_order  # pylint: disable=protected-access

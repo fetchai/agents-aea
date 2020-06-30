@@ -270,7 +270,8 @@ def test_add_key_fails_bad_key():
             mock_logger_error.assert_called_with(
                 "This is not a valid private key file: '{}'\n Exception: '{}'".format(
                     pvk_file, error_message
-                )
+                ),
+                exc_info=True,
             )
 
             # check that no key has been added.

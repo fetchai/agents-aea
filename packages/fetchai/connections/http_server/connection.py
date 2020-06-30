@@ -93,9 +93,9 @@ class Request(OpenAPIRequest):
         return self._id
 
     @id.setter
-    def id(self, id: RequestId) -> None:
+    def id(self, request_id: RequestId) -> None:
         """Set the request id."""
-        self._id = id
+        self._id = request_id
 
     @classmethod
     async def create(cls, http_request: BaseRequest) -> "Request":
@@ -242,7 +242,7 @@ class APISpec:
 
         try:
             validate_request(self._validator, request)
-        except Exception:
+        except Exception:  # pragma: nocover # pylint: disable=broad-except
             logger.exception("APISpec verify error")
             return False
         return True
@@ -369,7 +369,7 @@ class HTTPChannel(BaseAsyncChannel):
             try:
                 await self._start_http_server()
                 logger.info("HTTP Server has connected to port: {}.".format(self.port))
-            except Exception:
+            except Exception:  # pragma: nocover # pylint: disable=broad-except
                 self.is_stopped = True
                 self._in_queue = None
                 logger.exception(
@@ -408,7 +408,7 @@ class HTTPChannel(BaseAsyncChannel):
 
         except asyncio.TimeoutError:
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
-        except BaseException:
+        except BaseException:  # pragma: nocover # pylint: disable=broad-except
             return Response(
                 status=SERVER_ERROR, reason="Server Error", text=format_exc()
             )

@@ -316,7 +316,7 @@ class ThreadedAsyncRunner(Thread):
             return
         if self._loop.is_running():
             logger.debug("Stopping loop...")
-            self._loop.call_soon_threadsafe(lambda: self._loop.stop())
+            self._loop.call_soon_threadsafe(self._loop.stop)
         logger.debug("Wait thread to join...")
         self.join(10)
         logger.debug("Stopped.")

@@ -84,7 +84,7 @@ def cd(path):
     try:
         os.chdir(path)
         yield
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         os.chdir(old_cwd)
         raise e from e
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
             pass
         try:
             return_code = do_symlink(link_name, target)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             exception = e
             return_code = 1
             traceback.print_exc()

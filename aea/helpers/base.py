@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Miscellaneous helpers."""
 
 import builtins
@@ -28,10 +27,12 @@ import re
 import signal
 import subprocess  # nosec
 import sys
+import time
 import types
 from collections import OrderedDict, UserString
+from functools import wraps
 from pathlib import Path
-from typing import Any, Dict, TextIO
+from typing import Any, Callable, Dict, TextIO, Union
 
 from dotenv import load_dotenv
 
@@ -125,15 +126,15 @@ def locate(path: str) -> Any:
         else:
             break
     if module:
-        object = module
+        object_ = module
     else:
-        object = builtins
+        object_ = builtins
     for part in parts[n:]:
         try:
-            object = getattr(object, part)
+            object_ = getattr(object_, part)
         except AttributeError:
             return None
-    return object
+    return object_
 
 
 def load_aea_package(configuration: ComponentConfiguration) -> None:
@@ -145,8 +146,8 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     :param configuration: the configuration object.
     :return: None
     """
-    dir = configuration.directory
-    assert dir is not None
+    dir_ = configuration.directory
+    assert dir_ is not None
 
     # patch sys.modules with dummy modules
     prefix_root = "packages"
@@ -157,9 +158,9 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     sys.modules[prefix_author] = types.ModuleType(prefix_author)
     sys.modules[prefix_pkg_type] = types.ModuleType(prefix_pkg_type)
 
-    for subpackage_init_file in dir.rglob("__init__.py"):
+    for subpackage_init_file in dir_.rglob("__init__.py"):
         parent_dir = subpackage_init_file.parent
-        relative_parent_dir = parent_dir.relative_to(dir)
+        relative_parent_dir = parent_dir.relative_to(dir_)
         if relative_parent_dir == Path("."):
             # this handles the case when 'subpackage_init_file'
             # is path/to/package/__init__.py
@@ -255,3 +256,102 @@ def cd(path):
         yield
     finally:
         os.chdir(old_path)
+
+
+def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Callable:
+    """
+    Get logger method for function.
+
+    Get logger in `fn` definion module or creates logger is module.__name__.
+    Or return logger_method if it's callable.
+
+    :param fn: function to get logger for.
+    :param logger_method: logger name or callable.
+
+    :return: callable to write log with
+    """
+    if callable(logger_method):
+        return logger_method
+
+    logger = fn.__globals__.get("logger", logging.getLogger(fn.__globals__["__name__"]))  # type: ignore
+
+    return getattr(logger, logger_method)
+
+
+def try_decorator(error_message: str, default_return=None, logger_method="error"):
+    """
+    Run function, log and return default value on exception.
+
+    Does not support async or coroutines!
+
+    :param error_message: message template with one `{}` for exception
+    :param default_return: value to return on exception, by default None
+    :param logger_method: name of the logger method or callable to print logs
+    """
+
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+                if error_message:
+                    log = get_logger_method(fn, logger_method)
+                    log(error_message.format(e))
+                return default_return
+
+        return wrapper
+
+    return decorator
+
+
+class MaxRetriesError(Exception):
+    """Exception for retry decorator."""
+
+
+def retry_decorator(
+    number_of_retries: int, error_message: str, delay: float = 0, logger_method="error"
+):
+    """
+    Run function with several attempts.
+
+    Does not support async or coroutines!
+
+    :param number_of_retries: amount of attempts
+    :param error_message: message template with one `{}` for exception
+    :param delay: num of seconds to sleep between retries. default 0
+    :param logger_method: name of the logger method or callable to print logs
+    """
+
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            log = get_logger_method(fn, logger_method)
+            for retry in range(number_of_retries):
+                try:
+                    return fn(*args, **kwargs)
+                except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+                    if error_message:
+                        log(error_message.format(retry=retry + 1, error=e))
+                    if delay:
+                        time.sleep(delay)
+            raise MaxRetriesError(number_of_retries)
+
+        return wrapper
+
+    return decorator
+
+
+@contextlib.contextmanager
+def exception_log_and_reraise(log_method: Callable, message: str):
+    """
+    Run code in context to log and re raise exception.
+
+    :param log_method: function to print log
+    :param message: message template to add error text.
+    """
+    try:
+        yield
+    except BaseException as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+        log_method(message.format(e))
+        raise

@@ -105,7 +105,7 @@ class CryptoSpec:
     """A specification for a particular instance of a crypto object."""
 
     def __init__(
-        self, id: CryptoId, entry_point: EntryPoint, **kwargs: Dict,
+        self, crypto_id: CryptoId, entry_point: EntryPoint, **kwargs: Dict,
     ):
         """
         Initialize a crypto specification.
@@ -114,7 +114,7 @@ class CryptoSpec:
         :param entry_point: The Python entry_point of the environment class (e.g. module.name:Class).
         :param kwargs: other custom keyword arguments.
         """
-        self.id = CryptoId(id)
+        self.id = CryptoId(crypto_id)
         self.entry_point = EntryPoint(entry_point)
         self._kwargs = {} if kwargs is None else kwargs
 
@@ -144,41 +144,43 @@ class CryptoRegistry:
         """Get the supported crypto ids."""
         return set([str(id_) for id_ in self.specs.keys()])
 
-    def register(self, id: CryptoId, entry_point: EntryPoint, **kwargs):
+    def register(self, crypto_id: CryptoId, entry_point: EntryPoint, **kwargs):
         """
         Register a Crypto module.
 
-        :param id: the Cyrpto identifier (e.g. 'fetchai', 'ethereum' etc.)
+        :param crypto_id: the Cyrpto identifier (e.g. 'fetchai', 'ethereum' etc.)
         :param entry_point: the entry point, i.e. 'path.to.module:ClassName'
         :return: None
         """
-        if id in self.specs:
-            raise AEAException("Cannot re-register id: '{}'".format(id))
-        self.specs[id] = CryptoSpec(id, entry_point, **kwargs)
+        if crypto_id in self.specs:
+            raise AEAException("Cannot re-register id: '{}'".format(crypto_id))
+        self.specs[crypto_id] = CryptoSpec(crypto_id, entry_point, **kwargs)
 
-    def make(self, id: CryptoId, module: Optional[str] = None, **kwargs) -> Crypto:
+    def make(
+        self, crypto_id: CryptoId, module: Optional[str] = None, **kwargs
+    ) -> Crypto:
         """
         Make an instance of the crypto class associated to the given id.
 
-        :param id: the id of the crypto class.
+        :param crypto_id: the id of the crypto class.
         :param module: see 'module' parameter to 'make'.
         :param kwargs: keyword arguments to be forwarded to the Crypto object.
         :return: the new Crypto instance.
         """
-        spec = self._get_spec(id, module=module)
+        spec = self._get_spec(crypto_id, module=module)
         crypto = spec.make(**kwargs)
         return crypto
 
-    def has_spec(self, id: CryptoId) -> bool:
+    def has_spec(self, crypto_id: CryptoId) -> bool:
         """
         Check whether there exist a spec associated with a crypto id.
 
-        :param id: the crypto identifier.
+        :param crypto_id: the crypto identifier.
         :return: True if it is registered, False otherwise.
         """
-        return id in self.specs.keys()
+        return crypto_id in self.specs.keys()
 
-    def _get_spec(self, id: CryptoId, module: Optional[str] = None):
+    def _get_spec(self, crypto_id: CryptoId, module: Optional[str] = None):
         """Get the crypto spec."""
         if module is not None:
             try:
@@ -191,35 +193,37 @@ class CryptoRegistry:
                     )
                 )
 
-        if id not in self.specs:
-            raise AEAException("Crypto not registered with id '{}'.".format(id))
-        return self.specs[id]
+        if crypto_id not in self.specs:
+            raise AEAException("Crypto not registered with id '{}'.".format(crypto_id))
+        return self.specs[crypto_id]
 
 
 registry = CryptoRegistry()
 
 
 def register(
-    id: Union[CryptoId, str], entry_point: Union[EntryPoint, str], **kwargs
+    crypto_id: Union[CryptoId, str], entry_point: Union[EntryPoint, str], **kwargs
 ) -> None:
     """
     Register a crypto type.
 
-    :param id: the identifier for the crypto type.
+    :param crypto_id: the identifier for the crypto type.
     :param entry_point: the entry point to load the crypto object.
     :param kwargs: arguments to provide to the crypto class.
     :return: None.
     """
-    crypto_id = CryptoId(id)
+    crypto_id = CryptoId(crypto_id)
     entry_point = EntryPoint(entry_point)
     return registry.register(crypto_id, entry_point, **kwargs)
 
 
-def make(id: Union[CryptoId, str], module: Optional[str] = None, **kwargs) -> Crypto:
+def make(
+    crypto_id: Union[CryptoId, str], module: Optional[str] = None, **kwargs
+) -> Crypto:
     """
     Create a crypto instance.
 
-    :param id: the id of the crypto object. Make sure it has been registered earlier
+    :param crypto_id: the id of the crypto object. Make sure it has been registered earlier
                before calling this function.
     :param module: dotted path to a module.
                    whether a module should be loaded before creating the object.
@@ -233,5 +237,5 @@ def make(id: Union[CryptoId, str], module: Optional[str] = None, **kwargs) -> Cr
     :param kwargs: keyword arguments to be forwarded to the Crypto object.
     :return:
     """
-    crypto_id = CryptoId(id)
+    crypto_id = CryptoId(crypto_id)
     return registry.make(crypto_id, module=module, **kwargs)

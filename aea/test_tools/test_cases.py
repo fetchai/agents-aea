@@ -97,19 +97,25 @@ class BaseAEATestCase(ABC):
         cls.current_agent_context = ""
 
     @classmethod
-    def set_config(cls, dotted_path: str, value: Any, type: str = "str") -> None:
+    def set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> None:
         """
         Set a config.
         Run from agent's directory.
 
         :param dotted_path: str dotted path to config param.
         :param value: a new value to set.
-        :param type: the type
+        :param type_: the type
 
         :return: None
         """
         cls.run_cli_command(
-            "config", "set", dotted_path, str(value), "--type", type, cwd=cls._get_cwd()
+            "config",
+            "set",
+            dotted_path,
+            str(value),
+            "--type",
+            type_,
+            cwd=cls._get_cwd(),
         )
 
     @classmethod
