@@ -5,11 +5,12 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 aea fetch fetchai/ml_data_provider:0.5.0
 cd ml_data_provider
 aea install
-```
+``` 
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/ml_data_provider:0.5.0
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
@@ -23,6 +24,7 @@ aea install
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger_api:0.1.0
 aea add skill fetchai/ml_train:0.5.0
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
@@ -65,7 +67,7 @@ aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id A
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run
 ```
 ``` bash
 cd ..
@@ -78,9 +80,17 @@ ledger_apis:
     network: testnet
 ```
 ``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+```
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
+```
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
 ```
 ``` yaml
 ledger_apis:

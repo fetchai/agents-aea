@@ -1,10 +1,10 @@
-The AEA generic seller with ORM integration demonstrates how to configure an AEA to interact with a database using python-sql objects.
+This guide demonstrates how to configure an AEA to interact with a database using python-sql objects.
 
 ## Discussion
 
 Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language. The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs.
 
-- We assume, that you followed the guide for the <a href="/generic-skills/"> generic-skills. </a>
+- We assume, that you followed the guide for the <a href="../thermometer-skills/"> thermometer-skills. </a>
 - We assume, that we have a database `genericdb.db` with table name `data`. This table contains the following columns `timestamp` and `thermometer`
 - We assume, that we have a hardware thermometer sensor that adds the readings in the `genericdb` database (although you can follow the guide without having access to a sensor).
 
@@ -68,8 +68,8 @@ A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` ne
 
 First, fetch the seller AEA, which will provide data:
 ``` bash
-aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
-cd my_seller_aea
+aea fetch fetchai/thermometer_aea:0.3.0 --alias my_thermometer_aea
+cd my_thermometer_aea
 aea install
 ```
 
@@ -78,16 +78,16 @@ aea install
 
 The following steps create the seller from scratch:
 ``` bash
-aea create my_seller_aea
-cd my_seller_aea
+aea create my_thermometer_aea
+cd my_thermometer_aea
 aea add connection fetchai/oef:0.5.0
 aea add connection fetchai/ledger_api:0.1.0
-aea add skill fetchai/generic_seller:0.6.0
+aea add skill fetchai/thermometer:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
-In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
+In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
 ``` yaml
 ledger_apis:
   fetchai:
@@ -107,8 +107,8 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
-cd my_buyer_aea
+aea fetch fetchai/thermometer_client:0.3.0 --alias my_thermometer_client
+cd my_thermometer_client
 aea install
 ```
 
@@ -117,13 +117,13 @@ aea install
 
 The following steps create the car data client from scratch:
 ``` bash
-aea create my_buyer_aea
-cd my_buyer_aea
+aea create my_thermometer_client
+cd my_thermometer_client
 aea add connection fetchai/oef:0.5.0
 aea add connection fetchai/ledger_api:0.1.0
-aea add skill fetchai/generic_buyer:0.5.0
+aea add skill fetchai/thermometer_client:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -216,7 +216,7 @@ aea generate-wealth cosmos
 
 ### Update the seller and buyer AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/skills/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
+In `my_thermometer_aea/vendor/fetchai/skills/thermometer/skill.yaml`, replace the `data_for_sale` with your data:
 ``` yaml
 models:
   ...
@@ -224,9 +224,7 @@ models:
     args:
       currency_id: FET
       data_for_sale:
-        pressure: 20
         temperature: 26
-        wind: 10
       data_model:
         attribute_one:
           is_required: true
@@ -245,13 +243,13 @@ models:
         country: UK
       service_id: generic_service
       unit_price: 10
-    class_name: GenericStrategy
+    class_name: Strategy
 dependencies:
   SQLAlchemy: {}
 ```
-The `search_schema` and the `search_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
+The `data_model` and the `service_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `service_data` dictionary.
 
-In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
+In `my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) ensure you have matching data.
 
 ``` yaml
 models:
@@ -284,7 +282,7 @@ models:
           search_term: city
           search_value: Cambridge
       service_id: generic_service
-    class_name: GenericStrategy
+    class_name: Strategy
 ```
 
 <details><summary>Alternatively, configure skills for other test networks.</summary>
@@ -299,9 +297,7 @@ models:
     args:
       currency_id: ETH
       data_for_sale:
-        pressure: 20
         temperature: 26
-        wind: 10
       data_model:
         attribute_one:
           is_required: true
@@ -320,7 +316,7 @@ models:
         country: UK
       service_id: generic_service
       unit_price: 10
-    class_name: GenericStrategy
+    class_name: Strategy
 dependencies:
   SQLAlchemy: {}
 ```
@@ -356,7 +352,7 @@ models:
           search_term: city
           search_value: Cambridge
       service_id: generic_service
-    class_name: GenericStrategy
+    class_name: Strategy
 ```
 
 </p>
@@ -372,12 +368,12 @@ aea install
 Before being able to modify a package we need to eject it from vendor:
 
 ``` bash
-aea eject skill fetchai/generic_seller:0.6.0
+aea eject skill fetchai/thermometer:0.6.0
 ```
 
 This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.
 
-Open the `strategy.py` (in `my_seller_aea/skills/generic_seller/strategy.py`) with your IDE and modify the following.
+Open the `strategy.py` (in `my_thermometer_aea/skills/thermometer/strategy.py`) with your IDE and modify the following.
 
 Import the newly installed library to your strategy.
 ``` python
@@ -385,6 +381,9 @@ import sqlalchemy as db
 ```
 Then modify your strategy's \_\_init__ function to match the following code:
 ``` python
+class Strategy(GenericStrategy):
+    """This class defines a strategy for the agent."""
+
     def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
@@ -394,35 +393,15 @@ Then modify your strategy's \_\_init__ function to match the following code:
 
         :return: None
         """
-        self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-        self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
-        self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
-        self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
-        data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-
-        super().__init__(**kwargs)
-
-        self._oef_msg_id = 0
         self._db_engine = db.create_engine("sqlite:///genericdb.db")
         self._tbl = self.create_database_and_table()
         self.insert_data()
-
-        # Read the data from the sensor if the bool is set to True.
-        # Enables us to let the user implement his data collection logic without major changes.
-        if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()
-        else:
-            self._data_for_sale = data_for_sale
+        super().__init__(**kwargs)
 ``` 
 
 At the end of the file modify the `collect_from_data_source` function : 
 ``` python
-    def collect_from_data_source(self) -> Dict[str, Any]:
+    def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to collect data."""
         connection = self._db_engine.connect()
         query = db.select([self._tbl])
@@ -460,21 +439,7 @@ Also, create two new functions, one that will create a connection with the datab
 After modifying the skill we need to fingerprint it:
 
 ``` bash
-aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
-```
-
-### Update the skill configs
-
-Both skills are abstract skills, make them instantiatable:
-
-``` bash
-cd my_seller_aea
-aea config set vendor.fetchai.skills.generic_seller.is_abstract false --type bool
-```
-
-``` bash
-cd my_buyer_aea
-aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
+aea fingerprint skill {YOUR_AUTHOR_HANDLE}/thermometer:0.1.0
 ```
 
 ## Run the AEAs
@@ -491,6 +456,6 @@ You will see that the AEAs negotiate and then transact using the configured test
 When you're done, go up a level and delete the AEAs.
 ``` bash 
 cd ..
-aea delete my_seller_aea
-aea delete my_buyer_aea
+aea delete my_thermometer_aea
+aea delete my_thermometer_client
 ```
