@@ -77,7 +77,9 @@ class RequestDispatcher(ABC):
         """
         message = self.get_message(envelope)
         ledger_id = self.get_ledger_id(message)
-        api = self.registry.make(ledger_id)
+        api = self.registry.make(
+            ledger_id
+        )  # TODO: overwrite configs from connection.yaml
         message.is_incoming = True
         dialogue = self.dialogues.update(message)
         assert dialogue is not None, "No dialogue created."

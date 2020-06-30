@@ -33,7 +33,7 @@ def test_make_crypto_fetchai_positive():
 
 def test_make_ledger_api_fetchai_positive():
     """Test make_crypto for fetchai."""
-    ledger_api = make_ledger_api("fetchai")
+    ledger_api = make_ledger_api("fetchai", **{"network": "testnet"})
     assert isinstance(ledger_api, FetchAIApi)
 
 

@@ -19,14 +19,13 @@
 
 """Module wrapping all the public and private keys cryptography."""
 import logging
-import sys
-from typing import Any, Dict, Optional, Type, Union, cast
+from typing import Any, Dict, Optional, Type, Union
 
 from aea.crypto.base import LedgerApi
-from aea.crypto.cosmos import COSMOS_CURRENCY, CosmosApi
-from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumApi
-from aea.crypto.fetchai import FETCHAI_CURRENCY, FetchAIApi
-from aea.helpers.base import MaxRetriesError, retry_decorator
+from aea.crypto.cosmos import CosmosApi
+from aea.crypto.ethereum import EthereumApi
+from aea.crypto.fetchai import FetchAIApi
+from aea.crypto.registries import make_ledger_api
 from aea.mail.base import Address
 
 SUPPORTED_LEDGER_APIS = {
@@ -34,53 +33,8 @@ SUPPORTED_LEDGER_APIS = {
     EthereumApi.identifier: EthereumApi,
     FetchAIApi.identifier: FetchAIApi,
 }  # type: Dict[str, Type[LedgerApi]]
-SUPPORTED_CURRENCIES = {
-    CosmosApi.identifier: COSMOS_CURRENCY,
-    EthereumApi.identifier: ETHEREUM_CURRENCY,
-    FetchAIApi.identifier: FETCHAI_CURRENCY,
-}
 
 logger = logging.getLogger(__name__)
-
-MAX_CONNECTION_RETRY = 3
-
-
-# TODO: remove this  in favour of the registry approach!
-def _instantiate_api(identifier: str, config: Dict[str, Union[str, int]]) -> LedgerApi:
-    """
-    Instantiate a ledger api.
-
-    :param identifier: the ledger identifier
-    :param config: the config of the api
-    :return: the ledger api
-    """
-    if identifier not in SUPPORTED_LEDGER_APIS:
-        raise ValueError("Unsupported identifier {} in ledger apis.".format(identifier))
-
-    @retry_decorator(
-        MAX_CONNECTION_RETRY,
-        f"Connection attempt {{retry}} to {identifier} ledger with provided config {config} failed. error: {{error}}",
-    )
-    def _get_api():
-        if identifier == FetchAIApi.identifier:
-            api = FetchAIApi(**config)  # type: LedgerApi
-        elif identifier == EthereumApi.identifier:
-            api = EthereumApi(
-                cast(str, config["address"]), cast(str, config["gas_price"])
-            )
-        elif identifier == CosmosApi.identifier:
-            api = CosmosApi(**config)
-        return api
-
-    try:
-        return _get_api()
-    except MaxRetriesError:  # pragma: no cover
-        logger.error(
-            "Cannot connect to {} ledger with provided config {} after {} attemps. Giving up!".format(
-                identifier, config, MAX_CONNECTION_RETRY
-            )
-        )
-        sys.exit(1)  # TODO: raise exception instead?
 
 
 class LedgerApis:
@@ -99,7 +53,7 @@ class LedgerApis:
         """
         apis = {}  # type: Dict[str, LedgerApi]
         for identifier, config in ledger_api_configs.items():
-            api = _instantiate_api(identifier, config)
+            api = make_ledger_api(identifier, **config)
             apis[identifier] = api
         self._apis = apis
         self._configs = ledger_api_configs

@@ -345,6 +345,6 @@ For more demos, use cases or step by step guides, please check the following:
 
 - <a href="../generic-skills">Generic skill use case</a>
 - <a href='../weather-skills/'>Weather skill demo</a>
-- <a href='../thermometer-skills-step-by-step/'> Thermometer step by step guide </a>
+- <a href='../generic-skills-step-by-step/'> Generic step by step guide </a>
 
 <br />

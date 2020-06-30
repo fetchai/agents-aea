@@ -25,22 +25,29 @@ import pytest
 
 import aea.crypto
 
-from ...conftest import COSMOS_ADDRESS_ONE, ETHEREUM_ADDRESS_ONE, FETCHAI_ADDRESS_ONE
+from ...conftest import (
+    COSMOS_ADDRESS_ONE,
+    COSMOS_TESTNET_CONFIG,
+    ETHEREUM_ADDRESS_ONE,
+    ETHEREUM_TESTNET_CONFIG,
+    FETCHAI_ADDRESS_ONE,
+    FETCHAI_TESTNET_CONFIG,
+)
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    "identifier,address",
+    "identifier,address,config",
     [
-        ("fetchai", FETCHAI_ADDRESS_ONE),
-        ("ethereum", ETHEREUM_ADDRESS_ONE),
-        ("cosmos", COSMOS_ADDRESS_ONE),
+        ("fetchai", FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
+        ("ethereum", ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
+        ("cosmos", COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
-def test_make_ledger_apis(identifier, address):
+def test_make_ledger_apis(identifier, address, config):
     """Test the 'make' method for ledger api."""
-    api = aea.crypto.registries.make_ledger_api(identifier)
+    api = aea.crypto.registries.make_ledger_api(identifier, **config)
 
     # minimal functional test - comprehensive tests on ledger APIs are located in another module
     balance_1 = api.get_balance(address)

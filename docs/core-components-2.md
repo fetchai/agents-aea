@@ -46,7 +46,7 @@ Taken together, the core components from this section and the <a href="../core-c
 
 We recommend you continue with the next step in the 'Getting Started' series:
 
-- <a href="../thermometer-skills-step-by-step/">Trade between two AEAs</a>
+- <a href="../generic-skills-step-by-step/">Trade between two AEAs</a>
 
 ### Relevant deep-dives
 

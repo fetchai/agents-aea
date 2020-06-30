@@ -25,28 +25,12 @@ register_crypto(id_="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
 register_crypto(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
 register_crypto(id_="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
 
-DEFAULT_FETCHAI_LEDGER_CONFIG = dict(network="testnet")
 register_ledger_api(
-    id_="fetchai",
-    entry_point="aea.crypto.fetchai:FetchAIApi",
-    **DEFAULT_FETCHAI_LEDGER_CONFIG
+    id_="fetchai", entry_point="aea.crypto.fetchai:FetchAIApi",
 )
 
-DEFAULT_ETHEREUM_LEDGER_CONFIG = dict(
-    address="https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-    gas_price=50,
-)
-register_ledger_api(
-    id_="ethereum",
-    entry_point="aea.crypto.ethereum:EthereumApi",
-    **DEFAULT_ETHEREUM_LEDGER_CONFIG
-)
+register_ledger_api(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumApi")
 
-DEFAULT_COSMOS_LEDGER_CONFIG = dict(
-    address="http://aea-testnet.sandbox.fetch-ai.com:1317",
-)
 register_ledger_api(
-    id_="cosmos",
-    entry_point="aea.crypto.cosmos:CosmosApi",
-    **DEFAULT_COSMOS_LEDGER_CONFIG
+    id_="cosmos", entry_point="aea.crypto.cosmos:CosmosApi",
 )

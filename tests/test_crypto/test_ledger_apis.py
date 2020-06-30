@@ -28,6 +28,7 @@ from aea.crypto.cosmos import CosmosApi
 from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import FetchAIApi
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import AEAException
 
 from ..conftest import (
     COSMOS_TESTNET_CONFIG,
@@ -61,8 +62,8 @@ def test_initialisation():
     assert type(ledger_apis.get_api(EthereumApi.identifier)) == EthereumApi
     assert ledger_apis.has_ledger(CosmosApi.identifier)
     assert type(ledger_apis.get_api(CosmosApi.identifier)) == CosmosApi
-    unknown_config = ("UnknownPath", 8080)
-    with pytest.raises(ValueError):
+    unknown_config = {"UnknownPath": 8080}
+    with pytest.raises(AEAException):
         LedgerApis({"UNKNOWN": unknown_config}, FetchAIApi.identifier)
 
 
