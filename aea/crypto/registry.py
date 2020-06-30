@@ -156,7 +156,9 @@ class CryptoRegistry:
             raise AEAException("Cannot re-register id: '{}'".format(crypto_id))
         self.specs[crypto_id] = CryptoSpec(crypto_id, entry_point, **kwargs)
 
-    def make(self, crypto_id: CryptoId, module: Optional[str] = None, **kwargs) -> Crypto:
+    def make(
+        self, crypto_id: CryptoId, module: Optional[str] = None, **kwargs
+    ) -> Crypto:
         """
         Make an instance of the crypto class associated to the given id.
 
@@ -215,7 +217,9 @@ def register(
     return registry.register(crypto_id, entry_point, **kwargs)
 
 
-def make(crypto_id: Union[CryptoId, str], module: Optional[str] = None, **kwargs) -> Crypto:
+def make(
+    crypto_id: Union[CryptoId, str], module: Optional[str] = None, **kwargs
+) -> Crypto:
     """
     Create a crypto instance.
 

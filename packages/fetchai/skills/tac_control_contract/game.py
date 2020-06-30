@@ -293,7 +293,7 @@ class Transaction:
 
     def __init__(
         self,
-        id_: TransactionId,
+        transaction_id: TransactionId,
         sender_addr: Address,
         counterparty_addr: Address,
         amount_by_currency_id: Dict[str, int],
@@ -307,7 +307,7 @@ class Transaction:
         """
         Instantiate transaction request.
 
-        :param id: the id of the transaction.
+        :param transaction_id: the id of the transaction.
         :param sender_addr: the sender of the transaction.
         :param tx_counterparty_addr: the counterparty of the transaction.
         :param amount_by_currency_id: the currency used.
@@ -319,7 +319,7 @@ class Transaction:
         :param counterparty_signature: the signature of the transaction counterparty
         :return: None
         """
-        self._id = id_
+        self._id = transaction_id
         self._sender_addr = sender_addr
         self._counterparty_addr = counterparty_addr
         self._amount_by_currency_id = amount_by_currency_id

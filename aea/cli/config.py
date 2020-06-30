@@ -61,7 +61,10 @@ def get(ctx: Context, json_path: List[str]):
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx
 def set_command(
-    ctx: Context, json_path: List[str], value: str, type: str  # pylint: disable=redefined-builtin
+    ctx: Context,
+    json_path: List[str],
+    value: str,
+    type: str,  # pylint: disable=redefined-builtin
 ):
     """Set a field."""
     _set_config(ctx, json_path, value, type)
