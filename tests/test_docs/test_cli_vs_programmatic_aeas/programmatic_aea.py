@@ -26,10 +26,9 @@ from typing import cast
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, create_private_key
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
@@ -52,54 +51,69 @@ def run():
     # Create a private key
     create_private_key(FetchAICrypto.identifier)
 
-    # Set up the wallet, identity, oef connection, ledger and (empty) resources
+    # Set up the wallet, identity and (empty) resources
     wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE})
     identity = Identity(
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
-    configuration = ConnectionConfig(
-        addr=HOST, port=PORT, connection_id=OEFConnection.connection_id
-    )
-    oef_connection = OEFConnection(configuration=configuration, identity=identity)
-    configuration = ConnectionConfig(connection_id=LedgerApiConnection.connection_id)
-    ledger_api_connection = LedgerApiConnection(
-        configuration=configuration, identity=identity
-    )
-    ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
     resources = Resources()
 
+    # specify the default routing for some protocols
+    default_routing = {
+        PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerApiConnection.connection_id
+    }
+    default_connection = OEFConnection.connection_id
+
     # create the AEA
-    my_aea = AEA(identity, wallet, ledger_apis, resources,)  # stub_connection,
+    my_aea = AEA(
+        identity,
+        wallet,
+        resources,
+        default_connection=default_connection,
+        default_routing=default_routing,
+    )
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
     resources.add_protocol(default_protocol)
 
-    # Add the ledger_api protocol (which is part of the AEA distribution)
+    # Add the signing protocol (which is part of the AEA distribution)
+    signing_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "signing"))
+    resources.add_protocol(signing_protocol)
+
+    # Add the ledger_api protocol
     ledger_api_protocol = Protocol.from_dir(
-        os.path.join(AEA_DIR, "protocols", "ledger_api")
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "ledger_api",)
     )
     resources.add_protocol(ledger_api_protocol)
 
-    # Add the oef search protocol (which is a package)
+    # Add the oef_search protocol
     oef_protocol = Protocol.from_dir(
         os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef_search",)
     )
     resources.add_protocol(oef_protocol)
 
-    # Add the fipa protocol (which is a package)
+    # Add the fipa protocol
     fipa_protocol = Protocol.from_dir(
         os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "fipa",)
     )
     resources.add_protocol(fipa_protocol)
 
-    # Add the OEF connection
+    # Add the LedgerAPI connection
+    configuration = ConnectionConfig(connection_id=LedgerApiConnection.connection_id)
+    ledger_api_connection = LedgerApiConnection(
+        configuration=configuration, identity=identity
+    )
     resources.add_connection(ledger_api_connection)
 
     # Add the OEF connection
+    configuration = ConnectionConfig(
+        addr=HOST, port=PORT, connection_id=OEFConnection.connection_id
+    )
+    oef_connection = OEFConnection(configuration=configuration, identity=identity)
     resources.add_connection(oef_connection)
 
-    # Add the error and weather_station skills
+    # Add the error and weather_client skills
     error_skill = Skill.from_dir(
         os.path.join(AEA_DIR, "skills", "error"), agent_context=my_aea.context
     )
@@ -109,11 +123,12 @@ def run():
     )
 
     strategy = cast(Strategy, weather_skill.models.get("strategy"))
-    strategy.is_ledger_tx = False
+    strategy._is_ledger_tx = False
 
     for skill in [error_skill, weather_skill]:
         resources.add_skill(skill)
 
+    # Run the AEA
     try:
         logger.info("STARTING AEA NOW!")
         my_aea.start()

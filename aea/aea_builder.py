@@ -61,7 +61,6 @@ from aea.crypto.helpers import (
     create_private_key,
     try_validate_private_key_path,
 )
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
@@ -842,11 +841,7 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
-    def build(
-        self,
-        connection_ids: Optional[Collection[PublicId]] = None,
-        ledger_apis: Optional[LedgerApis] = None,
-    ) -> AEA:
+    def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
         """
         Build the AEA.
 
@@ -858,7 +853,6 @@ class AEABuilder:
         via 'add_component_instance' and the private keys.
 
         :param connection_ids: select only these connections to run the AEA.
-        :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
@@ -868,7 +862,6 @@ class AEABuilder:
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
         identity = self._build_identity_from_wallet(wallet)
-        ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
         self._load_and_add_components(
@@ -881,7 +874,6 @@ class AEABuilder:
         aea = AEA(
             identity,
             wallet,
-            ledger_apis,
             resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
@@ -903,35 +895,6 @@ class AEABuilder:
         )
         self._build_called = True
         return aea
-
-    def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
-        """
-        Load the ledger apis.
-
-        :param ledger_apis: the ledger apis provided
-        :return: ledger apis
-        """
-        if ledger_apis is not None:
-            self._check_consistent(ledger_apis)
-            ledger_apis = deepcopy(ledger_apis)
-        else:
-            ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
-        return ledger_apis
-
-    def _check_consistent(self, ledger_apis: LedgerApis) -> None:
-        """
-        Check the ledger apis are consistent with the configs.
-
-        :param ledger_apis: the ledger apis provided
-        :return: None
-        """
-        if self.ledger_apis_config != {}:
-            assert (
-                ledger_apis.configs == self.ledger_apis_config
-            ), "Config of LedgerApis does not match provided configs."
-        assert (
-            ledger_apis.default_ledger_id == self._default_ledger
-        ), "Default ledger id of LedgerApis does not match provided default ledger."
 
     def _get_agent_loop_timeout(self) -> float:
         """

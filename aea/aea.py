@@ -26,7 +26,6 @@ from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SKILL
 from aea.context.base import AgentContext
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.decision_maker.default import (
@@ -61,12 +60,10 @@ class AEA(Agent):
         self,
         identity: Identity,
         wallet: Wallet,
-        ledger_apis: LedgerApis,
         resources: Resources,
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 0.05,
         execution_timeout: float = 0,
-        is_debug: bool = False,
         max_reactions: int = 20,
         decision_maker_handler_class: Type[
             DecisionMakerHandler
@@ -85,12 +82,10 @@ class AEA(Agent):
 
         :param identity: the identity of the agent
         :param wallet: the wallet of the agent.
-        :param ledger_apis: the APIs the agent will use to connect to ledgers.
         :param resources: the resources (protocols and skills) of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param exeution_timeout: amount of time to limit single act/handle to execute.
-        :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param skill_exception_policy: the skill exception policy enum
@@ -109,7 +104,6 @@ class AEA(Agent):
             connections=[],
             loop=loop,
             timeout=timeout,
-            is_debug=is_debug,
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
         )
@@ -124,7 +118,6 @@ class AEA(Agent):
         )
         self._context = AgentContext(
             self.identity,
-            ledger_apis,
             self.multiplexer.connection_status,
             self.outbox,
             self.decision_maker.message_in_queue,

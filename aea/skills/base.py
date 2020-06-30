@@ -43,7 +43,6 @@ from aea.configurations.base import (
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
-from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
 from aea.mail.base import Address
@@ -181,11 +180,6 @@ class SkillContext:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
         return self._get_agent_context().task_manager
-
-    @property
-    def ledger_apis(self) -> LedgerApis:
-        """Get ledger APIs."""
-        return self._get_agent_context().ledger_apis
 
     @property
     def search_service_address(self) -> Address:

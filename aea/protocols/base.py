@@ -340,7 +340,14 @@ class Protocol(Component):
             configuration.prefix_import_path + ".message"
         )
         classes = inspect.getmembers(class_module, inspect.isclass)
-        message_classes = list(filter(lambda x: re.match("\\w+Message", x[0]), classes))
+        name_camel_case = "".join(
+            word.capitalize() for word in configuration.name.split("_")
+        )
+        message_classes = list(
+            filter(
+                lambda x: re.match("{}Message".format(name_camel_case), x[0]), classes
+            )
+        )
         assert len(message_classes) == 1, "Not exactly one message class detected."
         message_class = message_classes[0][1]
         class_module = importlib.import_module(
@@ -348,7 +355,10 @@ class Protocol(Component):
         )
         classes = inspect.getmembers(class_module, inspect.isclass)
         serializer_classes = list(
-            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
+            filter(
+                lambda x: re.match("{}Serializer".format(name_camel_case), x[0]),
+                classes,
+            )
         )
         assert (
             len(serializer_classes) == 1
