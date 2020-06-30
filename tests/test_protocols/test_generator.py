@@ -51,7 +51,6 @@ from aea.protocols.generator.common import check_prerequisites
 from aea.protocols.generator.extract_specification import (
     _specification_type_to_python_type,
 )
-from aea.protocols.generator.validate import _is_composition_type_with_custom_type
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import UseOef
@@ -468,19 +467,19 @@ class ProtocolGeneratorTestCase(TestCase):
         protocol_specification = mock.Mock()
         protocol_specification.name = "name"
 
-    @mock.patch(
-        "aea.protocols.generator.common._get_sub_types_of_compositional_types",
-        return_value=["some"],
-    )
-    def test__includes_custom_type_positive(self, *mocks):
-        """Test _includes_custom_type method positive result."""
-        content_type = "pt:union[pt:str]"
-        result = not _is_composition_type_with_custom_type(content_type)
-        self.assertTrue(result)
-
-        content_type = "pt:optional[pt:str]"
-        result = not _is_composition_type_with_custom_type(content_type)
-        self.assertTrue(result)
+    # @mock.patch(
+    #     "aea.protocols.generator.common._get_sub_types_of_compositional_types",
+    #     return_value=["some"],
+    # )
+    # def test__includes_custom_type_positive(self, *mocks):
+    #     """Test _includes_custom_type method positive result."""
+    #     content_type = "pt:union[pt:str]"
+    #     result = not _is_composition_type_with_custom_type(content_type)
+    #     self.assertTrue(result)
+    #
+    #     content_type = "pt:optional[pt:str]"
+    #     result = not _is_composition_type_with_custom_type(content_type)
+    #     self.assertTrue(result)
 
     # @mock.patch("aea.protocols.generator._get_indent_str")
     # @mock.patch(

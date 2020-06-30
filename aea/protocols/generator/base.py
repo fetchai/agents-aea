@@ -22,15 +22,29 @@
 import itertools
 import logging
 import os
-import re
 import shutil
 from datetime import date
 from pathlib import Path
 from typing import Optional, Tuple
 
 from aea.protocols.generator.common import (
+    CUSTOM_TYPES_DOT_PY_FILE_NAME,
+    DIALOGUE_DOT_PY_FILE_NAME,
+    INIT_FILE_NAME,
+    MESSAGE_DOT_PY_FILE_NAME,
+    MESSAGE_IMPORT,
+    PATH_TO_PACKAGES,
+    PROTOCOL_YAML_FILE_NAME,
+    PYTHON_TYPE_TO_PROTO_TYPE,
+    SERIALIZATION_DOT_PY_FILE_NAME,
+    SERIALIZER_IMPORT,
+    _camel_case_to_snake_case,
     _create_protocol_file,
     _get_sub_types_of_compositional_types,
+    _includes_custom_type,
+    _python_pt_or_ct_type_to_proto_type,
+    _to_camel_case,
+    _union_sub_type_to_protobuf_variable_name,
     check_prerequisites,
     check_protobuf_using_protoc,
     load_protocol_specification,
@@ -38,25 +52,6 @@ from aea.protocols.generator.common import (
     try_run_protoc,
 )
 from aea.protocols.generator.extract_specification import extract
-
-MESSAGE_IMPORT = "from aea.protocols.base import Message"
-SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
-
-PATH_TO_PACKAGES = "packages"
-INIT_FILE_NAME = "__init__.py"
-PROTOCOL_YAML_FILE_NAME = "protocol.yaml"
-MESSAGE_DOT_PY_FILE_NAME = "message.py"
-DIALOGUE_DOT_PY_FILE_NAME = "dialogues.py"
-CUSTOM_TYPES_DOT_PY_FILE_NAME = "custom_types.py"
-SERIALIZATION_DOT_PY_FILE_NAME = "serialization.py"
-
-PYTHON_TYPE_TO_PROTO_TYPE = {
-    "bytes": "bytes",
-    "int": "int32",
-    "float": "float",
-    "bool": "bool",
-    "str": "string",
-}
 
 logger = logging.getLogger(__name__)
 
@@ -91,98 +86,6 @@ def _copyright_header_str(author: str) -> str:
         "# ------------------------------------------------------------------------------\n"
     )
     return copy_right_str
-
-
-def _to_camel_case(text: str) -> str:
-    """
-    Convert a text in snake_case format into the CamelCase format.
-
-    :param text: the text to be converted.
-    :return: The text in CamelCase format.
-    """
-    return "".join(word.title() for word in text.split("_"))
-
-
-def _camel_case_to_snake_case(text: str) -> str:
-    """
-    Convert a text in CamelCase format into the snake_case format.
-
-    :param text: the text to be converted.
-    :return: The text in CamelCase format.
-    """
-    return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
-
-
-def _union_sub_type_to_protobuf_variable_name(
-    content_name: str, content_type: str
-) -> str:
-    """
-    Given a content of type union, create a variable name for its sub-type for protobuf.
-
-    :param content_name: the name of the content
-    :param content_type: the sub-type of a union type
-
-    :return: The variable name
-    """
-    if content_type.startswith("FrozenSet"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        expanded_type_str = "set_of_{}".format(sub_type)
-    elif content_type.startswith("Tuple"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        expanded_type_str = "list_of_{}".format(sub_type)
-    elif content_type.startswith("Dict"):
-        sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
-        sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
-        expanded_type_str = "dict_of_{}_{}".format(sub_type_1, sub_type_2)
-    else:
-        expanded_type_str = content_type
-
-    protobuf_variable_name = "{}_type_{}".format(content_name, expanded_type_str)
-
-    return protobuf_variable_name
-
-
-def _python_pt_or_ct_type_to_proto_type(content_type: str) -> str:
-    """
-    Convert a PT or CT from python to their protobuf equivalent.
-
-    :param content_type: the python type
-    :return: The protobuf equivalent
-    """
-    if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
-        proto_type = PYTHON_TYPE_TO_PROTO_TYPE[content_type]
-    else:
-        proto_type = content_type
-    return proto_type
-
-
-def _includes_custom_type(content_type: str) -> bool:
-    """
-    Evaluate whether a content type is a custom type or has a custom type as a sub-type.
-
-    :param content_type: the content type
-    :return: Boolean result
-    """
-    if content_type.startswith("Optional"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        result = _includes_custom_type(sub_type)
-    elif content_type.startswith("Union"):
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-        result = False
-        for sub_type in sub_types:
-            if _includes_custom_type(sub_type):
-                result = True
-                break
-    elif (
-        content_type.startswith("FrozenSet")
-        or content_type.startswith("Tuple")
-        or content_type.startswith("Dict")
-        or content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys()
-    ):
-        result = False
-    else:
-        result = True
-    return result
 
 
 class ProtocolGenerator:
