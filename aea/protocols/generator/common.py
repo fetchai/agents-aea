@@ -309,13 +309,10 @@ def try_run_black_formatting(path_to_protocol_package: str) -> None:
     :param path_to_protocol_package: a path where formatting should be applied.
     :return: None
     """
-    try:
-        subprocess.run(  # nosec
-            [sys.executable, "-m", "black", path_to_protocol_package, "--quiet"],
-            check=True,
-        )
-    except Exception:
-        raise
+    subprocess.run(  # nosec
+        [sys.executable, "-m", "black", path_to_protocol_package, "--quiet"],
+        check=True,
+    )
 
 
 def try_run_protoc(path_to_generated_protocol_package, name) -> None:
@@ -327,22 +324,19 @@ def try_run_protoc(path_to_generated_protocol_package, name) -> None:
 
     :return: A completed process object.
     """
-    try:
-        # command: "protoc -I={} --python_out={} {}/{}.proto"
-        subprocess.run(  # nosec
-            [
-                "protoc",
-                "-I={}".format(path_to_generated_protocol_package),
-                "--python_out={}".format(path_to_generated_protocol_package),
-                "{}/{}.proto".format(path_to_generated_protocol_package, name),
-            ],
-            stderr=subprocess.PIPE,
-            encoding="utf-8",
-            check=True,
-            env=os.environ.copy(),
-        )
-    except Exception:
-        raise
+    # command: "protoc -I={} --python_out={} {}/{}.proto"
+    subprocess.run(  # nosec
+        [
+            "protoc",
+            "-I={}".format(path_to_generated_protocol_package),
+            "--python_out={}".format(path_to_generated_protocol_package),
+            "{}/{}.proto".format(path_to_generated_protocol_package, name),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=os.environ.copy(),
+    )
 
 
 def check_protobuf_using_protoc(
@@ -367,5 +361,3 @@ def check_protobuf_using_protoc(
         pattern = name + ".proto:[0-9]+:[0-9]+: "
         error_message = re.sub(pattern, "", e.stderr[:-1])
         return False, error_message
-    except Exception:
-        raise

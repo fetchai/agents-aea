@@ -28,7 +28,6 @@ import (
 	"errors"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -49,7 +48,7 @@ import (
 
 func ignore(err error) {
 	if err != nil {
-		log.Println("TRACE", err)
+		log.Println("IGNORED", err)
 	}
 }
 
@@ -66,7 +65,7 @@ type DHTClient struct {
 
 	myAgentAddress  string
 	myAgentReady    func() bool
-	processEnvelope func(aea.Envelope) error
+	processEnvelope func(*aea.Envelope) error
 
 	closing chan struct{}
 	logger  zerolog.Logger
@@ -143,7 +142,7 @@ func New(opts ...Option) (*DHTClient, error) {
 	dhtClient.setupLogger()
 
 	// connect to the booststrap nodes
-	err = utils.BootstrapConnect(ctx, dhtClient.routedHost, dhtClient.bootstrapPeers)
+	err = utils.BootstrapConnect(ctx, dhtClient.routedHost, dhtClient.dht, dhtClient.bootstrapPeers)
 	if err != nil {
 		dhtClient.Close()
 		return nil, err
@@ -179,20 +178,14 @@ func New(opts ...Option) (*DHTClient, error) {
 }
 
 func (dhtClient *DHTClient) setupLogger() {
-	if dhtClient.routedHost == nil {
-		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("process", "DHTClient").
-			Str("relayid", dhtClient.relayPeer.Pretty()).
-			Logger()
-	} else {
-		dhtClient.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("process", "DHTClient").
-			Str("peerid", dhtClient.routedHost.ID().Pretty()).
-			Str("relayid", dhtClient.relayPeer.Pretty()).
-			Logger()
+	fields := map[string]string{
+		"package": "DHTClient",
+		"relayid": dhtClient.relayPeer.Pretty(),
 	}
+	if dhtClient.routedHost != nil {
+		fields["peerid"] = dhtClient.routedHost.ID().Pretty()
+	}
+	dhtClient.logger = utils.NewDefaultLoggerWithFields(fields)
 }
 
 func (dhtClient *DHTClient) getLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {
@@ -233,8 +226,13 @@ func (dhtClient *DHTClient) Close() []error {
 	return status
 }
 
+// MultiAddr always return empty string
+func (dhtClient *DHTClient) MultiAddr() string {
+	return ""
+}
+
 // RouteEnvelope to its destination
-func (dhtClient *DHTClient) RouteEnvelope(envel aea.Envelope) error {
+func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
 
 	target := envel.To
@@ -393,7 +391,7 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	ldebug().Msgf("Received envelope from peer %s", envel.String())
 
 	if envel.To == dhtClient.myAgentAddress && dhtClient.processEnvelope != nil {
-		err = dhtClient.processEnvelope(*envel)
+		err = dhtClient.processEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while processing envelope by agent")
 		}
@@ -484,6 +482,6 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 }
 
 //ProcessEnvelope register a callback function
-func (dhtClient *DHTClient) ProcessEnvelope(fn func(aea.Envelope) error) {
+func (dhtClient *DHTClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	dhtClient.processEnvelope = fn
 }

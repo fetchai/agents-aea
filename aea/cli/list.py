@@ -37,16 +37,16 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoader
 
 
-@click.group()
+@click.group(name="list")
 @click.pass_context
 @check_aea_project
-def list(click_context):
+def list_command(click_context):
     """List the installed resources."""
 
 
-@list.command()
+@list_command.command(name="all")
 @pass_ctx
-def all(ctx: Context):
+def all_command(ctx: Context):
     """List all the installed items."""
     for item_type in ITEM_TYPES:
         details = list_agent_items(ctx, item_type)
@@ -58,7 +58,7 @@ def all(ctx: Context):
         click.echo(output)
 
 
-@list.command()
+@list_command.command()
 @pass_ctx
 def connections(ctx: Context):
     """List all the installed connections."""
@@ -66,7 +66,7 @@ def connections(ctx: Context):
     click.echo(format_items(sort_items(result)))
 
 
-@list.command()
+@list_command.command()
 @pass_ctx
 def contracts(ctx: Context):
     """List all the installed protocols."""
@@ -74,7 +74,7 @@ def contracts(ctx: Context):
     click.echo(format_items(sort_items(result)))
 
 
-@list.command()
+@list_command.command()
 @pass_ctx
 def protocols(ctx: Context):
     """List all the installed protocols."""
@@ -82,7 +82,7 @@ def protocols(ctx: Context):
     click.echo(format_items(sort_items(result)))
 
 
-@list.command()
+@list_command.command()
 @pass_ctx
 def skills(ctx: Context):
     """List all the installed skills."""

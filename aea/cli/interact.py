@@ -79,7 +79,7 @@ def _run_interaction_channel():
 
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
-    except Exception as e:  # pragma: no cover
+    except Exception as e:  # pylint: disable=broad-except # pragma: no cover
         click.echo(e)
     finally:
         multiplexer.disconnect()
@@ -160,6 +160,6 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
         click.echo("Interrupting input, checking inbox ...")
     except KeyboardInterrupt as e:
         raise e
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except # pragma: no cover
         click.echo(e)
     return envelope

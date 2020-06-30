@@ -122,9 +122,11 @@ class HTTPClientAsyncChannel:
                 status_code=resp.status,
                 headers=resp.headers,
                 status_text=resp.reason,
-                bodyy=resp._body if resp._body is not None else b"",
+                bodyy=resp._body  # pylint: disable=protected-access
+                if resp._body is not None  # pylint: disable=protected-access
+                else b"",
             )
-        except Exception:
+        except Exception:  # pragma: nocover # pylint: disable=broad-except
             envelope = self.to_envelope(
                 self.connection_id,
                 request_http_message,
@@ -157,7 +159,7 @@ class HTTPClientAsyncChannel:
                 ) as resp:
                     await resp.read()
                 return resp
-        except Exception:
+        except Exception:  # pragma: nocover # pylint: disable=broad-except
             logger.exception(
                 f"Exception raised during http call: {request_http_message.method} {request_http_message.url}"
             )
@@ -290,7 +292,7 @@ class HTTPClientAsyncChannel:
                 await task
             except KeyboardInterrupt:  # pragma: nocover
                 raise
-            except BaseException:  # pragma: nocover
+            except BaseException:  # pragma: nocover # pylint: disable=broad-except
                 pass  # nosec
 
     async def disconnect(self) -> None:
@@ -364,5 +366,8 @@ class HTTPClientConnection(Connection):
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
-
-        return await self.channel.get_message()
+        try:
+            return await self.channel.get_message()
+        except Exception:  # pragma: nocover # pylint: disable=broad-except
+            logger.exception("Exception on receive")
+            return None

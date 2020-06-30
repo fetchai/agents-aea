@@ -424,6 +424,7 @@ class AEABuilder:
         """
         dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
         module = load_module(dotted_path, file_path)
+
         try:
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
@@ -433,6 +434,8 @@ class AEABuilder:
                     dotted_path, class_name, file_path, e
                 )
             )
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+
         return self
 
     def set_skill_exception_policy(
@@ -1015,7 +1018,7 @@ class AEABuilder:
 
     def _get_default_connection(self) -> PublicId:
         """
-        Return the default connection
+        Return the default connection.
 
         :return: the default connection
         """
@@ -1201,7 +1204,10 @@ class AEABuilder:
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
 
-        if agent_configuration._default_connection is None:
+        if (
+            agent_configuration._default_connection  # pylint: disable=protected-access
+            is None
+        ):
             self.set_default_connection(DEFAULT_CONNECTION)
         else:
             self.set_default_connection(
@@ -1278,6 +1284,7 @@ class AEABuilder:
         self, skill_ids: List[ComponentId], aea_project_path: Path
     ) -> List[ComponentId]:
         """Find import order for skills.        We need to handle skills separately, since skills can depend on each other.
+
         That is, we need to:
         - load the skill configurations to find the import order
         - detect if there are cycles

@@ -168,7 +168,7 @@ def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agent
         aea_version=aea.__version__,
         author=set_author,
         version=DEFAULT_VERSION,
-        license=DEFAULT_LICENSE,
+        license_=DEFAULT_LICENSE,
         registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
     )

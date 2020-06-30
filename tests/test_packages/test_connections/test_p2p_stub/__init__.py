@@ -17,12 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the crypto modules."""
-
-from aea.crypto.registry import make, register  # noqa
-
-register(crypto_id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
-
-register(crypto_id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
-
-register(crypto_id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
+"""The tests module contains the tests of the p2p stub connection package."""

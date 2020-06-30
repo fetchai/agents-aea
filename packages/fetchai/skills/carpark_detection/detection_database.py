@@ -381,7 +381,7 @@ class DetectionDatabase:
             c.execute(command, variables)
             ret = c.fetchall()
             conn.commit()
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             if print_exceptions:
                 logger.warning("Exception in database: {}".format(e))
         finally:

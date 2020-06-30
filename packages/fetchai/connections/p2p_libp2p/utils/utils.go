@@ -30,11 +30,13 @@ import (
 	"net"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/ipfs/go-cid"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/multiformats/go-multiaddr"
 	"github.com/multiformats/go-multihash"
 	"github.com/rs/zerolog"
@@ -43,14 +45,42 @@ import (
 	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
 
 	btcec "github.com/btcsuite/btcd/btcec"
-	proto "github.com/golang/protobuf/proto"
+	proto "google.golang.org/protobuf/proto"
 
 	"libp2p_node/aea"
 )
 
-var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-	With().Timestamp().
-	Logger()
+var logger zerolog.Logger = NewDefaultLogger()
+
+/*
+	Logging
+*/
+
+func newConsoleLogger() zerolog.Logger {
+	zerolog.TimeFieldFormat = time.RFC3339Nano
+	return zerolog.New(zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		NoColor:    false,
+		TimeFormat: "15:04:05.000",
+	})
+}
+
+// NewDefaultLogger basic zerolog console writer
+func NewDefaultLogger() zerolog.Logger {
+	return newConsoleLogger().
+		With().Timestamp().
+		Logger()
+}
+
+// NewDefaultLoggerWithFields zerolog console writer
+func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
+	logger := newConsoleLogger().
+		With().Timestamp()
+	for key, val := range fields {
+		logger = logger.Str(key, val)
+	}
+	return logger.Logger()
+}
 
 /*
 	Helpers
@@ -58,7 +88,7 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, No
 
 // BootstrapConnect connect to `peers` at bootstrap
 // This code is borrowed from the go-ipfs bootstrap process
-func BootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) error {
+func BootstrapConnect(ctx context.Context, ph host.Host, kaddht *dht.IpfsDHT, peers []peer.AddrInfo) error {
 	if len(peers) < 1 {
 		return errors.New("not enough bootstrap peers")
 	}
@@ -105,6 +135,22 @@ func BootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) 
 	if count == len(peers) {
 		return errors.New("failed to bootstrap: " + err.Error())
 	}
+
+	// workaround: to avoid getting `failed to find any peer in table`
+	//  when calling dht.Provide (happens occasionally)
+	logger.Debug().Msg("waiting for bootstrap peers to be added to dht routing table...")
+	for _, peer := range peers {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		for kaddht.RoutingTable().Find(peer.ID) == "" {
+			select {
+			case <-ctx.Done():
+				return errors.New("timeout: entry peer haven't been added to DHT routing table " + peer.ID.Pretty())
+			case <-time.After(time.Millisecond * 5):
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -212,8 +258,8 @@ func ReadBytesConn(conn net.Conn) ([]byte, error) {
 }
 
 // WriteEnvelopeConn send envelope to `conn`
-func WriteEnvelopeConn(conn net.Conn, envelope aea.Envelope) error {
-	data, err := proto.Marshal(&envelope)
+func WriteEnvelopeConn(conn net.Conn, envelope *aea.Envelope) error {
+	data, err := proto.Marshal(envelope)
 	if err != nil {
 		return err
 	}
@@ -282,9 +328,9 @@ func ReadString(s network.Stream) (string, error) {
 }
 
 // WriteEnvelope to a network stream
-func WriteEnvelope(envel aea.Envelope, s network.Stream) error {
+func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
 	wstream := bufio.NewWriter(s)
-	data, err := proto.Marshal(&envel)
+	data, err := proto.Marshal(envel)
 	if err != nil {
 		return err
 	}

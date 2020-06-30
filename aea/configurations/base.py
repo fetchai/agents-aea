@@ -629,7 +629,7 @@ class PackageConfiguration(Configuration, ABC):
         name: str,
         author: str,
         version: str = "",
-        license: str = "",
+        license_: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -640,7 +640,7 @@ class PackageConfiguration(Configuration, ABC):
         :param name: the name of the package.
         :param author: the author of the package.
         :param version: the version of the package (SemVer format).
-        :param license: the license.
+        :param license_: the license.
         :param aea_version: either a fixed version, or a set of specifiers
            describing the AEA versions allowed.
            (default: empty string - no constraint).
@@ -655,7 +655,7 @@ class PackageConfiguration(Configuration, ABC):
         self.name = name
         self.author = author
         self.version = version if version != "" else DEFAULT_VERSION
-        self.license = license if license != "" else DEFAULT_LICENSE
+        self.license = license_ if license_ != "" else DEFAULT_LICENSE
         self.fingerprint = fingerprint if fingerprint is not None else {}
         self.fingerprint_ignore_patterns = (
             fingerprint_ignore_patterns
@@ -711,7 +711,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         name: str,
         author: str,
         version: str = "",
-        license: str = "",
+        license_: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -722,7 +722,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             name,
             author,
             version,
-            license,
+            license_,
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
@@ -851,7 +851,7 @@ class ConnectionConfig(ComponentConfiguration):
         name: str = "",
         author: str = "",
         version: str = "",
-        license: str = "",
+        license_: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -889,7 +889,7 @@ class ConnectionConfig(ComponentConfiguration):
             name,
             author,
             version,
-            license,
+            license_,
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
@@ -959,7 +959,7 @@ class ConnectionConfig(ComponentConfiguration):
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
-            license=cast(str, obj.get("license")),
+            license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
             fingerprint_ignore_patterns=cast(
@@ -985,7 +985,7 @@ class ProtocolConfig(ComponentConfiguration):
         name: str,
         author: str,
         version: str = "",
-        license: str = "",
+        license_: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         aea_version: str = "",
@@ -997,7 +997,7 @@ class ProtocolConfig(ComponentConfiguration):
             name,
             author,
             version,
-            license,
+            license_,
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
@@ -1036,7 +1036,7 @@ class ProtocolConfig(ComponentConfiguration):
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
-            license=cast(str, obj.get("license")),
+            license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
             fingerprint_ignore_patterns=cast(
@@ -1083,7 +1083,7 @@ class SkillConfig(ComponentConfiguration):
         name: str,
         author: str,
         version: str = "",
-        license: str = "",
+        license_: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -1099,7 +1099,7 @@ class SkillConfig(ComponentConfiguration):
             name,
             author,
             version,
-            license,
+            license_,
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
@@ -1179,7 +1179,7 @@ class SkillConfig(ComponentConfiguration):
         name = cast(str, obj.get("name"))
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
-        license = cast(str, obj.get("license"))
+        license_ = cast(str, obj.get("license"))
         aea_version_specifiers = cast(str, obj.get("aea_version", ""))
         fingerprint = cast(Dict[str, str], obj.get("fingerprint"))
         fingerprint_ignore_patterns = cast(
@@ -1202,7 +1202,7 @@ class SkillConfig(ComponentConfiguration):
             name=name,
             author=author,
             version=version,
-            license=license,
+            license_=license_,
             aea_version=aea_version_specifiers,
             fingerprint=fingerprint,
             fingerprint_ignore_patterns=fingerprint_ignore_patterns,
@@ -1239,7 +1239,7 @@ class AgentConfig(PackageConfiguration):
         agent_name: str,
         author: str,
         version: str = "",
-        license: str = "",
+        license_: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -1260,7 +1260,7 @@ class AgentConfig(PackageConfiguration):
             agent_name,
             author,
             version,
-            license,
+            license_,
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
@@ -1441,7 +1441,7 @@ class AgentConfig(PackageConfiguration):
             agent_name=cast(str, obj.get("agent_name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
-            license=cast(str, obj.get("license")),
+            license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
@@ -1471,20 +1471,38 @@ class AgentConfig(PackageConfiguration):
 
         # parse connection public ids
         connections = set(
-            map(lambda x: PublicId.from_str(x), obj.get("connections", []))
+            map(
+                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
+                obj.get("connections", []),
+            )
         )
         agent_config.connections = cast(Set[PublicId], connections)
 
         # parse contracts public ids
-        contracts = set(map(lambda x: PublicId.from_str(x), obj.get("contracts", [])))
+        contracts = set(
+            map(
+                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
+                obj.get("contracts", []),
+            )
+        )
         agent_config.contracts = cast(Set[PublicId], contracts)
 
         # parse protocol public ids
-        protocols = set(map(lambda x: PublicId.from_str(x), obj.get("protocols", [])))
+        protocols = set(
+            map(
+                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
+                obj.get("protocols", []),
+            )
+        )
         agent_config.protocols = cast(Set[PublicId], protocols)
 
         # parse skills public ids
-        skills = set(map(lambda x: PublicId.from_str(x), obj.get("skills", [])))
+        skills = set(
+            map(
+                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
+                obj.get("skills", []),
+            )
+        )
         agent_config.skills = cast(Set[PublicId], skills)
 
         # set default connection
@@ -1537,7 +1555,7 @@ class ProtocolSpecification(ProtocolConfig):
         name: str,
         author: str,
         version: str = "",
-        license: str = "",
+        license_: str = "",
         aea_version: str = "",
         description: str = "",
     ):
@@ -1546,7 +1564,7 @@ class ProtocolSpecification(ProtocolConfig):
             name,
             author,
             version,
-            license,
+            license_,
             aea_version=aea_version,
             description=description,
         )
@@ -1599,7 +1617,7 @@ class ProtocolSpecification(ProtocolConfig):
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
-            license=cast(str, obj.get("license")),
+            license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             description=cast(str, obj.get("description", "")),
         )
@@ -1650,7 +1668,7 @@ class ContractConfig(ComponentConfiguration):
         name: str,
         author: str,
         version: str = "",
-        license: str = "",
+        license_: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -1664,7 +1682,7 @@ class ContractConfig(ComponentConfiguration):
             name,
             author,
             version,
-            license,
+            license_,
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
@@ -1707,7 +1725,7 @@ class ContractConfig(ComponentConfiguration):
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
-            license=cast(str, obj.get("license")),
+            license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
             fingerprint_ignore_patterns=cast(
