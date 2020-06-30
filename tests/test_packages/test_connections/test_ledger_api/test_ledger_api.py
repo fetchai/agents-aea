@@ -31,17 +31,11 @@ from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.base import Message
 
-from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
-from packages.fetchai.protocols.ledger_api.dialogues import (
-    LedgerApiDialogues as BaseLedgerApiDialogues,
-)
+from packages.fetchai.connections.ledger_api.ledger_dispatcher import LedgerApiDialogues
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
@@ -65,43 +59,6 @@ ledger_ids = pytest.mark.parametrize(
 )
 
 
-class LedgerApiDialogues(BaseLedgerApiDialogues):
-    """The dialogues class keeps track of all dialogues."""
-
-    def __init__(self, agent_address: str) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
-        BaseLedgerApiDialogues.__init__(self, agent_address)
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return LedgerApiDialogue.AgentRole.LEDGER
-
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> LedgerApiDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = LedgerApiDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role,
-        )
-        return dialogue
-
-
 @pytest.fixture()
 async def ledger_apis_connection(request):
     identity = Identity("name", FetchAICrypto().address)
@@ -120,13 +77,14 @@ async def ledger_apis_connection(request):
 @ledger_ids
 async def test_get_balance(ledger_id, address, ledger_apis_connection: Connection):
     """Test get balance."""
-    ledger_api_dialogues = LedgerApiDialogues(address)
+    ledger_api_dialogues = LedgerApiDialogues()
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ledger_id,
         address=address,
     )
+
     request.counterparty = str(ledger_apis_connection.connection_id)
     ledger_api_dialogue = ledger_api_dialogues.update(request)
     assert ledger_api_dialogue is not None
@@ -136,6 +94,7 @@ async def test_get_balance(ledger_id, address, ledger_apis_connection: Connectio
         protocol_id=request.protocol_id,
         message=request,
     )
+
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -159,7 +118,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     crypto2 = EthereumCrypto()
     api = aea.crypto.registries.make_ledger_api(EthereumCrypto.identifier)
     api = cast(EthereumApi, api)
-    ledger_api_dialogues = LedgerApiDialogues(crypto1.address)
+    ledger_api_dialogues = LedgerApiDialogues()
 
     amount = 40000
     fee = 30000
