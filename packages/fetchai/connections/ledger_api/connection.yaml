@@ -6,8 +6,8 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmPdSGmQYnFzJaHZsAxTDp6K3QTiaCF2KPqjtKTzUFTudy
-  connection.py: QmPE886aWxc7j8E2cXyRxD2yqupaRUcZJ3KhDDXZMr8sYv
+  base.py: Qmb45pZmaW5uF2Pz6t8F3atw5Sq2ospDBS8rUUQTAa6F33
+  connection.py: QmQtDUgaBZLgqvgzVZcBzpPFBywwddByjdbqRDZJKB9pNr
   contract_dispatcher.py: QmTppnCnL7SqAbhYF54daPJoYK7HEuQsogxSQbnxKmVntR
   ledger_dispatcher.py: QmYNVQYTNsqCb7caK2Q3iaK8F9Rf68o854o4Q364ECFj3e
 fingerprint_ignore_patterns: []
@@ -15,7 +15,15 @@ protocols:
 - fetchai/contract_api:0.1.0
 - fetchai/ledger_api:0.1.0
 class_name: LedgerApiConnection
-config: {}
+config:
+  ledger_apis:
+    cosmos:
+      address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    ethereum:
+      address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+      gas_price: 50
+    fetchai:
+      network: testnet
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:0.1.0

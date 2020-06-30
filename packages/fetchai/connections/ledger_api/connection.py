@@ -59,11 +59,18 @@ class LedgerApiConnection(Connection):
         self.receiving_tasks: List[asyncio.Future] = []
         self.task_to_request: Dict[asyncio.Future, Envelope] = {}
         self.done_tasks: Deque[asyncio.Future] = deque()
+        self.api_configs = self.configuration.config.get(
+            "ledger_apis", {}
+        )  # type: Dict[str, Dict[str, str]]
 
     async def connect(self) -> None:
         """Set up the connection."""
-        self._ledger_dispatcher = LedgerApiRequestDispatcher(loop=self.loop)
-        self._contract_dispatcher = ContractApiRequestDispatcher(loop=self.loop)
+        self._ledger_dispatcher = LedgerApiRequestDispatcher(
+            loop=self.loop, api_configs=self.api_configs
+        )
+        self._contract_dispatcher = ContractApiRequestDispatcher(
+            loop=self.loop, api_configs=self.api_configs
+        )
         self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:

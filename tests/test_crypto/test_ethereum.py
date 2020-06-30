@@ -111,6 +111,7 @@ def test_api_none():
     assert eth_api.api is not None, "The api property is None."
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_get_balance():
     """Test the balance is zero for a new account."""
@@ -175,6 +176,7 @@ def test_construct_sign_and_submit_transfer_transaction():
     assert tx != transaction_receipt, "Should not be same!"
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""

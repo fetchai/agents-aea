@@ -26,7 +26,7 @@ import pytest
 
 from aea.crypto.cosmos import CosmosApi, CosmosCrypto, CosmosFaucetApi
 
-from ..conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG
+from ..conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG, MAX_FLAKY_RERUNS
 
 
 def test_creation():
@@ -89,6 +89,7 @@ def test_generate_nonce():
     ), "The len(nonce) must not be 0 and must be hex"
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
@@ -139,6 +140,7 @@ def test_construct_sign_and_submit_transfer_transaction():
     assert tx == transaction_receipt, "Should be same!"
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_get_balance():
     """Test the balance is zero for a new account."""
@@ -151,6 +153,7 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""

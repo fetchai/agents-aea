@@ -28,7 +28,11 @@ import pytest
 
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 
-from ..conftest import FETCHAI_PRIVATE_KEY_PATH, FETCHAI_TESTNET_CONFIG
+from ..conftest import (
+    FETCHAI_PRIVATE_KEY_PATH,
+    FETCHAI_TESTNET_CONFIG,
+    MAX_FLAKY_RERUNS,
+)
 
 
 def test_initialisation():
@@ -92,6 +96,7 @@ def test_generate_nonce():
     ), "The len(nonce) must not be 0 and must be hex"
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
@@ -129,18 +134,21 @@ def test_construct_sign_and_submit_transfer_transaction():
         if transaction_receipt is None:
             continue
         is_settled = fetchai_api.is_transaction_settled(transaction_receipt)
+        if is_settled is None:
+            continue
         not_settled = not is_settled
     assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
     assert is_settled, "Failed to verify tx!"
 
     tx = fetchai_api.get_transaction(transaction_digest)
+    assert tx != transaction_receipt, "Should be same!"
     is_valid = fetchai_api.is_transaction_valid(
         tx, fc2.address, account.address, "", amount
     )
     assert is_valid, "Failed to settle tx correctly!"
-    assert tx != transaction_receipt, "Should be same!"
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_get_balance():
     """Test the balance is zero for a new account."""
@@ -153,6 +161,7 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.network
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""

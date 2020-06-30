@@ -40,9 +40,12 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
     COSMOS_ADDRESS_ONE,
+    COSMOS_TESTNET_CONFIG,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_PRIVATE_KEY_PATH,
+    ETHEREUM_TESTNET_CONFIG,
     FETCHAI_ADDRESS_ONE,
+    FETCHAI_TESTNET_CONFIG,
     ROOT_DIR,
 )
 
@@ -50,11 +53,11 @@ logger = logging.getLogger(__name__)
 
 
 ledger_ids = pytest.mark.parametrize(
-    "ledger_id,address",
+    "ledger_id,address,config",
     [
-        (FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE),
-        (EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE),
-        (CosmosCrypto.identifier, COSMOS_ADDRESS_ONE),
+        (FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
+        (EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
+        (CosmosCrypto.identifier, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
 
@@ -75,7 +78,9 @@ async def ledger_apis_connection(request):
 
 @pytest.mark.asyncio
 @ledger_ids
-async def test_get_balance(ledger_id, address, ledger_apis_connection: Connection):
+async def test_get_balance(
+    ledger_id, address, config, ledger_apis_connection: Connection
+):
     """Test get balance."""
     ledger_api_dialogues = LedgerApiDialogues()
     request = LedgerApiMessage(
@@ -106,7 +111,7 @@ async def test_get_balance(ledger_id, address, ledger_apis_connection: Connectio
     assert response_dialogue == ledger_api_dialogue
     actual_balance_amount = response_msg.balance
     expected_balance_amount = aea.crypto.registries.make_ledger_api(
-        ledger_id
+        ledger_id, **config
     ).get_balance(address)
     assert actual_balance_amount == expected_balance_amount
 
@@ -116,7 +121,9 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     """Test send signed transaction with Ethereum APIs."""
     crypto1 = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     crypto2 = EthereumCrypto()
-    api = aea.crypto.registries.make_ledger_api(EthereumCrypto.identifier)
+    api = aea.crypto.registries.make_ledger_api(
+        EthereumCrypto.identifier, **ETHEREUM_TESTNET_CONFIG
+    )
     api = cast(EthereumApi, api)
     ledger_api_dialogues = LedgerApiDialogues()
 

@@ -22,7 +22,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from asyncio import Task
 from concurrent.futures._base import Executor
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 from aea.configurations.base import PublicId
 from aea.crypto.registries import Registry
@@ -44,6 +44,7 @@ class RequestDispatcher(ABC):
         self,
         loop: Optional[asyncio.AbstractEventLoop] = None,
         executor: Optional[Executor] = None,
+        api_configs: Optional[Dict[str, Dict[str, str]]] = None,
     ):
         """
         Initialize the request dispatcher.
@@ -53,6 +54,14 @@ class RequestDispatcher(ABC):
         """
         self.loop = loop if loop is not None else asyncio.get_event_loop()
         self.executor = executor
+        self._api_configs = api_configs
+
+    def api_config(self, ledger_id: str) -> Dict[str, str]:
+        """Get api config"""
+        config = {}  # type: Dict[str, str]
+        if self._api_configs is not None and ledger_id in self._api_configs:
+            config = self._api_configs[ledger_id]
+        return config
 
     async def run_async(self, func: Callable[[Any], Task], *args):
         """
@@ -77,9 +86,7 @@ class RequestDispatcher(ABC):
         """
         message = self.get_message(envelope)
         ledger_id = self.get_ledger_id(message)
-        api = self.registry.make(
-            ledger_id
-        )  # TODO: overwrite configs from connection.yaml
+        api = self.registry.make(ledger_id, **self.api_config(ledger_id))
         message.is_incoming = True
         dialogue = self.dialogues.update(message)
         assert dialogue is not None, "No dialogue created."
