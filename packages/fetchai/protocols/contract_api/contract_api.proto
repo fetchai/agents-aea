@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package fetch.aea.ContractApi;
+
+message ContractApiMessage{
+
+    // Custom Types
+    message RawTransaction{
+        bytes raw_transaction = 1;
+    }
+
+    message SignedTransaction{
+        bytes signed_transaction = 1;
+    }
+
+    message State{
+        bytes state = 1;
+    }
+
+    message Terms{
+        bytes terms = 1;
+    }
+
+    message TransactionReceipt{
+        bytes transaction_receipt = 1;
+    }
+
+
+    // Performatives and contents
+    message Get_State_Performative{
+        string ledger_id = 1;
+        string contract_address = 2;
+        string callable = 3;
+        map<string, string> kwargs = 4;
+    }
+
+    message Get_Raw_Transaction_Performative{
+        string ledger_id = 1;
+        Terms terms = 2;
+    }
+
+    message Send_Signed_Transaction_Performative{
+        string ledger_id = 1;
+        SignedTransaction signed_transaction = 2;
+    }
+
+    message Get_Transaction_Receipt_Performative{
+        string ledger_id = 1;
+        string transaction_digest = 2;
+    }
+
+    message State_Performative{
+        State state_data = 1;
+    }
+
+    message Raw_Transaction_Performative{
+        RawTransaction raw_transaction = 1;
+    }
+
+    message Transaction_Digest_Performative{
+        string transaction_digest = 1;
+    }
+
+    message Transaction_Receipt_Performative{
+        TransactionReceipt transaction_receipt = 1;
+    }
+
+    message Error_Performative{
+        int32 code = 1;
+        bool code_is_set = 2;
+        string message = 3;
+        bool message_is_set = 4;
+        bytes data = 5;
+    }
+
+
+    // Standard ContractApiMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Error_Performative error = 5;
+        Get_Raw_Transaction_Performative get_raw_transaction = 6;
+        Get_State_Performative get_state = 7;
+        Get_Transaction_Receipt_Performative get_transaction_receipt = 8;
+        Raw_Transaction_Performative raw_transaction = 9;
+        Send_Signed_Transaction_Performative send_signed_transaction = 10;
+        State_Performative state = 11;
+        Transaction_Digest_Performative transaction_digest = 12;
+        Transaction_Receipt_Performative transaction_receipt = 13;
+    }
+}

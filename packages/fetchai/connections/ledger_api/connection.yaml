@@ -6,13 +6,18 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmeJvtPJHxkmonWVkWnto7kQPQeJ75ZJwvuL2qHBQydtX7
+  base.py: Qmb6CLUivtzfEyNspZnqwQdyqNfq46b3QmzE5Twgh9ngiM
+  connection.py: QmUEXAherydSGo9yAezrgLsq3jpm2p3zsb9bWo4tfx8dWz
+  contract_dispatcher.py: QmeJYVRXSCZpGRHcRvCexSCRezoZN7qbxwoQehQn9vFQ74
+  ledger_dispatcher.py: QmaZGyCt8Au35W3a1acmxMwNUmi2YK6AT33hv9X5y9svt7
 fingerprint_ignore_patterns: []
 protocols:
+- fetchai/contract_api:0.1.0
 - fetchai/ledger_api:0.1.0
 class_name: LedgerApiConnection
 config: {}
 excluded_protocols: []
 restricted_to_protocols:
+- fetchai/contract_api:0.1.0
 - fetchai/ledger_api:0.1.0
 dependencies: {}

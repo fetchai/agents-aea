@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the contract modules."""
-from aea.contracts.base import Contract
-from aea.crypto.registries import Registry
+"""This module contains the support resources for the contract_api protocol."""
 
-contract_registry: Registry[Contract] = Registry[Contract]()
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.contract_api.serialization import ContractApiSerializer
+
+ContractApiMessage.serializer = ContractApiSerializer
