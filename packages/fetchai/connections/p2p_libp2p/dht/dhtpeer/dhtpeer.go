@@ -30,7 +30,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -63,7 +62,7 @@ func check(err error) {
 
 func ignore(err error) {
 	if err != nil {
-		log.Println("TRACE", err)
+		log.Println("IGNORED", err)
 	}
 }
 
@@ -94,7 +93,7 @@ type DHTPeer struct {
 	myAgentReady     func() bool
 	dhtAddresses     map[string]string
 	tcpAddresses     map[string]net.Conn
-	processEnvelope  func(aea.Envelope) error
+	processEnvelope  func(*aea.Envelope) error
 
 	closing    chan struct{}
 	goroutines *sync.WaitGroup
@@ -177,7 +176,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	// connect to the booststrap nodes
 	if len(dhtPeer.bootstrapPeers) > 0 {
 		linfo().Msgf("Bootstrapping from %s", dhtPeer.bootstrapPeers)
-		err = utils.BootstrapConnect(ctx, dhtPeer.routedHost, dhtPeer.bootstrapPeers)
+		err = utils.BootstrapConnect(ctx, dhtPeer.routedHost, dhtPeer.dht, dhtPeer.bootstrapPeers)
 		if err != nil {
 			dhtPeer.Close()
 			return nil, err
@@ -260,18 +259,13 @@ func New(opts ...Option) (*DHTPeer, error) {
 }
 
 func (dhtPeer *DHTPeer) setupLogger() {
-	if dhtPeer.routedHost == nil {
-		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("process", "DHTPeer").
-			Logger()
-	} else {
-		dhtPeer.logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false}).
-			With().Timestamp().
-			Str("process", "DHTPeer").
-			Str("peerid", dhtPeer.routedHost.ID().Pretty()).
-			Logger()
+	fields := map[string]string{
+		"package": "DHTPeer",
 	}
+	if dhtPeer.routedHost != nil {
+		fields["peerid"] = dhtPeer.routedHost.ID().Pretty()
+	}
+	dhtPeer.logger = utils.NewDefaultLoggerWithFields(fields)
 }
 
 func (dhtPeer *DHTPeer) getLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {
@@ -344,11 +338,15 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
+	done := false
 	for {
 		select {
 		default:
 			linfo().Msg("DelegateService listening for new connections...")
-			ready.Done()
+			if !done {
+				done = true
+				ready.Done()
+			}
 			conn, err := dhtPeer.tcpListener.Accept()
 			if err != nil {
 				if strings.Contains(err.Error(), "use of closed network connection") {
@@ -381,8 +379,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		lerror(err).Msg("while receiving agent's Address")
 		return
 	}
-	err = utils.WriteBytesConn(conn, []byte("DONE"))
-	ignore(err)
 
 	addr := string(buf)
 	linfo().Msgf("connection from %s established for Address %s",
@@ -398,6 +394,9 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			return
 		}
 	}
+
+	err = utils.WriteBytesConn(conn, []byte("DONE"))
+	ignore(err)
 
 	for {
 		// read envelopes
@@ -416,7 +415,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		dhtPeer.goroutines.Add(1)
 		go func() {
 			defer dhtPeer.goroutines.Done()
-			err := dhtPeer.RouteEnvelope(*envel)
+			err := dhtPeer.RouteEnvelope(envel)
 			ignore(err)
 		}()
 	}
@@ -424,7 +423,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 }
 
 // ProcessEnvelope register callback function
-func (dhtPeer *DHTPeer) ProcessEnvelope(fn func(aea.Envelope) error) {
+func (dhtPeer *DHTPeer) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	dhtPeer.processEnvelope = fn
 }
 
@@ -440,7 +439,7 @@ func (dhtPeer *DHTPeer) MultiAddr() string {
 }
 
 // RouteEnvelope to its destination
-func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
+func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, linfo, _ := dhtPeer.getLoggers()
 
 	target := envel.To
@@ -520,7 +519,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel aea.Envelope) error {
 }
 
 func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
-	_, _, linfo, _ := dhtPeer.getLoggers()
+	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
 	addressCID, err := utils.ComputeCID(address)
 	if err != nil {
@@ -535,6 +534,11 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	start := time.Now()
 	provider := <-providers
 	elapsed := time.Since(start)
+	if provider.ID == "" {
+		err = errors.New("didn't found any provider for address within timeout")
+		lerror(err).Str("op", "lookup").Str("addr", address).Msg("")
+		return "", err
+	}
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msgf("found provider %s after %s", provider, elapsed.String())
 
@@ -590,13 +594,13 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 	// check if destination is a tcp client
 	if conn, exists := dhtPeer.tcpAddresses[envel.To]; exists {
 		linfo().Msgf("Sending envelope to tcp delegate client %s...", conn.RemoteAddr().String())
-		err = utils.WriteEnvelopeConn(conn, *envel)
+		err = utils.WriteEnvelopeConn(conn, envel)
 		if err != nil {
 			lerror(err).Msgf("while sending envelope to tcp client %s", conn.RemoteAddr().String())
 		}
 	} else if envel.To == dhtPeer.myAgentAddress && dhtPeer.processEnvelope != nil {
 		linfo().Msg("Processing envelope by local agent...")
-		err = dhtPeer.processEnvelope(*envel)
+		err = dhtPeer.processEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while processing envelope by agent")
 		}
@@ -671,12 +675,28 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 }
 
 func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
-	lerror, _, linfo, _ := dhtPeer.getLoggers()
+	lerror, _, linfo, ldebug := dhtPeer.getLoggers()
 
 	linfo().Str("op", "notif").
 		Msgf("Got a new notif stream")
 
 	if !dhtPeer.addressAnnounced {
+		// workaround: to avoid getting `failed to find any peer in table`
+		//  when calling dht.Provide (happens occasionally)
+		ldebug().Msg("waiting for notifying peer to be added to dht routing table...")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		for dhtPeer.dht.RoutingTable().Find(stream.Conn().RemotePeer()) == "" {
+			select {
+			case <-ctx.Done():
+				lerror(nil).
+					Msgf("timeout: notifying peer %s haven't been added to DHT routing table",
+						stream.Conn().RemotePeer().Pretty())
+				return
+			case <-time.After(time.Millisecond * 5):
+			}
+		}
+
 		if dhtPeer.myAgentAddress != "" {
 			err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
 			if err != nil {
