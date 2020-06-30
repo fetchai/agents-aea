@@ -25,8 +25,6 @@ import subprocess  # nosec
 import threading
 from typing import List, Set
 
-from aea.cli_gui import AppContext
-
 
 _processes = set()  # type: Set[subprocess.Popen]
 lock = threading.Lock()
@@ -95,7 +93,7 @@ def read_error(pid: subprocess.Popen, str_list: List[str]):
     str_list.append("process terminated\n")
 
 
-def stop_agent_process(agent_id: str, app_context: AppContext):
+def stop_agent_process(agent_id: str, app_context):
     # Test if we have the process id
     if agent_id not in app_context.agent_processes:
         return (
