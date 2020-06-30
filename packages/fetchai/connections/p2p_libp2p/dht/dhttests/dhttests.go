@@ -40,7 +40,7 @@ const (
 )
 
 // NewDHTPeerWithDefaults for testing
-func NewDHTPeerWithDefaults(inbox chan<- aea.Envelope) (*dhtpeer.DHTPeer, func(), error) {
+func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(), error) {
 	opts := []dhtpeer.Option{
 		dhtpeer.LocalURI(DHTPeerDefaultLocalHost, DHTPeerDefaultLocalPort),
 		dhtpeer.PublicURI(DHTPeerDefaultLocalHost, DHTPeerDefaultLocalPort),
@@ -62,7 +62,7 @@ func NewDHTPeerWithDefaults(inbox chan<- aea.Envelope) (*dhtpeer.DHTPeer, func()
 		}
 	}
 
-	dhtPeer.ProcessEnvelope(func(envel aea.Envelope) error {
+	dhtPeer.ProcessEnvelope(func(envel *aea.Envelope) error {
 		inbox <- envel
 		return nil
 	})

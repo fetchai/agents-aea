@@ -22,34 +22,36 @@
 import itertools
 import logging
 import os
-import re
+import shutil
 from datetime import date
-from os import path
 from pathlib import Path
 from typing import Optional, Tuple
 
-from aea.configurations.base import ProtocolSpecification
-from aea.protocols.generator.common import _get_sub_types_of_compositional_types
+from aea.protocols.generator.common import (
+    CUSTOM_TYPES_DOT_PY_FILE_NAME,
+    DIALOGUE_DOT_PY_FILE_NAME,
+    INIT_FILE_NAME,
+    MESSAGE_DOT_PY_FILE_NAME,
+    MESSAGE_IMPORT,
+    PATH_TO_PACKAGES,
+    PROTOCOL_YAML_FILE_NAME,
+    PYTHON_TYPE_TO_PROTO_TYPE,
+    SERIALIZATION_DOT_PY_FILE_NAME,
+    SERIALIZER_IMPORT,
+    _camel_case_to_snake_case,
+    _create_protocol_file,
+    _get_sub_types_of_compositional_types,
+    _includes_custom_type,
+    _python_pt_or_ct_type_to_proto_type,
+    _to_camel_case,
+    _union_sub_type_to_protobuf_variable_name,
+    check_prerequisites,
+    check_protobuf_using_protoc,
+    load_protocol_specification,
+    try_run_black_formatting,
+    try_run_protoc,
+)
 from aea.protocols.generator.extract_specification import extract
-
-MESSAGE_IMPORT = "from aea.protocols.base import Message"
-SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
-
-PATH_TO_PACKAGES = "packages"
-INIT_FILE_NAME = "__init__.py"
-PROTOCOL_YAML_FILE_NAME = "protocol.yaml"
-MESSAGE_DOT_PY_FILE_NAME = "message.py"
-DIALOGUE_DOT_PY_FILE_NAME = "dialogues.py"
-CUSTOM_TYPES_DOT_PY_FILE_NAME = "custom_types.py"
-SERIALIZATION_DOT_PY_FILE_NAME = "serialization.py"
-
-PYTHON_TYPE_TO_PROTO_TYPE = {
-    "bytes": "bytes",
-    "int": "int32",
-    "float": "float",
-    "bool": "bool",
-    "str": "string",
-}
 
 logger = logging.getLogger(__name__)
 
@@ -86,121 +88,46 @@ def _copyright_header_str(author: str) -> str:
     return copy_right_str
 
 
-def _to_camel_case(text: str) -> str:
-    """
-    Convert a text in snake_case format into the CamelCase format.
-
-    :param text: the text to be converted.
-    :return: The text in CamelCase format.
-    """
-    return "".join(word.title() for word in text.split("_"))
-
-
-def _camel_case_to_snake_case(text: str) -> str:
-    """
-    Convert a text in CamelCase format into the snake_case format.
-
-    :param text: the text to be converted.
-    :return: The text in CamelCase format.
-    """
-    return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
-
-
-def _union_sub_type_to_protobuf_variable_name(
-    content_name: str, content_type: str
-) -> str:
-    """
-    Given a content of type union, create a variable name for its sub-type for protobuf.
-
-    :param content_name: the name of the content
-    :param content_type: the sub-type of a union type
-
-    :return: The variable name
-    """
-    if content_type.startswith("FrozenSet"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        expanded_type_str = "set_of_{}".format(sub_type)
-    elif content_type.startswith("Tuple"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        expanded_type_str = "list_of_{}".format(sub_type)
-    elif content_type.startswith("Dict"):
-        sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
-        sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
-        expanded_type_str = "dict_of_{}_{}".format(sub_type_1, sub_type_2)
-    else:
-        expanded_type_str = content_type
-
-    protobuf_variable_name = "{}_type_{}".format(content_name, expanded_type_str)
-
-    return protobuf_variable_name
-
-
-def _python_pt_or_ct_type_to_proto_type(content_type: str) -> str:
-    """
-    Convert a PT or CT from python to their protobuf equivalent.
-
-    :param content_type: the python type
-    :return: The protobuf equivalent
-    """
-    if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
-        proto_type = PYTHON_TYPE_TO_PROTO_TYPE[content_type]
-    else:
-        proto_type = content_type
-    return proto_type
-
-
-def _includes_custom_type(content_type: str) -> bool:
-    """
-    Evaluate whether a content type is a custom type or has a custom type as a sub-type.
-
-    :param content_type: the content type
-    :return: Boolean result
-    """
-    if content_type.startswith("Optional"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        result = _includes_custom_type(sub_type)
-    elif content_type.startswith("Union"):
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-        result = False
-        for sub_type in sub_types:
-            if _includes_custom_type(sub_type):
-                result = True
-                break
-    elif (
-        content_type.startswith("FrozenSet")
-        or content_type.startswith("Tuple")
-        or content_type.startswith("Dict")
-        or content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys()
-    ):
-        result = False
-    else:
-        result = True
-    return result
-
-
 class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
     def __init__(
         self,
-        protocol_specification: ProtocolSpecification,
+        path_to_protocol_specification: str,
         output_path: str = ".",
         path_to_protocol_package: Optional[str] = None,
     ) -> None:
         """
         Instantiate a protocol generator.
 
-        :param protocol_specification: the protocol specification object
+        :param path_to_protocol_specification: path to protocol specification file
         :param output_path: the path to the location in which the protocol module is to be generated.
         :param path_to_protocol_package: the path to the protocol package
 
         :return: None
         """
-        self.protocol_specification = protocol_specification
+        # Check the prerequisite applications are installed
+        try:
+            check_prerequisites()
+        except FileNotFoundError:
+            raise
+
+        # Load protocol specification
+        try:
+            self.protocol_specification = load_protocol_specification(
+                path_to_protocol_specification
+            )
+        except Exception:
+            raise
+
+        # Helper fields
+        self.path_to_protocol_specification = path_to_protocol_specification
         self.protocol_specification_in_camel_case = _to_camel_case(
             self.protocol_specification.name
         )
-        self.output_folder_path = os.path.join(output_path, protocol_specification.name)
+        self.path_to_generated_protocol_package = os.path.join(
+            output_path, self.protocol_specification.name
+        )
         self.path_to_protocol_package = (
             path_to_protocol_package + self.protocol_specification.name
             if path_to_protocol_package is not None
@@ -210,11 +137,11 @@ class ProtocolGenerator:
                 self.protocol_specification.name,
             )
         )
-
         self.indent = ""
 
+        # Extract specification fields
         try:
-            self.spec = extract(protocol_specification)
+            self.spec = extract(self.protocol_specification)
         except Exception:
             raise
 
@@ -2010,20 +1937,6 @@ class ProtocolGenerator:
 
         return init_str
 
-    def _create_file(self, file_name: str, file_content: str) -> None:
-        """
-        Create a file.
-
-        :param file_name: the name of the file
-        :param file_content: the content of the file
-
-        :return: None
-        """
-        pathname = path.join(self.output_folder_path, file_name)
-
-        with open(pathname, "w") as file:
-            file.write(file_content)
-
     def generate_protobuf_only_mode(self) -> None:
         """
         Run the generator in "protobuf only" mode:
@@ -2033,15 +1946,28 @@ class ProtocolGenerator:
         :return: None
         """
         # Create the output folder
-        output_folder = Path(self.output_folder_path)
+        output_folder = Path(self.path_to_generated_protocol_package)
         if not output_folder.exists():
             os.mkdir(output_folder)
 
         # Generate protocol buffer schema file
-        self._create_file(
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
             "{}.proto".format(self.protocol_specification.name),
             self._protocol_buffer_schema_str(),
         )
+
+        # Check protobuf schema file is valid
+        is_valid_protobuf_schema, msg = check_protobuf_using_protoc(
+            self.path_to_generated_protocol_package, self.protocol_specification.name
+        )
+
+        if is_valid_protobuf_schema:
+            pass
+        else:
+            # Remove the generated folder and files
+            shutil.rmtree(output_folder)
+            raise SyntaxError("Error in the protocol buffer schema code:\n" + msg)
 
     def generate_full_mode(self) -> None:
         """
@@ -2057,20 +1983,46 @@ class ProtocolGenerator:
         self.generate_protobuf_only_mode()
 
         # Generate Python protocol package
-        self._create_file(INIT_FILE_NAME, self._init_str())
-        self._create_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
-        self._create_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
+        _create_protocol_file(
+            self.path_to_generated_protocol_package, INIT_FILE_NAME, self._init_str()
+        )
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
+            PROTOCOL_YAML_FILE_NAME,
+            self._protocol_yaml_str(),
+        )
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
+            MESSAGE_DOT_PY_FILE_NAME,
+            self._message_class_str(),
+        )
         if (
             self.protocol_specification.dialogue_config is not None
             and self.protocol_specification.dialogue_config != {}
         ):
-            self._create_file(DIALOGUE_DOT_PY_FILE_NAME, self._dialogue_class_str())
-        if len(self.spec.all_custom_types) > 0:
-            self._create_file(
-                CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
+            _create_protocol_file(
+                self.path_to_generated_protocol_package,
+                DIALOGUE_DOT_PY_FILE_NAME,
+                self._dialogue_class_str(),
             )
-        self._create_file(
-            SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
+        if len(self.spec.all_custom_types) > 0:
+            _create_protocol_file(
+                self.path_to_generated_protocol_package,
+                CUSTOM_TYPES_DOT_PY_FILE_NAME,
+                self._custom_types_module_str(),
+            )
+        _create_protocol_file(
+            self.path_to_generated_protocol_package,
+            SERIALIZATION_DOT_PY_FILE_NAME,
+            self._serialization_class_str(),
+        )
+
+        # Run black formatting
+        try_run_black_formatting(self.path_to_generated_protocol_package)
+
+        # Run protocol buffer compiler
+        try_run_protoc(
+            self.path_to_generated_protocol_package, self.protocol_specification.name
         )
 
         # Warn if specification has custom types
@@ -2079,15 +2031,6 @@ class ProtocolGenerator:
                 self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
             )
             logger.warning(incomplete_generation_warning_msg)
-
-        # Compile protobuf schema
-        cmd = "protoc -I={} --python_out={} {}/{}.proto".format(
-            self.output_folder_path,
-            self.output_folder_path,
-            self.output_folder_path,
-            self.protocol_specification.name,
-        )
-        os.system(cmd)  # nosec
 
     def generate(self, protobuf_only: bool = False) -> None:
         """

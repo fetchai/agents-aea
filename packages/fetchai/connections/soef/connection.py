@@ -237,7 +237,7 @@ class SOEFChannel:
                     "Agent registration error - page address or token not received"
                 )
                 self._send_error_response()
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error("Exception when interacting with SOEF: {}".format(e))
             self._send_error_response()
 
@@ -292,7 +292,7 @@ class SOEFChannel:
                 self._send_error_response(
                     oef_error_operation=OefSearchMessage.OefErrorOperation.REGISTER_SERVICE
                 )
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error("Exception when interacting with SOEF: {}".format(e))
             self._send_error_response()
 
@@ -321,7 +321,7 @@ class SOEFChannel:
                 self._send_error_response(
                     oef_error_operation=OefSearchMessage.OefErrorOperation.REGISTER_SERVICE
                 )
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error("Exception when interacting with SOEF: {}".format(e))
             self._send_error_response()
 
@@ -363,7 +363,7 @@ class SOEFChannel:
                     self._send_error_response(
                         oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE
                     )
-            except Exception as e:
+            except Exception as e:  # pragma: nocover # pylint: disable=broad-except
                 logger.error(
                     "Something went wrong cannot unregister the service! {}".format(e)
                 )
@@ -529,7 +529,7 @@ class SOEFChannel:
                 self._send_error_response(
                     oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES
                 )
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error("Exception when interacting with SOEF: {}".format(e))
             self._send_error_response()
 
@@ -625,7 +625,7 @@ class SOEFConnection(Connection):
         except CancelledError:
             logger.debug("Receive cancelled.")
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.exception(e)
             return None
 

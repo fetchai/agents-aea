@@ -97,19 +97,25 @@ class BaseAEATestCase(ABC):
         cls.current_agent_context = ""
 
     @classmethod
-    def set_config(cls, dotted_path: str, value: Any, type: str = "str") -> None:
+    def set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> None:
         """
         Set a config.
         Run from agent's directory.
 
         :param dotted_path: str dotted path to config param.
         :param value: a new value to set.
-        :param type: the type
+        :param type_: the type
 
         :return: None
         """
         cls.run_cli_command(
-            "config", "set", dotted_path, str(value), "--type", type, cwd=cls._get_cwd()
+            "config",
+            "set",
+            dotted_path,
+            str(value),
+            "--type",
+            type_,
+            cwd=cls._get_cwd(),
         )
 
     @classmethod
@@ -371,17 +377,21 @@ class BaseAEATestCase(ABC):
         cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
-    def add_item(cls, item_type: str, public_id: str) -> None:
+    def add_item(cls, item_type: str, public_id: str, local: bool = True) -> None:
         """
         Add an item to the agent.
         Run from agent's directory.
 
         :param item_type: str item type.
         :param public_id: public id of the item.
+        :param local: a flag for local folder add True by default.
 
         :return: None
         """
-        cls.run_cli_command("add", "--local", item_type, public_id, cwd=cls._get_cwd())
+        cli_args = ["add", "--local", item_type, public_id]
+        if not local:
+            cli_args.remove("--local")
+        cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
     def scaffold_item(cls, item_type: str, name: str) -> None:

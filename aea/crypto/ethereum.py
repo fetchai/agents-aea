@@ -33,10 +33,10 @@ from eth_keys import keys
 
 import requests
 
-import web3
 from web3 import HTTPProvider, Web3
 
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.helpers.base import try_decorator
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -258,14 +258,10 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Get the balance of a given account."""
         return self._try_get_balance(address)
 
+    @try_decorator("Unable to retrieve balance: {}", logger_method="warning")
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
-        try:
-            balance = self._api.eth.getBalance(address)  # pylint: disable=no-member
-        except Exception as e:  # pragma: no cover
-            logger.warning("Unable to retrieve balance: {}".format(str(e)))
-            balance = None
-        return balance
+        return self._api.eth.getBalance(address)  # pylint: disable=no-member
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -276,7 +272,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_nonce: str,
         chain_id: int = 1,
         **kwargs,
-    ) -> Any:
+    ) -> Optional[Any]:
         """
         Submit a transfer transaction to the ledger.
 
@@ -311,28 +307,22 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         return transaction
 
+    @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
     def _try_get_transaction_count(self, address: Address) -> Optional[int]:
         """Try get the transaction count."""
-        try:
-            nonce = self._api.eth.getTransactionCount(  # pylint: disable=no-member
-                self._api.toChecksumAddress(address)
-            )
-        except Exception as e:  # pragma: no cover
-            logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
-            nonce = None
+        nonce = self._api.eth.getTransactionCount(  # pylint: disable=no-member
+            self._api.toChecksumAddress(address)
+        )
         return nonce
 
+    @try_decorator("Unable to retrieve gas estimate: {}", logger_method="warning")
     def _try_get_gas_estimate(
         self, transaction: Dict[str, Union[str, int, None]]
     ) -> Optional[int]:
         """Try get the gas estimate."""
-        try:
-            gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
-                transaction=transaction
-            )
-        except Exception as e:  # pragma: no cover
-            logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
-            gas_estimate = None
+        gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
+            transaction=transaction
+        )
         return gas_estimate
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
@@ -345,6 +335,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_digest = self._try_send_signed_transaction(tx_signed)
         return tx_digest
 
+    @try_decorator("Unable to send transaction: {}", logger_method="warning")
     def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
         Try send a signed transaction.
@@ -352,18 +343,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        try:
-            tx_signed = cast(AttributeDict, tx_signed)
-            hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
-                tx_signed.rawTransaction
-            )
-            tx_digest = hex_value.hex()
-            logger.debug(
-                "Successfully sent transaction with digest: {}".format(tx_digest)
-            )
-        except Exception as e:  # pragma: no cover
-            logger.warning("Unable to send transaction: {}".format(str(e)))
-            tx_digest = None
+        tx_signed = cast(AttributeDict, tx_signed)
+        hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
+            tx_signed.rawTransaction
+        )
+        tx_digest = hex_value.hex()
+        logger.debug("Successfully sent transaction with digest: {}".format(tx_digest))
         return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
@@ -376,6 +361,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
         return tx_receipt
 
+    @try_decorator(
+        "Error when attempting getting tx receipt: {}", logger_method="debug"
+    )
     def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
         Try get the transaction receipt.
@@ -383,13 +371,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        try:
-            tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
-                tx_digest
-            )
-        except web3.exceptions.TransactionNotFound as e:
-            logger.debug("Error when attempting getting tx receipt: {}".format(str(e)))
-            tx_receipt = None
+        tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
+            tx_digest
+        )
         return tx_receipt
 
     def get_transaction(self, tx_digest: str) -> Optional[Any]:
@@ -402,6 +386,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx = self._try_get_transaction(tx_digest)
         return tx
 
+    @try_decorator("Error when attempting getting tx: {}", logger_method="debug")
     def _try_get_transaction(self, tx_digest: str) -> Optional[Any]:
         """
         Get the transaction.
@@ -409,11 +394,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the transaction digest.
         :return: the tx, if found
         """
-        try:
-            tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
-        except Exception as e:  # pragma: no cover
-            logger.debug("Error when attempting getting tx: {}".format(str(e)))
-            tx = None
+        tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
         return tx
 
 
@@ -432,6 +413,10 @@ class EthereumFaucetApi(FaucetApi):
         self._try_get_wealth(address)
 
     @staticmethod
+    @try_decorator(
+        "An error occured while attempting to generate wealth:\n{}",
+        logger_method="error",
+    )
     def _try_get_wealth(address: Address) -> None:
         """
         Get wealth from the faucet for the provided address.
@@ -439,25 +424,20 @@ class EthereumFaucetApi(FaucetApi):
         :param address: the address.
         :return: None
         """
-        try:
-            response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
-            if response.status_code // 100 == 5:  # pragma: no cover
-                logger.error("Response: {}".format(response.status_code))
-            elif response.status_code // 100 in [3, 4]:  # pragma: no cover
-                response_dict = json.loads(response.text)
-                logger.warning(
-                    "Response: {}\nMessage: {}".format(
-                        response.status_code, response_dict.get("message")
-                    )
-                )
-            elif response.status_code // 100 == 2:  # pragma: no cover
-                response_dict = json.loads(response.text)
-                logger.info(
-                    "Response: {}\nMessage: {}".format(
-                        response.status_code, response_dict.get("message")
-                    )
-                )
-        except Exception as e:  # pragma: no cover
+        response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
+        if response.status_code // 100 == 5:
+            logger.error("Response: {}".format(response.status_code))
+        elif response.status_code // 100 in [3, 4]:
+            response_dict = json.loads(response.text)
             logger.warning(
-                "An error occured while attempting to generate wealth:\n{}".format(e)
+                "Response: {}\nMessage: {}".format(
+                    response.status_code, response_dict.get("message")
+                )
             )
+        elif response.status_code // 100 == 2:
+            response_dict = json.loads(response.text)
+            logger.info(
+                "Response: {}\nMessage: {}".format(
+                    response.status_code, response_dict.get("message")
+                )
+            )  # pragma: no cover

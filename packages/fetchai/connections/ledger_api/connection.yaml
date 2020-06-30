@@ -6,7 +6,7 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: Qmb6CLUivtzfEyNspZnqwQdyqNfq46b3QmzE5Twgh9ngiM
+  base.py: QmbLT1Jstn9Hb8iSphGq8ttcwNsSYCFNAMh1Sz3ZedHTAv
   connection.py: QmPE886aWxc7j8E2cXyRxD2yqupaRUcZJ3KhDDXZMr8sYv
   contract_dispatcher.py: QmXkgmcaVCzmdCy7xVT9zGyfP5ubJSFyQXhkKL1zb9HppT
   ledger_dispatcher.py: QmaZGyCt8Au35W3a1acmxMwNUmi2YK6AT33hv9X5y9svt7

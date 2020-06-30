@@ -94,9 +94,9 @@ def run_aea(
     click.echo("Starting AEA '{}' in '{}' mode...".format(aea.name, aea.loop_mode))
     try:
         aea.start()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # pragma: no cover
         click.echo(" AEA '{}' interrupted!".format(aea.name))  # pragma: no cover
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise click.ClickException(str(e))
     finally:
         click.echo("Stopping AEA '{}' ...".format(aea.name))

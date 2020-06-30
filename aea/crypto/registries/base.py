@@ -106,16 +106,16 @@ class ItemSpec(Generic[ItemType]):
     """A specification for a particular instance of an object."""
 
     def __init__(
-        self, id: ItemId, entry_point: EntryPoint[ItemType], **kwargs: Dict,
+        self, id_: ItemId, entry_point: EntryPoint[ItemType], **kwargs: Dict,
     ):
         """
         Initialize an item specification.
 
-        :param id: the id associated to this specification
+        :param id_: the id associated to this specification
         :param entry_point: The Python entry_point of the environment class (e.g. module.name:Class).
         :param kwargs: other custom keyword arguments.
         """
-        self.id = ItemId(id)
+        self.id = ItemId(id_)
         self.entry_point = EntryPoint[ItemType](entry_point)
         self._kwargs = {} if kwargs is None else kwargs
 
@@ -147,31 +147,31 @@ class Registry(Generic[ItemType]):
 
     def register(
         self,
-        id: Union[ItemId, str],
+        id_: Union[ItemId, str],
         entry_point: Union[EntryPoint[ItemType], str],
         **kwargs,
     ):
         """
         Register an item type.
 
-        :param id: the identifier for the crypto type.
+        :param id_: the identifier for the crypto type.
         :param entry_point: the entry point to load the crypto object.
         :param kwargs: arguments to provide to the crypto class.
         :return: None.
         """
-        item_id = ItemId(id)
+        item_id = ItemId(id_)
         entry_point = EntryPoint[ItemType](entry_point)
         if item_id in self.specs:
             raise AEAException("Cannot re-register id: '{}'".format(item_id))
         self.specs[item_id] = ItemSpec[ItemType](item_id, entry_point, **kwargs)
 
     def make(
-        self, id: Union[ItemId, str], module: Optional[str] = None, **kwargs
+        self, id_: Union[ItemId, str], module: Optional[str] = None, **kwargs
     ) -> ItemType:
         """
         Create an instance of the associated type item id.
 
-        :param id: the id of the item class. Make sure it has been registered earlier
+        :param id_: the id of the item class. Make sure it has been registered earlier
             before calling this function.
         :param module: dotted path to a module.
             whether a module should be loaded before creating the object.
@@ -184,21 +184,23 @@ class Registry(Generic[ItemType]):
         :param kwargs: keyword arguments to be forwarded to the object.
         :return: the new item instance.
         """
-        item_id = ItemId(id)
+        item_id = ItemId(id_)
         spec = self._get_spec(item_id, module=module)
         item = spec.make(**kwargs)
         return item
 
-    def has_spec(self, id: ItemId) -> bool:
+    def has_spec(self, item_id: ItemId) -> bool:
         """
         Check whether there exist a spec associated with an item id.
 
-        :param id: the item identifier.
+        :param item_id: the item identifier.
         :return: True if it is registered, False otherwise.
         """
-        return id in self.specs.keys()
+        return item_id in self.specs.keys()
 
-    def _get_spec(self, id: ItemId, module: Optional[str] = None) -> ItemSpec[ItemType]:
+    def _get_spec(
+        self, item_id: ItemId, module: Optional[str] = None
+    ) -> ItemSpec[ItemType]:
         """Get the item spec."""
         if module is not None:
             try:
@@ -211,6 +213,6 @@ class Registry(Generic[ItemType]):
                     )
                 )
 
-        if id not in self.specs:
-            raise AEAException("Item not registered with id '{}'.".format(id))
-        return self.specs[id]
+        if item_id not in self.specs:
+            raise AEAException("Item not registered with id '{}'.".format(item_id))
+        return self.specs[item_id]

@@ -65,7 +65,7 @@ class RequestDispatcher(ABC):
         try:
             response = await self.loop.run_in_executor(self.executor, func, *args)
             return response
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             return self.get_error_message(e, *args)
 
     def dispatch(self, envelope: Envelope) -> Task:

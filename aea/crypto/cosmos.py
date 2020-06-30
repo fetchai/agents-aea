@@ -35,6 +35,7 @@ from ecdsa.util import sigencode_string_canonize
 import requests
 
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.helpers.base import try_decorator
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -184,8 +185,10 @@ class CosmosHelper(Helper):
         :param amount: the amount we expect to get from the transaction.
         :return: True if the random_message is equals to tx['input']
         """
+        if tx is None:
+            return False  # pragma: no cover
+
         try:
-            assert tx is not None
             _tx = tx.get("tx").get("value").get("msg")[0]
             recovered_amount = int(_tx.get("value").get("amount")[0].get("amount"))
             sender = _tx.get("value").get("from_address")
@@ -193,7 +196,7 @@ class CosmosHelper(Helper):
             is_valid = (
                 recovered_amount == amount and sender == client and recipient == seller
             )
-        except Exception:  # pragma: no cover
+        except (KeyError, IndexError):  # pragma: no cover
             is_valid = False
         return is_valid
 
@@ -280,22 +283,21 @@ class CosmosApi(LedgerApi, CosmosHelper):
         balance = self._try_get_balance(address)
         return balance
 
+    @try_decorator(
+        "Encountered exception when trying get balance: {}",
+        logger_method=logger.warning,
+    )
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Try get the balance of a given account."""
         balance = None  # type: Optional[int]
-        try:
-            url = self.network_address + f"/bank/balances/{address}"
-            response = requests.get(url=url)
-            if response.status_code == 200:
-                result = response.json()["result"]
-                if len(result) == 0:
-                    balance = 0
-                else:
-                    balance = int(result[0]["amount"])
-        except Exception as e:  # pragma: no cover
-            logger.warning(
-                "Encountered exception when trying get balance: {}".format(e)
-            )
+        url = self.network_address + f"/bank/balances/{address}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = response.json()["result"]
+            if len(result) == 0:
+                balance = 0
+            else:
+                balance = int(result[0]["amount"])
         return balance
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
@@ -312,7 +314,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         memo: str = "",
         chain_id: str = "aea-testnet",
         **kwargs,
-    ) -> Any:
+    ) -> Optional[Any]:
         """
         Submit a transfer transaction to the ledger.
 
@@ -348,34 +350,28 @@ class CosmosApi(LedgerApi, CosmosHelper):
         }
         return tx
 
-    def _try_get_account_number_and_sequence(self, address: Address) -> Tuple[int, int]:
+    @try_decorator(
+        "Encountered exception when trying to get account number and sequence: {}",
+        logger_method=logger.warning,
+    )
+    def _try_get_account_number_and_sequence(
+        self, address: Address
+    ) -> Optional[Tuple[int, int]]:
         """
         Try get account number and sequence for an address.
 
         :param address: the address
         :return: a tuple of account number and sequence
         """
-        try:
-            result = None  # type: Optional[Tuple[int, int]]
-            url = self.network_address + f"/auth/accounts/{address}"
-            response = requests.get(url=url)
-            if response.status_code == 200:
-                result = (
-                    int(response.json()["result"]["value"]["account_number"]),
-                    int(response.json()["result"]["value"]["sequence"]),
-                )
-            if result is None:
-                raise ValueError(
-                    "Cannot determine account number and sequence."
-                )  # pragma: no cover
-            return result
-        except Exception as e:  # pragma: no cover
-            logger.warning(
-                "Encountered exception when trying to get account number and sequence: {}".format(
-                    e
-                )
+        result = None  # type: Optional[Tuple[int, int]]
+        url = self.network_address + f"/auth/accounts/{address}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = (
+                int(response.json()["result"]["value"]["account_number"]),
+                int(response.json()["result"]["value"]["sequence"]),
             )
-            raise e
+        return result
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
@@ -387,6 +383,9 @@ class CosmosApi(LedgerApi, CosmosHelper):
         tx_digest = self._try_send_signed_transaction(tx_signed)
         return tx_digest
 
+    @try_decorator(
+        "Encountered exception when trying to send tx: {}", logger_method=logger.warning
+    )
     def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
         Try send the signed transaction.
@@ -395,13 +394,10 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :return: tx_digest, if present
         """
         tx_digest = None  # type: Optional[str]
-        try:
-            url = self.network_address + "/txs"
-            response = requests.post(url=url, json=tx_signed)
-            if response.status_code == 200:
-                tx_digest = response.json()["txhash"]
-        except Exception as e:  # pragma: no cover
-            logger.warning("Encountered exception when trying to send tx: {}".format(e))
+        url = self.network_address + "/txs"
+        response = requests.post(url=url, json=tx_signed)
+        if response.status_code == 200:
+            tx_digest = response.json()["txhash"]
         return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
@@ -414,6 +410,10 @@ class CosmosApi(LedgerApi, CosmosHelper):
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
         return tx_receipt
 
+    @try_decorator(
+        "Encountered exception when trying to get transaction receipt: {}",
+        logger_method=logger.warning,
+    )
     def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
         Try get the transaction receipt for a transaction digest.
@@ -422,17 +422,10 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :return: the tx receipt, if present
         """
         result = None  # type: Optional[Any]
-        try:
-            url = self.network_address + f"/txs/{tx_digest}"
-            response = requests.get(url=url)
-            if response.status_code == 200:
-                result = response.json()
-        except Exception as e:  # pragma: no cover
-            logger.warning(
-                "Encountered exception when trying to get transaction receipt: {}".format(
-                    e
-                )
-            )
+        url = self.network_address + f"/txs/{tx_digest}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = response.json()
         return result
 
     def get_transaction(self, tx_digest: str) -> Optional[Any]:
@@ -462,6 +455,10 @@ class CosmosFaucetApi(FaucetApi):
         self._try_get_wealth(address)
 
     @staticmethod
+    @try_decorator(
+        "An error occured while attempting to generate wealth:\n{}",
+        logger_method=logger.error,
+    )
     def _try_get_wealth(address: Address) -> None:
         """
         Get wealth from the faucet for the provided address.
@@ -469,18 +466,13 @@ class CosmosFaucetApi(FaucetApi):
         :param address: the address.
         :return: None
         """
-        try:
-            response = requests.post(
-                url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
-            )
-            if response.status_code == 200:
-                tx_hash = response.text
-                logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
-            else:  # pragma: no cover
-                logger.warning(
-                    "Response: {}, Text: {}".format(response.status_code, response.text)
-                )
-        except Exception as e:  # pragma: no cover
+        response = requests.post(
+            url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
+        )
+        if response.status_code == 200:
+            tx_hash = response.text
+            logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
+        else:  # pragma: no cover
             logger.warning(
-                "An error occured while attempting to generate wealth:\n{}".format(e)
+                "Response: {}, Text: {}".format(response.status_code, response.text)
             )

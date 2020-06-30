@@ -82,7 +82,7 @@ class TCPConnection(Connection, ABC):
         try:
             await self.setup()
             self.connection_status.is_connected = True
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error(str(e))
             self.connection_status.is_connected = False
 

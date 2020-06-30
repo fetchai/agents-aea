@@ -21,13 +21,13 @@
 
 from aea.crypto.registries import register_crypto, register_ledger_api  # noqa
 
-register_crypto(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
-register_crypto(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
-register_crypto(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
+register_crypto(id_="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
+register_crypto(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
+register_crypto(id_="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
 
 DEFAULT_FETCHAI_LEDGER_CONFIG = dict(network="testnet")
 register_ledger_api(
-    id="fetchai",
+    id_="fetchai",
     entry_point="aea.crypto.fetchai:FetchAIApi",
     **DEFAULT_FETCHAI_LEDGER_CONFIG
 )
@@ -37,7 +37,7 @@ DEFAULT_ETHEREUM_LEDGER_CONFIG = dict(
     gas_price=50,
 )
 register_ledger_api(
-    id="ethereum",
+    id_="ethereum",
     entry_point="aea.crypto.ethereum:EthereumApi",
     **DEFAULT_ETHEREUM_LEDGER_CONFIG
 )
@@ -46,7 +46,7 @@ DEFAULT_COSMOS_LEDGER_CONFIG = dict(
     address="http://aea-testnet.sandbox.fetch-ai.com:1317",
 )
 register_ledger_api(
-    id="cosmos",
+    id_="cosmos",
     entry_point="aea.crypto.cosmos:CosmosApi",
     **DEFAULT_COSMOS_LEDGER_CONFIG
 )

@@ -420,7 +420,7 @@ def update_hashes(arguments: argparse.Namespace) -> int:
             to_csv(test_package_hashes, TEST_PACKAGE_HASHES_PATH)
 
             print("Done!")
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             return_code = 1
 
@@ -477,7 +477,7 @@ def check_hashes(arguments: argparse.Namespace) -> int:
                 failed = failed or not check_same_ipfs_hash(
                     client, configuration_obj, package_type, all_expected_hashes
                 )
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             failed = True
 

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the stub connection."""
 
 import asyncio
@@ -33,6 +32,7 @@ from typing import AsyncIterable, IO, List, Optional
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers import file_lock
+from aea.helpers.base import exception_log_and_reraise
 from aea.mail.base import Envelope
 
 
@@ -88,13 +88,11 @@ def lock_file(file_descriptor: IO[bytes]):
 
     :param file_descriptor: file descriptio of file to lock.
     """
-    try:
+    with exception_log_and_reraise(
+        logger.error, f"Couldn't acquire lock for file {file_descriptor.name}: {{}}"
+    ):
         file_lock.lock(file_descriptor, file_lock.LOCK_EX)
-    except Exception as e:
-        logger.error(
-            "Couldn't acquire lock for file {}: {}".format(file_descriptor.name, e)
-        )
-        raise
+
     try:
         yield
     finally:
@@ -104,7 +102,8 @@ def lock_file(file_descriptor: IO[bytes]):
 def write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None:
     """Write envelope to file."""
     encoded_envelope = _encode(envelope, separator=SEPARATOR)
-    logger.debug("write {}".format(encoded_envelope))
+    logger.debug("write {}: to {}".format(encoded_envelope, file_pointer.name))
+
     with lock_file(file_pointer):
         file_pointer.write(encoded_envelope)
         file_pointer.flush()
@@ -125,8 +124,8 @@ def _process_line(line: bytes) -> Optional[Envelope]:
         envelope = _decode(line, separator=SEPARATOR)
     except ValueError as e:
         logger.error("Bad formatted line: {!r}. {}".format(line, e))
-    except Exception as e:
-        logger.error("Error when processing a line. Message: {}".format(str(e)))
+    except Exception as e:  # pragma: nocover # pylint: disable=broad-except
+        logger.exception("Error when processing a line. Message: {}".format(str(e)))
     return envelope
 
 
@@ -240,12 +239,14 @@ class StubConnection(Connection):
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
+        if self.in_queue is None:  # pragma: nocover
+            logger.error("Input queue not initialized.")
+            return None
+
         try:
-            assert self.in_queue is not None, "Input queue not initialized."
-            envelope = await self.in_queue.get()
-            return envelope
-        except Exception as e:
-            logger.exception(e)
+            return await self.in_queue.get()
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Stub connection receive error:")
             return None
 
     async def connect(self) -> None:
@@ -259,8 +260,6 @@ class StubConnection(Connection):
             # which is known only at connection time.
             self.in_queue = asyncio.Queue()
             self._read_envelopes_task = self._loop.create_task(self.read_envelopes())
-        except Exception as e:  # pragma: no cover
-            raise e
         finally:
             self.connection_status.is_connected = False
 
@@ -282,7 +281,7 @@ class StubConnection(Connection):
             await self._read_envelopes_task
         except CancelledError:
             pass  # task was cancelled, that was expected
-        except BaseException:  # pragma: nocover
+        except BaseException:  # pragma: nocover  # pylint: disable=broad-except
             logger.exception(
                 "during envelop read"
             )  # do not raise exception cause it's on task stop
@@ -309,6 +308,6 @@ class StubConnection(Connection):
         :return: None
         """
         assert self.loop is not None, "Loop not initialized."
-        self.loop.run_in_executor(
+        await self.loop.run_in_executor(
             self._write_pool, write_envelope, envelope, self.output_file
         )

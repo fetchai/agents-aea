@@ -829,7 +829,7 @@ class OEFConnection(Connection):
         except CancelledError:
             logger.debug("Receive cancelled.")
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.exception(e)
             return None
 

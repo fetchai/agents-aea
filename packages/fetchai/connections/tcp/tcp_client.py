@@ -81,7 +81,7 @@ class TCPClientConnection(TCPConnection):
         try:
             assert self._reader is not None
             data = await self._recv(self._reader)
-            if data is None:
+            if data is None:  # pragma: nocover
                 logger.debug("[{}] No data received.".format(self.address))
                 return None
             logger.debug("[{}] Message received: {!r}".format(self.address, data))

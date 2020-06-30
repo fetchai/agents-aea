@@ -27,7 +27,19 @@ import pprint
 from collections import defaultdict, deque
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Collection,
+    Deque,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import jsonschema
 
@@ -413,6 +425,7 @@ class AEABuilder:
         """
         dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
         module = load_module(dotted_path, file_path)
+
         try:
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
@@ -422,6 +435,8 @@ class AEABuilder:
                     dotted_path, class_name, file_path, e
                 )
             )
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+
         return self
 
     def set_skill_exception_policy(
@@ -969,7 +984,7 @@ class AEABuilder:
 
     def _get_default_connection(self) -> PublicId:
         """
-        Return the default connection
+        Return the default connection.
 
         :return: the default connection
         """
@@ -1155,7 +1170,10 @@ class AEABuilder:
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
 
-        if agent_configuration._default_connection is None:
+        if (
+            agent_configuration._default_connection  # pylint: disable=protected-access
+            is None
+        ):
             self.set_default_connection(DEFAULT_CONNECTION)
         else:
             self.set_default_connection(
@@ -1239,6 +1257,7 @@ class AEABuilder:
         """Find import order for skills.
 
         We need to handle skills separately, since skills can depend on each other.
+
         That is, we need to:
         - load the skill configurations to find the import order
         - detect if there are cycles
@@ -1250,7 +1269,6 @@ class AEABuilder:
         supports: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
         # nodes with no incoming edges
         roots = copy(skill_ids)
-
         for skill_id in skill_ids:
             component_path = self._find_component_directory_from_component_id(
                 aea_project_path, skill_id
@@ -1274,7 +1292,7 @@ class AEABuilder:
                 supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
 
         # find topological order (Kahn's algorithm)
-        queue = deque()  # type: ignore
+        queue: Deque[ComponentId] = deque()
         order = []
         queue.extend(roots)
         while len(queue) > 0:
@@ -1366,7 +1384,7 @@ class AEABuilder:
                 contract_interface = json.load(interface_file)
 
             contract_registry.register(
-                id=str(configuration.public_id),
+                id_=str(configuration.public_id),
                 entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
                 contract_config=configuration,
                 contract_interface=contract_interface,
