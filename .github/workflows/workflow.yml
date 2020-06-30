@@ -9,6 +9,7 @@ on:
 
 jobs:
   sync_aea_loop_unit_tests:
+    continue-on-error: True
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -32,6 +33,7 @@ jobs:
         tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
 
   sync_aea_loop_integrational_tests:
+    continue-on-error: True
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -56,7 +58,7 @@ jobs:
   
   common_checks:
     runs-on: ubuntu-latest
-
+    continue-on-error: True
     timeout-minutes: 30
 
     steps:
@@ -108,6 +110,7 @@ jobs:
         run: tox -e docs
 
   integration_checks:
+    continue-on-error: True
     runs-on: ubuntu-latest
 
     timeout-minutes: 40
@@ -128,6 +131,7 @@ jobs:
         run: tox -e py3.7 -- -m 'integration and not unstable and not ethereum'
 
   integration_checks_eth:
+    continue-on-error: True
     runs-on: ubuntu-latest
 
     timeout-minutes: 40
@@ -157,7 +161,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8]
 
-    continue-on-error: false
+    continue-on-error: True
 
     timeout-minutes: 30
 

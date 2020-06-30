@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Extension to the Simple OEF and OEF Python SDK."""
 
 import asyncio
 import logging
 from asyncio import CancelledError
-from typing import Dict, List, Optional, Set, Tuple, cast
+from concurrent.futures.thread import ThreadPoolExecutor
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 from urllib import parse
 from uuid import uuid4
 
@@ -56,8 +56,56 @@ DEFAULT_OEF = "default_oef"
 PUBLIC_ID = PublicId.from_str("fetchai/soef:0.3.0")
 
 
+NOT_SPECIFIED = object()
+
+PERSONALITY_PIECES = [
+    "genus",
+    "classification",
+    "architecture",
+    "dynamics.moving",
+    "dynamics.heading",
+    "dynamics.position",
+    "action.buyer",
+    "action.seller",
+]
+
+
+class SOEFException(Exception):
+    """Soef chanlle expected  exception."""
+
+    @classmethod
+    def warning(cls, msg: str) -> "SOEFException":  # pragma: no cover
+        """Construct exception and write log."""
+        logger.warning(msg)
+        return cls(msg)
+
+    @classmethod
+    def debug(cls, msg: str) -> "SOEFException":  # pragma: no cover
+        """Construct exception and write log."""
+        logger.debug(msg)
+        return cls(msg)
+
+    @classmethod
+    def error(cls, msg: str) -> "SOEFException":  # pragma: no cover
+        """Construct exception and write log."""
+        logger.error(msg)
+        return cls(msg)
+
+    @classmethod
+    def exception(cls, msg: str) -> "SOEFException":  # pragma: no cover
+        """Construct exception and write log."""
+        logger.exception(msg)
+        return cls(msg)
+
+
 class SOEFChannel:
     """The OEFChannel connects the OEF Agent with the connection."""
+
+    SUPPORTED_CHAIN_IDENTIFIERS = [
+        "fetchai",
+        "cosmos",
+        "ethereum",
+    ]
 
     def __init__(
         self,
@@ -67,6 +115,7 @@ class SOEFChannel:
         soef_port: int,
         excluded_protocols: Set[PublicId],
         restricted_to_protocols: Set[PublicId],
+        chain_identifier: Optional[str] = None,
     ):
         """
         Initialize.
@@ -77,7 +126,14 @@ class SOEFChannel:
         :param soef_port: the SOEF port.
         :param excluded_protocols: the protocol ids excluded
         :param restricted_to_protocols: the protocol ids restricted to
+        :param chain_identifier: supported chain id
         """
+        if (
+            chain_identifier is not None
+            and chain_identifier not in self.SUPPORTED_CHAIN_IDENTIFIERS
+        ):
+            raise ValueError("Unsupported chain_identifier")
+
         self.address = address
         self.api_key = api_key
         self.soef_addr = soef_addr
@@ -91,106 +147,349 @@ class SOEFChannel:
         self.unique_page_address = None  # type: Optional[str]
         self.agent_location = None  # type: Optional[Location]
         self.in_queue = None  # type: Optional[asyncio.Queue]
+        self._executor_pool: Optional[ThreadPoolExecutor] = None
+        self.chain_identifier: str = chain_identifier or "fetchai"
 
-    def send(self, envelope: Envelope) -> None:
+    @staticmethod
+    def _is_compatible_query(query: Query) -> bool:
+        """
+        Check if a query is compatible with the soef.
+
+        :param query: search query to check
+        :return: bool
+        """
+        constraints = [c for c in query.constraints if isinstance(c, Constraint)]
+        if len(constraints) == 0:  # pragma: nocover
+            return False
+
+        if ConstraintTypes.DISTANCE not in [
+            c.constraint_type.type for c in constraints
+        ]:  # pragma: nocover
+            return False
+
+        return True
+
+    @staticmethod
+    def _construct_personality_filter_params(
+        equality_constraints: List[Constraint],
+    ) -> Dict[str, List[str]]:
+        """
+        Construct a dictionary of personality filters.
+
+        :param equality_constraints: list of equality constraints
+        :return: bool
+        """
+        filters = []
+
+        for constraint in equality_constraints:
+            if constraint.attribute_name not in PERSONALITY_PIECES:
+                continue
+            filters.append(
+                constraint.attribute_name + "," + constraint.constraint_type.value
+            )
+        if not filters:  # pragma: nocover
+            return {}
+        return {"ppfilter": filters}
+
+    @staticmethod
+    def _construct_service_key_filter_params(
+        equality_constraints: List[Constraint],
+    ) -> Dict[str, List[str]]:
+        """
+        Construct a dictionary of service keys filters.
+
+        :param equality_constraints: list of equality constraints
+        :return: bool
+        """
+        filters = []
+
+        for constraint in equality_constraints:
+            if constraint.attribute_name in PERSONALITY_PIECES:
+                continue
+            filters.append(
+                constraint.attribute_name + "," + constraint.constraint_type.value
+            )
+        if not filters:  # pragma: nocover
+            return {}
+        return {"skfilter": filters}
+
+    def _check_protocol_valid(self, envelope: Envelope) -> None:
+        """
+        Check protocol is supported and raises ValueError if not.
+
+        :param envelope: envelope to check protocol of
+        :return: None
+        """
+        is_in_excluded = envelope.protocol_id in (self.excluded_protocols or [])
+        is_in_restricted = not self.restricted_to_protocols or envelope.protocol_id in (
+            self.restricted_to_protocols or []
+        )
+
+        if is_in_excluded or not is_in_restricted:
+            logger.error(
+                "This envelope cannot be sent with the soef connection: protocol_id={}".format(
+                    envelope.protocol_id
+                )
+            )
+            raise ValueError(
+                "Cannot send message, invalid protocol: {}".format(envelope.protocol_id)
+            )
+
+    async def send(self, envelope: Envelope) -> None:
         """
         Send message handler.
 
         :param envelope: the envelope.
         :return: None
         """
-        if self.excluded_protocols is not None:
-            if envelope.protocol_id in self.excluded_protocols:
-                logger.error(
-                    "This envelope cannot be sent with the soef connection: protocol_id={}".format(
-                        envelope.protocol_id
-                    )
-                )
-                raise ValueError("Cannot send message.")
-        if envelope.protocol_id in self.restricted_to_protocols:
-            assert (
-                envelope.protocol_id == OefSearchMessage.protocol_id
-            ), "Invalid protocol id passed check."
-            self.process_envelope(envelope)
-        else:
-            raise ValueError(
-                "Cannot send message, invalid protocol: {}".format(envelope.protocol_id)
-            )
+        self._check_protocol_valid(envelope)
+        await self.process_envelope(envelope)
 
-    def process_envelope(self, envelope: Envelope) -> None:
+    async def _request_text(self, *args, **kwargs) -> str:
+        """Perform and http request and return text of response."""
+        # pydocstyle fix. cause black reformat.
+        def _do_request():
+            return requests.request(*args, **kwargs).text
+
+        return await self._loop.run_in_executor(self._executor_pool, _do_request)
+
+    async def process_envelope(self, envelope: Envelope) -> None:
         """
         Process envelope.
 
         :param envelope: the envelope.
         :return: None
         """
-        if self.unique_page_address is None:
-            self._register_agent()
-        assert isinstance(
-            envelope.message, OefSearchMessage
-        ), "Message not of type OefSearchMessage"
-        oef_message = cast(OefSearchMessage, envelope.message)
-        if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
-            service_description = oef_message.service_description
-            self.register_service(service_description)
-        elif (
-            oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE
-        ):
-            service_description = oef_message.service_description
-            self.unregister_service(service_description)
-        elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
-            query = oef_message.query
-            dialogue_reference = oef_message.dialogue_reference[0]
-            self.search_id += 1
-            self.search_id_to_dialogue_reference[self.search_id] = (
-                dialogue_reference,
-                str(self.search_id),
-            )
-            self.search_services(self.search_id, query)
-        else:
-            raise ValueError("OEF request not recognized.")
+        err_ops = OefSearchMessage.OefErrorOperation
 
-    def register_service(self, service_description: Description) -> None:
+        oef_error_operation = err_ops.OTHER
+
+        try:
+            if self.unique_page_address is None:  # pragma: nocover
+                await self._register_agent()
+
+            assert isinstance(envelope.message, OefSearchMessage), ValueError(
+                "Message not of type OefSearchMessage"
+            )
+
+            oef_message = cast(OefSearchMessage, envelope.message)
+
+            handlers_and_errors = {
+                OefSearchMessage.Performative.REGISTER_SERVICE: (
+                    self.register_service,
+                    err_ops.REGISTER_SERVICE,
+                ),
+                OefSearchMessage.Performative.UNREGISTER_SERVICE: (
+                    self.unregister_service,
+                    err_ops.UNREGISTER_SERVICE,
+                ),
+                OefSearchMessage.Performative.SEARCH_SERVICES: (
+                    self.search_services,
+                    err_ops.SEARCH_SERVICES,
+                ),
+            }
+
+            if oef_message.performative not in handlers_and_errors:
+                raise ValueError("OEF request not recognized.")
+
+            handler, oef_error_operation = handlers_and_errors[oef_message.performative]
+            await handler(oef_message)
+
+        except SOEFException:
+            await self._send_error_response(oef_error_operation=oef_error_operation)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Exception during envelope processing")
+            await self._send_error_response(oef_error_operation=oef_error_operation)
+            raise
+
+    async def register_service(self, oef_message: OefSearchMessage) -> None:
         """
         Register a service on the SOEF.
 
-        :param service_description: the service description
+        :param oef_message: OefSearchMessage
         """
-        if self._is_compatible_description(service_description):
-            service_location = service_description.values.get("location", None)
-            piece = service_description.values.get("piece", None)
-            value = service_description.values.get("value", None)
-            if service_location is not None and isinstance(service_location, Location):
-                self._set_location(service_location)
-            elif isinstance(piece, str) and isinstance(value, str):
-                self._set_personality_piece(piece, value)
-            else:
-                self._send_error_response()
-        else:
-            logger.warning(
-                "Service description incompatible with SOEF: values={}".format(
-                    service_description.values
-                )
+        service_description = oef_message.service_description
+
+        data_model_handlers = {
+            "location_agent": self._register_location_handler,
+            "personality_agent": self._register_personality_piece_handler,
+            "set_service_key": self._set_service_key_handler,
+            "remove_service_key": self._remove_service_key_handler,
+        }
+        data_model_name = service_description.data_model.name
+
+        if data_model_name not in data_model_handlers:
+            raise SOEFException.error(
+                f'Data model name: {data_model_name} is not supported. Valid models are: {", ".join(data_model_handlers.keys())}'
             )
-            self._send_error_response()
 
-    @staticmethod
-    def _is_compatible_description(service_description: Description) -> bool:
-        """
-        Check if a description is compatible with the soef.
+        handler = data_model_handlers[data_model_name]
+        await handler(service_description)
 
-        :param service_description: the service description
-        :return: bool
+    async def _set_service_key_handler(self, service_description: Description) -> None:
         """
-        is_compatible = (
-            isinstance(service_description.values.get("location", None), Location)
-        ) or (
-            isinstance(service_description.values.get("piece", None), str)
-            and isinstance(service_description.values.get("value", None), str)
+        Set service key from service description.
+
+        :param service_description: Service description
+        :return None
+        """
+        self._sure_data_model(service_description, "set_service_key")
+
+        key = service_description.values.get("key", None)
+        value = service_description.values.get("value", NOT_SPECIFIED)
+
+        if key is None or value is NOT_SPECIFIED:  # pragma: nocover
+            raise SOEFException.error("Bad values provided!")
+
+        await self._set_service_key(key, value)
+
+    async def _generic_oef_command(
+        self, command, params=None, unique_page_address=None, check_success=True
+    ):
+        """
+        Set service key from service description.
+
+        :param service_description: Service description
+        :return None
+        """
+        params = params or {}
+        logger.debug(f"Perform `{command}` with {params}")
+        url = parse.urljoin(
+            self.base_url, unique_page_address or self.unique_page_address
         )
-        return is_compatible
+        response_text = await self._request_text(
+            "get", url=url, params={"command": command, **params}
+        )
+        try:
+            root = ET.fromstring(response_text)
+            assert root.tag == "response"
+            if check_success:
+                el = root.find("./success")
+                assert el is not None, "No success element"
+                assert str(el.text).strip() == "1", "Success is not 1"
+            logger.debug(f"`{command}` SUCCSESS!")
+            return response_text
+        except Exception as e:
+            raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
 
-    def _register_agent(self) -> None:
+    async def _set_service_key(self, key: str, value: Union[str, int, float]) -> None:
+        """
+        Perform set service key command.
+
+        :param key: key to set
+        :param value: value to set
+        :return None:
+        """
+        await self._generic_oef_command("set_service_key", {"key": key, "value": value})
+
+    async def _remove_service_key_handler(
+        self, service_description: Description
+    ) -> None:
+        """
+        Remove service key from service description.
+
+        :param service_description: Service description
+        :return None
+        """
+        self._sure_data_model(service_description, "remove_service_key")
+        key = service_description.values.get("key", None)
+
+        if key is None:  # pragma: nocover
+            raise SOEFException.error("Bad values provided!")
+
+        await self._remove_service_key(key)
+
+    async def _remove_service_key(self, key: str) -> None:
+        """
+        Perform remove service key command.
+
+        :param key: key to remove
+        :return None:
+        """
+        await self._generic_oef_command("remove_service_key", {"key": key})
+
+    async def _register_location_handler(
+        self, service_description: Description
+    ) -> None:
+        """
+        Register service with location.
+
+        :param service_description: Service description
+        :return None
+        """
+        self._sure_data_model(service_description, "location_agent")
+
+        agent_location = service_description.values.get("location", None)
+        if agent_location is None or not isinstance(
+            agent_location, Location
+        ):  # pragma: nocover
+            raise SOEFException.debug("Bad location provided.")
+        await self._set_location(agent_location)
+
+    def _sure_data_model(
+        self, service_description: Description, data_model_name: str
+    ) -> None:
+        """
+        Check data model corresponds.
+
+        Raise exception if not.
+
+        :param service_description: Service description
+        :param data_model_name: data model name expected.
+        :return None
+        """
+        if service_description.data_model.name != data_model_name:  # pragma: nocover
+            raise SOEFException.error(
+                f"Bad service description! expected {data_model_name} but go {service_description.data_model.name}"
+            )
+
+    async def _set_location(self, agent_location: Location) -> None:
+        """
+        Set the location.
+
+        :param service_location: the service location
+        """
+        latitude = agent_location.latitude
+        longitude = agent_location.longitude
+        params = {
+            "longitude": str(longitude),
+            "latitude": str(latitude),
+        }
+        await self._generic_oef_command("set_position", params)
+        self.agent_location = agent_location
+
+    async def _register_personality_piece_handler(
+        self, service_description: Description
+    ) -> None:
+        """
+        Set the personality piece.
+
+        :param piece: the piece to be set
+        :param value: the value to be set
+        """
+        self._sure_data_model(service_description, "personality_agent")
+        piece = service_description.values.get("piece", None)
+        value = service_description.values.get("value", None)
+
+        if not (isinstance(piece, str) and isinstance(value, str)):  # pragma: nocover
+            raise SOEFException.debug("Personality piece bad values provided.")
+
+        await self._set_personality_piece(piece, value)
+
+    async def _set_personality_piece(self, piece: str, value: str):
+        """
+        Set the personality piece.
+
+        :param piece: the piece to be set
+        :param value: the value to be set
+        """
+        params = {
+            "piece": piece,
+            "value": value,
+        }
+        await self._generic_oef_command("set_personality_piece", params)
+
+    async def _register_agent(self) -> None:
         """
         Register an agent on the SOEF.
 
@@ -200,48 +499,37 @@ class SOEFChannel:
         url = parse.urljoin(self.base_url, "register")
         params = {
             "api_key": self.api_key,
-            "chain_identifier": "fetchai",
+            "chain_identifier": self.chain_identifier,
             "address": self.address,
             "declared_name": self.declared_name,
         }
-        try:
-            response = requests.get(url=url, params=params)
-            logger.debug("Response: {}".format(response.text))
-            root = ET.fromstring(response.text)
-            logger.debug("Root tag: {}".format(root.tag))
-            unique_page_address = ""
-            unique_token = ""  # nosec
-            for child in root:
-                logger.debug(
-                    "Child tag={}, child attrib={}, child text={}".format(
-                        child.tag, child.attrib, child.text
-                    )
+        response_text = await self._request_text("get", url=url, params=params)
+        root = ET.fromstring(response_text)
+        logger.debug("Root tag: {}".format(root.tag))
+        unique_page_address = ""
+        unique_token = ""  # nosec
+        for child in root:
+            logger.debug(
+                "Child tag={}, child attrib={}, child text={}".format(
+                    child.tag, child.attrib, child.text
                 )
-                if child.tag == "page_address" and child.text is not None:
-                    unique_page_address = child.text
-                if child.tag == "token" and child.text is not None:
-                    unique_token = child.text
-            if len(unique_page_address) > 0 and len(unique_token) > 0:
-                logger.debug("Registering agent")
-                url = parse.urljoin(self.base_url, unique_page_address)
-                params = {"token": unique_token, "command": "acknowledge"}
-                response = requests.get(url=url, params=params)
-                if "<response><success>1</success></response>" in response.text:
-                    logger.debug("Agent registration SUCCESS")
-                    self.unique_page_address = unique_page_address
-                else:
-                    logger.error("Agent registration error - acknowledge not accepted")
-                    self._send_error_response()
-            else:
-                logger.error(
-                    "Agent registration error - page address or token not received"
-                )
-                self._send_error_response()
-        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.error("Exception when interacting with SOEF: {}".format(e))
-            self._send_error_response()
+            )
+            if child.tag == "page_address" and child.text is not None:
+                unique_page_address = child.text
+            if child.tag == "token" and child.text is not None:
+                unique_token = child.text
+        if not (len(unique_page_address) > 0 and len(unique_token) > 0):
+            raise SOEFException.error(
+                "Agent registration error - page address or token not received"
+            )
+        logger.debug("Registering agent")
+        params = {"token": unique_token}
+        await self._generic_oef_command(
+            "acknowledge", params, unique_page_address=unique_page_address
+        )
+        self.unique_page_address = unique_page_address
 
-    def _send_error_response(
+    async def _send_error_response(
         self,
         oef_error_operation: OefErrorOperation = OefSearchMessage.OefErrorOperation.OTHER,
     ) -> None:
@@ -262,216 +550,94 @@ class SOEFChannel:
             protocol_id=OefSearchMessage.protocol_id,
             message=message,
         )
-        self.in_queue.put_nowait(envelope)
+        await self.in_queue.put(envelope)
 
-    def _set_location(self, agent_location: Location) -> None:
-        """
-        Set the location.
-
-        :param service_location: the service location
-        """
-        try:
-            latitude = agent_location.latitude
-            longitude = agent_location.longitude
-
-            logger.debug(
-                "Registering position lat={}, long={}".format(latitude, longitude)
-            )
-            url = parse.urljoin(self.base_url, self.unique_page_address)
-            params = {
-                "longitude": str(longitude),
-                "latitude": str(latitude),
-                "command": "set_position",
-            }
-            response = requests.get(url=url, params=params)
-            if "<response><success>1</success></response>" in response.text:
-                logger.debug("Location registration SUCCESS")
-                self.agent_location = agent_location
-            else:
-                logger.debug("Location registration error.")
-                self._send_error_response(
-                    oef_error_operation=OefSearchMessage.OefErrorOperation.REGISTER_SERVICE
-                )
-        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.error("Exception when interacting with SOEF: {}".format(e))
-            self._send_error_response()
-
-    def _set_personality_piece(self, piece: str, value: str) -> None:
-        """
-        Set the personality piece.
-
-        :param piece: the piece to be set
-        :param value: the value to be set
-        """
-        try:
-            url = parse.urljoin(self.base_url, self.unique_page_address)
-            logger.debug(
-                "Registering personality piece: piece={}, value={}".format(piece, value)
-            )
-            params = {
-                "piece": piece,
-                "value": value,
-                "command": "set_personality_piece",
-            }
-            response = requests.get(url=url, params=params)
-            if "<response><success>1</success></response>" in response.text:
-                logger.debug("Personality piece registration SUCCESS")
-            else:
-                logger.debug("Personality piece registration error.")
-                self._send_error_response(
-                    oef_error_operation=OefSearchMessage.OefErrorOperation.REGISTER_SERVICE
-                )
-        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.error("Exception when interacting with SOEF: {}".format(e))
-            self._send_error_response()
-
-    def unregister_service(self, service_description: Description) -> None:
+    async def unregister_service(self, oef_message: OefSearchMessage) -> None:
         """
         Unregister a service on the SOEF.
 
-        :param service_description: the service description
+        :param oef_message: OefSearchMessage
         :return: None
         """
-        if self._is_compatible_description(service_description):
-            raise NotImplementedError
-        else:
-            logger.warning(
-                "Service description incompatible with SOEF: values={}".format(
-                    service_description.values
-                )
-            )
-            self._send_error_response(
-                oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE
-            )
+        raise NotImplementedError
 
-    def _unregister_agent(self) -> None:
+    async def _unregister_agent(self) -> None:
         """
         Unnregister a service_name from the SOEF.
 
         :return: None
         """
         # TODO: add keep alive background tasks which ping the SOEF until the agent is deregistered
-        if self.unique_page_address is not None:
-            url = parse.urljoin(self.base_url, self.unique_page_address)
-            params = {"command": "unregister"}
-            try:
-                response = requests.get(url=url, params=params)
-                if "<response><message>Goodbye!</message></response>" in response.text:
-                    logger.info("Successfully unregistered from the s-oef.")
-                    self.unique_page_address = None
-                else:
-                    self._send_error_response(
-                        oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE
-                    )
-            except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-                logger.error(
-                    "Something went wrong cannot unregister the service! {}".format(e)
-                )
-                self._send_error_response(
-                    oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE
-                )
-
-        else:
-            logger.error(
+        if self.unique_page_address is None:  # pragma: nocover
+            raise SOEFException.error(
                 "The service is not registered to the simple OEF. Cannot unregister."
             )
-            self._send_error_response(
-                oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE
-            )
 
-    def disconnect(self) -> None:
+        response = await self._generic_oef_command("unregister", check_success=False)
+        assert "<response><message>Goodbye!</message></response>" in response
+        self.unique_page_address = None
+
+    async def connect(self) -> None:
+        """Connect channel set queues and executor pool."""
+        self._loop = asyncio.get_event_loop()
+        self.in_queue = asyncio.Queue()
+        self._executor_pool = ThreadPoolExecutor(max_workers=10)
+
+    async def disconnect(self) -> None:
         """
         Disconnect unregisters any potential services still registered.
 
         :return: None
         """
-        self._unregister_agent()
+        assert self.in_queue, ValueError("Queue is not set, use connect first!")
+        await self._unregister_agent()
+        await self.in_queue.put(None)
 
-    def search_services(self, search_id: int, query: Query) -> None:
+    async def search_services(self, oef_message: OefSearchMessage) -> None:
         """
         Search services on the SOEF.
 
-        :param search_id: the message id
-        :param query: the oef query
+        :param oef_message: OefSearchMessage
         """
-        if self._is_compatible_query(query):
-            constraints = [cast(Constraint, c) for c in query.constraints]
-            constraint_distance = [
-                c
-                for c in constraints
-                if c.constraint_type.type == ConstraintTypes.DISTANCE
-            ][0]
-            service_location, radius = constraint_distance.constraint_type.value
-            equality_constraints = [
-                c
-                for c in constraints
-                if c.constraint_type.type == ConstraintTypes.EQUAL
-            ]
-            personality_filter_params = self._construct_personality_filter_params(
-                equality_constraints
-            )
+        query = oef_message.query
 
-            if self.agent_location is None or self.agent_location != service_location:
-                # we update the location to match the query.
-                self._set_location(service_location)
-            self._find_around_me(radius, personality_filter_params)
-        else:
-            logger.warning(
+        if not self._is_compatible_query(query):
+            raise SOEFException.warning(
                 "Service query incompatible with SOEF: constraints={}".format(
                     query.constraints
                 )
             )
-            self._send_error_response(
-                oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES
-            )
 
-    @staticmethod
-    def _is_compatible_query(query: Query) -> bool:
-        """
-        Check if a query is compatible with the soef.
+        dialogue_reference = oef_message.dialogue_reference[0]
+        self.search_id += 1
+        self.search_id_to_dialogue_reference[self.search_id] = (
+            dialogue_reference,
+            str(self.search_id),
+        )
 
-        :return: bool
-        """
-        is_compatible = True
-        is_compatible = is_compatible and len(query.constraints) >= 1
-        constraint_distances = [
-            c
-            for c in query.constraints
-            if isinstance(c, Constraint)
-            and c.constraint_type.type == ConstraintTypes.DISTANCE
+        constraints = [cast(Constraint, c) for c in query.constraints]
+        constraint_distance = [
+            c for c in constraints if c.constraint_type.type == ConstraintTypes.DISTANCE
+        ][0]
+        service_location, radius = constraint_distance.constraint_type.value
+
+        equality_constraints = [
+            c for c in constraints if c.constraint_type.type == ConstraintTypes.EQUAL
         ]
-        is_compatible = is_compatible and len(constraint_distances) == 1
-        if is_compatible:
-            constraint_distance = cast(Constraint, constraint_distances[0])
-            is_compatible = is_compatible and (
-                set([constraint_distance.attribute_name]) == set(["location"])
-                and set([constraint_distance.constraint_type.type])
-                == set([ConstraintTypes.DISTANCE])
-            )
-        return is_compatible
 
-    @staticmethod
-    def _construct_personality_filter_params(
-        equality_constraints: List[Constraint],
-    ) -> Dict[str, List[str]]:
-        """
-        Construct a dictionary of personality filters.
+        params = {}
 
-        :return: bool
-        """
-        personality_filter_params = {"ppfilter": []}  # type: Dict[str, List[str]]
-        for constraint in equality_constraints:
-            if constraint.constraint_type.type != ConstraintTypes.EQUAL:
-                continue
-            personality_filter_params["ppfilter"] = personality_filter_params[
-                "ppfilter"
-            ] + [constraint.attribute_name + "," + constraint.constraint_type.value]
-        if personality_filter_params == {"ppfilter": []}:
-            personality_filter_params = {}
-        return personality_filter_params
+        params.update(self._construct_personality_filter_params(equality_constraints))
 
-    def _find_around_me(
-        self, radius: float, personality_filter_params: Dict[str, List[str]]
+        params.update(self._construct_service_key_filter_params(equality_constraints))
+
+        if self.agent_location is None or self.agent_location != service_location:
+            # we update the location to match the query.
+            await self._set_location(service_location)  # pragma: nocover
+        await self._find_around_me(radius, params)
+
+    async def _find_around_me(
+        self, radius: float, params: Dict[str, List[str]]
     ) -> None:
         """
         Find agents around me.
@@ -480,58 +646,45 @@ class SOEFChannel:
         :return: None
         """
         assert self.in_queue is not None, "Inqueue not set!"
-        try:
-            logger.debug("Searching in radius={} of myself".format(radius))
-            url = parse.urljoin(self.base_url, self.unique_page_address)
-            params = {
-                "range_in_km": [str(radius)],
-                "command": ["find_around_me"],
-            }
-            params.update(personality_filter_params)
-            response = requests.get(url=url, params=params)
-            root = ET.fromstring(response.text)
-            agents = {
-                "fetchai": {},
-                "cosmos": {},
-                "ethereum": {},
-            }  # type: Dict[str, Dict[str, str]]
-            agents_l = []  # type: List[str]
-            for agent in root.findall(path=".//agent"):
-                chain_identifier = ""
-                for identities in agent.findall("identities"):
-                    for identity in identities.findall("identity"):
-                        for (
-                            chain_identifier_key,
-                            chain_identifier_name,
-                        ) in identity.items():
-                            if chain_identifier_key == "chain_identifier":
-                                chain_identifier = chain_identifier_name
-                                agent_address = identity.text
-                agent_distance = agent.find("range_in_km").text
-                if chain_identifier in agents:
-                    agents[chain_identifier][agent_address] = agent_distance
-                    agents_l.append(agent_address)
-            if root.tag == "response":
-                logger.debug("Search SUCCESS")
-                message = OefSearchMessage(
-                    performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                    agents=tuple(agents_l),
-                )
-                envelope = Envelope(
-                    to=self.address,
-                    sender="simple_oef",
-                    protocol_id=OefSearchMessage.protocol_id,
-                    message=message,
-                )
-                self.in_queue.put_nowait(envelope)
-            else:
-                logger.debug("Search FAILURE")
-                self._send_error_response(
-                    oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES
-                )
-        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.error("Exception when interacting with SOEF: {}".format(e))
-            self._send_error_response()
+        logger.debug("Searching in radius={} of myself".format(radius))
+
+        response_text = await self._generic_oef_command(
+            "find_around_me", {"range_in_km": [str(radius)], **params}
+        )
+        root = ET.fromstring(response_text)
+        agents = {
+            "fetchai": {},
+            "cosmos": {},
+            "ethereum": {},
+        }  # type: Dict[str, Dict[str, str]]
+        agents_l = []  # type: List[str]
+        for agent in root.findall(path=".//agent"):
+            chain_identifier = ""
+            for identities in agent.findall("identities"):
+                for identity in identities.findall("identity"):
+                    for (
+                        chain_identifier_key,
+                        chain_identifier_name,
+                    ) in identity.items():
+                        if chain_identifier_key == "chain_identifier":
+                            chain_identifier = chain_identifier_name
+                            agent_address = identity.text
+            agent_distance = agent.find("range_in_km").text
+            if chain_identifier in agents:
+                agents[chain_identifier][agent_address] = agent_distance
+                agents_l.append(agent_address)
+
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            agents=tuple(agents_l),
+        )
+        envelope = Envelope(
+            to=self.address,
+            sender="simple_oef",
+            protocol_id=OefSearchMessage.protocol_id,
+            message=message,
+        )
+        await self.in_queue.put(envelope)
 
 
 class SOEFConnection(Connection):
@@ -541,29 +694,24 @@ class SOEFConnection(Connection):
 
     def __init__(self, **kwargs):
         """Initialize."""
-        if (
-            kwargs.get("configuration") is None
-            and kwargs.get("excluded_protocols") is None
-        ):
-            kwargs["excluded_protocols"] = []
-        if (
-            kwargs.get("configuration") is None
-            and kwargs.get("restricted_to_protocols") is None
-        ):
-            kwargs["restricted_to_protocols"] = [
+        if kwargs.get("configuration") is None:  # pragma: nocover
+            kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
+            kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
                 PublicId.from_str("fetchai/oef_search:0.3.0")
             ]
+
         super().__init__(**kwargs)
         api_key = cast(str, self.configuration.config.get("api_key"))
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
+        chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
         assert (
             api_key is not None and soef_addr is not None and soef_port is not None
         ), "api_key, soef_addr and soef_port must be set!"
+
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = SOEFChannel(
             self.address,
             self.api_key,
@@ -571,6 +719,7 @@ class SOEFConnection(Connection):
             self.soef_port,
             self.excluded_protocols,
             self.restricted_to_protocols,
+            chain_identifier=chain_identifier,
         )
 
     async def connect(self) -> None:
@@ -580,17 +729,21 @@ class SOEFConnection(Connection):
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
-        if self.connection_status.is_connected:
+        if self.connection_status.is_connected:  # pragma: no cover
             return
         try:
             self.connection_status.is_connecting = True
-            self.in_queue = asyncio.Queue()
-            self.channel.in_queue = self.in_queue
+            await self.channel.connect()
             self.connection_status.is_connecting = False
             self.connection_status.is_connected = True
         except (CancelledError, Exception) as e:  # pragma: no cover
             self.connection_status.is_connected = False
             raise e
+
+    @property
+    def in_queue(self) -> Optional[asyncio.Queue]:
+        """Return in_queue of the channel."""
+        return self.channel.in_queue
 
     async def disconnect(self) -> None:
         """
@@ -602,11 +755,9 @@ class SOEFConnection(Connection):
             self.connection_status.is_connected or self.connection_status.is_connecting
         ), "Call connect before disconnect."
         assert self.in_queue is not None
-        self.channel.disconnect()
-        self.channel.in_queue = None
+        await self.channel.disconnect()
         self.connection_status.is_connected = False
         self.connection_status.is_connecting = False
-        await self.in_queue.put(None)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -617,7 +768,7 @@ class SOEFConnection(Connection):
         try:
             assert self.in_queue is not None
             envelope = await self.in_queue.get()
-            if envelope is None:
+            if envelope is None:  # pragma: nocover
                 logger.debug("Received None.")
                 return None
             logger.debug("Received envelope: {}".format(envelope))
@@ -637,4 +788,4 @@ class SOEFConnection(Connection):
         :return: None
         """
         if self.connection_status.is_connected:
-            self.channel.send(envelope)
+            await self.channel.send(envelope)
