@@ -19,6 +19,8 @@
 
 """This module contains the tests for the base module."""
 
+import pytest
+
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
@@ -58,6 +60,38 @@ def test_init_terms():
         == "Terms: ledger_id=some_ledger, sender_address=SenderAddress, counterparty_address=CounterpartyAddress, amount_by_currency_id={'FET': -10}, quantities_by_good_id={'good_1': 20}, is_sender_payable_tx_fee=True, nonce=somestring, fee=None"
     )
     assert terms == terms
+    with pytest.raises(AssertionError):
+        terms.fee
+
+
+def test_init_terms_w_fee():
+    """Test the terms object initialization with fee."""
+    ledger_id = "some_ledger"
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {"FET": -10}
+    quantities_by_good_id = {"good_1": 20}
+    is_sender_payable_tx_fee = True
+    nonce = "somestring"
+    fee = 1
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address=sender_addr,
+        counterparty_address=counterparty_addr,
+        amount_by_currency_id=amount_by_currency_id,
+        quantities_by_good_id=quantities_by_good_id,
+        is_sender_payable_tx_fee=is_sender_payable_tx_fee,
+        nonce=nonce,
+        fee=fee,
+    )
+    new_counterparty_address = "CounterpartyAddressNew"
+    terms.counterparty_address = new_counterparty_address
+    assert terms.counterparty_address == new_counterparty_address
+    assert terms.fee == fee
+    assert terms.counterparty_payable_amount == next(
+        iter(amount_by_currency_id.values())
+    )
+    assert terms.sender_payable_amount == -next(iter(amount_by_currency_id.values()))
 
 
 def test_init_raw_transaction():
