@@ -19,17 +19,20 @@
 
 """This module contains the strategy class."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description
 from aea.skills.base import Model
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
+
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_NFT = 1
 DEFAULT_FT = 2
+DEFAULT_TOKEN_TYPE = DEFAULT_NFT
 DEFAULT_NB_TOKENS = 10
-DEFAULT_MINT_STOCK = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+DEFAULT_MINT_QUANTITIES = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
 DEFAULT_FROM_SUPPLY = 10
 DEFAULT_TO_SUPPLY = 0
 DEFAULT_VALUE = 0
@@ -49,38 +52,101 @@ class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:
-        """
-        Initialize the strategy of the agent.
-        :return: None
-        """
-        self.nft = kwargs.pop("nft", DEFAULT_NFT)
-        self.ft = kwargs.pop("ft", DEFAULT_NFT)
-        self.nb_tokens = kwargs.pop("nb_tokens", DEFAULT_NB_TOKENS)
-        self.mint_stock = kwargs.pop("mint_stock", DEFAULT_MINT_STOCK)
-        self.contract_address = kwargs.pop("contract_address", None)
+        """Initialize the strategy of the agent."""
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        self._token_type = kwargs.pop("token_type", DEFAULT_TOKEN_TYPE)
+        self._nb_tokens = kwargs.pop("nb_tokens", DEFAULT_NB_TOKENS)
+        self._token_ids = kwargs.pop("token_ids", None)
+        self._mint_quantities = kwargs.pop("mint_quantities", DEFAULT_MINT_QUANTITIES)
+        self._contract_address = kwargs.pop("contract_address", None)
+        assert (self._token_ids is None and self._contract_address is None) or (
+            self._token_ids is not None and self._contract_address is not None
+        ), "Either provide contract address and token ids or provide neither."
+
         self.from_supply = kwargs.pop("from_supply", DEFAULT_FROM_SUPPLY)
         self.to_supply = kwargs.pop("to_supply", DEFAULT_TO_SUPPLY)
         self.value = kwargs.pop("value", DEFAULT_VALUE)
+
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+
         super().__init__(**kwargs)
-        self._oef_msg_id = 0
+
+        self._is_contract_deployed = self._contract_address is not None
+        self._is_tokens_created = self._token_ids is not None
+        self._is_tokens_minted = self._token_ids is not None
+        if self._token_ids is None:
+            self._token_ids = ERC1155Contract.generate_token_ids(
+                token_type=self._token_type, nb_tokens=self._nb_tokens
+            )
 
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
 
-    def get_next_oef_msg_id(self) -> int:
-        """
-        Get the next oef msg id.
+    @property
+    def mint_quantities(self) -> List[int]:
+        """Get the list of mint quantities."""
+        return self._mint_quantities
 
-        :return: the next oef msg id
-        """
-        self._oef_msg_id += 1
-        return self._oef_msg_id
+    @property
+    def token_ids(self) -> List[int]:
+        """Get the token ids."""
+        assert self._token_ids is not None, "Token ids not set."
+        return self._token_ids
+
+    @property
+    def contract_address(self) -> str:
+        """Get the contract address."""
+        assert self._contract_address is not None, "Contract address not set!"
+        return self._contract_address
+
+    @contract_address.setter
+    def contract_address(self, contract_address: str) -> None:
+        """Set the contract address."""
+        assert self._contract_address is None, "Contract address already set!"
+        self._contract_address = contract_address
+
+    @property
+    def is_contract_deployed(self) -> bool:
+        """Get contract deploy status."""
+        return self._is_contract_deployed
+
+    @is_contract_deployed.setter
+    def is_contract_deployed(self, is_contract_deployed: bool) -> None:
+        """Set contract deploy status."""
+        assert (
+            not self._is_contract_deployed and is_contract_deployed
+        ), "Only allowed to switch to true."
+        self._is_contract_deployed = is_contract_deployed
+
+    @property
+    def is_tokens_created(self) -> bool:
+        """Get token created status."""
+        return self._is_tokens_created
+
+    @is_tokens_created.setter
+    def is_tokens_created(self, is_tokens_created: bool) -> None:
+        """Set token created status."""
+        assert (
+            not self._is_tokens_created and is_tokens_created
+        ), "Only allowed to switch to true."
+        self._is_tokens_created = is_tokens_created
+
+    @property
+    def is_tokens_minted(self) -> bool:
+        """Get token minted status."""
+        return self._is_tokens_minted
+
+    @is_tokens_minted.setter
+    def is_tokens_minted(self, is_tokens_minted: bool) -> None:
+        """Set token minted status."""
+        assert (
+            not self._is_tokens_minted and is_tokens_minted
+        ), "Only allowed to switch to true."
+        self._is_tokens_minted = is_tokens_minted
 
     def get_service_description(self) -> Description:
         """
@@ -88,8 +154,8 @@ class Strategy(Model):
 
         :return: a description of the offered services
         """
-        desc = Description(
+        description = Description(
             self._service_data,
             data_model=GenericDataModel(self._data_model_name, self._data_model),
         )
-        return desc
+        return description

@@ -24,10 +24,11 @@ from typing import Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_deploy.dialogues import (
+    ContractApiDialogues,
     LedgerApiDialogues,
     OefSearchDialogues,
 )
@@ -47,9 +48,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
         self._registered_service_description = None  # type: Optional[Description]
-        self.is_items_created = False
-        self.is_items_minted = False
-        self.token_ids = []  # List[int]
 
     def setup(self) -> None:
         """
@@ -58,8 +56,10 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         self._request_balance()
-        self._request_contract_deploy_transaction()
         self._register_service()
+        strategy = cast(Strategy, self.context.strategy)
+        if not strategy.is_contract_deployed:
+            self._request_contract_deploy_transaction()
 
     def act(self) -> None:
         """
@@ -67,33 +67,16 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-        strategy = cast(Strategy, self.context.strategy)
-        if contract.is_deployed and not self.is_items_created:
-            self.token_ids = contract.create_token_ids(
-                token_type=strategy.ft, nb_tokens=strategy.nb_tokens
-            )
-            self.context.logger.info("Creating a batch of items")
-            creation_message = contract.get_create_batch_transaction_msg(
-                deployer_address=self.context.agent_address,
-                token_ids=self.token_ids,
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                skill_callback_id=self.context.skill_id,
-            )
-            self.context.decision_maker_message_queue.put_nowait(creation_message)
-        if contract.is_deployed and self.is_items_created and not self.is_items_minted:
-            self.context.logger.info("Minting a batch of items")
-            mint_message = contract.get_mint_batch_transaction_msg(
-                deployer_address=self.context.agent_address,
-                recipient_address=self.context.agent_address,
-                token_ids=self.token_ids,
-                mint_quantities=strategy.mint_stock,
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                skill_callback_id=self.context.skill_id,
-            )
-            self.context.decision_maker_message_queue.put_nowait(mint_message)
-
         self._unregister_service()
+        strategy = cast(Strategy, self.context.strategy)
+        if strategy.is_contract_deployed and not strategy.is_tokens_created:
+            self._request_token_create_transaction()
+        if (
+            strategy.is_contract_deployed
+            and strategy.is_tokens_created
+            and not strategy.is_tokens_minted
+        ):
+            self._request_token_mint_transaction()
         self._register_service()
 
     def teardown(self) -> None:
@@ -130,16 +113,85 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-        # if strategy.contract_address is None:
-        #     self.context.logger.info("Preparing contract deployment transaction")
-        #     contract.set_instance(self.context.ledger_apis.get_api(strategy.ledger_id))  # type: ignore
-        #     dm_message_for_deploy = contract.get_deploy_transaction_msg(
-        #         deployer_address=self.context.agent_address,
-        #         ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-        #         skill_callback_id=self.context.skill_id,
-        #     )
-        #     self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
+        strategy = cast(Strategy, self.context.strategy)
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        contract_api_msg = ContractApiMessage(
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+            ledger_id=strategy.ledger_id,
+            callable="get_deploy_transaction",
+            kwargs={"deployer_address": self.context.agent_address},
+        )
+        contract_api_msg.counterparty = LEDGER_API_ADDRESS
+        contract_api_dialogues.update(contract_api_msg)
+        self.context.outbox.put_message(message=contract_api_msg)
+        self.context.logger.info(
+            "[{}]: Requesting contract deployment transaction...".format(
+                self.context.agent_name
+            )
+        )
+
+    def _request_token_create_transaction(self) -> None:
+        """
+        Request token create transaction
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        contract_api_msg = ContractApiMessage(
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+            ledger_id=strategy.ledger_id,
+            contract_address=strategy.contract_address,
+            callable="get_create_batch_transaction",
+            kwargs={
+                "deployer_address": self.context.agent_address,
+                "token_ids": strategy.token_ids,
+            },  # TODO
+        )
+        contract_api_msg.counterparty = LEDGER_API_ADDRESS
+        contract_api_dialogues.update(contract_api_msg)
+        self.context.outbox.put_message(message=contract_api_msg)
+        self.context.logger.info(
+            "[{}]: Requesting create batch transaction...".format(
+                self.context.agent_name
+            )
+        )
+
+    def _request_token_mint_transaction(self) -> None:
+        """
+        Request token mint transaction
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        contract_api_msg = ContractApiMessage(
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+            ledger_id=strategy.ledger_id,
+            contract_address=strategy.contract_address,
+            callable="get_mint_batch_transaction",
+            kwargs={
+                "deployer_address": self.context.agent_address,
+                "recipient_address": self.context.agent_address,
+                "token_ids": strategy.token_ids,
+                "mint_quantities": strategy.mint_quantities,
+            },  # TODO
+        )
+        contract_api_msg.counterparty = LEDGER_API_ADDRESS
+        contract_api_dialogues.update(contract_api_msg)
+        self.context.outbox.put_message(message=contract_api_msg)
+        self.context.logger.info(
+            "[{}]: Requesting mint batch transaction...".format(self.context.agent_name)
+        )
 
     def _register_service(self) -> None:
         """
@@ -173,21 +225,22 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self._registered_service_description is not None:
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
+        if self._registered_service_description is None:
+            return
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=self._registered_service_description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info(
+            "[{}]: unregistering erc1155 service from OEF search node.".format(
+                self.context.agent_name
             )
-            oef_search_msg = OefSearchMessage(
-                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-                service_description=self._registered_service_description,
-            )
-            oef_search_msg.counterparty = self.context.search_service_address
-            oef_search_dialogues.update(oef_search_msg)
-            self.context.outbox.put_message(message=oef_search_msg)
-            self.context.logger.info(
-                "[{}]: unregistering erc1155 service from OEF search node.".format(
-                    self.context.agent_name
-                )
-            )
-            self._registered_service_description = None
+        )
+        self._registered_service_description = None

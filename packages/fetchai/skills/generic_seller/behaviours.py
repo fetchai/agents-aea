@@ -97,7 +97,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         description = strategy.get_service_description()
         self._registered_service_description = description
         oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.ledger_api_dialogues
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
@@ -122,7 +122,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         if self._registered_service_description is None:
             return
         oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.ledger_api_dialogues
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,

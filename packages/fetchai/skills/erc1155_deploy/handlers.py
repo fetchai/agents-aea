@@ -19,7 +19,6 @@
 
 """This package contains the handlers of the erc1155 deploy skill AEA."""
 
-import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -30,11 +29,17 @@ from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.skills.erc1155_deploy.dialogues import (
+    ContractApiDialogue,
+    ContractApiDialogues,
     DefaultDialogues,
     FipaDialogue,
     FipaDialogues,
+    LedgerApiDialogue,
+    LedgerApiDialogues,
     SigningDialogue,
     SigningDialogues,
 )
@@ -115,16 +120,19 @@ class FIPAHandler(Handler):
         :param fipa_dialogue: the dialogue object
         :return: None
         """
+        strategy = cast(Strategy, self.context.strategy)
         self.context.logger.info(
             "[{}]: received CFP from sender={}".format(
                 self.context.agent_name, fipa_msg.counterparty[-5:]
             )
         )
-        if self.context.behaviours.service_registration.is_items_minted:
+        if strategy.is_items_minted:
             # simply send the same proposal, independent of the query
-            strategy = cast(Strategy, self.context.strategy)
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-            trade_nonce = contract.generate_trade_nonce(self.context.agent_address)
+            # SEND REQUEST FOR TX
+            trade_nonce = ERC1155Contract.generate_trade_nonce(
+                self.context.agent_address
+            )
             token_id = self.context.behaviours.service_registration.token_ids[0]
             proposal = Description(
                 {
@@ -218,6 +226,226 @@ class FIPAHandler(Handler):
         )
 
 
+class LedgerApiHandler(Handler):
+    """Implement the ledger api handler."""
+
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        ledger_api_msg = cast(LedgerApiMessage, message)
+
+        # recover dialogue
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_dialogue = cast(
+            Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
+        )
+        if ledger_api_dialogue is None:
+            self._handle_unidentified_dialogue(ledger_api_msg)
+            return
+
+        # handle message
+        if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
+            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+        elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
+            self._handle_error(ledger_api_msg, ledger_api_dialogue)
+        else:
+            self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the message
+        """
+        self.context.logger.info(
+            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
+                self.context.agent_name, ledger_api_msg
+            )
+        )
+
+    def _handle_balance(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info(
+            "[{}]: starting balance on {} ledger={}.".format(
+                self.context.agent_name,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
+            )
+        )
+
+    def _handle_error(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of error performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info(
+            "[{}]: received ledger_api error message={} in dialogue={}.".format(
+                self.context.agent_name, ledger_api_msg, ledger_api_dialogue
+            )
+        )
+
+    def _handle_invalid(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of invalid performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.warning(
+            "[{}]: cannot handle ledger_api message of performative={} in dialogue={}.".format(
+                self.context.agent_name,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
+            )
+        )
+
+
+class ContractApiHandler(Handler):
+    """Implement the contract api handler."""
+
+    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        contract_api_msg = cast(LedgerApiMessage, message)
+
+        # recover dialogue
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        contract_api_dialogue = cast(
+            Optional[ContractApiDialogue],
+            contract_api_dialogues.update(contract_api_msg),
+        )
+        if contract_api_dialogue is None:
+            self._handle_unidentified_dialogue(contract_api_msg)
+            return
+
+        # handle message
+        if (
+            contract_api_msg.performative
+            is ContractApiMessage.Performative.RAW_TRANSACTION
+        ):
+            self._handle_raw_transaction(contract_api_msg, contract_api_dialogue)
+        elif contract_api_msg.performative == ContractApiMessage.Performative.ERROR:
+            self._handle_error(contract_api_msg, contract_api_dialogue)
+        else:
+            self._handle_invalid(contract_api_msg, contract_api_dialogue)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def _handle_unidentified_dialogue(
+        self, contract_api_msg: ContractApiMessage
+    ) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the message
+        """
+        self.context.logger.info(
+            "[{}]: received invalid contract_api message={}, unidentified dialogue.".format(
+                self.context.agent_name, contract_api_msg
+            )
+        )
+
+    def _handle_raw_transaction(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of raw_transaction performative.
+
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        # TODO handling of raw transaction!
+
+    def _handle_error(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of error performative.
+
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info(
+            "[{}]: received ledger_api error message={} in dialogue={}.".format(
+                self.context.agent_name, contract_api_msg, contract_api_dialogue
+            )
+        )
+
+    def _handle_invalid(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of invalid performative.
+
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.warning(
+            "[{}]: cannot handle contract_api message of performative={} in dialogue={}.".format(
+                self.context.agent_name,
+                contract_api_msg.performative,
+                contract_api_dialogue,
+            )
+        )
+
+
 class SigningHandler(Handler):
     """Implement the transaction handler."""
 
@@ -268,21 +496,10 @@ class SigningHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
+            "[{}]: received invalid signing message={}, unidentified dialogue.".format(
                 self.context.agent_name, signing_msg
             )
         )
-        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
-            performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
-            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
-            error_msg="Invalid dialogue.",
-            error_data={"signing_msg_message": signing_msg.encode()},
-        )
-        default_msg.counterparty = signing_msg.counterparty
-        default_dialogues.update(default_msg)
-        self.context.outbox.put_message(message=default_msg)
 
     def _handle_signed_transaction(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -294,177 +511,7 @@ class SigningHandler(Handler):
         :param signing_dialogue: the dialogue
         :return: None
         """
-        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-        strategy = cast(Strategy, self.context.strategy)
-        if (
-            signing_msg.dialogue_reference[0]
-            == contract.Performative.CONTRACT_DEPLOY.value
-        ):
-            tx_signed = signing_msg.signed_transaction
-            tx_digest = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).send_signed_transaction(tx_signed=tx_signed)
-            # TODO; handle case when no tx_digest returned and remove loop
-            assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).is_transaction_settled(tx_digest):
-                time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).get_transaction_receipt(tx_digest=tx_digest)
-            if tx_receipt is None:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to get tx receipt for deploy. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            elif tx_receipt.status != 1:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to deploy. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            else:
-                contract.set_address(
-                    self.context.ledger_apis.get_api(strategy.ledger_id),
-                    tx_receipt.contractAddress,
-                )
-                self.context.logger.info(
-                    "[{}]: Successfully deployed the contract. Transaction digest: {}".format(
-                        self.context.agent_name, tx_digest
-                    )
-                )
-
-        elif (
-            signing_msg.dialogue_reference[0]
-            == contract.Performative.CONTRACT_CREATE_BATCH.value
-        ):
-            tx_signed = signing_msg.signed_transaction
-            tx_digest = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).send_signed_transaction(tx_signed=tx_signed)
-            # TODO; handle case when no tx_digest returned and remove loop
-            assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).is_transaction_settled(tx_digest):
-                time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).get_transaction_receipt(tx_digest=tx_digest)
-            if tx_receipt is None:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to get tx receipt for create items. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            elif tx_receipt.status != 1:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to create items. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            else:
-                self.context.behaviours.service_registration.is_items_created = True
-                self.context.logger.info(
-                    "[{}]: Successfully created items. Transaction digest: {}".format(
-                        self.context.agent_name, tx_digest
-                    )
-                )
-        elif (
-            signing_msg.dialogue_reference[0]
-            == contract.Performative.CONTRACT_MINT_BATCH.value
-        ):
-            tx_signed = signing_msg.signed_transaction
-            tx_digest = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).send_signed_transaction(tx_signed=tx_signed)
-            # TODO; handle case when no tx_digest returned and remove loop
-            assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).is_transaction_settled(tx_digest):
-                time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).get_transaction_receipt(tx_digest=tx_digest)
-            if tx_receipt is None:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to get tx receipt for mint items. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            elif tx_receipt.status != 1:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to mint items. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            else:
-                self.context.behaviours.service_registration.is_items_minted = True
-                self.context.logger.info(
-                    "[{}]: Successfully minted items. Transaction digest: {}".format(
-                        self.context.agent_name, tx_digest
-                    )
-                )
-                result = contract.get_balances(
-                    address=self.context.agent_address,
-                    token_ids=self.context.behaviours.service_registration.token_ids,
-                )
-                self.context.logger.info(
-                    "[{}]: Current balances: {}".format(self.context.agent_name, result)
-                )
-        elif (
-            signing_msg.dialogue_reference[0]
-            == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
-        ):
-            tx_signed = signing_msg.signed_transaction
-            tx_digest = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).send_signed_transaction(tx_signed=tx_signed)
-            # TODO; handle case when no tx_digest returned and remove loop
-            assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).is_transaction_settled(tx_digest):
-                time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.get_api(
-                strategy.ledger_id
-            ).get_transaction_receipt(tx_digest=tx_digest)
-            if tx_receipt is None:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to get tx receipt for atomic swap. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            elif tx_receipt.status != 1:
-                self.context.is_active = False
-                self.context.logger.info(
-                    "[{}]: Failed to conduct atomic swap. Aborting...".format(
-                        self.context.agent_name
-                    )
-                )
-            else:
-                self.context.logger.info(
-                    "[{}]: Successfully conducted atomic swap. Transaction digest: {}".format(
-                        self.context.agent_name, tx_digest
-                    )
-                )
-                result = contract.get_balances(
-                    address=self.context.agent_address,
-                    token_ids=self.context.behaviours.service_registration.token_ids,
-                )
-                self.context.logger.info(
-                    "[{}]: Current balances: {}".format(self.context.agent_name, result)
-                )
+        # TODO handling of signed transaction
 
     def _handle_error(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue

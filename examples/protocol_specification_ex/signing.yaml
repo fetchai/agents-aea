@@ -10,13 +10,11 @@ speech_acts:
     skill_callback_ids: pt:list[pt:str]
     skill_callback_info: pt:dict[pt:str, pt:str]
     terms: ct:Terms
-    crypto_id: pt:str
     raw_transaction: ct:RawTransaction
   sign_message:
     skill_callback_ids: pt:list[pt:str]
     skill_callback_info: pt:dict[pt:str, pt:str]
     terms: ct:Terms
-    crypto_id: pt:str
     raw_message: ct:RawMessage
   signed_transaction:
     skill_callback_ids: pt:list[pt:str]
@@ -25,27 +23,29 @@ speech_acts:
   signed_message:
     skill_callback_ids: pt:list[pt:str]
     skill_callback_info: pt:dict[pt:str, pt:str]
-    signed_message: pt:bytes
+    signed_message: ct:SignedMessage
   error:
     skill_callback_ids: pt:list[pt:str]
     skill_callback_info: pt:dict[pt:str, pt:str]
     error_code: ct:ErrorCode
 ...
 ---
-ct:Terms: |
-  bytes terms = 1;
-ct:SignedTransaction: |
-  bytes signed_transaction = 1;
-ct:RawTransaction: |
-  bytes raw_transaction = 1;
-ct:RawMessage: |
-  bytes raw_message = 1;
 ct:ErrorCode: |
   enum ErrorCodeEnum {
       UNSUCCESSFUL_MESSAGE_SIGNING = 0;
       UNSUCCESSFUL_TRANSACTION_SIGNING = 1;
     }
   ErrorCodeEnum error_code = 1;
+ct:RawMessage: |
+  bytes raw_message = 1;
+ct:RawTransaction: |
+  bytes raw_transaction = 1;
+ct:SignedMessage: |
+  bytes signed_message = 1;
+ct:SignedTransaction: |
+  bytes signed_transaction = 1;
+ct:Terms: |
+  bytes terms = 1;
 ...
 ---
 initiation: [sign_transaction, sign_message]

@@ -19,7 +19,6 @@
 
 """This module contains utilities for building an AEA."""
 import itertools
-import json
 import logging
 import logging.config
 import os
@@ -1376,19 +1375,11 @@ class AEABuilder:
         ).values():
             configuration = cast(ContractConfig, configuration)
 
-            # load contract interface
-            path = Path(
-                configuration.directory, configuration.path_to_contract_interface
-            )
-            with open(path, "r") as interface_file:
-                contract_interface = json.load(interface_file)
-
             try:
                 contract_registry.register(
                     id_=str(configuration.public_id),
                     entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-                    contract_config=configuration,
-                    contract_interface=contract_interface,
+                    contract_config=configuration,  # TODO: resolve configuration being applied globally
                 )
             except AEAException as e:
                 if "Cannot re-register id:" in str(e):
