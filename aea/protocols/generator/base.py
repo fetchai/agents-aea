@@ -931,7 +931,7 @@ class ProtocolGenerator:
 
         :return: the agent role Enum string
         """
-        enum_str = self.indent + "class AgentRole(Dialogue.Role):\n"
+        enum_str = self.indent + "class Role(Dialogue.Role):\n"
         self._change_indent(1)
         enum_str += (
             self.indent

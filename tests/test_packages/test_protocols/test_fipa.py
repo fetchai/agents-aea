@@ -464,7 +464,7 @@ class TestDialogues:
         ), "The dialogue_reference is not setup properly."
 
         # Extends the outgoing list of messages.
-        seller_dialogue.update(proposal_msg)
+        seller_dialogue.add(proposal_msg)
 
         # MESSAGE BEING SENT BETWEEN AGENTS
 
@@ -498,7 +498,7 @@ class TestDialogues:
         accept_msg.counterparty = self.seller_addr
 
         # Adds the message to the buyer outgoing list.
-        buyer_dialogue.update(accept_msg)
+        buyer_dialogue.add(accept_msg)
 
         # MESSAGE BEING SENT BETWEEN AGENTS
 
