@@ -17,6 +17,10 @@ message LedgerApiMessage{
         bytes terms = 1;
     }
 
+    message TransactionDigest{
+        bytes transaction_digest = 1;
+    }
+
     message TransactionReceipt{
         bytes transaction_receipt = 1;
     }
@@ -37,8 +41,7 @@ message LedgerApiMessage{
     }
 
     message Get_Transaction_Receipt_Performative{
-        string ledger_id = 1;
-        string transaction_digest = 2;
+        TransactionDigest transaction_digest = 1;
     }
 
     message Balance_Performative{
@@ -51,8 +54,7 @@ message LedgerApiMessage{
     }
 
     message Transaction_Digest_Performative{
-        string ledger_id = 1;
-        string transaction_digest = 2;
+        TransactionDigest transaction_digest = 1;
     }
 
     message Transaction_Receipt_Performative{

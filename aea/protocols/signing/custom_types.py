@@ -23,6 +23,7 @@ from enum import Enum
 
 from aea.helpers.transaction.base import RawMessage as BaseRawMessage
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
+from aea.helpers.transaction.base import SignedMessage as BaseSignedMessage
 from aea.helpers.transaction.base import SignedTransaction as BaseSignedTransaction
 from aea.helpers.transaction.base import Terms as BaseTerms
 
@@ -62,5 +63,6 @@ class ErrorCode(Enum):
 
 RawMessage = BaseRawMessage
 RawTransaction = BaseRawTransaction
+SignedMessage = BaseSignedMessage
 SignedTransaction = BaseSignedTransaction
 Terms = BaseTerms

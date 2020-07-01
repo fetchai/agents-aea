@@ -126,7 +126,7 @@ class ERC1155Contract(Contract):
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         instance = cls.get_instance(ledger_api, contract_address)
         tx = instance.functions.createBatch(
-            deployer_address, token_ids, data
+            deployer_address, token_ids
         ).buildTransaction(
             {
                 "gas": gas,

@@ -296,7 +296,7 @@ def test_run_unknown_private_key():
         standalone_mode=False,
     )
 
-    s = "Crypto not registered with id 'fetchai_not'."
+    s = "Item not registered with id 'fetchai_not'."
     assert result.exception.message == s
 
     os.chdir(cwd)

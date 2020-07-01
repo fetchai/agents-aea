@@ -21,7 +21,7 @@
 
 import importlib
 import re
-from typing import Dict, Generic, Optional, Set, Type, TypeVar, Union
+from typing import Any, Dict, Generic, Optional, Set, Type, TypeVar, Union
 
 from aea.exceptions import AEAException
 from aea.helpers.base import RegexConstrainedString
@@ -106,17 +106,23 @@ class ItemSpec(Generic[ItemType]):
     """A specification for a particular instance of an object."""
 
     def __init__(
-        self, id_: ItemId, entry_point: EntryPoint[ItemType], **kwargs: Dict,
+        self,
+        id_: ItemId,
+        entry_point: EntryPoint[ItemType],
+        class_kwargs: Optional[Dict[str, Any]] = None,
+        **kwargs: Dict,
     ):
         """
         Initialize an item specification.
 
         :param id_: the id associated to this specification
         :param entry_point: The Python entry_point of the environment class (e.g. module.name:Class).
+        :param class_kwargs: keyword arguments to be attached on the class as class variables.
         :param kwargs: other custom keyword arguments.
         """
         self.id = ItemId(id_)
         self.entry_point = EntryPoint[ItemType](entry_point)
+        self._class_kwargs = {} if class_kwargs is None else class_kwargs
         self._kwargs = {} if kwargs is None else kwargs
 
     def make(self, **kwargs) -> ItemType:
@@ -129,6 +135,8 @@ class ItemSpec(Generic[ItemType]):
         _kwargs = self._kwargs.copy()
         _kwargs.update(kwargs)
         cls = self.entry_point.load()
+        for key, value in self._class_kwargs.items():
+            setattr(cls, key, value)
         item = cls(**_kwargs)  # type: ignore
         return item
 
@@ -149,6 +157,7 @@ class Registry(Generic[ItemType]):
         self,
         id_: Union[ItemId, str],
         entry_point: Union[EntryPoint[ItemType], str],
+        class_kwargs: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         """
@@ -156,6 +165,7 @@ class Registry(Generic[ItemType]):
 
         :param id_: the identifier for the crypto type.
         :param entry_point: the entry point to load the crypto object.
+        :param class_kwargs: keyword arguments to be attached on the class as class variables.
         :param kwargs: arguments to provide to the crypto class.
         :return: None.
         """
@@ -163,7 +173,9 @@ class Registry(Generic[ItemType]):
         entry_point = EntryPoint[ItemType](entry_point)
         if item_id in self.specs:
             raise AEAException("Cannot re-register id: '{}'".format(item_id))
-        self.specs[item_id] = ItemSpec[ItemType](item_id, entry_point, **kwargs)
+        self.specs[item_id] = ItemSpec[ItemType](
+            item_id, entry_point, class_kwargs, **kwargs
+        )
 
     def make(
         self, id_: Union[ItemId, str], module: Optional[str] = None, **kwargs

@@ -34,6 +34,9 @@ from packages.fetchai.protocols.ledger_api.custom_types import (
 )
 from packages.fetchai.protocols.ledger_api.custom_types import Terms as CustomTerms
 from packages.fetchai.protocols.ledger_api.custom_types import (
+    TransactionDigest as CustomTransactionDigest,
+)
+from packages.fetchai.protocols.ledger_api.custom_types import (
     TransactionReceipt as CustomTransactionReceipt,
 )
 
@@ -52,6 +55,8 @@ class LedgerApiMessage(Message):
     SignedTransaction = CustomSignedTransaction
 
     Terms = CustomTerms
+
+    TransactionDigest = CustomTransactionDigest
 
     TransactionReceipt = CustomTransactionReceipt
 
@@ -191,12 +196,12 @@ class LedgerApiMessage(Message):
         return cast(CustomTerms, self.get("terms"))
 
     @property
-    def transaction_digest(self) -> str:
+    def transaction_digest(self) -> CustomTransactionDigest:
         """Get the 'transaction_digest' content from the message."""
         assert self.is_set(
             "transaction_digest"
         ), "'transaction_digest' content is not set."
-        return cast(str, self.get("transaction_digest"))
+        return cast(CustomTransactionDigest, self.get("transaction_digest"))
 
     @property
     def transaction_receipt(self) -> CustomTransactionReceipt:
@@ -279,15 +284,10 @@ class LedgerApiMessage(Message):
                 self.performative
                 == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
             ):
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 1
                 assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
-                )
-                assert (
-                    type(self.transaction_digest) == str
-                ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
+                    type(self.transaction_digest) == CustomTransactionDigest
+                ), "Invalid type for content 'transaction_digest'. Expected 'TransactionDigest'. Found '{}'.".format(
                     type(self.transaction_digest)
                 )
             elif self.performative == LedgerApiMessage.Performative.BALANCE:
@@ -310,15 +310,10 @@ class LedgerApiMessage(Message):
                     type(self.raw_transaction)
                 )
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 1
                 assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
-                )
-                assert (
-                    type(self.transaction_digest) == str
-                ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
+                    type(self.transaction_digest) == CustomTransactionDigest
+                ), "Invalid type for content 'transaction_digest'. Expected 'TransactionDigest'. Found '{}'.".format(
                     type(self.transaction_digest)
                 )
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:

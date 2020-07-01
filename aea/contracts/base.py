@@ -63,8 +63,8 @@ class Contract(Component, ABC):
         assert self._configuration is not None, "Configuration not set."
         return cast(ContractConfig, super().configuration)
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def get_instance(
         cls, ledger_api: LedgerApi, contract_address: Optional[str] = None
     ) -> Any:

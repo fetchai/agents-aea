@@ -24,8 +24,11 @@ import pytest
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
+    SignedMessage,
     SignedTransaction,
+    State,
     Terms,
+    TransactionDigest,
     TransactionReceipt,
 )
 
@@ -131,6 +134,21 @@ def test_init_signed_transaction():
     assert st == st
 
 
+def test_init_signed_message():
+    """Test the signed_message object initialization."""
+    ledger_id = "some_ledger"
+    body = "body"
+    sm = SignedMessage(ledger_id, body)
+    assert sm.ledger_id == ledger_id
+    assert sm.body == body
+    assert not sm.is_deprecated_mode
+    assert (
+        str(sm)
+        == "SignedMessage: ledger_id=some_ledger, body=body, is_deprecated_mode=False"
+    )
+    assert sm == sm
+
+
 def test_init_transaction_receipt():
     """Test the transaction_receipt object initialization."""
     ledger_id = "some_ledger"
@@ -145,3 +163,25 @@ def test_init_transaction_receipt():
         == "TransactionReceipt: ledger_id=some_ledger, receipt=receipt, transaction=transaction"
     )
     assert tr == tr
+
+
+def test_init_state():
+    """Test the state object initialization."""
+    ledger_id = "some_ledger"
+    body = "state"
+    state = State(ledger_id, body)
+    assert state.ledger_id == ledger_id
+    assert state.body == body
+    assert str(state) == "State: ledger_id=some_ledger, body=state"
+    assert state == state
+
+
+def test_init_transaction_digest():
+    """Test the transaction_digest object initialization."""
+    ledger_id = "some_ledger"
+    body = "state"
+    td = TransactionDigest(ledger_id, body)
+    assert td.ledger_id == ledger_id
+    assert td.body == body
+    assert str(td) == "TransactionDigest: ledger_id=some_ledger, body=state"
+    assert td == td

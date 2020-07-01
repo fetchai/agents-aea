@@ -24,6 +24,7 @@ from asyncio import Task
 from concurrent.futures._base import Executor
 from typing import Any, Callable, Dict, Optional
 
+import aea
 from aea.configurations.base import PublicId
 from aea.crypto.registries import Registry
 from aea.helpers.dialogue.base import Dialogues
@@ -86,7 +87,7 @@ class RequestDispatcher(ABC):
         """
         message = self.get_message(envelope)
         ledger_id = self.get_ledger_id(message)
-        api = self.registry.make(ledger_id, **self.api_config(ledger_id))
+        api = self.ledger_api_registry.make(ledger_id, **self.api_config(ledger_id))
         message.is_incoming = True
         dialogue = self.dialogues.update(message)
         assert dialogue is not None, "No dialogue created."
@@ -121,9 +122,9 @@ class RequestDispatcher(ABC):
         """Get the dialogues."""
 
     @property
-    @abstractmethod
-    def registry(self) -> Registry:
+    def ledger_api_registry(self) -> Registry:
         """Get the registry."""
+        return aea.crypto.registries.ledger_apis_registry
 
     @abstractmethod
     def get_message(self, envelope: Envelope) -> Message:

@@ -19,14 +19,15 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
 from aea.helpers.transaction.base import SignedTransaction as BaseSignedTransaction
 from aea.helpers.transaction.base import Terms as BaseTerms
+from aea.helpers.transaction.base import TransactionDigest as BaseTransactionDigest
 from aea.helpers.transaction.base import TransactionReceipt as BaseTransactionReceipt
 
 
 RawTransaction = BaseRawTransaction
 SignedTransaction = BaseSignedTransaction
 Terms = BaseTerms
+TransactionDigest = BaseTransactionDigest
 TransactionReceipt = BaseTransactionReceipt

@@ -8,14 +8,18 @@ aea_version: '>=0.4.0, <0.5.0'
 speech_acts:
   get_deploy_transaction:
     ledger_id: pt:str
+    contract_id: pt:str
+    callable: pt:str
     kwargs: ct:Kwargs
   get_raw_transaction:
     ledger_id: pt:str
+    contract_id: pt:str
     contract_address: pt:str
     callable: pt:str
     kwargs: ct:Kwargs
   get_state:
     ledger_id: pt:str
+    contract_id: pt:str
     contract_address: pt:str
     callable: pt:str
     kwargs: ct:Kwargs
@@ -39,11 +43,12 @@ ct:RawTransaction:
 ---
 initiation: [get_deploy_transaction, get_raw_transaction, get_state]
 reply:
-  get_deploy_transaction: [raw_transaction]
-  get_raw_transaction: [raw_transaction]
-  get_state: [state]
+  get_deploy_transaction: [raw_transaction, error]
+  get_raw_transaction: [raw_transaction, error]
+  get_state: [state, error]
   raw_transaction: []
   state: []
+  error: []
 termination: [state, raw_transaction]
 roles: {agent, ledger}
 end_states: [successful, failed]

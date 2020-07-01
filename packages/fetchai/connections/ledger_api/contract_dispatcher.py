@@ -21,13 +21,14 @@
 from typing import cast
 
 import aea
-from aea.contracts import Contract
+from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
 from aea.helpers.dialogue.base import (
     Dialogue as BaseDialogue,
     DialogueLabel as BaseDialogueLabel,
     Dialogues as BaseDialogues,
 )
+from aea.helpers.transaction.base import RawTransaction, State
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
@@ -93,7 +94,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         return self._contract_api_dialogues
 
     @property
-    def registry(self) -> Registry:
+    def contract_registry(self) -> Registry:
         return aea.contracts.contract_registry
 
     def get_message(self, envelope: Envelope) -> Message:
@@ -116,7 +117,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     def get_error_message(  # type: ignore
         self,
         e: Exception,
-        api: Contract,
+        api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
@@ -133,6 +134,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             message_id=message.message_id + 1,
             target=message.message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            code=500,
             message=str(e),
             data=b"",
         )
@@ -141,7 +143,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         return response
 
     def get_state(
-        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
+        self,
+        api: LedgerApi,
+        message: ContractApiMessage,
+        dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
         """
         Send the request 'get_state'.
@@ -151,10 +156,28 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the contract API dialogue
         :return: None
         """
-        raise NotImplementedError
+        contract = self.contract_registry.make(message.contract_id)
+        method_to_call = getattr(contract, message.callable)
+        try:
+            data = method_to_call(api, message.contract_address, **message.kwargs.body)
+            response = ContractApiMessage(
+                performative=ContractApiMessage.Performative.STATE,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                raw_transaction=State(message.ledger_id, data),
+            )
+            response.counterparty = message.counterparty
+            dialogue.update(response)
+        except Exception as e:
+            response = self.get_error_message(e, api, message, dialogue)
+        return response
 
-    def get_raw_transaction(
-        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
+    def get_deploy_transaction(
+        self,
+        api: LedgerApi,
+        message: ContractApiMessage,
+        dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
         """
         Send the request 'get_raw_transaction'.
@@ -164,30 +187,50 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the contract API dialogue
         :return: None
         """
-        raise NotImplementedError
+        contract = self.contract_registry.make(message.contract_id)
+        method_to_call = getattr(contract, message.callable)
+        try:
+            tx = method_to_call(api, **message.kwargs.body)
+            response = ContractApiMessage(
+                performative=ContractApiMessage.Performative.RAW_TRANSACTION,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                raw_transaction=RawTransaction(message.ledger_id, tx),
+            )
+            response.counterparty = message.counterparty
+            dialogue.update(response)
+        except Exception as e:
+            response = self.get_error_message(e, api, message, dialogue)
+        return response
 
-    def send_signed_transaction(
-        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
+    def get_raw_transaction(
+        self,
+        api: LedgerApi,
+        message: ContractApiMessage,
+        dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
         """
-        Send the request 'send_signed_transaction'.
+        Send the request 'get_raw_transaction'.
 
         :param api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
         :return: None
         """
-        raise NotImplementedError
-
-    def get_transaction_receipt(
-        self, api: Contract, message: ContractApiMessage, dialogue: ContractApiDialogue,
-    ) -> ContractApiMessage:
-        """
-        Send the request 'get_transaction_receipt'.
-
-        :param api: the API object.
-        :param message: the Ledger API message
-        :param dialogue: the contract API dialogue
-        :return: None
-        """
-        raise NotImplementedError
+        contract = self.contract_registry.make(message.contract_id)
+        method_to_call = getattr(contract, message.callable)
+        try:
+            tx = method_to_call(api, message.contract_address, **message.kwargs.body)
+            response = ContractApiMessage(
+                performative=ContractApiMessage.Performative.RAW_TRANSACTION,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                raw_transaction=RawTransaction(message.ledger_id, tx),
+            )
+            response.counterparty = message.counterparty
+            dialogue.update(response)
+        except Exception as e:
+            response = self.get_error_message(e, api, message, dialogue)
+        return response

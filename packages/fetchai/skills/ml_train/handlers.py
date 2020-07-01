@@ -542,7 +542,7 @@ class LedgerApiHandler(Handler):
             message_id=ml_trade_msg.message_id + 1,
             dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
             target=ml_trade_msg.message_id,
-            tx_digest=ledger_api_msg.transaction_digest,
+            tx_digest=ledger_api_msg.transaction_digest.body,
             terms=ml_trade_msg.terms,
         )
         ml_accept.counterparty = ml_trade_msg.counterparty

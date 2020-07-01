@@ -142,7 +142,7 @@ class RawMessage:
         :return: None
         """
         raw_message_bytes = pickle.dumps(raw_message_object)  # nosec
-        raw_message_protobuf_object.raw_tmessage_bytes = raw_message_bytes
+        raw_message_protobuf_object.raw_message_bytes = raw_message_bytes
 
     @classmethod
     def decode(cls, raw_message_protobuf_object) -> "RawMessage":
@@ -246,6 +246,148 @@ class SignedTransaction:
         )
 
 
+class SignedMessage:
+    """This class represents an instance of RawMessage."""
+
+    def __init__(
+        self, ledger_id: str, body: str, is_deprecated_mode: bool = False,
+    ):
+        """Initialise an instance of SignedMessage."""
+        self._ledger_id = ledger_id
+        self._body = body
+        self._is_deprecated_mode = is_deprecated_mode
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert isinstance(self._body, str), "body must be string"
+        assert isinstance(
+            self._is_deprecated_mode, bool
+        ), "is_deprecated_mode must be bool"
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
+
+    @property
+    def body(self):
+        """Get the body."""
+        return self._body
+
+    @property
+    def is_deprecated_mode(self):
+        """Get the is_deprecated_mode."""
+        return self._is_deprecated_mode
+
+    @staticmethod
+    def encode(
+        signed_message_protobuf_object, signed_message_object: "SignedMessage"
+    ) -> None:
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The protocol buffer object in the signed_message_protobuf_object argument must be matched with the instance of this class in the 'signed_message_object' argument.
+
+        :param signed_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param signed_message_object: an instance of this class to be encoded in the protocol buffer object.
+        :return: None
+        """
+        signed_message_bytes = pickle.dumps(signed_message_object)  # nosec
+        signed_message_protobuf_object.signed_message_bytes = signed_message_bytes
+
+    @classmethod
+    def decode(cls, signed_message_protobuf_object) -> "SignedMessage":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the protocol buffer object in the 'signed_message_protobuf_object' argument.
+
+        :param signed_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'signed_message_protobuf_object' argument.
+        """
+        signed_message = pickle.loads(  # nosec
+            signed_message_protobuf_object.signed_message_bytes
+        )
+        return signed_message
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, SignedMessage)
+            and self.ledger_id == other.ledger_id
+            and self.body == other.body
+            and self.is_deprecated_mode == other.is_deprecated_mode
+        )
+
+    def __str__(self):
+        return "SignedMessage: ledger_id={}, body={}, is_deprecated_mode={}".format(
+            self.ledger_id, self.body, self.is_deprecated_mode,
+        )
+
+
+class State:
+    """This class represents an instance of State."""
+
+    def __init__(self, ledger_id: str, body: bytes):
+        """Initialise an instance of State."""
+        self._ledger_id = ledger_id
+        self._body = body
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert self._body is not None, "body must not be None"
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
+
+    @property
+    def body(self):
+        """Get the body."""
+        return self._body
+
+    @staticmethod
+    def encode(state_protobuf_object, state_object: "State") -> None:
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The protocol buffer object in the state_protobuf_object argument must be matched with the instance of this class in the 'state_object' argument.
+
+        :param state_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param state_object: an instance of this class to be encoded in the protocol buffer object.
+        :return: None
+        """
+        state_bytes = pickle.dumps(state_object)  # nosec
+        state_protobuf_object.state_bytes = state_bytes
+
+    @classmethod
+    def decode(cls, state_protobuf_object) -> "State":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the protocol buffer object in the 'state_protobuf_object' argument.
+
+        :param state_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'state_protobuf_object' argument.
+        """
+        state = pickle.loads(state_protobuf_object.state_bytes)  # nosec
+        return state
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, State)
+            and self.ledger_id == other.ledger_id
+            and self.body == other.body
+        )
+
+    def __str__(self):
+        return "State: ledger_id={}, body={}".format(self.ledger_id, self.body)
+
+
 class Terms:
     """Class to represent the terms of a multi-currency & multi-token ledger transaction."""
 
@@ -259,6 +401,7 @@ class Terms:
         is_sender_payable_tx_fee: bool,
         nonce: str,
         fee: Optional[int] = None,
+        **kwargs,
     ):
         """
         Instantiate terms.
@@ -280,6 +423,7 @@ class Terms:
         self._is_sender_payable_tx_fee = is_sender_payable_tx_fee
         self._nonce = nonce
         self._fee = fee
+        self._kwargs = kwargs if kwargs is not None else {}
         self._check_consistency()
 
     def _check_consistency(self) -> None:
@@ -392,6 +536,11 @@ class Terms:
         assert self._fee is not None, "Fee not set."
         return self._fee
 
+    @property
+    def kwargs(self) -> Dict[str, Any]:
+        """Get the kwargs."""
+        return self._kwargs
+
     @staticmethod
     def encode(terms_protobuf_object, terms_object: "Terms") -> None:
         """
@@ -429,13 +578,14 @@ class Terms:
             and self.quantities_by_good_id == other.quantities_by_good_id
             and self.is_sender_payable_tx_fee == other.is_sender_payable_tx_fee
             and self.nonce == other.nonce
+            and self.kwargs == other.kwargs
             and self.fee == other.fee
             if (self.has_fee and other.has_fee)
             else self.has_fee == other.has_fee
         )
 
     def __str__(self):
-        return "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee={}".format(
+        return "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee={}, kwargs={}".format(
             self.ledger_id,
             self.sender_address,
             self.counterparty_address,
@@ -444,6 +594,78 @@ class Terms:
             self.is_sender_payable_tx_fee,
             self.nonce,
             self._fee,
+            self.kwargs,
+        )
+
+
+class TransactionDigest:
+    """This class represents an instance of TransactionDigest."""
+
+    def __init__(self, ledger_id: str, body: Any):
+        """Initialise an instance of TransactionDigest."""
+        self._ledger_id = ledger_id
+        self._body = body
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert isinstance(self._ledger_id, str), "ledger_id must be str"
+        assert self._body is not None, "body must not be None"
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the id of the ledger on which the terms are to be settled."""
+        return self._ledger_id
+
+    @property
+    def body(self) -> Any:
+        """Get the receipt."""
+        return self._body
+
+    @staticmethod
+    def encode(
+        transaction_digest_protobuf_object,
+        transaction_digest_object: "TransactionDigest",
+    ) -> None:
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The protocol buffer object in the transaction_digest_protobuf_object argument must be matched with the instance of this class in the 'transaction_digest_object' argument.
+
+        :param transaction_digest_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param transaction_digest_object: an instance of this class to be encoded in the protocol buffer object.
+        :return: None
+        """
+        transaction_digest_bytes = pickle.dumps(transaction_digest_object)  # nosec
+        transaction_digest_protobuf_object.transaction_digest_bytes = (
+            transaction_digest_bytes
+        )
+
+    @classmethod
+    def decode(cls, transaction_digest_protobuf_object) -> "TransactionDigest":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the protocol buffer object in the 'transaction_digest_protobuf_object' argument.
+
+        :param transaction_digest_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'transaction_digest_protobuf_object' argument.
+        """
+        transaction_digest = pickle.loads(  # nosec
+            transaction_digest_protobuf_object.transaction_digest_bytes
+        )
+        return transaction_digest
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, TransactionDigest)
+            and self.ledger_id == other.ledger_id
+            and self.body == other.body
+        )
+
+    def __str__(self):
+        return "TransactionDigest: ledger_id={}, body={}".format(
+            self.ledger_id, self.body
         )
 
 
@@ -469,12 +691,12 @@ class TransactionReceipt:
         return self._ledger_id
 
     @property
-    def receipt(self):
+    def receipt(self) -> Any:
         """Get the receipt."""
         return self._receipt
 
     @property
-    def transaction(self):
+    def transaction(self) -> Any:
         """Get the transaction."""
         return self._transaction
 

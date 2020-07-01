@@ -21,6 +21,10 @@ message SigningMessage{
         bytes raw_transaction = 1;
     }
 
+    message SignedMessage{
+        bytes signed_message = 1;
+    }
+
     message SignedTransaction{
         bytes signed_transaction = 1;
     }
@@ -35,16 +39,14 @@ message SigningMessage{
         repeated string skill_callback_ids = 1;
         map<string, string> skill_callback_info = 2;
         Terms terms = 3;
-        string crypto_id = 4;
-        RawTransaction raw_transaction = 5;
+        RawTransaction raw_transaction = 4;
     }
 
     message Sign_Message_Performative{
         repeated string skill_callback_ids = 1;
         map<string, string> skill_callback_info = 2;
         Terms terms = 3;
-        string crypto_id = 4;
-        RawMessage raw_message = 5;
+        RawMessage raw_message = 4;
     }
 
     message Signed_Transaction_Performative{
@@ -56,7 +58,7 @@ message SigningMessage{
     message Signed_Message_Performative{
         repeated string skill_callback_ids = 1;
         map<string, string> skill_callback_info = 2;
-        bytes signed_message = 3;
+        SignedMessage signed_message = 3;
     }
 
     message Error_Performative{

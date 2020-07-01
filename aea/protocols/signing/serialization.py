@@ -27,6 +27,7 @@ from aea.protocols.signing import signing_pb2
 from aea.protocols.signing.custom_types import ErrorCode
 from aea.protocols.signing.custom_types import RawMessage
 from aea.protocols.signing.custom_types import RawTransaction
+from aea.protocols.signing.custom_types import SignedMessage
 from aea.protocols.signing.custom_types import SignedTransaction
 from aea.protocols.signing.custom_types import Terms
 from aea.protocols.signing.message import SigningMessage
@@ -60,8 +61,6 @@ class SigningSerializer(Serializer):
             performative.skill_callback_info.update(skill_callback_info)
             terms = msg.terms
             Terms.encode(performative.terms, terms)
-            crypto_id = msg.crypto_id
-            performative.crypto_id = crypto_id
             raw_transaction = msg.raw_transaction
             RawTransaction.encode(performative.raw_transaction, raw_transaction)
             signing_msg.sign_transaction.CopyFrom(performative)
@@ -73,8 +72,6 @@ class SigningSerializer(Serializer):
             performative.skill_callback_info.update(skill_callback_info)
             terms = msg.terms
             Terms.encode(performative.terms, terms)
-            crypto_id = msg.crypto_id
-            performative.crypto_id = crypto_id
             raw_message = msg.raw_message
             RawMessage.encode(performative.raw_message, raw_message)
             signing_msg.sign_message.CopyFrom(performative)
@@ -96,7 +93,7 @@ class SigningSerializer(Serializer):
             skill_callback_info = msg.skill_callback_info
             performative.skill_callback_info.update(skill_callback_info)
             signed_message = msg.signed_message
-            performative.signed_message = signed_message
+            SignedMessage.encode(performative.signed_message, signed_message)
             signing_msg.signed_message.CopyFrom(performative)
         elif performative_id == SigningMessage.Performative.ERROR:
             performative = signing_pb2.SigningMessage.Error_Performative()  # type: ignore
@@ -143,8 +140,6 @@ class SigningSerializer(Serializer):
             pb2_terms = signing_pb.sign_transaction.terms
             terms = Terms.decode(pb2_terms)
             performative_content["terms"] = terms
-            crypto_id = signing_pb.sign_transaction.crypto_id
-            performative_content["crypto_id"] = crypto_id
             pb2_raw_transaction = signing_pb.sign_transaction.raw_transaction
             raw_transaction = RawTransaction.decode(pb2_raw_transaction)
             performative_content["raw_transaction"] = raw_transaction
@@ -158,8 +153,6 @@ class SigningSerializer(Serializer):
             pb2_terms = signing_pb.sign_message.terms
             terms = Terms.decode(pb2_terms)
             performative_content["terms"] = terms
-            crypto_id = signing_pb.sign_message.crypto_id
-            performative_content["crypto_id"] = crypto_id
             pb2_raw_message = signing_pb.sign_message.raw_message
             raw_message = RawMessage.decode(pb2_raw_message)
             performative_content["raw_message"] = raw_message
@@ -180,7 +173,8 @@ class SigningSerializer(Serializer):
             skill_callback_info = signing_pb.signed_message.skill_callback_info
             skill_callback_info_dict = dict(skill_callback_info)
             performative_content["skill_callback_info"] = skill_callback_info_dict
-            signed_message = signing_pb.signed_message.signed_message
+            pb2_signed_message = signing_pb.signed_message.signed_message
+            signed_message = SignedMessage.decode(pb2_signed_message)
             performative_content["signed_message"] = signed_message
         elif performative_id == SigningMessage.Performative.ERROR:
             skill_callback_ids = signing_pb.error.skill_callback_ids

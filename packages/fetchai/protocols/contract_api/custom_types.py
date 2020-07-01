@@ -19,31 +19,54 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
+import pickle
+from typing import Any, Dict
 
-class RawTransaction:
-    """This class represents an instance of RawTransaction."""
+from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
+from aea.helpers.transaction.base import State as BaseState
 
-    def __init__(self):
+RawTransaction = BaseRawTransaction
+State = BaseState
+
+
+class Kwargs:
+    """This class represents an instance of Kwargs."""
+
+    def __init__(
+        self, body: Dict[str, Any],
+    ):
         """Initialise an instance of RawTransaction."""
-        raise NotImplementedError
+        self._body = body
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        assert self._body is not None, "body must not be None"
+        assert isinstance(self._body, dict) and [
+            isinstance(key, str) for key in self._body.keys()
+        ]
+
+    @property
+    def body(self) -> Dict[str, Any]:
+        """Get the body."""
+        return self._body
 
     @staticmethod
-    def encode(
-        raw_transaction_protobuf_object, raw_transaction_object: "RawTransaction"
-    ) -> None:
+    def encode(kwargs_protobuf_object, kwargs_object: "Kwargs") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The protocol buffer object in the raw_transaction_protobuf_object argument must be matched with the instance of this class in the 'raw_transaction_object' argument.
+        The protocol buffer object in the kwargs_protobuf_object argument must be matched with the instance of this class in the 'kwargs_object' argument.
 
-        :param raw_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param raw_transaction_object: an instance of this class to be encoded in the protocol buffer object.
+        :param kwargs_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param kwargs_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        raise NotImplementedError
+        kwargs_bytes = pickle.dumps(kwargs_object)  # nosec
+        kwargs_protobuf_object.kwargs_bytes = kwargs_bytes
 
     @classmethod
-    def decode(cls, raw_transaction_protobuf_object) -> "RawTransaction":
+    def decode(cls, kwargs_protobuf_object) -> "Kwargs":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -52,157 +75,11 @@ class RawTransaction:
         :param raw_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
         """
-        raise NotImplementedError
+        kwargs = pickle.loads(kwargs_protobuf_object.kwargs_bytes)  # nosec
+        return kwargs
 
     def __eq__(self, other):
-        raise NotImplementedError
+        return isinstance(other, Kwargs) and self.body == other.body
 
-
-class SignedTransaction:
-    """This class represents an instance of SignedTransaction."""
-
-    def __init__(self):
-        """Initialise an instance of SignedTransaction."""
-        raise NotImplementedError
-
-    @staticmethod
-    def encode(
-        signed_transaction_protobuf_object,
-        signed_transaction_object: "SignedTransaction",
-    ) -> None:
-        """
-        Encode an instance of this class into the protocol buffer object.
-
-        The protocol buffer object in the signed_transaction_protobuf_object argument must be matched with the instance of this class in the 'signed_transaction_object' argument.
-
-        :param signed_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param signed_transaction_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def decode(cls, signed_transaction_protobuf_object) -> "SignedTransaction":
-        """
-        Decode a protocol buffer object that corresponds with this class into an instance of this class.
-
-        A new instance of this class must be created that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
-
-        :param signed_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
-        """
-        raise NotImplementedError
-
-    def __eq__(self, other):
-        raise NotImplementedError
-
-
-class State:
-    """This class represents an instance of State."""
-
-    def __init__(self):
-        """Initialise an instance of State."""
-        raise NotImplementedError
-
-    @staticmethod
-    def encode(state_protobuf_object, state_object: "State") -> None:
-        """
-        Encode an instance of this class into the protocol buffer object.
-
-        The protocol buffer object in the state_protobuf_object argument must be matched with the instance of this class in the 'state_object' argument.
-
-        :param state_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param state_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def decode(cls, state_protobuf_object) -> "State":
-        """
-        Decode a protocol buffer object that corresponds with this class into an instance of this class.
-
-        A new instance of this class must be created that matches the protocol buffer object in the 'state_protobuf_object' argument.
-
-        :param state_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'state_protobuf_object' argument.
-        """
-        raise NotImplementedError
-
-    def __eq__(self, other):
-        raise NotImplementedError
-
-
-class Terms:
-    """This class represents an instance of Terms."""
-
-    def __init__(self):
-        """Initialise an instance of Terms."""
-        raise NotImplementedError
-
-    @staticmethod
-    def encode(terms_protobuf_object, terms_object: "Terms") -> None:
-        """
-        Encode an instance of this class into the protocol buffer object.
-
-        The protocol buffer object in the terms_protobuf_object argument must be matched with the instance of this class in the 'terms_object' argument.
-
-        :param terms_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param terms_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def decode(cls, terms_protobuf_object) -> "Terms":
-        """
-        Decode a protocol buffer object that corresponds with this class into an instance of this class.
-
-        A new instance of this class must be created that matches the protocol buffer object in the 'terms_protobuf_object' argument.
-
-        :param terms_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'terms_protobuf_object' argument.
-        """
-        raise NotImplementedError
-
-    def __eq__(self, other):
-        raise NotImplementedError
-
-
-class TransactionReceipt:
-    """This class represents an instance of TransactionReceipt."""
-
-    def __init__(self):
-        """Initialise an instance of TransactionReceipt."""
-        raise NotImplementedError
-
-    @staticmethod
-    def encode(
-        transaction_receipt_protobuf_object,
-        transaction_receipt_object: "TransactionReceipt",
-    ) -> None:
-        """
-        Encode an instance of this class into the protocol buffer object.
-
-        The protocol buffer object in the transaction_receipt_protobuf_object argument must be matched with the instance of this class in the 'transaction_receipt_object' argument.
-
-        :param transaction_receipt_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param transaction_receipt_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def decode(cls, transaction_receipt_protobuf_object) -> "TransactionReceipt":
-        """
-        Decode a protocol buffer object that corresponds with this class into an instance of this class.
-
-        A new instance of this class must be created that matches the protocol buffer object in the 'transaction_receipt_protobuf_object' argument.
-
-        :param transaction_receipt_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'transaction_receipt_protobuf_object' argument.
-        """
-        raise NotImplementedError
-
-    def __eq__(self, other):
-        raise NotImplementedError
+    def __str__(self):
+        return "Kwargs: body={}".format(self.body)

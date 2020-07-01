@@ -41,7 +41,12 @@ from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.helpers.transaction.base import RawMessage, RawTransaction, Terms
+from aea.helpers.transaction.base import (
+    RawMessage,
+    RawTransaction,
+    SignedMessage,
+    Terms,
+)
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.protocols.signing.dialogues import SigningDialogue
@@ -344,7 +349,6 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            crypto_id="fetchai",
             raw_transaction=RawTransaction("fetchai", tx),
         )
         signing_msg.counterparty = "decision_maker"
@@ -375,7 +379,6 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            crypto_id="ethereum",
             raw_transaction=RawTransaction("ethereum", tx),
         )
         signing_msg.counterparty = "decision_maker"
@@ -409,7 +412,6 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            crypto_id="unknown",
             raw_transaction=RawTransaction("unknown", tx),
         )
         signing_msg.counterparty = "decision_maker"
@@ -440,7 +442,6 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            crypto_id="fetchai",
             raw_message=RawMessage("fetchai", message),
         )
         signing_msg.counterparty = "decision_maker"
@@ -451,7 +452,7 @@ class TestDecisionMaker2:
             == SigningMessage.Performative.SIGNED_MESSAGE
         )
         assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
-        assert type(signing_msg_response.signed_message) == str
+        assert type(signing_msg_response.signed_message) == SignedMessage
 
     def test_handle_message_signing_ethereum(self):
         """Test message signing for ethereum."""
@@ -471,7 +472,6 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            crypto_id="ethereum",
             raw_message=RawMessage("ethereum", message),
         )
         signing_msg.counterparty = "decision_maker"
@@ -482,7 +482,7 @@ class TestDecisionMaker2:
             == SigningMessage.Performative.SIGNED_MESSAGE
         )
         assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
-        assert type(signing_msg_response.signed_message) == str
+        assert type(signing_msg_response.signed_message) == SignedMessage
 
     def test_handle_message_signing_ethereum_deprecated(self):
         """Test message signing for ethereum deprecated."""
@@ -502,8 +502,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            crypto_id="ethereum",
-            raw_message=RawMessage("unknown", message, is_deprecated_mode=True),
+            raw_message=RawMessage("ethereum", message, is_deprecated_mode=True),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -513,7 +512,8 @@ class TestDecisionMaker2:
             == SigningMessage.Performative.SIGNED_MESSAGE
         )
         assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
-        assert type(signing_msg_response.signed_message) == str
+        assert type(signing_msg_response.signed_message) == SignedMessage
+        assert signing_msg_response.signed_message.is_deprecated_mode
 
     def test_handle_message_signing_unknown(self):
         """Test message signing for unknown."""
@@ -533,7 +533,6 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            crypto_id="unknown",
             raw_message=RawMessage("unknown", message),
         )
         signing_msg.counterparty = "decision_maker"

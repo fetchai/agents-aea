@@ -28,12 +28,13 @@ from aea.protocols.base import Message
 from aea.protocols.signing.custom_types import ErrorCode as CustomErrorCode
 from aea.protocols.signing.custom_types import RawMessage as CustomRawMessage
 from aea.protocols.signing.custom_types import RawTransaction as CustomRawTransaction
+from aea.protocols.signing.custom_types import SignedMessage as CustomSignedMessage
 from aea.protocols.signing.custom_types import (
     SignedTransaction as CustomSignedTransaction,
 )
 from aea.protocols.signing.custom_types import Terms as CustomTerms
 
-logger = logging.getLogger("aea.protocols.signing.message")
+logger = logging.getLogger("aea.packages.fetchai.protocols.signing.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -48,6 +49,8 @@ class SigningMessage(Message):
     RawMessage = CustomRawMessage
 
     RawTransaction = CustomRawTransaction
+
+    SignedMessage = CustomSignedMessage
 
     SignedTransaction = CustomSignedTransaction
 
@@ -127,12 +130,6 @@ class SigningMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def crypto_id(self) -> str:
-        """Get the 'crypto_id' content from the message."""
-        assert self.is_set("crypto_id"), "'crypto_id' content is not set."
-        return cast(str, self.get("crypto_id"))
-
-    @property
     def error_code(self) -> CustomErrorCode:
         """Get the 'error_code' content from the message."""
         assert self.is_set("error_code"), "'error_code' content is not set."
@@ -151,10 +148,10 @@ class SigningMessage(Message):
         return cast(CustomRawTransaction, self.get("raw_transaction"))
 
     @property
-    def signed_message(self) -> bytes:
+    def signed_message(self) -> CustomSignedMessage:
         """Get the 'signed_message' content from the message."""
         assert self.is_set("signed_message"), "'signed_message' content is not set."
-        return cast(bytes, self.get("signed_message"))
+        return cast(CustomSignedMessage, self.get("signed_message"))
 
     @property
     def signed_transaction(self) -> CustomSignedTransaction:
@@ -227,7 +224,7 @@ class SigningMessage(Message):
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == SigningMessage.Performative.SIGN_TRANSACTION:
-                expected_nb_of_contents = 5
+                expected_nb_of_contents = 4
                 assert (
                     type(self.skill_callback_ids) == tuple
                 ), "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
@@ -259,11 +256,6 @@ class SigningMessage(Message):
                     type(self.terms) == CustomTerms
                 ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
                     type(self.terms)
-                )
-                assert (
-                    type(self.crypto_id) == str
-                ), "Invalid type for content 'crypto_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.crypto_id)
                 )
                 assert (
                     type(self.raw_transaction) == CustomRawTransaction
@@ -271,7 +263,7 @@ class SigningMessage(Message):
                     type(self.raw_transaction)
                 )
             elif self.performative == SigningMessage.Performative.SIGN_MESSAGE:
-                expected_nb_of_contents = 5
+                expected_nb_of_contents = 4
                 assert (
                     type(self.skill_callback_ids) == tuple
                 ), "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
@@ -303,11 +295,6 @@ class SigningMessage(Message):
                     type(self.terms) == CustomTerms
                 ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
                     type(self.terms)
-                )
-                assert (
-                    type(self.crypto_id) == str
-                ), "Invalid type for content 'crypto_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.crypto_id)
                 )
                 assert (
                     type(self.raw_message) == CustomRawMessage
@@ -378,8 +365,8 @@ class SigningMessage(Message):
                         type(value_of_skill_callback_info)
                     )
                 assert (
-                    type(self.signed_message) == bytes
-                ), "Invalid type for content 'signed_message'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.signed_message) == CustomSignedMessage
+                ), "Invalid type for content 'signed_message'. Expected 'SignedMessage'. Found '{}'.".format(
                     type(self.signed_message)
                 )
             elif self.performative == SigningMessage.Performative.ERROR:

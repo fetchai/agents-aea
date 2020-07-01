@@ -34,7 +34,7 @@ from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
-from aea.helpers.transaction.base import SignedTransaction, Terms
+from aea.helpers.transaction.base import SignedMessage, SignedTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.protocols.signing.dialogues import SigningDialogue
@@ -653,7 +653,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         )
         if self._is_acceptable_for_signing(signing_msg):
             signed_message = self.wallet.sign_message(
-                signing_msg.crypto_id,
+                signing_msg.raw_message.ledger_id,
                 signing_msg.raw_message.body,
                 signing_msg.raw_message.is_deprecated_mode,
             )
@@ -665,8 +665,11 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                     message_id=signing_msg.message_id + 1,
                     skill_callback_ids=signing_msg.skill_callback_ids,
                     skill_callback_info=signing_msg.skill_callback_info,
-                    crypto_id=signing_msg.crypto_id,
-                    signed_message=signed_message,
+                    signed_message=SignedMessage(
+                        signing_msg.raw_message.ledger_id,
+                        signed_message,
+                        signing_msg.raw_message.is_deprecated_mode,
+                    ),
                 )
         signing_msg_response.counterparty = signing_msg.counterparty
         signing_dialogue.update(signing_msg_response)
@@ -693,7 +696,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         )
         if self._is_acceptable_for_signing(signing_msg):
             signed_tx = self.wallet.sign_transaction(
-                signing_msg.crypto_id, signing_msg.raw_transaction.body
+                signing_msg.raw_transaction.ledger_id, signing_msg.raw_transaction.body
             )
             if signed_tx is not None:
                 signing_msg_response = SigningMessage(
@@ -704,7 +707,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                     skill_callback_ids=signing_msg.skill_callback_ids,
                     skill_callback_info=signing_msg.skill_callback_info,
                     signed_transaction=SignedTransaction(
-                        signing_msg.crypto_id, signed_tx
+                        signing_msg.raw_transaction.ledger_id, signed_tx
                     ),
                 )
         signing_msg_response.counterparty = signing_msg.counterparty

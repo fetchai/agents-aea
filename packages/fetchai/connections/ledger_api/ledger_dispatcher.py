@@ -21,15 +21,13 @@
 import time
 from typing import cast
 
-import aea
 from aea.crypto.base import LedgerApi
-from aea.crypto.registries import Registry
 from aea.helpers.dialogue.base import (
     Dialogue as BaseDialogue,
     DialogueLabel as BaseDialogueLabel,
     Dialogues as BaseDialogues,
 )
-from aea.helpers.transaction.base import RawTransaction
+from aea.helpers.transaction.base import RawTransaction, TransactionDigest
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
@@ -90,10 +88,6 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         super().__init__(**kwargs)
         self._ledger_api_dialogues = LedgerApiDialogues()
 
-    @property
-    def registry(self) -> Registry:
-        return aea.crypto.registries.ledger_apis_registry
-
     def get_message(self, envelope: Envelope) -> Message:
         if isinstance(envelope.message, bytes):
             message = cast(
@@ -117,6 +111,11 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             is LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION
         ):
             ledger_id = message.signed_transaction.ledger_id
+        elif (
+            message.performative
+            is LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
+        ):
+            ledger_id = message.transaction_digest.ledger_id
         else:
             ledger_id = message.ledger_id
         return ledger_id
@@ -170,6 +169,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             amount=message.terms.sender_payable_amount,
             tx_fee=message.terms.fee,
             tx_nonce=message.terms.nonce,
+            **message.terms.kwargs,
         )
         if raw_transaction is None:
             response = self.get_error_message(
@@ -204,15 +204,15 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         while not is_settled and attempts < self.MAX_ATTEMPTS:
             time.sleep(self.TIMEOUT)
             transaction_receipt = api.get_transaction_receipt(
-                message.transaction_digest
+                message.transaction_digest.body
             )
             is_settled = api.is_transaction_settled(transaction_receipt)
             attempts += 1
         attempts = 0
-        transaction = api.get_transaction(message.transaction_digest)
+        transaction = api.get_transaction(message.transaction_digest.body)
         while transaction is None and attempts < self.MAX_ATTEMPTS:
             time.sleep(self.TIMEOUT)
-            transaction = api.get_transaction(message.transaction_digest)
+            transaction = api.get_transaction(message.transaction_digest.body)
             attempts += 1
         if not is_settled:
             response = self.get_error_message(
@@ -236,7 +236,9 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 transaction_receipt=TransactionReceipt(
-                    message.ledger_id, transaction_receipt, transaction
+                    message.transaction_digest.ledger_id,
+                    transaction_receipt,
+                    transaction,
                 ),
             )
             response.counterparty = message.counterparty
@@ -266,8 +268,9 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                ledger_id=message.signed_transaction.ledger_id,
-                transaction_digest=transaction_digest,
+                transaction_digest=TransactionDigest(
+                    message.signed_transaction.ledger_id, transaction_digest
+                ),
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
@@ -293,6 +296,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             message_id=message.message_id + 1,
             target=message.message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            code=500,
             message=str(e),
             data=b"",
         )

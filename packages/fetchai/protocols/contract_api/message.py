@@ -21,22 +21,16 @@
 
 import logging
 from enum import Enum
-from typing import Dict, Optional, Set, Tuple, cast
+from typing import Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
+from packages.fetchai.protocols.contract_api.custom_types import Kwargs as CustomKwargs
 from packages.fetchai.protocols.contract_api.custom_types import (
     RawTransaction as CustomRawTransaction,
 )
-from packages.fetchai.protocols.contract_api.custom_types import (
-    SignedTransaction as CustomSignedTransaction,
-)
 from packages.fetchai.protocols.contract_api.custom_types import State as CustomState
-from packages.fetchai.protocols.contract_api.custom_types import Terms as CustomTerms
-from packages.fetchai.protocols.contract_api.custom_types import (
-    TransactionReceipt as CustomTransactionReceipt,
-)
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.contract_api.message")
 
@@ -48,28 +42,21 @@ class ContractApiMessage(Message):
 
     protocol_id = ProtocolId("fetchai", "contract_api", "0.1.0")
 
+    Kwargs = CustomKwargs
+
     RawTransaction = CustomRawTransaction
 
-    SignedTransaction = CustomSignedTransaction
-
     State = CustomState
-
-    Terms = CustomTerms
-
-    TransactionReceipt = CustomTransactionReceipt
 
     class Performative(Enum):
         """Performatives for the contract_api protocol."""
 
         ERROR = "error"
+        GET_DEPLOY_TRANSACTION = "get_deploy_transaction"
         GET_RAW_TRANSACTION = "get_raw_transaction"
         GET_STATE = "get_state"
-        GET_TRANSACTION_RECEIPT = "get_transaction_receipt"
         RAW_TRANSACTION = "raw_transaction"
-        SEND_SIGNED_TRANSACTION = "send_signed_transaction"
         STATE = "state"
-        TRANSACTION_DIGEST = "transaction_digest"
-        TRANSACTION_RECEIPT = "transaction_receipt"
 
         def __str__(self):
             """Get the string representation."""
@@ -100,14 +87,11 @@ class ContractApiMessage(Message):
         )
         self._performatives = {
             "error",
+            "get_deploy_transaction",
             "get_raw_transaction",
             "get_state",
-            "get_transaction_receipt",
             "raw_transaction",
-            "send_signed_transaction",
             "state",
-            "transaction_digest",
-            "transaction_receipt",
         }
 
     @property
@@ -157,16 +141,22 @@ class ContractApiMessage(Message):
         return cast(str, self.get("contract_address"))
 
     @property
+    def contract_id(self) -> str:
+        """Get the 'contract_id' content from the message."""
+        assert self.is_set("contract_id"), "'contract_id' content is not set."
+        return cast(str, self.get("contract_id"))
+
+    @property
     def data(self) -> bytes:
         """Get the 'data' content from the message."""
         assert self.is_set("data"), "'data' content is not set."
         return cast(bytes, self.get("data"))
 
     @property
-    def kwargs(self) -> Dict[str, str]:
+    def kwargs(self) -> CustomKwargs:
         """Get the 'kwargs' content from the message."""
         assert self.is_set("kwargs"), "'kwargs' content is not set."
-        return cast(Dict[str, str], self.get("kwargs"))
+        return cast(CustomKwargs, self.get("kwargs"))
 
     @property
     def ledger_id(self) -> str:
@@ -186,40 +176,10 @@ class ContractApiMessage(Message):
         return cast(CustomRawTransaction, self.get("raw_transaction"))
 
     @property
-    def signed_transaction(self) -> CustomSignedTransaction:
-        """Get the 'signed_transaction' content from the message."""
-        assert self.is_set(
-            "signed_transaction"
-        ), "'signed_transaction' content is not set."
-        return cast(CustomSignedTransaction, self.get("signed_transaction"))
-
-    @property
     def state_data(self) -> CustomState:
         """Get the 'state_data' content from the message."""
         assert self.is_set("state_data"), "'state_data' content is not set."
         return cast(CustomState, self.get("state_data"))
-
-    @property
-    def terms(self) -> CustomTerms:
-        """Get the 'terms' content from the message."""
-        assert self.is_set("terms"), "'terms' content is not set."
-        return cast(CustomTerms, self.get("terms"))
-
-    @property
-    def transaction_digest(self) -> str:
-        """Get the 'transaction_digest' content from the message."""
-        assert self.is_set(
-            "transaction_digest"
-        ), "'transaction_digest' content is not set."
-        return cast(str, self.get("transaction_digest"))
-
-    @property
-    def transaction_receipt(self) -> CustomTransactionReceipt:
-        """Get the 'transaction_receipt' content from the message."""
-        assert self.is_set(
-            "transaction_receipt"
-        ), "'transaction_receipt' content is not set."
-        return cast(CustomTransactionReceipt, self.get("transaction_receipt"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the contract_api protocol."""
@@ -261,12 +221,44 @@ class ContractApiMessage(Message):
             # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
-            if self.performative == ContractApiMessage.Performative.GET_STATE:
+            if (
+                self.performative
+                == ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
+            ):
                 expected_nb_of_contents = 4
                 assert (
                     type(self.ledger_id) == str
                 ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
                     type(self.ledger_id)
+                )
+                assert (
+                    type(self.contract_id) == str
+                ), "Invalid type for content 'contract_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.contract_id)
+                )
+                assert (
+                    type(self.callable) == str
+                ), "Invalid type for content 'callable'. Expected 'str'. Found '{}'.".format(
+                    type(self.callable)
+                )
+                assert (
+                    type(self.kwargs) == CustomKwargs
+                ), "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
+                    type(self.kwargs)
+                )
+            elif (
+                self.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
+            ):
+                expected_nb_of_contents = 5
+                assert (
+                    type(self.ledger_id) == str
+                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.ledger_id)
+                )
+                assert (
+                    type(self.contract_id) == str
+                ), "Invalid type for content 'contract_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.contract_id)
                 )
                 assert (
                     type(self.contract_address) == str
@@ -279,64 +271,36 @@ class ContractApiMessage(Message):
                     type(self.callable)
                 )
                 assert (
-                    type(self.kwargs) == dict
-                ), "Invalid type for content 'kwargs'. Expected 'dict'. Found '{}'.".format(
+                    type(self.kwargs) == CustomKwargs
+                ), "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
                     type(self.kwargs)
                 )
-                for key_of_kwargs, value_of_kwargs in self.kwargs.items():
-                    assert (
-                        type(key_of_kwargs) == str
-                    ), "Invalid type for dictionary keys in content 'kwargs'. Expected 'str'. Found '{}'.".format(
-                        type(key_of_kwargs)
-                    )
-                    assert (
-                        type(value_of_kwargs) == str
-                    ), "Invalid type for dictionary values in content 'kwargs'. Expected 'str'. Found '{}'.".format(
-                        type(value_of_kwargs)
-                    )
-            elif (
-                self.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
-            ):
-                expected_nb_of_contents = 2
+            elif self.performative == ContractApiMessage.Performative.GET_STATE:
+                expected_nb_of_contents = 5
                 assert (
                     type(self.ledger_id) == str
                 ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
                     type(self.ledger_id)
                 )
                 assert (
-                    type(self.terms) == CustomTerms
-                ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
-                    type(self.terms)
-                )
-            elif (
-                self.performative
-                == ContractApiMessage.Performative.SEND_SIGNED_TRANSACTION
-            ):
-                expected_nb_of_contents = 2
-                assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
+                    type(self.contract_id) == str
+                ), "Invalid type for content 'contract_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.contract_id)
                 )
                 assert (
-                    type(self.signed_transaction) == CustomSignedTransaction
-                ), "Invalid type for content 'signed_transaction'. Expected 'SignedTransaction'. Found '{}'.".format(
-                    type(self.signed_transaction)
-                )
-            elif (
-                self.performative
-                == ContractApiMessage.Performative.GET_TRANSACTION_RECEIPT
-            ):
-                expected_nb_of_contents = 2
-                assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
+                    type(self.contract_address) == str
+                ), "Invalid type for content 'contract_address'. Expected 'str'. Found '{}'.".format(
+                    type(self.contract_address)
                 )
                 assert (
-                    type(self.transaction_digest) == str
-                ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
-                    type(self.transaction_digest)
+                    type(self.callable) == str
+                ), "Invalid type for content 'callable'. Expected 'str'. Found '{}'.".format(
+                    type(self.callable)
+                )
+                assert (
+                    type(self.kwargs) == CustomKwargs
+                ), "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
+                    type(self.kwargs)
                 )
             elif self.performative == ContractApiMessage.Performative.STATE:
                 expected_nb_of_contents = 1
@@ -351,24 +315,6 @@ class ContractApiMessage(Message):
                     type(self.raw_transaction) == CustomRawTransaction
                 ), "Invalid type for content 'raw_transaction'. Expected 'RawTransaction'. Found '{}'.".format(
                     type(self.raw_transaction)
-                )
-            elif (
-                self.performative == ContractApiMessage.Performative.TRANSACTION_DIGEST
-            ):
-                expected_nb_of_contents = 1
-                assert (
-                    type(self.transaction_digest) == str
-                ), "Invalid type for content 'transaction_digest'. Expected 'str'. Found '{}'.".format(
-                    type(self.transaction_digest)
-                )
-            elif (
-                self.performative == ContractApiMessage.Performative.TRANSACTION_RECEIPT
-            ):
-                expected_nb_of_contents = 1
-                assert (
-                    type(self.transaction_receipt) == CustomTransactionReceipt
-                ), "Invalid type for content 'transaction_receipt'. Expected 'TransactionReceipt'. Found '{}'.".format(
-                    type(self.transaction_receipt)
                 )
             elif self.performative == ContractApiMessage.Performative.ERROR:
                 expected_nb_of_contents = 1

@@ -39,38 +39,39 @@ class ContractApiDialogue(Dialogue):
 
     INITIAL_PERFORMATIVES = frozenset(
         {
-            ContractApiMessage.Performative.GET_STATE,
+            ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ContractApiMessage.Performative.GET_RAW_TRANSACTION,
-            ContractApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+            ContractApiMessage.Performative.GET_STATE,
         }
     )
     TERMINAL_PERFORMATIVES = frozenset(
         {
             ContractApiMessage.Performative.STATE,
-            ContractApiMessage.Performative.TRANSACTION_RECEIPT,
+            ContractApiMessage.Performative.RAW_TRANSACTION,
         }
     )
     VALID_REPLIES = {
+        ContractApiMessage.Performative.ERROR: frozenset(),
+        ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION: frozenset(
+            {
+                ContractApiMessage.Performative.RAW_TRANSACTION,
+                ContractApiMessage.Performative.ERROR,
+            }
+        ),
         ContractApiMessage.Performative.GET_RAW_TRANSACTION: frozenset(
-            {ContractApiMessage.Performative.RAW_TRANSACTION}
+            {
+                ContractApiMessage.Performative.RAW_TRANSACTION,
+                ContractApiMessage.Performative.ERROR,
+            }
         ),
         ContractApiMessage.Performative.GET_STATE: frozenset(
-            {ContractApiMessage.Performative.STATE}
+            {
+                ContractApiMessage.Performative.STATE,
+                ContractApiMessage.Performative.ERROR,
+            }
         ),
-        ContractApiMessage.Performative.GET_TRANSACTION_RECEIPT: frozenset(
-            {ContractApiMessage.Performative.TRANSACTION_RECEIPT}
-        ),
-        ContractApiMessage.Performative.RAW_TRANSACTION: frozenset(
-            {ContractApiMessage.Performative.SEND_SIGNED_TRANSACTION}
-        ),
-        ContractApiMessage.Performative.SEND_SIGNED_TRANSACTION: frozenset(
-            {ContractApiMessage.Performative.TRANSACTION_DIGEST}
-        ),
+        ContractApiMessage.Performative.RAW_TRANSACTION: frozenset(),
         ContractApiMessage.Performative.STATE: frozenset(),
-        ContractApiMessage.Performative.TRANSACTION_DIGEST: frozenset(
-            {ContractApiMessage.Performative.GET_TRANSACTION_RECEIPT}
-        ),
-        ContractApiMessage.Performative.TRANSACTION_RECEIPT: frozenset(),
     }
 
     class AgentRole(Dialogue.Role):
@@ -83,6 +84,7 @@ class ContractApiDialogue(Dialogue):
         """This class defines the end states of a contract_api dialogue."""
 
         SUCCESSFUL = 0
+        FAILED = 1
 
     def __init__(
         self,
@@ -129,7 +131,9 @@ class ContractApiDialogue(Dialogue):
 class ContractApiDialogues(Dialogues, ABC):
     """This class keeps track of all contract_api dialogues."""
 
-    END_STATES = frozenset({ContractApiDialogue.EndState.SUCCESSFUL})
+    END_STATES = frozenset(
+        {ContractApiDialogue.EndState.SUCCESSFUL, ContractApiDialogue.EndState.FAILED}
+    )
 
     def __init__(self, agent_address: Address) -> None:
         """

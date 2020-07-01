@@ -19,13 +19,11 @@
 
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
-import json
 from pathlib import Path
 from typing import cast
 
 import pytest
 
-from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -33,8 +31,11 @@ from aea.configurations.base import (
 )
 from aea.connections.base import Connection
 from aea.contracts import contract_registry
+from aea.contracts.base import Contract
+from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.transaction.base import RawTransaction
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
@@ -66,37 +67,41 @@ def load_erc1155_contract():
     configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)
     configuration._directory = directory
     configuration = cast(ContractConfig, configuration)
-    load_component_from_config(configuration)
-    path = Path(configuration.directory, configuration.path_to_contract_interface)
-    with open(path, "r") as interface_file:
-        contract_interface = json.load(interface_file)
+
+    # ensure contract is loaded to sys.modules interface is attached to class!
+    contract = Contract.from_config(configuration)
+    assert contract.contract_interface is not None
 
     contract_registry.register(
         id_=str(configuration.public_id),
         entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+        class_kwargs={"contract_interface": contract.contract_interface},
         contract_config=configuration,
-        contract_interface=contract_interface,
     )
+    contract = contract_registry.make(configuration.public_id)
     yield
     contract_registry.specs.pop(str(configuration.public_id))
 
 
+@pytest.mark.network
 @pytest.mark.asyncio
-async def test_erc1155_get_state(ledger_apis_connection, load_erc1155_contract):
+async def test_erc1155_get_deploy_transaction(
+    ledger_apis_connection, load_erc1155_contract
+):
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
-    ledger_api_dialogues = ContractApiDialogues()
+    contract_api_dialogues = ContractApiDialogues()
     request = ContractApiMessage(
-        performative=ContractApiMessage.Performative.GET_STATE,
-        dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
-        contract_address="",  # TODO
-        callable="",
-        kwargs=dict(),
-        ledger_id="fetchai/erc1155:0.5.0",
+        performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=EthereumCrypto.identifier,
+        contract_id="fetchai/erc1155:0.5.0",
+        callable="get_deploy_transaction",
+        kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
     )
     request.counterparty = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue = ledger_api_dialogues.update(request)
-    assert ledger_api_dialogue is not None
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
         sender=address,
@@ -108,4 +113,63 @@ async def test_erc1155_get_state(ledger_apis_connection, load_erc1155_contract):
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
 
-    assert response.message.performative == ContractApiMessage.Performative.GET_STATE
+    assert response is not None
+    assert type(response.message) == ContractApiMessage
+    response_message = cast(ContractApiMessage, response.message)
+    assert (
+        response_message.performative == ContractApiMessage.Performative.RAW_TRANSACTION
+    )
+    response_dialogue = contract_api_dialogues.update(response_message)
+    assert response_dialogue == contract_api_dialogue
+    assert type(response_message.raw_transaction) == RawTransaction
+    assert response_message.raw_transaction.ledger_id == EthereumCrypto.identifier
+    assert len(response.message.raw_transaction.body) == 6
+    assert len(response.message.raw_transaction.body["data"]) > 0
+
+
+@pytest.mark.network
+@pytest.mark.asyncio
+async def test_erc1155_get_raw_transaction(
+    ledger_apis_connection, load_erc1155_contract
+):
+    """Test get state with contract erc1155."""
+    address = ETHEREUM_ADDRESS_ONE
+    contract_address = ETHEREUM_ADDRESS_ONE
+    contract_api_dialogues = ContractApiDialogues()
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=EthereumCrypto.identifier,
+        contract_id="fetchai/erc1155:0.5.0",
+        contract_address=contract_address,
+        callable="get_create_batch_transaction",
+        kwargs=ContractApiMessage.Kwargs(
+            {"deployer_address": address, "token_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+        ),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    await ledger_apis_connection.send(envelope)
+    await asyncio.sleep(0.01)
+    response = await ledger_apis_connection.receive()
+
+    assert response is not None
+    assert type(response.message) == ContractApiMessage
+    response_message = cast(ContractApiMessage, response.message)
+    assert (
+        response_message.performative == ContractApiMessage.Performative.RAW_TRANSACTION
+    ), "Error: {}".format(response_message.message)
+    response_dialogue = contract_api_dialogues.update(response_message)
+    assert response_dialogue == contract_api_dialogue
+    assert type(response_message.raw_transaction) == RawTransaction
+    assert response_message.raw_transaction.ledger_id == EthereumCrypto.identifier
+    assert len(response.message.raw_transaction.body) == 7
+    assert len(response.message.raw_transaction.body["data"]) > 0
