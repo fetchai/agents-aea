@@ -384,7 +384,7 @@ class Dialogue(ABC):
         """
         return len(self._outgoing_messages) == 0 and len(self._incoming_messages) == 0
 
-    def add(self, message: Message) -> bool:
+    def update(self, message: Message) -> bool:
         """
         Extend the list of incoming/outgoing messages with 'message', if 'message' is valid.
 
@@ -697,7 +697,7 @@ class Dialogues(ABC):
 
         if dialogue is not None:
             message.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
-            dialogue.add(message)
+            dialogue.update(message)
             result = dialogue  # type: Optional[Dialogue]
         else:  # couldn't find the dialogue
             result = None
