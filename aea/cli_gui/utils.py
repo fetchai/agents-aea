@@ -23,7 +23,18 @@ import logging
 import os
 import subprocess  # nosec
 import threading
+from enum import Enum
 from typing import List, Set
+
+
+class ProcessState(Enum):
+    """The state of execution of the agent."""
+
+    NOT_STARTED = "Not started yet"
+    RUNNING = "Running"
+    STOPPING = "Stopping"
+    FINISHED = "Finished"
+    FAILED = "Failed"
 
 
 _processes = set()  # type: Set[subprocess.Popen]
@@ -125,5 +136,18 @@ def _terminate_process(process: subprocess.Popen):
 def terminate_processes():
     """Terminate all the (async) processes instantiated by the GUI."""
     logging.info("Cleaning up...")
-    for process in _processes:
+    for process in _processes:  # pragma: no cover
         _terminate_process(process)
+
+
+def get_process_status(process_id: subprocess.Popen) -> ProcessState:
+    """Return the state of the execution."""
+    assert process_id is not None, "Process id cannot be None!"
+
+    return_code = process_id.poll()
+    if return_code is None:
+        return ProcessState.RUNNING
+    elif return_code <= 0:
+        return ProcessState.FINISHED
+    else:
+        return ProcessState.FAILED

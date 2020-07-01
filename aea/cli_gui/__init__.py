@@ -23,7 +23,6 @@ import os
 import subprocess  # nosec
 import sys
 import threading
-from enum import Enum
 from typing import Dict, List
 
 from click import ClickException
@@ -48,7 +47,9 @@ from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
 from aea.cli_gui.utils import (
+    ProcessState,
     call_aea_async,
+    get_process_status,
     is_agent_dir,
     read_error,
     read_tty,
@@ -67,16 +68,6 @@ elements = [
     ["local", "contract", "localContracts"],
     ["local", "skill", "localSkills"],
 ]
-
-
-class ProcessState(Enum):
-    """The state of execution of the agent."""
-
-    NOT_STARTED = "Not started yet"
-    RUNNING = "Running"
-    STOPPING = "Stopping"
-    FINISHED = "Finished"
-    FAILED = "Failed"
 
 
 max_log_lines = 100
@@ -286,7 +277,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
         if (
             get_process_status(app_context.agent_processes[agent_id])
             != ProcessState.RUNNING
-        ):
+        ):  # pragma: no cover
             if app_context.agent_processes[agent_id] is not None:
                 app_context.agent_processes[agent_id].terminate()
                 app_context.agent_processes[agent_id].wait()
@@ -406,19 +397,6 @@ def stop_agent(agent_id: str):
     """Stop agent running."""
     # pass to private function to make it easier to mock
     return stop_agent_process(agent_id, app_context)
-
-
-def get_process_status(process_id: subprocess.Popen) -> ProcessState:
-    """Return the state of the execution."""
-    assert process_id is not None, "Process id cannot be None!"
-
-    return_code = process_id.poll()
-    if return_code is None:
-        return ProcessState.RUNNING
-    elif return_code <= 0:
-        return ProcessState.FINISHED
-    else:
-        return ProcessState.FAILED
 
 
 def create_app():

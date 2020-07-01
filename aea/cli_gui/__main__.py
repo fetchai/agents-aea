@@ -17,11 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main entry point for CLI GUI."""
+"""Main entry point for CLI GUI."""  # pragma: no cover
 
-import argparse
+import argparse  # pragma: no cover
 
-import aea.cli_gui
+import aea.cli_gui  # pragma: no cover
 
 parser = argparse.ArgumentParser(
     description="Launch the gui through python"
