@@ -158,7 +158,7 @@ class GenericStrategy(Model):
             quantities_by_good_id={self._service_id: -self._sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
-            fee=0,
+            fee_by_currency_id={self._currency_id: 0},
         )
         return proposal, terms, self._data_for_sale
 

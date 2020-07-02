@@ -79,7 +79,7 @@ def test_init_terms_w_fee():
     quantities_by_good_id = {"good_1": 20}
     is_sender_payable_tx_fee = True
     nonce = "somestring"
-    fee = 1
+    fee = {"FET": 1}
     terms = Terms(
         ledger_id=ledger_id,
         sender_address=sender_addr,
@@ -88,7 +88,7 @@ def test_init_terms_w_fee():
         quantities_by_good_id=quantities_by_good_id,
         is_sender_payable_tx_fee=is_sender_payable_tx_fee,
         nonce=nonce,
-        fee=fee,
+        fee_by_currency_id=fee,
     )
     new_counterparty_address = "CounterpartyAddressNew"
     terms.counterparty_address = new_counterparty_address

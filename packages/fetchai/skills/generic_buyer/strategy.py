@@ -206,6 +206,6 @@ class GenericStrategy(Model):
             },
             is_sender_payable_tx_fee=True,
             nonce=proposal.values["tx_nonce"],
-            fee=self._max_tx_fee,
+            fee_by_currency_id={proposal.values["currency_id"]: self._max_tx_fee},
         )
         return terms

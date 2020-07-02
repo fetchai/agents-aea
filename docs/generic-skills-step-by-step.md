@@ -1006,7 +1006,7 @@ the [OEF search node](../oef-ledger) registration and we assume that the query m
             quantities_by_good_id={self._service_id: -self._sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
-            fee=0,
+            fee_by_currency_id={self._currency_id: 0},
         )
         return proposal, terms, self._data_for_sale
 
@@ -2485,7 +2485,7 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
             },
             is_sender_payable_tx_fee=True,
             nonce=proposal.values["tx_nonce"],
-            fee=self._max_tx_fee,
+            fee_by_currency_id={proposal.values["currency_id"]: self._max_tx_fee},
         )
         return terms
 ```

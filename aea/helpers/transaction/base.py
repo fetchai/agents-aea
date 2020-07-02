@@ -400,7 +400,7 @@ class Terms:
         quantities_by_good_id: Dict[str, int],
         is_sender_payable_tx_fee: bool,
         nonce: str,
-        fee: Optional[int] = None,
+        fee_by_currency_id: Optional[Dict[str, int]] = None,
         **kwargs,
     ):
         """
@@ -412,8 +412,8 @@ class Terms:
         :param amount_by_currency_id: the amount by the currency of the transaction.
         :param quantities_by_good_id: a map from good id to the quantity of that good involved in the transaction.
         :param is_sender_payable_tx_fee: whether the sender or counterparty pays the tx fee.
-        :param nonce: nonce to be included in transaction to discriminate otherwise identical transactions
-        :param fee: the fee associated with the transaction
+        :param nonce: nonce to be included in transaction to discriminate otherwise identical transactions.
+        :param fee_by_currency_id: the fee associated with the transaction.
         """
         self._ledger_id = ledger_id
         self._sender_address = sender_address
@@ -422,7 +422,7 @@ class Terms:
         self._quantities_by_good_id = quantities_by_good_id
         self._is_sender_payable_tx_fee = is_sender_payable_tx_fee
         self._nonce = nonce
-        self._fee = fee
+        self._fee_by_currency_id = fee_by_currency_id
         self._kwargs = kwargs if kwargs is not None else {}
         self._check_consistency()
 
@@ -464,9 +464,15 @@ class Terms:
             self._is_sender_payable_tx_fee, bool
         ), "is_sender_payable_tx_fee must be bool"
         assert isinstance(self._nonce, str), "nonce must be str"
-        assert self._fee is None or isinstance(
-            self._fee, int
-        ), "fee must be None or int"
+        assert self._fee_by_currency_id is None or (
+            isinstance(self._fee_by_currency_id, dict)
+            and all(
+                [
+                    isinstance(key, str) and isinstance(value, int)
+                    for key, value in self._fee_by_currency_id.items()
+                ]
+            )
+        ), "fee must be None or Dict[str, int]"
 
     @property
     def ledger_id(self) -> str:
@@ -500,7 +506,7 @@ class Terms:
         assert (
             len(self._amount_by_currency_id) == 1
         ), "More than one currency id, cannot get amount."
-        return -[key for key in self._amount_by_currency_id.values()][0]
+        return -next(iter(self._amount_by_currency_id.values()))
 
     @property
     def counterparty_payable_amount(self) -> int:
@@ -508,7 +514,7 @@ class Terms:
         assert (
             len(self._amount_by_currency_id) == 1
         ), "More than one currency id, cannot get amount."
-        return [key for key in self._amount_by_currency_id.values()][0]
+        return next(iter(self._amount_by_currency_id.values()))
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
@@ -528,13 +534,22 @@ class Terms:
     @property
     def has_fee(self) -> bool:
         """Check if fee is set."""
-        return self._fee is not None
+        return self._fee_by_currency_id is not None
 
     @property
     def fee(self) -> int:
         """Get the fee."""
-        assert self._fee is not None, "Fee not set."
-        return self._fee
+        assert self._fee_by_currency_id is not None, "fee_by_currency_id not set."
+        assert (
+            len(self._fee_by_currency_id) == 1
+        ), "More than one currency id, cannot get fee."
+        return next(iter(self._fee_by_currency_id.values()))
+
+    @property
+    def fee_by_currency_id(self) -> Dict[str, int]:
+        """Get fee by currency."""
+        assert self._fee_by_currency_id is not None, "fee_by_currency_id not set."
+        return self._fee_by_currency_id
 
     @property
     def kwargs(self) -> Dict[str, Any]:
@@ -585,7 +600,7 @@ class Terms:
         )
 
     def __str__(self):
-        return "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee={}, kwargs={}".format(
+        return "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee_by_currency_id={}, kwargs={}".format(
             self.ledger_id,
             self.sender_address,
             self.counterparty_address,
@@ -593,7 +608,7 @@ class Terms:
             self.quantities_by_good_id,
             self.is_sender_payable_tx_fee,
             self.nonce,
-            self._fee,
+            self._fee_by_currency_id,
             self.kwargs,
         )
 

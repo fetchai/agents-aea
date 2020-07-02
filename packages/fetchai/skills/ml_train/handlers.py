@@ -169,7 +169,7 @@ class MlTradeHandler(Handler):
                     is_sender_payable_tx_fee=True,
                     quantities_by_good_id={"ml_training_data": 1},
                     nonce=uuid.uuid4().hex,
-                    fee=1,
+                    fee_by_currency_id={terms.values["currency_id"]: 1},
                 ),
             )
             ledger_api_msg.counterparty = LEDGER_API_ADDRESS

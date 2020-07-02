@@ -139,6 +139,7 @@ class Transactions(Model):
             for good_id in goods_component.keys():
                 goods_component[good_id] = goods_component[good_id] * (-1)
         tx_amount_by_currency_id = {proposal_description.values["currency_id"]: amount}
+        tx_fee_by_currency_id = {proposal_description.values["currency_id"]: 1}
         tx_nonce = proposal_description.values["tx_nonce"]
         # need to hash positive.negative side separately
         tx_hash = tx_hash_from_values(
@@ -165,6 +166,7 @@ class Transactions(Model):
                 is_sender_payable_tx_fee=True,  # TODO: check!
                 quantities_by_good_id=goods_component,
                 nonce=tx_nonce,
+                fee_by_currency_id=tx_fee_by_currency_id,
             ),
             crypto_id="ethereum",
             skill_callback_info={"dialogue_label": dialogue_label.json},
