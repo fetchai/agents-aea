@@ -18,6 +18,3 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the protocol modules."""
-from typing import List
-
-default_dependencies = []  # type: List[str]

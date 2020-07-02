@@ -17,7 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the channel modules."""
-from typing import List
-
-stub_dependencies = ["watchdog"]  # type: List[str]
+"""This module contains the connection modules."""
