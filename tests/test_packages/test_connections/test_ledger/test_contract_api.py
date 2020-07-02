@@ -70,13 +70,18 @@ def load_erc1155_contract():
     contract = Contract.from_config(configuration)
     assert contract.contract_interface is not None
 
+    # TODO some other tests don't deregister contracts from the registry.
+    #   find a neater solution.
+    if configuration.public_id in contract_registry.specs.keys():
+        contract_registry.specs.pop(str(configuration.public_id))
+
     contract_registry.register(
         id_=str(configuration.public_id),
         entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
         class_kwargs={"contract_interface": contract.contract_interface},
         contract_config=configuration,
     )
-    contract = contract_registry.make(configuration.public_id)
+    contract = contract_registry.make(str(configuration.public_id))
     yield
     contract_registry.specs.pop(str(configuration.public_id))
 
