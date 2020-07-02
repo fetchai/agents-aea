@@ -64,21 +64,15 @@ crypto = [
 @pytest.fixture(params=ledger)
 def ledger_api(request):
     ledger_id, config = request.param
-    import aea  # noqa # ensures registries are populated!
-
     api = ledger_apis_registry.make(ledger_id, **config)
     yield api
-    ledger_apis_registry.specs.pop(ledger_id)
 
 
 @pytest.fixture(params=crypto)
 def crypto_api(request):
     crypto_id = request.param[0]
-    import aea  # noqa # ensures registries are populated!
-
     api = crypto_registry.make(crypto_id)
     yield api
-    crypto_registry.specs.pop(crypto_id)
 
 
 @pytest.fixture()
