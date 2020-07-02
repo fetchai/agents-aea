@@ -132,7 +132,7 @@ def get_registered_items(item_type: str):
 def search_registered_items(item_type: str, search_term: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
-    ctx = Context(cwd=os.path.join(app_context.agents_dir, "aea"))
+    ctx = Context(cwd=app_context.agents_dir)
     try:
         cli_setup_search_ctx(ctx, local=app_context.local)
         result = cli_search_items(ctx, item_type, query=search_term)
