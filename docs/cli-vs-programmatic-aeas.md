@@ -71,7 +71,7 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
-from packages.fetchai.connections.ledger_api.connection import LedgerApiConnection
+from packages.fetchai.connections.ledger_api.connection import LedgerConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
@@ -96,7 +96,7 @@ def run():
 
     # specify the default routing for some protocols
     default_routing = {
-        PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerApiConnection.connection_id
+        PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerConnection.connection_id
     }
     default_connection = OEFConnection.connection_id
 
@@ -136,8 +136,8 @@ def run():
     resources.add_protocol(fipa_protocol)
 
     # Add the LedgerAPI connection
-    configuration = ConnectionConfig(connection_id=LedgerApiConnection.connection_id)
-    ledger_api_connection = LedgerApiConnection(
+    configuration = ConnectionConfig(connection_id=LedgerConnection.connection_id)
+    ledger_api_connection = LedgerConnection(
         configuration=configuration, identity=identity
     )
     resources.add_connection(ledger_api_connection)

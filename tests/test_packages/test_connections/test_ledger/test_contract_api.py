@@ -39,9 +39,7 @@ from aea.helpers.transaction.base import RawTransaction
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.ledger_api.contract_dispatcher import (
-    ContractApiDialogues,
-)
+from packages.fetchai.connections.ledger.contract_dispatcher import ContractApiDialogues
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 
 from ....conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
@@ -51,7 +49,7 @@ from ....conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
 async def ledger_apis_connection(request):
     identity = Identity("name", FetchAICrypto().address)
     crypto_store = CryptoStore()
-    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger_api")
+    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
         directory, identity=identity, crypto_store=crypto_store
     )

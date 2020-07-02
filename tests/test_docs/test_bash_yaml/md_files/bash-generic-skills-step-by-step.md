@@ -48,7 +48,7 @@ aea generate-wealth fetchai
 ```
 ``` bash 
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea run
@@ -59,7 +59,7 @@ aea add-key ethereum eth_private_key.txt
 ```
 ``` bash 
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea run
@@ -241,7 +241,7 @@ ledger_apis:
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 ``` yaml
 ledger_apis:

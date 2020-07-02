@@ -41,7 +41,7 @@ from aea.helpers.transaction.base import (
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.ledger_api.ledger_dispatcher import LedgerApiDialogues
+from packages.fetchai.connections.ledger.ledger_dispatcher import LedgerApiDialogues
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
@@ -72,7 +72,7 @@ ledger_ids = pytest.mark.parametrize(
 async def ledger_apis_connection(request):
     identity = Identity("name", FetchAICrypto().address)
     crypto_store = CryptoStore()
-    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger_api")
+    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
         directory, identity=identity, crypto_store=crypto_store
     )

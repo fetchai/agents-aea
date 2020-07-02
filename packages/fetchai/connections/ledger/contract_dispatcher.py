@@ -31,7 +31,7 @@ from aea.helpers.dialogue.base import (
 from aea.helpers.transaction.base import RawTransaction, State
 from aea.protocols.base import Message
 
-from packages.fetchai.connections.ledger_api.base import (
+from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID,
     RequestDispatcher,
 )

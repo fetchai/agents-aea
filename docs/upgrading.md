@@ -5,7 +5,7 @@ This page provides some tipps of how to upgrade between versions.
 
 A number of breaking changes where introduced which make backwards compatibility of skills rare.
 
-- Ledger apis <a href="../api/crypto/ledger_apis#ledger-apis-obkects">`LedgerApis`</a> have been removed from the AEA constructor and skill context. `LedgerApis` are now exposed in the `LedgerApiConnection`. To communicate with the `LedgerApis` use the `fetchai/ledger_api` protocol.
+- Ledger apis <a href="../api/crypto/ledger_apis#ledger-apis-objects">`LedgerApis`</a> have been removed from the AEA constructor and skill context. `LedgerApis` are now exposed in the `LedgerConnection`. To communicate with the `LedgerApis` use the `fetchai/ledger_api` protocol.
 
 ## v0.4.0 to v0.4.1
 

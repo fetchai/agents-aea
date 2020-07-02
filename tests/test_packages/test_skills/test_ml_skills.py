@@ -41,12 +41,12 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         model_trainer_aea_name = "ml_model_trainer"
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger_api:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.add_item("skill", "fetchai/ml_data_provider:0.5.0")
         setting_path = (
@@ -60,7 +60,7 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.add_item("skill", "fetchai/ml_train:0.5.0")
         setting_path = (
@@ -131,12 +131,12 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         ledger_apis = {"fetchai": {"network": "testnet"}}
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger_api:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.add_item("skill", "fetchai/ml_data_provider:0.5.0")
         setting_path = "agent.ledger_apis"
@@ -155,7 +155,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.add_item("skill", "fetchai/ml_train:0.5.0")
         setting_path = "agent.ledger_apis"

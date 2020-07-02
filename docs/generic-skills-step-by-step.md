@@ -98,7 +98,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 30.0
-LEDGER_API_ADDRESS = "fetchai/ledger_api:0.1.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
@@ -235,13 +235,13 @@ We have to specify the logic to negotiate with another AEA based on the strategy
         Seller_AEA->>Buyer_AEA: propose
         Buyer_AEA->>Seller_AEA: accept
         Seller_AEA->>Buyer_AEA: match_accept
-        loop Once with LedgerApiConnection
+        loop Once with LedgerConnection
             Buyer_AEA->>Buyer_AEA: Get raw transaction from ledger api
         end
         loop Once with DecisionMaker
             Buyer_AEA->>Buyer_AEA: Get signed transaction from decision maker
         end
-        loop Once with LedgerApiConnection
+        loop Once with LedgerConnection
             Buyer_AEA->>Buyer_AEA: Send transaction and get digest from ledger api
             Buyer_AEA->>Blockchain: transfer_funds
         end
@@ -283,7 +283,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
-LEDGER_API_ADDRESS = "fetchai/ledger_api:0.1.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
 
 
 class GenericFipaHandler(Handler):
@@ -1422,7 +1422,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger_api:0.1.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
 
 
 class GenericSearchBehaviour(TickerBehaviour):
@@ -1518,7 +1518,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
-LEDGER_API_ADDRESS = "fetchai/ledger_api:0.1.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
 
 
 class GenericFipaHandler(Handler):
@@ -3001,7 +3001,7 @@ ledger_apis:
 and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 #### Fund the buyer AEA
@@ -3018,7 +3018,7 @@ Run both AEAs from their respective terminals
 
 ``` bash 
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea run
@@ -3079,7 +3079,7 @@ Run both AEAs from their respective terminals.
 
 ``` bash 
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea run

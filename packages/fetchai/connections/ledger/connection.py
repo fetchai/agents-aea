@@ -27,21 +27,21 @@ from aea.connections.base import Connection
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
-from packages.fetchai.connections.ledger_api.base import (
+from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID,
     RequestDispatcher,
 )
-from packages.fetchai.connections.ledger_api.contract_dispatcher import (
+from packages.fetchai.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,
 )
-from packages.fetchai.connections.ledger_api.ledger_dispatcher import (
+from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.ledger_api import LedgerApiMessage
 
 
-class LedgerApiConnection(Connection):
+class LedgerConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
     connection_id = CONNECTION_ID

@@ -48,7 +48,7 @@ from packages.fetchai.skills.ml_train.strategy import Strategy
 
 
 DUMMY_DIGEST = "dummy_digest"
-LEDGER_API_ADDRESS = "fetchai/ledger_api:0.1.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
 
 
 class MlTradeHandler(Handler):

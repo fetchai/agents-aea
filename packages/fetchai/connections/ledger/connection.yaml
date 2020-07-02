@@ -1,20 +1,20 @@
-name: ledger_api
+name: ledger
 author: fetchai
 version: 0.1.0
-description: A connection to interact with any ledger API.
+description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmeSwEkLjwsiaGV7RiB8Y2pELfNyj7mRnq1hY5pSi8M9RT
-  connection.py: QmQtDUgaBZLgqvgzVZcBzpPFBywwddByjdbqRDZJKB9pNr
-  contract_dispatcher.py: QmWMDfJ1pSzJUgfujtyyCw3MQvrSLtweP2FXfgS8H2xnRF
-  ledger_dispatcher.py: QmW8kMveVgTCpbjjJqFhwuDEhC5Bkyzz7JGEBcTpwtXjm2
+  base.py: QmSyYxrf7Jr9Ey2cwwsfzVSVJ2MExjvJ1jBQeba6vcf27M
+  connection.py: QmRS9gMEi88fnby3v53uZXTC6a6VWHJhkBPZmxJJDpzfZi
+  contract_dispatcher.py: QmXhWmhRuDsSVjXsAWK4CGNJUDAESY9e7KsyHvpURQYzX2
+  ledger_dispatcher.py: QmSBbEXW43HmYYLL2sPDWZGPR9P5Fda6uSTE8tqyZWLRpt
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/contract_api:0.1.0
 - fetchai/ledger_api:0.1.0
-class_name: LedgerApiConnection
+class_name: LedgerConnection
 config:
   ledger_apis:
     cosmos:

@@ -84,7 +84,7 @@ The following steps create the data provider from scratch:
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/ml_data_provider:0.5.0
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
@@ -99,7 +99,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -122,7 +122,7 @@ The following steps create the model trainer from scratch:
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/ml_train:0.5.0
 aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
@@ -139,7 +139,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>

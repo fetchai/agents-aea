@@ -113,12 +113,12 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         ledger_apis = {"fetchai": {"network": "testnet"}}
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger_api:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.add_item("skill", "fetchai/thermometer:0.5.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
@@ -146,7 +146,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.add_item("skill", "fetchai/thermometer_client:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)

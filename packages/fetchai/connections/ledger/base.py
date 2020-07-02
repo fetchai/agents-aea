@@ -31,7 +31,7 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/ledger_api:0.1.0")
+CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.1.0")
 
 
 class RequestDispatcher(ABC):

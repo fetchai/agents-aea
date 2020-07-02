@@ -35,12 +35,12 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         weather_client_aea_name = "my_weather_client"
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger_api:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.add_item("skill", "fetchai/weather_station:0.5.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         dotted_path = (
@@ -54,7 +54,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.add_item("skill", "fetchai/weather_client:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         dotted_path = (
@@ -120,7 +120,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         weather_client_aea_name = "my_weather_client"
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger_api:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
 
         # prepare ledger configurations
         ledger_apis = {"fetchai": {"network": "testnet"}}
@@ -128,7 +128,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.add_item("skill", "fetchai/weather_station:0.5.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
@@ -146,7 +146,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger_api:0.1.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.add_item("skill", "fetchai/weather_client:0.4.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)

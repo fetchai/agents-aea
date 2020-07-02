@@ -10,7 +10,7 @@ aea install
 aea create car_detector
 cd car_detector
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/carpark_detection:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -24,7 +24,7 @@ aea install
 aea create car_data_buyer
 cd car_data_buyer
 aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger_api:0.1.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/carpark_client:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -83,7 +83,7 @@ ledger_apis:
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger_api:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 ``` yaml
 ledger_apis:
