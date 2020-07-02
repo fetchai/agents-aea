@@ -19,15 +19,11 @@
 """Key pieces of functionality for CLI GUI."""
 
 import glob
-import io
-import logging
 import os
 import subprocess  # nosec
 import sys
 import threading
-import time
-from enum import Enum
-from typing import Dict, List, Set
+from typing import Dict, List
 
 from click import ClickException
 
@@ -50,6 +46,16 @@ from aea.cli.search import (
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
+from aea.cli_gui.utils import (
+    ProcessState,
+    call_aea_async,
+    get_process_status,
+    is_agent_dir,
+    read_error,
+    read_tty,
+    stop_agent_process,
+    terminate_processes,
+)
 from aea.configurations.base import PublicId
 
 elements = [
@@ -63,21 +69,8 @@ elements = [
     ["local", "skill", "localSkills"],
 ]
 
-_processes = set()  # type: Set[subprocess.Popen]
-
-
-class ProcessState(Enum):
-    """The state of execution of the agent."""
-
-    NOT_STARTED = "Not started yet"
-    RUNNING = "Running"
-    STOPPING = "Stopping"
-    FINISHED = "Finished"
-    FAILED = "Failed"
-
 
 max_log_lines = 100
-lock = threading.Lock()
 
 
 class AppContext:
@@ -98,35 +91,6 @@ class AppContext:
 
 
 app_context = AppContext()
-
-
-def _call_subprocess(*args, timeout=None, **kwargs):
-    """
-    Create a subprocess.Popen, but with error handling.
-
-    :return the exit code, or -1 if the call raises exception.
-    """
-    process = subprocess.Popen(*args)  # nosec
-    ret = -1
-    try:
-        ret = process.wait(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        logging.exception(
-            "TimeoutError occurred when calling with args={} and kwargs={}".format(
-                args, kwargs
-            )
-        )
-    finally:
-        _terminate_process(process)
-    return ret
-
-
-def is_agent_dir(dir_name: str) -> bool:
-    """Return true if this directory contains an AEA project (an agent)."""
-    if not os.path.isdir(dir_name):
-        return False
-    else:
-        return os.path.isfile(os.path.join(dir_name, "aea-config.yaml"))
 
 
 def get_agents() -> List[Dict]:
@@ -151,37 +115,6 @@ def get_agents() -> List[Dict]:
     return agent_list
 
 
-def _sync_extract_items_from_tty(pid: subprocess.Popen):
-    item_ids = []
-    item_descs = []
-    output = []
-    err = ""
-    for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
-        if line[:11] == "Public ID: ":
-            item_ids.append(line[11:-1])
-
-        if line[:13] == "Description: ":
-            item_descs.append(line[13:-1])
-
-    assert len(item_ids) == len(
-        item_descs
-    ), "Number of item ids and descriptions does not match!"
-
-    for idx, item_id in enumerate(item_ids):
-        output.append({"id": item_id, "description": item_descs[idx]})
-
-    for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
-        err += line + "\n"
-
-    while pid.poll() is None:
-        time.sleep(0.1)  # pragma: no cover
-
-    if pid.poll() == 0:
-        return output, 200  # 200 (Success)
-    else:
-        return {"detail": err}, 400  # 400 Bad request
-
-
 def get_registered_items(item_type: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the cher can find the packages
@@ -199,7 +132,7 @@ def get_registered_items(item_type: str):
 def search_registered_items(item_type: str, search_term: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
-    ctx = Context(cwd=os.path.join(app_context.agents_dir, "aea"))
+    ctx = Context(cwd=app_context.agents_dir)
     try:
         cli_setup_search_ctx(ctx, local=app_context.local)
         result = cli_search_items(ctx, item_type, query=search_term)
@@ -337,31 +270,6 @@ def scaffold_item(agent_id: str, item_type: str, item_id: str):
         return agent_id, 201  # 200 (OK)
 
 
-def _call_aea(param_list: List[str], dir_arg: str) -> int:
-    with lock:
-        old_cwd = os.getcwd()
-        os.chdir(dir_arg)
-        ret = _call_subprocess(param_list)  # nosec
-        os.chdir(old_cwd)
-    return ret
-
-
-def _call_aea_async(param_list: List[str], dir_arg: str) -> subprocess.Popen:
-    # Should lock here to prevent multiple calls coming in at once and changing the current working directory weirdly
-    with lock:
-        old_cwd = os.getcwd()
-
-        os.chdir(dir_arg)
-        env = os.environ.copy()
-        env["PYTHONUNBUFFERED"] = "1"
-        ret = subprocess.Popen(  # nosec
-            param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
-        )
-        _processes.add(ret)
-        os.chdir(old_cwd)
-    return ret
-
-
 def start_agent(agent_id: str, connection_id: PublicId):
     """Start a local agent running."""
     # Test if it is already running in some form
@@ -369,7 +277,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
         if (
             get_process_status(app_context.agent_processes[agent_id])
             != ProcessState.RUNNING
-        ):
+        ):  # pragma: no cover
             if app_context.agent_processes[agent_id] is not None:
                 app_context.agent_processes[agent_id].terminate()
                 app_context.agent_processes[agent_id].wait()
@@ -391,7 +299,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
             if element["public_id"] == connection_id:
                 has_named_connection = True
         if has_named_connection:
-            agent_process = _call_aea_async(
+            agent_process = call_aea_async(
                 [
                     sys.executable,
                     "-m",
@@ -412,7 +320,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
                 400,
             )  # 400 Bad request
     else:
-        agent_process = _call_aea_async(
+        agent_process = call_aea_async(
             [sys.executable, "-m", "aea.cli", "run"], agent_dir
         )
 
@@ -427,7 +335,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
         app_context.agent_error[agent_id] = []
 
         tty_read_thread = threading.Thread(
-            target=_read_tty,
+            target=read_tty,
             args=(
                 app_context.agent_processes[agent_id],
                 app_context.agent_tty[agent_id],
@@ -436,7 +344,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
         tty_read_thread.start()
 
         error_read_thread = threading.Thread(
-            target=_read_error,
+            target=read_error,
             args=(
                 app_context.agent_processes[agent_id],
                 app_context.agent_error[agent_id],
@@ -445,24 +353,6 @@ def start_agent(agent_id: str, connection_id: PublicId):
         error_read_thread.start()
 
     return agent_id, 201  # 200 (OK)
-
-
-def _read_tty(pid: subprocess.Popen, str_list: List[str]):
-    for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
-        out = line.replace("\n", "")
-        logging.info("stdout: {}".format(out))
-        str_list.append(line)
-
-    str_list.append("process terminated\n")
-
-
-def _read_error(pid: subprocess.Popen, str_list: List[str]):
-    for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
-        out = line.replace("\n", "")
-        logging.error("stderr: {}".format(out))
-        str_list.append(line)
-
-    str_list.append("process terminated\n")
 
 
 def get_agent_status(agent_id: str):
@@ -506,35 +396,7 @@ def get_agent_status(agent_id: str):
 def stop_agent(agent_id: str):
     """Stop agent running."""
     # pass to private function to make it easier to mock
-    return _stop_agent(agent_id)
-
-
-def _stop_agent(agent_id: str):
-    # Test if we have the process id
-    if agent_id not in app_context.agent_processes:
-        return (
-            {"detail": "Agent {} is not running".format(agent_id)},
-            400,
-        )  # 400 Bad request
-
-    app_context.agent_processes[agent_id].terminate()
-    app_context.agent_processes[agent_id].wait()
-    del app_context.agent_processes[agent_id]
-
-    return "stop_agent: All fine {}".format(agent_id), 200  # 200 (OK)
-
-
-def get_process_status(process_id: subprocess.Popen) -> ProcessState:
-    """Return the state of the execution."""
-    assert process_id is not None, "Process id cannot be None!"
-
-    return_code = process_id.poll()
-    if return_code is None:
-        return ProcessState.RUNNING
-    elif return_code <= 0:
-        return ProcessState.FINISHED
-    else:
-        return ProcessState.FAILED
+    return stop_agent_process(agent_id, app_context)
 
 
 def create_app():
@@ -581,27 +443,6 @@ def create_app():
     return app
 
 
-def _terminate_process(process: subprocess.Popen):
-    """Try to process gracefully."""
-    poll = process.poll()
-    if poll is None:
-        # send SIGTERM
-        process.terminate()
-        try:
-            # wait for termination
-            process.wait(3)
-        except subprocess.TimeoutExpired:
-            # send SIGKILL
-            process.kill()
-
-
-def _terminate_processes():
-    """Terminate all the (async) processes instantiated by the GUI."""
-    logging.info("Cleaning up...")
-    for process in _processes:
-        _terminate_process(process)
-
-
 def run(port: int, host: str = "127.0.0.1"):
     """Run the GUI."""
 
@@ -609,7 +450,7 @@ def run(port: int, host: str = "127.0.0.1"):
     try:
         app.run(host=host, port=port, debug=False)
     finally:
-        _terminate_processes()
+        terminate_processes()
 
     return app
 
