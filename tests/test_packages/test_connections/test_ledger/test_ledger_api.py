@@ -153,7 +153,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
             quantities_by_good_id={"some_service_id": 1},
             is_sender_payable_tx_fee=True,
             nonce="",
-            fee=fee,
+            fee_by_currency_id={"ETH": fee},
             chain_id=3,
         ),
     )

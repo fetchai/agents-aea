@@ -63,7 +63,7 @@ def test_init_terms():
     assert terms.kwargs == kwargs
     assert (
         str(terms)
-        == "Terms: ledger_id=some_ledger, sender_address=SenderAddress, counterparty_address=CounterpartyAddress, amount_by_currency_id={'FET': -10}, quantities_by_good_id={'good_1': 20}, is_sender_payable_tx_fee=True, nonce=somestring, fee=None, kwargs={'key': 'value'}"
+        == "Terms: ledger_id=some_ledger, sender_address=SenderAddress, counterparty_address=CounterpartyAddress, amount_by_currency_id={'FET': -10}, quantities_by_good_id={'good_1': 20}, is_sender_payable_tx_fee=True, nonce=somestring, fee_by_currency_id=None, kwargs={'key': 'value'}"
     )
     assert terms == terms
     with pytest.raises(AssertionError):
@@ -93,7 +93,8 @@ def test_init_terms_w_fee():
     new_counterparty_address = "CounterpartyAddressNew"
     terms.counterparty_address = new_counterparty_address
     assert terms.counterparty_address == new_counterparty_address
-    assert terms.fee == fee
+    assert terms.fee == fee["FET"]
+    assert terms.fee_by_currency_id == fee
     assert terms.counterparty_payable_amount == next(
         iter(amount_by_currency_id.values())
     )
