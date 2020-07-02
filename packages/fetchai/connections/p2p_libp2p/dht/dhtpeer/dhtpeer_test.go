@@ -21,6 +21,7 @@
 package dhtpeer
 
 import (
+	"context"
 	"net"
 	"strconv"
 	"testing"
@@ -42,7 +43,8 @@ const (
 	DefaultAgentAddress = "2FRCqDBo7Yw3E2VJc1tAkggppWzLnCCYjPN9zHrQrj8Fupzmkr"
 	DefaultDelegatePort = 3000
 
-	EnvelopeDeliveryTimeout = 5 * time.Second
+	EnvelopeDeliveryTimeout = 10 * time.Second
+	DHTPeerSetupTimeout     = 5 * time.Second
 )
 
 var (
@@ -149,6 +151,8 @@ func TestRoutingDHTPeerToDHTPeerDirect(t *testing.T) {
 		return nil
 	})
 
+	ensureAddressAnnounced(dhtPeer1, dhtPeer2)
+
 	err = dhtPeer2.RouteEnvelope(&aea.Envelope{
 		To:     AgentsTestAddresses[0],
 		Sender: AgentsTestAddresses[1],
@@ -206,7 +210,8 @@ func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 		return nil
 	})
 
-	time.Sleep(1 * time.Second)
+	ensureAddressAnnounced(dhtPeer1, dhtPeer2)
+
 	err = dhtPeer2.RouteEnvelope(&aea.Envelope{
 		To:     AgentsTestAddresses[1],
 		Sender: AgentsTestAddresses[2],
@@ -274,7 +279,8 @@ func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 		return nil
 	})
 
-	time.Sleep(1 * time.Second)
+	ensureAddressAnnounced(dhtPeer1, dhtPeer2)
+
 	err = dhtPeer2.RouteEnvelope(&aea.Envelope{
 		To:     AgentsTestAddresses[2],
 		Sender: AgentsTestAddresses[3],
@@ -327,7 +333,8 @@ func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
 		defer cleanup()
 	}
 
-	time.Sleep(1 * time.Second)
+	ensureAddressAnnounced(peers...)
+
 	for i := range peers {
 		for j := range peers {
 			from := len(peers) - 1 - i
@@ -450,6 +457,8 @@ func TestRoutingDHTClientToDHTPeerIndirect(t *testing.T) {
 		return nil
 	})
 
+	ensureAddressAnnounced(entryPeer, peer)
+
 	time.Sleep(1 * time.Second)
 	err = client.RouteEnvelope(&aea.Envelope{
 		To:     AgentsTestAddresses[1],
@@ -570,6 +579,8 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 		return nil
 	})
 
+	ensureAddressAnnounced(peer1, peer2)
+
 	time.Sleep(1 * time.Second)
 	err = client2.RouteEnvelope(&aea.Envelope{
 		To:     AgentsTestAddresses[2],
@@ -643,7 +654,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer peerCleanup1()
 
-	_, peerCleanup2, err := SetupLocalDHTPeer(
+	peer2, peerCleanup2, err := SetupLocalDHTPeer(
 		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{peer1.MultiAddr()},
 	)
@@ -664,6 +675,8 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 		rxPeer1 <- envel
 		return nil
 	})
+
+	ensureAddressAnnounced(peer1, peer2)
 
 	err = client.Send(&aea.Envelope{
 		To:     AgentsTestAddresses[0],
@@ -706,7 +719,7 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	}
 	defer peerCleanup1()
 
-	_, peerCleanup2, err := SetupLocalDHTPeer(
+	peer2, peerCleanup2, err := SetupLocalDHTPeer(
 		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
 		[]string{entryPeer.MultiAddr()},
 	)
@@ -727,6 +740,8 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 		rxPeer1 <- envel
 		return nil
 	})
+
+	ensureAddressAnnounced(entryPeer, peer1, peer2)
 
 	err = client.Send(&aea.Envelope{
 		To:     AgentsTestAddresses[1],
@@ -805,7 +820,7 @@ func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 	}
 	defer peer1Cleanup()
 
-	_, peer2Cleanup, err := SetupLocalDHTPeer(
+	peer2, peer2Cleanup, err := SetupLocalDHTPeer(
 		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{peer1.MultiAddr()},
 	)
@@ -826,7 +841,8 @@ func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 	}
 	defer clientCleanup2()
 
-	time.Sleep(1 * time.Second)
+	ensureAddressAnnounced(peer1, peer2)
+
 	err = client1.Send(&aea.Envelope{
 		To:     AgentsTestAddresses[3],
 		Sender: AgentsTestAddresses[2],
@@ -906,7 +922,7 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 	}
 	defer peerCleanup1()
 
-	_, peerCleanup2, err := SetupLocalDHTPeer(
+	peer2, peerCleanup2, err := SetupLocalDHTPeer(
 		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{peer1.MultiAddr()},
 	)
@@ -939,6 +955,8 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 			Sender: envel.To,
 		})
 	})
+
+	ensureAddressAnnounced(peer1, peer2)
 
 	time.Sleep(1 * time.Second)
 	err = delegateClient.Send(&aea.Envelope{
@@ -1256,7 +1274,8 @@ func TestRoutingAllToAll(t *testing.T) {
 
 	// Send envelope from everyone to everyone else and expect an echo back
 
-	time.Sleep(1 * time.Second)
+	ensureAddressAnnounced(dhtPeer1, dhtPeer2, dhtPeer3, dhtPeer4)
+
 	for i := range AgentsTestAddresses {
 		for j := range AgentsTestAddresses {
 			from := len(AgentsTestAddresses) - 1 - i
@@ -1398,5 +1417,19 @@ func expectEnvelope(t *testing.T, rx chan *aea.Envelope) {
 		t.Log("Received envelope", envel)
 	case <-timeout:
 		t.Error("Failed to receive envelope before timeout")
+	}
+}
+
+func ensureAddressAnnounced(peers ...*DHTPeer) {
+	for _, peer := range peers {
+		ctx, cancel := context.WithTimeout(context.Background(), DHTPeerSetupTimeout)
+		defer cancel()
+		for !peer.addressAnnounced {
+			select {
+			case <-ctx.Done():
+				break
+			case <-time.After(5 * time.Millisecond):
+			}
+		}
 	}
 }
