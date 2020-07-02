@@ -168,7 +168,6 @@ class Transactions(Model):
                 nonce=tx_nonce,
                 fee_by_currency_id=tx_fee_by_currency_id,
             ),
-            crypto_id="ethereum",
             skill_callback_info={"dialogue_label": dialogue_label.json},
             message=tx_hash,
         )

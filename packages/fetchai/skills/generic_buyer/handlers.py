@@ -684,7 +684,6 @@ class GenericLedgerApiHandler(Handler):
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=(str(self.context.skill_id),),
-            crypto_id=ledger_api_msg.raw_transaction.ledger_id,
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
             skill_callback_info={},

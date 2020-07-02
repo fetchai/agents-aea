@@ -19,7 +19,6 @@
 
 """The base contract."""
 import inspect
-import json
 import logging
 import re
 from abc import ABC, abstractmethod
@@ -117,10 +116,8 @@ class Contract(Component, ABC):
             contract_class_name
         )
 
-        path = Path(directory, configuration.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            contract_interface = json.load(interface_file)
+        # path = Path(directory, configuration.path_to_contract_interface)
+        # with open(path, "r") as interface_file:
+        #     contract_interface = json.load(interface_file)
 
-        # set the interface on the class globaly
-        contract_class.contract_interface = contract_interface
         return contract_class(configuration)

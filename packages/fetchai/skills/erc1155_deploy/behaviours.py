@@ -56,7 +56,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         self._request_balance()
-        self._register_service()
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_contract_deployed:
             self._request_contract_deploy_transaction()
@@ -67,17 +66,22 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        self._unregister_service()
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_contract_deployed and not strategy.is_tokens_created:
             self._request_token_create_transaction()
-        if (
+        elif (
             strategy.is_contract_deployed
             and strategy.is_tokens_created
             and not strategy.is_tokens_minted
         ):
             self._request_token_mint_transaction()
-        self._register_service()
+        elif (
+            strategy.is_contract_deployed
+            and strategy.is_tokens_created
+            and strategy.is_tokens_minted
+        ):
+            self._unregister_service()
+            self._register_service()
 
     def teardown(self) -> None:
         """
@@ -118,11 +122,14 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             ContractApiDialogues, self.context.contract_api_dialogues
         )
         contract_api_msg = ContractApiMessage(
-            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
             ledger_id=strategy.ledger_id,
+            contract_id="fetchai/erc1155:0.5.0",
             callable="get_deploy_transaction",
-            kwargs={"deployer_address": self.context.agent_address},
+            kwargs=ContractApiMessage.Kwargs(
+                {"deployer_address": self.context.agent_address}
+            ),
         )
         contract_api_msg.counterparty = LEDGER_API_ADDRESS
         contract_api_dialogues.update(contract_api_msg)
@@ -147,12 +154,15 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
             ledger_id=strategy.ledger_id,
+            contract_id="fetchai/erc1155:0.5.0",
             contract_address=strategy.contract_address,
             callable="get_create_batch_transaction",
-            kwargs={
-                "deployer_address": self.context.agent_address,
-                "token_ids": strategy.token_ids,
-            },  # TODO
+            kwargs=ContractApiMessage.Kwargs(
+                {
+                    "deployer_address": self.context.agent_address,
+                    "token_ids": strategy.token_ids,
+                }
+            ),
         )
         contract_api_msg.counterparty = LEDGER_API_ADDRESS
         contract_api_dialogues.update(contract_api_msg)
@@ -177,14 +187,17 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
             ledger_id=strategy.ledger_id,
+            contract_id="fetchai/erc1155:0.5.0",
             contract_address=strategy.contract_address,
             callable="get_mint_batch_transaction",
-            kwargs={
-                "deployer_address": self.context.agent_address,
-                "recipient_address": self.context.agent_address,
-                "token_ids": strategy.token_ids,
-                "mint_quantities": strategy.mint_quantities,
-            },  # TODO
+            kwargs=ContractApiMessage.Kwargs(
+                {
+                    "deployer_address": self.context.agent_address,
+                    "recipient_address": self.context.agent_address,
+                    "token_ids": strategy.token_ids,
+                    "mint_quantities": strategy.mint_quantities,
+                }
+            ),
         )
         contract_api_msg.counterparty = LEDGER_API_ADDRESS
         contract_api_dialogues.update(contract_api_msg)

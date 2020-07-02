@@ -214,7 +214,46 @@ class FipaDialogues(Model, BaseFipaDialogues):
         return dialogue
 
 
-LedgerApiDialogue = BaseLedgerApiDialogue
+class LedgerApiDialogue(BaseLedgerApiDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseLedgerApiDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self._associated_signing_dialogue = None  # type: Optional[SigningDialogue]
+
+    @property
+    def associated_signing_dialogue(self) -> "SigningDialogue":
+        """Get the associated signing dialogue."""
+        assert (
+            self._associated_signing_dialogue is not None
+        ), "Associated signing dialogue not set!"
+        return self._associated_signing_dialogue
+
+    @associated_signing_dialogue.setter
+    def associated_signing_dialogue(
+        self, associated_signing_dialogue: "SigningDialogue"
+    ) -> None:
+        """Set the associated signing dialogue."""
+        assert (
+            self._associated_signing_dialogue is None
+        ), "Associated signing dialogue already set!"
+        self._associated_signing_dialogue = associated_signing_dialogue
 
 
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
@@ -318,6 +357,27 @@ class SigningDialogue(BaseSigningDialogue):
         BaseSigningDialogue.__init__(
             self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
         )
+        self._associated_contract_api_dialogue = (
+            None
+        )  # type: Optional[ContractApiDialogue]
+
+    @property
+    def associated_contract_api_dialogue(self) -> ContractApiDialogue:
+        """Get the associated contract api dialogue."""
+        assert (
+            self._associated_contract_api_dialogue is not None
+        ), "Associated contract api dialogue not set!"
+        return self._associated_contract_api_dialogue
+
+    @associated_contract_api_dialogue.setter
+    def associated_contract_api_dialogue(
+        self, associated_contract_api_dialogue: ContractApiDialogue
+    ) -> None:
+        """Set the associated contract api dialogue."""
+        assert (
+            self._associated_contract_api_dialogue is None
+        ), "Associated contract api dialogue already set!"
+        self._associated_contract_api_dialogue = associated_contract_api_dialogue
 
 
 class SigningDialogues(Model, BaseSigningDialogues):
