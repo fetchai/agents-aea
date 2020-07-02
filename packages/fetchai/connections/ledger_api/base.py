@@ -24,9 +24,8 @@ from asyncio import Task
 from concurrent.futures._base import Executor
 from typing import Any, Callable, Dict, Optional
 
-import aea
 from aea.configurations.base import PublicId
-from aea.crypto.registries import Registry
+from aea.crypto.registries import Registry, ledger_apis_registry
 from aea.helpers.dialogue.base import Dialogues
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -85,7 +84,8 @@ class RequestDispatcher(ABC):
         :param envelope: the envelope.
         :return: an awaitable.
         """
-        message = self.get_message(envelope)
+        assert isinstance(envelope.message, Message)
+        message = envelope.message
         ledger_id = self.get_ledger_id(message)
         api = self.ledger_api_registry.make(ledger_id, **self.api_config(ledger_id))
         message.is_incoming = True
@@ -124,11 +124,7 @@ class RequestDispatcher(ABC):
     @property
     def ledger_api_registry(self) -> Registry:
         """Get the registry."""
-        return aea.crypto.registries.ledger_apis_registry
-
-    @abstractmethod
-    def get_message(self, envelope: Envelope) -> Message:
-        """Get the message from envelope."""
+        return ledger_apis_registry
 
     @abstractmethod
     def get_ledger_id(self, message: Message) -> str:

@@ -42,6 +42,7 @@ def test_init_terms():
     quantities_by_good_id = {"good_1": 20}
     is_sender_payable_tx_fee = True
     nonce = "somestring"
+    kwargs = {"key": "value"}
     terms = Terms(
         ledger_id=ledger_id,
         sender_address=sender_addr,
@@ -50,6 +51,7 @@ def test_init_terms():
         quantities_by_good_id=quantities_by_good_id,
         is_sender_payable_tx_fee=is_sender_payable_tx_fee,
         nonce=nonce,
+        **kwargs
     )
     assert terms.ledger_id == ledger_id
     assert terms.sender_address == sender_addr
@@ -58,9 +60,10 @@ def test_init_terms():
     assert terms.quantities_by_good_id == quantities_by_good_id
     assert terms.is_sender_payable_tx_fee == is_sender_payable_tx_fee
     assert terms.nonce == nonce
+    assert terms.kwargs == kwargs
     assert (
         str(terms)
-        == "Terms: ledger_id=some_ledger, sender_address=SenderAddress, counterparty_address=CounterpartyAddress, amount_by_currency_id={'FET': -10}, quantities_by_good_id={'good_1': 20}, is_sender_payable_tx_fee=True, nonce=somestring, fee=None"
+        == "Terms: ledger_id=some_ledger, sender_address=SenderAddress, counterparty_address=CounterpartyAddress, amount_by_currency_id={'FET': -10}, quantities_by_good_id={'good_1': 20}, is_sender_payable_tx_fee=True, nonce=somestring, fee=None, kwargs={'key': 'value'}"
     )
     assert terms == terms
     with pytest.raises(AssertionError):

@@ -20,7 +20,7 @@
 """This module contains the implementation of the contract API request dispatcher."""
 from typing import cast
 
-import aea
+from aea.contracts import contract_registry
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
 from aea.helpers.dialogue.base import (
@@ -29,7 +29,6 @@ from aea.helpers.dialogue.base import (
     Dialogues as BaseDialogues,
 )
 from aea.helpers.transaction.base import RawTransaction, State
-from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 from packages.fetchai.connections.ledger_api.base import (
@@ -95,19 +94,11 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     @property
     def contract_registry(self) -> Registry:
-        return aea.contracts.contract_registry
-
-    def get_message(self, envelope: Envelope) -> Message:
-        if isinstance(envelope.message, bytes):
-            message = cast(
-                ContractApiMessage,
-                ContractApiMessage.serializer.decode(envelope.message_bytes),
-            )
-        else:
-            message = cast(ContractApiMessage, envelope.message)
-        return message
+        """Get the contract registry."""
+        return contract_registry
 
     def get_ledger_id(self, message: Message) -> str:
+        """Get the ledger id."""
         assert isinstance(
             message, ContractApiMessage
         ), "argument is not a ContractApiMessage instance."
@@ -169,7 +160,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             response = self.get_error_message(e, api, message, dialogue)
         return response
 
@@ -200,7 +191,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             response = self.get_error_message(e, api, message, dialogue)
         return response
 
@@ -231,6 +222,6 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             response = self.get_error_message(e, api, message, dialogue)
         return response

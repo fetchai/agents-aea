@@ -24,7 +24,7 @@ import os
 import subprocess  # nosec
 import threading
 from enum import Enum
-from typing import List, Set
+from typing import List, Set, Tuple
 
 
 class ProcessState(Enum):
@@ -71,6 +71,7 @@ def is_agent_dir(dir_name: str) -> bool:
 
 
 def call_aea_async(param_list: List[str], dir_arg: str) -> subprocess.Popen:
+    """Call the aea in a subprocess."""
     # Should lock here to prevent multiple calls coming in at once and changing the current working directory weirdly
     with lock:
         old_cwd = os.getcwd()
@@ -86,7 +87,13 @@ def call_aea_async(param_list: List[str], dir_arg: str) -> subprocess.Popen:
     return ret
 
 
-def read_tty(pid: subprocess.Popen, str_list: List[str]):
+def read_tty(pid: subprocess.Popen, str_list: List[str]) -> None:
+    """
+    Read tty.
+
+    :param pid: the process id
+    :param str_list: the output list to append to.
+    """
     for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
         out = line.replace("\n", "")
         logging.info("stdout: {}".format(out))
@@ -95,7 +102,13 @@ def read_tty(pid: subprocess.Popen, str_list: List[str]):
     str_list.append("process terminated\n")
 
 
-def read_error(pid: subprocess.Popen, str_list: List[str]):
+def read_error(pid: subprocess.Popen, str_list: List[str]) -> None:
+    """
+    Read error.
+
+    :param pid: the process id
+    :param str_list: the output list to append to.
+    """
     for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
         out = line.replace("\n", "")
         logging.error("stderr: {}".format(out))
@@ -104,11 +117,17 @@ def read_error(pid: subprocess.Popen, str_list: List[str]):
     str_list.append("process terminated\n")
 
 
-def stop_agent_process(agent_id: str, app_context):
+def stop_agent_process(agent_id: str, app_context) -> Tuple[str, int]:
+    """
+    Stop an agent processs.
+
+    :param agent_id: the agent id
+    :param app_context: the app context
+    """
     # Test if we have the process id
     if agent_id not in app_context.agent_processes:
         return (
-            {"detail": "Agent {} is not running".format(agent_id)},
+            "detail: Agent {} is not running".format(agent_id),
             400,
         )  # 400 Bad request
 
@@ -119,7 +138,7 @@ def stop_agent_process(agent_id: str, app_context):
     return "stop_agent: All fine {}".format(agent_id), 200  # 200 (OK)
 
 
-def _terminate_process(process: subprocess.Popen):
+def _terminate_process(process: subprocess.Popen) -> None:
     """Try to process gracefully."""
     poll = process.poll()
     if poll is None:
@@ -133,7 +152,7 @@ def _terminate_process(process: subprocess.Popen):
             process.kill()
 
 
-def terminate_processes():
+def terminate_processes() -> None:
     """Terminate all the (async) processes instantiated by the GUI."""
     logging.info("Cleaning up...")
     for process in _processes:  # pragma: no cover
@@ -141,7 +160,11 @@ def terminate_processes():
 
 
 def get_process_status(process_id: subprocess.Popen) -> ProcessState:
-    """Return the state of the execution."""
+    """
+    Return the state of the execution.
+
+    :param process_id: the process id
+    """
     assert process_id is not None, "Process id cannot be None!"
 
     return_code = process_id.poll()

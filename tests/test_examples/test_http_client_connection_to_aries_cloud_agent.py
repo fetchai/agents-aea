@@ -35,6 +35,7 @@ import yaml
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
+    ConnectionConfig,
     ProtocolConfig,
     ProtocolId,
     SkillConfig,
@@ -101,10 +102,13 @@ class TestAEAToACA:
 
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
+        configuration = ConnectionConfig(
+            host=self.aca_admin_address,
+            port=self.aca_admin_port,
+            connection_id=HTTPClientConnection.connection_id,
+        )
         http_client_connection = HTTPClientConnection(
-            identity=self.aea_identity,
-            provider_address=self.aca_admin_address,
-            provider_port=self.aca_admin_port,
+            configuration=configuration, identity=self.aea_identity
         )
         http_client_connection.loop = asyncio.get_event_loop()
 
@@ -170,10 +174,13 @@ class TestAEAToACA:
             address=wallet.addresses.get(FetchAICrypto.identifier),
             default_address_key=FetchAICrypto.identifier,
         )
+        configuration = ConnectionConfig(
+            host=self.aca_admin_address,
+            port=self.aca_admin_port,
+            connection_id=HTTPClientConnection.connection_id,
+        )
         http_client_connection = HTTPClientConnection(
-            identity=identity,
-            provider_address=self.aca_admin_address,
-            provider_port=self.aca_admin_port,
+            configuration=configuration, identity=identity,
         )
         resources = Resources()
         resources.add_connection(http_client_connection)

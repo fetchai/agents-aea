@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmXcGvzZUqzFB1rhKVpx6349oLM7kgCPZNaRNYcEQY8tyi
+  base.py: QmeSwEkLjwsiaGV7RiB8Y2pELfNyj7mRnq1hY5pSi8M9RT
   connection.py: QmQtDUgaBZLgqvgzVZcBzpPFBywwddByjdbqRDZJKB9pNr
-  contract_dispatcher.py: Qmcc2HYD9UrRg5iMk1tzsvqxJ5bZWJdPu2Yz8drgWnp4uC
-  ledger_dispatcher.py: QmW69gDLQ3M6y91stVra1jZUj6JeagGMWnL2heirhXuX1J
+  contract_dispatcher.py: QmWMDfJ1pSzJUgfujtyyCw3MQvrSLtweP2FXfgS8H2xnRF
+  ledger_dispatcher.py: QmW8kMveVgTCpbjjJqFhwuDEhC5Bkyzz7JGEBcTpwtXjm2
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/contract_api:0.1.0

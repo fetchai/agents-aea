@@ -28,7 +28,6 @@ from aea.helpers.dialogue.base import (
     Dialogues as BaseDialogues,
 )
 from aea.helpers.transaction.base import RawTransaction, TransactionDigest
-from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 from packages.fetchai.connections.ledger_api.base import (
@@ -87,16 +86,6 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         """Initialize the dispatcher."""
         super().__init__(**kwargs)
         self._ledger_api_dialogues = LedgerApiDialogues()
-
-    def get_message(self, envelope: Envelope) -> Message:
-        if isinstance(envelope.message, bytes):
-            message = cast(
-                LedgerApiMessage,
-                LedgerApiMessage.serializer.decode(envelope.message_bytes),
-            )
-        else:
-            message = cast(LedgerApiMessage, envelope.message)
-        return message
 
     def get_ledger_id(self, message: Message) -> str:
         """Get the ledger id from message."""
