@@ -28,7 +28,6 @@ from aea.protocols.signing.message import SigningMessage
 from aea.protocols.state_update.message import StateUpdateMessage
 from aea.skills.base import Handler
 
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_participation.dialogues import (
@@ -347,16 +346,12 @@ class TacHandler(Handler):
         game.update_game_phase(Phase.GAME)
 
         if game.is_using_contract:
-            contract = cast(ERC1155Contract, self.context.contracts.erc1155)
             contract_address = (
                 None if tac_msg.info is None else tac_msg.info.get("contract_address")
             )
 
             if contract_address is not None:
-                ledger_api = self.context.ledger_apis.get_api(game.ledger_id)
-                contract.set_deployed_instance(
-                    ledger_api, contract_address,
-                )
+                game.contract_address = contract_address
                 self.context.shared_state["erc1155_contract_address"] = contract_address
                 self.context.logger.info(
                     "[{}]: Received a contract address: {}".format(

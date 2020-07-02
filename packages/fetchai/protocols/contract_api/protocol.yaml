@@ -8,7 +8,7 @@ fingerprint:
   __init__.py: QmZodYjNqoMgGAGKfkCU4zU9t1Cx9MAownqSy4wyVdwaHF
   contract_api.proto: QmdJxJTZmLkARQcKmecA3oZGCRk8zaSv6YGPtv5yfdhACp
   contract_api_pb2.py: QmZwV6w1sUv5PnBMNkRMrcbATngLERLZs5RHaWJGoupDib
-  custom_types.py: QmV65toKrejhDXHraaxkQH5PmphXY5TXVqdeFPVYDZVqJx
+  custom_types.py: QmfLbEyzgyygQTtwwK2XmV1ETsuADn4KQMfCYqww9DR8gW
   dialogues.py: QmZDgZLpaC8fkyDifJfAbF1wBhCZXo5yabJyrzdMEZ9GGz
   message.py: QmbwZJVma28yexh39ix1XcRJLa3fs6ok2t9Q9CcaB1rLzB
   serialization.py: QmYhp7LBXFo9LCdoFWhR4zaBuSDJCu2y1dd2gSmoRoZHNg

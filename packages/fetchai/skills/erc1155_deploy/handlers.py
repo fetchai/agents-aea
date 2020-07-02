@@ -22,13 +22,11 @@
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -126,40 +124,40 @@ class FIPAHandler(Handler):
                 self.context.agent_name, fipa_msg.counterparty[-5:]
             )
         )
-        if strategy.is_items_minted:
+        if strategy.is_tokens_minted:
+            pass
             # simply send the same proposal, independent of the query
-            contract = cast(ERC1155Contract, self.context.contracts.erc1155)
             # SEND REQUEST FOR TX
-            trade_nonce = ERC1155Contract.generate_trade_nonce(
-                self.context.agent_address
-            )
-            token_id = self.context.behaviours.service_registration.token_ids[0]
-            proposal = Description(
-                {
-                    "contract_address": contract.instance.address,
-                    "token_id": str(token_id),
-                    "trade_nonce": str(trade_nonce),
-                    "from_supply": str(strategy.from_supply),
-                    "to_supply": str(strategy.to_supply),
-                    "value": str(strategy.value),
-                }
-            )
-            fipa_dialogue.proposal = proposal
-            proposal_msg = FipaMessage(
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
-                performative=FipaMessage.Performative.PROPOSE,
-                proposal=proposal,
-            )
-            proposal_msg.counterparty = fipa_msg.counterparty
-            fipa_dialogue.update(proposal_msg)
-            self.context.logger.info(
-                "[{}]: Sending PROPOSE to agent={}: proposal={}".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:], proposal.values
-                )
-            )
-            self.context.outbox.put_message(message=proposal_msg)
+            # trade_nonce = ERC1155Contract.generate_trade_nonce(
+            #     self.context.agent_address
+            # )
+            # token_id = self.context.behaviours.service_registration.token_ids[0]
+            # proposal = Description(
+            #     {
+            #         "contract_address": strategy.contract_address,
+            #         "token_id": str(token_id),
+            #         "trade_nonce": str(trade_nonce),
+            #         "from_supply": str(strategy.from_supply),
+            #         "to_supply": str(strategy.to_supply),
+            #         "value": str(strategy.value),
+            #     }
+            # )
+            # fipa_dialogue.proposal = proposal
+            # proposal_msg = FipaMessage(
+            #     message_id=fipa_msg.message_id + 1,
+            #     dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
+            #     target=fipa_msg.message_id,
+            #     performative=FipaMessage.Performative.PROPOSE,
+            #     proposal=proposal,
+            # )
+            # proposal_msg.counterparty = fipa_msg.counterparty
+            # fipa_dialogue.update(proposal_msg)
+            # self.context.logger.info(
+            #     "[{}]: Sending PROPOSE to agent={}: proposal={}".format(
+            #         self.context.agent_name, fipa_msg.counterparty[-5:], proposal.values
+            #     )
+            # )
+            # self.context.outbox.put_message(message=proposal_msg)
         else:
             self.context.logger.info("Contract items not minted yet. Try again later.")
 
@@ -182,26 +180,27 @@ class FIPAHandler(Handler):
                     self.context.agent_name, fipa_msg.counterparty[-5:], tx_signature
                 )
             )
-            contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-            strategy = cast(Strategy, self.context.strategy)
-            tx = contract.get_atomic_swap_single_transaction_msg(
-                from_address=self.context.agent_address,
-                to_address=fipa_msg.counterparty,
-                token_id=int(fipa_dialogue.proposal.values["token_id"]),
-                from_supply=int(fipa_dialogue.proposal.values["from_supply"]),
-                to_supply=int(fipa_dialogue.proposal.values["to_supply"]),
-                value=int(fipa_dialogue.proposal.values["value"]),
-                trade_nonce=int(fipa_dialogue.proposal.values["trade_nonce"]),
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                skill_callback_id=self.context.skill_id,
-                signature=tx_signature,
-            )
-            self.context.logger.debug(
-                "[{}]: sending single atomic swap to decision maker.".format(
-                    self.context.agent_name
-                )
-            )
-            self.context.decision_maker_message_queue.put(tx)
+            # request atomic swap transaction
+            # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+            # strategy = cast(Strategy, self.context.strategy)
+            # tx = contract.get_atomic_swap_single_transaction_msg(
+            #     from_address=self.context.agent_address,
+            #     to_address=fipa_msg.counterparty,
+            #     token_id=int(fipa_dialogue.proposal.values["token_id"]),
+            #     from_supply=int(fipa_dialogue.proposal.values["from_supply"]),
+            #     to_supply=int(fipa_dialogue.proposal.values["to_supply"]),
+            #     value=int(fipa_dialogue.proposal.values["value"]),
+            #     trade_nonce=int(fipa_dialogue.proposal.values["trade_nonce"]),
+            #     ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+            #     skill_callback_id=self.context.skill_id,
+            #     signature=tx_signature,
+            # )
+            # self.context.logger.debug(
+            #     "[{}]: sending single atomic swap to decision maker.".format(
+            #         self.context.agent_name
+            #     )
+            # )
+            # self.context.decision_maker_message_queue.put(tx)
         else:
             self.context.logger.info(
                 "[{}]: received ACCEPT_W_INFORM from sender={} with no signature.".format(
@@ -349,7 +348,7 @@ class ContractApiHandler(Handler):
         :param message: the message
         :return: None
         """
-        contract_api_msg = cast(LedgerApiMessage, message)
+        contract_api_msg = cast(ContractApiMessage, message)
 
         # recover dialogue
         contract_api_dialogues = cast(

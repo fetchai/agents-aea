@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 COSMOS_CURRENCY = "ATOM"
-COSMOS_TESTNET_FAUCET_URL = "https://faucet-aea-testnet.sandbox.fetch-ai.com:8888/claim"
+COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
 
 
 class CosmosCrypto(Crypto[SigningKey]):

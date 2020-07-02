@@ -31,7 +31,6 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue, Dialogues
@@ -342,55 +341,53 @@ class FIPANegotiationHandler(Handler):
                 transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
             )
             if strategy.is_contract_tx:
-                contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-                if not contract.is_deployed:
-                    ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id)
-                    contract_address = self.context.shared_state.get(
-                        "erc1155_contract_address", None
-                    )
-                    assert (
-                        contract_address is not None
-                    ), "ERC1155Contract address not set!"
-                    contract.set_deployed_instance(
-                        ledger_api, cast(str, contract_address),
-                    )
-                tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None)
-                assert tx_nonce is not None, "tx_nonce must be provided"
-                transaction_msg = contract.get_hash_batch_transaction_msg(
-                    from_address=accept.counterparty,
-                    to_address=self.context.agent_address,  # must match self
-                    token_ids=[
-                        int(key)
-                        for key in transaction_msg.terms.quantities_by_good_id.keys()
-                    ]
-                    + [
-                        int(key)
-                        for key in transaction_msg.terms.amount_by_currency_id.keys()
-                    ],
-                    from_supplies=[
-                        quantity if quantity > 0 else 0
-                        for quantity in transaction_msg.terms.quantities_by_good_id.values()
-                    ]
-                    + [
-                        value if value > 0 else 0
-                        for value in transaction_msg.terms.amount_by_currency_id.values()
-                    ],
-                    to_supplies=[
-                        -quantity if quantity < 0 else 0
-                        for quantity in transaction_msg.terms.quantities_by_good_id.values()
-                    ]
-                    + [
-                        -value if value < 0 else 0
-                        for value in transaction_msg.terms.amount_by_currency_id.values()
-                    ],
-                    value=0,
-                    trade_nonce=int(tx_nonce),
-                    ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                    skill_callback_id=self.context.skill_id,
-                    skill_callback_info={
-                        "dialogue_label": dialogue.dialogue_label.json
-                    },
-                )
+                pass
+                # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+                # if not contract.is_deployed:
+                #     ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id)
+                #     contract_address = self.context.shared_state.get(
+                #         "erc1155_contract_address", None
+                #     )
+                #     assert (
+                #         contract_address is not None
+                #     ), "ERC1155Contract address not set!"
+                # tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None)
+                # assert tx_nonce is not None, "tx_nonce must be provided"
+                # transaction_msg = contract.get_hash_batch_transaction_msg(
+                #     from_address=accept.counterparty,
+                #     to_address=self.context.agent_address,  # must match self
+                #     token_ids=[
+                #         int(key)
+                #         for key in transaction_msg.terms.quantities_by_good_id.keys()
+                #     ]
+                #     + [
+                #         int(key)
+                #         for key in transaction_msg.terms.amount_by_currency_id.keys()
+                #     ],
+                #     from_supplies=[
+                #         quantity if quantity > 0 else 0
+                #         for quantity in transaction_msg.terms.quantities_by_good_id.values()
+                #     ]
+                #     + [
+                #         value if value > 0 else 0
+                #         for value in transaction_msg.terms.amount_by_currency_id.values()
+                #     ],
+                #     to_supplies=[
+                #         -quantity if quantity < 0 else 0
+                #         for quantity in transaction_msg.terms.quantities_by_good_id.values()
+                #     ]
+                #     + [
+                #         -value if value < 0 else 0
+                #         for value in transaction_msg.terms.amount_by_currency_id.values()
+                #     ],
+                #     value=0,
+                #     trade_nonce=int(tx_nonce),
+                #     ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+                #     skill_callback_id=self.context.skill_id,
+                #     skill_callback_info={
+                #         "dialogue_label": dialogue.dialogue_label.json
+                #     },
+                # )
             self.context.logger.info(
                 "[{}]: sending tx_message={} to decison maker.".format(
                     self.context.agent_name, transaction_msg
@@ -443,60 +440,61 @@ class FIPANegotiationHandler(Handler):
             )
             strategy = cast(Strategy, self.context.strategy)
             if strategy.is_contract_tx:
-                contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-                if not contract.is_deployed:
-                    ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id)
-                    contract_address = self.context.shared_state.get(
-                        "erc1155_contract_address", None
-                    )
-                    assert (
-                        contract_address is not None
-                    ), "ERC1155Contract address not set!"
-                    contract.set_deployed_instance(
-                        ledger_api, cast(str, contract_address),
-                    )
-                strategy = cast(Strategy, self.context.strategy)
-                tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None)
-                tx_signature = match_accept.info.get("tx_signature", None)
-                assert (
-                    tx_nonce is not None and tx_signature is not None
-                ), "tx_nonce or tx_signature not available"
-                transaction_msg = contract.get_atomic_swap_batch_transaction_msg(
-                    from_address=self.context.agent_address,
-                    to_address=match_accept.counterparty,
-                    token_ids=[
-                        int(key)
-                        for key in transaction_msg.terms.quantities_by_good_id.keys()
-                    ]
-                    + [
-                        int(key)
-                        for key in transaction_msg.terms.amount_by_currency_id.keys()
-                    ],
-                    from_supplies=[
-                        -quantity if quantity < 0 else 0
-                        for quantity in transaction_msg.terms.quantities_by_good_id.values()
-                    ]
-                    + [
-                        -value if value < 0 else 0
-                        for value in transaction_msg.terms.amount_by_currency_id.values()
-                    ],
-                    to_supplies=[
-                        quantity if quantity > 0 else 0
-                        for quantity in transaction_msg.terms.quantities_by_good_id.values()
-                    ]
-                    + [
-                        value if value > 0 else 0
-                        for value in transaction_msg.terms.amount_by_currency_id.values()
-                    ],
-                    value=0,
-                    trade_nonce=int(tx_nonce),
-                    ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                    skill_callback_id=self.context.skill_id,
-                    signature=tx_signature,
-                    skill_callback_info={
-                        "dialogue_label": dialogue.dialogue_label.json
-                    },
-                )
+                pass
+                # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+                # if not contract.is_deployed:
+                #     ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id)
+                #     contract_address = self.context.shared_state.get(
+                #         "erc1155_contract_address", None
+                #     )
+                #     assert (
+                #         contract_address is not None
+                #     ), "ERC1155Contract address not set!"
+                #     contract.set_deployed_instance(
+                #         ledger_api, cast(str, contract_address),
+                #     )
+                # strategy = cast(Strategy, self.context.strategy)
+                # tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None)
+                # tx_signature = match_accept.info.get("tx_signature", None)
+                # assert (
+                #     tx_nonce is not None and tx_signature is not None
+                # ), "tx_nonce or tx_signature not available"
+                # transaction_msg = contract.get_atomic_swap_batch_transaction_msg(
+                #     from_address=self.context.agent_address,
+                #     to_address=match_accept.counterparty,
+                #     token_ids=[
+                #         int(key)
+                #         for key in transaction_msg.terms.quantities_by_good_id.keys()
+                #     ]
+                #     + [
+                #         int(key)
+                #         for key in transaction_msg.terms.amount_by_currency_id.keys()
+                #     ],
+                #     from_supplies=[
+                #         -quantity if quantity < 0 else 0
+                #         for quantity in transaction_msg.terms.quantities_by_good_id.values()
+                #     ]
+                #     + [
+                #         -value if value < 0 else 0
+                #         for value in transaction_msg.terms.amount_by_currency_id.values()
+                #     ],
+                #     to_supplies=[
+                #         quantity if quantity > 0 else 0
+                #         for quantity in transaction_msg.terms.quantities_by_good_id.values()
+                #     ]
+                #     + [
+                #         value if value > 0 else 0
+                #         for value in transaction_msg.terms.amount_by_currency_id.values()
+                #     ],
+                #     value=0,
+                #     trade_nonce=int(tx_nonce),
+                #     ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+                #     skill_callback_id=self.context.skill_id,
+                #     signature=tx_signature,
+                #     skill_callback_info={
+                #         "dialogue_label": dialogue.dialogue_label.json
+                #     },
+                # )
             else:
                 transaction_msg.set(
                     "skill_callback_ids",
@@ -642,18 +640,19 @@ class SigningHandler(Handler):
                             self.context.agent_name, tx_digest
                         )
                     )
-                    contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-                    result = contract.get_balances(
-                        address=self.context.agent_address,
-                        token_ids=[
-                            int(key)
-                            for key in tx_message.terms.quantities_by_good_id.keys()
-                        ]
-                        + [
-                            int(key)
-                            for key in tx_message.terms.amount_by_currency_id.keys()
-                        ],
-                    )
+                    # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+                    # result = contract.get_balances(
+                    #     address=self.context.agent_address,
+                    #     token_ids=[
+                    #         int(key)
+                    #         for key in tx_message.terms.quantities_by_good_id.keys()
+                    #     ]
+                    #     + [
+                    #         int(key)
+                    #         for key in tx_message.terms.amount_by_currency_id.keys()
+                    #     ],
+                    # )
+                    result = 0
                     self.context.logger.info(
                         "[{}]: Current balances: {}".format(
                             self.context.agent_name, result

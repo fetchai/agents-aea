@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Test module for utils of CLI GUI."""
 
-from subprocess import TimeoutExpired
+from subprocess import TimeoutExpired  # nosec
 from unittest import TestCase, mock
 
 from aea.cli_gui.utils import (

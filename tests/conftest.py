@@ -132,7 +132,7 @@ FETCHAI_ADDRESS_ONE = "Vu6aENcVSYYH9GhY1k3CsL7shWH9gKKBAWcc4ckLk5w4Ltynx"
 FETCHAI_ADDRESS_TWO = "2LnTTHvGxWvKK1WfEAXnZvu81RPcMRDVQW8CJF3Gsh7Z3axDfP"
 
 # testnets
-COSMOS_TESTNET_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
+COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
 ETHEREUM_TESTNET_CONFIG = {
     "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
     "gas_price": 50,
