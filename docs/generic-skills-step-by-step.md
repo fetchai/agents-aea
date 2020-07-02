@@ -161,7 +161,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         description = strategy.get_service_description()
         self._registered_service_description = description
         oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.ledger_api_dialogues
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
@@ -186,7 +186,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         if self._registered_service_description is None:
             return
         oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.ledger_api_dialogues
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
@@ -2231,7 +2231,7 @@ class GenericLedgerApiHandler(Handler):
             message_id=fipa_msg.message_id + 1,
             dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
             target=fipa_msg.message_id,
-            info={"transaction_digest": ledger_api_msg.transaction_digest},
+            info={"transaction_digest": ledger_api_msg.transaction_digest.body},
         )
         inform_msg.counterparty = fipa_dialogue.dialogue_label.dialogue_opponent_addr
         fipa_dialogue.update(inform_msg)

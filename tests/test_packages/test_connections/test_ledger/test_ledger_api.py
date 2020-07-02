@@ -25,7 +25,6 @@ from typing import cast
 
 import pytest
 
-import aea
 from aea.connections.base import Connection
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto
@@ -89,6 +88,8 @@ async def test_get_balance(
     ledger_id, address, config, ledger_apis_connection: Connection
 ):
     """Test get balance."""
+    import aea  # noqa # to load registries
+
     ledger_api_dialogues = LedgerApiDialogues()
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
@@ -128,6 +129,8 @@ async def test_get_balance(
 @pytest.mark.asyncio
 async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connection):
     """Test send signed transaction with Ethereum APIs."""
+    import aea  # noqa # to load registries
+
     crypto1 = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     crypto2 = EthereumCrypto()
     api = aea.crypto.registries.make_ledger_api(
