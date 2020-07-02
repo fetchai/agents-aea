@@ -22,11 +22,11 @@
 import json
 from unittest.mock import patch
 
+from tests.test_cli.tools_for_testing import raise_click_exception
 from tests.test_cli_gui.test_base import create_app
 
 
 @patch("aea.cli_gui.cli_list_agent_items", return_value=[{"name": "some-connection"}])
-@patch("aea.cli_gui.try_to_load_agent_config")
 def test_search_connections(*mocks):
     """Test list localConnections."""
     app = create_app()
@@ -41,3 +41,16 @@ def test_search_connections(*mocks):
         "search_term": "query",
     }
     assert result == expected_result
+
+
+@patch("aea.cli_gui.cli_setup_search_ctx", raise_click_exception)
+def test_search_connections_negative(*mocks):
+    """Test list localConnections negative response."""
+    app = create_app()
+
+    response = app.get("api/connection/query")
+    assert response.status_code == 400
+
+    result = json.loads(response.get_data(as_text=True))
+    expected_result = "Failed to search items."
+    assert result["detail"] == expected_result

@@ -19,7 +19,6 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
-import sys
 from unittest.mock import patch
 
 from tests.test_cli.tools_for_testing import raise_click_exception
@@ -47,19 +46,9 @@ def test_delete_agent_fail(*mocks):
     app = create_app()
     agent_name = "test_agent_id"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "delete"
-        assert param_list[4] == agent_name
-        return 1
-
-    with patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_delete = app.delete(
-            "api/agent/" + agent_name, data=None, content_type="application/json"
-        )
+    response_delete = app.delete(
+        "api/agent/" + agent_name, data=None, content_type="application/json"
+    )
     assert response_delete.status_code == 400
     data = json.loads(response_delete.get_data(as_text=True))
     assert data["detail"] == "Failed to delete Agent {} - it may not exist".format(
