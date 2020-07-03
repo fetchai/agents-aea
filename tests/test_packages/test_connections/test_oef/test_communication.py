@@ -86,7 +86,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return OefSearchDialogue.AgentRole.AGENT
+        return OefSearchDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -808,7 +808,7 @@ class TestFIPA(UseOef):
         dialogue = OefSearchDialogue(
             BaseDialogueLabel(dialogue_reference, "agent", "agent"),
             "agent",
-            OefSearchDialogue.AgentRole.OEF_NODE,
+            OefSearchDialogue.Role.OEF_NODE,
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,

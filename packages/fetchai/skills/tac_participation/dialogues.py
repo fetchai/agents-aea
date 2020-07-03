@@ -68,7 +68,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseOefSearchDialogue.AgentRole.AGENT
+        return BaseOefSearchDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -110,7 +110,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseSigningDialogue.AgentRole.SKILL
+        return BaseSigningDialogue.Role.SKILL
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -151,7 +151,7 @@ class TacDialogues(Model, BaseTacDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseTacDialogue.AgentRole.PARTICIPANT
+        return BaseTacDialogue.Role.PARTICIPANT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

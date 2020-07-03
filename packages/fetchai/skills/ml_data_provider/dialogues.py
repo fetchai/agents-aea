@@ -76,7 +76,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return DefaultDialogue.AgentRole.AGENT
+        return DefaultDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -118,7 +118,7 @@ class MlTradeDialogues(Model, BaseMlTradeDialogues):
         :param message: an incoming/outgoing first message
         :return: the agent's role
         """
-        return MlTradeDialogue.AgentRole.SELLER
+        return MlTradeDialogue.Role.SELLER
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -159,7 +159,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseLedgerApiDialogue.AgentRole.AGENT
+        return BaseLedgerApiDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -201,7 +201,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseOefSearchDialogue.AgentRole.AGENT
+        return BaseOefSearchDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

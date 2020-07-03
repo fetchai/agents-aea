@@ -80,7 +80,7 @@ class SigningDialogues(BaseSigningDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return SigningDialogue.AgentRole.SKILL
+        return SigningDialogue.Role.SKILL
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -118,7 +118,7 @@ class StateUpdateDialogues(BaseStateUpdateDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return StateUpdateDialogue.AgentRole.DECISION_MAKER
+        return StateUpdateDialogue.Role.DECISION_MAKER
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

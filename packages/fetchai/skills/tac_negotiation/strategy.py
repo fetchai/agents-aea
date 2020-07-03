@@ -222,7 +222,7 @@ class Strategy(Model):
             return random.choice(proposals)  # nosec
 
     def get_proposal_for_query(
-        self, query: Query, role: Dialogue.AgentRole
+        self, query: Query, role: Dialogue.Role
     ) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
@@ -232,7 +232,7 @@ class Strategy(Model):
 
         :return: a description
         """
-        is_seller = role == Dialogue.AgentRole.SELLER
+        is_seller = role == Dialogue.Role.SELLER
 
         own_service_description = self.get_own_service_description(
             is_supply=is_seller, is_search_description=False
@@ -330,7 +330,7 @@ class Strategy(Model):
         return proposals
 
     def is_profitable_transaction(
-        self, transaction_msg: SigningMessage, role: Dialogue.AgentRole
+        self, transaction_msg: SigningMessage, role: Dialogue.Role
     ) -> bool:
         """
         Check if a transaction is profitable.
@@ -345,7 +345,7 @@ class Strategy(Model):
 
         :return: True if the transaction is good (as stated above), False otherwise.
         """
-        is_seller = role == Dialogue.AgentRole.SELLER
+        is_seller = role == Dialogue.Role.SELLER
 
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(

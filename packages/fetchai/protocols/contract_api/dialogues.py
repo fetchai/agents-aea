@@ -74,11 +74,11 @@ class ContractApiDialogue(Dialogue):
         ContractApiMessage.Performative.STATE: frozenset(),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a contract_api dialogue."""
 
-        LEDGER = "ledger"
         AGENT = "agent"
+        LEDGER = "ledger"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a contract_api dialogue."""

@@ -60,7 +60,7 @@ class ContractApiDialogues(BaseContractApiDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return ContractApiDialogue.AgentRole.LEDGER
+        return ContractApiDialogue.Role.LEDGER
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

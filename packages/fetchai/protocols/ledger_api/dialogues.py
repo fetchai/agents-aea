@@ -83,11 +83,11 @@ class LedgerApiDialogue(Dialogue):
         LedgerApiMessage.Performative.TRANSACTION_RECEIPT: frozenset(),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a ledger_api dialogue."""
 
-        LEDGER = "ledger"
         AGENT = "agent"
+        LEDGER = "ledger"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a ledger_api dialogue."""

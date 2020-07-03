@@ -60,7 +60,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return LedgerApiDialogue.AgentRole.LEDGER
+        return LedgerApiDialogue.Role.LEDGER
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

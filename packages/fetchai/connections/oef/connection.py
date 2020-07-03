@@ -112,7 +112,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return OefSearchDialogue.AgentRole.OEF_NODE
+        return OefSearchDialogue.Role.OEF_NODE
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

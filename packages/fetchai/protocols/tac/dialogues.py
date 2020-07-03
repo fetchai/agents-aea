@@ -68,7 +68,7 @@ class TacDialogue(Dialogue):
         ),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a tac dialogue."""
 
         CONTROLLER = "controller"

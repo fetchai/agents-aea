@@ -1072,7 +1072,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return DefaultDialogue.AgentRole.AGENT
+        return DefaultDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -1148,7 +1148,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :param message: an incoming/outgoing first message
         :return: the agent's role
         """
-        return FipaDialogue.AgentRole.SELLER
+        return FipaDialogue.Role.SELLER
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -1222,7 +1222,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseLedgerApiDialogue.AgentRole.AGENT
+        return BaseLedgerApiDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -1264,7 +1264,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseOefSearchDialogue.AgentRole.AGENT
+        return BaseOefSearchDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -2546,7 +2546,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return DefaultDialogue.AgentRole.AGENT
+        return DefaultDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -2639,7 +2639,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseFipaDialogue.AgentRole.BUYER
+        return BaseFipaDialogue.Role.BUYER
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -2713,7 +2713,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseLedgerApiDialogue.AgentRole.AGENT
+        return BaseLedgerApiDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -2755,7 +2755,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseOefSearchDialogue.AgentRole.AGENT
+        return BaseOefSearchDialogue.Role.AGENT
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
@@ -2830,7 +2830,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseSigningDialogue.AgentRole.SKILL
+        return BaseSigningDialogue.Role.SKILL
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

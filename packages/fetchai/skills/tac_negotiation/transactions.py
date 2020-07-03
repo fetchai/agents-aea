@@ -94,7 +94,7 @@ class Transactions(Model):
         performative: SigningMessage.Performative,
         proposal_description: Description,
         dialogue_label: DialogueLabel,
-        role: Dialogue.AgentRole,
+        role: Dialogue.Role,
         agent_addr: Address,
     ) -> SigningMessage:
         """
@@ -106,7 +106,7 @@ class Transactions(Model):
         :param agent_addr: the address of the agent
         :return: a transaction message
         """
-        is_seller = role == Dialogue.AgentRole.SELLER
+        is_seller = role == Dialogue.Role.SELLER
 
         # sender_tx_fee = (
         #     proposal_description.values["seller_tx_fee"]
@@ -306,7 +306,7 @@ class Transactions(Model):
         self._last_update_for_transactions.append((now, transaction_id))
 
     def add_locked_tx(
-        self, transaction_msg: SigningMessage, role: Dialogue.AgentRole
+        self, transaction_msg: SigningMessage, role: Dialogue.Role
     ) -> None:
         """
         Add a lock (in the form of a transaction).
@@ -317,7 +317,7 @@ class Transactions(Model):
 
         :return: None
         """
-        as_seller = role == Dialogue.AgentRole.SELLER
+        as_seller = role == Dialogue.Role.SELLER
 
         transaction_id = transaction_msg.dialogue_reference[0]  # TODO: fix
         assert transaction_id not in self._locked_txs

@@ -67,11 +67,11 @@ class SigningDialogue(Dialogue):
         SigningMessage.Performative.SIGNED_TRANSACTION: frozenset(),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a signing dialogue."""
 
-        SKILL = "skill"
         DECISION_MAKER = "decision_maker"
+        SKILL = "skill"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a signing dialogue."""

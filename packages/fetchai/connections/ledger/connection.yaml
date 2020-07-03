@@ -8,8 +8,8 @@ fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   base.py: QmezCD9d5kKgr8iYtszHSBpff6f7MP98xCEoBCqhD12veT
   connection.py: QmSRMPuW1a1pPfc9gWDQzvg2z3ZeD21yxZigpdbHF9qkgz
-  contract_dispatcher.py: QmW2weW6wMfh6FAN3DwBDTzW78Yga5JAqTfkxWwKAz5mou
-  ledger_dispatcher.py: QmeusozH3fN6WPhqUoArAeJTSTovJBDGJi1pCiEPApqMep
+  contract_dispatcher.py: QmXGC8QMJCnxVnXft55NvoUABVm9SotX9zgPNUAVF5698Z
+  ledger_dispatcher.py: QmUUUNn4gULf2rr6BLKvLCRHnWum23LCKFyo8rSZsfBttD
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/contract_api:0.1.0
