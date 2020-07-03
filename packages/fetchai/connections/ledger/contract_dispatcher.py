@@ -82,9 +82,9 @@ class ContractApiDialogues(BaseContractApiDialogues):
 class ContractApiRequestDispatcher(RequestDispatcher):
     """Implement the contract API request dispatcher."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Initialize the dispatcher."""
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self._contract_api_dialogues = ContractApiDialogues()
 
     @property
