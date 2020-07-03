@@ -67,10 +67,9 @@ def load_erc1155_contract():
     configuration._directory = directory
     configuration = cast(ContractConfig, configuration)
 
-    # TODO some other tests don't deregister contracts from the registry.
-    #   find a neater solution.
-    if configuration.public_id in contract_registry.specs.keys():
-        contract_registry.specs.pop(str(configuration.public_id))
+    if str(configuration.public_id) in contract_registry.specs:
+        # skip registration, contract is already registered.
+        return
 
     # load contract into sys modules!
     Contract.from_config(configuration)
