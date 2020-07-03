@@ -48,7 +48,7 @@ from aea.crypto.registries import crypto_registry, ledger_apis_registry
 
 from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
-    # ETHEREUM_ADDRESS_TWO,
+    ETHEREUM_ADDRESS_TWO,
     ETHEREUM_TESTNET_CONFIG,
     ROOT_DIR,
 )
@@ -193,51 +193,93 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     ), "Error, found: {}".format(tx)
 
 
-# def test_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
-#     contract_address = "0xB1Baa966dc7331bC4443cf74e339dd60baC07F71"
-#     from_address = ETHEREUM_ADDRESS_ONE
-#     to_address = ETHEREUM_ADDRESS_TWO
-#     token_id = erc1155_contract.generate_token_ids(token_type=1, nb_tokens=1)[0]
-#     from_supply = 0
-#     to_supply = 10
-#     value = 1
-#     trade_nonce = 1
-#     mock.patch
-#     # with mock.patch.object(erc1155_contract. .apis.get(FetchAIApi.identifier), "get_transfer_transaction",return_value="mock_transaction",):
-#     tx_hash = erc1155_contract.get_hash_single(
-#         ledger_api,
-#         contract_address,
-#         from_address,
-#         to_address,
-#         token_id,
-#         from_supply,
-#         to_supply,
-#         value,
-#         trade_nonce,
-#     )
-#     signature = crypto_api.sign_message(tx_hash)
-#     tx = erc1155_contract.get_atomic_swap_single_transaction(
-#         ledger_api=ledger_api,
-#         contract_address=contract_address,
-#         from_address=from_address,
-#         to_address=to_address,
-#         token_id=token_id,
-#         from_supply=from_supply,
-#         to_supply=to_supply,
-#         value=value,
-#         trade_nonce=trade_nonce,
-#         signature=signature,
-#     )
-#     import pdb
+def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    from_address = ETHEREUM_ADDRESS_ONE
+    to_address = ETHEREUM_ADDRESS_TWO
+    token_id = erc1155_contract.generate_token_ids(token_type=1, nb_tokens=1)[0]
+    from_supply = 0
+    to_supply = 10
+    value = 1
+    trade_nonce = 1
+    tx_hash = erc1155_contract.get_hash_single(
+        ledger_api,
+        contract_address,
+        from_address,
+        to_address,
+        token_id,
+        from_supply,
+        to_supply,
+        value,
+        trade_nonce,
+    )
+    assert isinstance(tx_hash, dict) and "hash_single" in tx_hash
+    hash_single = tx_hash["hash_single"]
+    signature = crypto_api.sign_message(hash_single)
+    tx = erc1155_contract.get_atomic_swap_single_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        from_address=from_address,
+        to_address=to_address,
+        token_id=token_id,
+        from_supply=from_supply,
+        to_supply=to_supply,
+        value=value,
+        trade_nonce=trade_nonce,
+        signature=signature,
+    )
+    assert len(tx) == 8
+    data = tx.pop("data")
+    assert len(data) > 0 and data.startswith("0x")
+    assert all(
+        [
+            key in tx
+            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "from"]
+        ]
+    ), "Error, found: {}".format(tx)
 
-#     pdb.set_trace()
-#     assert len(tx) == 7
-#     data = tx.pop("data")
-#     assert len(data) > 0 and data.startswith("0x")
-#     assert all(
-#         [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
-#     ), "Error, found: {}".format(tx)
 
-#     import pdb
-
-#     pdb.set_trace()
+def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    from_address = ETHEREUM_ADDRESS_ONE
+    to_address = ETHEREUM_ADDRESS_TWO
+    token_ids = erc1155_contract.generate_token_ids(token_type=1, nb_tokens=10)
+    from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
+    to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+    value = 1
+    trade_nonce = 1
+    tx_hash = erc1155_contract.get_hash_batch(
+        ledger_api,
+        contract_address,
+        from_address,
+        to_address,
+        token_ids,
+        from_supplies,
+        to_supplies,
+        value,
+        trade_nonce,
+    )
+    assert isinstance(tx_hash, dict) and "hash_batch" in tx_hash
+    hash_batch = tx_hash["hash_batch"]
+    signature = crypto_api.sign_message(hash_batch)
+    tx = erc1155_contract.get_atomic_swap_batch_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        from_address=from_address,
+        to_address=to_address,
+        token_ids=token_ids,
+        from_supplies=from_supplies,
+        to_supplies=to_supplies,
+        value=value,
+        trade_nonce=trade_nonce,
+        signature=signature,
+    )
+    assert len(tx) == 8
+    data = tx.pop("data")
+    assert len(data) > 0 and data.startswith("0x")
+    assert all(
+        [
+            key in tx
+            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "from"]
+        ]
+    ), "Error, found: {}".format(tx)

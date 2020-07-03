@@ -94,11 +94,7 @@ class ERC1155Contract(Contract):
             "nonce": nonce,
             "data": data,
         }
-
-        # estimate the gas and update the transaction dict
-        gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-        logger.debug("[ERC1155Contract]: gas estimate deploy: {}".format(gas_estimate))
-        tx["gas"] = gas_estimate
+        tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
 
     @classmethod
@@ -134,13 +130,7 @@ class ERC1155Contract(Contract):
                 "nonce": nonce,
             }
         )
-
-        # estimate the gas and update the transaction dict
-        gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-        logger.debug(
-            "[ERC1155Contract]: gas estimate create batch: {}".format(gas_estimate)
-        )
-        tx["gas"] = gas_estimate
+        tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
 
     @classmethod
@@ -176,13 +166,7 @@ class ERC1155Contract(Contract):
                 "nonce": nonce,
             }
         )
-
-        # estimate the gas and update the transaction dict
-        gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-        logger.debug(
-            "[ERC1155Contract]: gas estimate create batch: {}".format(gas_estimate)
-        )
-        tx["gas"] = gas_estimate
+        tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
 
     @classmethod
@@ -222,13 +206,7 @@ class ERC1155Contract(Contract):
                 "nonce": nonce,
             }
         )
-
-        # estimate the gas and update the transaction dict
-        gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-        logger.debug(
-            "[ERC1155Contract]: gas estimate mint batch: {}".format(gas_estimate)
-        )
-        tx["gas"] = gas_estimate
+        tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
 
     @classmethod
@@ -268,13 +246,7 @@ class ERC1155Contract(Contract):
                 "nonce": nonce,
             }
         )
-
-        # estimate the gas and update the transaction dict
-        gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-        logger.debug(
-            "[ERC1155Contract]: gas estimate mint single: {}".format(gas_estimate)
-        )
-        tx["gas"] = gas_estimate
+        tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
 
     @classmethod
@@ -355,15 +327,7 @@ class ERC1155Contract(Contract):
                 "nonce": nonce,
             }
         )
-
-        # estimate the gas and update the transaction dict
-        gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-        logger.debug(
-            "[ERC1155Contract]: gas estimate atomic swap single: {}".format(
-                gas_estimate
-            )
-        )
-        tx["gas"] = gas_estimate
+        tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
 
     @classmethod
@@ -538,7 +502,7 @@ class ERC1155Contract(Contract):
         )
 
     @classmethod
-    def get_hash_batch_transaction(
+    def get_hash_batch(
         cls,
         ledger_api: LedgerApi,
         contract_address: Address,
@@ -642,3 +606,23 @@ class ERC1155Contract(Contract):
         m_list.append(_value_eth_wei.to_bytes(32, "big"))
         m_list.append(_nonce.to_bytes(32, "big"))
         return keccak256(b"".join(m_list))
+
+    @staticmethod
+    def _try_estimate_gas(ledger_api: LedgerApi, tx: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Attempts to update the transaction with a gas estimate.
+
+        :param ledger_api: the ledger API
+        :param tx: the transaction
+        :return: the transaction (potentially updated)
+        """
+        try:
+            # try estimate the gas and update the transaction dict
+            gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
+            logger.debug("[ERC1155Contract]: gas estimate: {}".format(gas_estimate))
+            tx["gas"] = gas_estimate
+        except Exception as e:  # pylint: disable=broad-except
+            logger.debug(
+                "[ERC1155Contract]: Error when trying to estimate gas: {}".format(e)
+            )
+        return tx
