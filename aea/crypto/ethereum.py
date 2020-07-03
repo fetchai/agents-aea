@@ -270,7 +270,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        chain_id: int = 1,
+        chain_id: int = 3,
         **kwargs,
     ) -> Optional[Any]:
         """
@@ -281,7 +281,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
-        :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
+        :param chain_id: the Chain ID of the Ethereum transaction. Default is 3 (i.e. ropsten; mainnet has 1).
         :return: the transfer transaction
         """
         nonce = self._try_get_transaction_count(sender_address)

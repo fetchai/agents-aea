@@ -71,7 +71,7 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
-from packages.fetchai.connections.ledger_api.connection import LedgerConnection
+from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
 

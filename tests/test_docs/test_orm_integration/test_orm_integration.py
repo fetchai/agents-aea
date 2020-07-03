@@ -31,9 +31,18 @@ from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
 
 seller_strategy_replacement = """models:
-  dialogues:
+  default_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   strategy:
     args:
       currency_id: FET
@@ -49,7 +58,7 @@ seller_strategy_replacement = """models:
           name: city
           type: str
       data_model_name: location
-      has_data_source: false
+      has_data_source: true
       is_ledger_tx: true
       ledger_id: fetchai
       service_data:
@@ -62,9 +71,21 @@ dependencies:
   SQLAlchemy: {}"""
 
 buyer_strategy_replacement = """models:
-  dialogues:
+  default_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       currency_id: FET
@@ -124,6 +145,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.force_set_config("agent.ledger_apis", ledger_apis)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
+        # ejecting changes author and version!
         self.eject_item("skill", "fetchai/thermometer:0.5.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.force_set_config(
@@ -154,7 +176,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
         self.force_set_config(
-            "vendor.fetchai.skills.generic_buyer.models",
+            "vendor.fetchai.skills.thermometer_client.models",
             buyer_skill_config_replacement["models"],
         )
         self.run_install()
