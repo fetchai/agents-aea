@@ -161,7 +161,7 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     assert all(
         [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
     ), "Error, found: {}".format(tx)
-    mint_quantities = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    mint_quantities = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     tx = erc1155_contract.get_mint_batch_transaction(
         ledger_api=ledger_api,
         contract_address=ETHEREUM_ADDRESS_ONE,
@@ -176,7 +176,7 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     assert all(
         [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
     ), "Error, found: {}".format(tx)
-    mint_quantity = 100
+    mint_quantity = 1
     tx = erc1155_contract.get_mint_single_transaction(
         ledger_api=ledger_api,
         contract_address=ETHEREUM_ADDRESS_ONE,
@@ -197,7 +197,7 @@ def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     from_address = ETHEREUM_ADDRESS_ONE
     to_address = ETHEREUM_ADDRESS_TWO
-    token_id = erc1155_contract.generate_token_ids(token_type=1, nb_tokens=1)[0]
+    token_id = erc1155_contract.generate_token_ids(token_type=2, nb_tokens=1)[0]
     from_supply = 0
     to_supply = 10
     value = 1
@@ -243,7 +243,7 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     from_address = ETHEREUM_ADDRESS_ONE
     to_address = ETHEREUM_ADDRESS_TWO
-    token_ids = erc1155_contract.generate_token_ids(token_type=1, nb_tokens=10)
+    token_ids = erc1155_contract.generate_token_ids(token_type=2, nb_tokens=10)
     from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
     to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
     value = 1

@@ -20,6 +20,7 @@
 """This module contains the erc1155 contract definition."""
 
 import logging
+import random
 from typing import Any, Dict, List, Optional
 
 from vyper.utils import keccak256
@@ -29,6 +30,7 @@ from aea.crypto.base import LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
+MAX_UINT_256 = 2 ^ 256 - 1
 
 
 class ERC1155Contract(Contract):
@@ -194,6 +196,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
+        cls.validate_mint_quantities(token_ids, mint_quantities)
         # create the transaction dict
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         instance = cls.get_instance(ledger_api, contract_address)
@@ -208,6 +211,36 @@ class ERC1155Contract(Contract):
         )
         tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
+
+    @classmethod
+    def validate_mint_quantities(
+        cls, token_ids: List[int], mint_quantities: List[int]
+    ) -> None:
+        """Validate the mint quantities."""
+        for token_id, mint_quantity in zip(token_ids, mint_quantities):
+            decoded_type = cls.decode_id(token_id)
+            assert (
+                decoded_type == 1 or decoded_type == 2
+            ), "The token type must be 1 or 2. Found type={} for token_id={}".format(
+                decoded_type, token_id
+            )
+            if decoded_type == 1:
+                assert (
+                    mint_quantity == 1
+                ), "Cannot mint NFT (token_id={}) with mint_quantity more than 1 (found={})".format(
+                    token_id, mint_quantity
+                )
+
+    @staticmethod
+    def decode_id(token_id: int) -> int:
+        """
+        Decode a give token id.
+
+        :param token_id: the byte shifted token id
+        :return: the non-shifted id
+        """
+        decoded_type = token_id >> 128
+        return decoded_type
 
     @classmethod
     def get_mint_single_transaction(
@@ -606,6 +639,24 @@ class ERC1155Contract(Contract):
         m_list.append(_value_eth_wei.to_bytes(32, "big"))
         m_list.append(_nonce.to_bytes(32, "big"))
         return keccak256(b"".join(m_list))
+
+    @classmethod
+    def generate_trade_nonce(
+        cls, ledger_api: LedgerApi, contract_address: Address, agent_address: Address
+    ) -> Dict[str, int]:
+        """
+        Generate a valid trade nonce.
+
+        :param ledger_api: the ledger API
+        :param contract_address: the address of the contract
+        :param agent_address: the address to use
+        :return: the generated trade nonce
+        """
+        instance = cls.get_instance(ledger_api, contract_address)
+        trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
+        while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
+            trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
+        return {"trade_nonce": trade_nonce}
 
     @staticmethod
     def _try_estimate_gas(ledger_api: LedgerApi, tx: Dict[str, Any]) -> Dict[str, Any]:

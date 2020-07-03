@@ -227,7 +227,9 @@ class Strategy(Model):
 
     def get_proposal(self) -> Description:
         """Get the proposal."""
-        trade_nonce = random.randrange(0, 10000000)  # quickfix, to avoid contract call
+        trade_nonce = random.randrange(  # nosec
+            0, 10000000
+        )  # quickfix, to avoid contract call
         token_id = self.token_ids[0]
         proposal = Description(
             {
