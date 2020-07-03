@@ -137,8 +137,6 @@ class LedgerConnection(Connection):
 
         # update done tasks
         self.done_tasks.extend([*done])
-        # update receiving tasks
-        self.receiving_tasks[:] = pending
 
         return self._handle_done_task(done_task)
 
@@ -150,6 +148,7 @@ class LedgerConnection(Connection):
         :return: the reponse envelope.
         """
         request = self.task_to_request.pop(task)
+        self.receiving_tasks.remove(task)
         response_message: Optional[Message] = task.result()
 
         response_envelope = None
