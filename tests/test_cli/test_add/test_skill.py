@@ -25,6 +25,8 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+from click.testing import CliRunner
+
 from jsonschema import ValidationError
 
 import pytest
@@ -39,7 +41,6 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (

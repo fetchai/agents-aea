@@ -24,6 +24,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from aea.cli import cli
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
@@ -31,7 +33,6 @@ from aea.crypto.helpers import (
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
 )
-from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import CLI_LOG_OPTION
 

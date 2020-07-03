@@ -28,6 +28,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator, List, Optional
 
+from click.testing import CliRunner
+
 from pexpect.exceptions import EOF  # type: ignore
 
 import pytest
@@ -36,7 +38,6 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.test_tools.click_testing import CliRunner
 
 from tests.common.pexpect_popen import PexpectWrapper
 

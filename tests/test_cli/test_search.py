@@ -26,12 +26,13 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
 
+from click.testing import CliRunner
+
 import jsonschema
 from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
-from aea.test_tools.click_testing import CliRunner
 
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 

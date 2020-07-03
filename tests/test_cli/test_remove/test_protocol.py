@@ -25,13 +25,14 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
+from click.testing import CliRunner
+
 import yaml
 
 import aea
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.test_tools.click_testing import CliRunner
 
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 

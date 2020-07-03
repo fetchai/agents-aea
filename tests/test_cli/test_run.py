@@ -27,6 +27,7 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 from click import ClickException
+from click.testing import CliRunner
 
 import pytest
 
@@ -42,7 +43,6 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import sigint_crossplatform
-from aea.test_tools.click_testing import CliRunner
 
 from tests.common.pexpect_popen import PexpectWrapper
 

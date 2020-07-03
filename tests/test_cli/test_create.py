@@ -29,6 +29,8 @@ from typing import Dict
 from unittest import TestCase
 from unittest.mock import patch
 
+from click.testing import CliRunner
+
 import jsonschema
 from jsonschema import Draft4Validator
 
@@ -45,7 +47,6 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
-from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
