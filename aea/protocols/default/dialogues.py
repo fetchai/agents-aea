@@ -49,7 +49,7 @@ class DefaultDialogue(Dialogue):
         DefaultMessage.Performative.ERROR: frozenset(),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a default dialogue."""
 
         AGENT = "agent"

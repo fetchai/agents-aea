@@ -49,8 +49,8 @@ class HttpDialogue(Dialogue):
     class Role(Dialogue.Role):
         """This class defines the agent's role in a http dialogue."""
 
-        SERVER = "server"
         CLIENT = "client"
+        SERVER = "server"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a http dialogue."""

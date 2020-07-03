@@ -53,8 +53,8 @@ class MlTradeDialogue(Dialogue):
     class Role(Dialogue.Role):
         """This class defines the agent's role in a ml_trade dialogue."""
 
-        SELLER = "seller"
         BUYER = "buyer"
+        SELLER = "seller"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a ml_trade dialogue."""

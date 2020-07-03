@@ -62,8 +62,8 @@ class GymDialogue(Dialogue):
     class Role(Dialogue.Role):
         """This class defines the agent's role in a gym dialogue."""
 
-        ENVIRONMENT = "environment"
         AGENT = "agent"
+        ENVIRONMENT = "environment"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a gym dialogue."""

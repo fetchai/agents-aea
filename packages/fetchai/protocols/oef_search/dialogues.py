@@ -70,8 +70,8 @@ class OefSearchDialogue(Dialogue):
     class Role(Dialogue.Role):
         """This class defines the agent's role in a oef_search dialogue."""
 
-        OEF_NODE = "oef_node"
         AGENT = "agent"
+        OEF_NODE = "oef_node"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a oef_search dialogue."""

@@ -7,7 +7,7 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmWBvruqGuU2BVCq8cuP1S3mgvuC78yrG4TdtSvKhCT8qX
   custom_types.py: QmfDaswopanUqsETQXMatKfwwDSSo7q2Edz9MXGimT5jbf
-  dialogues.py: Qmdf6TjHmYP2FtJUxzWFBKMk6N56WzFizs69MPxXRPEMhH
+  dialogues.py: QmWJv1gRNvqkFGyx9FGkhhorymD5javXuBA8HwQ6z9BLPw
   gym.proto: QmQGF9Xz4Z93wmhdKoztzxjo5pS4SsAWe2TQdvZCLuzdGC
   gym_pb2.py: QmSTz7xrL8ryqzR1Sgu1NpR6PmW7GUhBGnN2qYc8m8NCcN
   message.py: QmaiYJbphafhurv7cYCLfJLY4hHCTzyqWz2r8YRJngkpq4
