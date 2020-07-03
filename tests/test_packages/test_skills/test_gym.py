@@ -37,24 +37,31 @@ class TestGymSkill(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/gym:0.3.0")
         self.run_install()
 
-        # add gyms folder from examples
-        gyms_src = os.path.join(ROOT_DIR, "examples", "gym_ex", "gyms")
-        gyms_dst = os.path.join(self.agent_name, "gyms")
-        shutil.copytree(gyms_src, gyms_dst)
-
         # change default connection
         setting_path = "agent.default_connection"
         self.set_config(setting_path, "fetchai/gym:0.3.0")
+
+        diff = self.difference_to_fetched_agent(
+            "fetchai/gym_aea:0.4.0", self.agent_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
 
         # change connection config
         setting_path = "vendor.fetchai.connections.gym.config.env"
         self.set_config(setting_path, "gyms.env.BanditNArmedRandom")
 
+        # add gyms folder from examples
+        gyms_src = os.path.join(ROOT_DIR, "examples", "gym_ex", "gyms")
+        gyms_dst = os.path.join(self.agent_name, "gyms")
+        shutil.copytree(gyms_src, gyms_dst)
+
         # change number of training steps
         setting_path = "vendor.fetchai.skills.gym.handlers.gym.args.nb_steps"
         self.set_config(setting_path, 20, "int")
 
-        gym_aea_process = self.run_agent("--connections", "fetchai/gym:0.3.0")
+        gym_aea_process = self.run_agent()
 
         check_strings = (
             "Training starting ...",

@@ -1,4 +1,9 @@
 ``` bash
+aea fetch fetchai/gym_aea:0.4.0 --alias my_gym_aea
+cd my_gym_aea
+aea install
+```
+``` bash
 aea create my_gym_aea
 cd my_gym_aea
 ```
@@ -6,21 +11,21 @@ cd my_gym_aea
 aea add skill fetchai/gym:0.4.0
 ```
 ``` bash
-mkdir gyms
-cp -a ../examples/gym_ex/gyms/. gyms/
-```
-``` bash
 aea add connection fetchai/gym:0.3.0
 aea config set agent.default_connection fetchai/gym:0.3.0
-```
-``` bash
-aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
 ``` bash
 aea install
 ```
 ``` bash
-aea run --connections fetchai/gym:0.3.0
+mkdir gyms
+cp -a ../examples/gym_ex/gyms/. gyms/
+```
+``` bash
+aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
+```
+``` bash
+aea run
 ```
 ``` bash
 cd ..
