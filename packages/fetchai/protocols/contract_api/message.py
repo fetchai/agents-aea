@@ -176,10 +176,10 @@ class ContractApiMessage(Message):
         return cast(CustomRawTransaction, self.get("raw_transaction"))
 
     @property
-    def state_data(self) -> CustomState:
-        """Get the 'state_data' content from the message."""
-        assert self.is_set("state_data"), "'state_data' content is not set."
-        return cast(CustomState, self.get("state_data"))
+    def state(self) -> CustomState:
+        """Get the 'state' content from the message."""
+        assert self.is_set("state"), "'state' content is not set."
+        return cast(CustomState, self.get("state"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the contract_api protocol."""
@@ -305,9 +305,9 @@ class ContractApiMessage(Message):
             elif self.performative == ContractApiMessage.Performative.STATE:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.state_data) == CustomState
-                ), "Invalid type for content 'state_data'. Expected 'State'. Found '{}'.".format(
-                    type(self.state_data)
+                    type(self.state) == CustomState
+                ), "Invalid type for content 'state'. Expected 'State'. Found '{}'.".format(
+                    type(self.state)
                 )
             elif self.performative == ContractApiMessage.Performative.RAW_TRANSACTION:
                 expected_nb_of_contents = 1

@@ -156,7 +156,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                raw_transaction=State(message.ledger_id, data),
+                state=State(message.ledger_id, data),
             )
             response.counterparty = message.counterparty
             dialogue.update(response)

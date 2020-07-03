@@ -471,6 +471,7 @@ class LedgerApiHandler(Handler):
                 )
             )
             strategy.is_searching = True
+            strategy.balance = ledger_api_msg.balance
         else:
             self.context.logger.warning(
                 "[{}]: you have no starting balance on {} ledger!".format(

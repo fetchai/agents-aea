@@ -90,8 +90,8 @@ class ContractApiSerializer(Serializer):
             contract_api_msg.get_state.CopyFrom(performative)
         elif performative_id == ContractApiMessage.Performative.STATE:
             performative = contract_api_pb2.ContractApiMessage.State_Performative()  # type: ignore
-            state_data = msg.state_data
-            State.encode(performative.state_data, state_data)
+            state = msg.state
+            State.encode(performative.state, state)
             contract_api_msg.state.CopyFrom(performative)
         elif performative_id == ContractApiMessage.Performative.RAW_TRANSACTION:
             performative = contract_api_pb2.ContractApiMessage.Raw_Transaction_Performative()  # type: ignore
@@ -172,9 +172,9 @@ class ContractApiSerializer(Serializer):
             kwargs = Kwargs.decode(pb2_kwargs)
             performative_content["kwargs"] = kwargs
         elif performative_id == ContractApiMessage.Performative.STATE:
-            pb2_state_data = contract_api_pb.state.state_data
-            state_data = State.decode(pb2_state_data)
-            performative_content["state_data"] = state_data
+            pb2_state = contract_api_pb.state.state
+            state = State.decode(pb2_state)
+            performative_content["state"] = state
         elif performative_id == ContractApiMessage.Performative.RAW_TRANSACTION:
             pb2_raw_transaction = contract_api_pb.raw_transaction.raw_transaction
             raw_transaction = RawTransaction.decode(pb2_raw_transaction)

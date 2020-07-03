@@ -19,6 +19,7 @@
 
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
 
+import json
 from pathlib import Path
 from typing import cast
 
@@ -82,14 +83,22 @@ def erc1155_contract():
     configuration._directory = directory
     configuration = cast(ContractConfig, configuration)
 
-    # ensure contract is loaded to sys.modules interface is attached to class!
-    contract = Contract.from_config(configuration)
-    assert contract.contract_interface is not None
+    # TODO some other tests don't deregister contracts from the registry.
+    #   find a neater solution.
+    if configuration.public_id in contract_registry.specs.keys():
+        contract_registry.specs.pop(str(configuration.public_id))
+
+    # load contract into sys modules!
+    Contract.from_config(configuration)
+
+    path = Path(configuration.directory, configuration.path_to_contract_interface)
+    with open(path, "r") as interface_file:
+        contract_interface = json.load(interface_file)
 
     contract_registry.register(
         id_=str(configuration.public_id),
         entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-        class_kwargs={"contract_interface": contract.contract_interface},
+        class_kwargs={"contract_interface": contract_interface},
         contract_config=configuration,
     )
     contract = contract_registry.make(configuration.public_id)

@@ -200,7 +200,7 @@ class MlTradeHandler(Handler):
         )
 
 
-class GenericLedgerApiHandler(Handler):
+class LedgerApiHandler(Handler):
     """Implement the ledger handler."""
 
     SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]

@@ -40,7 +40,7 @@ message ContractApiMessage{
     }
 
     message State_Performative{
-        State state_data = 1;
+        State state = 1;
     }
 
     message Raw_Transaction_Performative{

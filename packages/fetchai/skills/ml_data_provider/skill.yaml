@@ -9,7 +9,7 @@ fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmXKW1i7VouuwSMQUvmHyATudHph9QWtSp2SzDVPzgbPiY
-  handlers.py: QmRqLnNjTqzKm8L8JkbHqUWv5yTdjH3J38mjMiQdxnqnKm
+  handlers.py: QmPmTwojRvD11rpf1twKezvzv5cVSpdwYj81qqTMF89VLm
   strategy.py: Qma9H4dramyaXa6Y6R5cGTgf8qhq6J7PFYXN1k8qyE61Ji
 fingerprint_ignore_patterns: []
 contracts: []
@@ -26,6 +26,9 @@ behaviours:
       services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
   ml_trade:
     args: {}
     class_name: MlTradeHandler

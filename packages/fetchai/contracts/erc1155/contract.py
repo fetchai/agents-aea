@@ -284,7 +284,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_id: int,
-    ) -> int:
+    ) -> Dict[str, Dict[int, int]]:
         """
         Get the balance for a specific token id.
 
@@ -292,11 +292,12 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param agent_address: the address
         :param token_id: the token id
-        :return: the balance
+        :return: the balance in a dictionary
         """
         instance = cls.get_instance(ledger_api, contract_address)
         balance = instance.functions.balanceOf(agent_address, token_id).call()
-        return balance
+        result = {token_id: balance}
+        return {"balance": result}
 
     @classmethod
     def get_atomic_swap_single_transaction(
@@ -372,7 +373,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_ids: List[int],
-    ) -> List[int]:
+    ) -> Dict[str, Dict[int, int]]:
         """
         Get the balances for a batch of specific token ids.
 
@@ -386,7 +387,8 @@ class ERC1155Contract(Contract):
         balances = instance.functions.balanceOfBatch(
             [agent_address] * 10, token_ids
         ).call()
-        return balances
+        result = {key: value for key, value in zip(token_ids, balances)}
+        return {"balances": result}
 
     @classmethod
     def get_atomic_swap_batch_transaction(
@@ -457,7 +459,7 @@ class ERC1155Contract(Contract):
         to_supply: int,
         value: int,
         trade_nonce: int,
-    ) -> bytes:
+    ) -> Dict[str, bytes]:
         """
         Get the hash for a trustless trade between two agents for a single token.
 
@@ -470,7 +472,7 @@ class ERC1155Contract(Contract):
         :param to_supply: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
         :param ledger_api: the ledger API
-        :return: the transaction hash
+        :return: the transaction hash in a dict
         """
         instance = cls.get_instance(ledger_api, contract_address)
         from_address_hash = instance.functions.getAddress(from_address).call()
@@ -497,7 +499,7 @@ class ERC1155Contract(Contract):
                 trade_nonce,
             ).call()
         )
-        return tx_hash
+        return {"hash_single": tx_hash}
 
     @staticmethod
     def _get_hash_single(
@@ -547,7 +549,7 @@ class ERC1155Contract(Contract):
         to_supplies: List[int],
         value: int,
         trade_nonce: int,
-    ) -> bytes:
+    ) -> Dict[str, bytes]:
         """
         Get the hash for a trustless trade between two agents for a single token.
 
@@ -560,7 +562,7 @@ class ERC1155Contract(Contract):
         :param to_supplies: the quantities of tokens sent from the to_address to the from_address
         :param value: the value of ether sent from the from_address to the to_address
         :param trade_nonce: the trade nonce
-        :return: the transaction hash
+        :return: the transaction hash in a dict
         """
         instance = cls.get_instance(ledger_api, contract_address)
         from_address_hash = instance.functions.getAddress(from_address).call()
@@ -587,7 +589,7 @@ class ERC1155Contract(Contract):
                 trade_nonce,
             ).call()
         )
-        return tx_hash
+        return {"hash_batch": tx_hash}
 
     @staticmethod
     def _get_hash_batch(

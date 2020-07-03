@@ -24,7 +24,7 @@ speech_acts:
     callable: pt:str
     kwargs: ct:Kwargs
   state:
-    state_data: ct:State
+    state: ct:State
   raw_transaction:
     raw_transaction: ct:RawTransaction
   error:

@@ -19,8 +19,6 @@
 
 """This module contains the strategy class."""
 
-from typing import cast
-
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -56,6 +54,7 @@ class Strategy(Model):
         super().__init__(**kwargs)
         self._is_searching = False
         self._tx_id = 0
+        self._balance = 0
 
     @property
     def ledger_id(self) -> str:
@@ -82,6 +81,16 @@ class Strategy(Model):
         """Check if the agent is searching."""
         assert isinstance(is_searching, bool), "Can only set bool on is_searching!"
         self._is_searching = is_searching
+
+    @property
+    def balance(self) -> int:
+        """Get the balance."""
+        return self._balance
+
+    @balance.setter
+    def balance(self, balance: int) -> None:
+        """Set the balance."""
+        self._balance = balance
 
     def get_next_transaction_id(self) -> str:
         """
@@ -131,17 +140,12 @@ class Strategy(Model):
         :return: whether it is affordable
         """
         if self.is_ledger_tx:
-            result = False
             payable = (
                 terms.values["price"]
                 - terms.values["seller_tx_fee"]
                 + terms.values["buyer_tx_fee"]
             )
-            ledger_id = terms.values["ledger_id"]
-            address = cast(str, self.context.agent_addresses.get(ledger_id))
-            balance = self.context.ledger_apis.get_balance(ledger_id, address)
-            if balance is not None:
-                result = balance >= payable
+            result = self.balance >= payable
         else:
             result = True
         return result
