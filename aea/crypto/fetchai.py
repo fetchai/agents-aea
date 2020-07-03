@@ -244,6 +244,11 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
 
         :param kwargs: key word arguments (expects either a pair of 'host' and 'port' or a 'network')
         """
+        assert (
+            "host" in kwargs and "port" in kwargs
+        ) or "network" in kwargs, (
+            "expects either a pair of 'host' and 'port' or a 'network'"
+        )
         self._api = FetchaiLedgerApi(**kwargs)
 
     @property

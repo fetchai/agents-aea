@@ -43,6 +43,9 @@ logger = logging.getLogger(__name__)
 _COSMOS = "cosmos"
 COSMOS_CURRENCY = "ATOM"
 COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
+DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
+DEFAULT_CURRENCY_DENOM = "atestfet"
+DEFAULT_CHAIN_ID = "agent-land"
 
 
 class CosmosCrypto(Crypto[SigningKey]):
@@ -266,12 +269,11 @@ class CosmosApi(LedgerApi, CosmosHelper):
     def __init__(self, **kwargs):
         """
         Initialize the Ethereum ledger APIs.
-
-        :param address: the endpoint for Web3 APIs.
         """
         self._api = None
-        assert "address" in kwargs, "Address kwarg missing!"
-        self.network_address = kwargs.pop("address")
+        self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
+        self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
+        self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
 
     @property
     def api(self) -> None:
@@ -307,12 +309,12 @@ class CosmosApi(LedgerApi, CosmosHelper):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        denom: str = "testfet",
+        denom: Optional[str] = None,
         account_number: int = 0,
         sequence: int = 0,
         gas: int = 80000,
         memo: str = "",
-        chain_id: str = "aea-testnet",
+        chain_id: Optional[str] = None,
         **kwargs,
     ) -> Optional[Any]:
         """
@@ -326,6 +328,8 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
         :return: the transfer transaction
         """
+        denom = denom if denom is not None else self.denom
+        chain_id = chain_id if chain_id is not None else self.chain_id
         account_number, sequence = self._try_get_account_number_and_sequence(
             sender_address
         )

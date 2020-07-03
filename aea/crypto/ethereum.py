@@ -43,9 +43,10 @@ logger = logging.getLogger(__name__)
 
 _ETHEREUM = "ethereum"
 ETHEREUM_CURRENCY = "ETH"
-DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
 ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
+DEFAULT_CHAIN_ID = 3
+DEFAULT_GAS_PRICE = "50"
 
 
 class EthereumCrypto(Crypto[Account]):
@@ -240,14 +241,16 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     identifier = _ETHEREUM
 
-    def __init__(self, address: str, gas_price: str = DEFAULT_GAS_PRICE):
+    def __init__(self, address: str, **kwargs):
         """
         Initialize the Ethereum ledger APIs.
 
         :param address: the endpoint for Web3 APIs.
         """
+        assert address is not None, "address is a required key word argument"
         self._api = Web3(HTTPProvider(endpoint_uri=address))
-        self._gas_price = gas_price
+        self._gas_price = kwargs.pop("gas_price", DEFAULT_GAS_PRICE)
+        self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
 
     @property
     def api(self) -> Web3:
@@ -270,7 +273,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        chain_id: int = 3,
+        chain_id: Optional[int] = None,
+        gas_price: Optional[str] = None,
         **kwargs,
     ) -> Optional[Any]:
         """
@@ -282,8 +286,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 3 (i.e. ropsten; mainnet has 1).
+        :param gas_price: the gas price
         :return: the transfer transaction
         """
+        chain_id = chain_id if chain_id is not None else self._chain_id
+        gas_price = gas_price if gas_price is not None else self._gas_price
         nonce = self._try_get_transaction_count(sender_address)
 
         transaction = {
@@ -292,7 +299,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "to": destination_address,
             "value": amount,
             "gas": tx_fee,
-            "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
+            "gasPrice": self._api.toWei(gas_price, GAS_ID),
             "data": tx_nonce,
         }
 
