@@ -701,7 +701,7 @@ class Dialogues(ABC):
             else:
                 assert (
                     message.counterparty
-                    != dialogue.dialogue_label.dialogue_opponent_addr
+                    == dialogue.dialogue_label.dialogue_opponent_addr
                 ), "The counterparty specified in the message is different from the opponent in this dialogue."
 
             dialogue.update(message)
