@@ -183,4 +183,4 @@ def test_get_wealth_positive(caplog):
     ethereum_faucet_api = EthereumFaucetApi()
     ec = EthereumCrypto()
     ethereum_faucet_api.get_wealth(ec.address)
-    assert "Response: " in caplog.text
+    assert "Response: " in caplog.text, f"Cannot find message in output: {caplog.text}"

@@ -168,4 +168,6 @@ def test_get_wealth_positive(caplog):
     fetchai_faucet_api = FetchAIFaucetApi()
     fc = FetchAICrypto()
     fetchai_faucet_api.get_wealth(fc.address)
-    assert "Message: Transfer pending" in caplog.text
+    assert (
+        "Message: Transfer pending" in caplog.text
+    ), f"Cannot find message in output: {caplog.text}"
