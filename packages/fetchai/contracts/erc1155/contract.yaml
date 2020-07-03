@@ -1,6 +1,6 @@
 name: erc1155
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: The erc1155 contract implements an ERC1155 contract package.
 license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'

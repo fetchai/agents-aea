@@ -53,7 +53,7 @@ LIBP2P_NODE_CLARGS = list()  # type: List[str]
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.3.0")
 
 MultiAddr = str
 

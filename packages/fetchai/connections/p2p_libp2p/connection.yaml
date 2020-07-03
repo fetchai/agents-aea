@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
   same DHT.
@@ -11,7 +11,7 @@ fingerprint:
   aea/api.go: QmW5fUpVZmV3pxgoakm3RvsvCGC6FwT2XprcqXHM8rBXP5
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
-  connection.py: QmRZbfTn21VtM9Z8sP779a3Y4u9VFXZpQjURQGk3fUeqHa
+  connection.py: QmWMA8bx4YpA1ucqBtDCTY9cwGfo7bjfXXGfsEryig2F6n
   dht/dhtclient/dhtclient.go: Qma8rpw5wLUsqX1Qvengb1Da3KFB12ML1rZ8NGM5ZGZMar
   dht/dhtclient/dhtclient_test.go: QmdpspLKA9HXc56HVMcP36ikBpHrztWHJ6wWqoU6UnR6BM
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s

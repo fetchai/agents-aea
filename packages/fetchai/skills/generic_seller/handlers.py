@@ -23,6 +23,7 @@ from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.crypto.ledger_apis import LedgerApis
+from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -258,8 +259,9 @@ class GenericFipaHandler(Handler):
             ledger_api_msg = LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
                 dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
-                ledger_id=fipa_dialogue.terms.ledger_id,
-                transaction_digest=fipa_msg.info["transaction_digest"],
+                transaction_digest=TransactionDigest(
+                    fipa_dialogue.terms.ledger_id, fipa_msg.info["transaction_digest"]
+                ),
             )
             ledger_api_msg.counterparty = LEDGER_API_ADDRESS
             ledger_api_dialogue = cast(

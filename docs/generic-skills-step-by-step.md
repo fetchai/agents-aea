@@ -265,6 +265,7 @@ from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.crypto.ledger_apis import LedgerApis
+from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -529,8 +530,9 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
             ledger_api_msg = LedgerApiMessage(
                 performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
                 dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
-                ledger_id=fipa_dialogue.terms.ledger_id,
-                transaction_digest=fipa_msg.info["transaction_digest"],
+                transaction_digest=TransactionDigest(
+                    fipa_dialogue.terms.ledger_id, fipa_msg.info["transaction_digest"]
+                ),
             )
             ledger_api_msg.counterparty = LEDGER_API_ADDRESS
             ledger_api_dialogue = cast(
@@ -2039,7 +2041,6 @@ class GenericSigningHandler(Handler):
         )
         ledger_api_msg.counterparty = LEDGER_API_ADDRESS
         ledger_api_dialogue.update(ledger_api_msg)
-        # associate ledger api dialogue with fipa dialogue and send message
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info(
             "[{}]: sending transaction to ledger.".format(self.context.agent_name)
@@ -2189,7 +2190,6 @@ class GenericLedgerApiHandler(Handler):
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=(str(self.context.skill_id),),
-            crypto_id=ledger_api_msg.raw_transaction.ledger_id,
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
             skill_callback_info={},

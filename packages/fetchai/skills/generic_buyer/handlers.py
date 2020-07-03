@@ -534,7 +534,6 @@ class GenericSigningHandler(Handler):
         )
         ledger_api_msg.counterparty = LEDGER_API_ADDRESS
         ledger_api_dialogue.update(ledger_api_msg)
-        # associate ledger api dialogue with fipa dialogue and send message
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info(
             "[{}]: sending transaction to ledger.".format(self.context.agent_name)

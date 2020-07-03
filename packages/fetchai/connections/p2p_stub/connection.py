@@ -31,7 +31,7 @@ from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.3.0")
 
 
 class P2PStubConnection(StubConnection):

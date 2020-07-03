@@ -98,7 +98,7 @@ async def test_erc1155_get_deploy_transaction(
         performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=EthereumCrypto.identifier,
-        contract_id="fetchai/erc1155:0.5.0",
+        contract_id="fetchai/erc1155:0.6.0",
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
     )
@@ -143,7 +143,7 @@ async def test_erc1155_get_raw_transaction(
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=EthereumCrypto.identifier,
-        contract_id="fetchai/erc1155:0.5.0",
+        contract_id="fetchai/erc1155:0.6.0",
         contract_address=contract_address,
         callable="get_create_batch_transaction",
         kwargs=ContractApiMessage.Kwargs(

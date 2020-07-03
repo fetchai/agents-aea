@@ -38,9 +38,9 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.2.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.3.0")
         self.set_config(
-            "agent.default_connection", "fetchai/p2p_libp2p:0.2.0"
+            "agent.default_connection", "fetchai/p2p_libp2p:0.3.0"
         )  # TOFIX(LR) not sure is needed
 
         process = self.run_agent()
@@ -65,7 +65,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause to investigate
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.2.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.3.0")
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
