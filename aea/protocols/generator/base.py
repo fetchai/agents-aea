@@ -2017,13 +2017,13 @@ class ProtocolGenerator:
             self._serialization_class_str(),
         )
 
-        # Run black formatting
-        try_run_black_formatting(self.path_to_generated_protocol_package)
-
         # Run protocol buffer compiler
         try_run_protoc(
             self.path_to_generated_protocol_package, self.protocol_specification.name
         )
+
+        # Run black formatting
+        try_run_black_formatting(self.path_to_generated_protocol_package)
 
         # Warn if specification has custom types
         if len(self.spec.all_custom_types) > 0:

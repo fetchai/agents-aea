@@ -46,7 +46,7 @@ class HttpDialogue(Dialogue):
         HttpMessage.Performative.RESPONSE: frozenset(),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a http dialogue."""
 
         SERVER = "server"

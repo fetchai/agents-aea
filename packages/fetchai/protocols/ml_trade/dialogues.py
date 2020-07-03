@@ -50,7 +50,7 @@ class MlTradeDialogue(Dialogue):
         ),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a ml_trade dialogue."""
 
         SELLER = "seller"

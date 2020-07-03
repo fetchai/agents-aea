@@ -696,7 +696,14 @@ class Dialogues(ABC):
             dialogue = self.get_dialogue(message)
 
         if dialogue is not None:
-            message.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
+            if message.counterparty is None:
+                message.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
+            else:
+                assert (
+                    message.counterparty
+                    != dialogue.dialogue_label.dialogue_opponent_addr
+                ), "The counterparty specified in the message is different from the opponent in this dialogue."
+
             dialogue.update(message)
             result = dialogue  # type: Optional[Dialogue]
         else:  # couldn't find the dialogue

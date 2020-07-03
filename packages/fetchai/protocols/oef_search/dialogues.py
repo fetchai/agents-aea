@@ -67,7 +67,7 @@ class OefSearchDialogue(Dialogue):
         ),
     }
 
-    class AgentRole(Dialogue.Role):
+    class Role(Dialogue.Role):
         """This class defines the agent's role in a oef_search dialogue."""
 
         OEF_NODE = "oef_node"
