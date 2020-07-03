@@ -5,13 +5,13 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.2.0
+aea fetch fetchai/generic_seller:0.3.0
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.6.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.2.0
+aea fetch fetchai/generic_buyer:0.3.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.5.0
 cd ..

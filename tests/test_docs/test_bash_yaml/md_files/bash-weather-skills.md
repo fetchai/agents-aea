@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/weather_station:0.5.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.6.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -16,7 +16,7 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
-aea fetch fetchai/weather_client:0.5.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.6.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```

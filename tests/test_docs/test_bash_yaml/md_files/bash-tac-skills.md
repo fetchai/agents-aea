@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/tac_controller:0.2.0
+aea fetch fetchai/tac_controller:0.3.0
 cd tac_controller
 aea install
 ```
@@ -16,8 +16,8 @@ aea config set agent.default_connection fetchai/oef:0.5.0
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_one
-aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.4.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.4.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
 ```

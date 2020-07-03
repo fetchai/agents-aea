@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.3.0
+aea fetch fetchai/tac_controller_contract:0.4.0
 cd tac_controller_contract
 aea install
 ```
@@ -26,12 +26,12 @@ aea generate-wealth ethereum
 aea get-wealth ethereum
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.4.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 cd ..
-aea fetch fetchai/tac_participant:0.3.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.4.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool

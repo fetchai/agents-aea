@@ -137,7 +137,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.5.0", weather_station_aea_name
+            "fetchai/weather_station:0.6.0", weather_station_aea_name
         )
         assert (
             diff == []
@@ -155,7 +155,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.5.0", weather_client_aea_name
+            "fetchai/weather_client:0.6.0", weather_client_aea_name
         )
         assert (
             diff == []

@@ -64,7 +64,7 @@ Keep it running for all the following.
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.5.0
+aea fetch fetchai/car_detector:0.6.0
 cd car_detector
 aea install
 ```
@@ -102,7 +102,7 @@ default_routing:
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.5.0
+aea fetch fetchai/car_data_buyer:0.6.0
 cd car_data_buyer
 aea install
 ```

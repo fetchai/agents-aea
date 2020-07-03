@@ -70,7 +70,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.3.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.4.0 --alias my_thermometer_aea
 cd thermometer_aea
 aea install
 ```
@@ -108,7 +108,7 @@ default_routing:
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.3.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.4.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```

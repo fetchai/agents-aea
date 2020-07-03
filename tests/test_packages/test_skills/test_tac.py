@@ -69,7 +69,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.2.0", tac_controller_name
+            "fetchai/tac_controller:0.3.0", tac_controller_name
         )
         assert (
             diff == []
@@ -86,7 +86,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             self.set_config("agent.default_ledger", "ethereum")
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.3.0", agent_name
+                "fetchai/tac_participant:0.4.0", agent_name
             )
             assert (
                 diff == []
@@ -203,7 +203,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.3.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.4.0", tac_controller_name
         )
         assert (
             diff == []
@@ -239,7 +239,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.3.0", agent_name
+                "fetchai/tac_participant:0.4.0", agent_name
             )
             assert (
                 diff == []

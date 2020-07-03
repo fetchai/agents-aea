@@ -145,7 +145,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.2.0", seller_aea_name
+            "fetchai/generic_seller:0.3.0", seller_aea_name
         )
         assert (
             diff == []
@@ -163,7 +163,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.2.0", buyer_aea_name
+            "fetchai/generic_buyer:0.3.0", buyer_aea_name
         )
         assert (
             diff == []

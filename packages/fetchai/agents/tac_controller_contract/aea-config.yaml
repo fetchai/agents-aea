@@ -1,6 +1,6 @@
 agent_name: tac_controller_contract
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: An AEA to manage an instance of the TAC (trading agent competition) using
   an ERC1155 smart contract.
 license: Apache-2.0

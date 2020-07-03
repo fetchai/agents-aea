@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/ml_data_provider:0.5.0
+aea fetch fetchai/ml_data_provider:0.6.0
 cd ml_data_provider
 aea install
 ``` 
@@ -16,7 +16,7 @@ aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
 ```
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.5.0
+aea fetch fetchai/ml_model_trainer:0.6.0
 cd ml_model_trainer
 aea install
 ```

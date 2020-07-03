@@ -71,7 +71,7 @@ Keep it running for the following demo.
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.5.0
+aea fetch fetchai/ml_data_provider:0.6.0
 cd ml_data_provider
 aea install
 ```
@@ -109,7 +109,7 @@ default_routing:
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.5.0
+aea fetch fetchai/ml_model_trainer:0.6.0
 cd ml_model_trainer
 aea install
 ```

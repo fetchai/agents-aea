@@ -67,7 +67,7 @@ Keep it running for all the following demos.
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.3.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
@@ -105,7 +105,7 @@ default_routing:
 
 Then, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.3.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```

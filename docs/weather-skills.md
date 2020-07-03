@@ -70,7 +70,7 @@ trusts the seller AEA to send the data upon successful payment.
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.5.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.6.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -109,7 +109,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.5.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.6.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```

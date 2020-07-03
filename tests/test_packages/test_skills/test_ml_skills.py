@@ -146,7 +146,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.5.0", data_provider_aea_name
+            "fetchai/ml_data_provider:0.6.0", data_provider_aea_name
         )
         assert (
             diff == []
@@ -165,7 +165,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.5.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.6.0", model_trainer_aea_name
         )
         assert (
             diff == []
