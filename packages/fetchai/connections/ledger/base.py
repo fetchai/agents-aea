@@ -25,6 +25,7 @@ from concurrent.futures._base import Executor
 from typing import Any, Callable, Dict, Optional
 
 from aea.configurations.base import PublicId
+from aea.connections.base import ConnectionStatus
 from aea.crypto.registries import Registry, ledger_apis_registry
 from aea.helpers.dialogue.base import Dialogues
 from aea.mail.base import Envelope
@@ -42,6 +43,7 @@ class RequestDispatcher(ABC):
 
     def __init__(
         self,
+        connection_status: ConnectionStatus,
         loop: Optional[asyncio.AbstractEventLoop] = None,
         executor: Optional[Executor] = None,
         api_configs: Optional[Dict[str, Dict[str, str]]] = None,
@@ -52,6 +54,7 @@ class RequestDispatcher(ABC):
         :param loop: the asyncio loop.
         :param executor: an executor.
         """
+        self.connection_status = connection_status
         self.loop = loop if loop is not None else asyncio.get_event_loop()
         self.executor = executor
         self._api_configs = api_configs

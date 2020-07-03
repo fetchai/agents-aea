@@ -82,9 +82,9 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 class LedgerApiRequestDispatcher(RequestDispatcher):
     """Implement ledger API request dispatcher."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Initialize the dispatcher."""
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self._ledger_api_dialogues = LedgerApiDialogues()
 
     def get_ledger_id(self, message: Message) -> str:
@@ -190,7 +190,11 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         """
         is_settled = False
         attempts = 0
-        while not is_settled and attempts < self.MAX_ATTEMPTS:
+        while (
+            not is_settled
+            and attempts < self.MAX_ATTEMPTS
+            and self.connection_status.is_connected
+        ):
             time.sleep(self.TIMEOUT)
             transaction_receipt = api.get_transaction_receipt(
                 message.transaction_digest.body
@@ -199,7 +203,11 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             attempts += 1
         attempts = 0
         transaction = api.get_transaction(message.transaction_digest.body)
-        while transaction is None and attempts < self.MAX_ATTEMPTS:
+        while (
+            transaction is None
+            and attempts < self.MAX_ATTEMPTS
+            and self.connection_status.is_connected
+        ):
             time.sleep(self.TIMEOUT)
             transaction = api.get_transaction(message.transaction_digest.body)
             attempts += 1
