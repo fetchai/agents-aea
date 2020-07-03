@@ -21,6 +21,7 @@
 import asyncio
 from asyncio import Task
 from collections import deque
+from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Deque, Dict, List, Optional
 
 from aea.connections.base import Connection
@@ -53,6 +54,8 @@ class LedgerConnection(Connection):
         """
         super().__init__(**kwargs)
 
+        # TODO make the max number of workers configurable
+        self._executor: Optional[ThreadPoolExecutor] = None
         self._ledger_dispatcher: Optional[LedgerApiRequestDispatcher] = None
         self._contract_dispatcher: Optional[ContractApiRequestDispatcher] = None
 
@@ -65,11 +68,16 @@ class LedgerConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
+        self._executor = ThreadPoolExecutor(max_workers=None)
         self._ledger_dispatcher = LedgerApiRequestDispatcher(
-            loop=self.loop, api_configs=self.api_configs
+            loop=self.loop,
+            executor=self._executor,
+            api_configs=self.api_configs,
         )
         self._contract_dispatcher = ContractApiRequestDispatcher(
-            loop=self.loop, api_configs=self.api_configs
+            loop=self.loop,
+            executor=self._executor,
+            api_configs=self.api_configs,
         )
         self.connection_status.is_connected = True
 
@@ -79,6 +87,8 @@ class LedgerConnection(Connection):
         for task in self.receiving_tasks:
             if not task.cancelled():
                 task.cancel()
+        self._executor.shutdown(wait=True)
+        self._executor = None
         self._ledger_dispatcher = None
         self._contract_dispatcher = None
 
@@ -89,9 +99,10 @@ class LedgerConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        task = await self._schedule_request(envelope)
-        self.receiving_tasks.append(task)
-        self.task_to_request[task] = envelope
+        if self.connection_status.is_connected:
+            task = await self._schedule_request(envelope)
+            self.receiving_tasks.append(task)
+            self.task_to_request[task] = envelope
 
     async def _schedule_request(self, envelope: Envelope) -> Task:
         """
