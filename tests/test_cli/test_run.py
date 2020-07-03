@@ -45,8 +45,7 @@ from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import sigint_crossplatform
 
 from tests.common.pexpect_popen import PexpectWrapper
-
-from ..conftest import AUTHOR, CLI_LOG_OPTION, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 if sys.platform.startswith("win"):

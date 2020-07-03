@@ -27,7 +27,7 @@ import pytest
 
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 
-from ..conftest import ETHEREUM_PRIVATE_KEY_PATH, ETHEREUM_TESTNET_CONFIG
+from tests.conftest import ETHEREUM_PRIVATE_KEY_PATH, ETHEREUM_TESTNET_CONFIG
 
 
 def test_creation():

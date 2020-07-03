@@ -27,11 +27,12 @@ from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ..helper import extract_code_blocks
-from ...conftest import (
+from tests.conftest import (
     AUTHOR,
     ROOT_DIR,
 )
+from tests.test_docs.helper import extract_code_blocks
+
 
 MD_FILE = "docs/skill-guide.md"
 

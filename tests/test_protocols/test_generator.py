@@ -56,11 +56,11 @@ from aea.protocols.generator.extract_specification import (
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
 
+from tests.conftest import ROOT_DIR
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )
 
-from ..conftest import ROOT_DIR
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)

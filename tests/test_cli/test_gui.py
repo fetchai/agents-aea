@@ -32,8 +32,7 @@ import pytest
 from aea.configurations.loader import make_jsonschema_base_uri
 
 from tests.common.pexpect_popen import PexpectWrapper
-
-from ..conftest import (
+from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CONFIGURATION_SCHEMA_DIR,
     tcpping,

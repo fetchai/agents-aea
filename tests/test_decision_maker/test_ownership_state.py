@@ -26,7 +26,7 @@ from aea.decision_maker.default import OwnershipState
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 
-from ..conftest import AUTHOR
+from tests.conftest import AUTHOR
 
 
 def test_non_initialized_ownership_state_raises_exception():

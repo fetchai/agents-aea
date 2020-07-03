@@ -37,7 +37,7 @@ from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 
-from ..conftest import (
+from tests.conftest import (
     COSMOS_TESTNET_CONFIG,
     CUR_PATH,
     ETHEREUM_ADDRESS_ONE,

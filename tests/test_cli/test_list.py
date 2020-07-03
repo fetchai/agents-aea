@@ -33,14 +33,13 @@ from jsonschema import Draft4Validator
 
 from aea.cli import cli
 
-from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
-
-from ..conftest import (
+from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
 )
+from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 
 class TestListProtocols:

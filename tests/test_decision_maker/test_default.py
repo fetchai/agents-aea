@@ -47,7 +47,7 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
-from ..conftest import (
+from tests.conftest import (
     AUTHOR,
     CUR_PATH,
     _make_dummy_connection,

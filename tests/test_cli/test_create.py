@@ -48,7 +48,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
-from ..conftest import (
+from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,
     CLI_LOG_OPTION,

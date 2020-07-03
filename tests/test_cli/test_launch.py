@@ -40,8 +40,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from tests.common.pexpect_popen import PexpectWrapper
-
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 logger = logging.getLogger(__name__)
 

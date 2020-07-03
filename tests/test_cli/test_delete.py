@@ -29,7 +29,7 @@ from click.testing import CliRunner
 
 from aea.cli import cli
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION
+from tests.conftest import AUTHOR, CLI_LOG_OPTION
 
 
 class TestDelete:

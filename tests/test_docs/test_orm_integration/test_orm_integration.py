@@ -28,7 +28,7 @@ import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import MAX_FLAKY_RERUNS, ROOT_DIR
 
 seller_strategy_replacement = """models:
   dialogues:

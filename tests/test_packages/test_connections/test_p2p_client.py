@@ -32,7 +32,7 @@ import pytest
 
 from aea.mail.base import Envelope
 
-from ...conftest import (
+from tests.conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_p2p_client_connection,
 )

@@ -24,7 +24,7 @@ from click.testing import CliRunner
 
 from aea.cli import cli
 
-from ..conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION
 
 
 @mock.patch("aea.cli.login.registry_login", return_value="token")

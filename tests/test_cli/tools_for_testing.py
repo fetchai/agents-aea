@@ -26,9 +26,8 @@ from click import ClickException
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 
+from tests.conftest import AUTHOR
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
-
-from ..conftest import AUTHOR
 
 
 def raise_click_exception(*args, **kwargs):

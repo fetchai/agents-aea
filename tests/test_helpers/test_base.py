@@ -24,7 +24,7 @@ from aea.helpers.base import RegexConstrainedString, locate
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
-from ..conftest import CUR_PATH
+from tests.conftest import CUR_PATH
 
 
 class TestHelpersBase:

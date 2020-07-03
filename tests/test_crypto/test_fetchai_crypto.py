@@ -25,7 +25,7 @@ import pytest
 
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 
-from ..conftest import FETCHAI_PRIVATE_KEY_PATH, FETCHAI_TESTNET_CONFIG
+from tests.conftest import FETCHAI_PRIVATE_KEY_PATH, FETCHAI_TESTNET_CONFIG
 
 
 def test_initialisation():

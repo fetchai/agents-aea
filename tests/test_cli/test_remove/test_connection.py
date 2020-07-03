@@ -34,7 +34,7 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
 class TestRemoveConnectionWithPublicId:

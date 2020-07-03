@@ -34,7 +34,7 @@ from aea.crypto.helpers import (
     FETCHAI_PRIVATE_KEY_FILE,
 )
 
-from ..conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION
 
 
 class TestGenerateKey:

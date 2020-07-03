@@ -25,7 +25,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+from tests.conftest import FUNDED_FET_PRIVATE_KEY_1
 
 
 class TestMLSkills(AEATestCaseMany, UseOef):
