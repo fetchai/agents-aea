@@ -23,7 +23,6 @@ from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.crypto.ethereum import EthereumHelper
-from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
@@ -380,10 +379,13 @@ class LedgerApiHandler(Handler):
                 )
                 strategy.contract_address = contract_address
                 strategy.is_contract_deployed = is_transaction_successful
+                strategy.is_behaviour_active = is_transaction_successful
             elif not strategy.is_tokens_created:
                 strategy.is_tokens_created = is_transaction_successful
+                strategy.is_behaviour_active = is_transaction_successful
             elif not strategy.is_tokens_minted:
                 strategy.is_tokens_minted = is_transaction_successful
+                strategy.is_behaviour_active = is_transaction_successful
             else:
                 self.context.error("Unexpected transaction receipt!")
         else:
@@ -505,23 +507,13 @@ class ContractApiHandler(Handler):
                 self.context.agent_name, contract_api_msg
             )
         )
-        strategy = cast(Strategy, self.context.strategy)
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=contract_api_msg.raw_transaction,
-            terms=Terms(
-                strategy.ledger_id,
-                self.context.agent_address,
-                self.context.agent_address,
-                {},
-                {},
-                True,
-                "",
-                {},
-            ),  # TODO: Terms should depend on dialogue
+            terms=contract_api_dialogue.terms,
             skill_callback_info={},
         )
         signing_msg.counterparty = "decision_maker"

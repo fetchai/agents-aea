@@ -29,6 +29,7 @@ from typing import Optional
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import Description
+from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
@@ -58,7 +59,41 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 
-ContractApiDialogue = BaseContractApiDialogue
+
+class ContractApiDialogue(BaseContractApiDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseContractApiDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self._terms = None  # type: Optional[Terms]
+
+    @property
+    def terms(self) -> Terms:
+        """Get the terms."""
+        assert self._terms is not None, "Terms not set!"
+        return self._terms
+
+    @terms.setter
+    def terms(self, terms: Terms) -> None:
+        """Set the terms."""
+        assert self._terms is None, "Terms already set!"
+        self._terms = terms
 
 
 class ContractApiDialogues(Model, BaseContractApiDialogues):

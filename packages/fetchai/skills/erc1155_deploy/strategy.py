@@ -23,6 +23,7 @@ from typing import Any, Dict, List, Optional
 
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description
+from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -73,6 +74,7 @@ class Strategy(Model):
 
         super().__init__(**kwargs)
 
+        self.is_behaviour_active = True
         self._is_contract_deployed = self._contract_address is not None
         self._is_tokens_created = self._token_ids is not None
         self._is_tokens_minted = self._token_ids is not None
@@ -159,3 +161,57 @@ class Strategy(Model):
             data_model=GenericDataModel(self._data_model_name, self._data_model),
         )
         return description
+
+    def get_deploy_terms(self) -> Terms:
+        """
+        Get deploy terms of deployment.
+
+        :return: terms
+        """
+        terms = Terms(
+            self.ledger_id,
+            self.context.agent_address,
+            self.context.agent_address,
+            {},
+            {},
+            True,
+            "",
+            {},
+        )
+        return terms
+
+    def get_create_token_terms(self) -> Terms:
+        """
+        Get create token terms of deployment.
+
+        :return: terms
+        """
+        terms = Terms(
+            self.ledger_id,
+            self.context.agent_address,
+            self.context.agent_address,
+            {},
+            {},
+            True,
+            "",
+            {},
+        )
+        return terms
+
+    def get_mint_token_terms(self) -> Terms:
+        """
+        Get mint token terms of deployment.
+
+        :return: terms
+        """
+        terms = Terms(
+            self.ledger_id,
+            self.context.agent_address,
+            self.context.agent_address,
+            {},
+            {},
+            True,
+            "",
+            {},
+        )
+        return terms

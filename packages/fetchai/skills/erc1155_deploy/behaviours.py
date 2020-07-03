@@ -28,6 +28,7 @@ from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_deploy.dialogues import (
+    ContractApiDialogue,
     ContractApiDialogues,
     LedgerApiDialogues,
     OefSearchDialogues,
@@ -67,6 +68,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
+        if not strategy.is_behaviour_active:
+            return
+
         if strategy.is_contract_deployed and not strategy.is_tokens_created:
             self._request_token_create_transaction()
         elif (
@@ -118,6 +122,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
+        strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
@@ -132,7 +137,12 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             ),
         )
         contract_api_msg.counterparty = LEDGER_API_ADDRESS
-        contract_api_dialogues.update(contract_api_msg)
+        contract_api_dialogue = cast(
+            Optional[ContractApiDialogue],
+            contract_api_dialogues.update(contract_api_msg),
+        )
+        assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
+        contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info(
             "[{}]: Requesting contract deployment transaction...".format(
@@ -147,6 +157,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
+        strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
@@ -165,7 +176,12 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             ),
         )
         contract_api_msg.counterparty = LEDGER_API_ADDRESS
-        contract_api_dialogues.update(contract_api_msg)
+        contract_api_dialogue = cast(
+            Optional[ContractApiDialogue],
+            contract_api_dialogues.update(contract_api_msg),
+        )
+        assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
+        contract_api_dialogue.terms = strategy.get_create_token_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info(
             "[{}]: Requesting create batch transaction...".format(
@@ -180,6 +196,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
+        strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
@@ -200,7 +217,12 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             ),
         )
         contract_api_msg.counterparty = LEDGER_API_ADDRESS
-        contract_api_dialogues.update(contract_api_msg)
+        contract_api_dialogue = cast(
+            Optional[ContractApiDialogue],
+            contract_api_dialogues.update(contract_api_msg),
+        )
+        assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
+        contract_api_dialogue.terms = strategy.get_mint_token_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info(
             "[{}]: Requesting mint batch transaction...".format(self.context.agent_name)
