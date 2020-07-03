@@ -21,7 +21,7 @@
 import asyncio
 from asyncio import Task
 from collections import deque
-from typing import Deque, Dict, List, Optional
+from typing import Deque, Dict, List, Optional, cast
 
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
@@ -55,6 +55,7 @@ class LedgerConnection(Connection):
 
         self._ledger_dispatcher: Optional[LedgerApiRequestDispatcher] = None
         self._contract_dispatcher: Optional[ContractApiRequestDispatcher] = None
+        self._event_new_receiving_task: Optional[asyncio.Event] = None
 
         self.receiving_tasks: List[asyncio.Future] = []
         self.task_to_request: Dict[asyncio.Future, Envelope] = {}
@@ -62,6 +63,11 @@ class LedgerConnection(Connection):
         self.api_configs = self.configuration.config.get(
             "ledger_apis", {}
         )  # type: Dict[str, Dict[str, str]]
+
+    @property
+    def event_new_receiving_task(self) -> asyncio.Event:
+        """Get the event to notify the 'receive' method of new receiving tasks."""
+        return cast(asyncio.Event, self._event_new_receiving_task)
 
     async def connect(self) -> None:
         """Set up the connection."""
@@ -71,6 +77,7 @@ class LedgerConnection(Connection):
         self._contract_dispatcher = ContractApiRequestDispatcher(
             loop=self.loop, api_configs=self.api_configs
         )
+        self._event_new_receiving_task = asyncio.Event(loop=self.loop)
         self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:
@@ -81,6 +88,7 @@ class LedgerConnection(Connection):
                 task.cancel()
         self._ledger_dispatcher = None
         self._contract_dispatcher = None
+        self._event_new_receiving_task = None
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -92,6 +100,7 @@ class LedgerConnection(Connection):
         task = await self._schedule_request(envelope)
         self.receiving_tasks.append(task)
         self.task_to_request[task] = envelope
+        self.event_new_receiving_task.set()
 
     async def _schedule_request(self, envelope: Envelope) -> Task:
         """
@@ -124,8 +133,9 @@ class LedgerConnection(Connection):
             done_task = self.done_tasks.pop()
             return self._handle_done_task(done_task)
 
-        if not self.receiving_tasks:
-            return None
+        if len(self.receiving_tasks) == 0:
+            await self.event_new_receiving_task.wait()
+            self.event_new_receiving_task.clear()
 
         # wait for completion of at least one receiving task
         done, pending = await asyncio.wait(
