@@ -9,8 +9,8 @@ fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
   behaviours.py: QmQCWgREz2LmDGnWF2gGvscus4anqsjsPCMSy828JEePRT
   dialogues.py: QmcsgBiXaC1M1aGe5AdAHShuhFnQNfLC6Ta2632huqbhnW
-  handlers.py: QmRde3mkZ69TuhsouAS2HTf6f2WLBhqsrjYF4tPVhrwr7E
-  strategy.py: QmQibbv4zUQCPLGcYWoJQSzWc4q8Ynwre32EnjcT5BnFm7
+  handlers.py: QmTZsmDwqoS3d4DWoz89KfNoKy627hDsxcuPGjzRuXGUdw
+  strategy.py: QmTJG2TzpcjzomN2a1J1Sx3cCVMSkBUpqHQbBfwxNpV8Sw
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -84,7 +84,7 @@ models:
       service_data:
         has_erc1155_contract: true
       to_supply: 0
-      token_type: 1
+      token_type: 2
       value: 0
     class_name: Strategy
 dependencies:

@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+import random  # nosec
 from typing import Any, Dict, List, Optional
 
 from aea.helpers.search.generic import GenericDataModel
@@ -56,9 +57,17 @@ class Strategy(Model):
         """Initialize the strategy of the agent."""
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._token_type = kwargs.pop("token_type", DEFAULT_TOKEN_TYPE)
+        assert self._token_type in [1, 2], "Token type must be 1 (NFT) or 2 (FT)"
         self._nb_tokens = kwargs.pop("nb_tokens", DEFAULT_NB_TOKENS)
         self._token_ids = kwargs.pop("token_ids", None)
         self._mint_quantities = kwargs.pop("mint_quantities", DEFAULT_MINT_QUANTITIES)
+        assert (
+            len(self._mint_quantities) == self._nb_tokens
+        ), "Number of tokens must match mint quantities array size."
+        if self._token_type == 1:
+            assert all(
+                quantity == 1 for quantity in self._mint_quantities
+            ), "NFTs must have a quantity of 1"
         self._contract_address = kwargs.pop("contract_address", None)
         assert (self._token_ids is None and self._contract_address is None) or (
             self._token_ids is not None and self._contract_address is not None
@@ -215,3 +224,19 @@ class Strategy(Model):
             {},
         )
         return terms
+
+    def get_proposal(self) -> Description:
+        """Get the proposal."""
+        trade_nonce = random.randrange(0, 10000000)  # quickfix, to avoid contract call
+        token_id = self.token_ids[0]
+        proposal = Description(
+            {
+                "contract_address": self.contract_address,
+                "token_id": str(token_id),
+                "trade_nonce": str(trade_nonce),
+                "from_supply": str(self.from_supply),
+                "to_supply": str(self.to_supply),
+                "value": str(self.value),
+            }
+        )
+        return proposal

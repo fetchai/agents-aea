@@ -130,39 +130,27 @@ class FipaHandler(Handler):
         )
         if not strategy.is_tokens_minted:
             self.context.logger.info("Contract items not minted yet. Try again later.")
-            pass
+            return
+
         # simply send the same proposal, independent of the query
-        # SEND REQUEST FOR TX
-        # trade_nonce = ERC1155Contract.generate_trade_nonce(
-        #     self.context.agent_address
-        # )
-        # token_id = self.context.behaviours.service_registration.token_ids[0]
-        # proposal = Description(
-        #     {
-        #         "contract_address": strategy.contract_address,
-        #         "token_id": str(token_id),
-        #         "trade_nonce": str(trade_nonce),
-        #         "from_supply": str(strategy.from_supply),
-        #         "to_supply": str(strategy.to_supply),
-        #         "value": str(strategy.value),
-        #     }
-        # )
-        # fipa_dialogue.proposal = proposal
-        # proposal_msg = FipaMessage(
-        #     message_id=fipa_msg.message_id + 1,
-        #     dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-        #     target=fipa_msg.message_id,
-        #     performative=FipaMessage.Performative.PROPOSE,
-        #     proposal=proposal,
-        # )
-        # proposal_msg.counterparty = fipa_msg.counterparty
-        # fipa_dialogue.update(proposal_msg)
-        # self.context.logger.info(
-        #     "[{}]: Sending PROPOSE to agent={}: proposal={}".format(
-        #         self.context.agent_name, fipa_msg.counterparty[-5:], proposal.values
-        #     )
-        # )
-        # self.context.outbox.put_message(message=proposal_msg)
+        fipa_dialogue.proposal = strategy.get_proposal()
+        proposal_msg = FipaMessage(
+            message_id=fipa_msg.message_id + 1,
+            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
+            target=fipa_msg.message_id,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=fipa_dialogue.proposal,
+        )
+        proposal_msg.counterparty = fipa_msg.counterparty
+        fipa_dialogue.update(proposal_msg)
+        self.context.logger.info(
+            "[{}]: Sending PROPOSE to agent={}: proposal={}".format(
+                self.context.agent_name,
+                fipa_msg.counterparty[-5:],
+                fipa_dialogue.proposal.values,
+            )
+        )
+        self.context.outbox.put_message(message=proposal_msg)
 
     def _handle_accept_w_inform(
         self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue
