@@ -131,7 +131,7 @@ class FIPANegotiationHandler(Handler):
         query = cast(Query, cfp.query)
         strategy = cast(Strategy, self.context.strategy)
         proposal_description = strategy.get_proposal_for_query(
-            query, cast(Dialogue.AgentRole, dialogue.role)
+            query, cast(Dialogue.Role, dialogue.role)
         )
 
         if proposal_description is None:
@@ -167,7 +167,7 @@ class FIPANegotiationHandler(Handler):
                 TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
                 proposal_description,
                 dialogue.dialogue_label,
-                cast(Dialogue.AgentRole, dialogue.role),
+                cast(Dialogue.Role, dialogue.role),
                 self.context.agent_address,
             )
             transactions.add_pending_proposal(
@@ -220,12 +220,12 @@ class FIPANegotiationHandler(Handler):
             TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             proposal_description,
             dialogue.dialogue_label,
-            cast(Dialogue.AgentRole, dialogue.role),
+            cast(Dialogue.Role, dialogue.role),
             self.context.agent_address,
         )
 
         if strategy.is_profitable_transaction(
-            transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+            transaction_msg, role=cast(Dialogue.Role, dialogue.role)
         ):
             self.context.logger.info(
                 "[{}]: Accepting propose (as {}).".format(
@@ -233,7 +233,7 @@ class FIPANegotiationHandler(Handler):
                 )
             )
             transactions.add_locked_tx(
-                transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+                transaction_msg, role=cast(Dialogue.Role, dialogue.role)
             )
             transactions.add_pending_initial_acceptance(
                 dialogue.dialogue_label, new_msg_id, transaction_msg
@@ -331,7 +331,7 @@ class FIPANegotiationHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_profitable_transaction(
-            transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+            transaction_msg, role=cast(Dialogue.Role, dialogue.role)
         ):
             self.context.logger.info(
                 "[{}]: locking the current state (as {}).".format(
@@ -339,7 +339,7 @@ class FIPANegotiationHandler(Handler):
                 )
             )
             transactions.add_locked_tx(
-                transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+                transaction_msg, role=cast(Dialogue.Role, dialogue.role)
             )
             if strategy.is_contract_tx:
                 contract = cast(ERC1155Contract, self.context.contracts.erc1155)

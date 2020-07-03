@@ -91,7 +91,7 @@ class Dialogues(Model, FipaDialogues):
         :param message: an incoming/outgoing first message
         :return: the agent's role
         """
-        return FipaDialogue.AgentRole.SELLER
+        return FipaDialogue.Role.SELLER
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,

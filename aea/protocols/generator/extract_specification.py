@@ -254,7 +254,7 @@ def extract(
         roles_set = cast(
             Dict[str, None], protocol_specification.dialogue_config["roles"]
         )
-        spec.roles = sorted(roles_set, reverse=True)
+        spec.roles = sorted(roles_set)
         spec.end_states = cast(
             List[str], protocol_specification.dialogue_config["end_states"]
         )

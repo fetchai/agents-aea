@@ -152,10 +152,9 @@ class Dialogue(ABC):
             """
             Initialize a dialogue.
 
-            :param dialogue_label: the identifier of the dialogue
-            :param agent_address: the address of the agent for whom this dialogue is maintained
-            :param role: the role of the agent this dialogue is maintained for
-            :param rules: the rules of the dialogue
+            :param initial_performatives: the set of all initial performatives.
+            :param terminal_performatives: the set of all terminal performatives.
+            :param valid_replies: the reply structure of speech-acts.
 
             :return: None
             """
@@ -661,7 +660,7 @@ class Dialogues(ABC):
         """
         Update the state of dialogues with a new message.
 
-        If the message is for a new dialogue, a new dialogue is created with 'message' as its first message and returned.
+        If the message is for a new dialogue, a new dialogue is created with 'message' as its first message, and returned.
         If the message is addressed to an existing dialogue, the dialogue is retrieved, extended with this message and returned.
         If there are any errors, e.g. the message dialogue reference does not exists or the message is invalid w.r.t. the dialogue, return None.
 
@@ -697,6 +696,14 @@ class Dialogues(ABC):
             dialogue = self.get_dialogue(message)
 
         if dialogue is not None:
+            if message.counterparty is None:
+                message.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
+            else:
+                assert (
+                    message.counterparty
+                    == dialogue.dialogue_label.dialogue_opponent_addr
+                ), "The counterparty specified in the message is different from the opponent in this dialogue."
+
             dialogue.update(message)
             result = dialogue  # type: Optional[Dialogue]
         else:  # couldn't find the dialogue

@@ -369,20 +369,20 @@ class TestDialogues:
     def test_create_self_initiated(self):
         """Test the self initialisation of a dialogue."""
         result = self.buyer_dialogues._create_self_initiated(
-            dialogue_opponent_addr=self.seller_addr, role=FipaDialogue.AgentRole.SELLER,
+            dialogue_opponent_addr=self.seller_addr, role=FipaDialogue.Role.SELLER,
         )
         assert isinstance(result, FipaDialogue)
-        assert result.role == FipaDialogue.AgentRole.SELLER, "The role must be seller."
+        assert result.role == FipaDialogue.Role.SELLER, "The role must be seller."
 
     def test_create_opponent_initiated(self):
         """Test the opponent initialisation of a dialogue."""
         result = self.buyer_dialogues._create_opponent_initiated(
             dialogue_opponent_addr=self.seller_addr,
             dialogue_reference=(str(0), ""),
-            role=FipaDialogue.AgentRole.BUYER,
+            role=FipaDialogue.Role.BUYER,
         )
         assert isinstance(result, FipaDialogue)
-        assert result.role == FipaDialogue.AgentRole.BUYER, "The role must be buyer."
+        assert result.role == FipaDialogue.Role.BUYER, "The role must be buyer."
 
     def test_dialogue_endstates(self):
         """Test the end states of a dialogue."""
@@ -658,7 +658,7 @@ class BuyerDialogues(FipaDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return FipaDialogue.AgentRole.BUYER
+        return FipaDialogue.Role.BUYER
 
 
 class SellerDialogue(FipaDialogue):
@@ -719,4 +719,4 @@ class SellerDialogues(FipaDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return FipaDialogue.AgentRole.SELLER
+        return FipaDialogue.Role.SELLER

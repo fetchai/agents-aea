@@ -83,7 +83,5 @@ class Dialogues(Model, FipaDialogues):
             is_seller = (
                 query.model.name == DEMAND_DATAMODEL_NAME
             )  # the agent is querying for demand/buyers (this agent is sending the CFP so it is the seller)
-        role = (
-            FipaDialogue.AgentRole.SELLER if is_seller else FipaDialogue.AgentRole.BUYER
-        )
+        role = FipaDialogue.Role.SELLER if is_seller else FipaDialogue.Role.BUYER
         return role
