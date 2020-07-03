@@ -152,7 +152,7 @@ def ipfs_hashing(
     #      use ignore patterns somehow
     # ignore_patterns = configuration.fingerprint_ignore_patterns]
     assert configuration.directory is not None
-    result_list = client.add(configuration.directory)
+    result_list = client.add(configuration.directory, only_hash=True)
     key = os.path.join(
         configuration.author, package_type.to_plural(), configuration.directory.name,
     )
@@ -405,6 +405,8 @@ def update_hashes(arguments: argparse.Namespace) -> int:
                         package_path.name, package_type
                     )
                 )
+                if package_path.name == "dummy_aea":
+                    print("help")
                 configuration_obj = load_configuration(package_type, package_path)
                 sort_configuration_file(configuration_obj)
                 update_fingerprint(configuration_obj, client)
@@ -447,7 +449,7 @@ def check_same_ipfs_hash(client, configuration, package_type, all_expected_hashe
         )
         print(f"Expected: {expected_hash}")
         print(f"Actual:   {actual_hash}")
-        print("All the hashes: ", pprint.pprint(result_list))
+        print("All the hashes: ", pprint.pformat(result_list))
     return result
 
 
