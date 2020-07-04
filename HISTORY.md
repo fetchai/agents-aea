@@ -1,5 +1,23 @@
 # Release History
 
+## 0.5.0 (2020-07-06)
+
+- Refactors all connections to be fully async friendly
+- Adds almost complete test coverage on connections
+- Adds complete test coverage for cli and cli gui
+- Fixes cli gui functionality and removes oef node depdency
+- Refactors p2p go code and adds test coverage
+- Refactors protocol generator for higher code reusability
+- Adds option for skills to depend on other skills
+- Adds abstract skills option
+- Adds ledger connections to execute ledger related queries and transactions, removes ledger apis from skill context
+- Adds contracts registry and removes them from skill context
+- Rewrites all skills to be fully message based
+- Replaces internal messages with protocols (signing and state update)
+- Multiple refactoring to improve pylint adherence
+- Multiple docs updates
+- Multiple test stability fixes
+
 ## 0.4.1 (2020-06-15)
 
 - Updates component package module loading for skill and connection
