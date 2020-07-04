@@ -693,7 +693,7 @@ class BaseAEATestCase(ABC):
         cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
-        cls.package_registry_src = None
+        cls.package_registry_src = Path()
         cls.stdout = {}
         cls.stderr = {}
         try:
