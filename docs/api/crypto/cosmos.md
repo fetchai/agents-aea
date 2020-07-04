@@ -106,25 +106,6 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name=".aea.crypto.cosmos.CosmosCrypto.recover_message"></a>
-#### recover`_`message
-
-```python
- | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
-```
-
-Recover the addresses from the hash.
-
-**Arguments**:
-
-- `message`: the message we expect
-- `signature`: the transaction signature
-- `is_deprecated_mode`: if the deprecated signing was used
-
-**Returns**:
-
-the recovered addresses
-
 <a name=".aea.crypto.cosmos.CosmosCrypto.generate_private_key"></a>
 #### generate`_`private`_`key
 
@@ -134,24 +115,6 @@ the recovered addresses
 ```
 
 Generate a key pair for cosmos network.
-
-<a name=".aea.crypto.cosmos.CosmosCrypto.get_address_from_public_key"></a>
-#### get`_`address`_`from`_`public`_`key
-
-```python
- | @classmethod
- | get_address_from_public_key(cls, public_key: str) -> str
-```
-
-Get the address from the public key.
-
-**Arguments**:
-
-- `public_key`: the public key
-
-**Returns**:
-
-str
 
 <a name=".aea.crypto.cosmos.CosmosCrypto.dump"></a>
 #### dump
@@ -170,11 +133,117 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
+<a name=".aea.crypto.cosmos.CosmosHelper"></a>
+## CosmosHelper Objects
+
+```python
+class CosmosHelper(Helper)
+```
+
+Helper class usable as Mixin for CosmosApi or as standalone class.
+
+<a name=".aea.crypto.cosmos.CosmosHelper.is_transaction_settled"></a>
+#### is`_`transaction`_`settled
+
+```python
+ | @staticmethod
+ | is_transaction_settled(tx_receipt: Any) -> bool
+```
+
+Check whether a transaction is settled or not.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+True if the transaction has been settled, False o/w.
+
+<a name=".aea.crypto.cosmos.CosmosHelper.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
+
+```python
+ | @staticmethod
+ | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+```
+
+Check whether a transaction is valid or not.
+
+**Arguments**:
+
+- `tx`: the transaction.
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+- `tx_nonce`: the transaction nonce.
+- `amount`: the amount we expect to get from the transaction.
+
+**Returns**:
+
+True if the random_message is equals to tx['input']
+
+<a name=".aea.crypto.cosmos.CosmosHelper.generate_tx_nonce"></a>
+#### generate`_`tx`_`nonce
+
+```python
+ | @staticmethod
+ | generate_tx_nonce(seller: Address, client: Address) -> str
+```
+
+Generate a unique hash to distinguish txs with the same terms.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+
+**Returns**:
+
+return the hash in hex.
+
+<a name=".aea.crypto.cosmos.CosmosHelper.get_address_from_public_key"></a>
+#### get`_`address`_`from`_`public`_`key
+
+```python
+ | @staticmethod
+ | get_address_from_public_key(public_key: str) -> str
+```
+
+Get the address from the public key.
+
+**Arguments**:
+
+- `public_key`: the public key
+
+**Returns**:
+
+str
+
+<a name=".aea.crypto.cosmos.CosmosHelper.recover_message"></a>
+#### recover`_`message
+
+```python
+ | @staticmethod
+ | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+```
+
+Recover the addresses from the hash.
+
+**Arguments**:
+
+- `message`: the message we expect
+- `signature`: the transaction signature
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered addresses
+
 <a name=".aea.crypto.cosmos.CosmosApi"></a>
 ## CosmosApi Objects
 
 ```python
-class CosmosApi(LedgerApi)
+class CosmosApi(LedgerApi,  CosmosHelper)
 ```
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
@@ -187,10 +256,6 @@ Class to interact with the Cosmos SDK via a HTTP APIs.
 ```
 
 Initialize the Ethereum ledger APIs.
-
-**Arguments**:
-
-- `address`: the endpoint for Web3 APIs.
 
 <a name=".aea.crypto.cosmos.CosmosApi.api"></a>
 #### api
@@ -211,18 +276,18 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
-<a name=".aea.crypto.cosmos.CosmosApi.transfer"></a>
-#### transfer
+<a name=".aea.crypto.cosmos.CosmosApi.get_transfer_transaction"></a>
+#### get`_`transfer`_`transaction
 
 ```python
- | transfer(crypto: Crypto, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str = "", denom: str = "testfet", account_number: int = 0, sequence: int = 0, gas: int = 80000, memo: str = "", sync_mode: str = "sync", chain_id: str = "aea-testnet", **kwargs, ,) -> Optional[str]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, account_number: int = 0, sequence: int = 0, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Optional[Any]
 ```
 
 Submit a transfer transaction to the ledger.
 
 **Arguments**:
 
-- `crypto`: the crypto object associated to the payer.
+- `sender_address`: the sender address of the payer.
 - `destination_address`: the destination address of the payee.
 - `amount`: the amount of wealth to be transferred.
 - `tx_fee`: the transaction fee.
@@ -231,7 +296,7 @@ Submit a transfer transaction to the ledger.
 
 **Returns**:
 
-tx digest if present, otherwise None
+the transfer transaction
 
 <a name=".aea.crypto.cosmos.CosmosApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
@@ -250,23 +315,6 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name=".aea.crypto.cosmos.CosmosApi.is_transaction_settled"></a>
-#### is`_`transaction`_`settled
-
-```python
- | is_transaction_settled(tx_digest: str) -> bool
-```
-
-Check whether a transaction is settled or not.
-
-**Arguments**:
-
-- `tx_digest`: the digest associated to the transaction.
-
-**Returns**:
-
-True if the transaction has been settled, False o/w.
-
 <a name=".aea.crypto.cosmos.CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
@@ -274,7 +322,7 @@ True if the transaction has been settled, False o/w.
  | get_transaction_receipt(tx_digest: str) -> Optional[Any]
 ```
 
-Get the transaction receipt for a transaction digest (non-blocking).
+Get the transaction receipt for a transaction digest.
 
 **Arguments**:
 
@@ -284,44 +332,22 @@ Get the transaction receipt for a transaction digest (non-blocking).
 
 the tx receipt, if present
 
-<a name=".aea.crypto.cosmos.CosmosApi.generate_tx_nonce"></a>
-#### generate`_`tx`_`nonce
+<a name=".aea.crypto.cosmos.CosmosApi.get_transaction"></a>
+#### get`_`transaction
 
 ```python
- | generate_tx_nonce(seller: Address, client: Address) -> str
+ | get_transaction(tx_digest: str) -> Optional[Any]
 ```
 
-Generate a unique hash to distinguish txs with the same terms.
+Get the transaction for a transaction digest.
 
 **Arguments**:
 
-- `seller`: the address of the seller.
-- `client`: the address of the client.
+- `tx_digest`: the digest associated to the transaction.
 
 **Returns**:
 
-return the hash in hex.
-
-<a name=".aea.crypto.cosmos.CosmosApi.is_transaction_valid"></a>
-#### is`_`transaction`_`valid
-
-```python
- | is_transaction_valid(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
-```
-
-Check whether a transaction is valid or not (non-blocking).
-
-**Arguments**:
-
-- `tx_digest`: the transaction digest.
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-- `tx_nonce`: the transaction nonce.
-- `amount`: the amount we expect to get from the transaction.
-
-**Returns**:
-
-True if the random_message is equals to tx['input']
+the tx, if present
 
 <a name=".aea.crypto.cosmos.CosmosFaucetApi"></a>
 ## CosmosFaucetApi Objects

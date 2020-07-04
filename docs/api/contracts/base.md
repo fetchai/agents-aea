@@ -16,15 +16,14 @@ Abstract definition of a contract.
 #### `__`init`__`
 
 ```python
- | __init__(config: ContractConfig, contract_interface: Dict[str, Any])
+ | __init__(contract_config: ContractConfig)
 ```
 
 Initialize the contract.
 
 **Arguments**:
 
-- `config`: the contract configurations.
-- `contract_interface`: the contract interface
+- `contract_config`: the contract configurations.
 
 <a name=".aea.contracts.base.Contract.id"></a>
 #### id
@@ -36,81 +35,35 @@ Initialize the contract.
 
 Get the name.
 
-<a name=".aea.contracts.base.Contract.config"></a>
-#### config
+<a name=".aea.contracts.base.Contract.configuration"></a>
+#### configuration
 
 ```python
  | @property
- | config() -> ContractConfig
+ | configuration() -> ContractConfig
 ```
 
 Get the configuration.
 
-<a name=".aea.contracts.base.Contract.contract_interface"></a>
-#### contract`_`interface
+<a name=".aea.contracts.base.Contract.get_instance"></a>
+#### get`_`instance
 
 ```python
- | @property
- | contract_interface() -> Dict[str, Any]
-```
-
-Get the contract interface.
-
-<a name=".aea.contracts.base.Contract.set_instance"></a>
-#### set`_`instance
-
-```python
+ | @classmethod
  | @abstractmethod
- | set_instance(ledger_api: LedgerApi) -> None
+ | get_instance(cls, ledger_api: LedgerApi, contract_address: Optional[str] = None) -> Any
 ```
 
-Set the instance.
+Get the instance.
 
 **Arguments**:
 
 - `ledger_api`: the ledger api we are using.
+- `contract_address`: the contract address.
 
 **Returns**:
 
-None
-
-<a name=".aea.contracts.base.Contract.set_address"></a>
-#### set`_`address
-
-```python
- | @abstractmethod
- | set_address(ledger_api: LedgerApi, contract_address: str) -> None
-```
-
-Set the contract address.
-
-**Arguments**:
-
-- `ledger_api`: the ledger_api we are using.
-- `contract_address`: the contract address
-
-**Returns**:
-
-None
-
-<a name=".aea.contracts.base.Contract.set_deployed_instance"></a>
-#### set`_`deployed`_`instance
-
-```python
- | @abstractmethod
- | set_deployed_instance(ledger_api: LedgerApi, contract_address: str) -> None
-```
-
-Set the contract address.
-
-**Arguments**:
-
-- `ledger_api`: the ledger_api we are using.
-- `contract_address`: the contract address
-
-**Returns**:
-
-None
+the contract instance
 
 <a name=".aea.contracts.base.Contract.from_dir"></a>
 #### from`_`dir

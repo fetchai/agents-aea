@@ -158,3 +158,83 @@ cd(path)
 
 Change working directory temporarily.
 
+<a name=".aea.helpers.base.get_logger_method"></a>
+#### get`_`logger`_`method
+
+```python
+get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Callable
+```
+
+Get logger method for function.
+
+Get logger in `fn` definion module or creates logger is module.__name__.
+Or return logger_method if it's callable.
+
+**Arguments**:
+
+- `fn`: function to get logger for.
+- `logger_method`: logger name or callable.
+
+**Returns**:
+
+callable to write log with
+
+<a name=".aea.helpers.base.try_decorator"></a>
+#### try`_`decorator
+
+```python
+try_decorator(error_message: str, default_return=None, logger_method="error")
+```
+
+Run function, log and return default value on exception.
+
+Does not support async or coroutines!
+
+**Arguments**:
+
+- `error_message`: message template with one `{}` for exception
+- `default_return`: value to return on exception, by default None
+- `logger_method`: name of the logger method or callable to print logs
+
+<a name=".aea.helpers.base.MaxRetriesError"></a>
+## MaxRetriesError Objects
+
+```python
+class MaxRetriesError(Exception)
+```
+
+Exception for retry decorator.
+
+<a name=".aea.helpers.base.retry_decorator"></a>
+#### retry`_`decorator
+
+```python
+retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method="error")
+```
+
+Run function with several attempts.
+
+Does not support async or coroutines!
+
+**Arguments**:
+
+- `number_of_retries`: amount of attempts
+- `error_message`: message template with one `{}` for exception
+- `delay`: num of seconds to sleep between retries. default 0
+- `logger_method`: name of the logger method or callable to print logs
+
+<a name=".aea.helpers.base.exception_log_and_reraise"></a>
+#### exception`_`log`_`and`_`reraise
+
+```python
+@contextlib.contextmanager
+exception_log_and_reraise(log_method: Callable, message: str)
+```
+
+Run code in context to log and re raise exception.
+
+**Arguments**:
+
+- `log_method`: function to print log
+- `message`: message template to add error text.
+

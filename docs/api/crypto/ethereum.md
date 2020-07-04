@@ -106,25 +106,6 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.recover_message"></a>
-#### recover`_`message
-
-```python
- | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
-```
-
-Recover the addresses from the hash.
-
-**Arguments**:
-
-- `message`: the message we expect
-- `signature`: the transaction signature
-- `is_deprecated_mode`: if the deprecated signing was used
-
-**Returns**:
-
-the recovered addresses
-
 <a name=".aea.crypto.ethereum.EthereumCrypto.generate_private_key"></a>
 #### generate`_`private`_`key
 
@@ -134,24 +115,6 @@ the recovered addresses
 ```
 
 Generate a key pair for ethereum network.
-
-<a name=".aea.crypto.ethereum.EthereumCrypto.get_address_from_public_key"></a>
-#### get`_`address`_`from`_`public`_`key
-
-```python
- | @classmethod
- | get_address_from_public_key(cls, public_key: str) -> str
-```
-
-Get the address from the public key.
-
-**Arguments**:
-
-- `public_key`: the public key
-
-**Returns**:
-
-str
 
 <a name=".aea.crypto.ethereum.EthereumCrypto.dump"></a>
 #### dump
@@ -170,11 +133,117 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
+<a name=".aea.crypto.ethereum.EthereumHelper"></a>
+## EthereumHelper Objects
+
+```python
+class EthereumHelper(Helper)
+```
+
+Helper class usable as Mixin for EthereumApi or as standalone class.
+
+<a name=".aea.crypto.ethereum.EthereumHelper.is_transaction_settled"></a>
+#### is`_`transaction`_`settled
+
+```python
+ | @staticmethod
+ | is_transaction_settled(tx_receipt: Any) -> bool
+```
+
+Check whether a transaction is settled or not.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+True if the transaction has been settled, False o/w.
+
+<a name=".aea.crypto.ethereum.EthereumHelper.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
+
+```python
+ | @staticmethod
+ | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+```
+
+Check whether a transaction is valid or not.
+
+**Arguments**:
+
+- `tx`: the transaction.
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+- `tx_nonce`: the transaction nonce.
+- `amount`: the amount we expect to get from the transaction.
+
+**Returns**:
+
+True if the random_message is equals to tx['input']
+
+<a name=".aea.crypto.ethereum.EthereumHelper.generate_tx_nonce"></a>
+#### generate`_`tx`_`nonce
+
+```python
+ | @staticmethod
+ | generate_tx_nonce(seller: Address, client: Address) -> str
+```
+
+Generate a unique hash to distinguish txs with the same terms.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+
+**Returns**:
+
+return the hash in hex.
+
+<a name=".aea.crypto.ethereum.EthereumHelper.get_address_from_public_key"></a>
+#### get`_`address`_`from`_`public`_`key
+
+```python
+ | @staticmethod
+ | get_address_from_public_key(public_key: str) -> str
+```
+
+Get the address from the public key.
+
+**Arguments**:
+
+- `public_key`: the public key
+
+**Returns**:
+
+str
+
+<a name=".aea.crypto.ethereum.EthereumHelper.recover_message"></a>
+#### recover`_`message
+
+```python
+ | @staticmethod
+ | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+```
+
+Recover the addresses from the hash.
+
+**Arguments**:
+
+- `message`: the message we expect
+- `signature`: the transaction signature
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered addresses
+
 <a name=".aea.crypto.ethereum.EthereumApi"></a>
 ## EthereumApi Objects
 
 ```python
-class EthereumApi(LedgerApi)
+class EthereumApi(LedgerApi,  EthereumHelper)
 ```
 
 Class to interact with the Ethereum Web3 APIs.
@@ -183,7 +252,7 @@ Class to interact with the Ethereum Web3 APIs.
 #### `__`init`__`
 
 ```python
- | __init__(address: str, gas_price: str = DEFAULT_GAS_PRICE)
+ | __init__(address: str, **kwargs)
 ```
 
 Initialize the Ethereum ledger APIs.
@@ -211,27 +280,28 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
-<a name=".aea.crypto.ethereum.EthereumApi.transfer"></a>
-#### transfer
+<a name=".aea.crypto.ethereum.EthereumApi.get_transfer_transaction"></a>
+#### get`_`transfer`_`transaction
 
 ```python
- | transfer(crypto: Crypto, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: int = 1, **kwargs, ,) -> Optional[str]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, **kwargs, ,) -> Optional[Any]
 ```
 
 Submit a transfer transaction to the ledger.
 
 **Arguments**:
 
-- `crypto`: the crypto object associated to the payer.
+- `sender_address`: the sender address of the payer.
 - `destination_address`: the destination address of the payee.
 - `amount`: the amount of wealth to be transferred.
 - `tx_fee`: the transaction fee.
 - `tx_nonce`: verifies the authenticity of the tx
-- `chain_id`: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
+- `chain_id`: the Chain ID of the Ethereum transaction. Default is 3 (i.e. ropsten; mainnet has 1).
+- `gas_price`: the gas price
 
 **Returns**:
 
-tx digest if present, otherwise None
+the transfer transaction
 
 <a name=".aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
@@ -250,23 +320,6 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name=".aea.crypto.ethereum.EthereumApi.is_transaction_settled"></a>
-#### is`_`transaction`_`settled
-
-```python
- | is_transaction_settled(tx_digest: str) -> bool
-```
-
-Check whether a transaction is settled or not.
-
-**Arguments**:
-
-- `tx_digest`: the digest associated to the transaction.
-
-**Returns**:
-
-True if the transaction has been settled, False o/w.
-
 <a name=".aea.crypto.ethereum.EthereumApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
@@ -274,7 +327,7 @@ True if the transaction has been settled, False o/w.
  | get_transaction_receipt(tx_digest: str) -> Optional[Any]
 ```
 
-Get the transaction receipt for a transaction digest (non-blocking).
+Get the transaction receipt for a transaction digest.
 
 **Arguments**:
 
@@ -284,44 +337,22 @@ Get the transaction receipt for a transaction digest (non-blocking).
 
 the tx receipt, if present
 
-<a name=".aea.crypto.ethereum.EthereumApi.generate_tx_nonce"></a>
-#### generate`_`tx`_`nonce
+<a name=".aea.crypto.ethereum.EthereumApi.get_transaction"></a>
+#### get`_`transaction
 
 ```python
- | generate_tx_nonce(seller: Address, client: Address) -> str
+ | get_transaction(tx_digest: str) -> Optional[Any]
 ```
 
-Generate a unique hash to distinguish txs with the same terms.
+Get the transaction for a transaction digest.
 
 **Arguments**:
 
-- `seller`: the address of the seller.
-- `client`: the address of the client.
+- `tx_digest`: the digest associated to the transaction.
 
 **Returns**:
 
-return the hash in hex.
-
-<a name=".aea.crypto.ethereum.EthereumApi.is_transaction_valid"></a>
-#### is`_`transaction`_`valid
-
-```python
- | is_transaction_valid(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
-```
-
-Check whether a transaction is valid or not (non-blocking).
-
-**Arguments**:
-
-- `tx_digest`: the transaction digest.
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-- `tx_nonce`: the transaction nonce.
-- `amount`: the amount we expect to get from the transaction.
-
-**Returns**:
-
-True if the random_message is equals to tx['input']
+the tx, if present
 
 <a name=".aea.crypto.ethereum.EthereumFaucetApi"></a>
 ## EthereumFaucetApi Objects

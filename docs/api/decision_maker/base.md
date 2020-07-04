@@ -10,7 +10,7 @@ This module contains the decision maker class.
 class OwnershipState(ABC)
 ```
 
-Represent the ownership state of an agent.
+Represent the ownership state of an agent (can proxy a ledger).
 
 <a name=".aea.decision_maker.base.OwnershipState.set"></a>
 #### set
@@ -66,14 +66,14 @@ Get the initialization status.
 
 ```python
  | @abstractmethod
- | is_affordable_transaction(tx_message: TransactionMessage) -> bool
+ | is_affordable_transaction(terms: Terms) -> bool
 ```
 
 Check if the transaction is affordable (and consistent).
 
 **Arguments**:
 
-- `tx_message`: the transaction message
+- `terms`: the transaction terms
 
 **Returns**:
 
@@ -84,14 +84,14 @@ True if the transaction is legal wrt the current state, false otherwise.
 
 ```python
  | @abstractmethod
- | apply_transactions(transactions: List[TransactionMessage]) -> "OwnershipState"
+ | apply_transactions(list_of_terms: List[Terms]) -> "OwnershipState"
 ```
 
 Apply a list of transactions to (a copy of) the current state.
 
 **Arguments**:
 
-- `transactions`: the sequence of transaction messages.
+- `list_of_terms`: the sequence of transaction terms.
 
 **Returns**:
 
@@ -106,44 +106,6 @@ the final state.
 ```
 
 Copy the object.
-
-<a name=".aea.decision_maker.base.LedgerStateProxy"></a>
-## LedgerStateProxy Objects
-
-```python
-class LedgerStateProxy(ABC)
-```
-
-Class to represent a proxy to a ledger state.
-
-<a name=".aea.decision_maker.base.LedgerStateProxy.is_initialized"></a>
-#### is`_`initialized
-
-```python
- | @property
- | @abstractmethod
- | is_initialized() -> bool
-```
-
-Get the initialization status.
-
-<a name=".aea.decision_maker.base.LedgerStateProxy.is_affordable_transaction"></a>
-#### is`_`affordable`_`transaction
-
-```python
- | @abstractmethod
- | is_affordable_transaction(tx_message: TransactionMessage) -> bool
-```
-
-Check if the transaction is affordable on the default ledger.
-
-**Arguments**:
-
-- `tx_message`: the transaction message
-
-**Returns**:
-
-whether the transaction is affordable on the ledger
 
 <a name=".aea.decision_maker.base.Preferences"></a>
 ## Preferences Objects
@@ -205,7 +167,7 @@ the marginal utility score
 
 ```python
  | @abstractmethod
- | utility_diff_from_transaction(ownership_state: OwnershipState, tx_message: TransactionMessage) -> float
+ | utility_diff_from_transaction(ownership_state: OwnershipState, terms: Terms) -> float
 ```
 
 Simulate a transaction and get the resulting utility difference (taking into account the fee).
@@ -213,7 +175,7 @@ Simulate a transaction and get the resulting utility difference (taking into acc
 **Arguments**:
 
 - `ownership_state`: the ownership state against which to apply the transaction.
-- `tx_message`: a transaction message.
+- `terms`: the transaction terms.
 
 **Returns**:
 
@@ -255,7 +217,7 @@ Initialize the protected queue.
 #### put
 
 ```python
- | put(internal_message: Optional[InternalMessage], block=True, timeout=None) -> None
+ | put(internal_message: Optional[Message], block=True, timeout=None) -> None
 ```
 
 Put an internal message on the queue.
@@ -281,7 +243,7 @@ None
 #### put`_`nowait
 
 ```python
- | put_nowait(internal_message: Optional[InternalMessage]) -> None
+ | put_nowait(internal_message: Optional[Message]) -> None
 ```
 
 Put an internal message on the queue.
@@ -331,7 +293,7 @@ None
 #### protected`_`get
 
 ```python
- | protected_get(access_code: str, block=True, timeout=None) -> Optional[InternalMessage]
+ | protected_get(access_code: str, block=True, timeout=None) -> Optional[Message]
 ```
 
 Access protected get method.
@@ -426,7 +388,7 @@ Get (out) queue.
 
 ```python
  | @abstractmethod
- | handle(message: InternalMessage) -> None
+ | handle(message: Message) -> None
 ```
 
 Handle an internal message from the skills.
@@ -531,7 +493,7 @@ None
 #### handle
 
 ```python
- | handle(message: InternalMessage) -> None
+ | handle(message: Message) -> None
 ```
 
 Handle an internal message from the skills.

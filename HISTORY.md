@@ -5,8 +5,8 @@
 - Refactors all connections to be fully async friendly
 - Adds almost complete test coverage on connections
 - Adds complete test coverage for cli and cli gui
-- Fixes cli gui functionality and removes oef node depdency
-- Refactors p2p go code and adds test coverage
+- Fixes cli gui functionality and removes oef node dependency
+- Refactors p2p go code and increases test coverage
 - Refactors protocol generator for higher code reusability
 - Adds option for skills to depend on other skills
 - Adds abstract skills option

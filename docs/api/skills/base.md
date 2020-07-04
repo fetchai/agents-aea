@@ -168,16 +168,6 @@ Get decision maker handler context.
 
 Get behaviours of the skill.
 
-<a name=".aea.skills.base.SkillContext.ledger_apis"></a>
-#### ledger`_`apis
-
-```python
- | @property
- | ledger_apis() -> LedgerApis
-```
-
-Get ledger APIs.
-
 <a name=".aea.skills.base.SkillContext.search_service_address"></a>
 #### search`_`service`_`address
 
