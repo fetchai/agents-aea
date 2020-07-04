@@ -58,6 +58,8 @@ from aea.test_tools.generic import (
     write_envelope_to_file,
 )
 
+from tests.conftest import ROOT_DIR
+
 FETCHAI_NAME = FetchAICrypto.identifier
 
 CLI_LOG_OPTION = ["-v", "OFF"]
@@ -78,7 +80,7 @@ class BaseAEATestCase(ABC):
     threads: List[Thread] = []  # list of started threads
     packages_dir_path: Path = Path("packages")
     use_packages_dir: bool = True
-    package_registry_src: Path = Path()
+    package_registry_src: Path = Path(ROOT_DIR, "packages")
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
@@ -693,7 +695,7 @@ class BaseAEATestCase(ABC):
         cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
-        cls.package_registry_src = Path()
+        cls.package_registry_src = Path(ROOT_DIR, "packages")
         cls.stdout = {}
         cls.stderr = {}
         try:
