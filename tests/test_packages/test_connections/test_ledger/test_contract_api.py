@@ -19,20 +19,12 @@
 
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
-import json
 from pathlib import Path
 from typing import cast
 
 import pytest
 
-from aea.configurations.base import (
-    ComponentConfiguration,
-    ComponentType,
-    ContractConfig,
-)
 from aea.connections.base import Connection
-from aea.contracts import contract_registry
-from aea.contracts.base import Contract
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
@@ -60,40 +52,9 @@ async def ledger_apis_connection(request):
     await connection.disconnect()
 
 
-@pytest.fixture()
-def load_erc1155_contract():
-    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
-    configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)
-    configuration._directory = directory
-    configuration = cast(ContractConfig, configuration)
-
-    # TODO some other tests don't deregister contracts from the registry.
-    #   find a neater solution.
-    if configuration.public_id in contract_registry.specs.keys():
-        contract_registry.specs.pop(str(configuration.public_id))
-
-    # load contract into sys modules!
-    Contract.from_config(configuration)
-
-    path = Path(configuration.directory, configuration.path_to_contract_interface)
-    with open(path, "r") as interface_file:
-        contract_interface = json.load(interface_file)
-
-    contract_registry.register(
-        id_=str(configuration.public_id),
-        entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-        class_kwargs={"contract_interface": contract_interface},
-        contract_config=configuration,
-    )
-    yield
-    contract_registry.specs.pop(str(configuration.public_id))
-
-
 @pytest.mark.network
 @pytest.mark.asyncio
-async def test_erc1155_get_deploy_transaction(
-    load_erc1155_contract, ledger_apis_connection
-):
+async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues()
@@ -135,9 +96,7 @@ async def test_erc1155_get_deploy_transaction(
 
 @pytest.mark.network
 @pytest.mark.asyncio
-async def test_erc1155_get_raw_transaction(
-    load_erc1155_contract, ledger_apis_connection
-):
+async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
     contract_address = ETHEREUM_ADDRESS_ONE
@@ -183,7 +142,7 @@ async def test_erc1155_get_raw_transaction(
 
 @pytest.mark.network
 @pytest.mark.asyncio
-async def test_erc1155_get_state(load_erc1155_contract, ledger_apis_connection):
+async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"

@@ -125,6 +125,7 @@ async def test_get_balance(
     assert actual_balance_amount == expected_balance_amount
 
 
+@pytest.mark.ethereum
 @pytest.mark.network
 @pytest.mark.asyncio
 async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connection):
@@ -213,6 +214,9 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert response is not None
     assert type(response.message) == LedgerApiMessage
     response_message = cast(LedgerApiMessage, response.message)
+    assert (
+        response_message.performative != LedgerApiMessage.Performative.ERROR
+    ), f"Received error: {response_message.message}"
     assert (
         response_message.performative
         == LedgerApiMessage.Performative.TRANSACTION_DIGEST

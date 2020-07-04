@@ -1375,6 +1375,13 @@ class AEABuilder:
             ComponentType.CONTRACT
         ).values():
             configuration = cast(ContractConfig, configuration)
+            if str(configuration.public_id) in contract_registry.specs:
+                logger.warning(
+                    f"Skipping registration of contract {configuration.public_id} since already registered."
+                )
+                continue
+            else:
+                logger.debug(f"Registering contract {configuration.public_id}")
 
             path = Path(
                 configuration.directory, configuration.path_to_contract_interface

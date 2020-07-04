@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
-
+import logging
 import time
 from unittest.mock import MagicMock
 
@@ -157,7 +157,8 @@ def test_get_balance():
 @pytest.mark.network
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
-    cosmos_faucet_api = CosmosFaucetApi()
-    cc = CosmosCrypto()
-    cosmos_faucet_api.get_wealth(cc.address)
-    assert "Wealth generated" in caplog.text
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.cosmos"):
+        cosmos_faucet_api = CosmosFaucetApi()
+        cc = CosmosCrypto()
+        cosmos_faucet_api.get_wealth(cc.address)
+        assert "Wealth generated" in caplog.text

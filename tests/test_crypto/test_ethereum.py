@@ -20,6 +20,7 @@
 """This module contains the tests of the ethereum module."""
 
 import hashlib
+import logging
 import time
 from unittest.mock import MagicMock
 
@@ -180,7 +181,10 @@ def test_construct_sign_and_submit_transfer_transaction():
 @pytest.mark.network
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
-    ethereum_faucet_api = EthereumFaucetApi()
-    ec = EthereumCrypto()
-    ethereum_faucet_api.get_wealth(ec.address)
-    assert "Response: " in caplog.text
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum"):
+        ethereum_faucet_api = EthereumFaucetApi()
+        ec = EthereumCrypto()
+        ethereum_faucet_api.get_wealth(ec.address)
+        assert (
+            "Response: " in caplog.text
+        ), f"Cannot find message in output: {caplog.text}"

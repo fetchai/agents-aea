@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
-
+import logging
 import time
 from unittest.mock import MagicMock
 
@@ -165,7 +165,10 @@ def test_get_balance():
 @pytest.mark.network
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
-    fetchai_faucet_api = FetchAIFaucetApi()
-    fc = FetchAICrypto()
-    fetchai_faucet_api.get_wealth(fc.address)
-    assert "Message: Transfer pending" in caplog.text
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.fetchai"):
+        fetchai_faucet_api = FetchAIFaucetApi()
+        fc = FetchAICrypto()
+        fetchai_faucet_api.get_wealth(fc.address)
+        assert (
+            "Message: Transfer pending" in caplog.text
+        ), f"Cannot find message in output: {caplog.text}"
