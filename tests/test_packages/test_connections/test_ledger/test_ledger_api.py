@@ -125,8 +125,7 @@ async def test_get_balance(
     assert actual_balance_amount == expected_balance_amount
 
 
-@pytest.mark.ethereum
-@pytest.mark.network
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connection):
     """Test send signed transaction with Ethereum APIs."""

@@ -126,7 +126,7 @@ def test_get_balance():
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.network
+@pytest.mark.integration
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
     account = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
