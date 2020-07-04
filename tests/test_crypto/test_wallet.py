@@ -21,6 +21,8 @@
 
 from unittest import TestCase
 
+import eth_account
+
 import pytest
 
 from aea.crypto.cosmos import CosmosCrypto
@@ -101,3 +103,69 @@ class WalletTestCase(TestCase):
         self.assertTupleEqual(
             tuple(addresses), (EthereumCrypto.identifier, FetchAICrypto.identifier)
         )
+
+    def test_wallet_cryptos_positive(self):
+        """Test Wallet.main_cryptos and connection cryptos init positive result."""
+        private_key_paths = {
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+        }
+        connection_private_key_paths = {
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+        }
+        wallet = Wallet(private_key_paths, connection_private_key_paths)
+        assert len(wallet.main_cryptos.crypto_objects) == len(
+            wallet.connection_cryptos.crypto_objects
+        ), "Incorrect amount of cryptos"
+
+    def test_wallet_sign_message_positive(self):
+        """Test Wallet.sign_message positive result."""
+        private_key_paths = {
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+        }
+        wallet = Wallet(private_key_paths)
+        signature = wallet.sign_message(
+            EthereumCrypto.identifier, message=b"some message"
+        )
+        assert type(signature) == str and int(
+            signature, 16
+        ), "No signature present or not hexadecimal"
+
+    def test_wallet_sign_message_negative(self):
+        """Test Wallet.sign_message negative result."""
+        private_key_paths = {
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+        }
+        wallet = Wallet(private_key_paths)
+        signature = wallet.sign_message("unknown id", message=b"some message")
+        assert signature is None, "Signature should be none"
+
+    def test_wallet_sign_transaction_positive(self):
+        """Test Wallet.sign_transaction positive result."""
+        private_key_paths = {
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+        }
+        wallet = Wallet(private_key_paths)
+        signed_transaction = wallet.sign_transaction(
+            EthereumCrypto.identifier,
+            transaction={"gasPrice": 50, "nonce": 10, "gas": 10},
+        )
+        assert (
+            type(signed_transaction) == eth_account.datastructures.AttributeDict
+        ), "No signed transaction returned"
+
+    def test_wallet_sign_transaction_negative(self):
+        """Test Wallet.sign_transaction negative result."""
+        private_key_paths = {
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+        }
+        wallet = Wallet(private_key_paths)
+        signed_transaction = wallet.sign_transaction(
+            "unknown id", transaction={"this is my tx": "here"}
+        )
+        assert signed_transaction is None, "Signed transaction should be none"

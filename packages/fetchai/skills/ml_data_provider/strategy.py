@@ -49,9 +49,8 @@ class Strategy(Model):
         self.buyer_tx_fee = kwargs.pop("buyer_tx_fee", DEFAULT_BUYER_TX_FEE)
         self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        self._is_ledger_tx = kwargs.pop("is_ledger_tx", False)
         super().__init__(**kwargs)
-        self._oef_msg_id = 0
-
         # loading ML dataset
         # TODO this should be parametrized
         (
@@ -64,14 +63,10 @@ class Strategy(Model):
         """Get the ledger id."""
         return self._ledger_id
 
-    def get_next_oef_msg_id(self) -> int:
-        """
-        Get the next oef msg id.
-
-        :return: the next oef msg id
-        """
-        self._oef_msg_id += 1
-        return self._oef_msg_id
+    @property
+    def is_ledger_tx(self) -> str:
+        """Get the is_ledger_tx."""
+        return self._is_ledger_tx
 
     def get_service_description(self) -> Description:
         """

@@ -100,16 +100,6 @@ class Crypto(Generic[EntityClass], ABC):
         :return: an address string
         """
 
-    @classmethod
-    @abstractmethod
-    def get_address_from_public_key(cls, public_key: str) -> str:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-
     @abstractmethod
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
@@ -130,8 +120,69 @@ class Crypto(Generic[EntityClass], ABC):
         """
 
     @abstractmethod
+    def dump(self, fp: BinaryIO) -> None:
+        """
+        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+
+        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
+        :return: None
+        """
+
+
+class Helper(ABC):
+    """Interface for helper class usable as Mixin for LedgerApi or as standalone class."""
+
+    @staticmethod
+    @abstractmethod
+    def is_transaction_settled(tx_receipt: Any) -> bool:
+        """
+        Check whether a transaction is settled or not.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: True if the transaction has been settled, False o/w.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def is_transaction_valid(
+        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param tx: the transaction.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :return: True if the random_message is equals to tx['input']
+        """
+
+    @staticmethod
+    @abstractmethod
+    def generate_tx_nonce(seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish txs with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_address_from_public_key(public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+
+    @staticmethod
+    @abstractmethod
     def recover_message(
-        self, message: bytes, signature: str, is_deprecated_mode: bool = False
+        message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
         """
         Recover the addresses from the hash.
@@ -142,17 +193,8 @@ class Crypto(Generic[EntityClass], ABC):
         :return: the recovered addresses
         """
 
-    @abstractmethod
-    def dump(self, fp: BinaryIO) -> None:
-        """
-        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
 
-        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
-        :return: None
-        """
-
-
-class LedgerApi(ABC):
+class LedgerApi(Helper, ABC):
     """Interface for ledger APIs."""
 
     identifier = "base"  # type: str
@@ -179,27 +221,24 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def transfer(
+    def get_transfer_transaction(
         self,
-        crypto: Crypto,
+        sender_address: Address,
         destination_address: Address,
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        **kwargs
-    ) -> Optional[str]:
+        **kwargs,
+    ) -> Optional[Any]:
         """
-        Submit a transaction to the ledger.
+        Submit a transfer transaction to the ledger.
 
-        If the mandatory arguments are not enough for specifying a transaction
-        in the concrete ledger API, use keyword arguments for the additional parameters.
-
-        :param crypto: the crypto object associated to the payer.
+        :param sender_address: the sender address of the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
-        :return: tx digest if successful, otherwise None
+        :return: the transfer transaction
         """
 
     @abstractmethod
@@ -213,52 +252,21 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def is_transaction_settled(self, tx_digest: str) -> bool:
-        """
-        Check whether a transaction is settled or not.
-
-        :param tx_digest: the digest associated to the transaction.
-        :return: True if the transaction has been settled, False o/w.
-        """
-
-    @abstractmethod
-    def is_transaction_valid(
-        self,
-        tx_digest: str,
-        seller: Address,
-        client: Address,
-        tx_nonce: str,
-        amount: int,
-    ) -> bool:
-        """
-        Check whether a transaction is valid or not (non-blocking).
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :param tx_nonce: the transaction nonce.
-        :param amount: the amount we expect to get from the transaction.
-        :param tx_digest: the transaction digest.
-
-        :return: True if the transaction referenced by the tx_digest matches the terms.
-        """
-
-    @abstractmethod
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction receipt for a transaction digest (non-blocking).
+        Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
 
     @abstractmethod
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+    def get_transaction(self, tx_digest: str) -> Optional[Any]:
         """
-        Generate a random str message.
+        Get the transaction for a transaction digest.
 
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx, if present
         """
 
 

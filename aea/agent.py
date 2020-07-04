@@ -90,7 +90,6 @@ class Agent(ABC):
         connections: List[Connection],
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
-        is_debug: bool = False,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
     ) -> None:
@@ -101,7 +100,6 @@ class Agent(ABC):
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode to up agent.
 
@@ -117,8 +115,6 @@ class Agent(ABC):
         self._timeout = timeout
 
         self._tick = 0
-
-        self.is_debug = is_debug
 
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
         loop_cls = self._get_main_loop_class()

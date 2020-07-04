@@ -17,53 +17,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-import importlib
 import os
 import re
-from typing import Dict, List
+from typing import Dict
 
 from setuptools import find_packages, setup
 
 PACKAGE_NAME = "aea"
 
 
-def get_aea_extras() -> Dict[str, List[str]]:
-    """Parse extra dependencies from aea channels and protocols."""
-    result = {}
-
-    # parse connections dependencies
-    connection_module = importlib.import_module("aea.connections")
-    connection_dependencies = {
-        k.split("_")[0] + "-connection": v
-        for k, v in vars(connection_module).items()
-        if re.match(".+_dependencies", k)
-    }
-    result.update(connection_dependencies)
-
-    # parse protocols dependencies
-    protocols_module = importlib.import_module("aea.protocols")
-    protocols_dependencies = {
-        k.split("_")[0] + "-protocol": v
-        for k, v in vars(protocols_module).items()
-        if re.match(".+_dependencies", k)
-    }
-    result.update(protocols_dependencies)
-
-    # parse skills dependencies
-    skills_module = importlib.import_module("aea.skills")
-    skills_dependencies = {
-        k.split("_")[0] + "-skill": v
-        for k, v in vars(skills_module).items()
-        if re.match(".+_dependencies", k)
-    }
-    result.update(skills_dependencies)
-
-    return result
-
-
 def get_all_extras() -> Dict:
 
-    fetch_ledger_deps = ["fetchai-ledger-api==1.0.0rc1"]
+    fetch_ledger_deps = ["fetchai-ledger-api==1.1.0"]
 
     ethereum_ledger_deps = ["web3==5.2.2", "eth-account==0.4.0"]
 
@@ -89,7 +54,6 @@ def get_all_extras() -> Dict:
         "cosmos": cosmos_ledger_deps,
         "crypto": crypto_deps,
     }
-    extras.update(get_aea_extras())
 
     # add "all" extras
     extras["all"] = list(set(dep for e in extras.values() for dep in e))

@@ -54,18 +54,15 @@ def component_type_to_class(component_type: ComponentType) -> Type[Component]:
 
 
 def load_component_from_config(  # type: ignore
-    component_type: ComponentType,
-    configuration: ComponentConfiguration,
-    *args,
-    **kwargs
+    configuration: ComponentConfiguration, *args, **kwargs
 ) -> Component:
     """
     Load a component from a directory.
 
-    :param component_type: the component type.
     :param configuration: the component configuration.
     :return: the component instance.
     """
+    component_type = configuration.component_type
     component_class = component_type_to_class(component_type)
     try:
         return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore

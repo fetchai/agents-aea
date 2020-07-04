@@ -19,6 +19,7 @@
 
 """This module contains utilities for building an AEA."""
 import itertools
+import json
 import logging
 import logging.config
 import os
@@ -68,13 +69,13 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.contracts import contract_registry
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     create_private_key,
     try_validate_private_key_path,
 )
-from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.registry import registry
+from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
@@ -857,11 +858,7 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
-    def build(
-        self,
-        connection_ids: Optional[Collection[PublicId]] = None,
-        ledger_apis: Optional[LedgerApis] = None,
-    ) -> AEA:
+    def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
         """
         Build the AEA.
 
@@ -873,7 +870,6 @@ class AEABuilder:
         via 'add_component_instance' and the private keys.
 
         :param connection_ids: select only these connections to run the AEA.
-        :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
@@ -883,7 +879,6 @@ class AEABuilder:
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
         identity = self._build_identity_from_wallet(wallet)
-        ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
         self._load_and_add_components(
@@ -896,7 +891,6 @@ class AEABuilder:
         aea = AEA(
             identity,
             wallet,
-            ledger_apis,
             resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
@@ -917,36 +911,8 @@ class AEABuilder:
             ComponentType.SKILL, resources, agent_context=aea.context
         )
         self._build_called = True
+        self._populate_contract_registry()
         return aea
-
-    def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
-        """
-        Load the ledger apis.
-
-        :param ledger_apis: the ledger apis provided
-        :return: ledger apis
-        """
-        if ledger_apis is not None:
-            self._check_consistent(ledger_apis)
-            ledger_apis = deepcopy(ledger_apis)
-        else:
-            ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
-        return ledger_apis
-
-    def _check_consistent(self, ledger_apis: LedgerApis) -> None:
-        """
-        Check the ledger apis are consistent with the configs.
-
-        :param ledger_apis: the ledger apis provided
-        :return: None
-        """
-        if self.ledger_apis_config != {}:
-            assert (
-                ledger_apis.configs == self.ledger_apis_config
-            ), "Config of LedgerApis does not match provided configs."
-        assert (
-            ledger_apis.default_ledger_id == self._default_ledger
-        ), "Default ledger id of LedgerApis does not match provided default ledger."
 
     def _get_agent_loop_timeout(self) -> float:
         """
@@ -1269,7 +1235,9 @@ class AEABuilder:
         if len(skill_ids) == 0:
             return
 
-        skill_import_order = self._find_import_order(skill_ids, aea_project_path)
+        skill_import_order = self._find_import_order(
+            skill_ids, aea_project_path, skip_consistency_check
+        )
         for skill_id in skill_import_order:
             component_path = self._find_component_directory_from_component_id(
                 aea_project_path, skill_id
@@ -1281,9 +1249,14 @@ class AEABuilder:
             )
 
     def _find_import_order(
-        self, skill_ids: List[ComponentId], aea_project_path: Path
+        self,
+        skill_ids: List[ComponentId],
+        aea_project_path: Path,
+        skip_consistency_check: bool,
     ) -> List[ComponentId]:
-        """Find import order for skills.        We need to handle skills separately, since skills can depend on each other.
+        """Find import order for skills.
+
+        We need to handle skills separately, since skills can depend on each other.
 
         That is, we need to:
         - load the skill configurations to find the import order
@@ -1303,7 +1276,7 @@ class AEABuilder:
             configuration = cast(
                 SkillConfig,
                 ComponentConfiguration.load(
-                    skill_id.component_type, component_path, False
+                    skill_id.component_type, component_path, skip_consistency_check
                 ),
             )
 
@@ -1393,10 +1366,42 @@ class AEABuilder:
                 load_aea_package(configuration)
             else:
                 configuration = deepcopy(configuration)
-                component = load_component_from_config(
-                    component_type, configuration, **kwargs
-                )
+                component = load_component_from_config(configuration, **kwargs)
                 resources.add_component(component)
+
+    def _populate_contract_registry(self):
+        """Populate contract registry."""
+        for configuration in self._package_dependency_manager.get_components_by_type(
+            ComponentType.CONTRACT
+        ).values():
+            configuration = cast(ContractConfig, configuration)
+            if str(configuration.public_id) in contract_registry.specs:
+                logger.warning(
+                    f"Skipping registration of contract {configuration.public_id} since already registered."
+                )
+                continue
+            logger.debug(f"Registering contract {configuration.public_id}")
+
+            path = Path(
+                configuration.directory, configuration.path_to_contract_interface
+            )
+            with open(path, "r") as interface_file:
+                contract_interface = json.load(interface_file)
+
+            try:
+                contract_registry.register(
+                    id_=str(configuration.public_id),
+                    entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+                    class_kwargs={"contract_interface": contract_interface},
+                    contract_config=configuration,  # TODO: resolve configuration being applied globally
+                )
+            except AEAException as e:
+                if "Cannot re-register id:" in str(e):
+                    logger.warning(
+                        "Already registered: {}".format(configuration.class_name)
+                    )
+                else:
+                    raise e
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:
@@ -1408,6 +1413,7 @@ class AEABuilder:
             )
 
 
+# TODO this function is repeated in 'aea.cli.utils.package_utils.py'
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     """Verify or create private keys."""
     path_to_configuration = aea_project_path / DEFAULT_AEA_CONFIG_FILE
@@ -1416,7 +1422,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     agent_configuration = agent_loader.load(fp_read)
 
     for identifier, _value in agent_configuration.private_key_paths.read_all():
-        if identifier not in registry.supported_crypto_ids:
+        if identifier not in crypto_registry.supported_ids:
             ValueError("Unsupported identifier in private key paths.")
 
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():

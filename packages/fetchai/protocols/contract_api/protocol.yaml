@@ -1,0 +1,17 @@
+name: contract_api
+author: fetchai
+version: 0.1.0
+description: A protocol for contract APIs requests and responses.
+license: Apache-2.0
+aea_version: '>=0.4.0, <0.5.0'
+fingerprint:
+  __init__.py: QmZodYjNqoMgGAGKfkCU4zU9t1Cx9MAownqSy4wyVdwaHF
+  contract_api.proto: QmUma9Np2AyR9cbWzVtJ9Y94re1M1nwbt3ZokZh32cvVsA
+  contract_api_pb2.py: QmSV7sCsT1zUnbJ1Cy1TSMb7qr96K61N58Z1JP5unQ1sQs
+  custom_types.py: QmfLbEyzgyygQTtwwK2XmV1ETsuADn4KQMfCYqww9DR8gW
+  dialogues.py: QmZjkEyfG2gUENksrmWe4carCNYbvwC86HLEu9CWwL6DGW
+  message.py: QmYeAHm3JH2pEMrhZdpNK7cJfjLEg2pJ33wH1dzmFQmrD7
+  serialization.py: QmbvoM36R6y595jy2mLDWtn2JhWnqWb4nVPnuYsdooqa13
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

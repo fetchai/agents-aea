@@ -51,6 +51,7 @@ class AEATestWrapper:
         self._fake_connection: Optional[FakeConnection] = None
 
         self.aea = self.make_aea(self.name, self.components)
+        self._thread = None  # type: Optional[Thread]
 
     def make_aea(self, name: str = "my_aea", components: List[Component] = None) -> AEA:
         """
@@ -235,6 +236,7 @@ class AEATestWrapper:
 
     def stop_loop(self) -> None:
         """Stop agents loop in dedicated thread, close thread."""
+        assert self._thread is not None, "Thread not set, call start_loop first."
         self.aea.stop()
         self._thread.join()
 

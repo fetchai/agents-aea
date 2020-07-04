@@ -64,7 +64,7 @@ Keep it running for all the following.
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.5.0
+aea fetch fetchai/car_detector:0.6.0
 cd car_detector
 aea install
 ```
@@ -77,6 +77,7 @@ The following steps create the car detector from scratch:
 aea create car_detector
 cd car_detector
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/carpark_detection:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -88,6 +89,11 @@ ledger_apis:
   fetchai:
     network: testnet
 ```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+```
 
 </p>
 </details>
@@ -96,7 +102,7 @@ ledger_apis:
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.5.0
+aea fetch fetchai/car_data_buyer:0.6.0
 cd car_data_buyer
 aea install
 ```
@@ -109,6 +115,7 @@ The following steps create the car data client from scratch:
 aea create car_data_buyer
 cd car_data_buyer
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/carpark_client:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -121,6 +128,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -162,7 +174,7 @@ Alternatively, to connect to Cosmos:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```
 
 <strong>Wealth:</strong>
@@ -246,7 +258,7 @@ This updates the car data buyer skill config (`car_data_buyer/vendor/fetchai/ski
 
 Finally, run both AEAs from their respective directories:
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run
 ```
 
 You can see that the AEAs find each other, negotiate and eventually trade.

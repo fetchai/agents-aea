@@ -43,7 +43,6 @@ from aea.configurations.base import (
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
-from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
 from aea.mail.base import Address
@@ -181,11 +180,6 @@ class SkillContext:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
         return self._get_agent_context().task_manager
-
-    @property
-    def ledger_apis(self) -> LedgerApis:
-        """Get ledger APIs."""
-        return self._get_agent_context().ledger_apis
 
     @property
     def search_service_address(self) -> Address:
@@ -338,7 +332,7 @@ class Behaviour(AbstractBehaviour, ABC):
         :return: None
         """
 
-    def is_done(self) -> bool:
+    def is_done(self) -> bool:  # pylint: disable=no-self-use
         """Return True if the behaviour is terminated, False otherwise."""
         return False
 
@@ -364,12 +358,21 @@ class Behaviour(AbstractBehaviour, ABC):
         behaviours = {}  # type: Dict[str, "Behaviour"]
         if behaviour_configs == {}:
             return behaviours
+        behaviour_names = set(
+            config.class_name for _, config in behaviour_configs.items()
+        )
         behaviour_module = load_module("behaviours", Path(path))
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
         behaviours_classes = list(
             filter(
-                lambda x: re.match("\\w+Behaviour", x[0])
-                and not str.startswith(x[1].__module__, "aea."),
+                lambda x: any(
+                    re.match(behaviour, x[0]) for behaviour in behaviour_names
+                )
+                and not str.startswith(x[1].__module__, "aea.")
+                and not str.startswith(
+                    x[1].__module__,
+                    f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
+                ),
                 classes,
             )
         )
@@ -442,12 +445,17 @@ class Handler(SkillComponent, ABC):
         handlers = {}  # type: Dict[str, "Handler"]
         if handler_configs == {}:
             return handlers
+        handler_names = set(config.class_name for _, config in handler_configs.items())
         handler_module = load_module("handlers", Path(path))
         classes = inspect.getmembers(handler_module, inspect.isclass)
         handler_classes = list(
             filter(
-                lambda x: re.match("\\w+Handler", x[0])
-                and not str.startswith(x[1].__module__, "aea."),
+                lambda x: any(re.match(handler, x[0]) for handler in handler_names)
+                and not str.startswith(x[1].__module__, "aea.")
+                and not str.startswith(
+                    x[1].__module__,
+                    f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
+                ),
                 classes,
             )
         )
@@ -537,10 +545,13 @@ class Model(SkillComponent, ABC):
             classes = inspect.getmembers(model_module, inspect.isclass)
             filtered_classes = list(
                 filter(
-                    lambda x: any(re.match(shared, x[0]) for shared in model_names)
-                    and Model in inspect.getmro(x[1])
+                    lambda x: any(re.match(model, x[0]) for model in model_names)
+                    and issubclass(x[1], Model)
                     and not str.startswith(x[1].__module__, "aea.")
-                    and not str.startswith(x[1].__module__, "packages."),
+                    and not str.startswith(
+                        x[1].__module__,
+                        f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
+                    ),
                     classes,
                 )
             )

@@ -48,7 +48,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.5.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.6.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -56,19 +56,19 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
             "bool",
         )
         self.run_install()
-        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        weather_station_process = self.run_agent()
 
         file_path = os.path.join("tests", PY_FILE)
         weather_client_process = self.start_subprocess(file_path, cwd=ROOT_DIR)
 
         check_strings = (
-            "updating weather station services on OEF service directory.",
-            "unregistering weather station services from OEF service directory.",
+            "updating services on OEF service directory.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
+            "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
             weather_station_process, check_strings, timeout=120, is_terminating=False
@@ -84,7 +84,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
             "accepting the proposal from sender=",
             "informing counterparty=",
             "received INFORM from sender=",
-            "received the following weather data=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
             weather_client_process, check_strings, is_terminating=False

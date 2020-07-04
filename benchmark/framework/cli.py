@@ -54,7 +54,8 @@ class DefaultArgumentsMultiple(Argument):
             value = [self._parse_arg_str(i) for i in value]
         return super().process_value(ctx, value)
 
-    def _parse_arg_str(self, args: str) -> Tuple[Any]:
+    @staticmethod
+    def _parse_arg_str(args: str) -> Tuple[Any]:
         """
         Parse arguments string to tuple.
 
@@ -110,6 +111,13 @@ class TestCli:
         self.func = func
         self.executor_class = Executor
         self.report_printer_class = report_printer_class
+        self._report_printer = None  # type: Optional[ReportPrinter]
+
+    @property
+    def report_printer(self) -> ReportPrinter:
+        """Get report printer."""
+        assert self._report_printer is not None, "report printer not set!"
+        return self._report_printer
 
     def _make_command(self) -> Command:
         """
@@ -149,7 +157,8 @@ class TestCli:
         )
         return doc_str
 
-    def _executor_params(self) -> Dict[str, Parameter]:
+    @staticmethod
+    def _executor_params() -> Dict[str, Parameter]:
         """
         Get parameters used by Executor.
 
@@ -227,7 +236,7 @@ class TestCli:
 
         num_executions = params["num_executions"]
 
-        self.report_printer = self.report_printer_class(
+        self._report_printer = self.report_printer_class(
             self.func_details, executor_params
         )
 
@@ -278,8 +287,8 @@ class TestCli:
         self._draw_resource(ax[2], xaxis, reports_sorted_by_arg, [4, 5, 6], "mem")
         plt.show()
 
+    @staticmethod
     def _draw_resource(
-        self,
         plt: "matplotpib.axes.Axes",  # type: ignore  # noqa: F821
         xaxis: List[float],
         reports: List[PerformanceReport],

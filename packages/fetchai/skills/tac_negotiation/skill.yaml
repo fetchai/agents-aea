@@ -9,16 +9,15 @@ fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: QmSgtvb4rD4RZ5H2zQQqPUwBzAeoR6ZBTJ1p33YqL5XjMe
   dialogues.py: QmZe9PJncaWzJ4yn9b76Mm5R93VLNxGVd5ogUWhfp8Q6km
-  handlers.py: QmQ2DFUyPbhPQHTnZ57X7dNquc6nuSujChH3UfaAkzQW5Y
+  handlers.py: QmSdEvCaP9JnfQVcEpLvnzy6c8Uva24ifbGMkr2hFy5qFZ
   helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmULTdqKdZsjAKvBR2CEcq18ej7r2tWiiwbmjfDZawSTcP
-  tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
-  transactions.py: QmV539r7VkZGByob82efqXDsuJtDtLkTEiiEHsHsH9nLu9
+  strategy.py: QmQMSPqS3TZxhQoh6SUA8u2c5BNTxYGV95DSQc4neen6Ja
+  transactions.py: QmZQYmZoknmJ4kfFx4Z5D5uv36ZmC97q4CMnscgLNB3fSq
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.5.0
+- fetchai/erc1155:0.6.0
 protocols:
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0

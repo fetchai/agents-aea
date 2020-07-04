@@ -14,6 +14,19 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ## Demo instructions
 
+
+### Create the AEA
+
+First, fetch the gym AEA:
+``` bash
+aea fetch fetchai/gym_aea:0.4.0 --alias my_gym_aea
+cd my_gym_aea
+aea install
+```
+
+<details><summary>Alternatively, create from scratch.</summary>
+<p>
+
 ### Create the AEA
 In the root directory, create the gym AEA and enter the project.
 ``` bash
@@ -26,21 +39,10 @@ cd my_gym_aea
 aea add skill fetchai/gym:0.4.0
 ```
 
-### Copy the gym environment to the AEA directory
-``` bash
-mkdir gyms
-cp -a ../examples/gym_ex/gyms/. gyms/
-```
-
 ### Add a gym connection
 ``` bash
 aea add connection fetchai/gym:0.3.0
 aea config set agent.default_connection fetchai/gym:0.3.0
-```
-
-### Update the connection config
-``` bash
-aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
 
 ### Install the skill dependencies
@@ -50,10 +52,26 @@ To install the `gym` package, a dependency of the gym skill, from Pypi run
 aea install
 ```
 
+</p>
+</details>
+
+### Set up the training environment
+
+#### Copy the gym environment to the AEA directory
+``` bash
+mkdir gyms
+cp -a ../examples/gym_ex/gyms/. gyms/
+```
+
+#### Update the connection config
+``` bash
+aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
+```
+
 ### Run the AEA with the gym connection
 
 ``` bash
-aea run --connections fetchai/gym:0.3.0
+aea run
 ```
 
 You will see the gym training logs.

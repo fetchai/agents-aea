@@ -23,10 +23,7 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
-from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
-
-from ..conftest import AUTHOR
+from aea.helpers.transaction.base import Terms
 
 
 def test_non_initialized_ownership_state_raises_exception():
@@ -53,225 +50,180 @@ def test_initialisation():
     assert ownership_state.is_initialized
 
 
-def test_body():
-    """Test the setter for the body."""
-    msg = InternalMessage()
-    msg.body = {"test_key": "test_value"}
-
-    other_msg = InternalMessage(body={"test_key": "test_value"})
-    assert msg == other_msg, "Messages should be equal."
-    assert str(msg) == "InternalMessage(test_key=test_value)"
-    assert msg._body is not None
-    msg.body = {"Test": "My_test"}
-    assert msg._body == {
-        "Test": "My_test"
-    }, "Message body must be equal with the above dictionary."
-    msg.set("Test", 2)
-    assert msg._body["Test"] == 2, "body['Test'] should be equal to 2."
-    msg.unset("Test")
-    assert "Test" not in msg._body.keys(), "Test should not exist."
-
-
-def test_transaction_is_affordable_agent_is_buyer():
-    """Check if the agent has the money to cover the sender_amount (the agent=sender is the buyer)."""
-    currency_endowment = {"FET": 100}
-    good_endowment = {"good_id": 20}
+def test_is_affordable_for_uninitialized():
+    """Test the initialisation of the ownership_state."""
     ownership_state = OwnershipState()
-    ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
+    buyer_terms = Terms(
+        ledger_id="ethereum",
+        sender_address="pk1",
+        counterparty_address="pk2",
+        amount_by_currency_id={"FET": -1},
+        is_sender_payable_tx_fee=True,
+        quantities_by_good_id={"good_id": 10},
+        nonce="transaction nonce",
     )
-    tx_message = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
-        tx_id="transaction0",
-        tx_sender_addr="agent_1",
-        tx_counterparty_addr="pk",
-        tx_amount_by_currency_id={"FET": -1},
-        tx_sender_fee=0,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={"good_id": 10},
-        info={"some_info_key": "some_info_value"},
-        ledger_id="fetchai",
-        tx_nonce="transaction nonce",
-    )
-
-    assert ownership_state.is_affordable_transaction(
-        tx_message=tx_message
-    ), "We should have the money for the transaction!"
+    assert ownership_state.is_affordable(
+        terms=buyer_terms
+    ), "Any transaction should be classed as affordable."
 
 
-def test_transaction_is_affordable_there_is_no_wealth():
-    """Reject the transaction when there is no wealth exchange."""
-    currency_endowment = {"FET": 0}
-    good_endowment = {"good_id": 0}
-    ownership_state = OwnershipState()
-    ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-    )
-    tx_message = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
-        tx_id="transaction0",
-        tx_sender_addr="agent_1",
-        tx_counterparty_addr="pk",
-        tx_amount_by_currency_id={"FET": 0},
-        tx_sender_fee=0,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={"good_id": 0},
-        info={"some_info_key": "some_info_value"},
-        ledger_id="fetchai",
-        tx_nonce="transaction nonce",
-    )
+class TestOwnershipState:
+    """Test the OwnershipState module."""
 
-    assert not ownership_state.is_affordable_transaction(
-        tx_message=tx_message
-    ), "We must reject the transaction."
+    @classmethod
+    def setup_class(cls):
+        """Setup class for test case."""
+        cls.buyer_terms = Terms(
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
+            amount_by_currency_id={"FET": -1},
+            is_sender_payable_tx_fee=True,
+            quantities_by_good_id={"good_id": 10},
+            nonce="transaction nonce",
+        )
+        cls.neutral_terms = Terms(
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
+            amount_by_currency_id={"FET": 0},
+            is_sender_payable_tx_fee=True,
+            quantities_by_good_id={"good_id": 0},
+            nonce="transaction nonce",
+        )
+        cls.malformed_terms = Terms(
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
+            amount_by_currency_id={"FET": -10},
+            is_sender_payable_tx_fee=True,
+            quantities_by_good_id={"good_id": 10},
+            nonce="transaction nonce",
+        )
+        cls.malformed_terms._amount_by_currency_id = {"FET": 10}
+        cls.seller_terms = Terms(
+            ledger_id="ethereum",
+            sender_address="pk1",
+            counterparty_address="pk2",
+            amount_by_currency_id={"FET": 1},
+            is_sender_payable_tx_fee=True,
+            quantities_by_good_id={"good_id": -10},
+            nonce="transaction nonce",
+        )
+        cls.skill_callback_ids = (PublicId("author", "a_skill", "0.1.0"),)
+        cls.skill_callback_info = {"some_info_key": "some_info_value"}
 
+    def test_transaction_is_affordable_agent_is_buyer(self):
+        """Check if the agent has the money to cover the sender_amount (the agent=sender is the buyer)."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"good_id": 20}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        assert ownership_state.is_affordable(
+            terms=self.buyer_terms
+        ), "We should have the money for the transaction!"
 
-def tests_transaction_is_affordable_agent_is_the_seller():
-    """Check if the agent has the goods (the agent=sender is the seller)."""
-    currency_endowment = {"FET": 0}
-    good_endowment = {"good_id": 0}
-    ownership_state = OwnershipState()
-    ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-    )
-    tx_message = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
-        tx_id="transaction0",
-        tx_sender_addr="agent_1",
-        tx_counterparty_addr="pk",
-        tx_amount_by_currency_id={"FET": 10},
-        tx_sender_fee=0,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={"good_id": 0},
-        info={"some_info_key": "some_info_value"},
-        ledger_id="fetchai",
-        tx_nonce="transaction nonce",
-    )
+    def test_transaction_is_affordable_there_is_no_wealth(self):
+        """Reject the transaction when there is no wealth exchange."""
+        currency_endowment = {"FET": 0}
+        good_endowment = {"good_id": 0}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        assert not ownership_state.is_affordable_transaction(
+            terms=self.buyer_terms
+        ), "We must reject the transaction."
 
-    assert ownership_state.is_affordable_transaction(
-        tx_message=tx_message
-    ), "We must reject the transaction."
+    def test_transaction_is_affordable_neutral(self):
+        """Reject the transaction when there is no wealth exchange."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"good_id": 20}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        assert not ownership_state.is_affordable_transaction(
+            terms=self.neutral_terms
+        ), "We must reject the transaction."
 
+    def test_transaction_is_affordable_malformed(self):
+        """Reject the transaction when there is no wealth exchange."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"good_id": 20}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        assert not ownership_state.is_affordable_transaction(
+            terms=self.malformed_terms
+        ), "We must reject the transaction."
 
-def tests_transaction_is_affordable_else_statement():
-    """Check that the function returns false if we cannot satisfy any if/elif statements."""
-    currency_endowment = {"FET": 0}
-    good_endowment = {"good_id": 0}
-    ownership_state = OwnershipState()
-    ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-    )
-    tx_message = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
-        tx_id="transaction0",
-        tx_sender_addr="agent_1",
-        tx_counterparty_addr="pk",
-        tx_amount_by_currency_id={"FET": 10},
-        tx_sender_fee=0,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={"good_id": 50},
-        info={"some_info_key": "some_info_value"},
-        ledger_id="fetchai",
-        tx_nonce="transaction nonce",
-    )
+    def test_transaction_is_affordable_agent_is_seller(self):
+        """Check if the agent has the goods (the agent=sender is the seller)."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"good_id": 20}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        assert ownership_state.is_affordable_transaction(
+            terms=self.seller_terms
+        ), "We must reject the transaction."
 
-    assert not ownership_state.is_affordable_transaction(
-        tx_message=tx_message
-    ), "We must reject the transaction."
+    def test_apply(self):
+        """Test the apply function."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"good_id": 2}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        list_of_terms = [self.buyer_terms]
+        state = ownership_state
+        new_state = ownership_state.apply_transactions(list_of_terms=list_of_terms)
+        assert (
+            state != new_state
+        ), "after applying a list_of_terms must have a different state!"
 
+    def test_transaction_update(self):
+        """Test the transaction update when sending tokens."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"good_id": 20}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        assert ownership_state.amount_by_currency_id == currency_endowment
+        assert ownership_state.quantities_by_good_id == good_endowment
+        ownership_state.update(terms=self.buyer_terms)
+        expected_amount_by_currency_id = {"FET": 99}
+        expected_quantities_by_good_id = {"good_id": 30}
+        assert ownership_state.amount_by_currency_id == expected_amount_by_currency_id
+        assert ownership_state.quantities_by_good_id == expected_quantities_by_good_id
 
-def test_apply():
-    """Test the apply function."""
-    currency_endowment = {"FET": 100}
-    good_endowment = {"good_id": 2}
-    ownership_state = OwnershipState()
-    ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-    )
-    tx_message = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
-        tx_id="transaction0",
-        tx_sender_addr="agent_1",
-        tx_counterparty_addr="pk",
-        tx_amount_by_currency_id={"FET": -20},
-        tx_sender_fee=5,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={"good_id": 10},
-        info={"some_info_key": "some_info_value"},
-        ledger_id="fetchai",
-        tx_nonce="transaction nonce",
-    )
-    list_of_transactions = [tx_message]
-    state = ownership_state
-    new_state = ownership_state.apply_transactions(transactions=list_of_transactions)
-    assert (
-        state != new_state
-    ), "after applying a list_of_transactions must have a different state!"
-
-
-def test_transaction_update():
-    """Test the transaction update when sending tokens."""
-    currency_endowment = {"FET": 100}
-    good_endowment = {"good_id": 20}
-
-    ownership_state = OwnershipState()
-    ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-    )
-    assert ownership_state.amount_by_currency_id == currency_endowment
-    assert ownership_state.quantities_by_good_id == good_endowment
-    tx_message = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
-        tx_id="transaction0",
-        tx_sender_addr="agent_1",
-        tx_counterparty_addr="pk",
-        tx_amount_by_currency_id={"FET": -20},
-        tx_sender_fee=5,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={"good_id": 10},
-        info={"some_info_key": "some_info_value"},
-        ledger_id="fetchai",
-        tx_nonce="transaction nonce",
-    )
-    ownership_state.update(tx_message=tx_message)
-    expected_amount_by_currency_id = {"FET": 75}
-    expected_quantities_by_good_id = {"good_id": 30}
-    assert ownership_state.amount_by_currency_id == expected_amount_by_currency_id
-    assert ownership_state.quantities_by_good_id == expected_quantities_by_good_id
-
-
-def test_transaction_update_receive():
-    """Test the transaction update when receiving tokens."""
-    currency_endowment = {"FET": 75}
-    good_endowment = {"good_id": 30}
-    ownership_state = OwnershipState()
-    ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-    )
-    assert ownership_state.amount_by_currency_id == currency_endowment
-    assert ownership_state.quantities_by_good_id == good_endowment
-    tx_message = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
-        tx_id="transaction0",
-        tx_sender_addr="agent_1",
-        tx_counterparty_addr="pk",
-        tx_amount_by_currency_id={"FET": 20},
-        tx_sender_fee=5,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={"good_id": -10},
-        info={"some_info_key": "some_info_value"},
-        ledger_id="fetchai",
-        tx_nonce="transaction nonce",
-    )
-    ownership_state.update(tx_message=tx_message)
-    expected_amount_by_currency_id = {"FET": 90}
-    expected_quantities_by_good_id = {"good_id": 20}
-    assert ownership_state.amount_by_currency_id == expected_amount_by_currency_id
-    assert ownership_state.quantities_by_good_id == expected_quantities_by_good_id
+    def test_transaction_update_receive(self):
+        """Test the transaction update when receiving tokens."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"good_id": 20}
+        ownership_state = OwnershipState()
+        ownership_state.set(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        assert ownership_state.amount_by_currency_id == currency_endowment
+        assert ownership_state.quantities_by_good_id == good_endowment
+        ownership_state.update(terms=self.seller_terms)
+        expected_amount_by_currency_id = {"FET": 101}
+        expected_quantities_by_good_id = {"good_id": 10}
+        assert ownership_state.amount_by_currency_id == expected_amount_by_currency_id
+        assert ownership_state.quantities_by_good_id == expected_quantities_by_good_id

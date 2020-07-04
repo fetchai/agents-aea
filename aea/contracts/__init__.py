@@ -18,3 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the contract modules."""
+from aea.contracts.base import Contract
+from aea.crypto.registries import Registry
+
+contract_registry: Registry[Contract] = Registry[Contract]()

@@ -6,46 +6,80 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmRgSkJYi1WkoCTNNVv28NMhWVn5ptASmSvj2ArpTkfpis
-  dialogues.py: QmSSvLAKmPTHnWLKJkjNtTm3LjwDeVjFW8RNi7mUKeR2p5
-  handlers.py: QmcRz2BV35T6bUkJLxFzd6tgzqRk722K6yeSvMmGL1neK2
-  strategy.py: QmQF5YhSM4BbadrfggAeaoLDYPkSDscEPKj5agPWcuBTwH
+  behaviours.py: QmWLKynzXh9BNXJXyZ6yfiwPSo7PbkatCQ5Y1rxgjCHrej
+  dialogues.py: QmYMR28TDqE56GdUxP9LwerktaJrD9SBkGoeJsoLSMHpx6
+  handlers.py: QmWeB4kd4zGwaeqsdYNxDmPaaXwxKS8cjwEPUUqLaF2dYQ
+  strategy.py: QmdeUGoSq4owF3AkcGkpPZAZY5fWW6n645uCdAfjsuPtVa
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
 skills: []
 behaviours:
   search:
     args:
       search_interval: 5
-    class_name: MySearchBehaviour
+    class_name: GenericSearchBehaviour
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
-  oef:
+    class_name: GenericFipaHandler
+  ledger_api:
     args: {}
-    class_name: OEFSearchHandler
-  transaction:
+    class_name: GenericLedgerApiHandler
+  oef_search:
     args: {}
-    class_name: MyTransactionHandler
+    class_name: GenericOefSearchHandler
+  signing:
+    args: {}
+    class_name: GenericSigningHandler
 models:
-  dialogues:
+  default_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
       is_ledger_tx: true
       ledger_id: fetchai
-      max_buyer_tx_fee: 1
-      max_price: 20
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
       search_query:
-        constraint_type: ==
-        search_term: country
-        search_value: UK
-    class_name: Strategy
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: GenericStrategy
 dependencies: {}
+is_abstract: true

@@ -53,23 +53,22 @@ MODULES_TO_PATH = {
     "aea.crypto.fetchai": "api/crypto/fetchai.md",
     "aea.crypto.helpers": "api/crypto/helpers.md",
     "aea.crypto.ledger_apis": "api/crypto/ledger_apis.md",
-    "aea.crypto.registry": "api/crypto/registry.md",
     "aea.crypto.wallet": "api/crypto/wallet.md",
+    "aea.crypto.registries.base": "api/crypto/registries/base.md",
     "aea.decision_maker.base": "api/decision_maker/base.md",
     "aea.decision_maker.default": "api/decision_maker/default.md",
-    "aea.decision_maker.messages.base": "api/decision_maker/messages/base.md",
-    "aea.decision_maker.messages.state_update": "api/decision_maker/messages/state_update.md",
-    "aea.decision_maker.messages.transaction": "api/decision_maker/messages/transaction.md",
     "aea.helpers.dialogue.base": "api/helpers/dialogue/base.md",
     "aea.helpers.ipfs.base": "api/helpers/ipfs/base.md",
     "aea.helpers.preference_representations.base": "api/helpers/preference_representations/base.md",
     "aea.helpers.search.generic": "api/helpers/search/generic.md",
     "aea.helpers.search.models": "api/helpers/search/models.md",
+    "aea.helpers.transaction.base": "api/helpers/transaction/base.md",
     "aea.helpers.async_friendly_queue": "api/helpers/async_friendly_queue.md",
     "aea.helpers.async_utils": "api/helpers/async_utils.md",
     "aea.helpers.base": "api/helpers/base.md",
     "aea.helpers.exception_policy": "api/helpers/exception_policy.md",
     "aea.helpers.exec_timeout": "api/helpers/exec_timeout.md",
+    "aea.helpers.multiple_executor": "api/helpers/multiple_executor.md",
     "aea.identity.base": "api/identity/base.md",
     "aea.mail.base": "api/mail/base.md",
     "aea.protocols.base": "api/protocols/base.md",
@@ -77,6 +76,12 @@ MODULES_TO_PATH = {
     "aea.protocols.default.custom_types": "api/protocols/default/custom_types.md",
     "aea.protocols.default.message": "api/protocols/default/message.md",
     "aea.protocols.default.serialization": "api/protocols/default/serialization.md",
+    "aea.protocols.signing.custom_types": "api/protocols/signing/custom_types.md",
+    "aea.protocols.signing.message": "api/protocols/signing/message.md",
+    "aea.protocols.signing.serialization": "api/protocols/signing/serialization.md",
+    "aea.protocols.state_update.custom_types": "api/protocols/state_update/custom_types.md",
+    "aea.protocols.state_update.message": "api/protocols/state_update/message.md",
+    "aea.protocols.state_update.serialization": "api/protocols/state_update/serialization.md",
     "aea.registries.base": "api/registries/base.md",
     "aea.registries.filter": "api/registries/filter.md",
     "aea.registries.resources": "api/registries/resources.md",
@@ -130,7 +135,7 @@ def generate_api_docs():
         pydoc = subprocess.Popen(  # nosec
             ["pydoc-markdown", "-m", module, "-I", "."], stdout=subprocess.PIPE
         )
-        stdout, stderr = pydoc.communicate()
+        stdout, _ = pydoc.communicate()
         pydoc.wait()
         stdout_text = stdout.decode("utf-8")
         text = replace_underscores(stdout_text)

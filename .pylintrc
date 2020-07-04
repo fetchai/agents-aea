@@ -1,24 +1,30 @@
 [MASTER]
-ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py
+ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py,transaction.py
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,W0105,W0621,W0235,W0613,W0201,W0223,W0221,W0611,W0612,W0222,W1505,W0106,R0902,R0913,R0914,R1720,R1705,R0801,R0904,R0903,R0911,R0912,R1721,R0901,R1718,R1723,R1704,R0916,R0201,R1714,R1702,R0123,R0915,R1710,R1703,R1716,R1711,R0205,R0401,R1722
+disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,W0105,W0621,W0235,W0613,W0221,R0902,R0913,R0914,R1720,R1705,R0801,R0904,R0903,R0911,R0912,R1721,R0901,R1718,R1723,R1704,R0916,R1714,R1702,R0123,R0915,R1710,R1703,R1716,R1711,R1722,R0401
 
-## Resolve these:
-# W0703: broad-except ENABLED
-# W0212: protected-access ENABLED
-# W0706: try-except-raise ENABLED
-# W0108: unnecessary-lambda ENABLED
-# W0622: redefined-builtin ENABLED
+ENABLED:
+# W0703: broad-except 
+# W0212: protected-access
+# W0706: try-except-raise
+# W0108: unnecessary-lambda
+# W0622: redefined-builtin
 # W0163: unused-argument
 # W0201: attribute-defined-outside-init
-# W0223: abstract-method
 # W0222: signature-differs
-# W0221: arguments-differ
+# W0223: abstract-method
 # W0611: unused-import
 # W0612: unused-variable
 # W1505: deprecated-method
 # W0106: expression-not-assigned
+# R0201: no-self-use
+# R0205: useless-object-inheritance
+
+
+## Resolve these:
+# R0401: cyclic-import
+# W0221: arguments-differ
 # R0902: too-many-instance-attributes
 # R0913: too-many-arguments
 # R0914: too-many-locals
@@ -35,16 +41,13 @@ disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,W0105,W0621,W0235,
 # R1716: chained-comparison
 # R1704: redefined-argument-from-local
 # R0916: too-many-boolean-expressions
-# R0201: no-self-use
 # R1714: consider-using-in
 # R1702: too-many-nested-blocks
 # R0123: literal-comparison
 # R0915: too-many-statements
-# R0205: useless-object-inheritance
 # R1710: inconsistent-return-statements
 # R1703: simplifiable-if-statement
 # R1711: useless-return
-# R0401: cyclic-import
 # R1722: consider-using-sys-exit
 
 ## Keep the following:

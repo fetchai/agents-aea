@@ -164,6 +164,7 @@ class Game(Model):
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._conf = None  # type: Optional[Configuration]
+        self._contract_address = None  # type: Optional[str]
 
     @property
     def ledger_id(self) -> str:
@@ -184,6 +185,18 @@ class Game(Model):
     def phase(self) -> Phase:
         """Get the game phase."""
         return self._phase
+
+    @property
+    def contract_address(self) -> str:
+        """Get the contract address."""
+        assert self._contract_address is not None, "Contract address not set!"
+        return self._contract_address
+
+    @contract_address.setter
+    def contract_address(self, contract_address: str) -> None:
+        """Set the contract address."""
+        assert self._contract_address is None, "Contract address already set!"
+        self._contract_address = contract_address
 
     @property
     def expected_controller_addr(self) -> Address:

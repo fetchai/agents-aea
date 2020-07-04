@@ -18,21 +18,27 @@
 # ------------------------------------------------------------------------------
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
+import base64
+import hashlib
 import json
 import logging
 import time
 from pathlib import Path
 from typing import Any, BinaryIO, Optional, Tuple, cast
 
+from ecdsa import SECP256k1, VerifyingKey
+from ecdsa.util import sigencode_string_canonize
+
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
-from fetchai.ledger.api.tx import TxContents, TxStatus
+from fetchai.ledger.api.token import TokenTxFactory
+from fetchai.ledger.api.tx import TxContents
 from fetchai.ledger.crypto import Address as FetchaiAddress
 from fetchai.ledger.crypto import Entity, Identity
-from fetchai.ledger.serialisation import sha256_hash
+from fetchai.ledger.serialisation import sha256_hash, transaction
 
 import requests
 
-from aea.crypto.base import Crypto, FaucetApi, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.helpers.base import try_decorator
 from aea.mail.base import Address
 
@@ -105,8 +111,11 @@ class FetchAICrypto(Crypto[Entity]):
         :param is_deprecated_mode: if the deprecated signing is used
         :return: signature of the message in string form
         """
-        signature = self.entity.sign(message)
-        return signature
+        signature_compact = self.entity.signing_key.sign_deterministic(
+            message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
+        )
+        signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
+        return signature_base64_str
 
     def sign_transaction(self, transaction: Any) -> Any:
         """
@@ -115,32 +124,10 @@ class FetchAICrypto(Crypto[Entity]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-        raise NotImplementedError  # pragma: no cover
-
-    def recover_message(
-        self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[Address, ...]:
-        """
-        Recover the addresses from the hash.
-
-        :param message: the message we expect
-        :param signature: the transaction signature
-        :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered addresses
-        """
-        raise NotImplementedError  # praggma: no cover
-
-    @classmethod
-    def get_address_from_public_key(cls, public_key: str) -> Address:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-        identity = Identity.from_hex(public_key)
-        address = str(FetchaiAddress(identity))
-        return address
+        identity = Identity.from_hex(self.public_key)
+        transaction.add_signer(identity)
+        transaction.sign(self.entity)
+        return transaction
 
     def dump(self, fp: BinaryIO) -> None:
         """
@@ -152,7 +139,101 @@ class FetchAICrypto(Crypto[Entity]):
         fp.write(self.entity.private_key_hex.encode("utf-8"))
 
 
-class FetchAIApi(LedgerApi):
+class FetchAIHelper(Helper):
+    """Helper class usable as Mixin for FetchAIApi or as standalone class."""
+
+    @staticmethod
+    def is_transaction_settled(tx_receipt: Any) -> bool:
+        """
+        Check whether a transaction is settled or not.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: True if the transaction has been settled, False o/w.
+        """
+        is_successful = False
+        if tx_receipt is not None:
+            is_successful = tx_receipt.status in SUCCESSFUL_TERMINAL_STATES
+        return is_successful
+
+    @staticmethod
+    def is_transaction_valid(
+        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param tx: the transaction.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :return: True if the random_message is equals to tx['input']
+        """
+        is_valid = False
+        if tx is not None:
+            seller_address = FetchaiAddress(seller)
+            is_valid = (
+                str(tx.from_address) == client
+                and amount == tx.transfers[seller_address]
+                # and self.is_transaction_settled(tx_digest=tx_digest)
+            )
+        return is_valid
+
+    @staticmethod
+    def generate_tx_nonce(seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish txs with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = sha256_hash(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+        return aggregate_hash.hex()
+
+    @staticmethod
+    def get_address_from_public_key(public_key: str) -> Address:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        identity = Identity.from_hex(public_key)
+        address = str(FetchaiAddress(identity))
+        return address
+
+    @staticmethod
+    def recover_message(
+        message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
+        """
+        Recover the addresses from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
+        """
+        signature_b64 = base64.b64decode(signature)
+        verifying_keys = VerifyingKey.from_public_key_recovery(
+            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
+        )
+        public_keys = [
+            verifying_key.to_string("compressed").hex()
+            for verifying_key in verifying_keys
+        ]
+        addresses = [
+            FetchAIHelper.get_address_from_public_key(public_key)
+            for public_key in public_keys
+        ]
+        return tuple(addresses)
+
+
+class FetchAIApi(LedgerApi, FetchAIHelper):
     """Class to interact with the Fetch ledger APIs."""
 
     identifier = _FETCHAI
@@ -163,6 +244,11 @@ class FetchAIApi(LedgerApi):
 
         :param kwargs: key word arguments (expects either a pair of 'host' and 'port' or a 'network')
         """
+        assert (
+            "host" in kwargs and "port" in kwargs
+        ) or "network" in kwargs, (
+            "expects either a pair of 'host' and 'port' or a 'network'"
+        )
         self._api = FetchaiLedgerApi(**kwargs)
 
     @property
@@ -185,32 +271,34 @@ class FetchAIApi(LedgerApi):
         """Try get the balance."""
         return self._api.tokens.balance(FetchaiAddress(address))
 
-    def transfer(  # pylint: disable=arguments-differ
+    def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
-        crypto: Crypto,
+        sender_address: Address,
         destination_address: Address,
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        is_waiting_for_confirmation: bool = True,
         **kwargs,
-    ) -> Optional[str]:
-        """Submit a transaction to the ledger."""
-        tx_digest = self._try_transfer_tokens(
-            crypto, destination_address, amount, tx_fee
-        )
-        return tx_digest
+    ) -> Optional[Any]:
+        """
+        Submit a transfer transaction to the ledger.
 
-    @try_decorator(
-        "Error when attempting transfering tokens: {}", logger_method="debug"
-    )
-    def _try_transfer_tokens(
-        self, crypto: Crypto, destination_address: Address, amount: int, tx_fee: int
-    ) -> Optional[str]:
-        """Try transfer tokens."""
-        return self._api.tokens.transfer(
-            crypto.entity, FetchaiAddress(destination_address), amount, tx_fee
+        :param sender_address: the sender address of the payer.
+        :param destination_address: the destination address of the payee.
+        :param amount: the amount of wealth to be transferred.
+        :param tx_fee: the transaction fee.
+        :param tx_nonce: verifies the authenticity of the tx
+        :return: the transfer transaction
+        """
+        tx = TokenTxFactory.transfer(
+            FetchaiAddress(sender_address),
+            FetchaiAddress(destination_address),
+            amount,
+            tx_fee,
+            [],  # we don't add signer here as we would need the public key for this
         )
+        self._api.set_validity_period(tx)
+        return tx
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
@@ -218,15 +306,11 @@ class FetchAIApi(LedgerApi):
 
         :param tx_signed: the signed transaction
         """
-        raise NotImplementedError  # pragma: no cover
-
-    def is_transaction_settled(self, tx_digest: str) -> bool:
-        """Check whether a transaction is settled or not."""
-        tx_status = cast(TxStatus, self._try_get_transaction_receipt(tx_digest))
-        is_successful = False
-        if tx_status is not None:
-            is_successful = tx_status.status in SUCCESSFUL_TERMINAL_STATES
-        return is_successful
+        encoded_tx = transaction.encode_transaction(tx_signed)
+        endpoint = "transfer" if tx_signed.transfers is not None else "create"
+        return self.api.tokens._post_tx_json(  # pylint: disable=protected-access
+            encoded_tx, endpoint
+        )
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
@@ -250,50 +334,15 @@ class FetchAIApi(LedgerApi):
         """
         return self._api.tx.status(tx_digest)
 
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+    def get_transaction(self, tx_digest: str) -> Optional[Any]:
         """
-        Generate a random str message.
+        Get the transaction for a transaction digest.
 
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx, if present
         """
-        time_stamp = int(time.time())
-        aggregate_hash = sha256_hash(
-            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
-        )
-        return aggregate_hash.hex()
-
-    # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
-    def is_transaction_valid(
-        self,
-        tx_digest: str,
-        seller: Address,
-        client: Address,
-        tx_nonce: str,
-        amount: int,
-    ) -> bool:
-        """
-        Check whether a transaction is valid or not (non-blocking).
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :param tx_nonce: the transaction nonce.
-        :param amount: the amount we expect to get from the transaction.
-        :param tx_digest: the transaction digest.
-
-        :return: True if the random_message is equals to tx['input']
-        """
-        is_valid = False
-        tx_contents = self._try_get_transaction(tx_digest)
-        if tx_contents is not None:
-            seller_address = FetchaiAddress(seller)
-            is_valid = (
-                str(tx_contents.from_address) == client
-                and amount == tx_contents.transfers[seller_address]
-                and self.is_transaction_settled(tx_digest=tx_digest)
-            )
-        return is_valid
+        tx = self._try_get_transaction(tx_digest)
+        return tx
 
     @try_decorator("Error when attempting getting tx: {}", logger_method="debug")
     def _try_get_transaction(self, tx_digest: str) -> Optional[TxContents]:

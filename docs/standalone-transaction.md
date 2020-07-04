@@ -67,20 +67,28 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 
 ``` python
     # Create the transaction and send it to the ledger.
-    ledger_api = ledger_apis.apis[FetchAICrypto.identifier]
-    tx_nonce = ledger_api.generate_tx_nonce(
+    tx_nonce = ledger_apis.generate_tx_nonce(
+        FetchAICrypto.identifier,
         wallet_2.addresses.get(FetchAICrypto.identifier),
         wallet_1.addresses.get(FetchAICrypto.identifier),
     )
-    tx_digest = ledger_api.transfer(
-        crypto=wallet_1.crypto_objects.get(FetchAICrypto.identifier),
+    transaction = ledger_apis.get_transfer_transaction(
+        identifier=FetchAICrypto.identifier,
+        sender_address=wallet_1.addresses.get(FetchAICrypto.identifier),
         destination_address=wallet_2.addresses.get(FetchAICrypto.identifier),
         amount=1,
         tx_fee=1,
         tx_nonce=tx_nonce,
     )
+    signed_transaction = wallet_1.sign_transaction(
+        FetchAICrypto.identifier, transaction
+    )
+    transaction_digest = ledger_apis.send_signed_transaction(
+        FetchAICrypto.identifier, signed_transaction
+    )
+
     logger.info("Transaction complete.")
-    logger.info("The transaction digest is {}".format(tx_digest))
+    logger.info("The transaction digest is {}".format(transaction_digest))
 ```
 
 <details><summary>Stand-alone transaction full code</summary>
@@ -129,20 +137,28 @@ def run():
     )
 
     # Create the transaction and send it to the ledger.
-    ledger_api = ledger_apis.apis[FetchAICrypto.identifier]
-    tx_nonce = ledger_api.generate_tx_nonce(
+    tx_nonce = ledger_apis.generate_tx_nonce(
+        FetchAICrypto.identifier,
         wallet_2.addresses.get(FetchAICrypto.identifier),
         wallet_1.addresses.get(FetchAICrypto.identifier),
     )
-    tx_digest = ledger_api.transfer(
-        crypto=wallet_1.crypto_objects.get(FetchAICrypto.identifier),
+    transaction = ledger_apis.get_transfer_transaction(
+        identifier=FetchAICrypto.identifier,
+        sender_address=wallet_1.addresses.get(FetchAICrypto.identifier),
         destination_address=wallet_2.addresses.get(FetchAICrypto.identifier),
         amount=1,
         tx_fee=1,
         tx_nonce=tx_nonce,
     )
+    signed_transaction = wallet_1.sign_transaction(
+        FetchAICrypto.identifier, transaction
+    )
+    transaction_digest = ledger_apis.send_signed_transaction(
+        FetchAICrypto.identifier, signed_transaction
+    )
+
     logger.info("Transaction complete.")
-    logger.info("The transaction digest is {}".format(tx_digest))
+    logger.info("The transaction digest is {}".format(transaction_digest))
 
 
 if __name__ == "__main__":

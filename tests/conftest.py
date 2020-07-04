@@ -19,6 +19,7 @@
 """Conftest module for Pytest."""
 import asyncio
 import inspect
+import json
 import logging
 import os
 import platform
@@ -27,8 +28,9 @@ import sys
 import threading
 import time
 from functools import wraps
+from pathlib import Path
 from threading import Timer
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional, Sequence, cast
 from unittest.mock import patch
 
 import docker as docker
@@ -44,7 +46,10 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
 from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentType,
     ConnectionConfig,
+    ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
@@ -55,6 +60,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
+from aea.contracts import Contract, contract_registry
 from aea.crypto.fetchai import FetchAICrypto
 from aea.identity.base import Identity
 from aea.mail.base import Address
@@ -132,7 +138,7 @@ FETCHAI_ADDRESS_ONE = "Vu6aENcVSYYH9GhY1k3CsL7shWH9gKKBAWcc4ckLk5w4Ltynx"
 FETCHAI_ADDRESS_TWO = "2LnTTHvGxWvKK1WfEAXnZvu81RPcMRDVQW8CJF3Gsh7Z3axDfP"
 
 # testnets
-COSMOS_TESTNET_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
+COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
 ETHEREUM_TESTNET_CONFIG = {
     "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
     "gas_price": 50,
@@ -856,3 +862,33 @@ def check_test_threads(request):
     yield
     new_num_threads = threading.activeCount()
     assert num_threads >= new_num_threads, "Non closed threads!"
+
+
+@pytest.fixture()
+def erc1155_contract():
+    """
+    Instantiate an ERC1155 contract instance. As a side effect,
+    register it to the registry, if not already registered.
+    """
+    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+    configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) not in contract_registry.specs:
+        # load contract into sys modules
+        Contract.from_config(configuration)
+
+        path = Path(configuration.directory, configuration.path_to_contract_interface)
+        with open(path, "r") as interface_file:
+            contract_interface = json.load(interface_file)
+
+        contract_registry.register(
+            id_=str(configuration.public_id),
+            entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+            class_kwargs={"contract_interface": contract_interface},
+            contract_config=configuration,
+        )
+
+    contract = contract_registry.make(str(configuration.public_id))
+    yield contract

@@ -36,6 +36,7 @@ from ...conftest import (
 class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
+    @pytest.mark.unstable
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
@@ -68,7 +69,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.2.0", tac_controller_name
+            "fetchai/tac_controller:0.3.0", tac_controller_name
         )
         assert (
             diff == []
@@ -85,7 +86,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             self.set_config("agent.default_ledger", "ethereum")
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.3.0", agent_name
+                "fetchai/tac_participant:0.4.0", agent_name
             )
             assert (
                 diff == []
@@ -167,6 +168,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
 class TestTacSkillsContract(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
+    @pytest.mark.unstable
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
@@ -201,7 +203,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.3.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.4.0", tac_controller_name
         )
         assert (
             diff == []
@@ -237,7 +239,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.3.0", agent_name
+                "fetchai/tac_participant:0.4.0", agent_name
             )
             assert (
                 diff == []

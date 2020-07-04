@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/weather_station:0.5.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.6.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -10,12 +10,13 @@ aea install
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/weather_station:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
-aea fetch fetchai/weather_client:0.5.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.6.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -23,6 +24,7 @@ aea install
 aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
 aea add skill fetchai/weather_client:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
@@ -65,7 +67,7 @@ aea config set vendor.fetchai.skills.weather_client.models.strategy.args.currenc
 aea config set vendor.fetchai.skills.weather_client.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run
 ```
 ``` bash
 cd ..
@@ -78,9 +80,17 @@ ledger_apis:
     network: testnet
 ```
 ``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+```
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
+```
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 ``` yaml
 ledger_apis:
@@ -92,5 +102,5 @@ ledger_apis:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```

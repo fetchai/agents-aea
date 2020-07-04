@@ -121,7 +121,7 @@ The echo skill is a simple demo that introduces you to the main business logic c
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.5.0
+aea fetch fetchai/my_first_aea:0.6.0
 cd my_first_aea
 ```
 
@@ -345,6 +345,6 @@ For more demos, use cases or step by step guides, please check the following:
 
 - <a href="../generic-skills">Generic skill use case</a>
 - <a href='../weather-skills/'>Weather skill demo</a>
-- <a href='../thermometer-skills-step-by-step/'> Thermometer step by step guide </a>
+- <a href='../generic-skills-step-by-step/'> Generic step by step guide </a>
 
 <br />

@@ -17,11 +17,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+# pylint: disable=cyclic-import
 
 """
 This script will update the symlinks of the project, cross-platform compatible.
 """
-# pylint: disable=cyclic-import
+
 import contextlib
 import inspect
 import os

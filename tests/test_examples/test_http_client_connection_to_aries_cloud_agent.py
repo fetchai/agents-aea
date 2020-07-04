@@ -35,13 +35,13 @@ import yaml
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
+    ConnectionConfig,
     ProtocolConfig,
     ProtocolId,
     SkillConfig,
 )
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -102,10 +102,13 @@ class TestAEAToACA:
 
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
+        configuration = ConnectionConfig(
+            host=self.aca_admin_address,
+            port=self.aca_admin_port,
+            connection_id=HTTPClientConnection.connection_id,
+        )
         http_client_connection = HTTPClientConnection(
-            identity=self.aea_identity,
-            provider_address=self.aca_admin_address,
-            provider_port=self.aca_admin_port,
+            configuration=configuration, identity=self.aea_identity
         )
         http_client_connection.loop = asyncio.get_event_loop()
 
@@ -165,23 +168,25 @@ class TestAEAToACA:
     @pytest.mark.asyncio
     async def test_end_to_end_aea_aca(self):
         # AEA components
-        ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
         wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE})
         identity = Identity(
             name="my_aea_1",
             address=wallet.addresses.get(FetchAICrypto.identifier),
             default_address_key=FetchAICrypto.identifier,
         )
+        configuration = ConnectionConfig(
+            host=self.aca_admin_address,
+            port=self.aca_admin_port,
+            connection_id=HTTPClientConnection.connection_id,
+        )
         http_client_connection = HTTPClientConnection(
-            identity=identity,
-            provider_address=self.aca_admin_address,
-            provider_port=self.aca_admin_port,
+            configuration=configuration, identity=identity,
         )
         resources = Resources()
         resources.add_connection(http_client_connection)
 
         # create AEA
-        aea = AEA(identity, wallet, ledger_apis, resources)
+        aea = AEA(identity, wallet, resources)
 
         # Add http protocol to AEA resources
         http_protocol_configuration = ProtocolConfig.from_json(

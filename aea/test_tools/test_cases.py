@@ -420,6 +420,20 @@ class BaseAEATestCase(ABC):
         cls.run_cli_command("fingerprint", item_type, public_id, cwd=cls._get_cwd())
 
     @classmethod
+    def eject_item(cls, item_type: str, public_id: str) -> None:
+        """
+        Eject an item in the agent.
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param public_id: public id of the item.
+
+        :return: None
+        """
+        cli_args = ["eject", item_type, public_id]
+        cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
+
+    @classmethod
     def run_install(cls):
         """
         Execute AEA CLI install command.

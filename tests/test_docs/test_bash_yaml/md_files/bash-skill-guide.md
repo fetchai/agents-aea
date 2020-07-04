@@ -42,7 +42,7 @@ aea config set agent.default_connection fetchai/oef:0.5.0
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.5.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.6.0 && cd simple_service_registration
 aea run --connections fetchai/oef:0.5.0
 ```
 ``` yaml

@@ -46,7 +46,7 @@ nav:
         - AEA and web frameworks: 'aea-vs-mvc.md'
         - Build a skill for an AEA: 'skill-guide.md'
         - Core components - Part 2: 'core-components-2.md'
-        - Trade between two AEAs: 'thermometer-skills-step-by-step.md'
+        - Trade between two AEAs: 'generic-skills-step-by-step.md'
       - Topic guides:
         - Ways to build an AEA: 'step-one.md'
         - Build an AEA with the CLI: 'build-aea-step-by-step.md'
@@ -55,7 +55,7 @@ nav:
         - Logging: 'logging.md'
         - Use multiplexer stand-alone: 'multiplexer-standalone.md'
         - Create stand-alone transaction: 'standalone-transaction.md'
-        - Create decision-maker transaction: 'decision-maker-transaction.md'
+        # - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
         - Known limitations: 'known-limits.md'
         - Build an AEA programmatically: 'build-aea-programmatically.md'

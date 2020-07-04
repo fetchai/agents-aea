@@ -20,81 +20,27 @@
 """
 This module contains the classes required for dialogue management.
 
-- Dialogue: The dialogue class maintains state of a dialogue and manages it.
-- Dialogues: The dialogues class keeps track of all dialogues.
+- DefaultDialogues: The dialogues class keeps track of all dialogues of type default.
+- FipaDialogues: The dialogues class keeps track of all dialogues of type fipa.
+- LedgerApiDialogues: The dialogues class keeps track of all dialogues of type ledger_api.
+- OefSearchDialogues: The dialogues class keeps track of all dialogues of type oef_search.
 """
 
-from typing import Dict, Optional
-
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.helpers.search.models import Description
-from aea.mail.base import Address
-from aea.protocols.base import Message
-from aea.skills.base import Model
-
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
-
-
-class Dialogue(FipaDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        agent_address: Address,
-        role: BaseDialogue.Role,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        FipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
-        )
-        self.temp_data = None  # type: Optional[Dict[str, str]]
-        self.proposal = None  # type: Optional[Description]
+from packages.fetchai.skills.generic_seller.dialogues import (
+    DefaultDialogues as GenericDefaultDialogues,
+)
+from packages.fetchai.skills.generic_seller.dialogues import (
+    FipaDialogues as GenericFipaDialogues,
+)
+from packages.fetchai.skills.generic_seller.dialogues import (
+    LedgerApiDialogues as GenericLedgerApiDialogues,
+)
+from packages.fetchai.skills.generic_seller.dialogues import (
+    OefSearchDialogues as GenericOefSearchDialogues,
+)
 
 
-class Dialogues(Model, FipaDialogues):
-    """The dialogues class keeps track of all dialogues."""
-
-    def __init__(self, **kwargs) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
-        Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self, self.context.agent_address)
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming or outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: the agent's role
-        """
-        return FipaDialogue.Role.SELLER
-
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> Dialogue:
-        """
-        Create an instance of dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = Dialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
-        return dialogue
+DefaultDialogues = GenericDefaultDialogues
+FipaDialogues = GenericFipaDialogues
+LedgerApiDialogues = GenericLedgerApiDialogues
+OefSearchDialogues = GenericOefSearchDialogues

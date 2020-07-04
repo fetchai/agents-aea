@@ -284,7 +284,7 @@ def __init__(
 
 The `fetchai/fipa:0.4.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.4.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.4.0` protocol check out the <a href="../generic-skills-step-by-step" target=_blank> generic skills step by step guide</a>.
 
 
 ### Fipa dialogue
@@ -361,7 +361,7 @@ class BuyerDialogues(FipaDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return FipaDialogue.AgentRole.BUYER
+        return FipaDialogue.Role.BUYER
 
 
 class SellerDialogue(FipaDialogue):
@@ -422,7 +422,7 @@ class SellerDialogues(FipaDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return FipaDialogue.AgentRole.SELLER
+        return FipaDialogue.Role.SELLER
 ```
 
 Next, we can immitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:

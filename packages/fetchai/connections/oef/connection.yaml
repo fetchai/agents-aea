@@ -7,11 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez
-  connection.py: QmP54XwMNm1HRwRAy95iZTwrEC3rpPAyAxFPAyUYrBMoCg
+  connection.py: QmSs5yhmLJ3c7TbyHCEhqwGpP1yPy53ffpaAroEVSwrigY
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/default:0.3.0
-- fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
 class_name: OEFConnection
 config:

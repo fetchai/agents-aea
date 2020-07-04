@@ -24,8 +24,8 @@ import random
 from enum import Enum
 from typing import Dict, Optional, cast
 
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description, Query
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
@@ -142,7 +142,8 @@ class Strategy(Model):
         )
         return desc
 
-    def _supplied_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
+    @staticmethod
+    def _supplied_goods(good_holdings: Dict[str, int]) -> Dict[str, int]:
         """
         Generate a dictionary of quantities which are supplied.
 
@@ -154,7 +155,8 @@ class Strategy(Model):
             supply[good_id] = quantity - 1 if quantity > 1 else 0
         return supply
 
-    def _demanded_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
+    @staticmethod
+    def _demanded_goods(good_holdings: Dict[str, int]) -> Dict[str, int]:
         """
         Generate a dictionary of quantities which are demanded.
 
@@ -330,7 +332,7 @@ class Strategy(Model):
         return proposals
 
     def is_profitable_transaction(
-        self, transaction_msg: TransactionMessage, role: Dialogue.Role
+        self, transaction_msg: SigningMessage, role: Dialogue.Role
     ) -> bool:
         """
         Check if a transaction is profitable.
@@ -351,7 +353,9 @@ class Strategy(Model):
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
         )
-        if not ownership_state_after_locks.is_affordable_transaction(transaction_msg):
+        if not ownership_state_after_locks.is_affordable_transaction(
+            transaction_msg.terms
+        ):
             return False
         proposal_delta_score = self.context.decision_maker_handler_context.preferences.utility_diff_from_transaction(
             ownership_state_after_locks, transaction_msg

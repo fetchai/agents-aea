@@ -771,6 +771,18 @@ class Dialogues(ABC):
 
         return result
 
+    def get_dialogue_from_label(
+        self, dialogue_label: DialogueLabel
+    ) -> Optional[Dialogue]:
+        """
+        Retrieve a dialogue based on its label.
+
+        :param dialogue_label: the dialogue label
+        :return: the dialogue if present
+        """
+        result = self.dialogues.get(dialogue_label, None)
+        return result
+
     def _create_self_initiated(
         self, dialogue_opponent_addr: Address, role: Dialogue.Role,
     ) -> Dialogue:

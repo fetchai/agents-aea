@@ -6,13 +6,13 @@ license: Apache-2.0
 aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmZjPpSukWHJd4FZdxZgVSHzLpMQDEdXgJVTEzNfjbtiQX
+  behaviours.py: QmcpfaPDwPCUvcj8N1QSMcrHoupbccW5t7F3rnP25JK2ds
   dialogues.py: Qmbemx2zQTjGWyZJ5AvM4ojLfUG5oMm3n5nmLwLgw6DFUT
-  handlers.py: QmZVi3EQiuQPYRqZLfZK5DGvzJciqPgN1p26Z4TdUkh3aj
+  handlers.py: QmYbNro2HppF3YZcU7AAwXr9Bv2cvxZ4GU4ehn91wqjvV4
   strategy.py: Qme3Ck9KfWPWXRhV1GvHfYL65VapShETK8jyJqs3a2HBR5
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.5.0
+- fetchai/erc1155:0.6.0
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0

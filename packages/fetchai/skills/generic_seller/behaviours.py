@@ -24,14 +24,20 @@ from typing import Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.generic_seller.strategy import Strategy
+from packages.fetchai.skills.generic_seller.dialogues import (
+    LedgerApiDialogues,
+    OefSearchDialogues,
+)
+from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 30.0
+LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
 
 
-class ServiceRegistrationBehaviour(TickerBehaviour):
+class GenericServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
     def __init__(self, **kwargs):
@@ -48,25 +54,20 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.token_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
+        strategy = cast(GenericStrategy, self.context.strategy)
+        if strategy.is_ledger_tx:
+            ledger_api_dialogues = cast(
+                LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            if balance > 0:
-                self.context.logger.info(
-                    "[{}]: starting balance on {} ledger={}.".format(
-                        self.context.agent_name, strategy.ledger_id, balance
-                    )
-                )
-            else:
-                self.context.logger.warning(
-                    "[{}]: you have no starting balance on {} ledger!".format(
-                        self.context.agent_name, strategy.ledger_id
-                    )
-                )
-
+            ledger_api_msg = LedgerApiMessage(
+                performative=LedgerApiMessage.Performative.GET_BALANCE,
+                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
+                ledger_id=strategy.ledger_id,
+                address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
+            )
+            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+            ledger_api_dialogues.update(ledger_api_msg)
+            self.context.outbox.put_message(message=ledger_api_msg)
         self._register_service()
 
     def act(self) -> None:
@@ -84,18 +85,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
-            balance = self.context.ledger_apis.token_balance(
-                strategy.ledger_id,
-                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-            )
-            self.context.logger.info(
-                "[{}]: ending balance on {} ledger={}.".format(
-                    self.context.agent_name, strategy.ledger_id, balance
-                )
-            )
-
         self._unregister_service()
 
     def _register_service(self) -> None:
@@ -104,19 +93,22 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        desc = strategy.get_service_description()
-        self._registered_service_description = desc
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=(str(oef_msg_id), ""),
-            service_description=desc,
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_service_description()
+        self._registered_service_description = description
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
-        msg.counterparty = self.context.search_service_address
-        self.context.outbox.put_message(message=msg)
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
-            "[{}]: updating generic seller services on OEF service directory.".format(
+            "[{}]: updating services on OEF service directory.".format(
                 self.context.agent_name
             )
         )
@@ -127,19 +119,22 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self._registered_service_description is not None:
-            strategy = cast(Strategy, self.context.strategy)
-            oef_msg_id = strategy.get_next_oef_msg_id()
-            msg = OefSearchMessage(
-                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                dialogue_reference=(str(oef_msg_id), ""),
-                service_description=self._registered_service_description,
+        if self._registered_service_description is None:
+            return
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=self._registered_service_description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info(
+            "[{}]: unregistering services from OEF service directory.".format(
+                self.context.agent_name
             )
-            msg.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=msg)
-            self.context.logger.info(
-                "[{}]: unregistering generic seller services from OEF service directory.".format(
-                    self.context.agent_name
-                )
-            )
-            self._registered_service_description = None
+        )
+        self._registered_service_description = None

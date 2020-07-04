@@ -29,12 +29,15 @@ from jsonschema import Draft4Validator
 
 import pytest
 
+from aea.cli import cli
 from aea.configurations.loader import make_jsonschema_base_uri
+from aea.test_tools.click_testing import CliRunner
 
 from tests.common.pexpect_popen import PexpectWrapper
 
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
+    CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     tcpping,
 )
@@ -47,6 +50,7 @@ class TestGui:
 
     def setup(self):
         """Set the test up."""
+        self.runner = CliRunner()
         self.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
         self.resolver = jsonschema.RefResolver(
             make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
@@ -58,6 +62,11 @@ class TestGui:
         self.cwd = os.getcwd()
         self.t = tempfile.mkdtemp()
         os.chdir(self.t)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", "test_author"],
+        )
+
+        assert result.exit_code == 0
 
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""

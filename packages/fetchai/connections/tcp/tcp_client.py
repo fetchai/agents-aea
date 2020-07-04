@@ -22,7 +22,11 @@
 import asyncio
 import logging
 import struct
-from asyncio import CancelledError, StreamReader, StreamWriter
+from asyncio import (  # pylint: disable=unused-import
+    CancelledError,
+    StreamReader,
+    StreamWriter,
+)
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig

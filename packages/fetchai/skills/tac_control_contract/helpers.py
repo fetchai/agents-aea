@@ -46,14 +46,14 @@ def generate_good_id_to_name(good_ids: List[int]) -> Dict[str, str]:
     return good_id_to_name
 
 
-def generate_good_ids(nb_goods: int, contract: ERC1155Contract) -> List[int]:
+def generate_good_ids(nb_goods: int) -> List[int]:
     """
     Generate ids for things.
 
     :param nb_goods: the number of things.
     :param contract: the instance of the contract
     """
-    good_ids = contract.create_token_ids(FT_ID, nb_goods)
+    good_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_goods)
     assert len(good_ids) == nb_goods
     return good_ids
 
@@ -72,14 +72,14 @@ def generate_currency_id_to_name(currency_ids: List[int]) -> Dict[str, str]:
     return currency_id_to_name
 
 
-def generate_currency_ids(nb_currencies: int, contract: ERC1155Contract) -> List[int]:
+def generate_currency_ids(nb_currencies: int) -> List[int]:
     """
     Generate currency ids.
 
     :param nb_currencies: the number of currencies.
     :param contract: the instance of the contract.
     """
-    currency_ids = contract.create_token_ids(FT_ID, nb_currencies)
+    currency_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_currencies)
     assert len(currency_ids) == nb_currencies
     return currency_ids
 

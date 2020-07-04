@@ -25,7 +25,6 @@ from typing import Any, Dict, Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import ConnectionStatus
-from aea.crypto.ledger_apis import LedgerApis
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.multiplexer import OutBox
@@ -38,7 +37,6 @@ class AgentContext:
     def __init__(
         self,
         identity: Identity,
-        ledger_apis: LedgerApis,
         connection_status: ConnectionStatus,
         outbox: OutBox,
         decision_maker_message_queue: Queue,
@@ -53,7 +51,6 @@ class AgentContext:
         Initialize an agent context.
 
         :param identity: the identity object
-        :param ledger_apis: the APIs the agent will use to connect to ledgers.
         :param connection_status: the connection status of the multiplexer
         :param outbox: the outbox
         :param decision_maker_message_queue: the (in) queue of the decision maker
@@ -63,7 +60,6 @@ class AgentContext:
         """
         self._shared_state = {}  # type: Dict[str, Any]
         self._identity = identity
-        self._ledger_apis = ledger_apis
         self._connection_status = connection_status
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
@@ -124,11 +120,6 @@ class AgentContext:
     def decision_maker_handler_context(self) -> SimpleNamespace:
         """Get the decision maker handler context."""
         return self._decision_maker_handler_context
-
-    @property
-    def ledger_apis(self) -> LedgerApis:
-        """Get the ledger APIs."""
-        return self._ledger_apis
 
     @property
     def task_manager(self) -> TaskManager:

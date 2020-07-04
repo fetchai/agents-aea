@@ -26,14 +26,11 @@ from typing import Deque, Dict, Tuple
 
 from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
-from aea.decision_maker.messages.transaction import (
-    OFF_CHAIN,
-    TransactionId,
-    TransactionMessage,
-)
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
+from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
@@ -53,32 +50,32 @@ class Transactions(Model):
         super().__init__(**kwargs)
         self._pending_proposals = defaultdict(
             lambda: {}
-        )  # type: Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]
+        )  # type: Dict[DialogueLabel, Dict[MessageId, SigningMessage]]
         self._pending_initial_acceptances = defaultdict(
             lambda: {}
-        )  # type: Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]
+        )  # type: Dict[DialogueLabel, Dict[MessageId, SigningMessage]]
 
-        self._locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
-        self._locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]
-        self._locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
+        self._locked_txs = {}  # type: Dict[str, SigningMessage]
+        self._locked_txs_as_buyer = {}  # type: Dict[str, SigningMessage]
+        self._locked_txs_as_seller = {}  # type: Dict[str, SigningMessage]
 
         self._last_update_for_transactions = (
             deque()
-        )  # type: Deque[Tuple[datetime.datetime, TransactionId]]
+        )  # type: Deque[Tuple[datetime.datetime, str]]
         self._tx_nonce = 0
         self._tx_id = 0
 
     @property
     def pending_proposals(
         self,
-    ) -> Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]:
+    ) -> Dict[DialogueLabel, Dict[MessageId, SigningMessage]]:
         """Get the pending proposals."""
         return self._pending_proposals
 
     @property
     def pending_initial_acceptances(
         self,
-    ) -> Dict[DialogueLabel, Dict[MessageId, TransactionMessage]]:
+    ) -> Dict[DialogueLabel, Dict[MessageId, SigningMessage]]:
         """Get the pending initial acceptances."""
         return self._pending_initial_acceptances
 
@@ -87,19 +84,19 @@ class Transactions(Model):
         self._tx_nonce += 1
         return self._tx_nonce
 
-    def get_internal_tx_id(self) -> TransactionId:
+    def get_internal_tx_id(self) -> str:
         """Get an id for internal reference of the tx."""
         self._tx_id += 1
         return str(self._tx_id)
 
-    def generate_transaction_message(
+    def generate_transaction_message(  # pylint: disable=no-self-use
         self,
-        performative: TransactionMessage.Performative,
+        performative: SigningMessage.Performative,
         proposal_description: Description,
         dialogue_label: DialogueLabel,
         role: Dialogue.Role,
         agent_addr: Address,
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Generate the transaction message from the description and the dialogue.
 
@@ -111,18 +108,18 @@ class Transactions(Model):
         """
         is_seller = role == Dialogue.Role.SELLER
 
-        sender_tx_fee = (
-            proposal_description.values["seller_tx_fee"]
-            if is_seller
-            else proposal_description.values["buyer_tx_fee"]
-        )
-        counterparty_tx_fee = (
-            proposal_description.values["buyer_tx_fee"]
-            if is_seller
-            else proposal_description.values["seller_tx_fee"]
-        )
+        # sender_tx_fee = (
+        #     proposal_description.values["seller_tx_fee"]
+        #     if is_seller
+        #     else proposal_description.values["buyer_tx_fee"]
+        # )
+        # counterparty_tx_fee = (
+        #     proposal_description.values["buyer_tx_fee"]
+        #     if is_seller
+        #     else proposal_description.values["seller_tx_fee"]
+        # )
         goods_component = copy.copy(proposal_description.values)
-        [
+        [  # pylint: disable=expression-not-assigned
             goods_component.pop(key)
             for key in [
                 "seller_tx_fee",
@@ -142,6 +139,7 @@ class Transactions(Model):
             for good_id in goods_component.keys():
                 goods_component[good_id] = goods_component[good_id] * (-1)
         tx_amount_by_currency_id = {proposal_description.values["currency_id"]: amount}
+        tx_fee_by_currency_id = {proposal_description.values["currency_id"]: 1}
         tx_nonce = proposal_description.values["tx_nonce"]
         # need to hash positive.negative side separately
         tx_hash = tx_hash_from_values(
@@ -152,23 +150,26 @@ class Transactions(Model):
             tx_nonce=tx_nonce,
         )
         skill_callback_ids = (
-            [PublicId.from_str("fetchai/tac_participation:0.4.0")]
-            if performative == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT
-            else [PublicId.from_str("fetchai/tac_negotiation:0.4.0")]
+            (PublicId.from_str("fetchai/tac_participation:0.4.0"),)
+            if performative == SigningMessage.Performative.SIGN_MESSAGE
+            else (PublicId.from_str("fetchai/tac_negotiation:0.4.0"),)
         )
-        transaction_msg = TransactionMessage(
+        transaction_msg = SigningMessage(
             performative=performative,
             skill_callback_ids=skill_callback_ids,
-            tx_id=self.get_internal_tx_id(),
-            tx_sender_addr=agent_addr,
-            tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
-            tx_amount_by_currency_id=tx_amount_by_currency_id,
-            tx_sender_fee=sender_tx_fee,
-            tx_counterparty_fee=counterparty_tx_fee,
-            tx_quantities_by_good_id=goods_component,
-            ledger_id=OFF_CHAIN,
-            info={"dialogue_label": dialogue_label.json, "tx_nonce": tx_nonce},
-            signing_payload={"tx_hash": tx_hash},
+            # tx_id=self.get_internal_tx_id(),
+            terms=Terms(
+                ledger_id="ethereum",
+                sender_address=agent_addr,
+                counterparty_address=dialogue_label.dialogue_opponent_addr,
+                amount_by_currency_id=tx_amount_by_currency_id,
+                is_sender_payable_tx_fee=True,  # TODO: check!
+                quantities_by_good_id=goods_component,
+                nonce=tx_nonce,
+                fee_by_currency_id=tx_fee_by_currency_id,
+            ),
+            skill_callback_info={"dialogue_label": dialogue_label.json},
+            message=tx_hash,
         )
         return transaction_msg
 
@@ -213,7 +214,7 @@ class Transactions(Model):
         self,
         dialogue_label: DialogueLabel,
         proposal_id: int,
-        transaction_msg: TransactionMessage,
+        transaction_msg: SigningMessage,
     ) -> None:
         """
         Add a proposal (in the form of a transaction) to the pending list.
@@ -233,7 +234,7 @@ class Transactions(Model):
 
     def pop_pending_proposal(
         self, dialogue_label: DialogueLabel, proposal_id: int
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Remove a proposal (in the form of a transaction) from the pending list.
 
@@ -254,7 +255,7 @@ class Transactions(Model):
         self,
         dialogue_label: DialogueLabel,
         proposal_id: int,
-        transaction_msg: TransactionMessage,
+        transaction_msg: SigningMessage,
     ) -> None:
         """
         Add an acceptance (in the form of a transaction) to the pending list.
@@ -274,7 +275,7 @@ class Transactions(Model):
 
     def pop_pending_initial_acceptance(
         self, dialogue_label: DialogueLabel, proposal_id: int
-    ) -> TransactionMessage:
+    ) -> SigningMessage:
         """
         Remove an acceptance (in the form of a transaction) from the pending list.
 
@@ -293,7 +294,7 @@ class Transactions(Model):
         )
         return transaction_msg
 
-    def _register_transaction_with_time(self, transaction_id: TransactionId) -> None:
+    def _register_transaction_with_time(self, transaction_id: str) -> None:
         """
         Register a transaction with a creation datetime.
 
@@ -305,7 +306,7 @@ class Transactions(Model):
         self._last_update_for_transactions.append((now, transaction_id))
 
     def add_locked_tx(
-        self, transaction_msg: TransactionMessage, role: Dialogue.Role
+        self, transaction_msg: SigningMessage, role: Dialogue.Role
     ) -> None:
         """
         Add a lock (in the form of a transaction).
@@ -318,7 +319,7 @@ class Transactions(Model):
         """
         as_seller = role == Dialogue.Role.SELLER
 
-        transaction_id = transaction_msg.tx_id
+        transaction_id = transaction_msg.dialogue_reference[0]  # TODO: fix
         assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)
         self._locked_txs[transaction_id] = transaction_msg
@@ -327,7 +328,7 @@ class Transactions(Model):
         else:
             self._locked_txs_as_buyer[transaction_id] = transaction_msg
 
-    def pop_locked_tx(self, transaction_msg: TransactionMessage) -> TransactionMessage:
+    def pop_locked_tx(self, transaction_msg: SigningMessage) -> SigningMessage:
         """
         Remove a lock (in the form of a transaction).
 
@@ -336,7 +337,7 @@ class Transactions(Model):
 
         :return: the transaction
         """
-        transaction_id = transaction_msg.tx_id
+        transaction_id = transaction_msg.dialogue_reference[0]  # TODO: fix
         assert transaction_id in self._locked_txs
         transaction_msg = self._locked_txs.pop(transaction_id)
         self._locked_txs_as_buyer.pop(transaction_id, None)

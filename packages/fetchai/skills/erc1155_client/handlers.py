@@ -22,13 +22,12 @@
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_client.dialogues import Dialogue, Dialogues
@@ -128,30 +127,30 @@ class FIPAHandler(Handler):
                     self.context.agent_name, msg.counterparty[-5:], data
                 )
             )
-            contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-            strategy = cast(Strategy, self.context.strategy)
-            contract.set_address(
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                contract_address=data["contract_address"],
-            )
-            tx_msg = contract.get_hash_single_transaction_msg(
-                from_address=msg.counterparty,
-                to_address=self.context.agent_address,
-                token_id=int(data["token_id"]),
-                from_supply=int(data["from_supply"]),
-                to_supply=int(data["to_supply"]),
-                value=int(data["value"]),
-                trade_nonce=int(data["trade_nonce"]),
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
-                skill_callback_id=self.context.skill_id,
-                info={"dialogue_label": dialogue.dialogue_label.json},
-            )
-            self.context.logger.debug(
-                "[{}]: sending transaction to decision maker for signing. tx_msg={}".format(
-                    self.context.agent_name, tx_msg
-                )
-            )
-            self.context.decision_maker_message_queue.put_nowait(tx_msg)
+            # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+            # strategy = cast(Strategy, self.context.strategy)
+            # contract.set_address(
+            #     ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+            #     contract_address=data["contract_address"],
+            # )
+            # tx_msg = contract.get_hash_single_transaction_msg(
+            #     from_address=msg.counterparty,
+            #     to_address=self.context.agent_address,
+            #     token_id=int(data["token_id"]),
+            #     from_supply=int(data["from_supply"]),
+            #     to_supply=int(data["to_supply"]),
+            #     value=int(data["value"]),
+            #     trade_nonce=int(data["trade_nonce"]),
+            #     ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
+            #     skill_callback_id=self.context.skill_id,
+            #     skill_callback_info={"dialogue_label": dialogue.dialogue_label.json},
+            # )
+            # self.context.logger.debug(
+            #     "[{}]: sending transaction to decision maker for signing. tx_msg={}".format(
+            #         self.context.agent_name, tx_msg
+            #     )
+            # )
+            # self.context.decision_maker_message_queue.put_nowait(tx_msg)
         else:
             self.context.logger.info(
                 "[{}]: received invalid PROPOSE from sender={}: proposal={}".format(
@@ -233,10 +232,10 @@ class OEFSearchHandler(Handler):
             )
 
 
-class TransactionHandler(Handler):
+class SigningHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -249,18 +248,21 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
+        signing_msg_response = cast(SigningMessage, message)
         if (
-            tx_msg_response.performative
-            == TransactionMessage.Performative.SUCCESSFUL_SIGNING
-            and (
-                tx_msg_response.tx_id
-                == ERC1155Contract.Performative.CONTRACT_SIGN_HASH_SINGLE.value
-            )
+            signing_msg_response.performative
+            == SigningMessage.Performative.SIGNED_TRANSACTION
+            # and (
+            #     signing_msg_response.dialogue_reference[0]
+            #     == ERC1155Contract.Performative.CONTRACT_SIGN_HASH_SINGLE.value
+            # )
         ):
-            tx_signature = tx_msg_response.signed_payload.get("tx_signature")
+            tx_signature = signing_msg_response.signed_transaction
             dialogue_label = DialogueLabel.from_json(
-                cast(Dict[str, str], tx_msg_response.info.get("dialogue_label"))
+                cast(
+                    Dict[str, str],
+                    signing_msg_response.skill_callback_info.get("dialogue_label"),
+                )
             )
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
@@ -284,8 +286,8 @@ class TransactionHandler(Handler):
             self.context.outbox.put_message(message=inform_msg)
         else:
             self.context.logger.info(
-                "[{}]: signing failed: tx_msg_response={}".format(
-                    self.context.agent_name, tx_msg_response
+                "[{}]: signing failed: signing_msg_response={}".format(
+                    self.context.agent_name, signing_msg_response
                 )
             )
 
