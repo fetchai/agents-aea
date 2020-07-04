@@ -152,7 +152,7 @@ def ipfs_hashing(
     #      use ignore patterns somehow
     # ignore_patterns = configuration.fingerprint_ignore_patterns]
     assert configuration.directory is not None
-    result_list = client.add(configuration.directory, only_hash=True)
+    result_list = client.add(configuration.directory)
     key = os.path.join(
         configuration.author, package_type.to_plural(), configuration.directory.name,
     )
