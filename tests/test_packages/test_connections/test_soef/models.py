@@ -16,21 +16,22 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains models for soef connection tests."""
 
 from aea.helpers.search.models import Attribute, DataModel, Location
 
+from packages.fetchai.connections.soef.connection import ModelNames
+
 
 AGENT_LOCATION_MODEL = DataModel(
-    "location_agent",
+    ModelNames.location_agent,
     [Attribute("location", Location, True, "The location where the agent is.")],
     "A data model to describe location of an agent.",
 )
 
 
 AGENT_PERSONALITY_MODEL = DataModel(
-    "personality_agent",
+    ModelNames.personality_agent,
     [
         Attribute("piece", str, True, "The personality piece key."),
         Attribute("value", str, True, "The personality piece value."),
@@ -40,7 +41,7 @@ AGENT_PERSONALITY_MODEL = DataModel(
 
 
 SET_SERVICE_KEY_MODEL = DataModel(
-    "set_service_key",
+    ModelNames.set_service_key,
     [
         Attribute("key", str, True, "Service key name."),
         Attribute("value", str, True, "Service key value."),
@@ -50,14 +51,14 @@ SET_SERVICE_KEY_MODEL = DataModel(
 
 
 REMOVE_SERVICE_KEY_MODEL = DataModel(
-    "remove_service_key",
+    ModelNames.remove_service_key,
     [Attribute("key", str, True, "Service key name.")],
     "A data model to remove service key.",
 )
 
 
 SEARCH_MODEL = DataModel(
-    "search_model",
+    ModelNames.search_model,
     [Attribute("location", Location, True, "The location where the agent is.")],
     "A data model to perform search.",
 )

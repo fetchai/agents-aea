@@ -58,7 +58,7 @@ PUBLIC_ID = PublicId.from_str("fetchai/soef:0.3.0")
 
 NOT_SPECIFIED = object()
 
-PERSONALITY_PIECES = [
+PERSONALITY_PIECES_KEYS = [
     "genus",
     "classification",
     "architecture",
@@ -68,6 +68,16 @@ PERSONALITY_PIECES = [
     "action.buyer",
     "action.seller",
 ]
+
+
+class ModelNames:
+    """Enum of supported data models."""
+
+    location_agent = "location_agent"
+    set_service_key = "set_service_key"
+    remove_service_key = "remove_service_key"
+    personality_agent = "personality_agent"
+    search_model = "search_model"
 
 
 class SOEFException(Exception):
@@ -107,6 +117,8 @@ class SOEFChannel:
         "ethereum",
     ]
 
+    DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
+
     def __init__(
         self,
         address: Address,
@@ -132,7 +144,9 @@ class SOEFChannel:
             chain_identifier is not None
             and chain_identifier not in self.SUPPORTED_CHAIN_IDENTIFIERS
         ):
-            raise ValueError("Unsupported chain_identifier")
+            raise ValueError(
+                f"Unsupported chain_identifier. Valida are {', '.join(self.SUPPORTED_CHAIN_IDENTIFIERS)}"
+            )
 
         self.address = address
         self.api_key = api_key
@@ -155,6 +169,8 @@ class SOEFChannel:
         """
         Check if a query is compatible with the soef.
 
+        Each query must contain a distance constraint type.
+
         :param query: search query to check
         :return: bool
         """
@@ -169,9 +185,8 @@ class SOEFChannel:
 
         return True
 
-    @staticmethod
     def _construct_personality_filter_params(
-        equality_constraints: List[Constraint],
+        self, equality_constraints: List[Constraint],
     ) -> Dict[str, List[str]]:
         """
         Construct a dictionary of personality filters.
@@ -179,10 +194,10 @@ class SOEFChannel:
         :param equality_constraints: list of equality constraints
         :return: bool
         """
-        filters = []
+        filters = self.DEFAULT_PERSONALITY_PIECES
 
         for constraint in equality_constraints:
-            if constraint.attribute_name not in PERSONALITY_PIECES:
+            if constraint.attribute_name not in PERSONALITY_PIECES_KEYS:
                 continue
             filters.append(
                 constraint.attribute_name + "," + constraint.constraint_type.value
@@ -198,13 +213,16 @@ class SOEFChannel:
         """
         Construct a dictionary of service keys filters.
 
+        We assume each equality constraint which is not a personality piece relates to a service key!
+
         :param equality_constraints: list of equality constraints
+
         :return: bool
         """
         filters = []
 
         for constraint in equality_constraints:
-            if constraint.attribute_name in PERSONALITY_PIECES:
+            if constraint.attribute_name in PERSONALITY_PIECES_KEYS:
                 continue
             filters.append(
                 constraint.attribute_name + "," + constraint.constraint_type.value
@@ -260,19 +278,16 @@ class SOEFChannel:
         :param envelope: the envelope.
         :return: None
         """
+        assert isinstance(envelope.message, OefSearchMessage), ValueError(
+            "Message not of type OefSearchMessage"
+        )
+        oef_message = cast(OefSearchMessage, envelope.message)
         err_ops = OefSearchMessage.OefErrorOperation
-
         oef_error_operation = err_ops.OTHER
 
         try:
             if self.unique_page_address is None:  # pragma: nocover
                 await self._register_agent()
-
-            assert isinstance(envelope.message, OefSearchMessage), ValueError(
-                "Message not of type OefSearchMessage"
-            )
-
-            oef_message = cast(OefSearchMessage, envelope.message)
 
             handlers_and_errors = {
                 OefSearchMessage.Performative.REGISTER_SERVICE: (
@@ -312,7 +327,7 @@ class SOEFChannel:
 
         data_model_handlers = {
             "location_agent": self._register_location_handler,
-            "personality_agent": self._register_personality_piece_handler,
+            "personality_agent": self._set_personality_piece_handler,
             "set_service_key": self._set_service_key_handler,
             "remove_service_key": self._remove_service_key_handler,
         }
@@ -333,7 +348,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._sure_data_model(service_description, "set_service_key")
+        self._check_data_model(service_description, ModelNames.set_service_key)
 
         key = service_description.values.get("key", None)
         value = service_description.values.get("value", NOT_SPECIFIED)
@@ -391,7 +406,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._sure_data_model(service_description, "remove_service_key")
+        self._check_data_model(service_description, ModelNames.remove_service_key)
         key = service_description.values.get("key", None)
 
         if key is None:  # pragma: nocover
@@ -417,7 +432,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._sure_data_model(service_description, "location_agent")
+        self._check_data_model(service_description, ModelNames.location_agent)
 
         agent_location = service_description.values.get("location", None)
         if agent_location is None or not isinstance(
@@ -426,7 +441,7 @@ class SOEFChannel:
             raise SOEFException.debug("Bad location provided.")
         await self._set_location(agent_location)
 
-    def _sure_data_model(
+    def _check_data_model(
         self, service_description: Description, data_model_name: str
     ) -> None:
         """
@@ -458,7 +473,7 @@ class SOEFChannel:
         await self._generic_oef_command("set_position", params)
         self.agent_location = agent_location
 
-    async def _register_personality_piece_handler(
+    async def _set_personality_piece_handler(
         self, service_description: Description
     ) -> None:
         """
@@ -467,7 +482,7 @@ class SOEFChannel:
         :param piece: the piece to be set
         :param value: the value to be set
         """
-        self._sure_data_model(service_description, "personality_agent")
+        self._check_data_model(service_description, ModelNames.personality_agent)
         piece = service_description.values.get("piece", None)
         value = service_description.values.get("value", None)
 
