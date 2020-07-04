@@ -142,7 +142,8 @@ class Strategy(Model):
         )
         return desc
 
-    def _supplied_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
+    @staticmethod
+    def _supplied_goods(good_holdings: Dict[str, int]) -> Dict[str, int]:
         """
         Generate a dictionary of quantities which are supplied.
 
@@ -154,7 +155,8 @@ class Strategy(Model):
             supply[good_id] = quantity - 1 if quantity > 1 else 0
         return supply
 
-    def _demanded_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
+    @staticmethod
+    def _demanded_goods(good_holdings: Dict[str, int]) -> Dict[str, int]:
         """
         Generate a dictionary of quantities which are demanded.
 

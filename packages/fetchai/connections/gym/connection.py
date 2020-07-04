@@ -162,6 +162,7 @@ class GymConnection(Connection):
             gym_env_class = locate(gym_env_package)
             gym_env = gym_env_class()
         self.channel = GymChannel(self.address, gym_env)
+        self._connection = None  # type: Optional[asyncio.Queue]
 
     async def connect(self) -> None:
         """

@@ -273,12 +273,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             dialogue.update(response)
         return response
 
-    def get_error_message(  # type: ignore
-        self,
-        e: Exception,
-        api: LedgerApi,
-        message: LedgerApiMessage,
-        dialogue: LedgerApiDialogue,
+    def get_error_message(
+        self, e: Exception, api: LedgerApi, message: Message, dialogue: BaseDialogue,
     ) -> LedgerApiMessage:
         """
         Build an error message.
@@ -288,6 +284,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :param message: the request message.
         :return: an error message response.
         """
+        message = cast(LedgerApiMessage, message)
+        dialogue = cast(LedgerApiDialogue, dialogue)
         response = LedgerApiMessage(
             performative=LedgerApiMessage.Performative.ERROR,
             message_id=message.message_id + 1,

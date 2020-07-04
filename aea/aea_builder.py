@@ -1380,8 +1380,7 @@ class AEABuilder:
                     f"Skipping registration of contract {configuration.public_id} since already registered."
                 )
                 continue
-            else:
-                logger.debug(f"Registering contract {configuration.public_id}")
+            logger.debug(f"Registering contract {configuration.public_id}")
 
             path = Path(
                 configuration.directory, configuration.path_to_contract_interface

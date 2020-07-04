@@ -130,7 +130,7 @@ def generate_api_docs():
         pydoc = subprocess.Popen(  # nosec
             ["pydoc-markdown", "-m", module, "-I", "."], stdout=subprocess.PIPE
         )
-        stdout, stderr = pydoc.communicate()
+        stdout, _ = pydoc.communicate()
         pydoc.wait()
         stdout_text = stdout.decode("utf-8")
         text = replace_underscores(stdout_text)

@@ -466,7 +466,7 @@ class OEFChannel(OEFAgent):
         dialogue_id: int,
         origin: Address,
         target: int,
-        b_proposals: PROPOSE_TYPES,
+        proposals: PROPOSE_TYPES,
     ) -> None:
         """
         On propose event handler.
@@ -475,7 +475,7 @@ class OEFChannel(OEFAgent):
         :param dialogue_id: the dialogue id.
         :param origin: the address of the sender.
         :param target: the message target.
-        :param b_proposals: the proposals.
+        :param proposals: the proposals.
         :return: None
         """
         assert self.in_queue is not None
@@ -706,6 +706,10 @@ class OEFChannel(OEFAgent):
             self.search_services(self.oef_msg_id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
+
+    def handle_failure(self, exception: Exception, conn) -> None:
+        """Handle failure."""
+        logger.exception(exception)
 
 
 class OEFConnection(Connection):

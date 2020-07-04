@@ -332,7 +332,7 @@ class Behaviour(AbstractBehaviour, ABC):
         :return: None
         """
 
-    def is_done(self) -> bool:
+    def is_done(self) -> bool:  # pylint: disable=no-self-use
         """Return True if the behaviour is terminated, False otherwise."""
         return False
 

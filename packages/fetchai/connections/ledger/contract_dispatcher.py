@@ -105,12 +105,8 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         message = cast(ContractApiMessage, message)
         return message.ledger_id
 
-    def get_error_message(  # type: ignore
-        self,
-        e: Exception,
-        api: LedgerApi,
-        message: ContractApiMessage,
-        dialogue: ContractApiDialogue,
+    def get_error_message(
+        self, e: Exception, api: LedgerApi, message: Message, dialogue: BaseDialogue,
     ) -> ContractApiMessage:
         """
         Build an error message.

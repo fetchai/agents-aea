@@ -13,8 +13,8 @@ fingerprint:
   helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmQe74NHSCcTcpvdH6J2giFKyWodnSxCXK9sdCKydTRVL5
-  transactions.py: QmSP72gzYj9ZpHQDRd4HvrQa1Qq3JqRnfX1Db1NFiyw6YZ
+  strategy.py: QmQMSPqS3TZxhQoh6SUA8u2c5BNTxYGV95DSQc4neen6Ja
+  transactions.py: QmZQYmZoknmJ4kfFx4Z5D5uv36ZmC97q4CMnscgLNB3fSq
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0

@@ -178,7 +178,8 @@ class PerformanceReport:
 class ReportPrinter(ContextPrinter):
     """Class to handle output of performance test."""
 
-    def _print_header(self, report: PerformanceReport) -> None:
+    @staticmethod
+    def _print_header(report: PerformanceReport) -> None:
         """
         Print header for performance report.
 
@@ -198,7 +199,8 @@ class ReportPrinter(ContextPrinter):
         )
         print(text)
 
-    def _print_resources(self, report: PerformanceReport) -> None:
+    @staticmethod
+    def _print_resources(report: PerformanceReport) -> None:
         """
         Print resources details for performance report.
 

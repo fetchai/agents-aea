@@ -89,7 +89,7 @@ class Transactions(Model):
         self._tx_id += 1
         return str(self._tx_id)
 
-    def generate_transaction_message(
+    def generate_transaction_message(  # pylint: disable=no-self-use
         self,
         performative: SigningMessage.Performative,
         proposal_description: Description,
@@ -119,7 +119,7 @@ class Transactions(Model):
         #     else proposal_description.values["seller_tx_fee"]
         # )
         goods_component = copy.copy(proposal_description.values)
-        [
+        [  # pylint: disable=expression-not-assigned
             goods_component.pop(key)
             for key in [
                 "seller_tx_fee",

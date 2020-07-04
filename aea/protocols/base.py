@@ -168,7 +168,7 @@ class Message:
         """Check value is set for key."""
         return key in self._body
 
-    def _is_consistent(self) -> bool:
+    def _is_consistent(self) -> bool:  # pylint: disable=no-self-use
         """Check that the data is consistent."""
         return True
 

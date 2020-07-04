@@ -138,7 +138,7 @@ class LedgerConnection(Connection):
             self.event_new_receiving_task.clear()
 
         # wait for completion of at least one receiving task
-        done, pending = await asyncio.wait(
+        done, _ = await asyncio.wait(
             self.receiving_tasks, return_when=asyncio.FIRST_COMPLETED
         )
 

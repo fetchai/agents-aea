@@ -26,8 +26,9 @@ from typing import Any, Callable, Dict, Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import ConnectionStatus
+from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry, ledger_apis_registry
-from aea.helpers.dialogue.base import Dialogues
+from aea.helpers.dialogue.base import Dialogue, Dialogues
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
@@ -111,11 +112,16 @@ class RequestDispatcher(ABC):
         return handler
 
     @abstractmethod
-    def get_error_message(self, *args) -> Message:
+    def get_error_message(
+        self, e: Exception, api: LedgerApi, message: Message, dialogue: Dialogue,
+    ) -> Message:
         """
         Build an error message.
 
-        :param args: positional arguments.
+        :param e: the exception
+        :param api: the ledger api
+        :param message: the received message.
+        :param dialogue: the dialogue.
         :return: an error message response.
         """
 

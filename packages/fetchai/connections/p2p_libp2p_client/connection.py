@@ -136,7 +136,7 @@ class P2PLibp2pClientConnection(Connection):
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._in_queue = None  # type: Optional[asyncio.Queue]
-        self._process_message_task = None  # type: Union[asyncio.Future, None]
+        self._process_messages_task = None  # type: Union[asyncio.Future, None]
 
     async def connect(self) -> None:
         """

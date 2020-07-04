@@ -262,7 +262,8 @@ class AbstractMultipleExecutor(ABC):
     def _set_executor_pool(self) -> None:
         """Set executor pool to be used."""
 
-    def _stop_task(self, task: AbstractExecutorTask) -> None:
+    @staticmethod
+    def _stop_task(task: AbstractExecutorTask) -> None:
         """
         Stop particular task.
 
@@ -376,7 +377,6 @@ class AbstractMultipleRunner:
         :param threaded: run in dedicated thread without blocking current thread.
         :return: None
         """
-        self._is_running = True
         if threaded:
             self._thread = Thread(target=self._executor.start, daemon=True)
             self._thread.start()
@@ -390,7 +390,6 @@ class AbstractMultipleRunner:
         :param timeout: timeout in seconds to wait thread stopped, only if started in thread mode.
         :return: None
         """
-        self._is_running = False
         self._executor.stop()
 
         if self._thread is not None:

@@ -508,7 +508,7 @@ class ConstraintExpr(ABC):
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
         """
 
-    def check_validity(self) -> None:
+    def check_validity(self) -> None:  # pylint: disable=no-self-use
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 

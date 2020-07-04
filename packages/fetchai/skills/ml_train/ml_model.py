@@ -74,7 +74,8 @@ class MLModel(Model):
                 self.context.logger.info("Loss: {}, Acc: {}".format(loss, acc))
                 self._set_weights(model.get_weights())
 
-    def _make_model(self):
+    @staticmethod
+    def _make_model():
         """Make the model."""
         model = keras.Sequential(
             [

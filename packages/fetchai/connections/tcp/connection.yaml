@@ -7,9 +7,9 @@ aea_version: '>=0.4.0, <0.5.0'
 fingerprint:
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
   base.py: QmQhr6wYYc79LvdBWwKUqTwn1Qwr8KyQEWTz9uZxzuBGpE
-  connection.py: QmcG4q5Hg55aXRPiYi6zXAPDCJGchj7xUMxUHoYRS6G1J5
+  connection.py: QmP5Hei7U1iqcHqFDLzS1sKu6jcsBKvEi3udQussrePN3X
   tcp_client.py: QmRmdmUMs5dE222DePzn2cFwzfhN6teNsBP6YckEmrbppV
-  tcp_server.py: QmbS6JppnnKFjrVLisJWS3qQ2475tSukauMEBek9ZwtNX9
+  tcp_server.py: QmY7TRJnBiut6BJqpgYuwQvjHRG3xLePjxKDw7ffzr16Vc
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: TCPClientConnection
