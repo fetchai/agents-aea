@@ -17,15 +17,6 @@ Lock file in context manager.
 
 - `file_descriptor`: file descriptio of file to lock.
 
-<a name=".aea.connections.stub.connection.read_envelopes"></a>
-#### read`_`envelopes
-
-```python
-read_envelopes(file_pointer: IO[bytes]) -> List[Envelope]
-```
-
-Receive new envelopes, if any.
-
 <a name=".aea.connections.stub.connection.write_envelope"></a>
 #### write`_`envelope
 
@@ -48,10 +39,10 @@ Initialize a stub connection.
 #### read`_`envelopes
 
 ```python
- | read_envelopes() -> None
+ | async read_envelopes() -> None
 ```
 
-Receive new envelopes, if any.
+Read envelopes from inptut file, decode and put into in_queue.
 
 <a name=".aea.connections.stub.connection.StubConnection.receive"></a>
 #### receive
@@ -86,7 +77,7 @@ In this type of connection there's no channel to disconnect.
 #### send
 
 ```python
- | async send(envelope: Envelope)
+ | async send(envelope: Envelope) -> None
 ```
 
 Send messages.

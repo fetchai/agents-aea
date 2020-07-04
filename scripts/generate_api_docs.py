@@ -79,7 +79,6 @@ MODULES_TO_PATH = {
     "aea.protocols.signing.custom_types": "api/protocols/signing/custom_types.md",
     "aea.protocols.signing.message": "api/protocols/signing/message.md",
     "aea.protocols.signing.serialization": "api/protocols/signing/serialization.md",
-    "aea.protocols.state_update.custom_types": "api/protocols/state_update/custom_types.md",
     "aea.protocols.state_update.message": "api/protocols/state_update/message.md",
     "aea.protocols.state_update.serialization": "api/protocols/state_update/serialization.md",
     "aea.registries.base": "api/registries/base.md",

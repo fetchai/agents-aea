@@ -12,6 +12,24 @@ class Message()
 
 This class implements a message.
 
+<a name=".aea.protocols.base.Message.Performative"></a>
+## Performative Objects
+
+```python
+class Performative(Enum)
+```
+
+Performatives for the base message.
+
+<a name=".aea.protocols.base.Message.Performative.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation.
+
 <a name=".aea.protocols.base.Message.__init__"></a>
 #### `__`init`__`
 
@@ -89,7 +107,7 @@ Get the message_id of the message.
 
 ```python
  | @property
- | performative() -> Enum
+ | performative() -> "Performative"
 ```
 
 Get the performative of the message.

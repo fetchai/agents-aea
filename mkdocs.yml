@@ -125,8 +125,9 @@ nav:
           - Fetchai: 'api/crypto/fetchai.md'
           - Helpers: 'api/crypto/helpers.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
-          - Registry: 'api/crypto/registry.md'
           - Wallet: 'api/crypto/wallet.md'
+          - Registries:
+            - Base: 'api/crypto/registries/base.md'
         - Decision Maker:
           - Base: 'api/decision_maker/base.md'
           - Default: 'api/decision_maker/default.md'
@@ -144,12 +145,15 @@ nav:
           - Exec Timeout: 'api/helpers/exec_timeout.md'
           - IPFS:
             - Base: 'api/helpers/ipfs/base.md'
+          - MultipleExecutor: 'api/helpers/multiple_executor.md'
           - Preferences:
             - Base: 'api/helpers/preference_representations/base.md'
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
           - Test Cases: 'api/helpers/test_cases.md'
+          - Transaction:
+            - Base: 'api/helpers/transaction/base.md'
         - Identity: 'api/identity/base.md'
         - Mail: 'api/mail/base.md'
         - Protocols:
@@ -159,6 +163,13 @@ nav:
             - Custom Types: 'api/protocols/default/custom_types.md'
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
+          - Signing Protocol:
+            - Custom Types: 'api/protocols/signing/custom_types.md'
+            - Message: 'api/protocols/signing/message.md'
+            - Serialization: 'api/protocols/signing/serialization.md'
+          - State Update Protocol:
+            - Message: 'api/protocols/state_update/message.md'
+            - Serialization: 'api/protocols/state_update/serialization.md'
         - Registries:
           - Base: 'api/registries/base.md'
           - Filter: 'api/registries/filter.md'

@@ -110,25 +110,6 @@ Return the address.
 
 an address string
 
-<a name=".aea.crypto.base.Crypto.get_address_from_public_key"></a>
-#### get`_`address`_`from`_`public`_`key
-
-```python
- | @classmethod
- | @abstractmethod
- | get_address_from_public_key(cls, public_key: str) -> str
-```
-
-Get the address from the public key.
-
-**Arguments**:
-
-- `public_key`: the public key
-
-**Returns**:
-
-str
-
 <a name=".aea.crypto.base.Crypto.sign_message"></a>
 #### sign`_`message
 
@@ -166,26 +147,6 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name=".aea.crypto.base.Crypto.recover_message"></a>
-#### recover`_`message
-
-```python
- | @abstractmethod
- | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
-```
-
-Recover the addresses from the hash.
-
-**Arguments**:
-
-- `message`: the message we expect
-- `signature`: the transaction signature
-- `is_deprecated_mode`: if the deprecated signing was used
-
-**Returns**:
-
-the recovered addresses
-
 <a name=".aea.crypto.base.Crypto.dump"></a>
 #### dump
 
@@ -204,11 +165,122 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
+<a name=".aea.crypto.base.Helper"></a>
+## Helper Objects
+
+```python
+class Helper(ABC)
+```
+
+Interface for helper class usable as Mixin for LedgerApi or as standalone class.
+
+<a name=".aea.crypto.base.Helper.is_transaction_settled"></a>
+#### is`_`transaction`_`settled
+
+```python
+ | @staticmethod
+ | @abstractmethod
+ | is_transaction_settled(tx_receipt: Any) -> bool
+```
+
+Check whether a transaction is settled or not.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+True if the transaction has been settled, False o/w.
+
+<a name=".aea.crypto.base.Helper.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
+
+```python
+ | @staticmethod
+ | @abstractmethod
+ | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+```
+
+Check whether a transaction is valid or not.
+
+**Arguments**:
+
+- `tx`: the transaction.
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+- `tx_nonce`: the transaction nonce.
+- `amount`: the amount we expect to get from the transaction.
+
+**Returns**:
+
+True if the random_message is equals to tx['input']
+
+<a name=".aea.crypto.base.Helper.generate_tx_nonce"></a>
+#### generate`_`tx`_`nonce
+
+```python
+ | @staticmethod
+ | @abstractmethod
+ | generate_tx_nonce(seller: Address, client: Address) -> str
+```
+
+Generate a unique hash to distinguish txs with the same terms.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+
+**Returns**:
+
+return the hash in hex.
+
+<a name=".aea.crypto.base.Helper.get_address_from_public_key"></a>
+#### get`_`address`_`from`_`public`_`key
+
+```python
+ | @staticmethod
+ | @abstractmethod
+ | get_address_from_public_key(public_key: str) -> str
+```
+
+Get the address from the public key.
+
+**Arguments**:
+
+- `public_key`: the public key
+
+**Returns**:
+
+str
+
+<a name=".aea.crypto.base.Helper.recover_message"></a>
+#### recover`_`message
+
+```python
+ | @staticmethod
+ | @abstractmethod
+ | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+```
+
+Recover the addresses from the hash.
+
+**Arguments**:
+
+- `message`: the message we expect
+- `signature`: the transaction signature
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered addresses
+
 <a name=".aea.crypto.base.LedgerApi"></a>
 ## LedgerApi Objects
 
 ```python
-class LedgerApi(ABC)
+class LedgerApi(Helper,  ABC)
 ```
 
 Interface for ledger APIs.
@@ -247,22 +319,19 @@ This usually takes the form of a web request to be waited synchronously.
 
 the balance.
 
-<a name=".aea.crypto.base.LedgerApi.transfer"></a>
-#### transfer
+<a name=".aea.crypto.base.LedgerApi.get_transfer_transaction"></a>
+#### get`_`transfer`_`transaction
 
 ```python
  | @abstractmethod
- | transfer(crypto: Crypto, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, **kwargs) -> Optional[str]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, **kwargs, ,) -> Optional[Any]
 ```
 
-Submit a transaction to the ledger.
-
-If the mandatory arguments are not enough for specifying a transaction
-in the concrete ledger API, use keyword arguments for the additional parameters.
+Submit a transfer transaction to the ledger.
 
 **Arguments**:
 
-- `crypto`: the crypto object associated to the payer.
+- `sender_address`: the sender address of the payer.
 - `destination_address`: the destination address of the payee.
 - `amount`: the amount of wealth to be transferred.
 - `tx_fee`: the transaction fee.
@@ -270,7 +339,7 @@ in the concrete ledger API, use keyword arguments for the additional parameters.
 
 **Returns**:
 
-tx digest if successful, otherwise None
+the transfer transaction
 
 <a name=".aea.crypto.base.LedgerApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
@@ -288,46 +357,6 @@ Use keyword arguments for the specifying the signed transaction payload.
 
 - `tx_signed`: the signed transaction
 
-<a name=".aea.crypto.base.LedgerApi.is_transaction_settled"></a>
-#### is`_`transaction`_`settled
-
-```python
- | @abstractmethod
- | is_transaction_settled(tx_digest: str) -> bool
-```
-
-Check whether a transaction is settled or not.
-
-**Arguments**:
-
-- `tx_digest`: the digest associated to the transaction.
-
-**Returns**:
-
-True if the transaction has been settled, False o/w.
-
-<a name=".aea.crypto.base.LedgerApi.is_transaction_valid"></a>
-#### is`_`transaction`_`valid
-
-```python
- | @abstractmethod
- | is_transaction_valid(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
-```
-
-Check whether a transaction is valid or not (non-blocking).
-
-**Arguments**:
-
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-- `tx_nonce`: the transaction nonce.
-- `amount`: the amount we expect to get from the transaction.
-- `tx_digest`: the transaction digest.
-
-**Returns**:
-
-True if the transaction referenced by the tx_digest matches the terms.
-
 <a name=".aea.crypto.base.LedgerApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
@@ -336,7 +365,7 @@ True if the transaction referenced by the tx_digest matches the terms.
  | get_transaction_receipt(tx_digest: str) -> Optional[Any]
 ```
 
-Get the transaction receipt for a transaction digest (non-blocking).
+Get the transaction receipt for a transaction digest.
 
 **Arguments**:
 
@@ -346,24 +375,23 @@ Get the transaction receipt for a transaction digest (non-blocking).
 
 the tx receipt, if present
 
-<a name=".aea.crypto.base.LedgerApi.generate_tx_nonce"></a>
-#### generate`_`tx`_`nonce
+<a name=".aea.crypto.base.LedgerApi.get_transaction"></a>
+#### get`_`transaction
 
 ```python
  | @abstractmethod
- | generate_tx_nonce(seller: Address, client: Address) -> str
+ | get_transaction(tx_digest: str) -> Optional[Any]
 ```
 
-Generate a random str message.
+Get the transaction for a transaction digest.
 
 **Arguments**:
 
-- `seller`: the address of the seller.
-- `client`: the address of the client.
+- `tx_digest`: the digest associated to the transaction.
 
 **Returns**:
 
-return the hash in hex.
+the tx, if present
 
 <a name=".aea.crypto.base.FaucetApi"></a>
 ## FaucetApi Objects

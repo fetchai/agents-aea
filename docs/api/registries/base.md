@@ -464,20 +464,3 @@ Fetch the handler by the pair protocol id and skill id.
 
 the handlers registered for the protocol_id and skill_id
 
-<a name=".aea.registries.base.HandlerRegistry.fetch_internal_handler"></a>
-#### fetch`_`internal`_`handler
-
-```python
- | fetch_internal_handler(skill_id: SkillId) -> Optional[Handler]
-```
-
-Fetch the internal handler.
-
-**Arguments**:
-
-- `skill_id`: the skill id
-
-**Returns**:
-
-the internal handler registered for the skill id
-
