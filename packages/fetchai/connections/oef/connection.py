@@ -707,7 +707,9 @@ class OEFChannel(OEFAgent):
         else:
             raise ValueError("OEF request not recognized.")
 
-    def handle_failure(self, exception: Exception, conn) -> None:
+    def handle_failure(  # pylint: disable=no-self-use
+        self, exception: Exception, conn
+    ) -> None:
         """Handle failure."""
         logger.exception(exception)
 
