@@ -180,6 +180,7 @@ class FipaHandler(Handler):
                 dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
                 contract_id="fetchai/erc1155:0.6.0",
+                contract_address="",
                 callable="get_atomic_swap_single_transaction",
                 kwargs=ContractApiMessage.Kwargs(
                     {

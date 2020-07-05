@@ -22,9 +22,11 @@
 import pickle  # nosec
 from typing import Any, Dict
 
+from aea.helpers.transaction.base import RawMessage as BaseRawMessage
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
 from aea.helpers.transaction.base import State as BaseState
 
+RawMessage = BaseRawMessage
 RawTransaction = BaseRawTransaction
 State = BaseState
 

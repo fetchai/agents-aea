@@ -53,9 +53,8 @@ If something goes wrong you will receive an error message with performative `Oef
 
 ### Register personality pieces
 
-To register your service with personality pieces, you have to send an envelope with service description message.
-define a data model for personality pieces you'd like to specify
-```
+To register personality pieces, you have to use a specfic data model:
+``` python
 from aea.helpers.search.models import Attribute, DataModel, Location
 
 AGENT_PERSONALITY_MODEL = DataModel(
@@ -67,19 +66,19 @@ AGENT_PERSONALITY_MODEL = DataModel(
     "A data model to describe the personality of an agent.",
 )
 ```
-define a piece data i
-```
+
+An example follows:
+``` python
 service_instance = {"piece": "genus", "value": "service"}
 service_description = Description(
     service_instance, data_model=AGENT_PERSONALITY_MODEL
 )
 ```
-then create envelope and send it as described for location.
 
-### Set service key
+### Register services
 
-To set some service key and value you have to use a specific model
-```
+To set some service key and value you have to use a specific data model:
+``` python
 SET_SERVICE_KEY_MODEL = DataModel(
     "set_service_key",
     [
@@ -90,17 +89,18 @@ SET_SERVICE_KEY_MODEL = DataModel(
 )
 ```
 
-then set values, create service description and send it within envelope as defined for location
-```
+An example follows:
+``` python
 service_instance = {"key": "test", "value": "test"}
-    service_description = Description(
-    service_instance, data_model=models.SET_SERVICE_KEY_MODEL
+service_description = Description(
+    service_instance, data_model=SET_SERVICE_KEY_MODEL
 )
 ```
 
 ### Remove service key
-To remove service key have to use a specific model
-```
+
+To remove service key have to use a specific data model:
+``` python
 REMOVE_SERVICE_KEY_MODEL = DataModel(
     "remove_service_key",
     [Attribute("key", str, True, "Service key name.")],
@@ -108,22 +108,20 @@ REMOVE_SERVICE_KEY_MODEL = DataModel(
 )
 ```
 
-then set key name , create service description and send it within envelope as defined for location
-```
+An example follows:
+``` python
 service_instance = {"key": "test"}
 service_description = Description(
     service_instance, data_model=REMOVE_SERVICE_KEY_MODEL
 )
 ```
 
-it's imprtant to use proper models for every kind of request!
+## Perform a search
 
-# Perform a search
-to perform a search for services registered you have to define a search query consits of constraints
-location constraintss is required, personality pieces or services keys constraints are optional.
+To perform a search for services registered you have to define a search query consisting of constraints. The location constraints is required, personality pieces or services keys constraints are optional.
 
-create a query
-```
+An example follows:
+``` python
 from aea.helpers.search.models import (
     Constraint,
     ConstraintType,
@@ -154,29 +152,6 @@ message = OefSearchMessage(
     performative=OefSearchMessage.Performative.SEARCH_SERVICES,
     query=closeness_query,
 )
-envelope = Envelope(
-    to="soef",
-    sender=crypto.address,
-    protocol_id=message.protocol_id,
-    message=message,
-)
-
-multiplexer.put(envelope)
-```
-get results
-
-```
-result_envelope = multiplexer.get()
 ```
 
-in case of error `result_envelop.message.performative == OefSearchMessage.Performative.OEF_ERROR`
-in case of successful search `result_envelop.message.performative == OefSearchMessage.Performative.SEARCH_RESULT`
-
-list of matched agents addresses will be available on
-```
-result_envelope.message.agents  # Tuple[str]
-```
-
-
-
-
+In case of error you will received a message with `OefSearchMessage.Performative.OEF_ERROR`. In case of successful search you will receive a message with performative `OefSearchMessage.Performative.SEARCH_RESULT` and the list of matched agents addresses.

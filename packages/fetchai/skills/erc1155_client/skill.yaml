@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmcpfaPDwPCUvcj8N1QSMcrHoupbccW5t7F3rnP25JK2ds
-  dialogues.py: Qmbemx2zQTjGWyZJ5AvM4ojLfUG5oMm3n5nmLwLgw6DFUT
-  handlers.py: QmYbNro2HppF3YZcU7AAwXr9Bv2cvxZ4GU4ehn91wqjvV4
-  strategy.py: Qme3Ck9KfWPWXRhV1GvHfYL65VapShETK8jyJqs3a2HBR5
+  behaviours.py: QmPjxArBZiacGmPQh8Qm4G77Mo9dmc4QRj17YUpo7hkGbP
+  dialogues.py: QmWstZRxNCybbPwhJ59R3gxkUGpJhFRVZFEbHdmg7FW57x
+  handlers.py: QmW8GgXGfBnb1h6oropYavZN4qP75WeqUNVKdj6HfvmUDu
+  strategy.py: QmXzAiLUSd1vDgnN4WiHS7TmjHtTwmppvF331A3vj4icJx
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -22,7 +22,7 @@ behaviours:
   search:
     args:
       search_interval: 5
-    class_name: MySearchBehaviour
+    class_name: SearchBehaviour
 handlers:
   fipa:
     args: {}

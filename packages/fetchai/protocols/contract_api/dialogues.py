@@ -41,6 +41,7 @@ class ContractApiDialogue(Dialogue):
         {
             ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            ContractApiMessage.Performative.GET_RAW_MESSAGE,
             ContractApiMessage.Performative.GET_STATE,
         }
     )
@@ -48,6 +49,7 @@ class ContractApiDialogue(Dialogue):
         {
             ContractApiMessage.Performative.STATE,
             ContractApiMessage.Performative.RAW_TRANSACTION,
+            ContractApiMessage.Performative.RAW_MESSAGE,
         }
     )
     VALID_REPLIES = {
@@ -55,6 +57,12 @@ class ContractApiDialogue(Dialogue):
         ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION: frozenset(
             {
                 ContractApiMessage.Performative.RAW_TRANSACTION,
+                ContractApiMessage.Performative.ERROR,
+            }
+        ),
+        ContractApiMessage.Performative.GET_RAW_MESSAGE: frozenset(
+            {
+                ContractApiMessage.Performative.RAW_MESSAGE,
                 ContractApiMessage.Performative.ERROR,
             }
         ),
@@ -70,6 +78,7 @@ class ContractApiDialogue(Dialogue):
                 ContractApiMessage.Performative.ERROR,
             }
         ),
+        ContractApiMessage.Performative.RAW_MESSAGE: frozenset(),
         ContractApiMessage.Performative.RAW_TRANSACTION: frozenset(),
         ContractApiMessage.Performative.STATE: frozenset(),
     }

@@ -28,7 +28,7 @@ from aea.helpers.dialogue.base import (
     DialogueLabel as BaseDialogueLabel,
     Dialogues as BaseDialogues,
 )
-from aea.helpers.transaction.base import RawTransaction, State
+from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.protocols.base import Message
 
 from packages.fetchai.connections.ledger.base import (
@@ -215,6 +215,37 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 raw_transaction=RawTransaction(message.ledger_id, tx),
+            )
+            response.counterparty = message.counterparty
+            dialogue.update(response)
+        except Exception as e:  # pylint: disable=broad-except
+            response = self.get_error_message(e, api, message, dialogue)
+        return response
+
+    def get_raw_message(
+        self,
+        api: LedgerApi,
+        message: ContractApiMessage,
+        dialogue: ContractApiDialogue,
+    ) -> ContractApiMessage:
+        """
+        Send the request 'get_raw_message'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :param dialogue: the contract API dialogue
+        :return: None
+        """
+        contract = self.contract_registry.make(message.contract_id)
+        method_to_call = getattr(contract, message.callable)
+        try:
+            rm = method_to_call(api, message.contract_address, **message.kwargs.body)
+            response = ContractApiMessage(
+                performative=ContractApiMessage.Performative.RAW_MESSAGE,
+                message_id=message.message_id + 1,
+                target=message.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                raw_message=RawMessage(message.ledger_id, rm),
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
