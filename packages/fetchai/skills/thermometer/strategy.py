@@ -45,8 +45,7 @@ class Strategy(GenericStrategy):
             if "internal temperature" in results[0].keys():
                 degrees = {"thermometer_data": str(results)}
                 break
-            else:
-                self.context.logger.debug("Couldn't read the sensor I am re-trying.")
-                time.sleep(0.5)
-                retries += 1
+            self.context.logger.debug("Couldn't read the sensor I am re-trying.")
+            time.sleep(0.5)
+            retries += 1
         return degrees

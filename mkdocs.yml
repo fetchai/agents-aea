@@ -85,6 +85,7 @@ nav:
       - Search & Discovery:
         - Defining Data Models: 'defining-data-models.md'
         - The Query Language: 'query-language.md'
+        - SOEF Connection: 'simple-oef-usage.md'
       - Developer Interfaces:
         - CLI:
           - Installation: 'cli-how-to.md'
