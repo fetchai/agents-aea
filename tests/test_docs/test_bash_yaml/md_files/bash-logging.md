@@ -8,7 +8,7 @@ author: fetchai
 version: 0.1.0
 description: ''
 license: Apache-2.0
-aea_version: 0.4.1
+aea_version: 0.5.0
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
