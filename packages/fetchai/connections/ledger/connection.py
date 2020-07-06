@@ -137,7 +137,10 @@ class LedgerConnection(Connection):
             self.event_new_receiving_task.clear()
 
         while len(self.receiving_tasks) == 0:
-            await self.event_new_receiving_task.wait()
+            try:
+                await self.event_new_receiving_task.wait()
+            except Exception:
+                return None
         self.event_new_receiving_task.clear()
 
         # wait for completion of at least one receiving task
