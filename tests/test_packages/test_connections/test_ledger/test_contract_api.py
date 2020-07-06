@@ -190,8 +190,7 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
     assert response_dialogue == contract_api_dialogue
     assert type(response_message.raw_message) == RawMessage
     assert response_message.raw_message.ledger_id == EthereumCrypto.identifier
-    assert type(response.message.raw_message.body) == dict
-    assert type(response.message.raw_message.body.get("hash_single", None)) == bytes
+    assert type(response.message.raw_message.body) == bytes
 
 
 @pytest.mark.network

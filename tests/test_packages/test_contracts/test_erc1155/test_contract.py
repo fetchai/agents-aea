@@ -159,9 +159,8 @@ def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
         value,
         trade_nonce,
     )
-    assert isinstance(tx_hash, dict) and "hash_single" in tx_hash
-    hash_single = tx_hash["hash_single"]
-    signature = crypto_api.sign_message(hash_single)
+    assert isinstance(tx_hash, bytes)
+    signature = crypto_api.sign_message(tx_hash)
     tx = erc1155_contract.get_atomic_swap_single_transaction(
         ledger_api=ledger_api,
         contract_address=contract_address,
@@ -205,9 +204,8 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
         value,
         trade_nonce,
     )
-    assert isinstance(tx_hash, dict) and "hash_batch" in tx_hash
-    hash_batch = tx_hash["hash_batch"]
-    signature = crypto_api.sign_message(hash_batch)
+    assert isinstance(tx_hash, bytes)
+    signature = crypto_api.sign_message(tx_hash)
     tx = erc1155_contract.get_atomic_swap_batch_transaction(
         ledger_api=ledger_api,
         contract_address=contract_address,
