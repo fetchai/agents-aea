@@ -133,13 +133,9 @@ class LedgerConnection(Connection):
             done_task = self.done_tasks.pop()
             return self._handle_done_task(done_task)
 
-        while len(self.receiving_tasks) == 0:
+        if len(self.receiving_tasks) == 0:
             self.event_new_receiving_task.clear()
-            try:
-                await self.event_new_receiving_task.wait()
-            except Exception:  # pylint: disable=broad-except
-                return None
-        self.event_new_receiving_task.clear()
+            await self.event_new_receiving_task.wait()
 
         # wait for completion of at least one receiving task
         done, _ = await asyncio.wait(
