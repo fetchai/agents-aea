@@ -222,6 +222,7 @@ class Dialogue(ABC):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
+        message_class,
         agent_address: Optional[Address] = None,
         role: Optional[Role] = None,
         rules: Optional[Rules] = None,
@@ -248,6 +249,9 @@ class Dialogue(ABC):
         self._outgoing_messages = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
         self._rules = rules
+
+        assert issubclass(message_class, Message)
+        self._message_class = message_class
 
     @property
     def dialogue_label(self) -> DialogueLabel:
@@ -614,7 +618,7 @@ class Dialogues(ABC):
     """The dialogues class keeps track of all dialogues for an agent."""
 
     def __init__(
-        self, agent_address: Address, end_states: FrozenSet[Dialogue.EndState]
+        self, agent_address: Address, end_states: FrozenSet[Dialogue.EndState], message_class, dialogue_class,
     ) -> None:
         """
         Initialize dialogues.
@@ -627,6 +631,12 @@ class Dialogues(ABC):
         self._agent_address = agent_address
         self._dialogue_nonce = 0
         self._dialogue_stats = DialogueStats(end_states)
+
+        assert issubclass(message_class, Message)
+        self._message_class = message_class
+
+        assert issubclass(dialogue_class, Dialogue)
+        self._dialogue_class = dialogue_class
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:

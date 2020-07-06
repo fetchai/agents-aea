@@ -85,8 +85,8 @@ class FipaDialogue(Dialogue):
     class Role(Dialogue.Role):
         """This class defines the agent's role in a fipa dialogue."""
 
-        BUYER = "buyer"
         SELLER = "seller"
+        BUYER = "buyer"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a fipa dialogue."""
@@ -115,6 +115,7 @@ class FipaDialogue(Dialogue):
             dialogue_label=dialogue_label,
             agent_address=agent_address,
             role=role,
+            message_class=FipaMessage,
             rules=Dialogue.Rules(
                 cast(FrozenSet[Message.Performative], self.INITIAL_PERFORMATIVES),
                 cast(FrozenSet[Message.Performative], self.TERMINAL_PERFORMATIVES),
@@ -150,7 +151,12 @@ class FipaDialogues(Dialogues, ABC):
         }
     )
 
-    def __init__(self, agent_address: Address) -> None:
+    def __init__(
+        self,
+        agent_address: Address,
+        dialogue_class=FipaDialogue,
+        message_class=FipaMessage,
+    ) -> None:
         """
         Initialize dialogues.
 
@@ -161,6 +167,8 @@ class FipaDialogues(Dialogues, ABC):
             self,
             agent_address=agent_address,
             end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),
+            dialogue_class=dialogue_class,
+            message_class=message_class,
         )
 
     def create_dialogue(
