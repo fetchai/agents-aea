@@ -133,11 +133,8 @@ class LedgerConnection(Connection):
             done_task = self.done_tasks.pop()
             return self._handle_done_task(done_task)
 
-        # TODO this could be simplified.
-        if len(self.receiving_tasks) == 0:
-            self.event_new_receiving_task.clear()
-
         while len(self.receiving_tasks) == 0:
+            self.event_new_receiving_task.clear()
             try:
                 await self.event_new_receiving_task.wait()
             except Exception:
