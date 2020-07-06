@@ -70,6 +70,7 @@ base_deps = [
     "semver>=2.9.1",
     "protobuf",
     "pyyaml>=4.2b1",
+    "requests==2.22.0",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
