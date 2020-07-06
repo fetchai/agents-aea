@@ -39,25 +39,21 @@ class Strategy(Model):
 
         :return: None
         """
-        self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        assert all(
+            [
+                key in self._search_query
+                for key in ["search_term", "constraint_type", "search_value"]
+            ]
+        ), "Invalid search query data."
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         super().__init__(**kwargs)
-        self._search_id = 0
         self.is_searching = True
 
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
-
-    def get_next_search_id(self) -> int:
-        """
-        Get the next search id and set the search time.
-
-        :return: the next search id
-        """
-        self._search_id += 1
-        return self._search_id
 
     def get_service_query(self) -> Query:
         """
@@ -68,10 +64,10 @@ class Strategy(Model):
         query = Query(
             [
                 Constraint(
-                    self.search_query["search_term"],
+                    self._search_query["search_term"],
                     ConstraintType(
-                        self.search_query["constraint_type"],
-                        self.search_query["search_value"],
+                        self._search_query["constraint_type"],
+                        self._search_query["search_value"],
                     ),
                 )
             ],

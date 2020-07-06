@@ -219,9 +219,10 @@ class ERC1155Contract(Contract):
         """Validate the mint quantities."""
         for token_id, mint_quantity in zip(token_ids, mint_quantities):
             decoded_type = cls.decode_id(token_id)
-            assert (
-                decoded_type == 1 or decoded_type == 2
-            ), "The token type must be 1 or 2. Found type={} for token_id={}".format(
+            assert decoded_type in [
+                1,
+                2,
+            ], "The token type must be 1 or 2. Found type={} for token_id={}".format(
                 decoded_type, token_id
             )
             if decoded_type == 1:
@@ -384,7 +385,7 @@ class ERC1155Contract(Contract):
         balances = instance.functions.balanceOfBatch(
             [agent_address] * 10, token_ids
         ).call()
-        result = {key: value for key, value in zip(token_ids, balances)}
+        result = dict(zip(token_ids, balances))
         return {"balances": result}
 
     @classmethod
@@ -456,7 +457,7 @@ class ERC1155Contract(Contract):
         to_supply: int,
         value: int,
         trade_nonce: int,
-    ) -> Dict[str, bytes]:
+    ) -> bytes:
         """
         Get the hash for a trustless trade between two agents for a single token.
 
@@ -496,7 +497,7 @@ class ERC1155Contract(Contract):
                 trade_nonce,
             ).call()
         )
-        return {"hash_single": tx_hash}
+        return tx_hash
 
     @staticmethod
     def _get_hash_single(
@@ -546,7 +547,7 @@ class ERC1155Contract(Contract):
         to_supplies: List[int],
         value: int,
         trade_nonce: int,
-    ) -> Dict[str, bytes]:
+    ) -> bytes:
         """
         Get the hash for a trustless trade between two agents for a single token.
 
@@ -586,7 +587,7 @@ class ERC1155Contract(Contract):
                 trade_nonce,
             ).call()
         )
-        return {"hash_batch": tx_hash}
+        return tx_hash
 
     @staticmethod
     def _get_hash_batch(

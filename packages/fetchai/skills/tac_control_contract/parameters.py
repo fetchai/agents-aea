@@ -222,8 +222,8 @@ class Parameters(Model):
     def _check_consistency(self) -> None:
         """Check the parameters are consistent."""
         if self._contract_address is not None and (
-            self._good_ids is []
-            or self._currency_ids is []
+            self._good_ids == []
+            or self._currency_ids == []
             or len(self._good_ids) != self._nb_goods
             or len(self._currency_ids) != self._nb_currencies
         ):

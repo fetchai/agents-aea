@@ -380,12 +380,10 @@ class Behaviour(AbstractBehaviour, ABC):
         name_to_class = dict(behaviours_classes)
         _print_warning_message_for_non_declared_skill_components(
             set(name_to_class.keys()),
-            set(
-                [
-                    behaviour_config.class_name
-                    for behaviour_config in behaviour_configs.values()
-                ]
-            ),
+            {
+                behaviour_config.class_name
+                for behaviour_config in behaviour_configs.values()
+            },
             "behaviours",
             path,
         )
@@ -463,12 +461,7 @@ class Handler(SkillComponent, ABC):
         name_to_class = dict(handler_classes)
         _print_warning_message_for_non_declared_skill_components(
             set(name_to_class.keys()),
-            set(
-                [
-                    handler_config.class_name
-                    for handler_config in handler_configs.values()
-                ]
-            ),
+            {handler_config.class_name for handler_config in handler_configs.values()},
             "handlers",
             path,
         )
@@ -561,7 +554,7 @@ class Model(SkillComponent, ABC):
         name_to_class = dict(models)
         _print_warning_message_for_non_declared_skill_components(
             set(name_to_class.keys()),
-            set([model_config.class_name for model_config in model_configs.values()]),
+            {model_config.class_name for model_config in model_configs.values()},
             "models",
             path,
         )

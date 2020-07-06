@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmcpfaPDwPCUvcj8N1QSMcrHoupbccW5t7F3rnP25JK2ds
-  dialogues.py: Qmbemx2zQTjGWyZJ5AvM4ojLfUG5oMm3n5nmLwLgw6DFUT
-  handlers.py: QmYbNro2HppF3YZcU7AAwXr9Bv2cvxZ4GU4ehn91wqjvV4
-  strategy.py: Qme3Ck9KfWPWXRhV1GvHfYL65VapShETK8jyJqs3a2HBR5
+  behaviours.py: QmW66aJ6bNi8M4rnKakWnVPkQubjwQGhzaZRz1ir9s9mVe
+  dialogues.py: QmXd6KC9se6qZWaAsoqJpRYNF6BvVPBd5KJBxSKq9xhLLh
+  handlers.py: QmZNNiLQE56qZajCjhcdyZin8tZGGQU8DSBCDC3GiJ2MHp
+  strategy.py: QmXzAiLUSd1vDgnN4WiHS7TmjHtTwmppvF331A3vj4icJx
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -22,21 +22,42 @@ behaviours:
   search:
     args:
       search_interval: 5
-    class_name: MySearchBehaviour
+    class_name: SearchBehaviour
 handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
   fipa:
     args: {}
-    class_name: FIPAHandler
-  oef:
+    class_name: FipaHandler
+  ledger_api:
     args: {}
-    class_name: OEFSearchHandler
-  transaction:
+    class_name: LedgerApiHandler
+  oef_search:
     args: {}
-    class_name: TransactionHandler
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
 models:
-  dialogues:
+  contract_api_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       ledger_id: ethereum

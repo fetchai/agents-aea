@@ -28,7 +28,7 @@ from aea.connections.base import Connection
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
-from aea.helpers.transaction.base import RawTransaction, State
+from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
@@ -99,7 +99,7 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
 async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
-    contract_address = ETHEREUM_ADDRESS_ONE
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     contract_api_dialogues = ContractApiDialogues()
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -138,6 +138,59 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
     assert response_message.raw_transaction.ledger_id == EthereumCrypto.identifier
     assert len(response.message.raw_transaction.body) == 7
     assert len(response.message.raw_transaction.body["data"]) > 0
+
+
+@pytest.mark.network
+@pytest.mark.asyncio
+async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection):
+    """Test get state with contract erc1155."""
+    address = ETHEREUM_ADDRESS_ONE
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    contract_api_dialogues = ContractApiDialogues()
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=EthereumCrypto.identifier,
+        contract_id="fetchai/erc1155:0.6.0",
+        contract_address=contract_address,
+        callable="get_hash_single",
+        kwargs=ContractApiMessage.Kwargs(
+            {
+                "from_address": address,
+                "to_address": address,
+                "token_id": 1,
+                "from_supply": 10,
+                "to_supply": 0,
+                "value": 0,
+                "trade_nonce": 1,
+            }
+        ),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    await ledger_apis_connection.send(envelope)
+    await asyncio.sleep(0.01)
+    response = await ledger_apis_connection.receive()
+
+    assert response is not None
+    assert type(response.message) == ContractApiMessage
+    response_message = cast(ContractApiMessage, response.message)
+    assert (
+        response_message.performative == ContractApiMessage.Performative.RAW_MESSAGE
+    ), "Error: {}".format(response_message.message)
+    response_dialogue = contract_api_dialogues.update(response_message)
+    assert response_dialogue == contract_api_dialogue
+    assert type(response_message.raw_message) == RawMessage
+    assert response_message.raw_message.ledger_id == EthereumCrypto.identifier
+    assert type(response.message.raw_message.body) == bytes
 
 
 @pytest.mark.network
