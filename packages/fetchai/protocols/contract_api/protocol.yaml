@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmZodYjNqoMgGAGKfkCU4zU9t1Cx9MAownqSy4wyVdwaHF
   contract_api.proto: QmUma9Np2AyR9cbWzVtJ9Y94re1M1nwbt3ZokZh32cvVsA

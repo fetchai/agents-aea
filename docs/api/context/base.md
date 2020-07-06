@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], **kwargs)
+ | __init__(identity: Identity, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, **kwargs)
 ```
 
 Initialize an agent context.
@@ -24,7 +24,6 @@ Initialize an agent context.
 **Arguments**:
 
 - `identity`: the identity object
-- `ledger_apis`: the APIs the agent will use to connect to ledgers.
 - `connection_status`: the connection status of the multiplexer
 - `outbox`: the outbox
 - `decision_maker_message_queue`: the (in) queue of the decision maker
@@ -125,16 +124,6 @@ Get decision maker queue.
 ```
 
 Get the decision maker handler context.
-
-<a name=".aea.context.base.AgentContext.ledger_apis"></a>
-#### ledger`_`apis
-
-```python
- | @property
- | ledger_apis() -> LedgerApis
-```
-
-Get the ledger APIs.
 
 <a name=".aea.context.base.AgentContext.task_manager"></a>
 #### task`_`manager

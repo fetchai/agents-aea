@@ -47,7 +47,7 @@ Stop task.
 #### create`_`async`_`task
 
 ```python
- | create_async_task(loop: AbstractEventLoop) -> Awaitable
+ | create_async_task(loop: AbstractEventLoop) -> TaskAwaitable
 ```
 
 Return asyncio Task for task run in asyncio loop.

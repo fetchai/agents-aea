@@ -230,6 +230,23 @@ Set the runtime mode.
 
 self
 
+<a name=".aea.aea_builder.AEABuilder.set_search_service_address"></a>
+#### set`_`search`_`service`_`address
+
+```python
+ | set_search_service_address(search_service_address: str) -> "AEABuilder"
+```
+
+Set the search service address.
+
+**Arguments**:
+
+- `search_service_address`: the search service address
+
+**Returns**:
+
+self
+
 <a name=".aea.aea_builder.AEABuilder.set_name"></a>
 #### set`_`name
 
@@ -590,7 +607,7 @@ the AEABuilder
 #### build
 
 ```python
- | build(connection_ids: Optional[Collection[PublicId]] = None, ledger_apis: Optional[LedgerApis] = None) -> AEA
+ | build(connection_ids: Optional[Collection[PublicId]] = None) -> AEA
 ```
 
 Build the AEA.
@@ -605,7 +622,6 @@ via 'add_component_instance' and the private keys.
 **Arguments**:
 
 - `connection_ids`: select only these connections to run the AEA.
-- `ledger_apis`: the api ledger that we want to use.
 
 **Returns**:
 
