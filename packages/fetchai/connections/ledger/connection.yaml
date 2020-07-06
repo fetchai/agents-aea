@@ -7,7 +7,7 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   base.py: QmZecsNSNpct1Zrs7HsJPQJN2buKJCirz6Z7nYH2FQbJFH
-  connection.py: QmXVBF2Pckx45LfJxjaZ9ZzsSV7gXfKUtjpQhSCwwcxaCx
+  connection.py: QmUBCzfjWDLvKtyNb2vwXGzndQ6RWPPYh95hmKoUswA2hi
   contract_dispatcher.py: QmSkvdYrG6SrneTkXaQfFeYGgZfSLHuozHpcrcV68x6tiH
   ledger_dispatcher.py: QmUk2J1FokJR6iLQYfyZbSSvR5y5g3ozYq7H6yQcv7YqmJ
 fingerprint_ignore_patterns: []
