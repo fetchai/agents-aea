@@ -43,7 +43,6 @@ from ..conftest import (
 )
 
 
-@pytest.mark.unstable
 @pytest.mark.integration
 class TestGui:
     """Test that the command 'aea gui' works as expected."""

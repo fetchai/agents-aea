@@ -144,12 +144,11 @@ class IsVersionCorrectTestCase(TestCase):
 
 
 @pytest.mark.integration
-@pytest.mark.unstable
 class TestFetchFromRemoteRegistry(AEATestCaseMany):
     """Test case for fetch agent command from Registry."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""
-        self.run_cli_command("fetch", "fetchai/my_first_aea:0.1.0")
+        self.run_cli_command("fetch", "fetchai/my_first_aea:0.6.0")
         assert "my_first_aea" in os.listdir(self.t)
