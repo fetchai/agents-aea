@@ -180,7 +180,7 @@ class FipaHandler(Handler):
                 dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
                 contract_id="fetchai/erc1155:0.6.0",
-                contract_address="",
+                contract_address=strategy.contract_address,
                 callable="get_atomic_swap_single_transaction",
                 kwargs=ContractApiMessage.Kwargs(
                     {
@@ -200,7 +200,16 @@ class FipaHandler(Handler):
                 ),
             )
             contract_api_msg.counterparty = LEDGER_API_ADDRESS
-            contract_api_dialogues.update(contract_api_msg)
+            contract_api_dialogue = cast(
+                Optional[ContractApiDialogue],
+                contract_api_dialogues.update(contract_api_msg),
+            )
+            assert (
+                contract_api_dialogue is not None
+            ), "Contract api dialogue not created."
+            contract_api_dialogue.terms = strategy.get_single_swap_terms(
+                fipa_dialogue.proposal, fipa_msg.counterparty
+            )
             self.context.outbox.put_message(message=contract_api_msg)
             self.context.logger.info(
                 "[{}]: Requesting single atomic swap transaction...".format(
@@ -375,8 +384,17 @@ class LedgerApiHandler(Handler):
             elif not strategy.is_tokens_minted:
                 strategy.is_tokens_minted = is_transaction_successful
                 strategy.is_behaviour_active = is_transaction_successful
+            elif strategy.is_tokens_minted:
+                self.context.is_active = False
+                self.context.logger.info(
+                    "[{}]: Demo finished!".format(self.context.agent_name)
+                )
             else:
-                self.context.error("Unexpected transaction receipt!")
+                self.context.logger.error(
+                    "[{}]: Unexpected transaction receipt!".format(
+                        self.context.agent_name
+                    )
+                )
         else:
             self.context.logger.error(
                 "[{}]: transaction failed. Transaction receipt={}".format(

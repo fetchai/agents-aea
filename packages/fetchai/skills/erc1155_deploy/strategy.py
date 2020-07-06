@@ -242,3 +242,22 @@ class Strategy(Model):
             }
         )
         return proposal
+
+    def get_single_swap_terms(
+        self, proposal: Description, counterparty_address
+    ) -> Terms:
+        """Get the proposal."""
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=counterparty_address,
+            amount_by_currency_id={
+                str(proposal.values["token_id"]): int(proposal.values["from_supply"])
+                - int(proposal.values["to_supply"])
+            },
+            quantities_by_good_id={},
+            is_sender_payable_tx_fee=True,
+            nonce=str(proposal.values["trade_nonce"]),
+            fee_by_currency_id={},
+        )
+        return terms

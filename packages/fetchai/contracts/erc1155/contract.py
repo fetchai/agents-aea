@@ -457,7 +457,7 @@ class ERC1155Contract(Contract):
         to_supply: int,
         value: int,
         trade_nonce: int,
-    ) -> Dict[str, bytes]:
+    ) -> bytes:
         """
         Get the hash for a trustless trade between two agents for a single token.
 
@@ -497,7 +497,7 @@ class ERC1155Contract(Contract):
                 trade_nonce,
             ).call()
         )
-        return {"hash_single": tx_hash}
+        return tx_hash
 
     @staticmethod
     def _get_hash_single(
@@ -547,7 +547,7 @@ class ERC1155Contract(Contract):
         to_supplies: List[int],
         value: int,
         trade_nonce: int,
-    ) -> Dict[str, bytes]:
+    ) -> bytes:
         """
         Get the hash for a trustless trade between two agents for a single token.
 
@@ -587,7 +587,7 @@ class ERC1155Contract(Contract):
                 trade_nonce,
             ).call()
         )
-        return {"hash_batch": tx_hash}
+        return tx_hash
 
     @staticmethod
     def _get_hash_batch(

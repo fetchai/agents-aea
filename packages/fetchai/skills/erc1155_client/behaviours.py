@@ -25,11 +25,11 @@ from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.generic_buyer.dialogues import (
+from packages.fetchai.skills.erc1155_client.dialogues import (
     LedgerApiDialogues,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
+from packages.fetchai.skills.erc1155_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
@@ -47,7 +47,7 @@ class SearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
         )
@@ -67,7 +67,7 @@ class SearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching:
             query = strategy.get_service_query()
             oef_search_dialogues = cast(

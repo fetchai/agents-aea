@@ -22,7 +22,7 @@
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.helpers.transaction.base import Terms
+from aea.helpers.transaction.base import RawMessage, Terms
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
@@ -30,6 +30,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_client.dialogues import (
     ContractApiDialogue,
@@ -37,6 +38,8 @@ from packages.fetchai.skills.erc1155_client.dialogues import (
     DefaultDialogues,
     FipaDialogue,
     FipaDialogues,
+    LedgerApiDialogue,
+    LedgerApiDialogues,
     OefSearchDialogue,
     OefSearchDialogues,
     SigningDialogue,
@@ -47,7 +50,7 @@ from packages.fetchai.skills.erc1155_client.strategy import Strategy
 LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
 
 
-class FIPAHandler(Handler):
+class FipaHandler(Handler):
     """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
@@ -143,7 +146,7 @@ class FIPAHandler(Handler):
                 "[{}]: received valid PROPOSE from sender={}: proposal={}".format(
                     self.context.agent_name,
                     fipa_msg.counterparty[-5:],
-                    fipa_msg.proposal,
+                    fipa_msg.proposal.values,
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
@@ -225,7 +228,7 @@ class FIPAHandler(Handler):
         )
 
 
-class OEFSearchHandler(Handler):
+class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
@@ -440,7 +443,11 @@ class ContractApiHandler(Handler):
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=(str(self.context.skill_id),),
-            raw_message=contract_api_msg.raw_message,
+            raw_message=RawMessage(
+                contract_api_msg.raw_message.ledger_id,
+                contract_api_msg.raw_message.body,
+                is_deprecated_mode=True,
+            ),
             terms=contract_api_dialogue.terms,
             skill_callback_info={},
         )
@@ -569,14 +576,14 @@ class SigningHandler(Handler):
             dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
             target=last_fipa_msg.message_id,
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
-            info={"tx_signature": signing_msg.signed_transaction},
+            info={"tx_signature": signing_msg.signed_message.body},
         )
         inform_msg.counterparty = last_fipa_msg.counterparty
         self.context.logger.info(
             "[{}]: sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(
                 self.context.agent_name,
                 last_fipa_msg.counterparty[-5:],
-                signing_msg.signed_transaction,
+                signing_msg.signed_message,
             )
         )
         self.context.outbox.put_message(message=inform_msg)
@@ -610,5 +617,112 @@ class SigningHandler(Handler):
         self.context.logger.warning(
             "[{}]: cannot handle signing message of performative={} in dialogue={}.".format(
                 self.context.agent_name, signing_msg.performative, signing_dialogue
+            )
+        )
+
+
+class LedgerApiHandler(Handler):
+    """Implement the ledger api handler."""
+
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        ledger_api_msg = cast(LedgerApiMessage, message)
+
+        # recover dialogue
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_dialogue = cast(
+            Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
+        )
+        if ledger_api_dialogue is None:
+            self._handle_unidentified_dialogue(ledger_api_msg)
+            return
+
+        # handle message
+        if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
+            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+        elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
+            self._handle_error(ledger_api_msg, ledger_api_dialogue)
+        else:
+            self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the message
+        """
+        self.context.logger.info(
+            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
+                self.context.agent_name, ledger_api_msg
+            )
+        )
+
+    def _handle_balance(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info(
+            "[{}]: starting balance on {} ledger={}.".format(
+                self.context.agent_name,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
+            )
+        )
+
+    def _handle_error(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of error performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info(
+            "[{}]: received ledger_api error message={} in dialogue={}.".format(
+                self.context.agent_name, ledger_api_msg, ledger_api_dialogue
+            )
+        )
+
+    def _handle_invalid(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of invalid performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.warning(
+            "[{}]: cannot handle ledger_api message of performative={} in dialogue={}.".format(
+                self.context.agent_name,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
