@@ -100,7 +100,7 @@ def _handle_error_while_loading_component_module_not_found(
     import_path = match.group(1)
     parts = import_path.split(".")
     nb_parts = len(parts)
-    if parts[0] != "packages" and nb_parts < 2:
+    if parts[0] != "packages" or nb_parts < 2:
         # if the first part of the import path is not 'packages',
         # the error is due for other reasons - just re-raise the error
         raise e from e
