@@ -476,7 +476,6 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
 
 @pytest.mark.integration
-@pytest.mark.unstable
 class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add connection from Registry command."""
 

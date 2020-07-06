@@ -57,7 +57,6 @@ class AddContractCommandTestCase(TestCase):
 
 
 @pytest.mark.integration
-@pytest.mark.unstable
 class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add contract from Registry command."""
 
