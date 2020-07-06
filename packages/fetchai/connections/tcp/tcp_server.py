@@ -84,7 +84,7 @@ class TCPServerConnection(TCPConnection):
 
         try:
             logger.debug("Waiting for incoming messages...")
-            done, pending = await asyncio.wait(self._read_tasks_to_address.keys(), return_when=asyncio.FIRST_COMPLETED)  # type: ignore
+            done, _ = await asyncio.wait(self._read_tasks_to_address.keys(), return_when=asyncio.FIRST_COMPLETED)  # type: ignore
 
             # take the first
             task = next(iter(done))
@@ -101,7 +101,7 @@ class TCPServerConnection(TCPConnection):
         except asyncio.CancelledError:
             logger.debug("Receiving loop cancelled.")
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error("Error in the receiving loop: {}".format(str(e)))
             return None
 

@@ -84,7 +84,7 @@ class Attribute:
     def __init__(
         self,
         name: str,
-        type: Type[ATTRIBUTE_TYPES],
+        type_: Type[ATTRIBUTE_TYPES],
         is_required: bool,
         description: str = "",
     ):
@@ -97,7 +97,7 @@ class Attribute:
         :param description: an (optional) human-readable description for the attribute.
         """
         self.name = name
-        self.type = type
+        self.type = type_
         self.is_required = is_required
         self.description = description
 
@@ -331,7 +331,7 @@ class ConstraintType:
         >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
     """
 
-    def __init__(self, type: Union[ConstraintTypes, str], value: Any):
+    def __init__(self, type_: Union[ConstraintTypes, str], value: Any):
         """
         Initialize a constraint type.
 
@@ -341,7 +341,7 @@ class ConstraintType:
         :param value: the value that defines the constraint.
         :raises ValueError: if the type of the constraint is not
         """
-        self.type = ConstraintTypes(type)
+        self.type = ConstraintTypes(type_)
         self.value = value
         assert self.check_validity(), "ConstraintType initialization inconsistent."
 
@@ -508,7 +508,7 @@ class ConstraintExpr(ABC):
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
         """
 
-    def check_validity(self) -> None:
+    def check_validity(self) -> None:  # pylint: disable=no-self-use
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 

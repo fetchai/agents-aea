@@ -21,24 +21,30 @@
 
 import copy
 import logging
-import math
 from enum import Enum
-from typing import Any, Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast
 
-from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
-from aea.decision_maker.base import LedgerStateProxy as BaseLedgerStateProxy
 from aea.decision_maker.base import OwnershipState as BaseOwnershipState
 from aea.decision_maker.base import Preferences as BasePreferences
-from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
+from aea.helpers.transaction.base import SignedMessage, SignedTransaction, Terms
 from aea.identity.base import Identity
+from aea.protocols.base import Message
+from aea.protocols.signing.dialogues import SigningDialogue
+from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.signing.message import SigningMessage
+from aea.protocols.state_update.dialogues import StateUpdateDialogue
+from aea.protocols.state_update.dialogues import (
+    StateUpdateDialogues as BaseStateUpdateDialogues,
+)
+from aea.protocols.state_update.message import StateUpdateMessage
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -47,9 +53,84 @@ ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
 SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
-OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], "off_chain_settlement")
 
 logger = logging.getLogger(__name__)
+
+
+class SigningDialogues(BaseSigningDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        BaseSigningDialogues.__init__(self, "decision_maker")
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return SigningDialogue.Role.DECISION_MAKER
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> SigningDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = SigningDialogue(
+            dialogue_label=dialogue_label, agent_address="decision_maker", role=role
+        )
+        return dialogue
+
+
+class StateUpdateDialogues(BaseStateUpdateDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        BaseStateUpdateDialogues.__init__(self, "decision_maker")
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return StateUpdateDialogue.Role.DECISION_MAKER
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> StateUpdateDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = StateUpdateDialogue(
+            dialogue_label=dialogue_label, agent_address="decision_maker", role=role
+        )
+        return dialogue
 
 
 class GoalPursuitReadiness:
@@ -88,7 +169,7 @@ class GoalPursuitReadiness:
 
 
 class OwnershipState(BaseOwnershipState):
-    """Represent the ownership state of an agent."""
+    """Represent the ownership state of an agent (can proxy a ledger)."""
 
     def __init__(self):
         """
@@ -183,70 +264,84 @@ class OwnershipState(BaseOwnershipState):
         assert self._quantities_by_good_id is not None, "GoodHoldings not set!"
         return copy.copy(self._quantities_by_good_id)
 
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
+    def is_affordable_transaction(self, terms: Terms) -> bool:
         """
         Check if the transaction is affordable (and consistent).
 
         E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
         Note, the agent is the sender of the transaction message by design.
 
-        :param tx_message: the transaction message
+        :param terms: the transaction terms
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        if tx_message.amount == 0 and all(
-            quantity == 0 for quantity in tx_message.tx_quantities_by_good_id.values()
+        if all(amount == 0 for amount in terms.amount_by_currency_id.values()) and all(
+            quantity == 0 for quantity in terms.quantities_by_good_id.values()
         ):
             # reject the transaction when there is no wealth exchange
             result = False
-        elif tx_message.amount <= 0 and all(
-            quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()
-        ):
+        elif all(
+            amount <= 0 for amount in terms.amount_by_currency_id.values()
+        ) and all(quantity >= 0 for quantity in terms.quantities_by_good_id.values()):
             # check if the agent has the money to cover the sender_amount (the agent=sender is the buyer)
-            result = (
-                self.amount_by_currency_id[tx_message.currency_id]
-                >= tx_message.sender_amount
+            result = all(
+                self.amount_by_currency_id[currency_id] >= -amount
+                for currency_id, amount in terms.amount_by_currency_id.items()
             )
-        elif tx_message.amount >= 0 and all(
-            quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()
-        ):
+        elif all(
+            amount >= 0 for amount in terms.amount_by_currency_id.values()
+        ) and all(quantity <= 0 for quantity in terms.quantities_by_good_id.values()):
             # check if the agent has the goods (the agent=sender is the seller).
             result = all(
                 self.quantities_by_good_id[good_id] >= -quantity
-                for good_id, quantity in tx_message.tx_quantities_by_good_id.items()
+                for good_id, quantity in terms.quantities_by_good_id.items()
             )
         else:
             result = False
         return result
 
-    def update(self, tx_message: TransactionMessage) -> None:
+    def is_affordable(self, terms: Terms) -> bool:
+        """
+        Check if the tx is affordable.
+
+        :param terms: the transaction terms
+        :return: whether the transaction is affordable or not
+        """
+        if self.is_initialized:
+            is_affordable = self.is_affordable_transaction(terms)
+        else:
+            logger.warning(
+                "Cannot verify whether transaction is affordable as ownership state is not initialized. Assuming it is!"
+            )
+            is_affordable = True
+        return is_affordable
+
+    def update(self, terms: Terms) -> None:
         """
         Update the agent state from a transaction.
 
-        :param tx_message: the transaction message
+        :param terms: the transaction terms
         :return: None
         """
         assert (
             self._amount_by_currency_id is not None
             and self._quantities_by_good_id is not None
         ), "Cannot apply state update, current state is not initialized!"
+        for currency_id, amount_delta in terms.amount_by_currency_id.items():
+            self._amount_by_currency_id[currency_id] += amount_delta
 
-        self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
-
-        for good_id, quantity_delta in tx_message.tx_quantities_by_good_id.items():
+        for good_id, quantity_delta in terms.quantities_by_good_id.items():
             self._quantities_by_good_id[good_id] += quantity_delta
 
-    def apply_transactions(
-        self, transactions: List[TransactionMessage]
-    ) -> "OwnershipState":
+    def apply_transactions(self, list_of_terms: List[Terms]) -> "OwnershipState":
         """
         Apply a list of transactions to (a copy of) the current state.
 
-        :param transactions: the sequence of transaction messages.
+        :param list_of_terms: the sequence of transaction terms.
         :return: the final state.
         """
         new_state = copy.copy(self)
-        for tx_message in transactions:
-            new_state.update(tx_message)
+        for terms in list_of_terms:
+            new_state.update(terms)
 
         return new_state
 
@@ -259,58 +354,6 @@ class OwnershipState(BaseOwnershipState):
         return state
 
 
-class LedgerStateProxy(BaseLedgerStateProxy):
-    """Class to represent a proxy to a ledger state."""
-
-    def __init__(self, ledger_apis: LedgerApis):
-        """Instantiate a ledger state proxy."""
-        self._ledger_apis = ledger_apis
-
-    @property
-    def ledger_apis(self) -> LedgerApis:
-        """Get the ledger_apis."""
-        return self._ledger_apis
-
-    @property
-    def is_initialized(self) -> bool:
-        """Get the initialization status."""
-        return self._ledger_apis.has_default_ledger
-
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the transaction is affordable on the default ledger.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction is affordable on the ledger
-        """
-        assert (
-            self.is_initialized
-        ), "LedgerStateProxy must be initialized with default ledger!"
-        if (
-            tx_message.ledger_id in self.ledger_apis.apis.keys()
-            or tx_message.ledger_id == OFF_CHAIN
-        ):
-            if tx_message.sender_amount <= 0:
-                # check if the agent has the money to cover counterparty amount and tx fees
-                available_balance = self.ledger_apis.token_balance(
-                    tx_message.ledger_id, tx_message.tx_sender_addr
-                )
-                is_affordable = (
-                    tx_message.counterparty_amount + tx_message.fees
-                    <= available_balance
-                )
-            else:
-                is_affordable = True
-        else:
-            logger.error(
-                "Ledger api not available for ledger_id={}!".format(
-                    tx_message.ledger_id
-                )
-            )
-            is_affordable = False
-        return is_affordable
-
-
 class Preferences(BasePreferences):
     """Class to represent the preferences."""
 
@@ -318,14 +361,12 @@ class Preferences(BasePreferences):
         """Instantiate an agent preference object."""
         self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
-        self._transaction_fees = None  # type: Optional[Dict[str, int]]
         self._quantity_shift = QUANTITY_SHIFT
 
     def set(
         self,
         exchange_params_by_currency_id: ExchangeParams = None,
         utility_params_by_good_id: UtilityParams = None,
-        tx_fee: int = None,
         **kwargs,
     ) -> None:
         """
@@ -333,12 +374,10 @@ class Preferences(BasePreferences):
 
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
-        :param tx_fee: the acceptable transaction fee.
         """
         assert (
             exchange_params_by_currency_id is not None
             and utility_params_by_good_id is not None
-            and tx_fee is not None
         ), "Must provide values."
         assert (
             not self.is_initialized
@@ -346,7 +385,6 @@ class Preferences(BasePreferences):
 
         self._exchange_params_by_currency_id = copy.copy(exchange_params_by_currency_id)
         self._utility_params_by_good_id = copy.copy(utility_params_by_good_id)
-        self._transaction_fees = self._split_tx_fees(tx_fee)  # TODO: update
 
     @property
     def is_initialized(self) -> bool:
@@ -355,10 +393,8 @@ class Preferences(BasePreferences):
 
         Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
         """
-        return (
-            (self._exchange_params_by_currency_id is not None)
-            and (self._utility_params_by_good_id is not None)
-            and (self._transaction_fees is not None)
+        return (self._exchange_params_by_currency_id is not None) and (
+            self._utility_params_by_good_id is not None
         )
 
     @property
@@ -374,18 +410,6 @@ class Preferences(BasePreferences):
         """Get utility parameter for each good."""
         assert self._utility_params_by_good_id is not None, "UtilityParams not set!"
         return self._utility_params_by_good_id
-
-    @property
-    def seller_transaction_fee(self) -> int:
-        """Get the transaction fee."""
-        assert self._transaction_fees is not None, "Transaction fee not set!"
-        return self._transaction_fees["seller_tx_fee"]
-
-    @property
-    def buyer_transaction_fee(self) -> int:
-        """Get the transaction fee."""
-        assert self._transaction_fees is not None, "Transaction fee not set!"
-        return self._transaction_fees["buyer_tx_fee"]
 
     def logarithmic_utility(self, quantities_by_good_id: GoodHoldings) -> float:
         """
@@ -477,13 +501,13 @@ class Preferences(BasePreferences):
         return marginal_utility
 
     def utility_diff_from_transaction(
-        self, ownership_state: BaseOwnershipState, tx_message: TransactionMessage
+        self, ownership_state: BaseOwnershipState, terms: Terms
     ) -> float:
         """
         Simulate a transaction and get the resulting utility difference (taking into account the fee).
 
         :param ownership_state: the ownership state against which to apply the transaction.
-        :param tx_message: a transaction message.
+        :param terms: the transaction terms.
         :return: the score.
         """
         assert self.is_initialized, "Preferences params not set!"
@@ -492,7 +516,7 @@ class Preferences(BasePreferences):
             quantities_by_good_id=ownership_state.quantities_by_good_id,
             amount_by_currency_id=ownership_state.amount_by_currency_id,
         )
-        new_ownership_state = ownership_state.apply_transactions([tx_message])
+        new_ownership_state = ownership_state.apply_transactions([terms])
         new_score = self.utility(
             quantities_by_good_id=new_ownership_state.quantities_by_good_id,
             amount_by_currency_id=new_ownership_state.amount_by_currency_id,
@@ -500,20 +524,26 @@ class Preferences(BasePreferences):
         score_difference = new_score - current_score
         return score_difference
 
-    @staticmethod
-    def _split_tx_fees(tx_fee: int) -> Dict[str, int]:
+    def is_utility_enhancing(
+        self, ownership_state: BaseOwnershipState, terms: Terms
+    ) -> bool:
         """
-        Split the transaction fee.
+        Check if the tx is utility enhancing.
 
-        :param tx_fee: the tx fee
-        :return: the split into buyer and seller part
+        :param ownership_state: the ownership state against which to apply the transaction.
+        :param terms: the transaction terms
+        :return: whether the transaction is utility enhancing or not
         """
-        buyer_part = math.ceil(tx_fee * SENDER_TX_SHARE)
-        seller_part = math.ceil(tx_fee * (1 - SENDER_TX_SHARE))
-        if buyer_part + seller_part > tx_fee:
-            seller_part -= 1
-        tx_fee_split = {"seller_tx_fee": seller_part, "buyer_tx_fee": buyer_part}
-        return tx_fee_split
+        if self.is_initialized and ownership_state.is_initialized:
+            is_utility_enhancing = (
+                self.utility_diff_from_transaction(ownership_state, terms) >= 0.0
+            )
+        else:
+            logger.warning(
+                "Cannot verify whether transaction improves utility as preferences are not initialized. Assuming it does!"
+            )
+            is_utility_enhancing = True
+        return is_utility_enhancing
 
     def __copy__(self) -> "Preferences":
         """Copy the object."""
@@ -523,59 +553,55 @@ class Preferences(BasePreferences):
                 self.exchange_params_by_currency_id
             )
             preferences._utility_params_by_good_id = self.utility_params_by_good_id
-            preferences._transaction_fees = self._transaction_fees
         return preferences
 
 
 class DecisionMakerHandler(BaseDecisionMakerHandler):
     """This class implements the decision maker."""
 
-    def __init__(self, identity: Identity, wallet: Wallet, ledger_apis: LedgerApis):
+    def __init__(self, identity: Identity, wallet: Wallet):
         """
         Initialize the decision maker.
 
         :param identity: the identity
         :param wallet: the wallet
-        :param ledger_apis: the ledger apis
         """
-        # TODO: remove ledger_api from constructor
         kwargs = {
             "goal_pursuit_readiness": GoalPursuitReadiness(),
             "ownership_state": OwnershipState(),
-            "ledger_state_proxy": LedgerStateProxy(ledger_apis),
             "preferences": Preferences(),
         }
         super().__init__(
-            identity=identity, wallet=wallet, ledger_apis=ledger_apis, **kwargs,
+            identity=identity, wallet=wallet, **kwargs,
         )
+        self.signing_dialogues = SigningDialogues()
+        self.state_update_dialogues = StateUpdateDialogues()
 
-    def handle(self, message: InternalMessage) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle an internal message from the skills.
 
         :param message: the internal message
         :return: None
         """
-        if isinstance(message, TransactionMessage):
-            self._handle_tx_message(message)
+        if isinstance(message, SigningMessage):
+            self._handle_signing_message(message)
         elif isinstance(message, StateUpdateMessage):
             self._handle_state_update_message(message)
-
-    def _handle_tx_message(self, tx_message: TransactionMessage) -> None:
-        """
-        Handle a transaction message.
-
-        :param tx_message: the transaction message
-        :return: None
-        """
-        if tx_message.ledger_id not in SUPPORTED_LEDGER_APIS + [OFF_CHAIN]:
+        else:  # pragma: no cover
             logger.error(
-                "[{}]: ledger_id={} is not supported".format(
-                    self.agent_name, tx_message.ledger_id
+                "[{}]: cannot handle message={} of type={}".format(
+                    self.agent_name, message, type(message)
                 )
             )
-            return
 
+    def _handle_signing_message(self, signing_msg: SigningMessage) -> None:
+        """
+        Handle a signing message.
+
+        :param signing_msg: the transaction message
+        :return: None
+        """
         if not self.context.goal_pursuit_readiness.is_ready:
             logger.debug(
                 "[{}]: Preferences and ownership state not initialized!".format(
@@ -583,273 +609,125 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )
 
+        signing_dialogue = cast(
+            Optional[SigningDialogue], self.signing_dialogues.update(signing_msg)
+        )
+        if signing_dialogue is None:  # pragma: no cover
+            logger.error(
+                "[{}]: Could not construct signing dialogue. Aborting!".format(
+                    self.agent_name
+                )
+            )
+            return
+
         # check if the transaction is acceptable and process it accordingly
-        if (
-            tx_message.performative
-            == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT
-        ):
-            self._handle_tx_message_for_settlement(tx_message)
-        elif (
-            tx_message.performative
-            == TransactionMessage.Performative.PROPOSE_FOR_SIGNING
-        ):
-            self._handle_tx_message_for_signing(tx_message)
-        else:
+        if signing_msg.performative == SigningMessage.Performative.SIGN_MESSAGE:
+            self._handle_message_signing(signing_msg, signing_dialogue)
+        elif signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
+            self._handle_transaction_signing(signing_msg, signing_dialogue)
+        else:  # pragma: no cover
             logger.error(
                 "[{}]: Unexpected transaction message performative".format(
                     self.agent_name
                 )
-            )  # pragma: no cover
+            )
 
-    def _handle_tx_message_for_settlement(self, tx_message) -> None:
+    def _handle_message_signing(
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+    ) -> None:
         """
-        Handle a transaction message for settlement.
+        Handle a message for signing.
 
-        :param tx_message: the transaction message
+        :param signing_msg: the signing message
+        :param signing_dialogue: the signing dialogue
         :return: None
         """
-        if self._is_acceptable_for_settlement(tx_message):
-            tx_digest = self._settle_tx(tx_message)
-            if tx_digest is not None:
-                tx_message_response = TransactionMessage.respond_settlement(
-                    tx_message,
-                    performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-                    tx_digest=tx_digest,
-                )
-            else:
-                tx_message_response = TransactionMessage.respond_settlement(
-                    tx_message,
-                    performative=TransactionMessage.Performative.FAILED_SETTLEMENT,
-                )
-        else:
-            tx_message_response = TransactionMessage.respond_settlement(
-                tx_message,
-                performative=TransactionMessage.Performative.REJECTED_SETTLEMENT,
-            )
-        self.message_out_queue.put(tx_message_response)
-
-    def _is_acceptable_for_settlement(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the tx is acceptable.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction is acceptable or not
-        """
-        result = (
-            self._is_valid_tx_amount(tx_message)
-            and self._is_utility_enhancing(tx_message)
-            and self._is_affordable(tx_message)
+        signing_msg_response = SigningMessage(
+            performative=SigningMessage.Performative.ERROR,
+            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+            target=signing_msg.message_id,
+            message_id=signing_msg.message_id + 1,
+            skill_callback_ids=signing_msg.skill_callback_ids,
+            skill_callback_info=signing_msg.skill_callback_info,
+            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         )
-        return result
-
-    @staticmethod
-    def _is_valid_tx_amount(tx_message: TransactionMessage) -> bool:
-        """
-        Check if the transaction amount is negative (agent is buyer).
-
-        If the transaction amount is positive, then the agent is the seller, so abort.
-        """
-        result = tx_message.sender_amount <= 0
-        return result
-
-    def _is_utility_enhancing(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the tx is utility enhancing.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction is utility enhancing or not
-        """
-        if (
-            self.context.preferences.is_initialized
-            and self.context.ownership_state.is_initialized
-        ):
-            is_utility_enhancing = (
-                self.context.preferences.utility_diff_from_transaction(
-                    self.context.ownership_state, tx_message
+        if self._is_acceptable_for_signing(signing_msg):
+            signed_message = self.wallet.sign_message(
+                signing_msg.raw_message.ledger_id,
+                signing_msg.raw_message.body,
+                signing_msg.raw_message.is_deprecated_mode,
+            )
+            if signed_message is not None:
+                signing_msg_response = SigningMessage(
+                    performative=SigningMessage.Performative.SIGNED_MESSAGE,
+                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+                    target=signing_msg.message_id,
+                    message_id=signing_msg.message_id + 1,
+                    skill_callback_ids=signing_msg.skill_callback_ids,
+                    skill_callback_info=signing_msg.skill_callback_info,
+                    signed_message=SignedMessage(
+                        signing_msg.raw_message.ledger_id,
+                        signed_message,
+                        signing_msg.raw_message.is_deprecated_mode,
+                    ),
                 )
-                >= 0.0
-            )
-        else:
-            logger.warning(
-                "[{}]: Cannot verify whether transaction improves utility. Assuming it does!".format(
-                    self.agent_name
-                )
-            )
-            is_utility_enhancing = True
-        return is_utility_enhancing
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_dialogue.update(signing_msg_response)
+        self.message_out_queue.put(signing_msg_response)
 
-    def _is_affordable(self, tx_message: TransactionMessage) -> bool:
+    def _handle_transaction_signing(
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+    ) -> None:
         """
-        Check if the tx is affordable.
+        Handle a transaction for signing.
 
-        :param tx_message: the transaction message
-        :return: whether the transaction is affordable or not
-        """
-        is_affordable = True
-        if self.context.ownership_state.is_initialized:
-            is_affordable = self.context.ownership_state.is_affordable_transaction(
-                tx_message
-            )
-        if self.context.ledger_state_proxy.is_initialized and (
-            tx_message.ledger_id != OFF_CHAIN
-        ):
-            is_affordable = (
-                is_affordable
-                and self.context.ledger_state_proxy.is_affordable_transaction(
-                    tx_message
-                )
-            )
-        if not self.context.ownership_state.is_initialized and not (
-            self.context.ledger_state_proxy.is_initialized
-            and (tx_message.ledger_id != OFF_CHAIN)
-        ):
-            logger.warning(
-                "[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(
-                    self.agent_name
-                )
-            )
-            is_affordable = True
-        return is_affordable
-
-    def _settle_tx(self, tx_message: TransactionMessage) -> Optional[str]:
-        """
-        Settle the tx.
-
-        :param tx_message: the transaction message
-        :return: the transaction digest
-        """
-        if tx_message.ledger_id == OFF_CHAIN:
-            logger.info(
-                "[{}]: Cannot settle transaction, settlement happens off chain!".format(
-                    self.agent_name
-                )
-            )
-            tx_digest = OFF_CHAIN_SETTLEMENT_DIGEST
-        else:
-            logger.info("[{}]: Settling transaction on chain!".format(self.agent_name))
-            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
-            tx_digest = self.context.ledger_apis.transfer(
-                crypto_object,
-                tx_message.tx_counterparty_addr,
-                tx_message.counterparty_amount,
-                tx_message.fees,
-                info=tx_message.info,
-                tx_nonce=tx_message.tx_nonce,
-            )
-        return tx_digest
-
-    def _handle_tx_message_for_signing(self, tx_message: TransactionMessage) -> None:
-        """
-        Handle a transaction message for signing.
-
-        :param tx_message: the transaction message
+        :param signing_msg: the signing message
+        :param signing_dialogue: the signing dialogue
         :return: None
         """
-        tx_message_response = TransactionMessage.respond_signing(
-            tx_message, performative=TransactionMessage.Performative.REJECTED_SIGNING,
+        signing_msg_response = SigningMessage(
+            performative=SigningMessage.Performative.ERROR,
+            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+            target=signing_msg.message_id,
+            message_id=signing_msg.message_id + 1,
+            skill_callback_ids=signing_msg.skill_callback_ids,
+            skill_callback_info=signing_msg.skill_callback_info,
+            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
         )
-        if self._is_acceptable_for_signing(tx_message):
-            if self._is_valid_message(tx_message):
-                tx_signature = self._sign_tx_hash(tx_message)
-                if tx_signature is not None:
-                    tx_message_response = TransactionMessage.respond_signing(
-                        tx_message,
-                        performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                        signed_payload={"tx_signature": tx_signature},
-                    )
-            if self._is_valid_tx(tx_message):
-                tx_signed = self._sign_ledger_tx(tx_message)
-                if tx_signed is not None:
-                    tx_message_response = TransactionMessage.respond_signing(
-                        tx_message,
-                        performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                        signed_payload={"tx_signed": tx_signed},
-                    )
-        self.message_out_queue.put(tx_message_response)
+        if self._is_acceptable_for_signing(signing_msg):
+            signed_tx = self.wallet.sign_transaction(
+                signing_msg.raw_transaction.ledger_id, signing_msg.raw_transaction.body
+            )
+            if signed_tx is not None:
+                signing_msg_response = SigningMessage(
+                    performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
+                    target=signing_msg.message_id,
+                    message_id=signing_msg.message_id + 1,
+                    skill_callback_ids=signing_msg.skill_callback_ids,
+                    skill_callback_info=signing_msg.skill_callback_info,
+                    signed_transaction=SignedTransaction(
+                        signing_msg.raw_transaction.ledger_id, signed_tx
+                    ),
+                )
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_dialogue.update(signing_msg_response)
+        self.message_out_queue.put(signing_msg_response)
 
-    def _is_acceptable_for_signing(self, tx_message: TransactionMessage) -> bool:
+    def _is_acceptable_for_signing(self, signing_msg: SigningMessage) -> bool:
         """
         Check if the tx message is acceptable for signing.
 
-        :param tx_message: the transaction message
+        :param signing_msg: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        result = (
-            (self._is_valid_message(tx_message) or self._is_valid_tx(tx_message))
-            and self._is_utility_enhancing(tx_message)
-            and self._is_affordable(tx_message)
-        )
+        result = self.context.preferences.is_utility_enhancing(
+            self.context.ownership_state, signing_msg.terms
+        ) and self.context.ownership_state.is_affordable(signing_msg.terms)
         return result
 
-    @staticmethod
-    def _is_valid_message(tx_message: TransactionMessage) -> bool:
-        """
-        Check if the tx hash is present and matches the terms.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction hash is valid
-        """
-        # TODO check the hash matches the terms of the transaction, this means dm requires knowledge of how the hash is composed
-        tx_hash = tx_message.signing_payload.get("tx_hash")
-        is_valid = isinstance(tx_hash, bytes)
-        return is_valid
-
-    def _is_valid_tx(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the transaction message contains a valid ledger transaction.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction is valid
-        """
-        tx = tx_message.signing_payload.get("tx")
-        is_valid = tx is not None
-        return is_valid
-
-    def _sign_tx_hash(self, tx_message: TransactionMessage) -> Optional[str]:
-        """
-        Sign the tx hash.
-
-        :param tx_message: the transaction message
-        :return: the signature of the signing payload
-        """
-        if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get("ethereum", None)
-            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
-        else:
-            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id, None)
-        if crypto_object is not None:
-            tx_hash = cast(bytes, tx_message.signing_payload["tx_hash"])
-            is_deprecated_mode = tx_message.signing_payload.get(
-                "is_deprecated_mode", False
-            )
-            tx_signature = crypto_object.sign_message(
-                tx_hash, is_deprecated_mode
-            )  # type: Optional[str]
-        else:
-            tx_signature = None
-        return tx_signature
-
-    def _sign_ledger_tx(self, tx_message: TransactionMessage) -> Optional[Any]:
-        """
-        Handle a transaction message for deployment.
-
-        :param tx_message: the transaction message
-        :return: None
-        """
-        if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get("ethereum", None)
-            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
-        else:
-            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id, None)
-        if crypto_object is not None:
-            tx = tx_message.signing_payload["tx"]
-            tx_signed = crypto_object.sign_transaction(tx)  # type: Optional[Any]
-        else:
-            tx_signed = None
-        return tx_signed
-
     def _handle_state_update_message(
-        self, state_update_message: StateUpdateMessage
+        self, state_update_msg: StateUpdateMessage
     ) -> None:
         """
         Handle a state update message.
@@ -857,30 +735,38 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param state_update_message: the state update message
         :return: None
         """
-        if (
-            state_update_message.performative
-            == StateUpdateMessage.Performative.INITIALIZE
-        ):
+        state_update_dialogue = cast(
+            Optional[StateUpdateDialogue],
+            self.state_update_dialogues.update(state_update_msg),
+        )
+        if state_update_dialogue is None:  # pragma: no cover
+            logger.error(
+                "[{}]: Could not construct state_update dialogue. Aborting!".format(
+                    self.agent_name
+                )
+            )
+            return
+
+        if state_update_msg.performative == StateUpdateMessage.Performative.INITIALIZE:
             logger.warning(
                 "[{}]: Applying ownership_state and preferences initialization!".format(
                     self.agent_name
                 )
             )
             self.context.ownership_state.set(
-                amount_by_currency_id=state_update_message.amount_by_currency_id,
-                quantities_by_good_id=state_update_message.quantities_by_good_id,
+                amount_by_currency_id=state_update_msg.amount_by_currency_id,
+                quantities_by_good_id=state_update_msg.quantities_by_good_id,
             )
             self.context.preferences.set(
-                exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id,
-                utility_params_by_good_id=state_update_message.utility_params_by_good_id,
-                tx_fee=state_update_message.tx_fee,
+                exchange_params_by_currency_id=state_update_msg.exchange_params_by_currency_id,
+                utility_params_by_good_id=state_update_msg.utility_params_by_good_id,
             )
             self.context.goal_pursuit_readiness.update(
                 GoalPursuitReadiness.Status.READY
             )
-        elif state_update_message.performative == StateUpdateMessage.Performative.APPLY:
+        elif state_update_msg.performative == StateUpdateMessage.Performative.APPLY:
             logger.info("[{}]: Applying state update!".format(self.agent_name))
             self.context.ownership_state.apply_delta(
-                delta_amount_by_currency_id=state_update_message.amount_by_currency_id,
-                delta_quantities_by_good_id=state_update_message.quantities_by_good_id,
+                delta_amount_by_currency_id=state_update_msg.amount_by_currency_id,
+                delta_quantities_by_good_id=state_update_msg.quantities_by_good_id,
             )

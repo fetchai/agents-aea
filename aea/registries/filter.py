@@ -21,33 +21,19 @@
 
 import logging
 import queue
-import re
 from queue import Queue
-from typing import List, Optional, Tuple, TypeVar, cast
+from typing import List, Optional, cast
 
 from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
+from aea.protocols.signing.message import SigningMessage
 from aea.registries.resources import Resources
-from aea.skills.base import Behaviour, Handler, Model
-from aea.skills.tasks import Task
+from aea.skills.base import Behaviour, Handler
 
 logger = logging.getLogger(__name__)
-
-PACKAGE_NAME_REGEX = re.compile(
-    "^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE
-)
-INTERNAL_PROTOCOL_ID = PublicId.from_str("fetchai/internal:0.1.0")
-DECISION_MAKER = "decision_maker"
-
-Item = TypeVar("Item")
-ItemId = TypeVar("ItemId")
-ComponentId = Tuple[SkillId, str]
-SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
 
 
 class Filter:
@@ -123,20 +109,20 @@ class Filter:
             try:
                 internal_message = (
                     self.decision_maker_out_queue.get_nowait()
-                )  # type: Optional[InternalMessage]
+                )  # type: Optional[Message]
                 self._process_internal_message(internal_message)
             except queue.Empty:
                 logger.warning("The decision maker out queue is unexpectedly empty.")
                 continue
 
-    def _process_internal_message(
-        self, internal_message: Optional[InternalMessage]
-    ) -> None:
+    def _process_internal_message(self, internal_message: Optional[Message]) -> None:
         if internal_message is None:
             logger.warning("Got 'None' while processing internal messages.")
-        elif isinstance(internal_message, TransactionMessage):
-            internal_message = cast(TransactionMessage, internal_message)
-            self._handle_tx_message(internal_message)
+        elif isinstance(
+            internal_message, SigningMessage
+        ):  # TODO: remove; all messages allowed
+            internal_message = cast(SigningMessage, internal_message)
+            self._handle_signing_message(internal_message)
         else:
             # TODO: is it expected unknown data type here?
             logger.warning("Cannot handle a {} message.".format(type(internal_message)))
@@ -156,16 +142,23 @@ class Filter:
                         "Error when trying to add a new behaviour: {}".format(str(e))
                     )
 
-    def _handle_tx_message(self, tx_message: TransactionMessage):
+    def _handle_signing_message(self, signing_message: SigningMessage):
         """Handle transaction message from the Decision Maker."""
-        skill_callback_ids = tx_message.skill_callback_ids
+        skill_callback_ids = [
+            PublicId.from_str(skill_id)
+            for skill_id in signing_message.skill_callback_ids
+        ]
         for skill_id in skill_callback_ids:
-            handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
+            handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+                signing_message.protocol_id, skill_id
+            )
             if handler is not None:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)
                 )
-                handler.handle(cast(Message, tx_message))
+                signing_message.counterparty = "decision_maker"  # TODO: temp fix
+                signing_message.is_incoming = True
+                handler.handle(cast(Message, signing_message))
             else:
                 logger.warning(
                     "No internal handler fetched for skill_id={}".format(skill_id)

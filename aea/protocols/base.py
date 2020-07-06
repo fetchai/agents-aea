@@ -51,6 +51,13 @@ class Message:
     protocol_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
+    class Performative(Enum):
+        """Performatives for the base message."""
+
+        def __str__(self):
+            """Get the string representation."""
+            return str(self.value)
+
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
@@ -128,10 +135,10 @@ class Message:
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Enum:
+    def performative(self) -> "Performative":
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
-        return cast(Enum, self.get("performative"))
+        return cast(Message.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
@@ -161,7 +168,7 @@ class Message:
         """Check value is set for key."""
         return key in self._body
 
-    def _is_consistent(self) -> bool:
+    def _is_consistent(self) -> bool:  # pylint: disable=no-self-use
         """Check that the data is consistent."""
         return True
 
@@ -333,7 +340,14 @@ class Protocol(Component):
             configuration.prefix_import_path + ".message"
         )
         classes = inspect.getmembers(class_module, inspect.isclass)
-        message_classes = list(filter(lambda x: re.match("\\w+Message", x[0]), classes))
+        name_camel_case = "".join(
+            word.capitalize() for word in configuration.name.split("_")
+        )
+        message_classes = list(
+            filter(
+                lambda x: re.match("{}Message".format(name_camel_case), x[0]), classes
+            )
+        )
         assert len(message_classes) == 1, "Not exactly one message class detected."
         message_class = message_classes[0][1]
         class_module = importlib.import_module(
@@ -341,7 +355,10 @@ class Protocol(Component):
         )
         classes = inspect.getmembers(class_module, inspect.isclass)
         serializer_classes = list(
-            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
+            filter(
+                lambda x: re.match("{}Serializer".format(name_camel_case), x[0]),
+                classes,
+            )
         )
         assert (
             len(serializer_classes) == 1

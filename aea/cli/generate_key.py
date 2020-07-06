@@ -24,14 +24,14 @@ from pathlib import Path
 import click
 
 from aea.crypto.helpers import IDENTIFIER_TO_KEY_FILES, create_private_key
-from aea.crypto.registry import registry
+from aea.crypto.registries import crypto_registry
 
 
 @click.command()
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice([*list(registry.supported_crypto_ids), "all"]),
+    type=click.Choice([*list(crypto_registry.supported_ids), "all"]),
     required=True,
 )
 def generate_key(type_):

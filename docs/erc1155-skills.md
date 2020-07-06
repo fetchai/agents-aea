@@ -31,16 +31,43 @@ Keep it running for all the following demos.
 
 ### Create the deployer AEA
 
+Fetch the AEA that will deploy the contract.
+
+``` bash
+aea fetch fetchai/erc1155_deployer:0.7.0
+cd erc1155_deployer
+aea install
+```
+
+<details><summary>Alternatively, create from scratch.</summary>
+<p>
+
 Create the AEA that will deploy the contract.
 
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/erc1155_deploy:0.6.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/erc1155_deploy:0.7.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
+
+Then update the agent config (`aea-config.yaml`) with the default routing:
+``` yaml
+default_routing:
+  fetchai/contract_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+```
+
+And change the default ledger:
+``` bash
+aea config set agent.default_ledger ethereum
+```
+
+</p>
+</details>
 
 Additionally, create the private key for the deployer AEA. Generate and add a key for Ethereum use:
 
@@ -51,16 +78,43 @@ aea add-key ethereum eth_private_key.txt
 
 ### Create the client AEA
 
-In another terminal, create the AEA that will sign the transaction.
+In another terminal, fetch the AEA that will get some tokens from the deployer.
+
+``` bash
+aea fetch fetchai/erc1155_client:0.7.0
+cd erc1155_client
+aea install
+```
+
+<details><summary>Alternatively, create from scratch.</summary>
+<p>
+
+Create the AEA that will get some tokens from the deployer.
 
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/erc1155_client:0.5.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/erc1155_client:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
+
+Then update the agent config (`aea-config.yaml`) with the default routing:
+``` yaml
+default_routing:
+  fetchai/contract_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+```
+
+And change the default ledger:
+``` bash
+aea config set agent.default_ledger ethereum
+```
+
+</p>
+</details>
 
 Additionally, create the private key for the client AEA. Generate and add a key for Ethereum use:
 
@@ -71,8 +125,8 @@ aea add-key ethereum eth_private_key.txt
 
 ### Update the AEA configs
 
-Both in `my_erc1155_deploy/aea-config.yaml` and
-`my_erc1155_client/aea-config.yaml`, replace `ledger_apis: {}` with the following based on the network you want to connect
+Both in `erc1155_deployer/aea-config.yaml` and
+`erc1155_client/aea-config.yaml`, replace `ledger_apis: {}` with the following based on the network you want to connect
 
 Connect to Ethereum:
 ``` yaml
@@ -81,10 +135,6 @@ ledger_apis:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
-```
-And change the default ledger:
-``` bash
-aea config set agent.default_ledger ethereum
 ```
 
 ### Fund the AEAs
@@ -111,7 +161,7 @@ aea get-wealth ethereum
 First, run the deployer AEA.
 
 ``` bash 
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 
 It will perform the following steps:
@@ -127,7 +177,7 @@ Successfully minted items. Transaction digest: ...
 Then, in the separate terminal run the client AEA.
 
 ``` bash 
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 
 You will see that upon discovery the two AEAs exchange information about the transaction and the client at the end signs and sends the signature to the deployer AEA to send it to the network.

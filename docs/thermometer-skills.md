@@ -70,7 +70,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.3.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.4.0 --alias my_thermometer_aea
 cd thermometer_aea
 aea install
 ```
@@ -82,10 +82,11 @@ The following steps create the thermometer AEA from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/thermometer:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/thermometer:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -93,6 +94,11 @@ In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the follo
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -102,7 +108,7 @@ ledger_apis:
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.3.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.4.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -114,10 +120,11 @@ The following steps create the thermometer client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/thermometer_client:0.3.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/thermometer_client:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -127,6 +134,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -168,7 +180,7 @@ Alternatively, to connect to Cosmos:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```
 
 <strong>Wealth:</strong>
@@ -250,7 +262,7 @@ This updates the thermometer client skill config (`my_thermometer_client/vendor/
 
 Finally, run both AEAs from their respective directories:
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 
 You can see that the AEAs find each other, negotiate and eventually trade.

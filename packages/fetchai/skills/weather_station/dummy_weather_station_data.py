@@ -70,7 +70,8 @@ if con is not None:
 class Forecast:
     """Represents a whether forecast."""
 
-    def add_data(self, tagged_data: Dict[str, Union[int, datetime.datetime]]) -> None:
+    @staticmethod
+    def add_data(tagged_data: Dict[str, Union[int, datetime.datetime]]) -> None:
         """
         Add data to the forecast.
 

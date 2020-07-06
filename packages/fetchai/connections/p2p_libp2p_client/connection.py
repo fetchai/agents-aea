@@ -34,7 +34,7 @@ from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.2.0")
 
 
 class Uri:
@@ -136,7 +136,7 @@ class P2PLibp2pClientConnection(Connection):
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._in_queue = None  # type: Optional[asyncio.Queue]
-        self._process_message_task = None  # type: Union[asyncio.Future, None]
+        self._process_messages_task = None  # type: Union[asyncio.Future, None]
 
     async def connect(self) -> None:
         """
@@ -154,7 +154,9 @@ class P2PLibp2pClientConnection(Connection):
 
             # connect the tcp socket
             self._reader, self._writer = await asyncio.open_connection(
-                self.node_uri.host, self.node_uri._port, loop=self._loop
+                self.node_uri.host,
+                self.node_uri._port,  # pylint: disable=protected-access
+                loop=self._loop,
             )
 
             # send agent address to node
@@ -235,7 +237,7 @@ class P2PLibp2pClientConnection(Connection):
         except CancelledError:
             logger.debug("Receive cancelled.")
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.exception(e)
             return None
 

@@ -37,4 +37,6 @@ class DummyHandler(Handler):
 
     def handle(self, message: Message) -> None:
         """Handle incoming message, actually noop."""
-        randint(1, 100) + randint(1, 100)  # nosec
+        randint(1, 100) + randint(  # nosec # pylint: disable=expression-not-assigned
+            1, 100
+        )

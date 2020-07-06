@@ -22,7 +22,6 @@
 import os
 import shutil
 from pathlib import Path
-from typing import cast
 
 import click
 
@@ -30,11 +29,11 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import check_aea_project, clean_after
+from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import validate_package_name
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
-from aea.configurations.base import (  # noqa: F401
+from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-import
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -51,49 +50,56 @@ def scaffold(click_context):
 
 @scaffold.command()
 @click.argument("connection_name", type=str, required=True)
-@click.pass_context
-def connection(click_context, connection_name: str) -> None:
+@pass_ctx
+def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
-    _scaffold_item(click_context, "connection", connection_name)
+    scaffold_item(ctx, "connection", connection_name)
 
 
 @scaffold.command()
 @click.argument("contract_name", type=str, required=True)
-@click.pass_context
-def contract(click_context, contract_name: str) -> None:
+@pass_ctx
+def contract(ctx: Context, contract_name: str) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
-    _scaffold_item(click_context, "contract", contract_name)  # pragma: no cover
+    scaffold_item(ctx, "contract", contract_name)
 
 
 @scaffold.command()
 @click.argument("protocol_name", type=str, required=True)
-@click.pass_context
-def protocol(click_context, protocol_name: str):
+@pass_ctx
+def protocol(ctx: Context, protocol_name: str):
     """Add a protocol scaffolding to the configuration file and agent."""
-    _scaffold_item(click_context, "protocol", protocol_name)
+    scaffold_item(ctx, "protocol", protocol_name)
 
 
 @scaffold.command()
 @click.argument("skill_name", type=str, required=True)
-@click.pass_context
-def skill(click_context, skill_name: str):
+@pass_ctx
+def skill(ctx: Context, skill_name: str):
     """Add a skill scaffolding to the configuration file and agent."""
-    _scaffold_item(click_context, "skill", skill_name)
+    scaffold_item(ctx, "skill", skill_name)
 
 
 @scaffold.command()
-@click.pass_context
-def decision_maker_handler(click_context):
+@pass_ctx
+def decision_maker_handler(ctx: Context):
     """Add a decision maker scaffolding to the configuration file and agent."""
-    _scaffold_dm_handler(click_context)
+    _scaffold_dm_handler(ctx)
 
 
 @clean_after
-def _scaffold_item(click_context, item_type, item_name):
-    """Add an item scaffolding to the configuration file and agent."""
-    validate_package_name(item_name)
+def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
+    """
+    Add an item scaffolding to the configuration file and agent.
 
-    ctx = cast(Context, click_context.obj)
+    :param ctx: Context object.
+    :param item_type: type of item.
+    :param item_name: item name.
+
+    :return: None
+    :raises ClickException: if some error occures.
+    """
+    validate_package_name(item_name)
     author_name = ctx.agent_config.author
     loader = getattr(ctx, "{}_loader".format(item_type))
     default_config_filename = globals()[
@@ -161,9 +167,8 @@ def _scaffold_item(click_context, item_type, item_name):
         raise click.ClickException(str(e))
 
 
-def _scaffold_dm_handler(click_context):
+def _scaffold_dm_handler(ctx: Context):
     """Add a scaffolded decision maker handler to the project and configuration."""
-    ctx = cast(Context, click_context.obj)
     existing_dm_handler = getattr(ctx.agent_config, "decision_maker_handler")
 
     # check if we already have a decision maker in the project
@@ -172,16 +177,13 @@ def _scaffold_dm_handler(click_context):
             "A decision maker handler specification already exists. Aborting..."
         )
 
+    dest = Path("decision_maker.py")
+    agent_name = ctx.agent_config.agent_name
+    click.echo("Adding decision maker scaffold to the agent '{}'...".format(agent_name))
+
+    # create the file name
+    dotted_path = ".decision_maker::DecisionMakerHandler"
     try:
-        agent_name = ctx.agent_config.agent_name
-        click.echo(
-            "Adding decision maker scaffold to the agent '{}'...".format(agent_name)
-        )
-
-        # create the file name
-        dest = Path("decision_maker.py")
-        dotted_path = ".decision_maker::DecisionMakerHandler"
-
         # copy the item package into the agent project.
         src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
         logger.debug("Copying decision maker. src={} dst={}".format(src, dest))

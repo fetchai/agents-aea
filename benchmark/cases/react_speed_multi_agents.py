@@ -38,9 +38,9 @@ def _make_custom_config(name: str = "dummy_agent", skills_num: int = 1) -> dict:
     :return: dict to be used in AEATestWrapper(**result)
     """
     # noqa
-    def _make_skill(id):
+    def _make_skill(id_):
         return AEATestWrapper.make_skill(
-            config=SkillConfig(name=f"sc{id}", author="fetchai"),
+            config=SkillConfig(name=f"sc{id_}", author="fetchai"),
             handlers={"dummy_handler": DummyHandler},
         )
 

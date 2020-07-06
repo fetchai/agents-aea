@@ -1,13 +1,14 @@
 name: ml_trade
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmXZMVdsBXUJxLZvwwhWBx58xfxMSyoGxdYp5Aeqmzqhzt
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
-  message.py: QmcAqDsYBUArquRtcgyf7jbYcmcq7kcoENBJTqWEjev4s5
+  dialogues.py: QmZFztFu4LxHdsJZpSHizELFStHtz2ZGfQBx9cnP7gHHWf
+  message.py: QmdCpkebeDrFZk4R7S2mrX2KMCDgo8JV78Hj6jb6sA5EL4
   ml_trade.proto: QmeB21MQduEGQCrtiYZQzPpRqHL4CWEkvvcaKZ9GsfE8f6
   ml_trade_pb2.py: QmZVvugPysR1og6kWCJkvo3af2s9pQRHfuj4BptE7gU1EU
   serialization.py: QmSHywy12uQkzakU1RHnnkaPuTzaFTALsKisyYF8dPc8ns

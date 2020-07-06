@@ -19,13 +19,27 @@
 
 """This module contains utilities for building an AEA."""
 import itertools
+import json
 import logging
 import logging.config
 import os
 import pprint
+from collections import defaultdict, deque
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Collection,
+    Deque,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import jsonschema
 
@@ -55,20 +69,20 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.contracts import contract_registry
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     create_private_key,
     try_validate_private_key_path,
 )
-from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.registry import registry
+from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_module
+from aea.helpers.base import load_aea_package, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
@@ -287,6 +301,9 @@ class AEABuilder:
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
+    DEFAULT_SEARCH_SERVICE_ADDRESS = "oef"
+
+    # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -348,6 +365,7 @@ class AEABuilder:
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
+        self._search_service_address: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         if self._with_default_packages:
@@ -407,6 +425,7 @@ class AEABuilder:
         """
         dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
         module = load_module(dotted_path, file_path)
+
         try:
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
@@ -416,6 +435,8 @@ class AEABuilder:
                     dotted_path, class_name, file_path, e
                 )
             )
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+
         return self
 
     def set_skill_exception_policy(
@@ -464,6 +485,16 @@ class AEABuilder:
         :return: self
         """
         self._runtime_mode = runtime_mode
+        return self
+
+    def set_search_service_address(self, search_service_address: str) -> "AEABuilder":
+        """
+        Set the search service address.
+
+        :param search_service_address: the search service address
+        :return: self
+        """
+        self._search_service_address = search_service_address
         return self
 
     def _add_default_packages(self) -> None:
@@ -772,7 +803,9 @@ class AEABuilder:
             )
         else:  # pragma: no cover
             identity = Identity(
-                self._name, address=wallet.addresses[self._default_ledger],
+                self._name,
+                address=wallet.addresses[self._default_ledger],
+                default_address_key=self._default_ledger,
             )
         return identity
 
@@ -825,11 +858,7 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
-    def build(
-        self,
-        connection_ids: Optional[Collection[PublicId]] = None,
-        ledger_apis: Optional[LedgerApis] = None,
-    ) -> AEA:
+    def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
         """
         Build the AEA.
 
@@ -841,7 +870,6 @@ class AEABuilder:
         via 'add_component_instance' and the private keys.
 
         :param connection_ids: select only these connections to run the AEA.
-        :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
@@ -851,7 +879,6 @@ class AEABuilder:
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
         identity = self._build_identity_from_wallet(wallet)
-        ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
         self._load_and_add_components(
@@ -864,7 +891,6 @@ class AEABuilder:
         aea = AEA(
             identity,
             wallet,
-            ledger_apis,
             resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
@@ -878,42 +904,15 @@ class AEABuilder:
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
+            search_service_address=self._get_search_service_address(),
             **deepcopy(self._context_namespace),
         )
         self._load_and_add_components(
             ComponentType.SKILL, resources, agent_context=aea.context
         )
         self._build_called = True
+        self._populate_contract_registry()
         return aea
-
-    def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
-        """
-        Load the ledger apis.
-
-        :param ledger_apis: the ledger apis provided
-        :return: ledger apis
-        """
-        if ledger_apis is not None:
-            self._check_consistent(ledger_apis)
-            ledger_apis = deepcopy(ledger_apis)
-        else:
-            ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
-        return ledger_apis
-
-    def _check_consistent(self, ledger_apis: LedgerApis) -> None:
-        """
-        Check the ledger apis are consistent with the configs.
-
-        :param ledger_apis: the ledger apis provided
-        :return: None
-        """
-        if self.ledger_apis_config != {}:
-            assert (
-                ledger_apis.configs == self.ledger_apis_config
-            ), "Config of LedgerApis does not match provided configs."
-        assert (
-            ledger_apis.default_ledger_id == self._default_ledger
-        ), "Default ledger id of LedgerApis does not match provided default ledger."
 
     def _get_agent_loop_timeout(self) -> float:
         """
@@ -985,7 +984,7 @@ class AEABuilder:
 
     def _get_default_connection(self) -> PublicId:
         """
-        Return the default connection
+        Return the default connection.
 
         :return: the default connection
         """
@@ -1011,6 +1010,18 @@ class AEABuilder:
             self._runtime_mode
             if self._runtime_mode is not None
             else self.DEFAULT_RUNTIME_MODE
+        )
+
+    def _get_search_service_address(self) -> str:
+        """
+        Return the search service address.
+
+        :return: the search service address.
+        """
+        return (
+            self._search_service_address
+            if self._search_service_address is not None
+            else self.DEFAULT_SEARCH_SERVICE_ADDRESS
         )
 
     def _check_configuration_not_already_added(
@@ -1159,7 +1170,10 @@ class AEABuilder:
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
 
-        if agent_configuration._default_connection is None:
+        if (
+            agent_configuration._default_connection  # pylint: disable=protected-access
+            is None
+        ):
             self.set_default_connection(DEFAULT_CONNECTION)
         else:
             self.set_default_connection(
@@ -1202,10 +1216,6 @@ class AEABuilder:
                 ComponentId(ComponentType.CONNECTION, p_id)
                 for p_id in agent_configuration.connections
             ],
-            [
-                ComponentId(ComponentType.SKILL, p_id)
-                for p_id in agent_configuration.skills
-            ],
         )
         for component_id in component_ids:
             component_path = self._find_component_directory_from_component_id(
@@ -1216,6 +1226,87 @@ class AEABuilder:
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+
+        skill_ids = [
+            ComponentId(ComponentType.SKILL, p_id)
+            for p_id in agent_configuration.skills
+        ]
+
+        if len(skill_ids) == 0:
+            return
+
+        skill_import_order = self._find_import_order(
+            skill_ids, aea_project_path, skip_consistency_check
+        )
+        for skill_id in skill_import_order:
+            component_path = self._find_component_directory_from_component_id(
+                aea_project_path, skill_id
+            )
+            self.add_component(
+                skill_id.component_type,
+                component_path,
+                skip_consistency_check=skip_consistency_check,
+            )
+
+    def _find_import_order(
+        self,
+        skill_ids: List[ComponentId],
+        aea_project_path: Path,
+        skip_consistency_check: bool,
+    ) -> List[ComponentId]:
+        """Find import order for skills.
+
+        We need to handle skills separately, since skills can depend on each other.
+
+        That is, we need to:
+        - load the skill configurations to find the import order
+        - detect if there are cycles
+        - import skills from the leaves of the dependency graph, by finding a topological ordering.
+        """
+        # the adjacency list for the dependency graph
+        depends_on: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
+        # the adjacency list for the inverse dependency graph
+        supports: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
+        # nodes with no incoming edges
+        roots = copy(skill_ids)
+        for skill_id in skill_ids:
+            component_path = self._find_component_directory_from_component_id(
+                aea_project_path, skill_id
+            )
+            configuration = cast(
+                SkillConfig,
+                ComponentConfiguration.load(
+                    skill_id.component_type, component_path, skip_consistency_check
+                ),
+            )
+
+            if len(configuration.skills) != 0:
+                roots.remove(skill_id)
+            depends_on[skill_id].update(
+                [
+                    ComponentId(ComponentType.SKILL, skill)
+                    for skill in configuration.skills
+                ]
+            )
+            for dependency in configuration.skills:
+                supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
+
+        # find topological order (Kahn's algorithm)
+        queue: Deque[ComponentId] = deque()
+        order = []
+        queue.extend(roots)
+        while len(queue) > 0:
+            current = queue.pop()
+            order.append(current)
+            for node in supports[current]:
+                depends_on[node].discard(current)
+                if len(depends_on[node]) == 0:
+                    queue.append(node)
+
+        if any(len(edges) > 0 for edges in depends_on.values()):
+            raise AEAException("Cannot load skills, there is a cyclic dependency.")
+
+        return order
 
     @classmethod
     def from_aea_project(
@@ -1270,12 +1361,47 @@ class AEABuilder:
         ).values():
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
+                resources.add_component(component)
+            elif configuration.is_abstract_component:
+                load_aea_package(configuration)
             else:
                 configuration = deepcopy(configuration)
-                component = load_component_from_config(
-                    component_type, configuration, **kwargs
+                component = load_component_from_config(configuration, **kwargs)
+                resources.add_component(component)
+
+    def _populate_contract_registry(self):
+        """Populate contract registry."""
+        for configuration in self._package_dependency_manager.get_components_by_type(
+            ComponentType.CONTRACT
+        ).values():
+            configuration = cast(ContractConfig, configuration)
+            if str(configuration.public_id) in contract_registry.specs:
+                logger.warning(
+                    f"Skipping registration of contract {configuration.public_id} since already registered."
                 )
-            resources.add_component(component)
+                continue
+            logger.debug(f"Registering contract {configuration.public_id}")
+
+            path = Path(
+                configuration.directory, configuration.path_to_contract_interface
+            )
+            with open(path, "r") as interface_file:
+                contract_interface = json.load(interface_file)
+
+            try:
+                contract_registry.register(
+                    id_=str(configuration.public_id),
+                    entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+                    class_kwargs={"contract_interface": contract_interface},
+                    contract_config=configuration,  # TODO: resolve configuration being applied globally
+                )
+            except AEAException as e:
+                if "Cannot re-register id:" in str(e):
+                    logger.warning(
+                        "Already registered: {}".format(configuration.class_name)
+                    )
+                else:
+                    raise e
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:
@@ -1287,6 +1413,7 @@ class AEABuilder:
             )
 
 
+# TODO this function is repeated in 'aea.cli.utils.package_utils.py'
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     """Verify or create private keys."""
     path_to_configuration = aea_project_path / DEFAULT_AEA_CONFIG_FILE
@@ -1295,7 +1422,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     agent_configuration = agent_loader.load(fp_read)
 
     for identifier, _value in agent_configuration.private_key_paths.read_all():
-        if identifier not in registry.supported_crypto_ids:
+        if identifier not in crypto_registry.supported_ids:
             ValueError("Unsupported identifier in private key paths.")
 
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():

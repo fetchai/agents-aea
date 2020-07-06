@@ -31,7 +31,9 @@ class AsyncFriendlyQueue(queue.Queue):
         super().__init__(*args, **kwargs)
         self._non_empty_waiters = deque()
 
-    def put(self, item: Any, *args, **kwargs) -> None:
+    def put(  # pylint: disable=signature-differs
+        self, item: Any, *args, **kwargs
+    ) -> None:
         """
         Put an item into the queue.
 
@@ -45,7 +47,7 @@ class AsyncFriendlyQueue(queue.Queue):
                 waiter.set_result, True
             )
 
-    def get(self, *args, **kwargs) -> Any:
+    def get(self, *args, **kwargs) -> Any:  # pylint: disable=signature-differs
         """
         Get an item into the queue.
 

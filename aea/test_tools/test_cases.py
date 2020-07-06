@@ -21,7 +21,7 @@
 import os
 import random
 import shutil
-import signal
+import signal  # pylint: disable=unused-import
 import string
 import subprocess  # nosec
 import sys
@@ -39,7 +39,6 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.loader import ConfigLoader
 from aea.connections.stub.connection import (
@@ -51,12 +50,15 @@ from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.helpers.base import cd, sigint_crossplatform
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
+from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.generic import (
     force_set_config,
     read_envelope_from_file,
     write_envelope_to_file,
 )
+
+from tests.conftest import ROOT_DIR
 
 FETCHAI_NAME = FetchAICrypto.identifier
 
@@ -78,7 +80,7 @@ class BaseAEATestCase(ABC):
     threads: List[Thread] = []  # list of started threads
     packages_dir_path: Path = Path("packages")
     use_packages_dir: bool = True
-    package_registry_src: Path = Path()
+    package_registry_src: Path = Path(ROOT_DIR, "packages")
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
@@ -97,19 +99,25 @@ class BaseAEATestCase(ABC):
         cls.current_agent_context = ""
 
     @classmethod
-    def set_config(cls, dotted_path: str, value: Any, type: str = "str") -> None:
+    def set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> None:
         """
         Set a config.
         Run from agent's directory.
 
         :param dotted_path: str dotted path to config param.
         :param value: a new value to set.
-        :param type: the type
+        :param type_: the type
 
         :return: None
         """
         cls.run_cli_command(
-            "config", "set", dotted_path, str(value), "--type", type, cwd=cls._get_cwd()
+            "config",
+            "set",
+            dotted_path,
+            str(value),
+            "--type",
+            type_,
+            cwd=cls._get_cwd(),
         )
 
     @classmethod
@@ -312,6 +320,23 @@ class BaseAEATestCase(ABC):
         return process
 
     @classmethod
+    def run_interaction(cls) -> subprocess.Popen:
+        """
+        Run interaction as subprocess.
+        Run from agent's directory.
+
+        :param args: CLI args
+
+        :return: subprocess object.
+        """
+        process = cls._run_python_subprocess(
+            "-m", "aea.cli", "interact", cwd=cls._get_cwd()
+        )
+        cls._start_output_read_thread(process)
+        cls._start_error_read_thread(process)
+        return process
+
+    @classmethod
     def terminate_agents(
         cls,
         *subprocesses: subprocess.Popen,
@@ -354,17 +379,21 @@ class BaseAEATestCase(ABC):
         cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
-    def add_item(cls, item_type: str, public_id: str) -> None:
+    def add_item(cls, item_type: str, public_id: str, local: bool = True) -> None:
         """
         Add an item to the agent.
         Run from agent's directory.
 
         :param item_type: str item type.
         :param public_id: public id of the item.
+        :param local: a flag for local folder add True by default.
 
         :return: None
         """
-        cls.run_cli_command("add", "--local", item_type, public_id, cwd=cls._get_cwd())
+        cli_args = ["add", "--local", item_type, public_id]
+        if not local:
+            cli_args.remove("--local")
+        cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
     def scaffold_item(cls, item_type: str, name: str) -> None:
@@ -391,6 +420,20 @@ class BaseAEATestCase(ABC):
         :return: None
         """
         cls.run_cli_command("fingerprint", item_type, public_id, cwd=cls._get_cwd())
+
+    @classmethod
+    def eject_item(cls, item_type: str, public_id: str) -> None:
+        """
+        Eject an item in the agent.
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param public_id: public id of the item.
+
+        :return: None
+        """
+        cli_args = ["eject", item_type, public_id]
+        cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
     def run_install(cls):
@@ -652,7 +695,7 @@ class BaseAEATestCase(ABC):
         cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
-        cls.package_registry_src = None
+        cls.package_registry_src = Path(ROOT_DIR, "packages")
         cls.stdout = {}
         cls.stderr = {}
         try:

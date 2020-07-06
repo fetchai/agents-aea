@@ -16,28 +16,26 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Tests for the webhook connection and channel."""
 
 import asyncio
+import json
 import logging
-import subprocess  # nosec
-import time
+from traceback import print_exc
+from typing import cast
 
-# from unittest import mock
-# from unittest.mock import Mock
-#
-# from aiohttp import web  # type: ignore
-#
-# from multidict import CIMultiDict, CIMultiDictProxy  # type: ignore
+import aiohttp
+from aiohttp.client_reqrep import ClientResponse
 
 import pytest
 
-# from yarl import URL  # type: ignore
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
+from aea.mail.base import Envelope
+
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection
+from packages.fetchai.protocols.http.message import HttpMessage
 
 from ....conftest import (
     get_host,
@@ -48,26 +46,27 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio
-class TestWebhookConnect:
+class TestWebhookConnection:
     """Tests the webhook connection's 'connect' functionality."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Initialise the class."""
-        cls.address = get_host()
-        cls.port = get_unused_tcp_port()
-        cls.identity = Identity("", address="some string")
+        self.host = get_host()
+        self.port = get_unused_tcp_port()
+        self.identity = Identity("", address="some string")
+        self.path = "/webhooks/topic/{topic}/"
+        self.loop = asyncio.get_event_loop()
 
         configuration = ConnectionConfig(
-            webhook_address=cls.address,
-            webhook_port=cls.port,
-            webhook_url_path="/webhooks/topic/{topic}/",
+            webhook_address=self.host,
+            webhook_port=self.port,
+            webhook_url_path=self.path,
             connection_id=WebhookConnection.connection_id,
         )
-        cls.webhook_connection = WebhookConnection(
-            configuration=configuration, identity=cls.identity,
+        self.webhook_connection = WebhookConnection(
+            configuration=configuration, identity=self.identity,
         )
-        cls.webhook_connection.loop = asyncio.get_event_loop()
+        self.webhook_connection.loop = self.loop
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
@@ -79,29 +78,6 @@ class TestWebhookConnect:
         await self.webhook_connection.connect()
         assert self.webhook_connection.connection_status.is_connected is True
 
-
-@pytest.mark.asyncio
-class TestWebhookDisconnection:
-    """Tests the webhook connection's 'disconnect' functionality."""
-
-    @classmethod
-    def setup_class(cls):
-        """Initialise the class."""
-        cls.address = get_host()
-        cls.port = get_unused_tcp_port()
-        cls.identity = Identity("", address="some string")
-
-        configuration = ConnectionConfig(
-            webhook_address=cls.address,
-            webhook_port=cls.port,
-            webhook_url_path="/webhooks/topic/{topic}/",
-            connection_id=WebhookConnection.connection_id,
-        )
-        cls.webhook_connection = WebhookConnection(
-            configuration=configuration, identity=cls.identity,
-        )
-        cls.webhook_connection.loop = asyncio.get_event_loop()
-
     @pytest.mark.asyncio
     async def test_disconnect(self):
         """Test the disconnect functionality of the webhook connection."""
@@ -111,66 +87,73 @@ class TestWebhookDisconnection:
         await self.webhook_connection.disconnect()
         assert self.webhook_connection.connection_status.is_connected is False
 
+    def teardown(self):
+        """Close connection after testing."""
+        try:
+            self.loop.run_until_complete(self.webhook_connection.disconnect())
+        except Exception:
+            print_exc()
+            raise
 
-# ToDo: testing webhooks received
-# @pytest.mark.asyncio
-# async def test_webhook_receive():
-#     """Test the receive functionality of the webhook connection."""
-#     admin_address = "127.0.0.1"
-#     admin_port = 8051
-#     webhook_address = "127.0.0.1"
-#     webhook_port = 8052
-#     agent_address = "some agent address"
-#
-#     webhook_connection = WebhookConnection(
-#         address=agent_address,
-#         webhook_address=webhook_address,
-#         webhook_port=webhook_port,
-#         webhook_url_path="/webhooks/topic/{topic}/",
-#     )
-#     webhook_connection.loop = asyncio.get_event_loop()
-#     await webhook_connection.connect()
-#
-#
-#
-#     # # Start an aries agent process
-#     # process = start_aca(admin_address, admin_port)
-#
-#     received_webhook_envelop = await webhook_connection.receive()
-#     logger.info(received_webhook_envelop)
+    @pytest.mark.asyncio
+    async def test_receive_post_ok(self):
+        """Test the connect functionality of the webhook connection."""
+        await self.webhook_connection.connect()
+        assert self.webhook_connection.connection_status.is_connected is True
+        payload = {"hello": "world"}
+        call_task = self.loop.create_task(self.call_webhook("test_topic", json=payload))
+        envelope = await asyncio.wait_for(self.webhook_connection.receive(), timeout=10)
 
-#     webhook_request_mock = Mock()
-#     webhook_request_mock.method = "POST"
-#     webhook_request_mock.url = URL(val="some url")
-#     webhook_request_mock.version = (1, 1)
-#     webhook_request_mock.headers = CIMultiDictProxy(CIMultiDict(a="Ali"))
-#     webhook_request_mock.body = b"some body"
-#
-#     with mock.patch.object(web.Request, "__init__", return_value=webhook_request_mock):
-#         received_webhook_envelop = await webhook_connection.receive()
-#         logger.info(received_webhook_envelop)
-#
-#     # process.terminate()
+        assert envelope
 
+        message = cast(HttpMessage, envelope.message)
+        assert message.method.upper() == "POST"
+        assert message.bodyy.decode("utf-8") == json.dumps(payload)
+        await call_task
 
-def start_aca(admin_address: str, admin_port: int):
-    process = subprocess.Popen(  # nosec
-        [
-            "aca-py",
-            "start",
-            "--admin",
-            admin_address,
-            str(admin_port),
-            "--admin-insecure-mode",
-            "--inbound-transport",
-            "http",
-            "0.0.0.0",
-            "8000",
-            "--outbound-transport",
-            "http",
-            "--webhook-url",
-            "http://127.0.0.1:8052/webhooks",
-        ]
-    )
-    time.sleep(4.0)
-    return process
+    @pytest.mark.asyncio
+    async def test_send(self):
+        """Test the connect functionality of the webhook connection."""
+        await self.webhook_connection.connect()
+        assert self.webhook_connection.connection_status.is_connected is True
+
+        http_message = HttpMessage(
+            dialogue_reference=("", ""),
+            target=0,
+            message_id=1,
+            performative=HttpMessage.Performative.REQUEST,
+            method="get",
+            url="/",
+            headers="",
+            bodyy="",
+            version="",
+        )
+        envelope = Envelope(
+            to="addr",
+            sender="my_id",
+            protocol_id=PublicId.from_str("fetchai/http:0.3.0"),
+            message=http_message,
+        )
+        await self.webhook_connection.send(envelope)
+
+    async def call_webhook(self, topic: str, **kwargs) -> ClientResponse:
+        """
+        Make a http request to a webhook.
+
+        :param topic: topic to use
+        :params **kwargs: data or json for payload
+
+        :return: http response
+        """
+        path = self.path.format(topic=topic)
+        method = kwargs.get("method", "post")
+        url = f"http://{self.host}:{self.port}{path}"
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.request(method, url, **kwargs) as resp:
+                    await resp.read()
+                    return resp
+        except Exception:
+            print_exc()
+            raise

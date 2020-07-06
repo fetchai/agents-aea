@@ -149,7 +149,8 @@ class ProxyEnv(gym.Env):
         # Send the message via the proxy agent and to the environment
         self._skill_context.outbox.put_message(message=gym_msg)
 
-    def _message_to_percept(self, message: Message) -> Feedback:
+    @staticmethod
+    def _message_to_percept(message: Message) -> Feedback:
         """
         Transform the message received from the gym environment into observation, reward, done, info.
 

@@ -19,10 +19,18 @@
 
 """This module contains the crypto modules."""
 
-from aea.crypto.registry import make, register  # noqa
+from aea.crypto.registries import register_crypto, register_ledger_api  # noqa
 
-register(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
+register_crypto(id_="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
+register_crypto(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
+register_crypto(id_="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
 
-register(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
+register_ledger_api(
+    id_="fetchai", entry_point="aea.crypto.fetchai:FetchAIApi",
+)
 
-register(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
+register_ledger_api(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumApi")
+
+register_ledger_api(
+    id_="cosmos", entry_point="aea.crypto.cosmos:CosmosApi",
+)

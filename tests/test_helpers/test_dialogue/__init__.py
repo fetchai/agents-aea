@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the helper module."""
+"""This module contains the tests for the dialogue helper module."""

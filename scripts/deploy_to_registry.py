@@ -162,7 +162,7 @@ def push_package(package_id: PackageId, runner: CliRunner) -> None:
         ), "Publishing {} with public_id '{}' failed with: {}".format(
             package_id.package_type, package_id.public_id, result.output
         )
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         print("An exception occured: {}".format(e))
     finally:
         os.chdir(cwd)
@@ -211,7 +211,7 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
         ), "Pushing {} with public_id '{}' failed with: {}".format(
             package_id.package_type, package_id.public_id, result.output
         )
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         print("An exception occured: {}".format(e))
     finally:
         os.chdir(cwd)

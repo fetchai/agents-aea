@@ -1,10 +1,10 @@
 AEAs are more than just agents.
 
-<center>![AEA vs Agent vs Multiplexer](assets/aea-vs-agent-vs-multiplexer.png)</center>
+<img src="../assets/aea-vs-agent-vs-multiplexer.png" alt="AEA vs Agent vs Multiplexer" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
 
 In this guide we show some of the differences in terms of code.
 
-The <a href="../build-aea-programmatically">Build an AEA programmatically</a> guide shows how to programmatically build an AEA. We can build an agent of the `Agent` class programmatically as well.
+The <a href="../build-aea-programmatically">Build an AEA programmatically</a> guide shows how to programmatically build an AEA. We can build an agent of the <a href="../api/agent#agent-objects">`Agent`</a> class programmatically as well.
 
 First, import the python and application specific libraries.
 ``` python
@@ -122,7 +122,7 @@ We use the input and output text files to send an envelope to our agent and rece
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             f.write(message_text)
@@ -241,7 +241,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             f.write(message_text)

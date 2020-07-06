@@ -2,30 +2,32 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/car_detector:0.5.0
+aea fetch fetchai/car_detector:0.6.0
 cd car_detector
 aea install
 ```
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/carpark_detection:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/carpark_detection:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
-aea fetch fetchai/car_data_buyer:0.5.0
+aea fetch fetchai/car_data_buyer:0.6.0
 cd car_data_buyer
 aea install
 ```
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/carpark_client:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/carpark_client:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
 aea generate-key fetchai
@@ -67,7 +69,7 @@ aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.currenc
 aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 ``` bash
 cd ..
@@ -80,6 +82,10 @@ ledger_apis:
     network: testnet
 ```
 ``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+```
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
@@ -89,5 +95,5 @@ ledger_apis:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```

@@ -50,17 +50,24 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             }
         }
         setting_path = "agent.ledger_apis"
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0",
+            "fetchai/contract_api:0.1.0": "fetchai/ledger:0.1.0",
+        }
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
         self.force_set_config(setting_path, ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.4.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_deploy:0.6.0")
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
+        self.add_item("skill", "fetchai/erc1155_deploy:0.7.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.6.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.7.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -79,13 +86,16 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         # add packages for agent two
         self.set_agent_context(client_aea_name)
         self.force_set_config(setting_path, ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.4.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
+        self.add_item("connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/ledger:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_client:0.5.0")
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
+        self.add_item("skill", "fetchai/erc1155_client:0.6.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.6.0", client_aea_name
+            "fetchai/erc1155_client:0.7.0", client_aea_name
         )
         assert (
             diff == []
@@ -103,14 +113,19 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
 
         # run agents
         self.set_agent_context(deploy_aea_name)
-        deploy_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
+        deploy_aea_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
 
         check_strings = (
-            "updating erc1155 service on OEF search node.",
-            "unregistering erc1155 service from OEF search node.",
-            "Successfully deployed the contract. Transaction digest:",
-            "Successfully created items. Transaction digest:",
-            "Successfully minted items. Transaction digest:",
+            "starting balance on ethereum ledger=",
+            "received raw transaction=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "transaction signing was successful.",
+            "sending transaction to ledger.",
+            "transaction was successfully submitted. Transaction digest=",
+            "requesting transaction receipt.",
+            "transaction was successfully settled. Transaction receipt="
+            "Requesting create batch transaction...",
+            "Requesting mint batch transaction...",
         )
         missing_strings = self.missing_from_output(
             deploy_aea_process, check_strings, timeout=420, is_terminating=False
@@ -120,12 +135,20 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
 
         self.set_agent_context(client_aea_name)
-        client_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
+        client_aea_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
 
         check_strings = (
             "Sending PROPOSE to agent=",
             "received ACCEPT_W_INFORM from sender=",
-            "Successfully conducted atomic swap. Transaction digest:",
+            "Requesting single atomic swap transaction...",
+            "received raw transaction=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "transaction signing was successful.",
+            "sending transaction to ledger.",
+            "transaction was successfully submitted. Transaction digest=",
+            "requesting transaction receipt.",
+            "transaction was successfully settled. Transaction receipt=",
+            "Demo finished!",
         )
         missing_strings = self.missing_from_output(
             deploy_aea_process, check_strings, timeout=360, is_terminating=False
@@ -138,6 +161,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             "found agents=",
             "sending CFP to agent=",
             "received valid PROPOSE from sender=",
+            "requesting single hash message from contract api...",
+            "received raw message=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "sending ACCEPT_W_INFORM to agent=",
         )
         missing_strings = self.missing_from_output(

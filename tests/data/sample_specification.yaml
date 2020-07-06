@@ -2,7 +2,7 @@ name: t_protocol
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 description: 'A protocol for testing purposes.'
 speech_acts:
   performative_ct:
@@ -41,7 +41,7 @@ speech_acts:
     content_o_bool: pt:optional[pt:bool]
     content_o_set_float: pt:optional[pt:set[pt:float]]
     content_o_list_bytes: pt:optional[pt:list[pt:bytes]]
-    content_o_dict_str_int: pt:optional[pt:dict[pt:str, ct:int]]
+    content_o_dict_str_int: pt:optional[pt:dict[pt:str, pt:int]]
     content_o_union: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:int], pt:set[pt:bytes], pt:list[pt:bool], pt:dict[pt:str, pt:float]]]
   performative_empty_contents: {}
 ---

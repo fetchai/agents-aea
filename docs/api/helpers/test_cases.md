@@ -37,7 +37,7 @@ Unset the current agent context.
 
 ```python
  | @classmethod
- | set_config(cls, dotted_path: str, value: Any, type: str = "str") -> None
+ | set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> None
 ```
 
 Set a config.
@@ -47,7 +47,7 @@ Run from agent's directory.
 
 - `dotted_path`: str dotted path to config param.
 - `value`: a new value to set.
-- `type`: the type
+- `type_`: the type
 
 **Returns**:
 
@@ -231,6 +231,25 @@ Run from agent's directory.
 
 subprocess object.
 
+<a name=".aea.test_tools.test_cases.BaseAEATestCase.run_interaction"></a>
+#### run`_`interaction
+
+```python
+ | @classmethod
+ | run_interaction(cls) -> subprocess.Popen
+```
+
+Run interaction as subprocess.
+Run from agent's directory.
+
+**Arguments**:
+
+- `args`: CLI args
+
+**Returns**:
+
+subprocess object.
+
 <a name=".aea.test_tools.test_cases.BaseAEATestCase.terminate_agents"></a>
 #### terminate`_`agents
 
@@ -277,7 +296,7 @@ None
 
 ```python
  | @classmethod
- | add_item(cls, item_type: str, public_id: str) -> None
+ | add_item(cls, item_type: str, public_id: str, local: bool = True) -> None
 ```
 
 Add an item to the agent.
@@ -287,6 +306,7 @@ Run from agent's directory.
 
 - `item_type`: str item type.
 - `public_id`: public id of the item.
+- `local`: a flag for local folder add True by default.
 
 **Returns**:
 
@@ -327,6 +347,26 @@ Run from agent's directory.
 
 - `item_type`: str item type.
 - `name`: public id of the item.
+
+**Returns**:
+
+None
+
+<a name=".aea.test_tools.test_cases.BaseAEATestCase.eject_item"></a>
+#### eject`_`item
+
+```python
+ | @classmethod
+ | eject_item(cls, item_type: str, public_id: str) -> None
+```
+
+Eject an item in the agent.
+Run from agent's directory.
+
+**Arguments**:
+
+- `item_type`: str item type.
+- `public_id`: public id of the item.
 
 **Returns**:
 

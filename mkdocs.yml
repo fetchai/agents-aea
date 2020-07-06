@@ -12,6 +12,8 @@ theme:
   feature:
     tabs: true
 
+strict: true
+
 nav:
   - AEA Framework:
     - Welcome: 'index.md'
@@ -28,7 +30,7 @@ nav:
       - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
       # - Contract deploy and interact: 'erc1155-skills.md'
-      - Generic skills: 'generic-skills.md'
+      # - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
       - Gym skill: 'gym-skill.md'
       - ML skills: 'ml-skills.md'
@@ -44,31 +46,30 @@ nav:
         - AEA and web frameworks: 'aea-vs-mvc.md'
         - Build a skill for an AEA: 'skill-guide.md'
         - Core components - Part 2: 'core-components-2.md'
-        - Trade between two AEAs: 'thermometer-skills-step-by-step.md'
+        - Trade between two AEAs: 'generic-skills-step-by-step.md'
       - Topic guides:
-        - Ways to build an AEA: 'step_one.md'
+        - Ways to build an AEA: 'step-one.md'
         - Build an AEA with the CLI: 'build-aea-step-by-step.md'
         - Scaffolding packages: 'scaffolding.md'
         - Generating protocols: 'protocol-generator.md'
         - Logging: 'logging.md'
         - Use multiplexer stand-alone: 'multiplexer-standalone.md'
         - Create stand-alone transaction: 'standalone-transaction.md'
-        - Create decision-maker transaction: 'decision-maker-transaction.md'
+        # - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
         - Known limitations: 'known-limits.md'
         - Build an AEA programmatically: 'build-aea-programmatically.md'
         - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
         - AEAs vs agents: 'agent-vs-aea.md'
         - Upgrading versions: 'upgrading.md'
+        - Modes of running an AEA: 'modes.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
-        - Frontend intergration: 'connect-a-frontend.md'
+        - Front-end intergration: 'connect-a-frontend.md'
         - HTTP Connection: 'http-connection-and-skill.md'
         - ORM integration: 'orm-integration.md'
         - Contract deploy and interact: 'erc1155-skills.md'
-        - Identity - Aries Cloud Agent: 'aries-cloud-agent-example.md'
         - P2P Connection: 'p2p-connection.md'
-        - Using public ledgers: 'ledger-integration.md'
         - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
       - Architecture & component deep-dives:
         - Design principles: 'design-principles.md'
@@ -78,10 +79,13 @@ nav:
         - Skills: 'skill.md'
         - Contracts: 'contract.md'
         - Decision Maker: 'decision-maker.md'
+        - Ledger & Crypto APIs: 'ledger-integration.md'
+        - Message routing: 'message-routing.md'
         - Configurations: 'config.md'
       - Search & Discovery:
         - Defining Data Models: 'defining-data-models.md'
         - The Query Language: 'query-language.md'
+        - SOEF Connection: 'simple-oef-usage.md'
       - Developer Interfaces:
         - CLI:
           - Installation: 'cli-how-to.md'
@@ -122,8 +126,9 @@ nav:
           - Fetchai: 'api/crypto/fetchai.md'
           - Helpers: 'api/crypto/helpers.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
-          - Registry: 'api/crypto/registry.md'
           - Wallet: 'api/crypto/wallet.md'
+          - Registries:
+            - Base: 'api/crypto/registries/base.md'
         - Decision Maker:
           - Base: 'api/decision_maker/base.md'
           - Default: 'api/decision_maker/default.md'
@@ -141,12 +146,15 @@ nav:
           - Exec Timeout: 'api/helpers/exec_timeout.md'
           - IPFS:
             - Base: 'api/helpers/ipfs/base.md'
+          - MultipleExecutor: 'api/helpers/multiple_executor.md'
           - Preferences:
             - Base: 'api/helpers/preference_representations/base.md'
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
           - Test Cases: 'api/helpers/test_cases.md'
+          - Transaction:
+            - Base: 'api/helpers/transaction/base.md'
         - Identity: 'api/identity/base.md'
         - Mail: 'api/mail/base.md'
         - Protocols:
@@ -156,6 +164,13 @@ nav:
             - Custom Types: 'api/protocols/default/custom_types.md'
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
+          - Signing Protocol:
+            - Custom Types: 'api/protocols/signing/custom_types.md'
+            - Message: 'api/protocols/signing/message.md'
+            - Serialization: 'api/protocols/signing/serialization.md'
+          - State Update Protocol:
+            - Message: 'api/protocols/state_update/message.md'
+            - Serialization: 'api/protocols/state_update/serialization.md'
         - Registries:
           - Base: 'api/registries/base.md'
           - Filter: 'api/registries/filter.md'
@@ -167,6 +182,7 @@ nav:
           - Task: 'api/skills/tasks.md'
         - Test Tools: 'api/test_tools/generic.md'
     - Q&A: 'questions-and-answers.md'
+  - Simple OEF: 'simple-oef.md'
 
 plugins:
     - markdownmermaid

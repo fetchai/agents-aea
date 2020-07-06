@@ -3,6 +3,130 @@
 
 This module contains the decision maker class.
 
+<a name=".aea.decision_maker.default.SigningDialogues"></a>
+## SigningDialogues Objects
+
+```python
+class SigningDialogues(BaseSigningDialogues)
+```
+
+This class keeps track of all oef_search dialogues.
+
+<a name=".aea.decision_maker.default.SigningDialogues.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(**kwargs) -> None
+```
+
+Initialize dialogues.
+
+**Arguments**:
+
+- `agent_address`: the address of the agent for whom dialogues are maintained
+
+**Returns**:
+
+None
+
+<a name=".aea.decision_maker.default.SigningDialogues.role_from_first_message"></a>
+#### role`_`from`_`first`_`message
+
+```python
+ | @staticmethod
+ | role_from_first_message(message: Message) -> BaseDialogue.Role
+```
+
+Infer the role of the agent from an incoming/outgoing first message
+
+**Arguments**:
+
+- `message`: an incoming/outgoing first message
+
+**Returns**:
+
+The role of the agent
+
+<a name=".aea.decision_maker.default.SigningDialogues.create_dialogue"></a>
+#### create`_`dialogue
+
+```python
+ | create_dialogue(dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role) -> SigningDialogue
+```
+
+Create an instance of fipa dialogue.
+
+**Arguments**:
+
+- `dialogue_label`: the identifier of the dialogue
+- `role`: the role of the agent this dialogue is maintained for
+
+**Returns**:
+
+the created dialogue
+
+<a name=".aea.decision_maker.default.StateUpdateDialogues"></a>
+## StateUpdateDialogues Objects
+
+```python
+class StateUpdateDialogues(BaseStateUpdateDialogues)
+```
+
+This class keeps track of all oef_search dialogues.
+
+<a name=".aea.decision_maker.default.StateUpdateDialogues.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(**kwargs) -> None
+```
+
+Initialize dialogues.
+
+**Arguments**:
+
+- `agent_address`: the address of the agent for whom dialogues are maintained
+
+**Returns**:
+
+None
+
+<a name=".aea.decision_maker.default.StateUpdateDialogues.role_from_first_message"></a>
+#### role`_`from`_`first`_`message
+
+```python
+ | @staticmethod
+ | role_from_first_message(message: Message) -> BaseDialogue.Role
+```
+
+Infer the role of the agent from an incoming/outgoing first message
+
+**Arguments**:
+
+- `message`: an incoming/outgoing first message
+
+**Returns**:
+
+The role of the agent
+
+<a name=".aea.decision_maker.default.StateUpdateDialogues.create_dialogue"></a>
+#### create`_`dialogue
+
+```python
+ | create_dialogue(dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role) -> StateUpdateDialogue
+```
+
+Create an instance of fipa dialogue.
+
+**Arguments**:
+
+- `dialogue_label`: the identifier of the dialogue
+- `role`: the role of the agent this dialogue is maintained for
+
+**Returns**:
+
+the created dialogue
+
 <a name=".aea.decision_maker.default.GoalPursuitReadiness"></a>
 ## GoalPursuitReadiness Objects
 
@@ -69,7 +193,7 @@ None
 class OwnershipState(BaseOwnershipState)
 ```
 
-Represent the ownership state of an agent.
+Represent the ownership state of an agent (can proxy a ledger).
 
 <a name=".aea.decision_maker.default.OwnershipState.__init__"></a>
 #### `__`init`__`
@@ -152,7 +276,7 @@ Get good holdings in this state.
 #### is`_`affordable`_`transaction
 
 ```python
- | is_affordable_transaction(tx_message: TransactionMessage) -> bool
+ | is_affordable_transaction(terms: Terms) -> bool
 ```
 
 Check if the transaction is affordable (and consistent).
@@ -162,24 +286,41 @@ Note, the agent is the sender of the transaction message by design.
 
 **Arguments**:
 
-- `tx_message`: the transaction message
+- `terms`: the transaction terms
 
 **Returns**:
 
 True if the transaction is legal wrt the current state, false otherwise.
 
+<a name=".aea.decision_maker.default.OwnershipState.is_affordable"></a>
+#### is`_`affordable
+
+```python
+ | is_affordable(terms: Terms) -> bool
+```
+
+Check if the tx is affordable.
+
+**Arguments**:
+
+- `terms`: the transaction terms
+
+**Returns**:
+
+whether the transaction is affordable or not
+
 <a name=".aea.decision_maker.default.OwnershipState.update"></a>
 #### update
 
 ```python
- | update(tx_message: TransactionMessage) -> None
+ | update(terms: Terms) -> None
 ```
 
 Update the agent state from a transaction.
 
 **Arguments**:
 
-- `tx_message`: the transaction message
+- `terms`: the transaction terms
 
 **Returns**:
 
@@ -189,14 +330,14 @@ None
 #### apply`_`transactions
 
 ```python
- | apply_transactions(transactions: List[TransactionMessage]) -> "OwnershipState"
+ | apply_transactions(list_of_terms: List[Terms]) -> "OwnershipState"
 ```
 
 Apply a list of transactions to (a copy of) the current state.
 
 **Arguments**:
 
-- `transactions`: the sequence of transaction messages.
+- `list_of_terms`: the sequence of transaction terms.
 
 **Returns**:
 
@@ -210,61 +351,6 @@ the final state.
 ```
 
 Copy the object.
-
-<a name=".aea.decision_maker.default.LedgerStateProxy"></a>
-## LedgerStateProxy Objects
-
-```python
-class LedgerStateProxy(BaseLedgerStateProxy)
-```
-
-Class to represent a proxy to a ledger state.
-
-<a name=".aea.decision_maker.default.LedgerStateProxy.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(ledger_apis: LedgerApis)
-```
-
-Instantiate a ledger state proxy.
-
-<a name=".aea.decision_maker.default.LedgerStateProxy.ledger_apis"></a>
-#### ledger`_`apis
-
-```python
- | @property
- | ledger_apis() -> LedgerApis
-```
-
-Get the ledger_apis.
-
-<a name=".aea.decision_maker.default.LedgerStateProxy.is_initialized"></a>
-#### is`_`initialized
-
-```python
- | @property
- | is_initialized() -> bool
-```
-
-Get the initialization status.
-
-<a name=".aea.decision_maker.default.LedgerStateProxy.is_affordable_transaction"></a>
-#### is`_`affordable`_`transaction
-
-```python
- | is_affordable_transaction(tx_message: TransactionMessage) -> bool
-```
-
-Check if the transaction is affordable on the default ledger.
-
-**Arguments**:
-
-- `tx_message`: the transaction message
-
-**Returns**:
-
-whether the transaction is affordable on the ledger
 
 <a name=".aea.decision_maker.default.Preferences"></a>
 ## Preferences Objects
@@ -288,7 +374,7 @@ Instantiate an agent preference object.
 #### set
 
 ```python
- | set(exchange_params_by_currency_id: ExchangeParams = None, utility_params_by_good_id: UtilityParams = None, tx_fee: int = None, **kwargs, ,) -> None
+ | set(exchange_params_by_currency_id: ExchangeParams = None, utility_params_by_good_id: UtilityParams = None, **kwargs, ,) -> None
 ```
 
 Set values on the preferences.
@@ -297,7 +383,6 @@ Set values on the preferences.
 
 - `exchange_params_by_currency_id`: the exchange params.
 - `utility_params_by_good_id`: the utility params for every asset.
-- `tx_fee`: the acceptable transaction fee.
 
 <a name=".aea.decision_maker.default.Preferences.is_initialized"></a>
 #### is`_`initialized
@@ -330,26 +415,6 @@ Get exchange parameter for each currency.
 ```
 
 Get utility parameter for each good.
-
-<a name=".aea.decision_maker.default.Preferences.seller_transaction_fee"></a>
-#### seller`_`transaction`_`fee
-
-```python
- | @property
- | seller_transaction_fee() -> int
-```
-
-Get the transaction fee.
-
-<a name=".aea.decision_maker.default.Preferences.buyer_transaction_fee"></a>
-#### buyer`_`transaction`_`fee
-
-```python
- | @property
- | buyer_transaction_fee() -> int
-```
-
-Get the transaction fee.
 
 <a name=".aea.decision_maker.default.Preferences.logarithmic_utility"></a>
 #### logarithmic`_`utility
@@ -426,7 +491,7 @@ the marginal utility score
 #### utility`_`diff`_`from`_`transaction
 
 ```python
- | utility_diff_from_transaction(ownership_state: BaseOwnershipState, tx_message: TransactionMessage) -> float
+ | utility_diff_from_transaction(ownership_state: BaseOwnershipState, terms: Terms) -> float
 ```
 
 Simulate a transaction and get the resulting utility difference (taking into account the fee).
@@ -434,11 +499,29 @@ Simulate a transaction and get the resulting utility difference (taking into acc
 **Arguments**:
 
 - `ownership_state`: the ownership state against which to apply the transaction.
-- `tx_message`: a transaction message.
+- `terms`: the transaction terms.
 
 **Returns**:
 
 the score.
+
+<a name=".aea.decision_maker.default.Preferences.is_utility_enhancing"></a>
+#### is`_`utility`_`enhancing
+
+```python
+ | is_utility_enhancing(ownership_state: BaseOwnershipState, terms: Terms) -> bool
+```
+
+Check if the tx is utility enhancing.
+
+**Arguments**:
+
+- `ownership_state`: the ownership state against which to apply the transaction.
+- `terms`: the transaction terms
+
+**Returns**:
+
+whether the transaction is utility enhancing or not
 
 <a name=".aea.decision_maker.default.Preferences.__copy__"></a>
 #### `__`copy`__`
@@ -462,7 +545,7 @@ This class implements the decision maker.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, ledger_apis: LedgerApis)
+ | __init__(identity: Identity, wallet: Wallet)
 ```
 
 Initialize the decision maker.
@@ -471,13 +554,12 @@ Initialize the decision maker.
 
 - `identity`: the identity
 - `wallet`: the wallet
-- `ledger_apis`: the ledger apis
 
 <a name=".aea.decision_maker.default.DecisionMakerHandler.handle"></a>
 #### handle
 
 ```python
- | handle(message: InternalMessage) -> None
+ | handle(message: Message) -> None
 ```
 
 Handle an internal message from the skills.

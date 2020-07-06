@@ -296,7 +296,7 @@ async def test_receiving_loop_raises_exception():
             multiplexer.connect()
             time.sleep(0.1)
             mock_logger_error.assert_called_with(
-                "Error in the receiving loop: a weird error."
+                "Error in the receiving loop: a weird error.", exc_info=True
             )
 
     multiplexer.disconnect()

@@ -1,0 +1,31 @@
+name: ledger
+author: fetchai
+version: 0.1.0
+description: A connection to interact with any ledger API and contract API.
+license: Apache-2.0
+aea_version: '>=0.5.0, <0.6.0'
+fingerprint:
+  __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
+  base.py: QmZecsNSNpct1Zrs7HsJPQJN2buKJCirz6Z7nYH2FQbJFH
+  connection.py: QmP6kzX6pnsT44tu3bH9PC486mxcTnZ8CR6SngqxtrjHnb
+  contract_dispatcher.py: QmPtV5PxCP3YCtyA4EeGijqgpNwqPp3xvNZvtvk1nkhRJk
+  ledger_dispatcher.py: QmUk2J1FokJR6iLQYfyZbSSvR5y5g3ozYq7H6yQcv7YqmJ
+fingerprint_ignore_patterns: []
+protocols:
+- fetchai/contract_api:0.1.0
+- fetchai/ledger_api:0.1.0
+class_name: LedgerConnection
+config:
+  ledger_apis:
+    cosmos:
+      address: https://rest-agent-land.prod.fetch-ai.com:443
+    ethereum:
+      address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+      gas_price: 50
+    fetchai:
+      network: testnet
+excluded_protocols: []
+restricted_to_protocols:
+- fetchai/contract_api:0.1.0
+- fetchai/ledger_api:0.1.0
+dependencies: {}

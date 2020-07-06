@@ -14,13 +14,13 @@ cd my_aea
 Add the http server connection package
 
 ``` bash
-aea add connection fetchai/http_server:0.3.0
+aea add connection fetchai/http_server:0.4.0
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.3.0
+aea config set agent.default_connection fetchai/http_server:0.4.0
 ```
 
 Modify the `api_spec_path`:
@@ -46,7 +46,7 @@ aea scaffold skill http_echo
 We will implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
 
 
-First, we delete the `my_model.py` and `behaviour.py`. The server will be pyrely reactive, so we only require the `handlers.py` file. We update the `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
+First, we delete the `my_model.py` and `behaviour.py` (in `my_aea/skills/http_echo/`). The server will be purely reactive, so we only require the `handlers.py` file. We update the `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
 
 Next we implement a basic handler which prints the received envelopes and responds:
 
@@ -165,11 +165,11 @@ handlers:
   http_handler:
     args: {}
     class_name: HttpHandler
-``` 
+```
 
 Finally, we run the fingerprinter:
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.2.0
+aea fingerprint skill fetchai/http_echo:0.3.0
 ```
 Note, you will have to replace the author name with your author handle.
 
@@ -183,7 +183,7 @@ In a separate terminal, we can create a client and communicate with the server:
 import requests
 
 response = requests.get('http://127.0.0.1:8000')
-response.status_code 
+response.status_code
 # >>> 404
 # we receive a not found since the path is not available in the api spec
 
@@ -199,5 +199,3 @@ response.status_code
 response.content
 # >>> b''
 ```
-
-

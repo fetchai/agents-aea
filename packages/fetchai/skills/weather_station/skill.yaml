@@ -1,26 +1,29 @@
 name: weather_station
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmWdv9BWgBLt9Y7T3U8Wd4KhTMScXANVY7A2pB5kqfBnaP
+  behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
-  dialogues.py: QmUVgQaBaAUB9cFKkyYGQmtYXNiXh53AGkcrCfcmDm6f1z
-  dummy_weather_station_data.py: QmUD52fXy9DW2FgivyP1VMhk3YbvRVUWUEuZVftXmkNymR
-  handlers.py: QmeYB2f5yLV474GVH1jJC2zCAGV5R1QmPsc3TPUMCnYjAg
-  strategy.py: Qmeh8PVR6sukZiaGsCWacZz5u9kwd6FKZocoGqg3LW3ZCQ
+  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
+  dummy_weather_station_data.py: QmQTTo8ZF7VgQHKjeGDkyyLJueuNMzyX1vkcYoRG4yGRsT
+  handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
+  strategy.py: Qmdqw5XB7biCSY8G7dhJZ7nVzy22ffSbGCvQtUD3jqP7ij
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:
 - '*.db'
 contracts: []
 protocols:
-- fetchai/default:0.2.0
-- fetchai/fipa:0.3.0
-- fetchai/oef_search:0.2.0
+- fetchai/default:0.3.0
+- fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
+- fetchai/oef_search:0.3.0
+skills:
+- fetchai/generic_seller:0.6.0
 behaviours:
   service_registration:
     args:
@@ -29,19 +32,50 @@ behaviours:
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
-models:
-  dialogues:
+    class_name: FipaHandler
+  ledger_api:
     args: {}
-    class_name: Dialogues
+    class_name: LedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   strategy:
     args:
       currency_id: FET
-      date_one: 1/10/2019
-      date_two: 1/12/2019
+      data_for_sale:
+        pressure: 20
+        temperature: 26
+        wind: 10
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      has_data_source: true
       is_ledger_tx: true
       ledger_id: fetchai
-      price_per_row: 1
-      seller_tx_fee: 0
+      service_data:
+        city: Cambridge
+        country: UK
+      service_id: generic_service
+      unit_price: 10
     class_name: Strategy
 dependencies: {}

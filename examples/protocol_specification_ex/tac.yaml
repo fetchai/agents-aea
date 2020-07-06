@@ -1,11 +1,11 @@
 ---
 name: tac
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 speech_acts:
   register:
     agent_name: pt:str
@@ -56,4 +56,18 @@ ct:ErrorCode: |
     DIALOGUE_INCONSISTENT = 9;
   }
   ErrorCodeEnum error_code = 1;
+...
+---
+initiation: [register]
+reply:
+  register: [tac_error, game_data, cancelled]
+  unregister: [tac_error]
+  transaction: [transaction_confirmation,tac_error]
+  cancelled: []
+  game_data: [transaction]
+  transaction_confirmation: [transaction]
+  tac_error: []
+termination: [cancelled, tac_error]
+roles: {participant, controller}
+end_states: [successful, failed]
 ...

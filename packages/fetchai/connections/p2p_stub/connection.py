@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the p2p stub connection."""
 
 import logging
@@ -26,17 +25,13 @@ from pathlib import Path
 from typing import Union, cast
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.stub.connection import (
-    StubConnection,
-    _encode,
-    lock_file,
-)
+from aea.connections.stub.connection import StubConnection, write_envelope
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.3.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -78,20 +73,30 @@ class P2PStubConnection(StubConnection):
 
         :return: None
         """
-
+        assert self.loop is not None, "Loop not initialized."
         target_file = Path(os.path.join(self.namespace, "{}.in".format(envelope.to)))
-        if not target_file.is_file():
-            target_file.touch()
-            logger.warn("file {} doesn't exist, creating it ...".format(target_file))
-
-        encoded_envelope = _encode(envelope)
-        logger.debug("write to {}: {}".format(target_file, encoded_envelope))
 
         with open(target_file, "ab") as file:
-            with lock_file(file):
-                file.write(encoded_envelope)
-                file.flush()
+            await self.loop.run_in_executor(
+                self._write_pool, write_envelope, envelope, file
+            )
 
     async def disconnect(self) -> None:
+        """Disconnect the connection."""
+        assert self.loop is not None, "Loop not initialized."
+        await self.loop.run_in_executor(self._write_pool, self._cleanup)
         await super().disconnect()
-        os.rmdir(self.namespace)
+
+    def _cleanup(self):
+        try:
+            os.unlink(self.configuration.config["input_file"])
+        except OSError:
+            pass
+        try:
+            os.unlink(self.configuration.config["output_file"])
+        except OSError:
+            pass
+        try:
+            os.rmdir(self.namespace)
+        except OSError:
+            pass

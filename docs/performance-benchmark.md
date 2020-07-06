@@ -7,6 +7,7 @@ The benchmark module is a set of tools to measure execution time, CPU load and m
 ## How does it work?
 
 The framework:
+
 * spawns a dedicated process for each test run to execute the function to test.
 * measures CPU and RAM usage periodically.
 * waits for function exits or terminates them by timeout.
@@ -199,9 +200,6 @@ Memory usage and execution time can slightly differ per case execution.
 * `-P, --plot INTEGER` -  Draw a chart using, using values of argument specified as values for axis X. argument positions started with 0, argument benchmark does not counted. for example `-P 0` will use `run_time` values, `-P 1` will use `sleep` values.
 
 
-
-
-
 ## Limitations
 
 Currently, the benchmark framework does not measure resources consumed by subprocess spawned in python code. So try to keep one process solutions during tests.
@@ -210,7 +208,7 @@ Asynchronous functions or coroutines are not supported directly. So you have to 
 
 
 
-## Testing AEA. Handlers example:
+## Testing AEA: handlers example
 
 Test react speed on specific messages amount.
 
@@ -249,7 +247,7 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
 ```
 
 
-**create AEA wrapper with specified handler**
+Create AEA wrapper with specified handler:
 ``` python
 skill_definition = {
     "handlers": {"dummy_handler": DummyHandler}
@@ -261,27 +259,24 @@ aea_test_wrapper = AEATestWrapper(
 ```
 
 
-**populate inbox with dummy messages**
+Populate inbox with dummy messages:
 ``` python
 for _ in range(inbox_amount):
     aea_test_wrapper.put_inbox(aea_test_wrapper.dummy_envelope())
 ```
 
+Set timeout `0`, for maximum messages processing speed: `aea_test_wrapper.set_loop_timeout(0.0)`
 
-**set timeout 0, for maximum messages processing speed**
-`aea_test_wrapper.set_loop_timeout(0.0)`
+Start benchmark: `benchmark.start()`
 
-**start benchmark**
-`benchmark.start()`
-
-**start/stop AEA**
+Start/stop AEA:
 ``` python
 aea_test_wrapper.start()
 ...
 aea_test_wrapper.stop()
 ```
 
-**wait till messages present in inbox.**
+Wait till messages present in inbox:
 ``` python
 while not aea_test_wrapper.is_inbox_empty():
     time.sleep(0.1)

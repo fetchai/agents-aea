@@ -50,7 +50,7 @@ def get(ctx: Context, json_path: List[str]):
     click.echo(value)
 
 
-@config.command()
+@config.command(name="set")
 @click.option(
     "--type",
     default="str",
@@ -60,7 +60,12 @@ def get(ctx: Context, json_path: List[str]):
 @click.argument("JSON_PATH", required=True, type=AEAJsonPathType())
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx
-def set(ctx: Context, json_path: List[str], value, type):
+def set_command(
+    ctx: Context,
+    json_path: List[str],
+    value: str,
+    type: str,  # pylint: disable=redefined-builtin
+):
     """Set a field."""
     _set_config(ctx, json_path, value, type)
 
@@ -81,7 +86,7 @@ def _get_config_value(ctx: Context, json_path: List[str]):
     return parent_object.get(attribute_name)
 
 
-def _set_config(ctx: Context, json_path: List[str], value, type) -> None:
+def _set_config(ctx: Context, json_path: List[str], value: str, type_str: str) -> None:
     config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
@@ -94,7 +99,7 @@ def _set_config(ctx: Context, json_path: List[str], value, type) -> None:
         configuration_object, parent_object_path, attribute_name
     )
 
-    type_ = FROM_STRING_TO_TYPE[type]
+    type_ = FROM_STRING_TO_TYPE[type_str]
     try:
         if type_ != bool:
             parent_object[attribute_name] = type_(value)

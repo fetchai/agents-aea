@@ -23,7 +23,6 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, List, Sequence
 from unittest import TestCase
-from unittest.mock import Mock, patch
 
 from jsonschema.exceptions import ValidationError  # type: ignore
 
@@ -56,7 +55,7 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.5.0
+default_connection: fetchai/stub:0.6.0
 default_ledger: fetchai
 ledger_apis:
   fetchai:
@@ -159,8 +158,7 @@ class BaseConfigTestVariable(TestCase):
         """
         return getattr(aea, self.AEA_ATTR_NAME)
 
-    @patch("aea.aea_builder.LedgerApis")
-    def test_builder_applies_default_value_to_aea(self, mock: Mock) -> None:
+    def test_builder_applies_default_value_to_aea(self) -> None:
         """Test AEABuilder applies default value to AEA instance when option is not specified in config."""
         configuration = self._make_configuration(NotSet)
         builder = AEABuilder()
@@ -169,8 +167,7 @@ class BaseConfigTestVariable(TestCase):
 
         assert self._get_aea_value(aea) == self.AEA_DEFAULT_VALUE
 
-    @patch("aea.aea_builder.LedgerApis")
-    def test_builder_applies_config_value_to_aea(self, mock: Mock) -> None:
+    def test_builder_applies_config_value_to_aea(self) -> None:
         """Test AEABuilder applies value to AEA instance when option is specified in config."""
         for good_value in self.GOOD_VALUES:
             configuration = self._make_configuration(good_value)

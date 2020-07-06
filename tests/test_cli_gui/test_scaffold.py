@@ -19,13 +19,15 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
-import sys
-import unittest.mock
+from unittest.mock import patch
 
-from .test_base import create_app
+from tests.test_cli.tools_for_testing import raise_click_exception
+from tests.test_cli_gui.test_base import create_app
 
 
-def test_scaffold_item():
+@patch("aea.cli_gui.cli_scaffold_item")
+@patch("aea.cli_gui.try_to_load_agent_config")
+def test_scaffold_item(*mocks):
     """Test remove a skill/connection/protocol.
 
     Actually we just do connection as code coverage is the same.
@@ -33,31 +35,21 @@ def test_scaffold_item():
     app = create_app()
 
     agent_name = "test_agent_id"
-    connection_name = "test_connection"
+    connection_name = "fetchai/test_connection:0.1.0"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "scaffold"
-        assert param_list[4] == "connection"
-        assert param_list[5] == connection_name
-        assert agent_name in dir
-        return 0
-
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_remove = app.post(
-            "api/agent/" + agent_name + "/connection/scaffold",
-            content_type="application/json",
-            data=json.dumps(connection_name),
-        )
+    response_remove = app.post(
+        "api/agent/" + agent_name + "/connection/scaffold",
+        content_type="application/json",
+        data=json.dumps(connection_name),
+    )
     assert response_remove.status_code == 201
     data = json.loads(response_remove.get_data(as_text=True))
     assert data == agent_name
 
 
-def test_scaffold_agent_fail():
+@patch("aea.cli_gui.cli_scaffold_item", raise_click_exception)
+@patch("aea.cli_gui.try_to_load_agent_config")
+def test_scaffold_agent_fail(*mocks):
     """Test remove a skill/connection/protocol when it fails.
 
     Actually we just do connection as code coverage is the same.
@@ -65,25 +57,13 @@ def test_scaffold_agent_fail():
     app = create_app()
 
     agent_name = "test_agent_id"
-    connection_name = "test_connection"
+    connection_name = "fetchai/test_connection:0.1.0"
 
-    def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "scaffold"
-        assert param_list[4] == "connection"
-        assert param_list[5] == connection_name
-        assert agent_name in dir
-        return 1
-
-    with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
-        # Ensure there is now one agent
-        response_remove = app.post(
-            "api/agent/" + agent_name + "/connection/scaffold",
-            content_type="application/json",
-            data=json.dumps(connection_name),
-        )
+    response_remove = app.post(
+        "api/agent/" + agent_name + "/connection/scaffold",
+        content_type="application/json",
+        data=json.dumps(connection_name),
+    )
     assert response_remove.status_code == 400
     data = json.loads(response_remove.get_data(as_text=True))
     assert data[

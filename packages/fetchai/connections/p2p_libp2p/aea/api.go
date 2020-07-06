@@ -1,22 +1,49 @@
+/* -*- coding: utf-8 -*-
+* ------------------------------------------------------------------------------
+*
+*   Copyright 2018-2019 Fetch.AI Limited
+*
+*   Licensed under the Apache License, Version 2.0 (the "License");
+*   you may not use this file except in compliance with the License.
+*   You may obtain a copy of the License at
+*
+*       http://www.apache.org/licenses/LICENSE-2.0
+*
+*   Unless required by applicable law or agreed to in writing, software
+*   distributed under the License is distributed on an "AS IS" BASIS,
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*   See the License for the specific language governing permissions and
+*   limitations under the License.
+*
+* ------------------------------------------------------------------------------
+ */
+
 package aea
 
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"log"
-	"math"
-	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
-	proto "github.com/golang/protobuf/proto"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	proto "google.golang.org/protobuf/proto"
 )
+
+// code redandency to avoid import cycle
+var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
+	Out:        os.Stdout,
+	NoColor:    false,
+	TimeFormat: "15:04:05.000",
+}).
+	With().Timestamp().
+	Str("package", "AeaApi").
+	Logger()
 
 /*
 
@@ -80,7 +107,7 @@ func (aea *AeaApi) Queue() <-chan *Envelope {
 	return aea.out_queue
 }
 
-func (aea AeaApi) Connected() bool {
+func (aea *AeaApi) Connected() bool {
 	return aea.connected
 }
 
@@ -91,6 +118,8 @@ func (aea *AeaApi) Stop() {
 }
 
 func (aea *AeaApi) Init() error {
+	zerolog.TimeFieldFormat = time.RFC3339Nano
+
 	if aea.sandbox {
 		return nil
 	}
@@ -101,7 +130,7 @@ func (aea *AeaApi) Init() error {
 	aea.connected = false
 
 	env_file := os.Args[1]
-	fmt.Println("[aea-api  ][debug] env_file:", env_file)
+	logger.Debug().Msgf("env_file: %s", env_file)
 
 	// get config
 	err := godotenv.Load(env_file)
@@ -116,25 +145,27 @@ func (aea *AeaApi) Init() error {
 	uri := os.Getenv("AEA_P2P_URI")
 	uri_public := os.Getenv("AEA_P2P_URI_PUBLIC")
 	uri_delegate := os.Getenv("AEA_P2P_DELEGATE_URI")
-	fmt.Println("[aea-api  ][debug] msgin_path:", aea.msgin_path)
-	fmt.Println("[aea-api  ][debug] msgout_path:", aea.msgout_path)
-	fmt.Println("[aea-api  ][debug] id:", aea.id)
-	fmt.Println("[aea-api  ][debug] addr:", aea.agent_addr)
-	fmt.Println("[aea-api  ][debug] entry_peers:", entry_peers)
-	fmt.Println("[aea-api  ][debug] uri:", uri)
-	fmt.Println("[aea-api  ][debug] uri public:", uri_public)
-	fmt.Println("[aea-api  ][debug] uri delegate service:", uri_delegate)
+	logger.Debug().Msgf("msgin_path: %s", aea.msgin_path)
+	logger.Debug().Msgf("msgout_path: %s", aea.msgout_path)
+	logger.Debug().Msgf("id: %s", aea.id)
+	logger.Debug().Msgf("addr: %s", aea.agent_addr)
+	logger.Debug().Msgf("entry_peers: %s", entry_peers)
+	logger.Debug().Msgf("uri: %s", uri)
+	logger.Debug().Msgf("uri public: %s", uri_public)
+	logger.Debug().Msgf("uri delegate service: %s", uri_delegate)
 
 	if aea.msgin_path == "" || aea.msgout_path == "" || aea.id == "" || uri == "" {
-		fmt.Println("[aea-api  ][error] couldn't get configuration")
-		return errors.New("Couldn't get AEA configuration.")
+		err := errors.New("couldn't get AEA configuration")
+		logger.Error().Str("err", err.Error()).Msg("")
+		return err
 	}
 
 	// parse uri
 	parts := strings.SplitN(uri, ":", -1)
 	if len(parts) < 2 {
-		fmt.Println("[aea-api  ][error] malformed Uri:", uri)
-		return errors.New("Malformed Uri.")
+		err := errors.New("malformed Uri " + uri)
+		logger.Error().Str("err", err.Error()).Msg("")
+		return err
 	}
 	aea.host = parts[0]
 	port, _ := strconv.ParseUint(parts[1], 10, 16)
@@ -146,7 +177,7 @@ func (aea *AeaApi) Init() error {
 	}
 	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] Uri already taken", uri)
+		logger.Error().Str("err", err.Error()).Msgf("Uri already taken %s", uri)
 		return err
 	}
 	listener.Close()
@@ -155,8 +186,9 @@ func (aea *AeaApi) Init() error {
 	if uri_public != "" {
 		parts = strings.SplitN(uri_public, ":", -1)
 		if len(parts) < 2 {
-			fmt.Println("[aea-api  ][error] malformed Uri:", uri_public)
-			return errors.New("Malformed Uri.")
+			err := errors.New("malformed Uri " + uri_public)
+			logger.Error().Str("err", err.Error()).Msg("")
+			return err
 		}
 		aea.host_public = parts[0]
 		port, _ = strconv.ParseUint(parts[1], 10, 16)
@@ -170,8 +202,9 @@ func (aea *AeaApi) Init() error {
 	if uri_delegate != "" {
 		parts = strings.SplitN(uri_delegate, ":", -1)
 		if len(parts) < 2 {
-			fmt.Println("[aea-api  ][error] malformed Uri:", uri_delegate)
-			return errors.New("Malformed Uri.")
+			err := errors.New("malformed Uri " + uri_delegate)
+			logger.Error().Str("err", err.Error()).Msg("")
+			return err
 		}
 		aea.host_delegate = parts[0]
 		port, _ = strconv.ParseUint(parts[1], 10, 16)
@@ -196,7 +229,8 @@ func (aea *AeaApi) Connect() error {
 	aea.msgin, erri = os.OpenFile(aea.msgin_path, os.O_RDONLY, os.ModeNamedPipe)
 
 	if erri != nil || erro != nil {
-		fmt.Println("[aea-api  ][error] while opening pipes", erri, erro)
+		logger.Error().Str("err", erri.Error()).Str("err", erro.Error()).
+			Msgf("while opening pipes %s %s", aea.msgin_path, aea.msgout_path)
 		if erri != nil {
 			return erri
 		}
@@ -207,13 +241,14 @@ func (aea *AeaApi) Connect() error {
 	//TOFIX(LR) trade-offs between bufferd vs unbuffered channel
 	aea.out_queue = make(chan *Envelope, 10)
 	go aea.listen_for_envelopes()
-	fmt.Println("[aea-api  ][info] connected to agent")
+	logger.Info().Msg("connected to agent")
 
 	aea.connected = true
 
 	return nil
 }
 
+/*
 func (aea *AeaApi) WithSandbox() *AeaApi {
 	var err error
 	fmt.Println("[aea-api  ][warning] running in sandbox mode")
@@ -224,11 +259,12 @@ func (aea *AeaApi) WithSandbox() *AeaApi {
 	aea.sandbox = true
 	return aea
 }
+*/
 
-func UnmarshalEnvelope(buf []byte) (Envelope, error) {
+func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
 	envelope := &Envelope{}
 	err := proto.Unmarshal(buf, envelope)
-	return *envelope, err
+	return envelope, err
 }
 
 func (aea *AeaApi) listen_for_envelopes() {
@@ -236,15 +272,15 @@ func (aea *AeaApi) listen_for_envelopes() {
 	for {
 		envel, err := read_envelope(aea.msgin)
 		if err != nil {
-			fmt.Println("[aea-api  ][error] while receiving envelope:", err)
-			fmt.Println("[aea-api  ][info] disconnecting")
+			logger.Error().Str("err", err.Error()).Msg("while receiving envelope")
+			logger.Info().Msg("disconnecting")
 			// TOFIX(LR) see above
 			if !aea.closing {
 				aea.stop()
 			}
 			return
 		}
-		fmt.Println("[aea-api  ][debug] received envelope from agent")
+		logger.Debug().Msgf("received envelope from agent")
 		aea.out_queue <- envel
 		if aea.closing {
 			return
@@ -269,15 +305,15 @@ func write(pipe *os.File, data []byte) error {
 	binary.BigEndian.PutUint32(buf, size)
 	_, err := pipe.Write(buf)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while writing size to pipe:", size, buf, ":", err, err == os.ErrInvalid)
+		logger.Error().Str("err", err.Error()).Msgf("while writing size to pipe: %d %x", size, buf)
 		return err
 	}
-	fmt.Println("[aea-api  ][debug] writing size to pipe:", size, buf, ":", err)
+	logger.Debug().Msgf("writing size to pipe %d %x", size, buf)
 	_, err = pipe.Write(data)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while writing data to pipe ", data, ":", err)
+		logger.Error().Str("err", err.Error()).Msgf("while writing data to pipe %x", data)
 	}
-	fmt.Println("[aea-api  ][debug] writing data to pipe len ", size, ":", err)
+	logger.Debug().Msgf("writing data to pipe len %d", size)
 	return err
 }
 
@@ -285,7 +321,7 @@ func read(pipe *os.File) ([]byte, error) {
 	buf := make([]byte, 4)
 	_, err := pipe.Read(buf)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while receiving size:", err)
+		logger.Error().Str("err", err.Error()).Msg("while receiving size")
 		return buf, err
 	}
 	size := binary.BigEndian.Uint32(buf)
@@ -298,7 +334,7 @@ func read(pipe *os.File) ([]byte, error) {
 func write_envelope(pipe *os.File, envelope *Envelope) error {
 	data, err := proto.Marshal(envelope)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while serializing envelope:", envelope, ":", err)
+		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
 		return err
 	}
 	return write(pipe, data)
@@ -308,7 +344,7 @@ func read_envelope(pipe *os.File) (*Envelope, error) {
 	envelope := &Envelope{}
 	data, err := read(pipe)
 	if err != nil {
-		fmt.Println("[aea-api  ][error] while receiving data:", err)
+		logger.Error().Str("err", err.Error()).Msg("while receiving data")
 		return envelope, err
 	}
 	err = proto.Unmarshal(data, envelope)
@@ -318,9 +354,11 @@ func read_envelope(pipe *os.File) (*Envelope, error) {
 /*
 
   Sandbox
+  - DISABLED
 
 */
 
+/*
 func setup_aea_sandbox() (string, string, string, string, uint16, error) {
 	// setup id
 	id := ""
@@ -347,7 +385,12 @@ func setup_aea_sandbox() (string, string, string, string, uint16, error) {
 		}
 		return "", "", "", "", 0, erro
 	}
-	go run_aea_sandbox(msgin_path, msgout_path)
+	// TOFIX(LR) should use channels
+	go func() {
+		err := run_aea_sandbox(msgin_path, msgout_path)
+		if err != nil {
+		}
+	}()
 	return msgin_path, msgout_path, id, host, port, nil
 }
 
@@ -381,7 +424,7 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
 		i := 1
 		for {
 			time.Sleep(time.Duration((rand.Intn(5000) + 3000)) * time.Millisecond)
-			envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.2.0", []byte("\x08\x01*\x07\n\x05Message from sandbox " + strconv.Itoa(i)), ""}
+			envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.3.0", []byte("\x08\x01*\x07\n\x05Message from sandbox " + strconv.Itoa(i)), ""}
 			err := write_envelope(msgin, envel)
 			if err != nil {
 				fmt.Println("[aea-api  ][error][sandbox] stopped producing envelopes:", err)
@@ -393,97 +436,4 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
 
 	return nil
 }
-
-/*
-
-  Protobuf generated Envelope - Edited
-
 */
-
-// Code generated by protoc-gen-go. DO NOT EDIT.
-// source: pocs/p2p_noise_pipe/envelope.proto
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ = proto.Marshal
-var _ = fmt.Errorf
-var _ = math.Inf
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the proto package it is being compiled against.
-// A compilation error at this line likely means your copy of the
-// proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
-
-type Envelope struct {
-	To         string `protobuf:"bytes,1,opt,name=to" json:"to,omitempty"`
-	Sender     string `protobuf:"bytes,2,opt,name=sender" json:"sender,omitempty"`
-	ProtocolId string `protobuf:"bytes,3,opt,name=protocol_id,json=protocolId" json:"protocol_id,omitempty"`
-	Message    []byte `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
-	Uri        string `protobuf:"bytes,5,opt,name=uri" json:"uri,omitempty"`
-}
-
-func (m *Envelope) Reset()                    { *m = Envelope{} }
-func (m *Envelope) String() string            { return proto.CompactTextString(m) }
-func (*Envelope) ProtoMessage()               {}
-func (*Envelope) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
-
-func (m *Envelope) GetTo() string {
-	if m != nil {
-		return m.To
-	}
-	return ""
-}
-
-func (m *Envelope) GetSender() string {
-	if m != nil {
-		return m.Sender
-	}
-	return ""
-}
-
-func (m *Envelope) GetProtocolId() string {
-	if m != nil {
-		return m.ProtocolId
-	}
-	return ""
-}
-
-func (m *Envelope) GetMessage() []byte {
-	if m != nil {
-		return m.Message
-	}
-	return nil
-}
-
-func (m *Envelope) GetUri() string {
-	if m != nil {
-		return m.Uri
-	}
-	return ""
-}
-
-func (m Envelope) Marshal() []byte {
-	data, _ := proto.Marshal(&m)
-	// TOFIX(LR) doesn't expect error as a return value
-	return data
-}
-
-func init() {
-	proto.RegisterType((*Envelope)(nil), "Envelope")
-}
-
-func init() { proto.RegisterFile("envelope.proto", fileDescriptor0) }
-
-var fileDescriptor0 = []byte{
-	// 157 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x2a, 0xc8, 0x4f, 0x2e,
-	0xd6, 0x2f, 0x30, 0x2a, 0x88, 0xcf, 0xcb, 0xcf, 0x2c, 0x4e, 0x8d, 0x2f, 0xc8, 0x2c, 0x48, 0xd5,
-	0x4f, 0xcd, 0x2b, 0x4b, 0xcd, 0xc9, 0x2f, 0x48, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x57, 0xaa,
-	0xe7, 0xe2, 0x70, 0x85, 0x8a, 0x08, 0xf1, 0x71, 0x31, 0x95, 0xe4, 0x4b, 0x30, 0x2a, 0x30, 0x6a,
-	0x70, 0x06, 0x31, 0x95, 0xe4, 0x0b, 0x89, 0x71, 0xb1, 0x15, 0xa7, 0xe6, 0xa5, 0xa4, 0x16, 0x49,
-	0x30, 0x81, 0xc5, 0xa0, 0x3c, 0x21, 0x79, 0x2e, 0x6e, 0xb0, 0xe6, 0xe4, 0xfc, 0x9c, 0xf8, 0xcc,
-	0x14, 0x09, 0x66, 0xb0, 0x24, 0x17, 0x4c, 0xc8, 0x33, 0x45, 0x48, 0x82, 0x8b, 0x3d, 0x37, 0xb5,
-	0xb8, 0x38, 0x31, 0x3d, 0x55, 0x82, 0x45, 0x81, 0x51, 0x83, 0x27, 0x08, 0xc6, 0x15, 0x12, 0xe0,
-	0x62, 0x2e, 0x2d, 0xca, 0x94, 0x60, 0x05, 0x6b, 0x01, 0x31, 0x93, 0xd8, 0xc0, 0xfa, 0x8c, 0x01,
-	0x01, 0x00, 0x00, 0xff, 0xff, 0xaf, 0x62, 0x87, 0x61, 0xad, 0x00, 0x00, 0x00,
-}

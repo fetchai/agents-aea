@@ -64,7 +64,7 @@ Stop task.
 #### create`_`async`_`task
 
 ```python
- | create_async_task(loop: AbstractEventLoop) -> Awaitable
+ | create_async_task(loop: AbstractEventLoop) -> TaskAwaitable
 ```
 
 Return asyncio Task for task run in asyncio loop.
@@ -94,7 +94,7 @@ Version for multiprocess executor mode.
 #### `__`init`__`
 
 ```python
- | __init__(agent_dir: Union[PathLike, str])
+ | __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None)
 ```
 
 Init aea config dir task.
@@ -102,6 +102,7 @@ Init aea config dir task.
 **Arguments**:
 
 - `agent_dir`: direcory with aea config.
+- `log_level`: debug level applied for AEA in subprocess
 
 <a name=".aea.launcher.AEADirMultiprocessTask.start"></a>
 #### start
@@ -131,6 +132,20 @@ Stop task.
 
 Return agent_dir.
 
+<a name=".aea.launcher.AEADirMultiprocessTask.failed"></a>
+#### failed
+
+```python
+ | @property
+ | failed() -> bool
+```
+
+Return was exception failed or not.
+
+If it's running it's not failed.
+
+:rerurn: bool
+
 <a name=".aea.launcher.AEALauncher"></a>
 ## AEALauncher Objects
 
@@ -144,7 +159,7 @@ Run multiple AEA instances.
 #### `__`init`__`
 
 ```python
- | __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate) -> None
+ | __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate, log_level: Optional[str] = None) -> None
 ```
 
 Init AEARunner.
@@ -154,4 +169,5 @@ Init AEARunner.
 - `agent_dirs`: sequence of AEA config directories.
 - `mode`: executor name to use.
 - `fail_policy`: one of ExecutorExceptionPolicies to be used with Executor
+- `log_level`: debug level applied for AEA in subprocesses
 

@@ -1,53 +1,78 @@
 name: carpark_detection
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmepjZcV5PVT5a9S8cGSAkR8tqPDD6dhGgELywDJUQyqTR
-  carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
-  detection_database.py: QmaPNzCHC9RnrSQJDGt8kvkerdXS3jYhkPmzz3NtT9eAUh
-  dialogues.py: QmXvtptqguRrfHxRpQT9gQYE85x7KLyALmV6Wd7r8ipXxc
-  handlers.py: QmaMGQv42116aunu21zKLyCETPsVYa1FBDn6x6XMZis1aW
-  strategy.py: QmcFQ9QymhW2SRczxiicsgJbUt2PyqZdb3rmQ3ueqWUmzq
+  behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
+  database.py: QmVUoN2cuAE54UPvSBRFArdGmVzoSuEjrJXiVkGcfwHrvb
+  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
+  handlers.py: QmbkmEP9K4Qu2MsRtnkdx3PGNbSW46qi48bCHVCUJHpcQF
+  strategy.py: QmUJsWA9GYHxn5cmuXUQTkc9oCLJNJtWbRDJdRy2Yp3pQk
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
 protocols:
-- fetchai/default:0.2.0
-- fetchai/fipa:0.3.0
-- fetchai/oef_search:0.2.0
+- fetchai/default:0.3.0
+- fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
+- fetchai/oef_search:0.3.0
+skills:
+- fetchai/generic_seller:0.6.0
 behaviours:
-  car_park_detection:
-    args:
-      default_latitude: 40.780343
-      default_longitude: -73.967491
-      image_capture_interval: 120
-    class_name: CarParkDetectionAndGUIBehaviour
   service_registration:
     args:
-      tick_interval: 20
+      services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
-models:
-  dialogues:
+    class_name: GenericFipaHandler
+  ledger_api:
     args: {}
-    class_name: Dialogues
+    class_name: GenericLedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: GenericOefSearchHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   strategy:
     args:
       currency_id: FET
-      data_price: 200000000
-      db_is_rel_to_cwd: false
-      db_rel_dir: ../temp_files
+      data_for_sale:
+        free_spaces: 0
+      data_model:
+        attribute_one:
+          is_required: true
+          name: latitude
+          type: float
+        attribute_two:
+          is_required: true
+          name: longitude
+          type: float
+      data_model_name: location
+      has_data_source: true
       is_ledger_tx: true
       ledger_id: fetchai
-      seller_tx_fee: 0
+      service_data:
+        latitude: 52.2053
+        longitude: 0.1218
+      service_id: car_park_service
+      unit_price: 10
     class_name: Strategy
 dependencies:
   scikit-image: {}

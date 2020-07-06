@@ -70,7 +70,7 @@ trusts the seller AEA to send the data upon successful payment.
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.5.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.6.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -82,10 +82,11 @@ The following steps create the weather station from scratch:
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/weather_station:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/weather_station:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `weather_station/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -93,6 +94,11 @@ In `weather_station/aea-config.yaml` replace `ledger_apis: {}` with the followin
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -103,7 +109,7 @@ ledger_apis:
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.5.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.6.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -115,10 +121,11 @@ The following steps create the weather client from scratch:
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/weather_client:0.3.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/weather_client:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `my_weather_client/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -128,6 +135,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -170,7 +182,7 @@ Alternatively, to connect to Cosmos:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```
 
 <strong>Wealth:</strong>
@@ -253,7 +265,7 @@ This updates the weather client skill config (`my_weather_client/vendor/fetchai/
 
 Run both AEAs from their respective terminals.
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 
 You will see that the AEAs negotiate and then transact using the selected ledger.

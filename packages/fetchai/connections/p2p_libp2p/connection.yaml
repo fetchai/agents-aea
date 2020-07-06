@@ -1,20 +1,32 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
   same DHT.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmP4K2iqPWwLb3GZxGKUAhBcJ4cZxu46JictgncYTC1C3E
-  connection.py: QmahTLL4JZ9sD22peWaGPS8d7aLgeB2sRMxYmUwTtRwpjF
-  go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
-  libp2p_node.go: QmTJ7U16frgyi5G8rRy5gLvG5wogkmnCEARQgUi4bPvFuy
-fingerprint_ignore_patterns:
-- go.sum
-- libp2p_node
+  aea/api.go: QmW5fUpVZmV3pxgoakm3RvsvCGC6FwT2XprcqXHM8rBXP5
+  aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
+  aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
+  connection.py: QmSxxjTeuWQoZtZrjN6bo8tmT61yxSBrRrJo9FLCgbUvKt
+  dht/dhtclient/dhtclient.go: Qma8rpw5wLUsqX1Qvengb1Da3KFB12ML1rZ8NGM5ZGZMar
+  dht/dhtclient/dhtclient_test.go: QmdpspLKA9HXc56HVMcP36ikBpHrztWHJ6wWqoU6UnR6BM
+  dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
+  dht/dhtnetwork_test.go: QmcrLh1ebq8x4MQQjSb3isHb268pnRazT147gpN6cz9rbY
+  dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
+  dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
+  dht/dhtpeer/dhtpeer.go: Qmc6sdHbVuGqysbL8J8qyTeuZk4D2TbNJXFRcyeJ1jN6jJ
+  dht/dhtpeer/dhtpeer_test.go: QmRDtUkmVW8uvSbXxnPr73wB8rUqKc2pbEd9nHf7TGnuhj
+  dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
+  dht/dhttests/dhttests.go: QmZpYRCiVARGL1n4nDwqjhzHA95Y4ACNWoa3HSDnB6PitK
+  go.mod: QmacqAAxC3dkydmfbEyVWVkMDmZECTWKZcBoPyRSnheQzD
+  go.sum: Qmbu57aSPSqanJ1xHNmMHAqLL8nvCV61URknizsKJDvenG
+  libp2p_node.go: QmZQoa9RGdVkcE8Hu9kVAdSh3jRUveScDhG84UkSY6N3vz
+  utils/utils.go: QmUsNceCQKYfaLqJN8YhTkPoB7aD2ahn6gvFG1iHKeimax
+fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PLibp2pConnection
 config:

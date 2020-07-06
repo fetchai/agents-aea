@@ -2,30 +2,32 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
-cd my_seller_aea
+aea fetch fetchai/thermometer_aea:0.4.0 --alias my_thermometer_aea
+cd my_thermometer_aea
 aea install
 ```
 ``` bash
-aea create my_seller_aea
-cd my_seller_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_seller:0.5.0
+aea create my_thermometer_aea
+cd my_thermometer_aea
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/thermometer:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
-cd my_buyer_aea
+aea fetch fetchai/thermometer_client:0.4.0 --alias my_thermometer_client
+cd my_thermometer_client
 aea install
 ```
 ``` bash
-aea create my_buyer_aea
-cd my_buyer_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_buyer:0.4.0
+aea create my_thermometer_client
+cd my_thermometer_client
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/thermometer_client:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 ``` bash
 aea generate-key fetchai
@@ -52,18 +54,18 @@ aea generate-wealth cosmos
 aea install
 ```
 ``` bash
-aea eject skill fetchai/generic_seller:0.5.0
+aea eject skill fetchai/thermometer:0.6.0
 ```
 ``` bash
-aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
+aea fingerprint skill {YOUR_AUTHOR_HANDLE}/thermometer:0.1.0
 ```
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
-``` bash
+``` bash 
 cd ..
-aea delete my_seller_aea
-aea delete my_buyer_aea
+aea delete my_thermometer_aea
+aea delete my_thermometer_client
 ```
 ``` yaml
 ledger_apis:
@@ -71,9 +73,17 @@ ledger_apis:
     network: testnet
 ```
 ``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+```
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
+```
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 ``` yaml
 ledger_apis:
@@ -85,62 +95,131 @@ ledger_apis:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      total_price: 10              |      total_price: 10             |
-|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      has_data_source: True        |      has_data_source: True       |
-|      data_for_sale: {}            |      data_for_sale: {}           |
-|      search_schema:               |      search_schema:              |
-|        attribute_one:             |        attribute_one:            |
-|          name: country            |          name: country           |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|        attribute_two:             |        attribute_two:            |
-|          name: city               |          name: city              |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|      search_data:                 |      search_data:                |
-|        country: UK                |        country: UK               |
-|        city: Cambridge            |        city: Cambridge           |
-|dependencies:                      |dependencies:                     |
-|  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------|
+models:
+  ...
+  strategy:
+    args:
+      currency_id: FET
+      data_for_sale:
+        temperature: 26
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      has_data_source: false
+      is_ledger_tx: true
+      ledger_id: fetchai
+      service_data:
+        city: Cambridge
+        country: UK
+      service_id: generic_service
+      unit_price: 10
+    class_name: Strategy
+dependencies:
+  SQLAlchemy: {}
 ```
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |  
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      max_price: 40                |      max_price: 40               |
-|      max_buyer_tx_fee: 100        |      max_buyer_tx_fee: 200000    |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      search_query:                |      search_query:               |
-|        search_term: country       |        search_term: country      |
-|        search_value: UK           |        search_value: UK          |
-|        constraint_type: '=='      |        constraint_type: '=='     |
-|ledgers: ['fetchai']               |ledgers: ['ethereum']             |
-|----------------------------------------------------------------------|
+models:
+  ...
+  strategy:
+    args:
+      currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      is_ledger_tx: true
+      ledger_id: fetchai
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
+      search_query:
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: Strategy
+```
+``` yaml
+models:
+  ...
+  strategy:
+    args:
+      currency_id: ETH
+      data_for_sale:
+        temperature: 26
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      has_data_source: false
+      is_ledger_tx: true
+      ledger_id: ethereum
+      service_data:
+        city: Cambridge
+        country: UK
+      service_id: generic_service
+      unit_price: 10
+    class_name: Strategy
+dependencies:
+  SQLAlchemy: {}
+```
+``` yaml
+models:
+  ...
+  strategy:
+    args:
+      currency_id: ETH
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      is_ledger_tx: true
+      ledger_id: ethereum
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
+      search_query:
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: Strategy
 ```

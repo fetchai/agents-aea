@@ -30,6 +30,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    TYPE_CHECKING,
 )
 
 from aea.exceptions import AEAException
@@ -44,7 +45,7 @@ from aea.skills.base import Behaviour
 
 logger = logging.getLogger(__name__)
 
-if False:  # MYPY compatible for types definitions
+if TYPE_CHECKING:
     from aea.aea import AEA  # pragma: no cover
     from aea.agent import Agent  # pragma: no cover
 
@@ -187,7 +188,11 @@ class AsyncAgentLoop(BaseAgentLoop):
             return
 
         periodic_caller = PeriodicCaller(
-            partial(self._agent._execution_control, behaviour.act_wrapper, behaviour),
+            partial(
+                self._agent._execution_control,  # pylint: disable=protected-access # TODO: refactoring!
+                behaviour.act_wrapper,
+                behaviour,
+            ),
             behaviour.tick_interval,
             behaviour.start_at,
             self._behaviour_exception_callback,
@@ -266,13 +271,15 @@ class AsyncAgentLoop(BaseAgentLoop):
         while self.is_running:
             msg = await queue.async_get()
             # TODO: better interaction with agent's internal messages
-            self._agent.filter._process_internal_message(msg)
+            self._agent.filter._process_internal_message(  # pylint: disable=protected-access # TODO: refactoring!
+                msg
+            )
 
     async def _task_process_new_behaviours(self) -> None:
         """Process new behaviours added to skills in runtime."""
         while self.is_running:
             # TODO: better handling internal messages for skills internal updates
-            self._agent.filter._handle_new_behaviours()
+            self._agent.filter._handle_new_behaviours()  # pylint: disable=protected-access # TODO: refactoring!
             self._register_all_behaviours()  # re register, cause new may appear
             await asyncio.sleep(self.NEW_BEHAVIOURS_PROCESS_SLEEP)
 

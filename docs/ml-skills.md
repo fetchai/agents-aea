@@ -71,7 +71,7 @@ Keep it running for the following demo.
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.5.0
+aea fetch fetchai/ml_data_provider:0.6.0
 cd ml_data_provider
 aea install
 ```
@@ -83,9 +83,10 @@ The following steps create the data provider from scratch:
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/ml_data_provider:0.4.0
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/ml_data_provider:0.5.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
 ```
 
@@ -95,6 +96,11 @@ ledger_apis:
   fetchai:
     network: testnet
 ```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+```
 
 </p>
 </details>
@@ -103,7 +109,7 @@ ledger_apis:
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.5.0
+aea fetch fetchai/ml_model_trainer:0.6.0
 cd ml_model_trainer
 aea install
 ```
@@ -115,9 +121,10 @@ The following steps create the model trainer from scratch:
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/ml_train:0.4.0
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/ml_train:0.5.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 aea install
 ```
 
@@ -128,6 +135,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -169,7 +181,7 @@ Alternatively, to connect to Cosmos:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```
 
 <strong>Wealth:</strong>
@@ -251,7 +263,7 @@ This updates the ml_nodel_trainer skill config (`ml_model_trainer/vendor/fetchai
 
 Finally, run both AEAs from their respective directories:
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 
 You can see that the AEAs find each other, negotiate and eventually trade.

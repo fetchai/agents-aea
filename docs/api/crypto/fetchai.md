@@ -116,43 +116,6 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name=".aea.crypto.fetchai.FetchAICrypto.recover_message"></a>
-#### recover`_`message
-
-```python
- | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
-```
-
-Recover the addresses from the hash.
-
-**Arguments**:
-
-- `message`: the message we expect
-- `signature`: the transaction signature
-- `is_deprecated_mode`: if the deprecated signing was used
-
-**Returns**:
-
-the recovered addresses
-
-<a name=".aea.crypto.fetchai.FetchAICrypto.get_address_from_public_key"></a>
-#### get`_`address`_`from`_`public`_`key
-
-```python
- | @classmethod
- | get_address_from_public_key(cls, public_key: str) -> Address
-```
-
-Get the address from the public key.
-
-**Arguments**:
-
-- `public_key`: the public key
-
-**Returns**:
-
-str
-
 <a name=".aea.crypto.fetchai.FetchAICrypto.dump"></a>
 #### dump
 
@@ -170,11 +133,117 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
+<a name=".aea.crypto.fetchai.FetchAIHelper"></a>
+## FetchAIHelper Objects
+
+```python
+class FetchAIHelper(Helper)
+```
+
+Helper class usable as Mixin for FetchAIApi or as standalone class.
+
+<a name=".aea.crypto.fetchai.FetchAIHelper.is_transaction_settled"></a>
+#### is`_`transaction`_`settled
+
+```python
+ | @staticmethod
+ | is_transaction_settled(tx_receipt: Any) -> bool
+```
+
+Check whether a transaction is settled or not.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+True if the transaction has been settled, False o/w.
+
+<a name=".aea.crypto.fetchai.FetchAIHelper.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
+
+```python
+ | @staticmethod
+ | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+```
+
+Check whether a transaction is valid or not.
+
+**Arguments**:
+
+- `tx`: the transaction.
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+- `tx_nonce`: the transaction nonce.
+- `amount`: the amount we expect to get from the transaction.
+
+**Returns**:
+
+True if the random_message is equals to tx['input']
+
+<a name=".aea.crypto.fetchai.FetchAIHelper.generate_tx_nonce"></a>
+#### generate`_`tx`_`nonce
+
+```python
+ | @staticmethod
+ | generate_tx_nonce(seller: Address, client: Address) -> str
+```
+
+Generate a unique hash to distinguish txs with the same terms.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+
+**Returns**:
+
+return the hash in hex.
+
+<a name=".aea.crypto.fetchai.FetchAIHelper.get_address_from_public_key"></a>
+#### get`_`address`_`from`_`public`_`key
+
+```python
+ | @staticmethod
+ | get_address_from_public_key(public_key: str) -> Address
+```
+
+Get the address from the public key.
+
+**Arguments**:
+
+- `public_key`: the public key
+
+**Returns**:
+
+str
+
+<a name=".aea.crypto.fetchai.FetchAIHelper.recover_message"></a>
+#### recover`_`message
+
+```python
+ | @staticmethod
+ | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+```
+
+Recover the addresses from the hash.
+
+**Arguments**:
+
+- `message`: the message we expect
+- `signature`: the transaction signature
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered addresses
+
 <a name=".aea.crypto.fetchai.FetchAIApi"></a>
 ## FetchAIApi Objects
 
 ```python
-class FetchAIApi(LedgerApi)
+class FetchAIApi(LedgerApi,  FetchAIHelper)
 ```
 
 Class to interact with the Fetch ledger APIs.
@@ -219,14 +288,26 @@ Get the balance of a given account.
 
 the balance, if retrivable, otherwise None
 
-<a name=".aea.crypto.fetchai.FetchAIApi.transfer"></a>
-#### transfer
+<a name=".aea.crypto.fetchai.FetchAIApi.get_transfer_transaction"></a>
+#### get`_`transfer`_`transaction
 
 ```python
- | transfer(crypto: Crypto, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, is_waiting_for_confirmation: bool = True, **kwargs, ,) -> Optional[str]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, **kwargs, ,) -> Optional[Any]
 ```
 
-Submit a transaction to the ledger.
+Submit a transfer transaction to the ledger.
+
+**Arguments**:
+
+- `sender_address`: the sender address of the payer.
+- `destination_address`: the destination address of the payee.
+- `amount`: the amount of wealth to be transferred.
+- `tx_fee`: the transaction fee.
+- `tx_nonce`: verifies the authenticity of the tx
+
+**Returns**:
+
+the transfer transaction
 
 <a name=".aea.crypto.fetchai.FetchAIApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
@@ -240,15 +321,6 @@ Send a signed transaction and wait for confirmation.
 **Arguments**:
 
 - `tx_signed`: the signed transaction
-
-<a name=".aea.crypto.fetchai.FetchAIApi.is_transaction_settled"></a>
-#### is`_`transaction`_`settled
-
-```python
- | is_transaction_settled(tx_digest: str) -> bool
-```
-
-Check whether a transaction is settled or not.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
@@ -267,44 +339,22 @@ Get the transaction receipt for a transaction digest (non-blocking).
 
 the tx receipt, if present
 
-<a name=".aea.crypto.fetchai.FetchAIApi.generate_tx_nonce"></a>
-#### generate`_`tx`_`nonce
+<a name=".aea.crypto.fetchai.FetchAIApi.get_transaction"></a>
+#### get`_`transaction
 
 ```python
- | generate_tx_nonce(seller: Address, client: Address) -> str
+ | get_transaction(tx_digest: str) -> Optional[Any]
 ```
 
-Generate a random str message.
+Get the transaction for a transaction digest.
 
 **Arguments**:
 
-- `seller`: the address of the seller.
-- `client`: the address of the client.
+- `tx_digest`: the digest associated to the transaction.
 
 **Returns**:
 
-return the hash in hex.
-
-<a name=".aea.crypto.fetchai.FetchAIApi.is_transaction_valid"></a>
-#### is`_`transaction`_`valid
-
-```python
- | is_transaction_valid(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
-```
-
-Check whether a transaction is valid or not (non-blocking).
-
-**Arguments**:
-
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-- `tx_nonce`: the transaction nonce.
-- `amount`: the amount we expect to get from the transaction.
-- `tx_digest`: the transaction digest.
-
-**Returns**:
-
-True if the random_message is equals to tx['input']
+the tx, if present
 
 <a name=".aea.crypto.fetchai.FetchAIFaucetApi"></a>
 ## FetchAIFaucetApi Objects

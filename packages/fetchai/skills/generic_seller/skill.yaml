@@ -1,42 +1,57 @@
 name: generic_seller
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmRcbkDFZoFRvheDXQj71FR8qW4hkCM1uVjN4rg6TaZdgs
-  dialogues.py: QmYox8f4LBUQAEJjUELTFA7xgLqiFuk8mFCStMj2mgqxV1
-  handlers.py: QmRoQqFQFUYYdaq77S9319Xn329n1f9drFKGxwLg57Tm35
-  strategy.py: QmTQgnXKzAuoXAiU6JnYzhLswo2g15fxV73yguXMbHXQvf
+  behaviours.py: QmNYjBYgBeiq3MqyuLpFKEac2vvkMzQ2EzouKdRSvakTwS
+  dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
+  handlers.py: QmTrFdfXHuRSWcLCBWCSiEeLY41zaSGinkTaGnJZC1XQZf
+  strategy.py: QmP5fNiD5ARzKiHrT68EwmLUnPC578vUrbqvDM7vMDRHFv
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.2.0
-- fetchai/fipa:0.3.0
-- fetchai/oef_search:0.2.0
+- fetchai/default:0.3.0
+- fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
+- fetchai/oef_search:0.3.0
+skills: []
 behaviours:
   service_registration:
     args:
       services_interval: 20
-    class_name: ServiceRegistrationBehaviour
+    class_name: GenericServiceRegistrationBehaviour
 handlers:
   fipa:
     args: {}
-    class_name: FIPAHandler
-models:
-  dialogues:
+    class_name: GenericFipaHandler
+  ledger_api:
     args: {}
-    class_name: Dialogues
+    class_name: GenericLedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: GenericOefSearchHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   strategy:
     args:
       currency_id: FET
       data_for_sale:
-        pressure: 20
-        temperature: 26
-        wind: 10
+        generic: data
       data_model:
         attribute_one:
           is_required: true
@@ -50,10 +65,11 @@ models:
       has_data_source: false
       is_ledger_tx: true
       ledger_id: fetchai
-      seller_tx_fee: 0
       service_data:
         city: Cambridge
         country: UK
-      total_price: 10
-    class_name: Strategy
+      service_id: generic_service
+      unit_price: 10
+    class_name: GenericStrategy
 dependencies: {}
+is_abstract: true

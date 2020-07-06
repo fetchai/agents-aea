@@ -20,6 +20,7 @@
 """This module contains the p2p libp2p connection."""
 
 import asyncio
+import distutils
 import errno
 import logging
 import os
@@ -52,7 +53,7 @@ LIBP2P_NODE_CLARGS = list()  # type: List[str]
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.3.0")
 
 MultiAddr = str
 
@@ -250,6 +251,15 @@ class Libp2pNode:
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
         self._stream_reader = None  # type: Optional[asyncio.StreamReader]
+        self._log_file_desc = None  # type: Optional[IO[str]]
+        self._reader_protocol = None  # type: Optional[asyncio.StreamReaderProtocol]
+        self._fileobj = None  # type: Optional[IO[str]]
+
+    @property
+    def reader_protocol(self) -> asyncio.StreamReaderProtocol:
+        """Get reader protocol."""
+        assert self._reader_protocol is not None, "reader protocol not set!"
+        return self._reader_protocol
 
     async def start(self) -> None:
         """
@@ -384,7 +394,7 @@ class Libp2pNode:
             self._stream_reader, loop=self._loop
         )
         self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
-        await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
+        await self._loop.connect_read_pipe(lambda: self.reader_protocol, self._fileobj)
 
         logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
@@ -542,7 +552,7 @@ class P2PLibp2pConnection(Connection):
                     "At least one Entry Peer should be provided when node can not be publically reachable"
                 )
             if delegate_uri is not None:
-                logger.warn(
+                logger.warning(
                     "Ignoring Delegate Uri configuration as node can not be publically reachable"
                 )
         else:
@@ -555,10 +565,13 @@ class P2PLibp2pConnection(Connection):
 
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
+        self.libp2p_workdir = tempfile.mkdtemp()
+        distutils.dir_util.copy_tree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
+
         self.node = Libp2pNode(
             self.address,
             key,
-            LIBP2P_NODE_MODULE,
+            self.libp2p_workdir,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
@@ -620,6 +633,8 @@ class P2PLibp2pConnection(Connection):
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
         self.node.stop()
+        if self.libp2p_workdir is not None:
+            distutils.dir_util.remove_tree(self.libp2p_workdir)
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
@@ -645,7 +660,7 @@ class P2PLibp2pConnection(Connection):
         except CancelledError:
             logger.debug("Receive cancelled.")
             return None
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.exception(e)
             return None
 
@@ -670,7 +685,8 @@ class P2PLibp2pConnection(Connection):
             assert self._in_queue is not None, "Input queue not initialized."
             self._in_queue.put_nowait(data)
 
-    def _check_go_installed(self) -> None:
+    @staticmethod
+    def _check_go_installed() -> None:
         """Checks if go is installed. Sys.exits if not"""
         res = shutil.which("go")
         if res is None:

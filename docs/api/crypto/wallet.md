@@ -134,3 +134,40 @@ Get the main crypto store.
 
 Get the connection crypto store.
 
+<a name=".aea.crypto.wallet.Wallet.sign_message"></a>
+#### sign`_`message
+
+```python
+ | sign_message(crypto_id: str, message: bytes, is_deprecated_mode: bool = False) -> Optional[str]
+```
+
+Sign a message.
+
+**Arguments**:
+
+- `crypto_id`: the id of the crypto
+- `message`: the message to be signed
+- `is_deprecated_mode`: what signing mode to use
+
+**Returns**:
+
+the signature of the message
+
+<a name=".aea.crypto.wallet.Wallet.sign_transaction"></a>
+#### sign`_`transaction
+
+```python
+ | sign_transaction(crypto_id: str, transaction: Any) -> Optional[Any]
+```
+
+Sign a tx.
+
+**Arguments**:
+
+- `crypto_id`: the id of the crypto
+- `transaction`: the transaction to be signed
+
+**Returns**:
+
+the signed tx
+

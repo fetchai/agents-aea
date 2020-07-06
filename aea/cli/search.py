@@ -56,7 +56,8 @@ def search(click_context, local):
         aea search connections
         aea search --local skills
     """
-    _setup_search_command(click_context, local)
+    ctx = cast(Context, click_context.obj)
+    setup_search_ctx(ctx, local)
 
 
 @search.command()
@@ -64,7 +65,8 @@ def search(click_context, local):
 @pass_ctx
 def connections(ctx: Context, query):
     """Search for Connections."""
-    _search_items(ctx, "connection", query)
+    item_type = "connection"
+    _output_search_results(item_type, search_items(ctx, item_type, query))
 
 
 @search.command()
@@ -72,7 +74,8 @@ def connections(ctx: Context, query):
 @pass_ctx
 def contracts(ctx: Context, query):
     """Search for Contracts."""
-    _search_items(ctx, "contract", query)
+    item_type = "contract"
+    _output_search_results(item_type, search_items(ctx, item_type, query))
 
 
 @search.command()
@@ -80,7 +83,8 @@ def contracts(ctx: Context, query):
 @pass_ctx
 def protocols(ctx: Context, query):
     """Search for Protocols."""
-    _search_items(ctx, "protocol", query)
+    item_type = "protocol"
+    _output_search_results(item_type, search_items(ctx, item_type, query))
 
 
 @search.command()
@@ -88,7 +92,8 @@ def protocols(ctx: Context, query):
 @pass_ctx
 def skills(ctx: Context, query):
     """Search for Skills."""
-    _search_items(ctx, "skill", query)
+    item_type = "skill"
+    _output_search_results(item_type, search_items(ctx, item_type, query))
 
 
 @search.command()
@@ -96,10 +101,11 @@ def skills(ctx: Context, query):
 @pass_ctx
 def agents(ctx: Context, query):
     """Search for Agents."""
-    _search_items(ctx, "agent", query)
+    item_type = "agent"
+    _output_search_results(item_type, search_items(ctx, item_type, query))
 
 
-def _setup_search_command(click_context: click.core.Context, local: bool) -> None:
+def setup_search_ctx(ctx: Context, local: bool) -> None:
     """
     Set up search command.
 
@@ -108,7 +114,6 @@ def _setup_search_command(click_context: click.core.Context, local: bool) -> Non
 
     :return: None.
     """
-    ctx = cast(Context, click_context.obj)
     if local:
         ctx.set_config("is_local", True)
         # if we are in an agent directory, try to load the configuration file.
@@ -119,7 +124,7 @@ def _setup_search_command(click_context: click.core.Context, local: bool) -> Non
             # fp = open(str(path), mode="r", encoding="utf-8")
             # agent_config = ctx.agent_loader.load(fp)
             registry_directory = ctx.agent_config.registry_path
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
 
         ctx.set_config("registry_directory", registry_directory)
@@ -196,7 +201,7 @@ def _search_items_locally(ctx, item_type_plural):
     return sorted(result, key=lambda k: k["name"])
 
 
-def _search_items(ctx: Context, item_type: str, query: str) -> None:
+def search_items(ctx: Context, item_type: str, query: str) -> List:
     """
     Search items by query and click.echo results.
 
@@ -209,12 +214,21 @@ def _search_items(ctx: Context, item_type: str, query: str) -> None:
     click.echo('Searching for "{}"...'.format(query))
     item_type_plural = item_type + "s"
     if ctx.config.get("is_local"):
-        results = _search_items_locally(ctx, item_type_plural)
+        return _search_items_locally(ctx, item_type_plural)
     else:
-        results = request_api(
+        return request_api(
             "GET", "/{}".format(item_type_plural), params={"search": query}
         )
 
+
+def _output_search_results(item_type: str, results: List[Dict]) -> None:
+    """
+    Output search results.
+
+    :param results: list of found items
+
+    """
+    item_type_plural = item_type + "s"
     if len(results) == 0:
         click.echo("No {} found.".format(item_type_plural))  # pragma: no cover
     else:

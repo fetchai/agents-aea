@@ -26,13 +26,13 @@ from queue import Queue
 from threading import Thread
 from types import SimpleNamespace
 from typing import List, Optional
+from uuid import uuid4
 
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
+from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
+from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ def _hash(access_code: str) -> str:
 
 
 class OwnershipState(ABC):
-    """Represent the ownership state of an agent."""
+    """Represent the ownership state of an agent (can proxy a ledger)."""
 
     @abstractmethod
     def set(self, **kwargs) -> None:
@@ -77,46 +77,26 @@ class OwnershipState(ABC):
         """Get the initialization status."""
 
     @abstractmethod
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
+    def is_affordable_transaction(self, terms: Terms) -> bool:
         """
         Check if the transaction is affordable (and consistent).
 
-        :param tx_message: the transaction message
+        :param terms: the transaction terms
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
 
     @abstractmethod
-    def apply_transactions(
-        self, transactions: List[TransactionMessage]
-    ) -> "OwnershipState":
+    def apply_transactions(self, list_of_terms: List[Terms]) -> "OwnershipState":
         """
         Apply a list of transactions to (a copy of) the current state.
 
-        :param transactions: the sequence of transaction messages.
+        :param list_of_terms: the sequence of transaction terms.
         :return: the final state.
         """
 
     @abstractmethod
     def __copy__(self) -> "OwnershipState":
         """Copy the object."""
-
-
-class LedgerStateProxy(ABC):
-    """Class to represent a proxy to a ledger state."""
-
-    @property
-    @abstractmethod
-    def is_initialized(self) -> bool:
-        """Get the initialization status."""
-
-    @abstractmethod
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the transaction is affordable on the default ledger.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction is affordable on the ledger
-        """
 
 
 class Preferences(ABC):
@@ -151,13 +131,13 @@ class Preferences(ABC):
 
     @abstractmethod
     def utility_diff_from_transaction(
-        self, ownership_state: OwnershipState, tx_message: TransactionMessage
+        self, ownership_state: OwnershipState, terms: Terms
     ) -> float:
         """
         Simulate a transaction and get the resulting utility difference (taking into account the fee).
 
         :param ownership_state: the ownership state against which to apply the transaction.
-        :param tx_message: a transaction message.
+        :param terms: the transaction terms.
         :return: the score.
         """
 
@@ -179,7 +159,7 @@ class ProtectedQueue(Queue):
         self._access_code_hash = _hash(access_code)
 
     def put(
-        self, internal_message: Optional[InternalMessage], block=True, timeout=None
+        self, internal_message: Optional[Message], block=True, timeout=None
     ) -> None:
         """
         Put an internal message on the queue.
@@ -196,15 +176,11 @@ class ProtectedQueue(Queue):
         :raises: ValueError, if the item is not an internal message
         :return: None
         """
-        if not (
-            type(internal_message)
-            in {InternalMessage, TransactionMessage, StateUpdateMessage}
-            or internal_message is None
-        ):
-            raise ValueError("Only internal messages are allowed!")
+        if not (isinstance(internal_message, Message) or internal_message is None):
+            raise ValueError("Only messages are allowed!")
         super().put(internal_message, block=True, timeout=None)
 
-    def put_nowait(self, internal_message: Optional[InternalMessage]) -> None:
+    def put_nowait(self, internal_message: Optional[Message]) -> None:
         """
         Put an internal message on the queue.
 
@@ -214,12 +190,8 @@ class ProtectedQueue(Queue):
         :raises: ValueError, if the item is not an internal message
         :return: None
         """
-        if not (
-            type(internal_message)
-            in {InternalMessage, TransactionMessage, StateUpdateMessage}
-            or internal_message is None
-        ):
-            raise ValueError("Only internal messages are allowed!")
+        if not (isinstance(internal_message, Message) or internal_message is None):
+            raise ValueError("Only messages are allowed!")
         super().put_nowait(internal_message)
 
     def get(self, block=True, timeout=None) -> None:
@@ -242,7 +214,7 @@ class ProtectedQueue(Queue):
 
     def protected_get(
         self, access_code: str, block=True, timeout=None
-    ) -> Optional[InternalMessage]:
+    ) -> Optional[Message]:
         """
         Access protected get method.
 
@@ -256,7 +228,7 @@ class ProtectedQueue(Queue):
             raise ValueError("Wrong code, access not permitted!")
         internal_message = super().get(
             block=block, timeout=timeout
-        )  # type: Optional[InternalMessage]
+        )  # type: Optional[Message]
         return internal_message
 
 
@@ -302,7 +274,7 @@ class DecisionMakerHandler(ABC):
         return self._message_out_queue
 
     @abstractmethod
-    def handle(self, message: InternalMessage) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle an internal message from the skills.
 
@@ -385,7 +357,7 @@ class DecisionMaker:
         while not self._stopped:
             message = self.message_in_queue.protected_get(
                 self._queue_access_code, block=True
-            )  # type: Optional[InternalMessage]
+            )  # type: Optional[Message]
 
             if message is None:
                 logger.debug(
@@ -395,20 +367,15 @@ class DecisionMaker:
                 )
                 continue
 
-            if message.protocol_id == InternalMessage.protocol_id:
-                self.handle(message)
-            else:
-                logger.warning(
-                    "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
-                        self._agent_name
-                    )
-                )
+            self.handle(message)
 
-    def handle(self, message: InternalMessage) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle an internal message from the skills.
 
         :param message: the internal message
         :return: None
         """
+        message.counterparty = uuid4().hex  # TODO: temporary fix only
+        message.is_incoming = True
         self.decision_maker_handler.handle(message)

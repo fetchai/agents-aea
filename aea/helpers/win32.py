@@ -25,7 +25,7 @@ import platform
 logger = logging.getLogger(__file__)
 
 
-def enable_ctrl_c_support() -> None:
+def enable_ctrl_c_support() -> None:  # pragma: no cover
     """Enable ctrl+c support for aea.cli command to be tested on windows platform."""
     if platform.system() != "Windows":
         return

@@ -21,7 +21,7 @@
 
 import os
 from pathlib import Path
-from typing import cast
+from typing import Optional, cast
 
 import click
 
@@ -58,15 +58,38 @@ from aea.configurations.constants import (
 @click.option("--local", is_flag=True, help="For using local folder.")
 @click.option("--empty", is_flag=True, help="Not adding default dependencies.")
 @click.pass_context
-def create(click_context, agent_name, author, local, empty):
+def create(
+    click_context: click.core.Context,
+    agent_name: str,
+    author: str,
+    local: bool,
+    empty: bool,
+):
     """Create an agent."""
-    _create_aea(click_context, agent_name, author, local, empty)
+    ctx = cast(Context, click_context.obj)
+    create_aea(ctx, agent_name, local, author=author, empty=empty)
 
 
 @clean_after
-def _create_aea(
-    click_context, agent_name: str, author: str, local: bool, empty: bool,
+def create_aea(
+    ctx: Context,
+    agent_name: str,
+    local: bool,
+    author: Optional[str] = None,
+    empty: bool = False,
 ) -> None:
+    """
+    Create AEA project.
+
+    :param ctx: Context object.
+    :param local: boolean flag for local folder usage.
+    :param agent_name: agent name.
+    :param author: optional author name (valid with local=True only).
+    :param empty: optional boolean flag for skip adding default dependencies.
+
+    :return: None
+    :raises: ClickException if an error occured.
+    """
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
@@ -94,8 +117,6 @@ def _create_aea(
 
     click.echo("Initializing AEA project '{}'".format(agent_name))
     click.echo("Creating project directory './{}'".format(agent_name))
-
-    ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
     ctx.clean_paths.append(str(path))
 
@@ -147,11 +168,11 @@ def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agent
         aea_version=aea.__version__,
         author=set_author,
         version=DEFAULT_VERSION,
-        license=DEFAULT_LICENSE,
+        license_=DEFAULT_LICENSE,
         registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
     )
-    agent_config.default_connection = DEFAULT_CONNECTION  # type: ignore
+    agent_config.default_connection = str(DEFAULT_CONNECTION)
     agent_config.default_ledger = DEFAULT_LEDGER
 
     with open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w") as config_file:

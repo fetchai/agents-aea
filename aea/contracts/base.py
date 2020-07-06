@@ -19,12 +19,11 @@
 
 """The base contract."""
 import inspect
-import json
 import logging
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, cast
+from typing import Any, Optional, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -42,17 +41,15 @@ logger = logging.getLogger(__name__)
 class Contract(Component, ABC):
     """Abstract definition of a contract."""
 
-    def __init__(
-        self, config: ContractConfig, contract_interface: Dict[str, Any],
-    ):
+    contract_interface: Any = None
+
+    def __init__(self, contract_config: ContractConfig):
         """
         Initialize the contract.
 
-        :param config: the contract configurations.
-        :param contract_interface: the contract interface
+        :param contract_config: the contract configurations.
         """
-        super().__init__(config)
-        self._contract_interface = contract_interface  # type: Dict[str, Any]
+        super().__init__(contract_config)
 
     @property
     def id(self) -> ContractId:
@@ -60,45 +57,22 @@ class Contract(Component, ABC):
         return self.public_id
 
     @property
-    def config(self) -> ContractConfig:
+    def configuration(self) -> ContractConfig:
         """Get the configuration."""
-        # return self._config
-        return self._configuration  # type: ignore
+        assert self._configuration is not None, "Configuration not set."
+        return cast(ContractConfig, super().configuration)
 
-    @property
-    def contract_interface(self) -> Dict[str, Any]:
-        """Get the contract interface."""
-        return self._contract_interface
-
+    @classmethod
     @abstractmethod
-    def set_instance(self, ledger_api: LedgerApi) -> None:
+    def get_instance(
+        cls, ledger_api: LedgerApi, contract_address: Optional[str] = None
+    ) -> Any:
         """
-        Set the instance.
+        Get the instance.
 
         :param ledger_api: the ledger api we are using.
-        :return: None
-        """
-
-    @abstractmethod
-    def set_address(self, ledger_api: LedgerApi, contract_address: str) -> None:
-        """
-        Set the contract address.
-
-        :param ledger_api: the ledger_api we are using.
-        :param contract_address: the contract address
-        :return: None
-        """
-
-    @abstractmethod
-    def set_deployed_instance(
-        self, ledger_api: LedgerApi, contract_address: str
-    ) -> None:
-        """
-        Set the contract address.
-
-        :param ledger_api: the ledger_api we are using.
-        :param contract_address: the contract address
-        :return: None
+        :param contract_address: the contract address.
+        :return: the contract instance
         """
 
     @classmethod
@@ -142,8 +116,8 @@ class Contract(Component, ABC):
             contract_class_name
         )
 
-        path = Path(directory, configuration.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            contract_interface = json.load(interface_file)
+        # path = Path(directory, configuration.path_to_contract_interface)
+        # with open(path, "r") as interface_file:
+        #     contract_interface = json.load(interface_file)
 
-        return contract_class(configuration, contract_interface)
+        return contract_class(configuration)

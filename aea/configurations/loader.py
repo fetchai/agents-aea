@@ -124,8 +124,12 @@ class ConfigLoader(Generic[T]):
             protobuf_snippets_json = {}
             dialogue_configuration = {}  # type: Dict
         elif len(yaml_documents) == 2:
-            protobuf_snippets_json = yaml_documents[1]
-            dialogue_configuration = {}
+            protobuf_snippets_json = (
+                {} if "initiation" in yaml_documents[1] else yaml_documents[1]
+            )
+            dialogue_configuration = (
+                yaml_documents[1] if "initiation" in yaml_documents[1] else {}
+            )
         elif len(yaml_documents) == 3:
             protobuf_snippets_json = yaml_documents[1]
             dialogue_configuration = yaml_documents[2]
@@ -133,10 +137,9 @@ class ConfigLoader(Generic[T]):
             raise ValueError(
                 "Incorrect number of Yaml documents in the protocol specification."
             )
-        try:
-            self.validator.validate(instance=configuration_file_json)
-        except Exception:
-            raise
+
+        self.validator.validate(instance=configuration_file_json)
+
         protocol_specification = self.configuration_class.from_json(
             configuration_file_json
         )
@@ -153,10 +156,9 @@ class ConfigLoader(Generic[T]):
         :raises
         """
         configuration_file_json = yaml_load(file_pointer)
-        try:
-            self.validator.validate(instance=configuration_file_json)
-        except Exception:
-            raise
+
+        self.validator.validate(instance=configuration_file_json)
+
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
         configuration_obj._key_order = key_order  # pylint: disable=protected-access

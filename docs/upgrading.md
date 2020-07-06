@@ -1,8 +1,18 @@
 This page provides some tipps of how to upgrade between versions.
 
+
+## v0.4.1 to 0.5.0
+
+A number of breaking changes where introduced which make backwards compatibility of skills rare.
+
+- Ledger apis <a href="../api/crypto/ledger_apis#ledger-apis-objects">`LedgerApis`</a> have been removed from the AEA constructor and skill context. `LedgerApis` are now exposed in the `LedgerConnection` (`fetchai/ledger`). To communicate with the `LedgerApis` use the `fetchai/ledger_api` protocol. This allows for more flexibility (anyone can add another `LedgerAPI` to the registry and execute it with the connection) and removes dependencies from the core framework.
+- Skills can now depend on other skills. As a result, skills have a new required config field in `skill.yaml` files, by default empty: `skills: []`.
+
 ## v0.4.0 to v0.4.1
 
-No breaking changes mean there are no upgrage requirements.
+There are no upgrage requirements if you use the CLI based approach to AEA development.
+
+Connections are now added via <a href="../api/registries/resources#resources-objects">`Resources`</a> to the AEA, not the AEA constructor directly. For programmatic usage remove the list of connections from the AEA constructor and instead add the connections to resources.
 
 ## v0.3.3 to v0.4.0
 

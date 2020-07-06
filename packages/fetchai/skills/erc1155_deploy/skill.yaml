@@ -1,39 +1,64 @@
 name: erc1155_deploy
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: The ERC1155 deploy skill has the ability to deploy and interact with
   the smart contract.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
-  behaviours.py: QmfVhsodjSXefvHcxqnE8mZeWYP3cLewwgBjk2UkTjtZvz
-  dialogues.py: QmPwjeYetp1QRe9jiRgrbRY94sT9KgLEXxd41xJJJGUqgH
-  handlers.py: QmUebHTe1kE3cwH7TyW8gt9xm4aT7D9gE5S6mRJwBYXCde
-  strategy.py: QmXUq6w8w5NX9ryVr4uJyNgFL3KPzD6EbWNYbfXXqWAxGK
+  behaviours.py: QmQCWgREz2LmDGnWF2gGvscus4anqsjsPCMSy828JEePRT
+  dialogues.py: QmR6qb8PdmUozHANKMuLaKfLGKxgnx2zFzbkmcgqXq8wgg
+  handlers.py: QmfCoHpW1j6fW4vCazvt665q6inMa2EmGVXpZJEPB6VaEp
+  strategy.py: QmTbYkAigzz2EcmxnMhGWTC1F6oanK1yHmSJWmve1iK2rY
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.5.0
+- fetchai/erc1155:0.6.0
 protocols:
-- fetchai/default:0.2.0
-- fetchai/fipa:0.3.0
-- fetchai/oef_search:0.2.0
+- fetchai/contract_api:0.1.0
+- fetchai/default:0.3.0
+- fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
+- fetchai/oef_search:0.3.0
+- fetchai/signing:0.1.0
+skills: []
 behaviours:
   service_registration:
     args:
       services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
-  default:
+  contract_api:
     args: {}
-    class_name: FIPAHandler
-  transaction:
+    class_name: ContractApiHandler
+  fipa:
     args: {}
-    class_name: TransactionHandler
+    class_name: FipaHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
 models:
-  dialogues:
+  contract_api_dialogues:
     args: {}
-    class_name: Dialogues
+    class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       data_model:
@@ -43,9 +68,8 @@ models:
           type: bool
       data_model_name: erc1155_deploy
       from_supply: 10
-      ft: 2
       ledger_id: ethereum
-      mint_stock:
+      mint_quantities:
       - 100
       - 100
       - 100
@@ -57,10 +81,10 @@ models:
       - 100
       - 100
       nb_tokens: 10
-      nft: 1
       service_data:
         has_erc1155_contract: true
       to_supply: 0
+      token_type: 2
       value: 0
     class_name: Strategy
 dependencies:

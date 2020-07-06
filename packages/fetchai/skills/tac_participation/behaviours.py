@@ -17,18 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a tac participation behaviour."""
+"""This package contains a tac search behaviour."""
 
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.tac_participation.dialogues import OefSearchDialogues
 from packages.fetchai.skills.tac_participation.game import Game, Phase
-from packages.fetchai.skills.tac_participation.search import Search
 
 
-class TACBehaviour(TickerBehaviour):
+class TacSearchBehaviour(TickerBehaviour):
     """This class scaffolds a behaviour."""
 
     def setup(self) -> None:
@@ -67,19 +67,20 @@ class TACBehaviour(TickerBehaviour):
         :return: None
         """
         game = cast(Game, self.context.game)
-        search = cast(Search, self.context.search)
         query = game.get_game_query()
-        search_id = search.get_next_id()
-        search.ids_for_tac.add(search_id)
-        self.context.logger.info(
-            "[{}]: Searching for TAC, search_id={}".format(
-                self.context.agent_name, search_id
-            )
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_msg = OefSearchMessage(
+        oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=(str(search_id), ""),
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        oef_msg.counterparty = self.context.search_service_address
-        self.context.outbox.put_message(message=oef_msg)
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info(
+            "[{}]: Searching for TAC, search_id={}".format(
+                self.context.agent_name, oef_search_msg.dialogue_reference
+            )
+        )

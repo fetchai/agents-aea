@@ -22,13 +22,16 @@ import json
 import shutil
 import sys
 import time
-import unittest.mock
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 import aea
+from aea.cli.create import create_aea
+from aea.cli.utils.context import Context
 from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from .test_base import TempCWD, create_app
 from ..conftest import CUR_PATH, skip_test_windows
@@ -50,20 +53,20 @@ def test_create_and_run_agent():
         agent_id = "test_agent"
 
         # Make an agent
-        response_create = app.post(
-            "api/agent", content_type="application/json", data=json.dumps(agent_id)
-        )
-        assert response_create.status_code == 201
-        data = json.loads(response_create.get_data(as_text=True))
-        assert data == agent_id
+        # We do it programmatically as we need to create an agent with default author
+        # that was prevented from GUI.
+        ctx = Context(cwd=temp_cwd.temp_dir)
+        ctx.set_config("is_local", True)
+        create_aea(ctx, agent_id, local=True, author=DEFAULT_AUTHOR)
 
         # Add the local connection
-        response_add = app.post(
-            "api/agent/" + agent_id + "/connection",
-            content_type="application/json",
-            data=json.dumps("fetchai/local:0.2.0"),
-        )
-        assert response_add.status_code == 201
+        with patch("aea.cli_gui.app_context.local", True):
+            response_add = app.post(
+                "api/agent/" + agent_id + "/connection",
+                content_type="application/json",
+                data=json.dumps("fetchai/local:0.3.0"),
+            )
+            assert response_add.status_code == 201
 
         # Get the running status before we have run it
         response_status = app.get(
@@ -101,7 +104,7 @@ def test_create_and_run_agent():
         assert response_stop.status_code == 200
         time.sleep(2)
 
-        # run the agent with stub connection (as no OEF node is running)
+        # run the agent with stub connection
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
@@ -130,23 +133,11 @@ def test_create_and_run_agent():
 
         assert data["error"] == ""
         assert "RUNNING" in data["status"]
-
-        # Create a stop agent function that behaves as if the agent had stopped itself
-        def _stop_agent_override(loc_agent_id: str):
-            # Test if we have the process id
-            assert loc_agent_id in aea.cli_gui.app_context.agent_processes
-
-            aea.cli_gui.app_context.agent_processes[loc_agent_id].terminate()
-            aea.cli_gui.app_context.agent_processes[loc_agent_id].wait()
-
-            return "stop_agent: All fine {}".format(loc_agent_id), 200  # 200 (OK)
-
-        with unittest.mock.patch("aea.cli_gui._stop_agent", _stop_agent_override):
-            app.delete(
-                "api/agent/" + agent_id + "/run",
-                data=None,
-                content_type="application/json",
-            )
+        app.delete(
+            "api/agent/" + agent_id + "/run",
+            data=None,
+            content_type="application/json",
+        )
         time.sleep(1)
 
         # Get the running status
@@ -158,7 +149,7 @@ def test_create_and_run_agent():
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
         assert "process terminate" in data["error"]
-        assert "FINISHED" in data["status"]
+        assert "NOT_STARTED" in data["status"]
 
         # run the agent again (takes a different path through code)
         response_run = app.post(
@@ -199,7 +190,6 @@ def test_create_and_run_agent():
         )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
-
         assert "process terminate" in data["error"]
         assert "NOT_STARTED" in data["status"]
 
@@ -212,9 +202,9 @@ def test_create_and_run_agent():
         assert response_stop.status_code == 400
         time.sleep(2)
 
-        genuine_func = aea.cli_gui._call_aea_async
+        genuine_func = aea.cli_gui.call_aea_async
 
-        def _dummy_call_aea_async(param_list, dir_arg):
+        def _dummycall_aea_async(param_list, dir_arg):
             assert param_list[0] == sys.executable
             assert param_list[1] == "-m"
             assert param_list[2] == "aea.cli"
@@ -224,7 +214,7 @@ def test_create_and_run_agent():
                 return genuine_func(param_list, dir_arg)
 
         # Run when process files (but other call - such as status should not fail)
-        with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+        with patch("aea.cli_gui.call_aea_async", _dummycall_aea_async):
             response_run = app.post(
                 "api/agent/" + agent_id + "/run",
                 content_type="application/json",

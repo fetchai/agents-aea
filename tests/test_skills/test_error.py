@@ -25,7 +25,6 @@ from threading import Thread
 
 from aea.aea import AEA
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -67,7 +66,6 @@ class TestSkillError:
         """Test the initialisation of the AEA."""
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         self.wallet = Wallet({FetchAICrypto.identifier: private_key_path})
-        self.ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
         self.agent_name = "Agent0"
 
         self.connection = _make_dummy_connection()
@@ -79,7 +77,6 @@ class TestSkillError:
         self.my_aea = AEA(
             self.identity,
             self.wallet,
-            self.ledger_apis,
             timeout=0.1,
             resources=Resources(),
             default_connection=self.connection.public_id,

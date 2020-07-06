@@ -1,4 +1,31 @@
-A `Protocol` manages message representation (syntax in `message.py`), optionally rules of the message exchange (semantics in `dialogues.py`), as well as encoding and decoding (in `serialization.py`). All protocols are for point to point interactions between two agents. Agents can be AEAs or other types of agent-like services.
+<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define agent to agent interactions, which include:
+
+* messages, which define the representation;
+
+* serialization logic, which define how a message is encoded for transport; and, optionally
+
+* dialogues, which define rules over message sequences.
+
+The framework provides one default protocol, called `default` and introduced <a href="#fetchaidefault020-protocol">below</a>. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#defaultmessage-objects">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#defaultserializer-objects">`DefaultSerializer`</a> and <a href="..api/protocols/default/dialogues#defaultdialogues-objects">`DefaultDialogue`</a> classes.
+
+Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
+
+We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
+
+## Components of a protocol
+
+A protocol package contains the following files:
+
+* `__init__.py`
+* `message.py`, which defines message representation
+* `serialization.py`, which defines the encoding and decoding logic
+* two protobuf related files
+
+It optionally also contains
+* `dialogues.py`, which defines rules of the message exchange
+* `custom_types.py`, which defines custom types 
+
+All protocols are for point to point interactions between two agents or agent-like services.
 
 <!-- ## Interaction Protocols
 
@@ -15,7 +42,7 @@ Each `Message` in an interaction protocol has a set of default fields:
 * `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the agent who first initiates the dialogue (i.e. sends the first message). The second part of the tuple is the reference assigned to by the other agent. * `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the dialogue initiator, the second part of the tuple is the reference assigned to by the dialogue responder. The default value is `("", "")`.
 * `message_id: int`, the identifier of the message in a dialogue. The default value is `1`.
 * `target: int`, the id of the message this message is replying to. The default value is `0`.
-* `Performative: Enum`, the purpose/intention of the message. 
+* `performative: Enum`, the purpose/intention of the message. 
 * `is_incoming: bool`, a boolean specifying whether the message is outgoing (from the agent), or incoming (from the other agent). The default value is `False`. 
 * `counterparty: Address`, the address of the counterparty of this agent; the other agent, this agent is communicating with.  
 
@@ -29,15 +56,19 @@ Each message may optionally have any number of contents of varying types.
 
 ## Dialogue rules
 
-Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single dialogue, respectively all dialogues, associated with the protocol. 
+Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single dialogue, respectively all dialogues, associated with the protocol.
+
+The framework provides a number of helpful classes which implement most of the logic to maintain dialogues, namely the <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> base classes.
 
 ## Custom protocol
 
 The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. This lets the developer specify the speech-acts as well as optionally the dialogue structure (e.g. roles of agents participating in a dialogue, the states a dialogue may end in, and the reply structure of the speech-acts in a dialogue).
 
-## `fetchai/default:0.2.0` protocol
+We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
-The `fetchai/default:0.2.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
+## `fetchai/default:0.3.0` protocol
+
+The `fetchai/default:0.3.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
 ``` python
 from enum import Enum
@@ -84,13 +115,13 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.2.0` skill utilises the `fetchai/default:0.2.0` protocol for error handling.
+Each AEA's `fetchai/error:0.3.0` skill utilises the `fetchai/default:0.3.0` protocol for error handling.
 
-## `fetchai/oef_search:0.2.0` protocol
+## `fetchai/oef_search:0.3.0` protocol
 
-The `fetchai/oef_search:0.2.0` protocol is used by AEAs to interact with an [OEF search node](../oef-ledger) to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.3.0` protocol is used by AEAs to interact with an [OEF search node](../oef-ledger) to register and unregister their own services and search for services registered by other agents.
 
-The `fetchai/oef_search:0.2.0` protocol definition includes an `OefSearchMessage` with the following message types:
+The `fetchai/oef_search:0.3.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ``` python
 class Performative(Enum):
@@ -199,7 +230,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.2.0`.
+* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.3.0`.
 
 * If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python
@@ -214,11 +245,11 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:0.3.0` protocol
+## `fetchai/fipa:0.4.0` protocol
 
 This protocol provides classes and functions necessary for communication between AEAs via a variant of the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language.
 
-The `fetchai/fipa:0.3.0` protocol definition includes a `FipaMessage` with the following performatives:
+The `fetchai/fipa:0.4.0` protocol definition includes a `FipaMessage` with the following performatives:
 
 ``` python
 class Performative(Enum):
@@ -251,10 +282,225 @@ def __init__(
 )
 ```
 
-The `fetchai/fipa:0.3.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
+The `fetchai/fipa:0.4.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.3.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.4.0` protocol check out the <a href="../generic-skills-step-by-step" target=_blank> generic skills step by step guide</a>.
 
+
+### Fipa dialogue
+
+Below, we give an example of a dialogue between two agents. In practice; both dialogues would be maintained in the respective agent.
+
+We first create concrete implementations of `FipaDialogue` and `FipaDialogues` for the buyer and seller:
+``` python
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
+from aea.mail.base import Address, Envelope
+from aea.protocols.base import Message
+
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
+from packages.fetchai.protocols.fipa.message import FipaMessage
+
+
+class BuyerDialogue(FipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self.proposal = None  # type: Optional[Description]
+
+
+class BuyerDialogues(FipaDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, agent_address: str) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        FipaDialogues.__init__(self, agent_address)
+
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
+    ) -> BuyerDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = BuyerDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.Role.BUYER
+
+
+class SellerDialogue(FipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self.proposal = None  # type: Optional[Description]
+
+
+class SellerDialogues(FipaDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, agent_address) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        FipaDialogues.__init__(self, agent_address)
+
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
+    ) -> SellerDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = SellerDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.Role.SELLER
+```
+
+Next, we can immitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:
+``` python
+buyer_address = "buyer_address_stub"
+seller_address = "seller_address_stub"
+buyer_dialogues = BuyerDialogues(buyer_address)
+seller_dialogues = SellerDialogues(seller_address)
+```
+
+First, the buyer creates a message destined for the seller and updates the dialogues:
+``` python
+cfp_msg = FipaMessage(
+    message_id=1,
+    dialogue_reference=buyer_dialogues.new_self_initiated_dialogue_reference(),
+    target=0,
+    performative=FipaMessage.Performative.CFP,
+    query=Query([Constraint("something", ConstraintType(">", 1))]),
+)
+cfp_msg.counterparty = seller_addr
+
+# Extends the outgoing list of messages.
+buyer_dialogue = buyer_dialogues.update(cfp_msg)
+```
+If the message has been correctly constructed, the `buyer_dialogue` will be returned, otherwise it will be `None`.
+
+In a skill, the message could now be sent:
+``` python
+# In a skill we would do:
+# self.context.outbox.put_message(message=cfp_msg)
+```
+
+However, here we simply continue with the seller:
+``` python
+# change the incoming message field & counterparty
+cfp_msg.is_incoming = True
+cfp_msg.counterparty = buyer_address
+```
+In the skill, the above two lines will be done by the framework; you can simply receive the message in the handler.
+
+We update the seller's dialogues model next to generate a new dialogue:
+``` python
+# Creates a new dialogue for the seller side based on the income message.
+seller_dialogue = seller_dialogues.update(cfp_msg)
+```
+
+Next, the seller can generate a proposal:
+``` python
+# Generate a proposal message to send to the buyer.
+proposal = Description({"foo1": 1, "bar1": 2})
+message_id = cfp_msg.message_id + 1
+target = cfp_msg.message_id
+proposal_msg = FipaMessage(
+    message_id=message_id,
+    dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
+    target=target,
+    performative=FipaMessage.Performative.PROPOSE,
+    proposal=proposal,
+)
+proposal_msg.counterparty = cfp_msg.counterparty
+
+# Then we update the dialogue
+seller_dialogue.update(proposal_msg)
+```
+
+In a skill, the message could now be sent:
+``` python
+# In a skill we would do:
+# self.context.outbox.put_message(message=proposal_msg)
+```
+
+The dialogue can continue like this.
+
+To retrieve a dialogue for a given message, we can do the following:
+
+``` python
+retrieved_dialogue = seller_dialogues.get_dialogue(cfp_msg)
+```
 
 
 <br />

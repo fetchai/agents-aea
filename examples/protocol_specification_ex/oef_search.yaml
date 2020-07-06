@@ -1,10 +1,10 @@
 ---
 name: oef_search
 author: fetchai
-version: 0.2.0
+version: 0.4.0
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 speech_acts:
   register_service:
     service_description: ct:Description
@@ -14,7 +14,8 @@ speech_acts:
     query: ct:Query
   search_result:
     agents: pt:list[pt:str]
-  oef_error:
+  success: {}
+  error:
     oef_error_operation: ct:OefErrorOperation
 ...
 ---
@@ -36,4 +37,17 @@ ct:OefErrorOperation: |
         SEND_MESSAGE = 3;
       }
   OefErrorEnum oef_error = 1;
+...
+---
+initiation: [register_service, unregister_service, search_services]
+reply:
+  register_service: [success, error]
+  unregister_service: [success, error]
+  search_services: [search_result, error]
+  success: []
+  search_result: []
+  oef_error: []
+termination: [success, error, search_result]
+roles: {agent, oef_node}
+end_states: [successful, failed]
 ...

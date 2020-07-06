@@ -30,18 +30,18 @@ Email: hello@fetch.ai
 Password:
 Please make sure that passwords are equal.
 Confirm password:
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
-v0.4.1
+
+v0.5.0
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.5.0
+aea fetch fetchai/my_first_aea:0.6.0
 cd my_first_aea
 ```
 ``` bash
@@ -49,28 +49,28 @@ aea create my_first_aea
 cd my_first_aea
 ```
 ``` bash
-aea add skill fetchai/echo:0.2.0
+aea add skill fetchai/echo:0.3.0
 ```
 ``` bash
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,
 ```
 ``` bash
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.5.0
+aea run --connections fetchai/stub:0.6.0
 ```
 ``` bash
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
-v0.4.1
+
+v0.5.0
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -82,7 +82,7 @@ info: Echo Behaviour: act method called.
 ...
 ```
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,' >> input_file
 ```
 ``` bash
 info: Echo Behaviour: act method called.

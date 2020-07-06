@@ -74,7 +74,7 @@ Implements an attribute for an OEF data model.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, type: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "")
+ | __init__(name: str, type_: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "")
 ```
 
 Initialize an attribute.
@@ -287,7 +287,7 @@ Used with the Constraint class, this class allows to specify constraint over att
 #### `__`init`__`
 
 ```python
- | __init__(type: Union[ConstraintTypes, str], value: Any)
+ | __init__(type_: Union[ConstraintTypes, str], value: Any)
 ```
 
 Initialize a constraint type.

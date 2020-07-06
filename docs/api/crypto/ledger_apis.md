@@ -74,16 +74,6 @@ Get the ledger API.
 
 Check if it has the default ledger API.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.last_tx_statuses"></a>
-#### last`_`tx`_`statuses
-
-```python
- | @property
- | last_tx_statuses() -> Dict[str, str]
-```
-
-Get last tx statuses.
-
 <a name=".aea.crypto.ledger_apis.LedgerApis.default_ledger_id"></a>
 #### default`_`ledger`_`id
 
@@ -94,11 +84,11 @@ Get last tx statuses.
 
 Get the default ledger id.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.token_balance"></a>
-#### token`_`balance
+<a name=".aea.crypto.ledger_apis.LedgerApis.get_balance"></a>
+#### get`_`balance
 
 ```python
- | token_balance(identifier: str, address: str) -> int
+ | get_balance(identifier: str, address: str) -> Optional[int]
 ```
 
 Get the token balance.
@@ -112,26 +102,27 @@ Get the token balance.
 
 the token balance
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.transfer"></a>
-#### transfer
+<a name=".aea.crypto.ledger_apis.LedgerApis.get_transfer_transaction"></a>
+#### get`_`transfer`_`transaction
 
 ```python
- | transfer(crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int, tx_nonce: str, **kwargs) -> Optional[str]
+ | get_transfer_transaction(identifier: str, sender_address: str, destination_address: str, amount: int, tx_fee: int, tx_nonce: str, **kwargs, ,) -> Optional[Any]
 ```
 
-Transfer from self to destination.
+Get a transaction to transfer from self to destination.
 
 **Arguments**:
 
-- `tx_nonce`: verifies the authenticity of the tx
-- `crypto_object`: the crypto object that contains the fucntions for signing transactions.
-- `destination_address`: the address of the receive
+- `identifier`: the identifier of the ledger
+- `sender_address`: the address of the sender
+- `destination_address`: the address of the receiver
 - `amount`: the amount
+- `tx_nonce`: verifies the authenticity of the tx
 - `tx_fee`: the tx fee
 
 **Returns**:
 
-tx digest if successful, otherwise None
+tx
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
@@ -144,17 +135,55 @@ Send a signed transaction and wait for confirmation.
 
 **Arguments**:
 
+- `identifier`: the identifier of the ledger
 - `tx_signed`: the signed transaction
 
 **Returns**:
 
 the tx_digest, if present
 
+<a name=".aea.crypto.ledger_apis.LedgerApis.get_transaction_receipt"></a>
+#### get`_`transaction`_`receipt
+
+```python
+ | get_transaction_receipt(identifier: str, tx_digest: str) -> Optional[Any]
+```
+
+Get the transaction receipt for a transaction digest.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+the tx receipt, if present
+
+<a name=".aea.crypto.ledger_apis.LedgerApis.get_transaction"></a>
+#### get`_`transaction
+
+```python
+ | get_transaction(identifier: str, tx_digest: str) -> Optional[Any]
+```
+
+Get the transaction for a transaction digest.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+the tx, if present
+
 <a name=".aea.crypto.ledger_apis.LedgerApis.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
- | is_transaction_settled(identifier: str, tx_digest: str) -> bool
+ | @staticmethod
+ | is_transaction_settled(identifier: str, tx_receipt: Any) -> bool
 ```
 
 Check whether the transaction is settled and correct.
@@ -162,26 +191,18 @@ Check whether the transaction is settled and correct.
 **Arguments**:
 
 - `identifier`: the identifier of the ledger
-- `tx_digest`: the transaction digest
+- `tx_receipt`: the transaction digest
 
 **Returns**:
 
 True if correctly settled, False otherwise
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.is_tx_valid"></a>
-#### is`_`tx`_`valid
-
-```python
- | is_tx_valid(identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
-```
-
-Kept for backwards compatibility!
-
 <a name=".aea.crypto.ledger_apis.LedgerApis.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
- | is_transaction_valid(identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+ | @staticmethod
+ | is_transaction_valid(identifier: str, tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether the transaction is valid.
@@ -189,7 +210,7 @@ Check whether the transaction is valid.
 **Arguments**:
 
 - `identifier`: Ledger identifier
-- `tx_digest`: the transaction digest
+- `tx`: the transaction
 - `seller`: the address of the seller.
 - `client`: the address of the client.
 - `tx_nonce`: the transaction nonce.
@@ -203,6 +224,7 @@ True if is valid , False otherwise
 #### generate`_`tx`_`nonce
 
 ```python
+ | @staticmethod
  | generate_tx_nonce(identifier: str, seller: Address, client: Address) -> str
 ```
 

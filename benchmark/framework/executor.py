@@ -131,7 +131,8 @@ class Executor:
         time_usage, stats, killed = self._measure(process)
         return self._report(args, time_usage, stats, killed)
 
-    def _prepare(self, func: Callable, args: tuple) -> Process:
+    @staticmethod
+    def _prepare(func: Callable, args: tuple) -> Process:
         """
         Start process and wait process ready to be measured.
 
@@ -179,7 +180,8 @@ class Executor:
 
         return time_usage, stats, is_killed
 
-    def _get_stats_record(self, proc_info: psutil.Process) -> ResourceStats:
+    @staticmethod
+    def _get_stats_record(proc_info: psutil.Process) -> ResourceStats:
         """
         Read resources usage and create record.
 

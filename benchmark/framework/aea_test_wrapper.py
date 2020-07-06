@@ -51,6 +51,7 @@ class AEATestWrapper:
         self._fake_connection: Optional[FakeConnection] = None
 
         self.aea = self.make_aea(self.name, self.components)
+        self._thread = None  # type: Optional[Thread]
 
     def make_aea(self, name: str = "my_aea", components: List[Component] = None) -> AEA:
         """
@@ -215,7 +216,9 @@ class AEATestWrapper:
         """Contenxt manager enter."""
         self.start_loop()
 
-    def __exit__(self, exc_type=None, exc=None, traceback=None) -> None:
+    def __exit__(  # pylint: disable=useless-return
+        self, exc_type=None, exc=None, traceback=None
+    ) -> None:
         """
         Context manager exit, stop agent.
 
@@ -235,6 +238,7 @@ class AEATestWrapper:
 
     def stop_loop(self) -> None:
         """Stop agents loop in dedicated thread, close thread."""
+        assert self._thread is not None, "Thread not set, call start_loop first."
         self.aea.stop()
         self._thread.join()
 
@@ -264,7 +268,9 @@ class AEATestWrapper:
         self._fake_connection = FakeConnection(
             envelope, inbox_num, connection_id="fake_connection"
         )
-        self.aea._connections.append(self._fake_connection)
+        self.aea._connections.append(  # pylint: disable=protected-access
+            self._fake_connection
+        )
 
     def is_messages_in_fake_connection(self) -> bool:
         """

@@ -39,10 +39,10 @@ from typing import (
 )
 
 try:
-    from asyncio import create_task  # pylint: disable=ungrouped-imports
+    from asyncio import create_task  # pylint: disable=ungrouped-imports,unused-import
 except ImportError:  # pragma: no cover
     # for python3.6!
-    from asyncio import ensure_future as create_task  # type: ignore # noqa: F401 # pylint: disable=ungrouped-imports
+    from asyncio import ensure_future as create_task  # type: ignore # noqa: F401 # pylint: disable=ungrouped-imports,unused-import
 
 
 logger = logging.getLogger(__file__)
@@ -105,7 +105,8 @@ class AsyncState:
         except KeyError:
             pass
 
-    def _watcher_result_callback(self, watcher: Future) -> Callable:
+    @staticmethod
+    def _watcher_result_callback(watcher: Future) -> Callable:
         """Create callback for watcher result."""
         # docstyle.
         def _callback(result):
@@ -316,7 +317,7 @@ class ThreadedAsyncRunner(Thread):
             return
         if self._loop.is_running():
             logger.debug("Stopping loop...")
-            self._loop.call_soon_threadsafe(lambda: self._loop.stop())
+            self._loop.call_soon_threadsafe(self._loop.stop)
         logger.debug("Wait thread to join...")
         self.join(10)
         logger.debug("Stopped.")

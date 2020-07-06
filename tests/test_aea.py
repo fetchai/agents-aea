@@ -27,7 +27,6 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -130,10 +129,10 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.3.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
+        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.3.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = agent.resources.get_connection(local_connection_id)
@@ -187,10 +186,10 @@ def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.3.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.3.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = aea.resources.get_connection(local_connection_id)
@@ -273,10 +272,10 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.2.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.3.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.2.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.3.0")])
         local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
@@ -344,7 +343,6 @@ def test_initialize_aea_programmatically_build_resources():
             agent_name = "MyAgent"
             private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
             wallet = Wallet({FETCHAI: private_key_path})
-            ledger_apis = LedgerApis({}, FETCHAI)
             identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
             connection = _make_local_connection(agent_name, node)
 
@@ -352,7 +350,6 @@ def test_initialize_aea_programmatically_build_resources():
             aea = AEA(
                 identity,
                 wallet,
-                ledger_apis,
                 resources=resources,
                 default_connection=connection.public_id,
             )
@@ -441,17 +438,10 @@ def test_add_behaviour_dynamically():
     agent_name = "MyAgent"
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     wallet = Wallet({FETCHAI: private_key_path})
-    ledger_apis = LedgerApis({}, FETCHAI)
     resources = Resources()
     identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
     connection = _make_local_connection(identity.address, LocalNode())
-    agent = AEA(
-        identity,
-        wallet,
-        ledger_apis,
-        resources,
-        default_connection=connection.public_id,
-    )
+    agent = AEA(identity, wallet, resources, default_connection=connection.public_id,)
     resources.add_connection(connection)
     resources.add_component(
         Skill.from_dir(
@@ -494,14 +484,11 @@ class TestContextNamespace:
         agent_name = "my_agent"
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         connection = _make_local_connection(identity.address, LocalNode())
         resources = Resources()
         cls.context_namespace = {"key1": 1, "key2": 2}
-        cls.agent = AEA(
-            identity, wallet, ledger_apis, resources, **cls.context_namespace
-        )
+        cls.agent = AEA(identity, wallet, resources, **cls.context_namespace)
 
         resources.add_connection(connection)
         resources.add_component(

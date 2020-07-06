@@ -5,7 +5,7 @@ The Open Economic Framework (OEF) and Decentralized Ledger Technologies (DLTs) a
 
 ## Open Economic Framework (OEF)
 
-The 'Open Economic Framework' (OEF) consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other.
+The 'Open Economic Framework' (OEF) consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other. As such the OEF defines the decentralised virtual environment that supplies and supports APIs for autonomous third-party software agents, also known as Autonomous Economic Agents (AEAs).
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
@@ -25,13 +25,13 @@ The agent communication network is a peer-to-peer communication network for agen
 
 The implementation builds on the open-source <a href="https://libp2p.io/" target="_blank">libp2p</a> library. A distributed hash table is used by all participating peers to maintain a mapping between agents' cryptographic addresses and their network addresses.
 
-Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a>).
+Agents can receive messages from other agents if they are both connected to the ACN (see <a href="../p2p-connection">here</a> for an example).
 
 ### Centralized search and discovery
 
-A `simple OEF search node` allows agents to search and discover each other. In particular, agents can register themselves and their services as well as send search requests.
+A <a href="../simple-oef">`simple OEF search node`</a> allows agents to search and discover each other. In particular, agents can register themselves and their services as well as send search requests.
 
-For two agents to be able to find each other, at least one must register as a service and the other must query the `simple OEF search node` for this service.
+For two agents to be able to find each other, at least one must register themselves and the other must query the `simple OEF search node` for it. Detailed documentation is provided <a href="../simple-oef">`here`</a>.
 
 ### Deprecated alternative (for local development only)
 
@@ -54,7 +54,7 @@ When it is live you will see the sentence 'A thing of beauty is a joy forever...
 
 To view the `OEF search and communication node` logs for debugging, navigate to `data/oef-logs`.
 
-To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.4.0`).
+To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.5.0`).
 
 If you experience any problems launching the `OEF search and communication node` then consult [this](https://docs.google.com/document/d/1x_hFwEIXHlr_JCkuIv-izxSz0tN-7kSmSc-g32ImL1U/edit?usp=sharing) guide.
 
@@ -63,7 +63,7 @@ If you experience any problems launching the `OEF search and communication node`
 
 ## Ledgers
 
-Ledgers enable the AEAs to complete a transaction, which can involve the transfer of funds to each other or the execution of smart contracts.
+Ledgers enable the AEAs to complete a transaction, which can involve the transfer of funds to each other or the execution of smart contracts. They ensure the truth and integrity of agent to agent interactions.
 
 Whilst a ledger can, in principle, also be used to store structured data - for instance, training data in a machine learning model - in most use cases the resulting costs and privacy implications do not make this a relevant use of the ledger. Instead, usually only references to the structured data - often in the form of hashes - are stored on the ledger and the actual data is stored off-chain.
 

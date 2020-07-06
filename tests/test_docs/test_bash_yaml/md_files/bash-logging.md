@@ -3,27 +3,29 @@ aea create my_aea
 cd my_aea
 ```
 ``` yaml
-aea_version: '>=0.4.0, <0.5.0'
 agent_name: my_aea
-author: ''
-connections:
-- fetchai/stub:0.5.0
-default_connection: fetchai/stub:0.5.0
-default_ledger: fetchai
+author: fetchai
+version: 0.1.0
 description: ''
-fingerprint: ''
+license: Apache-2.0
+aea_version: 0.5.0
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/stub:0.6.0
+contracts: []
+protocols:
+- fetchai/default:0.3.0
+skills:
+- fetchai/error:0.3.0
+default_connection: fetchai/stub:0.6.0
+default_ledger: fetchai
 ledger_apis: {}
-license: ''
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-protocols:
-- fetchai/default:0.2.0
 registry_path: ../packages
-skills:
-- fetchai/error:0.2.0
-version: 0.1.0
 ```
 ``` yaml
 logging_config:

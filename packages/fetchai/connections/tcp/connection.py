@@ -19,5 +19,9 @@
 
 """Base classes for TCP communication."""
 
-from .tcp_client import TCPClientConnection  # noqa: F401
-from .tcp_server import TCPServerConnection  # noqa: F401
+from .tcp_client import (  # noqa: F401 # pylint: disable=unused-import
+    TCPClientConnection,
+)
+from .tcp_server import (  # noqa: F401 # pylint: disable=unused-import
+    TCPServerConnection,
+)

@@ -34,7 +34,7 @@
                     <div class = "addLeftMarginBordered">
                         <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
                             <div class="simpleBox spaceAllRound">
-                                <label for="localAgentsCreateId">Create Agent id&nbsp;&nbsp;
+                                <label for="localAgentsCreateId">Create Agent name&nbsp;&nbsp;
                                     <input id="localAgentsCreateId" type="text"/>&nbsp;&nbsp;
                                     <button id="localAgentsCreate">Create Agent</button>
                                 </label>
@@ -48,7 +48,7 @@
                                             <caption>Local Agents </caption>
                                             <thead>
                                                 <tr>
-                                                    <th class="idWidth">Agent id</th>
+                                                    <th class="idWidth">Agent name</th>
                                                     <th class="descriptionWidth">Description</th>
                                                 </tr>
                                             </thead>
@@ -121,9 +121,15 @@
                         <div class="simpleOutlinedBox  fullWidth halfSpaceBottom">
                             <div class="spaceAllRound sectionTitle">Search registry</div>
                             <div class="spaceAllRound simpleBox">
+                                <label for="agent" class="interactive">
+                                    <input type="radio" name="itemType" id="agent" class="interactive"> Agents<br>
+                                </label>
                                 <label for="connection" class="interactive">
                                     <input type="radio" name="itemType" id="connection" class="interactive"> Connections<br>
                                 </label>
+                                  <label for="contract" class="interactive">
+                                      <input type="radio" name="itemType" id="contract" class="interactive"> Contracts<br>
+                                  </label>
                                 <label for="protocol" class="interactive">
                                     <input type="radio" name="itemType" id="protocol" class="interactive"> Protocols<br>
                                 </label>
@@ -159,17 +165,8 @@
                                 <div class="spaceAllRound">Selected <span id="searchItemTypeSelected">skill</span>: <span id="searchItemsTableSelectionId">NONE</span></div>
                             </div>
                             <button id="searchItemsAdd" class="spaceAllRoundNoTop"><< Add item</button>
+                            <button id="searchAgentsFetch" class="spaceAllRoundNoTop"><< Fetch agent</button>
 
-                        </div>
-
-                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
-                            <div class="spaceAllRound sectionTitle">OEF Node</div>
-
-                            <button id="startOEFNode" class="spaceAllRound">Start OEF Node</button>
-                            <button id="stopOEFNode" class="spaceAllRound">Stop OEF Node</button>
-                            <div id="oefStatus" class="spaceAllRound">OEF Node Status: NONE</div>
-                            <div class="code spaceAllRound" id="oefTTY"></div>
-                            <div class="codeError spaceAllRound" id="oefError"></div>
                         </div>
 
                     </div>

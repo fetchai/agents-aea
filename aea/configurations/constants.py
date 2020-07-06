@@ -24,9 +24,12 @@ from aea.configurations.base import DEFAULT_REGISTRY_PATH as DRP
 from aea.configurations.base import PublicId
 from aea.crypto.fetchai import FetchAICrypto
 
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.5.0")
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.2.0")
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.2.0")
+DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.6.0")
+DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.3.0")
+DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.3.0")
 DEFAULT_LEDGER = FetchAICrypto.identifier
 DEFAULT_REGISTRY_PATH = DRP
 DEFAULT_LICENSE = DL
+SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.1.0")
+STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.1.0")
+LOCAL_PROTOCOLS = [DEFAULT_PROTOCOL, SIGNING_PROTOCOL, STATE_UPDATE_PROTOCOL]

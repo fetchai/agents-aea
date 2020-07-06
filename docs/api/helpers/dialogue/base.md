@@ -141,6 +141,93 @@ class Dialogue(ABC)
 
 The dialogue class maintains state of a dialogue and manages it.
 
+<a name=".aea.helpers.dialogue.base.Dialogue.Rules"></a>
+## Rules Objects
+
+```python
+class Rules()
+```
+
+This class defines the rules for the dialogue.
+
+<a name=".aea.helpers.dialogue.base.Dialogue.Rules.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(initial_performatives: FrozenSet[Message.Performative], terminal_performatives: FrozenSet[Message.Performative], valid_replies: Dict[Message.Performative, FrozenSet[Message.Performative]]) -> None
+```
+
+Initialize a dialogue.
+
+**Arguments**:
+
+- `initial_performatives`: the set of all initial performatives.
+- `terminal_performatives`: the set of all terminal performatives.
+- `valid_replies`: the reply structure of speech-acts.
+
+**Returns**:
+
+None
+
+<a name=".aea.helpers.dialogue.base.Dialogue.Rules.initial_performatives"></a>
+#### initial`_`performatives
+
+```python
+ | @property
+ | initial_performatives() -> FrozenSet[Message.Performative]
+```
+
+Get the performatives one of which the terminal message in the dialogue must have.
+
+**Returns**:
+
+the valid performatives of an terminal message
+
+<a name=".aea.helpers.dialogue.base.Dialogue.Rules.terminal_performatives"></a>
+#### terminal`_`performatives
+
+```python
+ | @property
+ | terminal_performatives() -> FrozenSet[Message.Performative]
+```
+
+Get the performatives one of which the terminal message in the dialogue must have.
+
+**Returns**:
+
+the valid performatives of an terminal message
+
+<a name=".aea.helpers.dialogue.base.Dialogue.Rules.valid_replies"></a>
+#### valid`_`replies
+
+```python
+ | @property
+ | valid_replies() -> Dict[Message.Performative, FrozenSet[Message.Performative]]
+```
+
+Get all the valid performatives which are a valid replies to performatives.
+
+**Returns**:
+
+the full valid reply structure.
+
+<a name=".aea.helpers.dialogue.base.Dialogue.Rules.get_valid_replies"></a>
+#### get`_`valid`_`replies
+
+```python
+ | get_valid_replies(performative: Message.Performative) -> FrozenSet[Message.Performative]
+```
+
+Given a `performative`, return the list of performatives which are its valid replies in a dialogue.
+
+**Arguments**:
+
+- `performative`: the performative in a message
+
+**Returns**:
+
+list of valid performative replies
+
 <a name=".aea.helpers.dialogue.base.Dialogue.Role"></a>
 ## Role Objects
 
@@ -181,7 +268,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(dialogue_label: DialogueLabel, agent_address: Optional[Address] = None, role: Optional[Role] = None) -> None
+ | __init__(dialogue_label: DialogueLabel, agent_address: Optional[Address] = None, role: Optional[Role] = None, rules: Optional[Rules] = None) -> None
 ```
 
 Initialize a dialogue.
@@ -191,6 +278,7 @@ Initialize a dialogue.
 - `dialogue_label`: the identifier of the dialogue
 - `agent_address`: the address of the agent for whom this dialogue is maintained
 - `role`: the role of the agent this dialogue is maintained for
+- `rules`: the rules of the dialogue
 
 **Returns**:
 
@@ -239,6 +327,20 @@ Set the agent's role in the dialogue.
 **Returns**:
 
 None
+
+<a name=".aea.helpers.dialogue.base.Dialogue.rules"></a>
+#### rules
+
+```python
+ | @property
+ | rules() -> "Rules"
+```
+
+Get the dialogue rules.
+
+**Returns**:
+
+the rules
 
 <a name=".aea.helpers.dialogue.base.Dialogue.is_self_initiated"></a>
 #### is`_`self`_`initiated
@@ -380,38 +482,6 @@ Update the dialogue label of the dialogue.
 
 - `final_dialogue_label`: the final dialogue label
 
-<a name=".aea.helpers.dialogue.base.Dialogue.initial_performative"></a>
-#### initial`_`performative
-
-```python
- | @abstractmethod
- | initial_performative() -> Enum
-```
-
-Get the performative which the initial message in the dialogue must have.
-
-**Returns**:
-
-the performative of the initial message
-
-<a name=".aea.helpers.dialogue.base.Dialogue.get_replies"></a>
-#### get`_`replies
-
-```python
- | @abstractmethod
- | get_replies(performative: Enum) -> FrozenSet
-```
-
-Given a `performative`, return the list of performatives which are its valid replies in a dialogue.
-
-**Arguments**:
-
-- `performative`: the performative in a message
-
-**Returns**:
-
-list of valid performative replies
-
 <a name=".aea.helpers.dialogue.base.Dialogue.is_valid"></a>
 #### is`_`valid
 
@@ -445,6 +515,66 @@ Get the string representation.
 
 The string representation of the dialogue
 
+<a name=".aea.helpers.dialogue.base.DialogueStats"></a>
+## DialogueStats Objects
+
+```python
+class DialogueStats(ABC)
+```
+
+Class to handle statistics on default dialogues.
+
+<a name=".aea.helpers.dialogue.base.DialogueStats.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(end_states: FrozenSet[Dialogue.EndState]) -> None
+```
+
+Initialize a StatsManager.
+
+**Arguments**:
+
+- `end_states`: the list of dialogue endstates
+
+<a name=".aea.helpers.dialogue.base.DialogueStats.self_initiated"></a>
+#### self`_`initiated
+
+```python
+ | @property
+ | self_initiated() -> Dict[Dialogue.EndState, int]
+```
+
+Get the stats dictionary on self initiated dialogues.
+
+<a name=".aea.helpers.dialogue.base.DialogueStats.other_initiated"></a>
+#### other`_`initiated
+
+```python
+ | @property
+ | other_initiated() -> Dict[Dialogue.EndState, int]
+```
+
+Get the stats dictionary on other initiated dialogues.
+
+<a name=".aea.helpers.dialogue.base.DialogueStats.add_dialogue_endstate"></a>
+#### add`_`dialogue`_`endstate
+
+```python
+ | add_dialogue_endstate(end_state: Dialogue.EndState, is_self_initiated: bool) -> None
+```
+
+Add dialogue endstate stats.
+
+**Arguments**:
+
+- `end_state`: the end state of the dialogue
+- `is_self_initiated`: whether the dialogue is initiated by the agent or the opponent
+
+**Returns**:
+
+None
+
 <a name=".aea.helpers.dialogue.base.Dialogues"></a>
 ## Dialogues Objects
 
@@ -458,7 +588,7 @@ The dialogues class keeps track of all dialogues for an agent.
 #### `__`init`__`
 
 ```python
- | __init__(agent_address: Address = "") -> None
+ | __init__(agent_address: Address, end_states: FrozenSet[Dialogue.EndState]) -> None
 ```
 
 Initialize dialogues.
@@ -466,6 +596,7 @@ Initialize dialogues.
 **Arguments**:
 
 - `agent_address`: the address of the agent for whom dialogues are maintained
+- `end_states`: the list of dialogue endstates
 
 **Returns**:
 
@@ -491,6 +622,20 @@ Get dictionary of dialogues in which the agent engages.
 
 Get the address of the agent for whom dialogues are maintained.
 
+<a name=".aea.helpers.dialogue.base.Dialogues.dialogue_stats"></a>
+#### dialogue`_`stats
+
+```python
+ | @property
+ | dialogue_stats() -> DialogueStats
+```
+
+Get the dialogue statistics.
+
+**Returns**:
+
+dialogue stats object
+
 <a name=".aea.helpers.dialogue.base.Dialogues.new_self_initiated_dialogue_reference"></a>
 #### new`_`self`_`initiated`_`dialogue`_`reference
 
@@ -513,7 +658,7 @@ the next nonce
 
 Update the state of dialogues with a new message.
 
-If the message is for a new dialogue, a new dialogue is created with 'message' as its first message and returned.
+If the message is for a new dialogue, a new dialogue is created with 'message' as its first message, and returned.
 If the message is addressed to an existing dialogue, the dialogue is retrieved, extended with this message and returned.
 If there are any errors, e.g. the message dialogue reference does not exists or the message is invalid w.r.t. the dialogue, return None.
 
@@ -541,6 +686,23 @@ Retrieve the dialogue 'message' belongs to.
 **Returns**:
 
 the dialogue, or None in case such a dialogue does not exist
+
+<a name=".aea.helpers.dialogue.base.Dialogues.get_dialogue_from_label"></a>
+#### get`_`dialogue`_`from`_`label
+
+```python
+ | get_dialogue_from_label(dialogue_label: DialogueLabel) -> Optional[Dialogue]
+```
+
+Retrieve a dialogue based on its label.
+
+**Arguments**:
+
+- `dialogue_label`: the dialogue label
+
+**Returns**:
+
+the dialogue if present
 
 <a name=".aea.helpers.dialogue.base.Dialogues.create_dialogue"></a>
 #### create`_`dialogue

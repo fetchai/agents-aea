@@ -25,13 +25,10 @@ from typing import Any, Dict, Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import ConnectionStatus
-from aea.crypto.ledger_apis import LedgerApis
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.multiplexer import OutBox
 from aea.skills.tasks import TaskManager
-
-DEFAULT_OEF = "default_oef"
 
 
 class AgentContext:
@@ -40,7 +37,6 @@ class AgentContext:
     def __init__(
         self,
         identity: Identity,
-        ledger_apis: LedgerApis,
         connection_status: ConnectionStatus,
         outbox: OutBox,
         decision_maker_message_queue: Queue,
@@ -48,13 +44,13 @@ class AgentContext:
         task_manager: TaskManager,
         default_connection: Optional[PublicId],
         default_routing: Dict[PublicId, PublicId],
+        search_service_address: Address,
         **kwargs
     ):
         """
         Initialize an agent context.
 
         :param identity: the identity object
-        :param ledger_apis: the APIs the agent will use to connect to ledgers.
         :param connection_status: the connection status of the multiplexer
         :param outbox: the outbox
         :param decision_maker_message_queue: the (in) queue of the decision maker
@@ -64,15 +60,12 @@ class AgentContext:
         """
         self._shared_state = {}  # type: Dict[str, Any]
         self._identity = identity
-        self._ledger_apis = ledger_apis
         self._connection_status = connection_status
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
         self._decision_maker_handler_context = decision_maker_handler_context
         self._task_manager = task_manager
-        self._search_service_address = (
-            DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml
-        )
+        self._search_service_address = search_service_address
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._namespace = SimpleNamespace(**kwargs)
@@ -127,11 +120,6 @@ class AgentContext:
     def decision_maker_handler_context(self) -> SimpleNamespace:
         """Get the decision maker handler context."""
         return self._decision_maker_handler_context
-
-    @property
-    def ledger_apis(self) -> LedgerApis:
-        """Get the ledger APIs."""
-        return self._ledger_apis
 
     @property
     def task_manager(self) -> TaskManager:

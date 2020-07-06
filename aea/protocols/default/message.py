@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = ProtocolId("fetchai", "default", "0.2.0")
+    protocol_id = ProtocolId("fetchai", "default", "0.3.0")
 
     ErrorCode = CustomErrorCode
 
@@ -47,7 +47,7 @@ class DefaultMessage(Message):
 
         def __str__(self):
             """Get the string representation."""
-            return self.value
+            return str(self.value)
 
     def __init__(
         self,
@@ -92,7 +92,7 @@ class DefaultMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(DefaultMessage.Performative, self.get("performative"))

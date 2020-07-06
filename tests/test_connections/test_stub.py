@@ -16,9 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the stub connection."""
-
+import asyncio
 import base64
 import os
 import shutil
@@ -31,35 +30,57 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
-from aea.connections.stub.connection import _process_line
+from aea.connections.stub.connection import (
+    StubConnection,
+    _process_line,
+    lock_file,
+    write_envelope,
+)
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
-from ..conftest import _make_stub_connection
+from ..conftest import ROOT_DIR, _make_stub_connection
 
 SEPARATOR = ","
+
+
+def make_test_envelope() -> Envelope:
+    """Create a test envelope."""
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
+    msg.counterparty = "any"
+    envelope = Envelope(
+        to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
+    )
+    return envelope
 
 
 class TestStubConnectionReception:
     """Test that the stub connection is implemented correctly."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set the test up."""
-        cls.cwd = os.getcwd()
-        cls.tmpdir = Path(tempfile.mkdtemp())
-        d = cls.tmpdir / "test_stub"
+        self.cwd = os.getcwd()
+        self.tmpdir = Path(tempfile.mkdtemp())
+        d = self.tmpdir / "test_stub"
         d.mkdir(parents=True)
-        cls.input_file_path = d / "input_file.csv"
-        cls.output_file_path = d / "output_file.csv"
-        cls.connection = _make_stub_connection(
-            cls.input_file_path, cls.output_file_path
+        self.input_file_path = d / "input_file.csv"
+        self.output_file_path = d / "output_file.csv"
+        self.connection = _make_stub_connection(
+            self.input_file_path, self.output_file_path
         )
 
-        cls.multiplexer = Multiplexer([cls.connection])
-        cls.multiplexer.connect()
-        os.chdir(cls.tmpdir)
+        self.multiplexer = Multiplexer([self.connection])
+        self.multiplexer.connect()
+        os.chdir(self.tmpdir)
 
     def test_reception_a(self):
         """Test that the connection receives what has been enqueued in the input file."""
@@ -74,21 +95,9 @@ class TestStubConnectionReception:
         expected_envelope = Envelope(
             to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
         )
-        encoded_envelope = "{}{}{}{}{}{}{}{}".format(
-            expected_envelope.to,
-            SEPARATOR,
-            expected_envelope.sender,
-            SEPARATOR,
-            expected_envelope.protocol_id,
-            SEPARATOR,
-            expected_envelope.message_bytes.decode("utf-8"),
-            SEPARATOR,
-        )
-        encoded_envelope = encoded_envelope.encode("utf-8")
 
         with open(self.input_file_path, "ab+") as f:
-            f.write(encoded_envelope)
-            f.flush()
+            write_envelope(expected_envelope, f)
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope.to == actual_envelope.to
@@ -116,8 +125,9 @@ class TestStubConnectionReception:
         encoded_envelope = encoded_envelope.encode("utf-8")
 
         with open(self.input_file_path, "ab+") as f:
-            f.write(encoded_envelope)
-            f.flush()
+            with lock_file(f):
+                f.write(encoded_envelope)
+                f.flush()
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert "any" == actual_envelope.to
@@ -127,16 +137,17 @@ class TestStubConnectionReception:
 
     def test_reception_c(self):
         """Test that the connection receives what has been enqueued in the input file."""
-        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.2.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
+        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.3.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
         expected_envelope = Envelope(
             to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
             sender="default_oef",
-            protocol_id=PublicId.from_str("fetchai/oef_search:0.2.0"),
+            protocol_id=PublicId.from_str("fetchai/oef_search:0.3.0"),
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
-            f.write(encoded_envelope)
-            f.flush()
+            with lock_file(f):
+                f.write(encoded_envelope)
+                f.flush()
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope == actual_envelope
@@ -151,20 +162,19 @@ class TestStubConnectionReception:
         ):
             _process_line(b"")
             mocked_logger_error.assert_called_with(
-                "Error when processing a line. Message: an error."
+                "Error when processing a line. Message: an error.", exc_info=True
             )
 
         patch.stop()
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown(self):
         """Tear down the test."""
-        os.chdir(cls.cwd)
+        os.chdir(self.cwd)
         try:
-            shutil.rmtree(cls.tmpdir)
+            shutil.rmtree(self.tmpdir)
         except (OSError, IOError):
             pass
-        cls.multiplexer.disconnect()
+        self.multiplexer.disconnect()
 
 
 class TestStubConnectionSending:
@@ -317,3 +327,79 @@ async def test_receiving_returns_none_when_error_occurs():
         assert ret is None
 
     await connection.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_multiple_envelopes():
+    """Test many envelopes received."""
+    tmpdir = Path(tempfile.mkdtemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
+    connection = _make_stub_connection(input_file_path, output_file_path)
+
+    num_envelopes = 5
+    await connection.connect()
+
+    async def wait_num(num):
+        for _ in range(num):
+            assert await connection.receive()
+
+    task = asyncio.get_event_loop().create_task(wait_num(num_envelopes))
+
+    with open(input_file_path, "ab+") as f:
+        for _ in range(num_envelopes):
+            write_envelope(make_test_envelope(), f)
+            await asyncio.sleep(0.01)  # spin asyncio loop
+
+    await asyncio.wait_for(task, timeout=3)
+    await connection.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_bad_envelope():
+    """Test bad format envelop."""
+    tmpdir = Path(tempfile.mkdtemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
+    connection = _make_stub_connection(input_file_path, output_file_path)
+
+    await connection.connect()
+
+    with open(input_file_path, "ab+") as f:
+        f.write(b"1,2,3,4,5,")
+        f.flush()
+
+    with pytest.raises(asyncio.TimeoutError):
+        await asyncio.wait_for(connection.receive(), timeout=0.1)
+
+    await connection.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_load_from_dir():
+    """Test stub connection can be loaded from dir."""
+    StubConnection.from_dir(
+        ROOT_DIR + "/aea/connections/stub", Identity("name", "address"), CryptoStore(),
+    )
+
+
+class TestFileLock:
+    """Test for filelocks."""
+
+    def test_lock_file_ok(self):
+        """Work ok ok for random file."""
+        with tempfile.TemporaryFile() as fp:
+            with lock_file(fp):
+                pass
+
+    def test_lock_file_error(self):
+        """Fail on closed file."""
+        with tempfile.TemporaryFile() as fp:
+            fp.close()
+            with pytest.raises(ValueError):
+                with lock_file(fp):
+                    pass

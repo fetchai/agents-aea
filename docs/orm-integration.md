@@ -1,20 +1,14 @@
-The AEA generic seller with ORM integration demonstrate how to interact with a database using python-sql objects.
-
-* The provider of a service in the form of data retrieved from a database.
-* The buyer of a service.
+This guide demonstrates how to configure an AEA to interact with a database using python-sql objects.
 
 ## Discussion
 
-Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language.
-The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs. 
-This demo will not use any smart contract, because these would be out of the scope of the tutorial.
+Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language. The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs.
 
-- We assume, that you followed the guide for the <a href="/generic-skills/"> generic-skills. </a>
+- We assume, that you followed the guide for the <a href="../thermometer-skills/"> thermometer-skills. </a>
 - We assume, that we have a database `genericdb.db` with table name `data`. This table contains the following columns `timestamp` and `thermometer`
-- We assume, that we have a hardware thermometer sensor that adds the readings in the `genericdb` database
+- We assume, that we have a hardware thermometer sensor that adds the readings in the `genericdb` database (although you can follow the guide without having access to a sensor).
 
-Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies. The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
-
+Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies. The `aea install` command will install each dependency that the specific AEA needs and which is listed in the skill's YAML file. 
 
 ## Communication
 
@@ -74,8 +68,8 @@ A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` ne
 
 First, fetch the seller AEA, which will provide data:
 ``` bash
-aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
-cd my_seller_aea
+aea fetch fetchai/thermometer_aea:0.4.0 --alias my_thermometer_aea
+cd my_thermometer_aea
 aea install
 ```
 
@@ -84,19 +78,25 @@ aea install
 
 The following steps create the seller from scratch:
 ``` bash
-aea create my_seller_aea
-cd my_seller_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_seller:0.5.0
+aea create my_thermometer_aea
+cd my_thermometer_aea
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/thermometer:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
-In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
+In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
 ``` yaml
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -107,8 +107,8 @@ ledger_apis:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
-cd my_buyer_aea
+aea fetch fetchai/thermometer_client:0.4.0 --alias my_thermometer_client
+cd my_thermometer_client
 aea install
 ```
 
@@ -117,12 +117,13 @@ aea install
 
 The following steps create the car data client from scratch:
 ``` bash
-aea create my_buyer_aea
-cd my_buyer_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_buyer:0.4.0
+aea create my_thermometer_client
+cd my_thermometer_client
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/thermometer_client:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -132,6 +133,11 @@ To connect to Fetchai:
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -176,7 +182,7 @@ Alternatively, to connect to Cosmos:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```
 
 <strong>Wealth:</strong>
@@ -210,68 +216,147 @@ aea generate-wealth cosmos
 
 ### Update the seller and buyer AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/skills/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
+In `my_thermometer_aea/vendor/fetchai/skills/thermometer/skill.yaml`, replace the `data_for_sale` with your data:
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      total_price: 10              |      total_price: 10             |
-|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      has_data_source: True        |      has_data_source: True       |
-|      data_for_sale: {}            |      data_for_sale: {}           |
-|      search_schema:               |      search_schema:              |
-|        attribute_one:             |        attribute_one:            |
-|          name: country            |          name: country           |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|        attribute_two:             |        attribute_two:            |
-|          name: city               |          name: city              |
-|          type: str                |          type: str               |
-|          is_required: True        |          is_required: True       |
-|      search_data:                 |      search_data:                |
-|        country: UK                |        country: UK               |
-|        city: Cambridge            |        city: Cambridge           |
-|dependencies:                      |dependencies:                     |
-|  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------|
+models:
+  ...
+  strategy:
+    args:
+      currency_id: FET
+      data_for_sale:
+        temperature: 26
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      has_data_source: false
+      is_ledger_tx: true
+      ledger_id: fetchai
+      service_data:
+        city: Cambridge
+        country: UK
+      service_id: generic_service
+      unit_price: 10
+    class_name: Strategy
+dependencies:
+  SQLAlchemy: {}
 ```
-The `search_schema` and the `search_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
+The `data_model` and the `service_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `service_data` dictionary.
 
-In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
+In `my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) ensure you have matching data.
 
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |  
-|  dialogues:                       |  dialogues:                      |
-|    args: {}                       |    args: {}                      |
-|    class_name: Dialogues          |    class_name: Dialogues         |
-|  strategy:                        |  strategy:                       |
-|    class_name: Strategy           |    class_name: Strategy          |
-|    args:                          |    args:                         |
-|      max_price: 40                |      max_price: 40               |
-|      max_buyer_tx_fee: 100        |      max_buyer_tx_fee: 200000    |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|      search_query:                |      search_query:               |
-|        search_term: country       |        search_term: country      |
-|        search_value: UK           |        search_value: UK          |
-|        constraint_type: '=='      |        constraint_type: '=='     |
-|ledgers: ['fetchai']               |ledgers: ['ethereum']             |
-|----------------------------------------------------------------------|
+models:
+  ...
+  strategy:
+    args:
+      currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      is_ledger_tx: true
+      ledger_id: fetchai
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
+      search_query:
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: Strategy
 ```
+
+<details><summary>Alternatively, configure skills for other test networks.</summary>
+<p>
+
+<strong>Ethereum:</strong>
+<br>
+``` yaml
+models:
+  ...
+  strategy:
+    args:
+      currency_id: ETH
+      data_for_sale:
+        temperature: 26
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      has_data_source: false
+      is_ledger_tx: true
+      ledger_id: ethereum
+      service_data:
+        city: Cambridge
+        country: UK
+      service_id: generic_service
+      unit_price: 10
+    class_name: Strategy
+dependencies:
+  SQLAlchemy: {}
+```
+
+``` yaml
+models:
+  ...
+  strategy:
+    args:
+      currency_id: ETH
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
+      is_ledger_tx: true
+      ledger_id: ethereum
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
+      search_query:
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: Strategy
+```
+
+</p>
+</details>
 
 After changing the skill config files you should run the following command for both agents to install each dependency:
 ``` bash
@@ -283,12 +368,12 @@ aea install
 Before being able to modify a package we need to eject it from vendor:
 
 ``` bash
-aea eject skill fetchai/generic_seller:0.5.0
+aea eject skill fetchai/thermometer:0.6.0
 ```
 
 This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.
 
-Open the `strategy.py` (in `my_seller_aea/skills/generic_seller/strategy.py`) with your IDE and modify the following.
+Open the `strategy.py` (in `my_thermometer_aea/skills/thermometer/strategy.py`) with your IDE and modify the following.
 
 Import the newly installed library to your strategy.
 ``` python
@@ -296,6 +381,9 @@ import sqlalchemy as db
 ```
 Then modify your strategy's \_\_init__ function to match the following code:
 ``` python
+class Strategy(GenericStrategy):
+    """This class defines a strategy for the agent."""
+
     def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
@@ -305,35 +393,15 @@ Then modify your strategy's \_\_init__ function to match the following code:
 
         :return: None
         """
-        self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-        self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
-        self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
-        self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
-        data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-
-        super().__init__(**kwargs)
-
-        self._oef_msg_id = 0
         self._db_engine = db.create_engine("sqlite:///genericdb.db")
         self._tbl = self.create_database_and_table()
         self.insert_data()
-
-        # Read the data from the sensor if the bool is set to True.
-        # Enables us to let the user implement his data collection logic without major changes.
-        if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()
-        else:
-            self._data_for_sale = data_for_sale
+        super().__init__(**kwargs)
 ``` 
 
 At the end of the file modify the `collect_from_data_source` function : 
 ``` python
-    def collect_from_data_source(self) -> Dict[str, Any]:
+    def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to collect data."""
         connection = self._db_engine.connect()
         query = db.select([self._tbl])
@@ -360,7 +428,6 @@ Also, create two new functions, one that will create a connection with the datab
     def insert_data(self):
         """Insert data in the database."""
         connection = self._db_engine.connect()
-        self.context.logger.info("Populating the database...")
         for _ in range(10):
             query = db.insert(self._tbl).values(  # nosec
                 timestamp=time.time(), temprature=str(random.randrange(10, 25))
@@ -371,7 +438,7 @@ Also, create two new functions, one that will create a connection with the datab
 After modifying the skill we need to fingerprint it:
 
 ``` bash
-aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
+aea fingerprint skill {YOUR_AUTHOR_HANDLE}/thermometer:0.1.0
 ```
 
 ## Run the AEAs
@@ -379,7 +446,7 @@ aea fingerprint skill {YOUR_AUTHOR_HANDLE}/generic_seller:0.1.0
 Run both AEAs from their respective terminals
 
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 You will see that the AEAs negotiate and then transact using the configured testnet.
 
@@ -388,6 +455,6 @@ You will see that the AEAs negotiate and then transact using the configured test
 When you're done, go up a level and delete the AEAs.
 ``` bash 
 cd ..
-aea delete my_seller_aea
-aea delete my_buyer_aea
+aea delete my_thermometer_aea
+aea delete my_thermometer_client
 ```

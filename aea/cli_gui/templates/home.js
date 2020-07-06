@@ -61,23 +61,6 @@ class Model{
         })
     }
 
-    readOEFStatus() {
-        var ajax_options = {
-            type: 'GET',
-            url: 'api/oef',
-            accepts: 'application/json',
-            contentType: 'plain/text'
-        };
-        var self = this;
-        $.ajax(ajax_options)
-        .done(function(data) {
-            self.$event_pump.trigger('model_OEFStatusReadSuccess', [data]);
-        })
-        .fail(function(xhr, textStatus, errorThrown) {
-            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-        })
-    }
-
     readAgentStatus(agentId) {
         var ajax_options = {
             type: 'GET',
@@ -151,13 +134,36 @@ class Model{
         })
     }
 
+    fetchAgent(agentId) {
+        var ajax_options = {
+            type: 'POST',
+            url: 'api/fetch-agent',
+            accepts: 'application/json',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(agentId)
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+          var element = {"type": $("#searchItemTypeSelected").html(), "combined": "localSkills"}
+            self.$event_pump.trigger('model_' + element["combined"] + 'AddSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
+
     removeItem(element, agentId, itemId) {
         var propertyName = element["type"] +  "_id"
         var ajax_options = {
-            type: 'DELETE',
-            url: 'api/agent/' + agentId + '/' + element["type"]+ "/" + itemId,
+            type: 'POST',
+            url: 'api/agent/' + agentId  + '/' + element["type"]+ '/remove',
             accepts: 'application/json',
-            contentType: 'plain/text'
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(itemId)
         };
         var self = this;
         $.ajax(ajax_options)
@@ -198,38 +204,6 @@ class Model{
         $.ajax(ajax_options)
         .done(function(data) {
             self.$event_pump.trigger('model_' + element["combined"] + 'ScaffoldSuccess', [data]);
-        })
-        .fail(function(xhr, textStatus, errorThrown) {
-            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-        })
-    }
-    startOEFNode(){
-        var ajax_options = {
-            type: 'POST',
-            url: 'api/oef',
-            accepts: 'application/json',
-            contentType: 'plain/text'
-        };
-        var self = this;
-        $.ajax(ajax_options)
-        .done(function(data) {
-            self.$event_pump.trigger('model_StartOEFNodeSuccess', [data]);
-        })
-        .fail(function(xhr, textStatus, errorThrown) {
-            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-        })
-    }
-    stopOEFNode(){
-        var ajax_options = {
-            type: 'DELETE',
-            url: 'api/oef',
-            accepts: 'application/json',
-            contentType: 'plain/text'
-        };
-        var self = this;
-        $.ajax(ajax_options)
-        .done(function(data) {
-            self.$event_pump.trigger('model_StopOEFNodeSuccess', [data]);
         })
         .fail(function(xhr, textStatus, errorThrown) {
             self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -278,18 +252,6 @@ class View{
         this.$event_pump = $('body');
 
     }
-
-    setOEFStatus(status){
-        $('#oefStatus').html(status);
-    }
-    setOEFTTY(tty){
-        $('#oefTTY').html(tty);
-        $('#oefTTY').scrollTop($('#oefTTY')[0].scrollHeight);
-    }
-    setOEFError(error){
-        $('#oefError').html(error);
-        $('#oefError').scrollTop($('#oefError')[0].scrollHeight);
-    }
     setAgentStatus(status){
         $('#agentStatus').html(status);
     }
@@ -327,7 +289,7 @@ class View{
         // did we get a people array?
         if (tableName) {
             for (let i=0, l=data.length; i < l; i++) {
-                rows += `<tr><td class="id interactive">${data[i].id}</td><td class="description interactive">${data[i].description}</td></tr>`;
+                rows += `<tr><td class="id interactive">${data[i].public_id}</td><td class="description interactive">${data[i].description}</td></tr>`;
             }
             $('.' + tableName + ' table > tbody').append(rows);
         }
@@ -502,12 +464,6 @@ class Controller{
             });
 
         }
-        this.$event_pump.on('model_OEFStatusReadSuccess', function(e, data) {
-            self.view.setOEFStatus("OEF Node Status: " + data["status"])
-            self.view.setOEFTTY(data["tty"])
-            self.view.setOEFError(data["error"])
-            self.handleButtonStates()
-        });
 
         this.$event_pump.on('model_AgentStatusReadSuccess', function(e, data) {
             self.view.setAgentStatus("Agent Status: " + data["status"])
@@ -520,20 +476,6 @@ class Controller{
             self.view.setSearchType(data["item_type"])
             self.view.build_table(data["search_result"], 'searchItemsTable');
             self.handleButtonStates()
-        });
-
-
-        $('#startOEFNode').click({el: element}, function(e) {
-            e.preventDefault();
-
-            self.model.startOEFNode()
-            e.preventDefault();
-        });
-        $('#stopOEFNode').click({el: element}, function(e) {
-            e.preventDefault();
-
-            self.model.stopOEFNode()
-            e.preventDefault();
         });
 
         $('#startAgent').click({el: element}, function(e) {
@@ -618,6 +560,23 @@ class Controller{
             e.preventDefault();
         });
 
+        $('#searchAgentsFetch').click({el: element}, function(e) {
+            var agentId = $('#searchItemsTableSelectionId').html();
+            // It doesn't matter too much what the combined name is as long as it exists
+            var itemType = {"type": $("#searchItemTypeSelected").html(), "combined": "localSkills"}
+
+            e.preventDefault();
+
+            if (self.validateId(agentId) ) {
+                self.model.fetchAgent(agentId)
+                self.view.setSelectedId("searchItemsTable", "NONE")
+                var tableBody = $(e.target).closest(".searchItemsTableRegisteredTable");
+                self.clearTable(tableBody);
+            } else {
+                alert('Error: Problem with one of the selected ids (either agent or ' + itemType);
+            }
+            e.preventDefault();
+        });
 
 
         this.$event_pump.on('model_error', {el: element}, function(e, xhr, textStatus, errorThrown) {
@@ -644,7 +603,6 @@ class Controller{
                 self.handleButtonStates()});
         }
 
-        this.getOEFStatus();
         this.getAgentStatus();
 
     }
@@ -696,14 +654,24 @@ class Controller{
         var searchTerm = $('#searchInput').val();
         $('#searchInputButton').prop('disabled', !this.validateId(searchTerm));
         var searchItem = $('#searchItemsTableSelectionId').html();
-        var isDisabled =  !this.validateId(searchItem) || !this.validateId(agentSelectionId);
+        var itemType = $("#searchItemTypeSelected").html();
+        var isDisabled =  !this.validateId(searchItem) || !this.validateId(agentSelectionId) || (itemType == "agent");
         $('#searchItemsAdd').prop('disabled', isDisabled);
         if (isDisabled){
-            $('#searchItemsAdd').html("<< Add " + $("#searchItemTypeSelected").html())
+            $('#searchItemsAdd').html("<< Add " + itemType)
         }
         else{
-            $('#searchItemsAdd').html("<< Add " + searchItem + " "  + $("#searchItemTypeSelected").html() + " to " + agentSelectionId + " agent")
+            $('#searchItemsAdd').html("<< Add " + searchItem + " "  + itemType + " to " + agentSelectionId + " agent")
 //            $('#searchItemsAdd').html("<< Add " + itemSelectionId + " " + elements[j]["type"] + " to " + agentSelectionId + " agent")
+        }
+
+        var isDisabled =  !this.validateId(searchItem) || (itemType != "agent");
+        $('#searchAgentsFetch').prop('disabled', isDisabled);
+        if (isDisabled){
+            $('#searchAgentsFetch').html("<< Fetch agent")
+        }
+        else {
+            $('#searchAgentsFetch').html("<< Fetch agent "  + searchItem)
         }
 
         if (agentSelectionId != "NONE"){
@@ -713,30 +681,11 @@ class Controller{
             $('.localItemHeading').html("Local");
 
         }
-
-        var isOEFStopped = $('#oefStatus').html().includes("NOT_STARTED")
-        $('#startOEFNode').prop('disabled',!isOEFStopped);
-        $('#stopOEFNode').prop('disabled', isOEFStopped);
-
-        var agentOEFStopped = $('#agentStatus').html().includes("NOT_STARTED")
-        var hasValidAgent = this.validateId(agentSelectionId);
-        $('#startAgent').prop('disabled', !hasValidAgent || !agentOEFStopped);
-        $('#stopAgent').prop('disabled', !hasValidAgent || agentOEFStopped);
-
-
-    }
-
-    getOEFStatus(){
-        this.model.readOEFStatus()
-        self = this
-        setTimeout(function() {
-            self.getOEFStatus()
-        }, 500)
-
     }
 
     getAgentStatus(){
         var agentId = $('#localAgentsSelectionId').html()
+        self = this
         if (self.validateId(agentId)){
             this.model.readAgentStatus(agentId)
         }
@@ -745,7 +694,6 @@ class Controller{
             self.view.setAgentTTY("<br><br><br><br><br>")
             self.view.setAgentError("<br><br><br><br><br>")
         }
-        self = this
         setTimeout(function() {
             self.getAgentStatus()
         }, 500)

@@ -29,7 +29,7 @@ This diagram shows the communication between the various entities as data is suc
         activate Blockchain
         
         Seller_AEA->>Search: register_service
-        Buyer_AEA->>Search: search
+        Buyer_AEA->>Search: search_agents
         Search-->>Buyer_AEA: list_of_agents
         Buyer_AEA->>Seller_AEA: call_for_proposal
         Seller_AEA->>Buyer_AEA: propose
@@ -67,7 +67,7 @@ Keep it running for all the following demos.
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.3.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
@@ -79,10 +79,11 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_seller:0.5.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/generic_seller:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -90,6 +91,11 @@ In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following 
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -99,7 +105,7 @@ ledger_apis:
 
 Then, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.3.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
@@ -111,10 +117,11 @@ The following steps create the buyer from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_buyer:0.4.0
+aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/ledger:0.1.0
+aea add skill fetchai/generic_buyer:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.4.0
+aea config set agent.default_connection fetchai/oef:0.5.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -122,6 +129,11 @@ In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following b
 ledger_apis:
   fetchai:
     network: testnet
+```
+and add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
 ```
 
 </p>
@@ -164,7 +176,7 @@ Alternatively, to connect to Cosmos:
 ``` yaml
 ledger_apis:
   cosmos:
-    address: http://aea-testnet.sandbox.fetch-ai.com:1317
+    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```
 
 <strong>Wealth:</strong>
@@ -224,12 +236,12 @@ models:
       has_data_source: false
       is_ledger_tx: true
       ledger_id: fetchai
-      seller_tx_fee: 0
       service_data:
         city: Cambridge
         country: UK
-      total_price: 10
-    class_name: Strategy 
+      service_id: generic_service
+      unit_price: 10
+    class_name: GenericStrategy 
 ```
 The `data_model`, `data_model_name` and the `service_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
 
@@ -241,15 +253,32 @@ models:
   strategy:
     args:
       currency_id: FET
+      data_model:
+        attribute_one:
+          is_required: true
+          name: country
+          type: str
+        attribute_two:
+          is_required: true
+          name: city
+          type: str
+      data_model_name: location
       is_ledger_tx: true
       ledger_id: fetchai
-      max_buyer_tx_fee: 1
-      max_price: 4
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
       search_query:
-        constraint_type: ==
-        search_term: country
-        search_value: UK
-    class_name: Strategy
+        constraint_one:
+          constraint_type: ==
+          search_term: country
+          search_value: UK
+        constraint_two:
+          constraint_type: ==
+          search_term: city
+          search_value: Cambridge
+      service_id: generic_service
+    class_name: GenericStrategy
 ```
 
 <details><summary>Alternatively, configure skills for other test networks.</summary>
@@ -295,12 +324,26 @@ This updates the buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic
 </p>
 </details>
 
+### Update the skill configs
+
+Both skills are abstract skills, make them instantiatable:
+
+``` bash
+cd my_seller_aea
+aea config set vendor.fetchai.skills.generic_seller.is_abstract false --type bool
+```
+
+``` bash
+cd my_buyer_aea
+aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
+```
+
 ## Run the AEAs
 
 Run both AEAs from their respective terminals
 
 ``` bash
-aea run --connections fetchai/oef:0.4.0
+aea run
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 

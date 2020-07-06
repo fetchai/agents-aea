@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="fetch.aea.Gym",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\tgym.proto\x12\rfetch.aea.Gym"\xdb\x05\n\nGymMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x39\n\x03\x61\x63t\x18\x05 \x01(\x0b\x32*.fetch.aea.Gym.GymMessage.Act_PerformativeH\x00\x12=\n\x05\x63lose\x18\x06 \x01(\x0b\x32,.fetch.aea.Gym.GymMessage.Close_PerformativeH\x00\x12\x41\n\x07percept\x18\x07 \x01(\x0b\x32..fetch.aea.Gym.GymMessage.Percept_PerformativeH\x00\x12=\n\x05reset\x18\x08 \x01(\x0b\x32,.fetch.aea.Gym.GymMessage.Reset_PerformativeH\x00\x1a\x18\n\tAnyObject\x12\x0b\n\x03\x61ny\x18\x01 \x01(\x0c\x1aX\n\x10\x41\x63t_Performative\x12\x33\n\x06\x61\x63tion\x18\x01 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x12\x0f\n\x07step_id\x18\x02 \x01(\x05\x1a\xb2\x01\n\x14Percept_Performative\x12\x0f\n\x07step_id\x18\x01 \x01(\x05\x12\x38\n\x0bobservation\x18\x02 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x12\x0e\n\x06reward\x18\x03 \x01(\x02\x12\x0c\n\x04\x64one\x18\x04 \x01(\x08\x12\x31\n\x04info\x18\x05 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x1a\x14\n\x12Reset_Performative\x1a\x14\n\x12\x43lose_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\tgym.proto\x12\rfetch.aea.Gym"\xb1\x07\n\nGymMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x39\n\x03\x61\x63t\x18\x05 \x01(\x0b\x32*.fetch.aea.Gym.GymMessage.Act_PerformativeH\x00\x12=\n\x05\x63lose\x18\x06 \x01(\x0b\x32,.fetch.aea.Gym.GymMessage.Close_PerformativeH\x00\x12\x41\n\x07percept\x18\x07 \x01(\x0b\x32..fetch.aea.Gym.GymMessage.Percept_PerformativeH\x00\x12=\n\x05reset\x18\x08 \x01(\x0b\x32,.fetch.aea.Gym.GymMessage.Reset_PerformativeH\x00\x12?\n\x06status\x18\t \x01(\x0b\x32-.fetch.aea.Gym.GymMessage.Status_PerformativeH\x00\x1a\x18\n\tAnyObject\x12\x0b\n\x03\x61ny\x18\x01 \x01(\x0c\x1aX\n\x10\x41\x63t_Performative\x12\x33\n\x06\x61\x63tion\x18\x01 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x12\x0f\n\x07step_id\x18\x02 \x01(\x05\x1a\xb2\x01\n\x14Percept_Performative\x12\x0f\n\x07step_id\x18\x01 \x01(\x05\x12\x38\n\x0bobservation\x18\x02 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x12\x0e\n\x06reward\x18\x03 \x01(\x02\x12\x0c\n\x04\x64one\x18\x04 \x01(\x08\x12\x31\n\x04info\x18\x05 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x1a\x92\x01\n\x13Status_Performative\x12K\n\x07\x63ontent\x18\x01 \x03(\x0b\x32:.fetch.aea.Gym.GymMessage.Status_Performative.ContentEntry\x1a.\n\x0c\x43ontentEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x14\n\x12Reset_Performative\x1a\x14\n\x12\x43lose_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -55,8 +55,8 @@ _GYMMESSAGE_ANYOBJECT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=405,
-    serialized_end=429,
+    serialized_start=470,
+    serialized_end=494,
 )
 
 _GYMMESSAGE_ACT_PERFORMATIVE = _descriptor.Descriptor(
@@ -111,8 +111,8 @@ _GYMMESSAGE_ACT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=431,
-    serialized_end=519,
+    serialized_start=496,
+    serialized_end=584,
 )
 
 _GYMMESSAGE_PERCEPT_PERFORMATIVE = _descriptor.Descriptor(
@@ -221,8 +221,102 @@ _GYMMESSAGE_PERCEPT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=522,
-    serialized_end=700,
+    serialized_start=587,
+    serialized_end=765,
+)
+
+_GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY = _descriptor.Descriptor(
+    name="ContentEntry",
+    full_name="fetch.aea.Gym.GymMessage.Status_Performative.ContentEntry",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="key",
+            full_name="fetch.aea.Gym.GymMessage.Status_Performative.ContentEntry.key",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="fetch.aea.Gym.GymMessage.Status_Performative.ContentEntry.value",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=b"8\001",
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=868,
+    serialized_end=914,
+)
+
+_GYMMESSAGE_STATUS_PERFORMATIVE = _descriptor.Descriptor(
+    name="Status_Performative",
+    full_name="fetch.aea.Gym.GymMessage.Status_Performative",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="content",
+            full_name="fetch.aea.Gym.GymMessage.Status_Performative.content",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=768,
+    serialized_end=914,
 )
 
 _GYMMESSAGE_RESET_PERFORMATIVE = _descriptor.Descriptor(
@@ -240,8 +334,8 @@ _GYMMESSAGE_RESET_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=702,
-    serialized_end=722,
+    serialized_start=916,
+    serialized_end=936,
 )
 
 _GYMMESSAGE_CLOSE_PERFORMATIVE = _descriptor.Descriptor(
@@ -259,8 +353,8 @@ _GYMMESSAGE_CLOSE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=724,
-    serialized_end=744,
+    serialized_start=938,
+    serialized_end=958,
 )
 
 _GYMMESSAGE = _descriptor.Descriptor(
@@ -414,12 +508,31 @@ _GYMMESSAGE = _descriptor.Descriptor(
             serialized_options=None,
             file=DESCRIPTOR,
         ),
+        _descriptor.FieldDescriptor(
+            name="status",
+            full_name="fetch.aea.Gym.GymMessage.status",
+            index=8,
+            number=9,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
     ],
     extensions=[],
     nested_types=[
         _GYMMESSAGE_ANYOBJECT,
         _GYMMESSAGE_ACT_PERFORMATIVE,
         _GYMMESSAGE_PERCEPT_PERFORMATIVE,
+        _GYMMESSAGE_STATUS_PERFORMATIVE,
         _GYMMESSAGE_RESET_PERFORMATIVE,
         _GYMMESSAGE_CLOSE_PERFORMATIVE,
     ],
@@ -438,7 +551,7 @@ _GYMMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=29,
-    serialized_end=760,
+    serialized_end=974,
 )
 
 _GYMMESSAGE_ANYOBJECT.containing_type = _GYMMESSAGE
@@ -453,12 +566,20 @@ _GYMMESSAGE_PERCEPT_PERFORMATIVE.fields_by_name[
     "info"
 ].message_type = _GYMMESSAGE_ANYOBJECT
 _GYMMESSAGE_PERCEPT_PERFORMATIVE.containing_type = _GYMMESSAGE
+_GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY.containing_type = (
+    _GYMMESSAGE_STATUS_PERFORMATIVE
+)
+_GYMMESSAGE_STATUS_PERFORMATIVE.fields_by_name[
+    "content"
+].message_type = _GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY
+_GYMMESSAGE_STATUS_PERFORMATIVE.containing_type = _GYMMESSAGE
 _GYMMESSAGE_RESET_PERFORMATIVE.containing_type = _GYMMESSAGE
 _GYMMESSAGE_CLOSE_PERFORMATIVE.containing_type = _GYMMESSAGE
 _GYMMESSAGE.fields_by_name["act"].message_type = _GYMMESSAGE_ACT_PERFORMATIVE
 _GYMMESSAGE.fields_by_name["close"].message_type = _GYMMESSAGE_CLOSE_PERFORMATIVE
 _GYMMESSAGE.fields_by_name["percept"].message_type = _GYMMESSAGE_PERCEPT_PERFORMATIVE
 _GYMMESSAGE.fields_by_name["reset"].message_type = _GYMMESSAGE_RESET_PERFORMATIVE
+_GYMMESSAGE.fields_by_name["status"].message_type = _GYMMESSAGE_STATUS_PERFORMATIVE
 _GYMMESSAGE.oneofs_by_name["performative"].fields.append(
     _GYMMESSAGE.fields_by_name["act"]
 )
@@ -481,6 +602,12 @@ _GYMMESSAGE.oneofs_by_name["performative"].fields.append(
     _GYMMESSAGE.fields_by_name["reset"]
 )
 _GYMMESSAGE.fields_by_name["reset"].containing_oneof = _GYMMESSAGE.oneofs_by_name[
+    "performative"
+]
+_GYMMESSAGE.oneofs_by_name["performative"].fields.append(
+    _GYMMESSAGE.fields_by_name["status"]
+)
+_GYMMESSAGE.fields_by_name["status"].containing_oneof = _GYMMESSAGE.oneofs_by_name[
     "performative"
 ]
 DESCRIPTOR.message_types_by_name["GymMessage"] = _GYMMESSAGE
@@ -517,6 +644,24 @@ GymMessage = _reflection.GeneratedProtocolMessageType(
                 # @@protoc_insertion_point(class_scope:fetch.aea.Gym.GymMessage.Percept_Performative)
             },
         ),
+        "Status_Performative": _reflection.GeneratedProtocolMessageType(
+            "Status_Performative",
+            (_message.Message,),
+            {
+                "ContentEntry": _reflection.GeneratedProtocolMessageType(
+                    "ContentEntry",
+                    (_message.Message,),
+                    {
+                        "DESCRIPTOR": _GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY,
+                        "__module__": "gym_pb2"
+                        # @@protoc_insertion_point(class_scope:fetch.aea.Gym.GymMessage.Status_Performative.ContentEntry)
+                    },
+                ),
+                "DESCRIPTOR": _GYMMESSAGE_STATUS_PERFORMATIVE,
+                "__module__": "gym_pb2"
+                # @@protoc_insertion_point(class_scope:fetch.aea.Gym.GymMessage.Status_Performative)
+            },
+        ),
         "Reset_Performative": _reflection.GeneratedProtocolMessageType(
             "Reset_Performative",
             (_message.Message,),
@@ -544,8 +689,11 @@ _sym_db.RegisterMessage(GymMessage)
 _sym_db.RegisterMessage(GymMessage.AnyObject)
 _sym_db.RegisterMessage(GymMessage.Act_Performative)
 _sym_db.RegisterMessage(GymMessage.Percept_Performative)
+_sym_db.RegisterMessage(GymMessage.Status_Performative)
+_sym_db.RegisterMessage(GymMessage.Status_Performative.ContentEntry)
 _sym_db.RegisterMessage(GymMessage.Reset_Performative)
 _sym_db.RegisterMessage(GymMessage.Close_Performative)
 
 
+_GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY._options = None
 # @@protoc_insertion_point(module_scope)

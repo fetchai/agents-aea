@@ -4,7 +4,7 @@ author: fetchai
 version: 0.1.0
 description: A protocol for negotiation over a fixed set of resources involving two parties.
 license: Apache-2.0
-aea_version: '>=0.4.0, <0.5.0'
+aea_version: '>=0.5.0, <0.6.0'
 speech_acts:
   cfp:
     query: ct:Query
@@ -45,12 +45,17 @@ ct:Description: |
   bytes description = 1;
 ...
 ---
+initiation: [cfp]
 reply:
   cfp: [propose, decline]
   propose: [accept, decline]
+  request: []
+  inform: [inform-reply]
+  inform_reply: []
   accept: [decline, match_accept]
   decline: []
   match_accept: []
+termination: [decline, match_accept]
 roles: {buyer, seller}
 end_states: [successful, failed]
 ...

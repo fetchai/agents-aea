@@ -16,9 +16,9 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 0, is_debug: bool = False, max_reactions: int = 20, decision_maker_handler_class: Type[
+ | __init__(identity: Identity, wallet: Wallet, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, decision_maker_handler_class: Type[
  |             DecisionMakerHandler
- |         ] = DefaultDecisionMakerHandler, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, **kwargs, ,) -> None
+ |         ] = DefaultDecisionMakerHandler, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = "oef", **kwargs, ,) -> None
 ```
 
 Instantiate the agent.
@@ -27,12 +27,10 @@ Instantiate the agent.
 
 - `identity`: the identity of the agent
 - `wallet`: the wallet of the agent.
-- `ledger_apis`: the APIs the agent will use to connect to ledgers.
 - `resources`: the resources (protocols and skills) of the agent.
 - `loop`: the event loop to run the connections.
 - `timeout`: the time in (fractions of) seconds to time out an agent between act and react
 - `exeution_timeout`: amount of time to limit single act/handle to execute.
-- `is_debug`: if True, run the agent in debug mode (does not connect the multiplexer).
 - `max_reactions`: the processing rate of envelopes per tick (i.e. single loop).
 - `decision_maker_handler_class`: the class implementing the decision maker handler to be used.
 - `skill_exception_policy`: the skill exception policy enum
@@ -41,6 +39,7 @@ Instantiate the agent.
 - `default_connection`: public id to the default connection
 - `default_routing`: dictionary for default routing.
 - `connection_ids`: active connection ids. Default: consider all the ones in the resources.
+- `search_service_address`: the address of the search service used.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 **Returns**:

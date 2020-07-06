@@ -13,34 +13,36 @@ cd my_aea
 The `aea-config.yaml` file should look like this.
 
 ``` yaml
-aea_version: '>=0.4.0, <0.5.0'
 agent_name: my_aea
-author: ''
-connections:
-- fetchai/stub:0.5.0
-default_connection: fetchai/stub:0.5.0
-default_ledger: fetchai
+author: fetchai
+version: 0.1.0
 description: ''
-fingerprint: ''
+license: Apache-2.0
+aea_version: 0.5.0
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/stub:0.6.0
+contracts: []
+protocols:
+- fetchai/default:0.3.0
+skills:
+- fetchai/error:0.3.0
+default_connection: fetchai/stub:0.6.0
+default_ledger: fetchai
 ledger_apis: {}
-license: ''
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-protocols:
-- fetchai/default:0.2.0
 registry_path: ../packages
-skills:
-- fetchai/error:0.2.0
-version: 0.1.0
 ```
 
 By updating the `logging_config` section, you can configure the loggers of your application.
 
 The format of this section is specified in the <a href="https://docs.python.org/3/library/logging.config.html" target=_blank>`logging.config`</a> module.
 
-At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target=_blank>this section</a> 
+At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target=_blank>this section</a>
 you'll find the definition of the configuration dictionary schema.
 
 Below is an example of the `logging_config` value.

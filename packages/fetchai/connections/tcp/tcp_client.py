@@ -22,7 +22,11 @@
 import asyncio
 import logging
 import struct
-from asyncio import CancelledError, StreamReader, StreamWriter
+from asyncio import (  # pylint: disable=unused-import
+    CancelledError,
+    StreamReader,
+    StreamWriter,
+)
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
@@ -81,7 +85,7 @@ class TCPClientConnection(TCPConnection):
         try:
             assert self._reader is not None
             data = await self._recv(self._reader)
-            if data is None:
+            if data is None:  # pragma: nocover
                 logger.debug("[{}] No data received.".format(self.address))
                 return None
             logger.debug("[{}] Message received: {!r}".format(self.address, data))

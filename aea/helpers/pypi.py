@@ -69,7 +69,7 @@ def is_satisfiable(specifier_set: SpecifierSet) -> bool:
     """
     # group single specifiers by operator
     all_specifiers = []
-    operator_to_specifiers: Dict[str, Set[Specifier]] = defaultdict(lambda: set())
+    operator_to_specifiers: Dict[str, Set[Specifier]] = defaultdict(set)
     # pre-processing
     for specifier in list(specifier_set):
         specifier = cast(Specifier, specifier)

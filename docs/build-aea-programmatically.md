@@ -1,10 +1,5 @@
-## Preliminaries
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
-
-
-This guide assumes you have already followed the Preliminaries and Installation section in the [quick start](quickstart.md) guide and so have the framework installed and the packages and scripts directory downloaded into the directory you are working in.
-
 
 ## Imports
 
@@ -51,7 +46,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the AEABuilder to readily build an AEA. By default, the AEABuilder adds the `fetchai/default:0.2.0` protocol, the `fetchai/stub:0.5.0` connection and the `fetchai/error:0.2.0` skill.
+We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.3.0` protocol, the `fetchai/stub:0.6.0` connection and the `fetchai/error:0.3.0` skill.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -127,7 +122,7 @@ We use the input and output text files to send an envelope to our AEA and receiv
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = (
-            "my_aea,other_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,"
+            "my_aea,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
@@ -154,8 +149,8 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello
-    output message: other_agent,my_aea,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello
+    input message: my_aea,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello
+    output message: other_agent,my_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello
 
 
 ## Entire code listing
@@ -244,7 +239,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = (
-            "my_aea,other_agent,fetchai/default:0.2.0,\x08\x01*\x07\n\x05hello,"
+            "my_aea,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)

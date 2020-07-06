@@ -21,6 +21,7 @@
 
 import inspect
 import os
+import aea.crypto  # triggers registry population
 
 from aea.__version__ import __title__, __description__, __url__, __version__
 from aea.__version__ import __author__, __license__, __copyright__

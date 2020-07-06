@@ -30,7 +30,7 @@ from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
-PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.3.0")
 
 
 class TCPConnection(Connection, ABC):
@@ -82,7 +82,7 @@ class TCPConnection(Connection, ABC):
         try:
             await self.setup()
             self.connection_status.is_connected = True
-        except Exception as e:
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             logger.error(str(e))
             self.connection_status.is_connected = False
 

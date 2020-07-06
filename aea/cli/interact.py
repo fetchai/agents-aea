@@ -25,6 +25,7 @@ from typing import Optional, Union
 
 import click
 
+from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.configurations.base import (
     ConnectionConfig,
@@ -44,7 +45,9 @@ from aea.protocols.default.message import DefaultMessage
 
 
 @click.command()
-def interact():
+@click.pass_context
+@check_aea_project
+def interact(click_context: click.core.Context):
     """Interact with a running AEA via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
@@ -71,27 +74,41 @@ def _run_interaction_channel():
 
     try:
         multiplexer.connect()
-        is_running = True
-        while is_running:
-            try:
-                envelope = _try_construct_envelope(agent_name, identity_stub.name)
-                if envelope is None and not inbox.empty():
-                    envelope = inbox.get_nowait()
-                    assert (
-                        envelope is not None
-                    ), "Could not recover envelope from inbox."
-                    click.echo(_construct_message("received", envelope))
-                elif envelope is None and inbox.empty():
-                    click.echo("Received no new envelope!")
-                else:
-                    outbox.put(envelope)
-                    click.echo(_construct_message("sending", envelope))
-            except KeyboardInterrupt:
-                is_running = False
-            except Exception as e:
-                click.echo(e)
+        while True:  # pragma: no cover
+            _process_envelopes(agent_name, identity_stub, inbox, outbox)
+
+    except KeyboardInterrupt:
+        click.echo("Interaction interrupted!")
+    except Exception as e:  # pylint: disable=broad-except # pragma: no cover
+        click.echo(e)
     finally:
         multiplexer.disconnect()
+
+
+def _process_envelopes(
+    agent_name: str, identity_stub: Identity, inbox: InBox, outbox: OutBox
+) -> None:
+    """
+    Process envelopes.
+
+    :param agent_name: name of an agent.
+    :param identity_stub: stub identity.
+    :param inbox: an inbox object.
+    :param outbox: an outbox object.
+
+    :return: None.
+    """
+    envelope = _try_construct_envelope(agent_name, identity_stub.name)
+    if envelope is None:
+        if not inbox.empty():
+            envelope = inbox.get_nowait()
+            assert envelope is not None, "Could not recover envelope from inbox."
+            click.echo(_construct_message("received", envelope))
+        else:
+            click.echo("Received no new envelope!")
+    else:
+        outbox.put(envelope)
+        click.echo(_construct_message("sending", envelope))
 
 
 def _construct_message(action_name, envelope):
@@ -114,14 +131,10 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
     try:
-        # click.echo("Provide performative of protocol fetchai/default:0.2.0:")
-        # performative_str = input()  # nosec
-        # if performative_str == "":
-        #     raise InterruptInputException
         performative_str = "bytes"
         performative = DefaultMessage.Performative(performative_str)
         click.echo(
-            "Provide message of protocol fetchai/default:0.2.0 for performative {}:".format(
+            "Provide message of protocol fetchai/default:0.3.0 for performative {}:".format(
                 performative_str
             )
         )
@@ -135,7 +148,7 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
             )
             message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         else:
-            message = message_escaped
+            message = message_escaped  # pragma: no cover
         msg = DefaultMessage(performative=performative, content=message)
         envelope = Envelope(
             to=agent_name,
@@ -147,6 +160,6 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
         click.echo("Interrupting input, checking inbox ...")
     except KeyboardInterrupt as e:
         raise e
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except # pragma: no cover
         click.echo(e)
     return envelope

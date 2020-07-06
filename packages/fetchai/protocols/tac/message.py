@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = ProtocolId("fetchai", "tac", "0.2.0")
+    protocol_id = ProtocolId("fetchai", "tac", "0.3.0")
 
     ErrorCode = CustomErrorCode
 
@@ -106,7 +106,7 @@ class TacMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(TacMessage.Performative, self.get("performative"))
