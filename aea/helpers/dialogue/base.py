@@ -404,6 +404,22 @@ class Dialogue(ABC):
                 self._outgoing_messages.extend([message])
         return is_extendable
 
+    def reply(self, target_message: Message, performative, **kwargs) -> Optional[Message]:
+        reply = self._message_class(
+            dialogue_reference=self.dialogue_label.dialogue_reference,
+            message_id=self.last_message.message_id+1,
+            target=target_message.message_id,
+            performative=performative,
+            **kwargs,
+        )
+        reply.counterparty = self.dialogue_label.dialogue_opponent_addr
+        result = self.update(reply)
+
+        if result:
+            return reply
+        else:
+            return None
+
     def _update_self_initiated_dialogue_label_on_second_message(
         self, second_message: Message
     ) -> None:
@@ -666,6 +682,27 @@ class Dialogues(ABC):
         """
         return str(self._dialogue_nonce + 1), ""
 
+    def create(self, counterparty, performative, **kwargs,) -> Tuple[Message, Dialogue]:
+        initial_message = self._message_class(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=performative,
+            **kwargs,
+        )
+        initial_message.counterparty = counterparty
+
+        dialogue = self._create_self_initiated(
+            dialogue_opponent_addr=counterparty,
+            role=self.role_from_first_message(initial_message),
+        )
+        initial_message.set("dialogue_reference", dialogue.dialogue_label.dialogue_reference)
+
+        successfully_updated = dialogue.update(initial_message)
+        assert successfully_updated, "Cannot create the a dialogue with the specified performative and contents."
+
+        return initial_message, dialogue
+
     def update(self, message: Message) -> Optional[Dialogue]:
         """
         Update the state of dialogues with a new message.
@@ -808,7 +845,7 @@ class Dialogues(ABC):
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
-        dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role)
+        dialogue = self._dialogue_class(dialogue_label=dialogue_label, message_class=self._message_class, agent_address=self.agent_address, role=role)
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -839,23 +876,10 @@ class Dialogues(ABC):
         )
 
         assert dialogue_label not in self.dialogues
-        dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role)
+        dialogue = self._dialogue_class(dialogue_label=dialogue_label, message_class=self._message_class, agent_address=self.agent_address, role=role)
         self.dialogues.update({dialogue_label: dialogue})
 
         return dialogue
-
-    @abstractmethod
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> Dialogue:
-        """
-        Create a dialogue instance.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
 
     @staticmethod
     @abstractmethod

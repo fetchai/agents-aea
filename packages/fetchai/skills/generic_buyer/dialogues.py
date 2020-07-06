@@ -161,7 +161,9 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseFipaDialogues.__init__(self, self.context.agent_address)
+        BaseFipaDialogues.__init__(
+            self, self.context.agent_address, dialogue_class=FipaDialogue
+        )
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
@@ -171,22 +173,6 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: The role of the agent
         """
         return BaseFipaDialogue.Role.BUYER
-
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> FipaDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = FipaDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
-        return dialogue
 
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
