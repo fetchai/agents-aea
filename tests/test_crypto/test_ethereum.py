@@ -125,6 +125,7 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
+@pytest.mark.unstable  # TODO: fix
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 def test_construct_sign_and_submit_transfer_transaction():
