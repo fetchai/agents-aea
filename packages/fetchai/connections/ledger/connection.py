@@ -137,7 +137,7 @@ class LedgerConnection(Connection):
             self.event_new_receiving_task.clear()
             try:
                 await self.event_new_receiving_task.wait()
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 return None
         self.event_new_receiving_task.clear()
 
