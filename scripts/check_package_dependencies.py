@@ -72,6 +72,7 @@ class DependencyNotFound(Exception):
 
 
 def find_all_configuration_files():
+    """Find all configuration files."""
     packages_dir = Path("packages")
     return list(chain(packages_dir.glob("*/*/*/*.yaml"), default_config_file_paths()))
 
