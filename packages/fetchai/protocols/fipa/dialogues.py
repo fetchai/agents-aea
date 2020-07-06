@@ -85,8 +85,8 @@ class FipaDialogue(Dialogue):
     class Role(Dialogue.Role):
         """This class defines the agent's role in a fipa dialogue."""
 
-        SELLER = "seller"
         BUYER = "buyer"
+        SELLER = "seller"
 
     class EndState(Dialogue.EndState):
         """This class defines the end states of a fipa dialogue."""
