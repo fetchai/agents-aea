@@ -406,8 +406,6 @@ def update_hashes(arguments: argparse.Namespace) -> int:
                         package_path.name, package_type
                     )
                 )
-                if package_path.name == "dummy_aea":
-                    print("help")
                 configuration_obj = load_configuration(package_type, package_path)
                 sort_configuration_file(configuration_obj)
                 update_fingerprint(configuration_obj, client)

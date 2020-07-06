@@ -97,12 +97,12 @@ class LedgerConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        task = await self._schedule_request(envelope)
+        task = self._schedule_request(envelope)
         self.receiving_tasks.append(task)
         self.task_to_request[task] = envelope
         self.event_new_receiving_task.set()
 
-    async def _schedule_request(self, envelope: Envelope) -> Task:
+    def _schedule_request(self, envelope: Envelope) -> Task:
         """
         Schedule a ledger API request.
 
@@ -134,8 +134,8 @@ class LedgerConnection(Connection):
             return self._handle_done_task(done_task)
 
         if len(self.receiving_tasks) == 0:
-            await self.event_new_receiving_task.wait()
             self.event_new_receiving_task.clear()
+            await self.event_new_receiving_task.wait()
 
         # wait for completion of at least one receiving task
         done, _ = await asyncio.wait(
