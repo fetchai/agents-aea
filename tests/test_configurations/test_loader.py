@@ -21,10 +21,14 @@
 import os
 from pathlib import Path
 from unittest import mock
+from unittest.mock import MagicMock
 
 import pytest
 
-from aea.configurations.base import PackageType
+import yaml
+
+import aea
+from aea.configurations.base import PackageType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 from aea.protocols.generator.common import load_protocol_specification
 
@@ -50,7 +54,46 @@ def test_config_loader_get_required_fields():
     config_loader.required_fields
 
 
+def test_config_loader_dump():
+    """Test ConfigLoader.dump"""
+    config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
+    configuration = MagicMock()
+    with mock.patch.object(aea.configurations.loader, "yaml_dump"), mock.patch(
+        "jsonschema.Draft4Validator.validate"
+    ), mock.patch("builtins.open"):
+        config_loader.dump(configuration, open("foo"))
+
+
 @pytest.mark.parametrize("spec_file_path", protocol_specification_files)
 def test_load_protocol_specification(spec_file_path):
     """Test for the utility function 'load_protocol_specification'"""
-    load_protocol_specification(spec_file_path)
+    result = load_protocol_specification(spec_file_path)
+    assert type(result) == ProtocolSpecification
+
+
+def test_load_protocol_specification_only_first_part():
+    """Test 'load_protocol_specification' with only the first part."""
+    valid_protocol_specification = dict(
+        name="name",
+        author="author",
+        version="0.1.0",
+        license="",
+        aea_version="0.1.0",
+        speech_acts={"example": {}},
+    )
+    with mock.patch.object(
+        yaml, "safe_load_all", return_value=[valid_protocol_specification]
+    ), mock.patch("builtins.open"), mock.patch("jsonschema.Draft4Validator.validate"):
+        load_protocol_specification("foo")
+
+
+def test_load_protocol_specification_too_many_parts():
+    """Test 'load_protocol_specification' with more than three parts."""
+    with pytest.raises(
+        ValueError,
+        match="Incorrect number of Yaml documents in the protocol specification.",
+    ):
+        with mock.patch.object(
+            yaml, "safe_load_all", return_value=[{}] * 4
+        ), mock.patch("builtins.open"):
+            load_protocol_specification("foo")
