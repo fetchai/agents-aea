@@ -22,6 +22,7 @@
 import asyncio
 import logging
 from asyncio import CancelledError
+from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Optional, cast
 
@@ -39,20 +40,30 @@ logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
 """default 'to' field for Gym envelopes."""
 DEFAULT_GYM = "gym"
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.4.0")
 
 
 class GymChannel:
     """A wrapper of the gym environment."""
 
+    THREAD_POOL_SIZE = 3
+
     def __init__(self, address: Address, gym_env: gym.Env):
         """Initialize a gym channel."""
         self.address = address
         self.gym_env = gym_env
-        self._lock: Optional[asyncio.Lock] = None
-
+        self._loop: Optional[AbstractEventLoop] = None
         self._queue: Optional[asyncio.Queue] = None
-        self._threaded_pool: ThreadPoolExecutor = ThreadPoolExecutor(10)
+        self._threaded_pool: ThreadPoolExecutor = ThreadPoolExecutor(
+            self.THREAD_POOL_SIZE
+        )
+
+    @property
+    def queue(self) -> asyncio.Queue:
+        """Check queue is set and return queue."""
+        if self._queue is None:  # pragma: nocover
+            raise ValueError("Channel is not connected")
+        return self._queue
 
     async def connect(self) -> None:
         """
@@ -125,10 +136,8 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        if self._queue is None:  # pragma: nocover
-            raise ValueError("Channel is not connected")
         assert envelope.to == self.address, "Invalid destination address"
-        await self._queue.put(envelope)
+        await self.queue.put(envelope)
 
     async def disconnect(self) -> None:
         """
@@ -142,9 +151,7 @@ class GymChannel:
 
     async def get(self) -> Optional[Envelope]:
         """Get incoming envelope."""
-        if self._queue is None:  # pragma: nocover
-            raise ValueError("Channel is not connected")
-        return await self._queue.get()
+        return await self.queue.get()
 
 
 class GymConnection(Connection):

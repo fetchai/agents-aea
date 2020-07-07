@@ -19,7 +19,7 @@
 """This module contains the tests of the gym connection module."""
 import asyncio
 import logging
-import os
+import sys
 from unittest.mock import patch
 
 import gym
@@ -166,15 +166,15 @@ class TestGymConnection:
 
     def test_gym_env_load(self):
         """Load gym env from file."""
-        cur_dir = os.getcwd()
-        os.chdir(ROOT_DIR)
-        gym_env_path = "examples.gym_ex.gyms.env.BanditNArmedRandom"
-        configuration = ConnectionConfig(
-            connection_id=GymConnection.connection_id, env=gym_env_path
-        )
-        identity = Identity("name", address=self.my_address)
-        gym_con = GymConnection(
-            gym_env=None, identity=identity, configuration=configuration
-        )
-        assert gym_con.channel.gym_env is not None
-        os.chdir(cur_dir)
+        paths = [] + sys.path + [ROOT_DIR]
+
+        with patch("sys.path", return_value=paths):
+            gym_env_path = "examples.gym_ex.gyms.env.BanditNArmedRandom"
+            configuration = ConnectionConfig(
+                connection_id=GymConnection.connection_id, env=gym_env_path
+            )
+            identity = Identity("name", address=self.my_address)
+            gym_con = GymConnection(
+                gym_env=None, identity=identity, configuration=configuration
+            )
+            assert gym_con.channel.gym_env is not None
