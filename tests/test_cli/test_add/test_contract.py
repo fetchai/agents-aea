@@ -56,10 +56,10 @@ class AddContractCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-@pytest.mark.integration
 class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add contract from Registry command."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_contract_from_remote_registry_positive(self):
         """Test add contract from Registry positive result."""

@@ -191,7 +191,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "a Data message:",
         )
         missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=180, is_terminating=False
+            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

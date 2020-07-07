@@ -471,10 +471,10 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
             pass
 
 
-@pytest.mark.integration
 class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add protocol from Registry command."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_protocol_from_remote_registry_positive(self):
         """Test add protocol from Registry positive result."""

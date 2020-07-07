@@ -186,7 +186,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            weather_station_process, check_strings, timeout=180, is_terminating=False
+            weather_station_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

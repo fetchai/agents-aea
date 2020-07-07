@@ -1,6 +1,6 @@
 agent_name: erc1155_client
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: An AEA to interact with the ERC1155 deployer AEA
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -20,7 +20,7 @@ protocols:
 - fetchai/oef_search:0.3.0
 - fetchai/signing:0.1.0
 skills:
-- fetchai/erc1155_client:0.6.0
+- fetchai/erc1155_client:0.7.0
 - fetchai/error:0.3.0
 default_connection: fetchai/oef:0.5.0
 default_ledger: ethereum

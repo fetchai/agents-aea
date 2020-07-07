@@ -204,7 +204,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=180, is_terminating=False
+            seller_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

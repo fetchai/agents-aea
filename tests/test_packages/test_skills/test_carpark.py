@@ -184,7 +184,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, timeout=180, is_terminating=False
+            carpark_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

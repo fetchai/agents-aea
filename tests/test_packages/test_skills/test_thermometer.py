@@ -190,7 +190,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=180, is_terminating=False
+            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
