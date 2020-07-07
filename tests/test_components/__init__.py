@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a test for aea.components."""
+"""This module contains tests for aea/components/*"""
