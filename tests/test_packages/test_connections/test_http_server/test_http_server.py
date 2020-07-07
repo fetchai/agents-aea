@@ -40,7 +40,7 @@ from packages.fetchai.connections.http_server.connection import (
 )
 from packages.fetchai.protocols.http.message import HttpMessage
 
-from ....conftest import (
+from tests.conftest import (
     HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,

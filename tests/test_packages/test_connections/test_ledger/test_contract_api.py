@@ -35,7 +35,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.ledger.contract_dispatcher import ContractApiDialogues
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 
-from ....conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
+from tests.conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
 
 
 @pytest.fixture()

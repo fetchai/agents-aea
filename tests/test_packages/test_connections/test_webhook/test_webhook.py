@@ -37,7 +37,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.webhook.connection import WebhookConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 
-from ....conftest import (
+from tests.conftest import (
     get_host,
     get_unused_tcp_port,
 )

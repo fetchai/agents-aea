@@ -25,6 +25,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
+from click.testing import CliRunner
+
 import jsonschema
 from jsonschema import Draft4Validator
 
@@ -32,9 +34,8 @@ import pytest
 
 from aea.cli import cli
 from aea.configurations.loader import make_jsonschema_base_uri
-from aea.test_tools.click_testing import CliRunner
 
-from ..conftest import (
+from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,

@@ -32,7 +32,7 @@ import yaml
 
 from aea.configurations.loader import make_jsonschema_base_uri
 
-from ..conftest import (
+from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CONFIGURATION_SCHEMA_DIR,
     CONNECTION_CONFIGURATION_SCHEMA,

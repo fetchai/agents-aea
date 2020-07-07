@@ -38,7 +38,7 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 
-from ..conftest import (
+from tests.conftest import (
     AUTHOR,
     agent_config_files,
     connection_config_files,

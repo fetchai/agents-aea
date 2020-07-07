@@ -45,7 +45,7 @@ from aea.registries.base import AgentComponentRegistry
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
-from ..conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
+from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
 
 class TestContractRegistry:

@@ -28,7 +28,7 @@ import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
 
 seller_strategy_replacement = """models:
   default_dialogues:
