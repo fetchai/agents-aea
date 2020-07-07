@@ -50,11 +50,11 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_AEA_CONFIG_FILE as AGENT_YAML,
+    DEFAULT_CONNECTION_CONFIG_FILE as CONNECTION_YAML,
+    DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAML,
+    DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML,
+    DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML,
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
@@ -102,6 +102,12 @@ CONNECTION_CONFIGURATION_SCHEMA = os.path.join(
 )
 PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(
     CONFIGURATION_SCHEMA_DIR, "protocol-config_schema.json"
+)
+CONTRACT_CONFIGURATION_SCHEMA = os.path.join(
+    CONFIGURATION_SCHEMA_DIR, "contract-config_schema.json"
+)
+PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
+    CONFIGURATION_SCHEMA_DIR, "protocol-specification_schema.json"
 )
 
 DUMMY_ENV = gym.GoalEnv
@@ -162,182 +168,93 @@ DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 MAX_FLAKY_RERUNS = 3
 MAX_FLAKY_RERUNS_ETH = 1
 
+FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
+PROTOCOL_SPECS_PREF = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
 
 contract_config_files = [
-    os.path.join(
-        ROOT_DIR, "aea", "contracts", "scaffold", DEFAULT_CONTRACT_CONFIG_FILE
-    ),
+    os.path.join(ROOT_DIR, "aea", "contracts", "scaffold", CONTRACT_YAML),
 ]
 
 protocol_config_files = [
-    os.path.join(ROOT_DIR, "aea", "protocols", "default", DEFAULT_PROTOCOL_CONFIG_FILE),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "protocols",
-        "fipa",
-        DEFAULT_PROTOCOL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "protocols",
-        "oef_search",
-        DEFAULT_PROTOCOL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR, "aea", "protocols", "scaffold", DEFAULT_PROTOCOL_CONFIG_FILE
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "protocols",
-        "gym",
-        DEFAULT_PROTOCOL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "protocols",
-        "ml_trade",
-        DEFAULT_PROTOCOL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "protocols",
-        "tac",
-        DEFAULT_PROTOCOL_CONFIG_FILE,
-    ),
+    os.path.join(ROOT_DIR, "aea", "protocols", "default", PROTOCOL_YAML),
+    os.path.join(FETCHAI_PREF, "protocols", "fipa", PROTOCOL_YAML,),
+    os.path.join(FETCHAI_PREF, "protocols", "oef_search", PROTOCOL_YAML,),
+    os.path.join(ROOT_DIR, "aea", "protocols", "scaffold", PROTOCOL_YAML),
+    os.path.join(FETCHAI_PREF, "protocols", "gym", PROTOCOL_YAML,),
+    os.path.join(FETCHAI_PREF, "protocols", "ml_trade", PROTOCOL_YAML,),
+    os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML,),
 ]
 
 connection_config_files = [
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "connections",
-        "local",
-        DEFAULT_CONNECTION_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "connections",
-        "oef",
-        DEFAULT_CONNECTION_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR, "aea", "connections", "scaffold", DEFAULT_CONNECTION_CONFIG_FILE
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "connections",
-        "gym",
-        DEFAULT_CONNECTION_CONFIG_FILE,
-    ),
-    os.path.join(CUR_PATH, "data", "dummy_connection", DEFAULT_CONNECTION_CONFIG_FILE),
+    os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML,),
+    os.path.join(FETCHAI_PREF, "connections", "oef", CONNECTION_YAML,),
+    os.path.join(ROOT_DIR, "aea", "connections", "scaffold", CONNECTION_YAML),
+    os.path.join(FETCHAI_PREF, "connections", "gym", CONNECTION_YAML,),
+    os.path.join(CUR_PATH, "data", "dummy_connection", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
 ]
 
 
 skill_config_files = [
-    os.path.join(ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE),
-    os.path.join(ROOT_DIR, "aea", "skills", "scaffold", DEFAULT_SKILL_CONFIG_FILE),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "carpark_client",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "carpark_detection",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR, "packages", "fetchai", "skills", "echo", DEFAULT_SKILL_CONFIG_FILE
-    ),
-    os.path.join(
-        ROOT_DIR, "packages", "fetchai", "skills", "gym", DEFAULT_SKILL_CONFIG_FILE
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "ml_data_provider",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR, "packages", "fetchai", "skills", "ml_train", DEFAULT_SKILL_CONFIG_FILE
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "tac_control",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "tac_negotiation",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "tac_participation",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "weather_client",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "weather_station",
-        DEFAULT_SKILL_CONFIG_FILE,
-    ),
-    os.path.join(CUR_PATH, "data", "dummy_skill", DEFAULT_SKILL_CONFIG_FILE),
-    os.path.join(
-        CUR_PATH, "data", "dummy_aea", "skills", "dummy", DEFAULT_SKILL_CONFIG_FILE
-    ),
-    os.path.join(CUR_PATH, "data", "dependencies_skill", DEFAULT_SKILL_CONFIG_FILE),
-    os.path.join(CUR_PATH, "data", "exception_skill", DEFAULT_SKILL_CONFIG_FILE),
+    os.path.join(ROOT_DIR, "aea", "skills", "error", SKILL_YAML),
+    os.path.join(ROOT_DIR, "aea", "skills", "scaffold", SKILL_YAML),
+    os.path.join(FETCHAI_PREF, "skills", "carpark_client", SKILL_YAML,),
+    os.path.join(FETCHAI_PREF, "skills", "carpark_detection", SKILL_YAML,),
+    os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo", SKILL_YAML),
+    os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "gym", SKILL_YAML),
+    os.path.join(FETCHAI_PREF, "skills", "ml_data_provider", SKILL_YAML,),
+    os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "ml_train", SKILL_YAML),
+    os.path.join(FETCHAI_PREF, "skills", "tac_control", SKILL_YAML,),
+    os.path.join(FETCHAI_PREF, "skills", "tac_negotiation", SKILL_YAML,),
+    os.path.join(FETCHAI_PREF, "skills", "tac_participation", SKILL_YAML,),
+    os.path.join(FETCHAI_PREF, "skills", "weather_client", SKILL_YAML,),
+    os.path.join(FETCHAI_PREF, "skills", "weather_station", SKILL_YAML,),
+    os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML),
+    os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy", SKILL_YAML),
+    os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
+    os.path.join(CUR_PATH, "data", "exception_skill", SKILL_YAML),
 ]
 
 
 agent_config_files = [
-    os.path.join(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE),
+    os.path.join(CUR_PATH, "data", "dummy_aea", AGENT_YAML),
     os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
     os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml"),
+    os.path.join(FETCHAI_PREF, "agents", "aries_alice", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "aries_faber", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "car_data_buyer", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "car_detector", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "erc1155_client", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "erc1155_deployer", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "generic_buyer", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "generic_seller", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "gym_aea", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "ml_data_provider", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "ml_model_trainer", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "my_first_aea", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "simple_service_registration", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "tac_controller", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "tac_controller_contract", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "tac_participant", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "thermometer_aea", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "thermometer_client", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "weather_client", AGENT_YAML),
+    os.path.join(FETCHAI_PREF, "agents", "weather_station", AGENT_YAML),
+]
+
+protocol_specification_files = [
+    os.path.join(PROTOCOL_SPECS_PREF, "contract_api.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "default.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "fipa.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "gym.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "http.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "ledger_api.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "ml_trade.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "oef_search.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "sample.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "signing.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "state_update.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF, "tac.yaml",),
 ]
 
 
