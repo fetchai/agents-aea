@@ -534,10 +534,18 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	start := time.Now()
 	provider := <-providers
 	elapsed := time.Since(start)
-	if provider.ID == "" {
+	for provider.ID == "" {
 		err = errors.New("didn't found any provider for address within timeout")
 		lerror(err).Str("op", "lookup").Str("addr", address).Msg("")
-		return "", err
+		select {
+		default:
+			time.Sleep(200 * time.Millisecond)
+			providers = dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 1)
+			provider = <-providers
+			elapsed = time.Since(start)
+		case <-ctx.Done():
+			return "", err
+		}
 	}
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msgf("found provider %s after %s", provider, elapsed.String())

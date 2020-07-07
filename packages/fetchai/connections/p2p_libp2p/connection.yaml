@@ -18,7 +18,7 @@ fingerprint:
   dht/dhtnetwork_test.go: QmcrLh1ebq8x4MQQjSb3isHb268pnRazT147gpN6cz9rbY
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  dht/dhtpeer/dhtpeer.go: Qmc6sdHbVuGqysbL8J8qyTeuZk4D2TbNJXFRcyeJ1jN6jJ
+  dht/dhtpeer/dhtpeer.go: QmR7164YNF8o4qYBnQJeyNs1qfc9bhXc4qK1p4Ktovnnb8
   dht/dhtpeer/dhtpeer_test.go: QmRDtUkmVW8uvSbXxnPr73wB8rUqKc2pbEd9nHf7TGnuhj
   dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
   dht/dhttests/dhttests.go: QmZpYRCiVARGL1n4nDwqjhzHA95Y4ACNWoa3HSDnB6PitK
