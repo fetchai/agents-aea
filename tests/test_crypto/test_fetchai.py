@@ -28,7 +28,7 @@ import pytest
 
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 
-from ..conftest import (
+from tests.conftest import (
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
