@@ -32,10 +32,11 @@ from aea.configurations.base import PackageType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 from aea.protocols.generator.common import load_protocol_specification
 
-from tests.conftest import protocol_specification_files
+from tests.conftest import protocol_specification_files, skip_test_windows
 
 
 @pytest.mark.parametrize("system", ["nt", "posix"])
+@skip_test_windows
 def test_windows_uri_path(system):
     """Test windows uri path."""
     dir = Path("aea", "configurations").absolute()
