@@ -478,7 +478,7 @@ class PublicId(JSONSerializable):
         >>> public_id_1 < public_id_3
         Traceback (most recent call last):
         ...
-        ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author and name attributes are different.
+        ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author or name attributes are different.
 
         """
         if (
