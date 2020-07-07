@@ -113,7 +113,8 @@ def test_api_none():
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_get_balance():
     """Test the balance is zero for a new account."""
     ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
@@ -125,9 +126,9 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
-@pytest.mark.unstable  # TODO: fix
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
+@pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
     account = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
@@ -179,7 +180,8 @@ def test_construct_sign_and_submit_transfer_transaction():
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum"):

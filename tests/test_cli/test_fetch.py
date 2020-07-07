@@ -143,10 +143,10 @@ class IsVersionCorrectTestCase(TestCase):
         self.assertFalse(result)
 
 
-@pytest.mark.integration
 class TestFetchFromRemoteRegistry(AEATestCaseMany):
     """Test case for fetch agent command from Registry."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""

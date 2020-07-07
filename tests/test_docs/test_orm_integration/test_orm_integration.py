@@ -125,7 +125,6 @@ ORM_SELLER_STRATEGY_PATH = Path(
 class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @pytest.mark.unstable
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""

@@ -113,6 +113,9 @@ COSMOS_PRIVATE_KEY_PATH = os.path.join(
 ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", "eth_private_key.txt"
 )
+FUNDED_ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "eth_private_key.txt"
+)
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", "fet_private_key.txt"
 )

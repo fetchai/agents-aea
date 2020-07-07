@@ -496,10 +496,10 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
         assert contract_dependency_name in contracts_folders
 
 
-@pytest.mark.integration
 class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add skill from Registry command."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""

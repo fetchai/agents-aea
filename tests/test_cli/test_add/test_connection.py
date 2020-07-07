@@ -475,10 +475,10 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
             pass
 
 
-@pytest.mark.integration
 class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add connection from Registry command."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""

@@ -34,10 +34,10 @@ from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from .test_base import TempCWD, create_app
-from ..conftest import CUR_PATH, skip_test_windows
+from ..conftest import CUR_PATH, MAX_FLAKY_RERUNS, skip_test_windows
 
 
-@pytest.mark.unstable
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @skip_test_windows
 def test_create_and_run_agent():
     """Test for running and agent, reading TTY and errors."""
