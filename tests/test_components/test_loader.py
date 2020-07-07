@@ -34,11 +34,27 @@ def component_configuration():
     return ProtocolConfig("a_protocol", "an_author", "0.1.0")
 
 
+def test_component_loading_generic_exception(component_configuration):
+    """Test 'load_component_from_config' method when a generic "Exception" occurs."""
+
+    with mock.patch.object(
+        Protocol, "from_config", side_effect=Exception("Generic exception")
+    ):
+        with pytest.raises(
+            Exception, match="An error occurred while loading .*: Generic exception"
+        ):
+            load_component_from_config(component_configuration)
+
+
 def test_component_loading_generic_module_not_found_error(component_configuration):
     """Test 'load_component_from_config' method when a generic "ModuleNotFoundError" occurs."""
 
     with mock.patch.object(
-        Protocol, "from_config", side_effect=ModuleNotFoundError("Generic error")
+        Protocol,
+        "from_config",
+        side_effect=ModuleNotFoundError(
+            "An error occurred while loading .*: Generic error"
+        ),
     ):
         with pytest.raises(ModuleNotFoundError, match="Generic error"):
             load_component_from_config(component_configuration)
