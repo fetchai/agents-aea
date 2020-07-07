@@ -489,7 +489,7 @@ class PublicId(JSONSerializable):
             return self.version_info < other.version_info
         else:
             raise ValueError(
-                "The public IDs {} and {} cannot be compared. Their author and name attributes are different.".format(
+                "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
                     self, other
                 )
             )

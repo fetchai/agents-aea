@@ -371,22 +371,42 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     """
     # for docstyle.
     def decorator(pytest_func):
-        if platform.system() != platform_name:
+        """
+        For the sake of clarity, assume the chosen platform for the action is "Windows".
+        If the following condition is true:
+          - the current system is not Windows (is_different) AND we want to skip it (skip)
+         OR
+          - the current system is Windows (not is_different) AND we want to run only on it (not skip)
+        we run the test, else we skip the test.
+
+        logically, the condition is a boolean equivalence
+        between the variables "is_different" and "skip"
+        Hence, the condition becomes:
+        """
+        is_different = platform.system() != platform_name
+        if is_different is skip:
             return pytest_func
 
-        def skip(*args, **kwargs):
-            pytest.skip(f"Skipping the test since it doesn't work on {platform_name}.")
+        def action(*args, **kwargs):
+            if skip:
+                pytest.skip(
+                    f"Skipping the test since it doesn't work on {platform_name}."
+                )
+            else:
+                pytest.skip(
+                    f"Skipping the test since it works only on {platform_name}."
+                )
 
         if isinstance(pytest_func, type):
             return type(
                 pytest_func.__name__,
                 (pytest_func,),
-                {"setup_class": skip, "setup": skip, "setUp": skip},
+                {"setup_class": action, "setup": action, "setUp": action},
             )
 
         @wraps(pytest_func)
         def wrapper(*args, **kwargs):  # type: ignore
-            pytest.skip(f"Skipping the test since it doesn't work on {platform_name}.")
+            action(*args, **kwargs)
 
         return wrapper
 
