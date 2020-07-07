@@ -106,6 +106,8 @@ jobs:
           working-directory: packages/fetchai/connections/p2p_libp2p/
       - name: Check package versions in documentation
         run: tox -e package_version_checks
+      - name: Check package dependencies
+        run: tox -e package_dependencies_checks
       - name: Generate Documentation
         run: tox -e docs
 
