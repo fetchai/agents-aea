@@ -42,7 +42,7 @@ class TestGymSkill(AEATestCaseEmpty):
         self.set_config(setting_path, "fetchai/gym:0.4.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/gym_aea:0.4.0", self.agent_name
+            "fetchai/gym_aea:0.5.0", self.agent_name
         )
         assert (
             diff == []
