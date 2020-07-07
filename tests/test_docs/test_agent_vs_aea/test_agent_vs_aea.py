@@ -25,9 +25,9 @@ import pytest
 
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from .agent_code_block import run
-from ..helper import extract_code_blocks, extract_python_code
-from ...conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.test_docs.helper import extract_code_blocks, extract_python_code
+from tests.test_docs.test_agent_vs_aea.agent_code_block import run
 
 MD_FILE = "docs/agent-vs-aea.md"
 PY_FILE = "test_docs/test_agent_vs_aea/agent_code_block.py"

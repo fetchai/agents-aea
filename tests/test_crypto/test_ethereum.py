@@ -30,7 +30,7 @@ import pytest
 
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto, EthereumFaucetApi
 
-from ..conftest import (
+from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     ETHEREUM_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,

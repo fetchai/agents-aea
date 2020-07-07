@@ -21,10 +21,11 @@
 import os
 from unittest import TestCase, mock
 
+from click.testing import CliRunner
+
 import pytest
 
 from aea.cli import cli
-from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import CLI_LOG_OPTION, MAX_FLAKY_RERUNS

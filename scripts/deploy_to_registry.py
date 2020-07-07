@@ -29,11 +29,12 @@ from itertools import chain
 from pathlib import Path
 from typing import Set
 
+from click.testing import CliRunner
+
 import yaml
 
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId
-from aea.test_tools.click_testing import CliRunner
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 

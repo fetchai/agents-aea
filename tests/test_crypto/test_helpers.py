@@ -36,7 +36,7 @@ from aea.crypto.helpers import (
     try_validate_private_key_path,
 )
 
-from ..conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_PATH, FETCHAI_PRIVATE_KEY_PATH
+from tests.conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_PATH, FETCHAI_PRIVATE_KEY_PATH
 
 logger = logging.getLogger(__name__)
 

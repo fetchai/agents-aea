@@ -26,7 +26,11 @@ import pytest
 
 from aea.crypto.cosmos import CosmosApi, CosmosCrypto, CosmosFaucetApi
 
-from ..conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG, MAX_FLAKY_RERUNS
+from tests.conftest import (
+    COSMOS_PRIVATE_KEY_PATH,
+    COSMOS_TESTNET_CONFIG,
+    MAX_FLAKY_RERUNS,
+)
 
 
 def test_creation():

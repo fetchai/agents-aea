@@ -20,12 +20,13 @@
 
 from unittest import TestCase, mock
 
+from click.testing import CliRunner
+
 import pytest
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth, _wait_funds_release
 from aea.crypto.fetchai import FetchAICrypto
-from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
 

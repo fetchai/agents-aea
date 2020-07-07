@@ -30,7 +30,7 @@ from aea.crypto.fetchai import FetchAIApi
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAException
 
-from ..conftest import (
+from tests.conftest import (
     COSMOS_TESTNET_CONFIG,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_TESTNET_CONFIG,

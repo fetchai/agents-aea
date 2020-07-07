@@ -58,7 +58,7 @@ from aea.protocols.state_update.dialogues import (
 )
 from aea.protocols.state_update.message import StateUpdateMessage
 
-from ..conftest import CUR_PATH
+from tests.conftest import CUR_PATH
 
 
 class SigningDialogues(BaseSigningDialogues):
