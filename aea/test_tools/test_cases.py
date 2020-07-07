@@ -661,6 +661,13 @@ class BaseAEATestCase(ABC):
         missing_strings = cls.missing_from_output(
             process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
         )
+
+        # debug: log process output if not running
+        if len(missing_strings) > 0:
+            print("AEA stdout ==========")
+            print(cls.stdout[process.pid])
+            print("=====================")
+
         return missing_strings == []
 
     @classmethod
