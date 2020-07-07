@@ -26,10 +26,11 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from click.testing import CliRunner
+
 import yaml
 
 from aea.cli import cli
-from aea.test_tools.click_testing import CliRunner
 
 from tests.conftest import CLI_LOG_OPTION
 
@@ -104,7 +105,6 @@ class TestDoInit:
             cli,
             [*CLI_LOG_OPTION, "init", "--author", author],
             input=f"n\n{email}\n{pwd}\n{pwd}\n\n",
-            mix_stderr=True,
         )
         assert result.exit_code == 0, result.output
         assert "Successfully registered" in result.output
@@ -130,7 +130,7 @@ class TestDoInit:
     def test_already_logged_in(self, *mocks):
         """Registered and logged in (has token)."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", "test_author"], mix_stderr=True,
+            cli, [*CLI_LOG_OPTION, "init", "--author", "test_author"],
         )
         assert result.exit_code == 0
 

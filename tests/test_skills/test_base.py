@@ -34,7 +34,7 @@ from aea.identity.base import Identity
 from aea.registries.resources import Resources
 from aea.skills.base import SkillComponent, SkillContext
 
-from ..conftest import CUR_PATH, _make_dummy_connection
+from tests.conftest import CUR_PATH, _make_dummy_connection
 
 
 class TestSkillContext:

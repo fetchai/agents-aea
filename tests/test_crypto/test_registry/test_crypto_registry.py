@@ -32,7 +32,7 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
 
-from ...data.custom_crypto import CustomCrypto
+from tests.data.custom_crypto import CustomCrypto
 
 logger = logging.getLogger(__name__)
 

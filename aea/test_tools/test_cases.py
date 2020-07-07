@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
+import copy
 import os
 import random
 import shutil
@@ -253,7 +254,7 @@ class BaseAEATestCase(ABC):
 
         def is_allowed_diff_in_agent_config(
             path_to_fetched_aea, path_to_manually_created_aea
-        ) -> bool:
+        ) -> Tuple[bool, Dict[str, str], Dict[str, str]]:
             with open(
                 os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
             ) as file:
@@ -262,12 +263,20 @@ class BaseAEATestCase(ABC):
                 os.path.join(path_to_manually_created_aea, "aea-config.yaml"), "r"
             ) as file:
                 content2 = yaml.full_load(file)
-            diff_count = 0
-            for key, value in content1.items():
-                if content2[key] != value:
-                    diff_count += 1
-            # allow diff in aea_version, author, description and version
-            return diff_count <= 4
+            content1c = copy.deepcopy(content1)
+            for key, value in content1c.items():
+                if content2[key] == value:
+                    content1.pop(key)
+                    content2.pop(key)
+            allowed_diff_keys = ["aea_version", "author", "description", "version"]
+            result = all([key in allowed_diff_keys for key in content1.keys()])
+            result = result and all(
+                [key in allowed_diff_keys for key in content2.keys()]
+            )
+            if result:
+                return result, {}, {}
+            else:
+                return result, content1, content2
 
         path_to_manually_created_aea = os.path.join(cls.t, agent_name)
         new_cwd = os.path.join(cls.t, "fetch_dir")
@@ -279,10 +288,15 @@ class BaseAEATestCase(ABC):
             cls.run_cli_command("fetch", "--local", public_id, "--alias", agent_name)
         comp = dircmp(path_to_manually_created_aea, path_to_fetched_aea)
         file_diff = comp.diff_files
-        if is_allowed_diff_in_agent_config(
+        result, diff1, diff2 = is_allowed_diff_in_agent_config(
             path_to_fetched_aea, path_to_manually_created_aea
-        ):
+        )
+        if result:
             file_diff.remove("aea-config.yaml")  # won't match!
+        else:
+            file_diff.append(
+                "Difference in aea-config.yaml: " + str(diff1) + " vs. " + str(diff2)
+            )
         try:
             shutil.rmtree(new_cwd)
         except (OSError, IOError):

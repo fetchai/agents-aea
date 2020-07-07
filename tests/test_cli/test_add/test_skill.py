@@ -25,6 +25,8 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+from click.testing import CliRunner
+
 from jsonschema import ValidationError
 
 import pytest
@@ -39,7 +41,6 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
@@ -488,7 +489,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.6.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.7.0")
 
         contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)
@@ -496,10 +497,10 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
         assert contract_dependency_name in contracts_folders
 
 
-@pytest.mark.integration
 class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add skill from Registry command."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""

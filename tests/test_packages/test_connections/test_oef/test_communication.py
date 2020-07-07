@@ -60,7 +60,11 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from ....conftest import FETCHAI_ADDRESS_ONE, FETCHAI_ADDRESS_TWO, _make_oef_connection
+from tests.conftest import (
+    FETCHAI_ADDRESS_ONE,
+    FETCHAI_ADDRESS_TWO,
+    _make_oef_connection,
+)
 
 DEFAULT_OEF = "default_oef"
 

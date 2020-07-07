@@ -20,10 +20,11 @@
 
 from unittest import TestCase, mock
 
+from click.testing import CliRunner
+
 from aea.cli import cli
 from aea.cli.get_wealth import _try_get_wealth
 from aea.crypto.fetchai import FetchAICrypto
-from aea.test_tools.click_testing import CliRunner
 
 from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock

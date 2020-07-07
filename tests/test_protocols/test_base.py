@@ -29,7 +29,7 @@ from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.mail.base import Envelope
 from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
 
-from ..conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
+from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 
 class TestBaseSerializations:

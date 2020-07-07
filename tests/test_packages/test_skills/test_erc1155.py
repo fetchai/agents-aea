@@ -22,17 +22,18 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import (
+from tests.conftest import (
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     MAX_FLAKY_RERUNS_ETH,
 )
 
 
-@pytest.mark.ethereum
 class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
+    @pytest.mark.integration
+    @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_generic(self):
         """Run the generic skills sequence."""
@@ -84,6 +85,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         # add packages for agent two
+        setting_path = "agent.ledger_apis"
         self.set_agent_context(client_aea_name)
         self.force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.5.0")
@@ -92,10 +94,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.set_config("agent.default_ledger", "ethereum")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.6.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.7.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.7.0", client_aea_name
+            "fetchai/erc1155_client:0.8.0", client_aea_name
         )
         assert (
             diff == []
@@ -113,7 +115,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
 
         # run agents
         self.set_agent_context(deploy_aea_name)
-        deploy_aea_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        deploy_aea_process = self.run_agent()
 
         check_strings = (
             "starting balance on ethereum ledger=",
@@ -123,7 +125,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             "sending transaction to ledger.",
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
-            "transaction was successfully settled. Transaction receipt="
+            "transaction was successfully settled. Transaction receipt=",
             "Requesting create batch transaction...",
             "Requesting mint batch transaction...",
         )
@@ -135,7 +137,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
 
         self.set_agent_context(client_aea_name)
-        client_aea_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        client_aea_process = self.run_agent()
 
         check_strings = (
             "Sending PROPOSE to agent=",

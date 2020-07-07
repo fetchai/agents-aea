@@ -24,7 +24,7 @@ import shutil
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ...conftest import ROOT_DIR, skip_test_windows
+from tests.conftest import ROOT_DIR, skip_test_windows
 
 
 class TestGymSkill(AEATestCaseEmpty):

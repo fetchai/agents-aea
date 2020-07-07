@@ -28,7 +28,7 @@ import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
 
 seller_strategy_replacement = """models:
   default_dialogues:
@@ -125,7 +125,6 @@ ORM_SELLER_STRATEGY_PATH = Path(
 class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @pytest.mark.unstable
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""
@@ -207,7 +206,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=180, is_terminating=False
+            seller_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

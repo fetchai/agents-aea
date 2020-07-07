@@ -23,7 +23,7 @@ aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 ``` bash
-aea fetch fetchai/erc1155_client:0.7.0
+aea fetch fetchai/erc1155_client:0.8.0
 cd erc1155_client
 aea install
 ```
@@ -32,7 +32,7 @@ aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/oef:0.5.0
 aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/erc1155_client:0.6.0
+aea add skill fetchai/erc1155_client:0.7.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.5.0
 ```

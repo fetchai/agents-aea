@@ -21,7 +21,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestThermometerSkill(AEATestCaseMany, UseOef):
@@ -190,7 +190,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=180, is_terminating=False
+            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

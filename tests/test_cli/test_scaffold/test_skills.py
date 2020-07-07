@@ -27,6 +27,8 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
+from click.testing import CliRunner
+
 import jsonschema
 from jsonschema import Draft4Validator, ValidationError
 
@@ -36,9 +38,8 @@ from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
-from aea.test_tools.click_testing import CliRunner
 
-from ...conftest import (
+from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,

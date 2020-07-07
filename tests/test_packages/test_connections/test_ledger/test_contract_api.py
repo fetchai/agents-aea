@@ -35,7 +35,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.ledger.contract_dispatcher import ContractApiDialogues
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 
-from ....conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
+from tests.conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
 
 
 @pytest.fixture()
@@ -52,7 +52,8 @@ async def ledger_apis_connection(request):
     await connection.disconnect()
 
 
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.mark.asyncio
 async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
@@ -94,7 +95,8 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
     assert len(response.message.raw_transaction.body["data"]) > 0
 
 
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.mark.asyncio
 async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
@@ -140,7 +142,8 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
     assert len(response.message.raw_transaction.body["data"]) > 0
 
 
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.mark.asyncio
 async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
@@ -193,7 +196,8 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
     assert type(response.message.raw_message.body) == bytes
 
 
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.mark.asyncio
 async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
