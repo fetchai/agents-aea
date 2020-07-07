@@ -341,20 +341,31 @@ agent_config_files = [
 ]
 
 
+def only_windows(fn: Callable) -> Callable:
+    """
+    Decorate a pytest method to run a test only in a case we are on Windows.
+
+    :return: decorated method.
+    """
+    return action_for_platform("Windows", skip=False)(fn)
+
+
 def skip_test_windows(fn: Callable) -> Callable:
     """
     Decorate a pytest method to skip a test in a case we are on Windows.
 
     :return: decorated method.
     """
-    return skip_for_platform("Windows")(fn)
+    return action_for_platform("Windows", skip=True)(fn)
 
 
-def skip_for_platform(platform_name: str) -> Callable:
+def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     """
     Decorate a pytest class or method to skip on certain platform.
 
     :param platform_name: check `platform.system()` for available platforms.
+    :param skip: if True, the test will be skipped;
+      if False, the test will be run ONLY on the chosen platform.
 
     :return: decorated object
     """
@@ -364,7 +375,7 @@ def skip_for_platform(platform_name: str) -> Callable:
             return pytest_func
 
         def skip(*args, **kwargs):
-            pytest.skip("Skipping the test since it doesn't work on Windows.")
+            pytest.skip(f"Skipping the test since it doesn't work on {platform_name}.")
 
         if isinstance(pytest_func, type):
             return type(
@@ -375,7 +386,7 @@ def skip_for_platform(platform_name: str) -> Callable:
 
         @wraps(pytest_func)
         def wrapper(*args, **kwargs):  # type: ignore
-            pytest.skip("Skipping the test since it doesn't work on Windows.")
+            pytest.skip(f"Skipping the test since it doesn't work on {platform_name}.")
 
         return wrapper
 
