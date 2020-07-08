@@ -19,6 +19,8 @@
 
 """This module contains tests for aea.crypto.registries"""
 
+from typing import Optional
+
 from aea.crypto.base import Crypto
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 from aea.crypto.registries import make_crypto, make_ledger_api
@@ -35,6 +37,36 @@ def test_make_ledger_api_fetchai_positive():
     """Test make_crypto for fetchai."""
     ledger_api = make_ledger_api("fetchai", **{"network": "testnet"})
     assert isinstance(ledger_api, FetchAIApi)
+
+
+class Something:
+    """Some class."""
+
+    class_key = None  # type: Optional[str]
+
+    def __init__(self, **kwargs):
+        """Initialize something."""
+        self.kwargs = kwargs
+
+
+def test_register_make_with_class_kwargs():
+    """Test registry make with class kwargs."""
+    reg = Registry()
+    id_ = "id"
+    kwargs = {"key": "value"}
+    class_kwargs = {"class_key": "class_value"}
+    reg.register(
+        id_=id_,
+        entry_point="tests.test_crypto.test_registries:Something",
+        class_kwargs=class_kwargs,
+        **kwargs
+    )
+    assert Something.class_key is None
+    item = reg.make(id_)
+    assert item is not None
+    assert type(item) == Something
+    assert item.kwargs == kwargs
+    assert item.class_key == "class_value"
 
 
 def test_itemid():

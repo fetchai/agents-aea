@@ -122,3 +122,4 @@ output_file
 !packages/fetchai/contracts/erc1155/build
 packages/fetchai/connections/p2p_libp2p/libp2p_node
 
+!tests/data/dummy_contract/build
