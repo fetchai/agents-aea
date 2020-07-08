@@ -32,6 +32,8 @@ import (
 const (
 	DefaultFetchAIKey   = "3916b301d1a0ec09de1db4833b0c945531004290caee0b4a5d7b554caa39dbf1"
 	DefaultAgentAddress = "2TsHmM9JXeFgK928LYc6HV96gi78pBv6sWprJAXaS6ydg9MTC6"
+
+	EnvelopeDeliveryTimeout = 10 * time.Second
 )
 
 // TestNew dht client peer
@@ -108,7 +110,7 @@ func TestRouteEnvelopeToPeerAgent(t *testing.T) {
 		t.Error("Failed to Route envelope to DHTPeer agent:", err)
 	}
 
-	timeout := time.After(3 * time.Second)
+	timeout := time.After(EnvelopeDeliveryTimeout)
 	select {
 	case envel := <-rxEnvelopesPeer:
 		t.Log("DHT received envelope", envel)
