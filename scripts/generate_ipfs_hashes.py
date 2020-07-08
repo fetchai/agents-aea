@@ -116,6 +116,7 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
     TEST_PACKAGES = [
         (PackageType.AGENT, TEST_PATH / "dummy_aea"),
         (PackageType.CONNECTION, TEST_PATH / "dummy_connection"),
+        (PackageType.CONTRACT, TEST_PATH / "dummy_contract"),
         (PackageType.SKILL, TEST_PATH / "dependencies_skill"),
         (PackageType.SKILL, TEST_PATH / "exception_skill"),
         (PackageType.SKILL, TEST_PATH / "dummy_skill"),

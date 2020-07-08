@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the scaffold contract definition."""
+"""This module contains a dummy contract for an AEA."""
 
 from aea.contracts.ethereum import Contract
+from aea.crypto.base import LedgerApi
 
 
-class MyScaffoldContract(Contract):
-    """
-    The scaffold contract class for an ethereum based smart contract.
+class DummyContract(Contract):
+    """The some contract class."""
 
-    For non-ethereum based contracts import `from aea.contracts.base import Contract` and extend accordingly.
-    """
+    @classmethod
+    def some_method(cls, ledger_api: LedgerApi, contract_address: str) -> None:
+        pass
