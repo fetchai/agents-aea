@@ -11,11 +11,10 @@ fingerprint:
   aea/api.go: QmW5fUpVZmV3pxgoakm3RvsvCGC6FwT2XprcqXHM8rBXP5
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
-  connection.py: QmSxxjTeuWQoZtZrjN6bo8tmT61yxSBrRrJo9FLCgbUvKt
+  connection.py: QmXZER3iiX8wzUFB6eZJRtZSX9JMWU7VsmSfrqyMe21HBv
   dht/dhtclient/dhtclient.go: QmNnU1pVCUtj8zJ1Pz5eMk9sznsjPFSJ9qDkzbrNwzEecV
   dht/dhtclient/dhtclient_test.go: QmdpspLKA9HXc56HVMcP36ikBpHrztWHJ6wWqoU6UnR6BM
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
-  dht/dhtnetwork_test.go: QmcrLh1ebq8x4MQQjSb3isHb268pnRazT147gpN6cz9rbY
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtpeer/dhtpeer.go: QmZyKodcR832YVR3MWxm71G7Bfqx9gwkPQSiFdJx53TrzV

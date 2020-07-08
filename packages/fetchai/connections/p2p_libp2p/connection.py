@@ -50,6 +50,8 @@ LIBP2P_NODE_ENV_FILE = ".env.libp2p"
 
 LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
+CONNECTION_TIMEOUT_FACTOR = 1.6
+
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
@@ -246,7 +248,8 @@ class Libp2pNode:
         self.aea_to_libp2p_path = "{}/{}-aea_to_libp2p".format(tmp_dir, self.pub[:5])
         self._libp2p_to_aea = -1
         self._aea_to_libp2p = -1
-        self._connection_attempts = 30
+        self._connection_attempts = 10
+        self._connection_timeout = 1.0
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
@@ -377,7 +380,9 @@ class Libp2pNode:
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                await asyncio.sleep(2)
+                logger.debug("Sleeping for {}...".format(self._connection_timeout))
+                await asyncio.sleep(self._connection_timeout)
+                self._connection_timeout *= CONNECTION_TIMEOUT_FACTOR
                 await self._connect()
                 return
             else:
