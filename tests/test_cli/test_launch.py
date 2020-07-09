@@ -28,6 +28,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator, List, Optional
 
+from click.testing import CliRunner
+
 from pexpect.exceptions import EOF  # type: ignore
 
 import pytest
@@ -36,11 +38,9 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.test_tools.click_testing import CliRunner
 
 from tests.common.pexpect_popen import PexpectWrapper
-
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, MAX_FLAKY_RERUNS
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class TestLaunch(BaseLaunchTestCase):
             )
 
 
-@pytest.mark.unstable
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
     """Test aea launch when there is a failing agent.."""
 

@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="fetch.aea.ContractApi",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x12\x63ontract_api.proto\x12\x15\x66\x65tch.aea.ContractApi"\xec\x0c\n\x12\x43ontractApiMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12M\n\x05\x65rror\x18\x05 \x01(\x0b\x32<.fetch.aea.ContractApi.ContractApiMessage.Error_PerformativeH\x00\x12o\n\x16get_deploy_transaction\x18\x06 \x01(\x0b\x32M.fetch.aea.ContractApi.ContractApiMessage.Get_Deploy_Transaction_PerformativeH\x00\x12i\n\x13get_raw_transaction\x18\x07 \x01(\x0b\x32J.fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12U\n\tget_state\x18\x08 \x01(\x0b\x32@.fetch.aea.ContractApi.ContractApiMessage.Get_State_PerformativeH\x00\x12\x61\n\x0fraw_transaction\x18\t \x01(\x0b\x32\x46.fetch.aea.ContractApi.ContractApiMessage.Raw_Transaction_PerformativeH\x00\x12M\n\x05state\x18\n \x01(\x0b\x32<.fetch.aea.ContractApi.ContractApiMessage.State_PerformativeH\x00\x1a\x18\n\x06Kwargs\x12\x0e\n\x06kwargs\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\xa1\x01\n#Get_Deploy_Transaction_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x13\n\x0b\x63ontract_id\x18\x02 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x03 \x01(\t\x12@\n\x06kwargs\x18\x04 \x01(\x0b\x32\x30.fetch.aea.ContractApi.ContractApiMessage.Kwargs\x1a\xb8\x01\n Get_Raw_Transaction_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x13\n\x0b\x63ontract_id\x18\x02 \x01(\t\x12\x18\n\x10\x63ontract_address\x18\x03 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x04 \x01(\t\x12@\n\x06kwargs\x18\x05 \x01(\x0b\x32\x30.fetch.aea.ContractApi.ContractApiMessage.Kwargs\x1a\xae\x01\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x13\n\x0b\x63ontract_id\x18\x02 \x01(\t\x12\x18\n\x10\x63ontract_address\x18\x03 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x04 \x01(\t\x12@\n\x06kwargs\x18\x05 \x01(\x0b\x32\x30.fetch.aea.ContractApi.ContractApiMessage.Kwargs\x1aT\n\x12State_Performative\x12>\n\x05state\x18\x01 \x01(\x0b\x32/.fetch.aea.ContractApi.ContractApiMessage.State\x1aq\n\x1cRaw_Transaction_Performative\x12Q\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32\x38.fetch.aea.ContractApi.ContractApiMessage.RawTransaction\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x13\n\x0b\x63ode_is_set\x18\x02 \x01(\x08\x12\x0f\n\x07message\x18\x03 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x04 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x12\x63ontract_api.proto\x12\x15\x66\x65tch.aea.ContractApi"\xeb\x10\n\x12\x43ontractApiMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12M\n\x05\x65rror\x18\x05 \x01(\x0b\x32<.fetch.aea.ContractApi.ContractApiMessage.Error_PerformativeH\x00\x12o\n\x16get_deploy_transaction\x18\x06 \x01(\x0b\x32M.fetch.aea.ContractApi.ContractApiMessage.Get_Deploy_Transaction_PerformativeH\x00\x12\x61\n\x0fget_raw_message\x18\x07 \x01(\x0b\x32\x46.fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_PerformativeH\x00\x12i\n\x13get_raw_transaction\x18\x08 \x01(\x0b\x32J.fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12U\n\tget_state\x18\t \x01(\x0b\x32@.fetch.aea.ContractApi.ContractApiMessage.Get_State_PerformativeH\x00\x12Y\n\x0braw_message\x18\n \x01(\x0b\x32\x42.fetch.aea.ContractApi.ContractApiMessage.Raw_Message_PerformativeH\x00\x12\x61\n\x0fraw_transaction\x18\x0b \x01(\x0b\x32\x46.fetch.aea.ContractApi.ContractApiMessage.Raw_Transaction_PerformativeH\x00\x12M\n\x05state\x18\x0c \x01(\x0b\x32<.fetch.aea.ContractApi.ContractApiMessage.State_PerformativeH\x00\x1a\x18\n\x06Kwargs\x12\x0e\n\x06kwargs\x18\x01 \x01(\x0c\x1a!\n\nRawMessage\x12\x13\n\x0braw_message\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\xa1\x01\n#Get_Deploy_Transaction_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x13\n\x0b\x63ontract_id\x18\x02 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x03 \x01(\t\x12@\n\x06kwargs\x18\x04 \x01(\x0b\x32\x30.fetch.aea.ContractApi.ContractApiMessage.Kwargs\x1a\xb8\x01\n Get_Raw_Transaction_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x13\n\x0b\x63ontract_id\x18\x02 \x01(\t\x12\x18\n\x10\x63ontract_address\x18\x03 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x04 \x01(\t\x12@\n\x06kwargs\x18\x05 \x01(\x0b\x32\x30.fetch.aea.ContractApi.ContractApiMessage.Kwargs\x1a\xb4\x01\n\x1cGet_Raw_Message_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x13\n\x0b\x63ontract_id\x18\x02 \x01(\t\x12\x18\n\x10\x63ontract_address\x18\x03 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x04 \x01(\t\x12@\n\x06kwargs\x18\x05 \x01(\x0b\x32\x30.fetch.aea.ContractApi.ContractApiMessage.Kwargs\x1a\xae\x01\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x13\n\x0b\x63ontract_id\x18\x02 \x01(\t\x12\x18\n\x10\x63ontract_address\x18\x03 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x04 \x01(\t\x12@\n\x06kwargs\x18\x05 \x01(\x0b\x32\x30.fetch.aea.ContractApi.ContractApiMessage.Kwargs\x1aT\n\x12State_Performative\x12>\n\x05state\x18\x01 \x01(\x0b\x32/.fetch.aea.ContractApi.ContractApiMessage.State\x1aq\n\x1cRaw_Transaction_Performative\x12Q\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32\x38.fetch.aea.ContractApi.ContractApiMessage.RawTransaction\x1a\x65\n\x18Raw_Message_Performative\x12I\n\x0braw_message\x18\x01 \x01(\x0b\x32\x34.fetch.aea.ContractApi.ContractApiMessage.RawMessage\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x13\n\x0b\x63ode_is_set\x18\x02 \x01(\x08\x12\x0f\n\x07message\x18\x03 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x04 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -55,8 +55,46 @@ _CONTRACTAPIMESSAGE_KWARGS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=742,
-    serialized_end=766,
+    serialized_start=932,
+    serialized_end=956,
+)
+
+_CONTRACTAPIMESSAGE_RAWMESSAGE = _descriptor.Descriptor(
+    name="RawMessage",
+    full_name="fetch.aea.ContractApi.ContractApiMessage.RawMessage",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="raw_message",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.RawMessage.raw_message",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=958,
+    serialized_end=991,
 )
 
 _CONTRACTAPIMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
@@ -93,8 +131,8 @@ _CONTRACTAPIMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=768,
-    serialized_end=809,
+    serialized_start=993,
+    serialized_end=1034,
 )
 
 _CONTRACTAPIMESSAGE_STATE = _descriptor.Descriptor(
@@ -131,8 +169,8 @@ _CONTRACTAPIMESSAGE_STATE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=811,
-    serialized_end=833,
+    serialized_start=1036,
+    serialized_end=1058,
 )
 
 _CONTRACTAPIMESSAGE_GET_DEPLOY_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
@@ -223,8 +261,8 @@ _CONTRACTAPIMESSAGE_GET_DEPLOY_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=836,
-    serialized_end=997,
+    serialized_start=1061,
+    serialized_end=1222,
 )
 
 _CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
@@ -333,8 +371,118 @@ _CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1000,
-    serialized_end=1184,
+    serialized_start=1225,
+    serialized_end=1409,
+)
+
+_CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
+    name="Get_Raw_Message_Performative",
+    full_name="fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_Performative",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="ledger_id",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_Performative.ledger_id",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="contract_id",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_Performative.contract_id",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="contract_address",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_Performative.contract_address",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="callable",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_Performative.callable",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="kwargs",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_Performative.kwargs",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1412,
+    serialized_end=1592,
 )
 
 _CONTRACTAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
@@ -443,8 +591,8 @@ _CONTRACTAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1187,
-    serialized_end=1361,
+    serialized_start=1595,
+    serialized_end=1769,
 )
 
 _CONTRACTAPIMESSAGE_STATE_PERFORMATIVE = _descriptor.Descriptor(
@@ -481,8 +629,8 @@ _CONTRACTAPIMESSAGE_STATE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1363,
-    serialized_end=1447,
+    serialized_start=1771,
+    serialized_end=1855,
 )
 
 _CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
@@ -519,8 +667,46 @@ _CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1449,
-    serialized_end=1562,
+    serialized_start=1857,
+    serialized_end=1970,
+)
+
+_CONTRACTAPIMESSAGE_RAW_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
+    name="Raw_Message_Performative",
+    full_name="fetch.aea.ContractApi.ContractApiMessage.Raw_Message_Performative",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="raw_message",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.Raw_Message_Performative.raw_message",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1972,
+    serialized_end=2073,
 )
 
 _CONTRACTAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
@@ -629,8 +815,8 @@ _CONTRACTAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1564,
-    serialized_end=1674,
+    serialized_start=2075,
+    serialized_end=2185,
 )
 
 _CONTRACTAPIMESSAGE = _descriptor.Descriptor(
@@ -749,8 +935,8 @@ _CONTRACTAPIMESSAGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="get_raw_transaction",
-            full_name="fetch.aea.ContractApi.ContractApiMessage.get_raw_transaction",
+            name="get_raw_message",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.get_raw_message",
             index=6,
             number=7,
             type=11,
@@ -767,8 +953,8 @@ _CONTRACTAPIMESSAGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="get_state",
-            full_name="fetch.aea.ContractApi.ContractApiMessage.get_state",
+            name="get_raw_transaction",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.get_raw_transaction",
             index=7,
             number=8,
             type=11,
@@ -785,8 +971,8 @@ _CONTRACTAPIMESSAGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="raw_transaction",
-            full_name="fetch.aea.ContractApi.ContractApiMessage.raw_transaction",
+            name="get_state",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.get_state",
             index=8,
             number=9,
             type=11,
@@ -803,10 +989,46 @@ _CONTRACTAPIMESSAGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="state",
-            full_name="fetch.aea.ContractApi.ContractApiMessage.state",
+            name="raw_message",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.raw_message",
             index=9,
             number=10,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="raw_transaction",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.raw_transaction",
+            index=10,
+            number=11,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="state",
+            full_name="fetch.aea.ContractApi.ContractApiMessage.state",
+            index=11,
+            number=12,
             type=11,
             cpp_type=10,
             label=1,
@@ -824,13 +1046,16 @@ _CONTRACTAPIMESSAGE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[
         _CONTRACTAPIMESSAGE_KWARGS,
+        _CONTRACTAPIMESSAGE_RAWMESSAGE,
         _CONTRACTAPIMESSAGE_RAWTRANSACTION,
         _CONTRACTAPIMESSAGE_STATE,
         _CONTRACTAPIMESSAGE_GET_DEPLOY_TRANSACTION_PERFORMATIVE,
         _CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE,
+        _CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE,
         _CONTRACTAPIMESSAGE_GET_STATE_PERFORMATIVE,
         _CONTRACTAPIMESSAGE_STATE_PERFORMATIVE,
         _CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE,
+        _CONTRACTAPIMESSAGE_RAW_MESSAGE_PERFORMATIVE,
         _CONTRACTAPIMESSAGE_ERROR_PERFORMATIVE,
     ],
     enum_types=[],
@@ -848,10 +1073,11 @@ _CONTRACTAPIMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=46,
-    serialized_end=1690,
+    serialized_end=2201,
 )
 
 _CONTRACTAPIMESSAGE_KWARGS.containing_type = _CONTRACTAPIMESSAGE
+_CONTRACTAPIMESSAGE_RAWMESSAGE.containing_type = _CONTRACTAPIMESSAGE
 _CONTRACTAPIMESSAGE_RAWTRANSACTION.containing_type = _CONTRACTAPIMESSAGE
 _CONTRACTAPIMESSAGE_STATE.containing_type = _CONTRACTAPIMESSAGE
 _CONTRACTAPIMESSAGE_GET_DEPLOY_TRANSACTION_PERFORMATIVE.fields_by_name[
@@ -866,6 +1092,10 @@ _CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE.fields_by_name[
 _CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE.containing_type = (
     _CONTRACTAPIMESSAGE
 )
+_CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE.fields_by_name[
+    "kwargs"
+].message_type = _CONTRACTAPIMESSAGE_KWARGS
+_CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE.containing_type = _CONTRACTAPIMESSAGE
 _CONTRACTAPIMESSAGE_GET_STATE_PERFORMATIVE.fields_by_name[
     "kwargs"
 ].message_type = _CONTRACTAPIMESSAGE_KWARGS
@@ -878,6 +1108,10 @@ _CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE.fields_by_name[
     "raw_transaction"
 ].message_type = _CONTRACTAPIMESSAGE_RAWTRANSACTION
 _CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE.containing_type = _CONTRACTAPIMESSAGE
+_CONTRACTAPIMESSAGE_RAW_MESSAGE_PERFORMATIVE.fields_by_name[
+    "raw_message"
+].message_type = _CONTRACTAPIMESSAGE_RAWMESSAGE
+_CONTRACTAPIMESSAGE_RAW_MESSAGE_PERFORMATIVE.containing_type = _CONTRACTAPIMESSAGE
 _CONTRACTAPIMESSAGE_ERROR_PERFORMATIVE.containing_type = _CONTRACTAPIMESSAGE
 _CONTRACTAPIMESSAGE.fields_by_name[
     "error"
@@ -886,11 +1120,17 @@ _CONTRACTAPIMESSAGE.fields_by_name[
     "get_deploy_transaction"
 ].message_type = _CONTRACTAPIMESSAGE_GET_DEPLOY_TRANSACTION_PERFORMATIVE
 _CONTRACTAPIMESSAGE.fields_by_name[
+    "get_raw_message"
+].message_type = _CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE
+_CONTRACTAPIMESSAGE.fields_by_name[
     "get_raw_transaction"
 ].message_type = _CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE
 _CONTRACTAPIMESSAGE.fields_by_name[
     "get_state"
 ].message_type = _CONTRACTAPIMESSAGE_GET_STATE_PERFORMATIVE
+_CONTRACTAPIMESSAGE.fields_by_name[
+    "raw_message"
+].message_type = _CONTRACTAPIMESSAGE_RAW_MESSAGE_PERFORMATIVE
 _CONTRACTAPIMESSAGE.fields_by_name[
     "raw_transaction"
 ].message_type = _CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE
@@ -910,6 +1150,12 @@ _CONTRACTAPIMESSAGE.fields_by_name[
     "get_deploy_transaction"
 ].containing_oneof = _CONTRACTAPIMESSAGE.oneofs_by_name["performative"]
 _CONTRACTAPIMESSAGE.oneofs_by_name["performative"].fields.append(
+    _CONTRACTAPIMESSAGE.fields_by_name["get_raw_message"]
+)
+_CONTRACTAPIMESSAGE.fields_by_name[
+    "get_raw_message"
+].containing_oneof = _CONTRACTAPIMESSAGE.oneofs_by_name["performative"]
+_CONTRACTAPIMESSAGE.oneofs_by_name["performative"].fields.append(
     _CONTRACTAPIMESSAGE.fields_by_name["get_raw_transaction"]
 )
 _CONTRACTAPIMESSAGE.fields_by_name[
@@ -920,6 +1166,12 @@ _CONTRACTAPIMESSAGE.oneofs_by_name["performative"].fields.append(
 )
 _CONTRACTAPIMESSAGE.fields_by_name[
     "get_state"
+].containing_oneof = _CONTRACTAPIMESSAGE.oneofs_by_name["performative"]
+_CONTRACTAPIMESSAGE.oneofs_by_name["performative"].fields.append(
+    _CONTRACTAPIMESSAGE.fields_by_name["raw_message"]
+)
+_CONTRACTAPIMESSAGE.fields_by_name[
+    "raw_message"
 ].containing_oneof = _CONTRACTAPIMESSAGE.oneofs_by_name["performative"]
 _CONTRACTAPIMESSAGE.oneofs_by_name["performative"].fields.append(
     _CONTRACTAPIMESSAGE.fields_by_name["raw_transaction"]
@@ -947,6 +1199,15 @@ ContractApiMessage = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _CONTRACTAPIMESSAGE_KWARGS,
                 "__module__": "contract_api_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.ContractApi.ContractApiMessage.Kwargs)
+            },
+        ),
+        "RawMessage": _reflection.GeneratedProtocolMessageType(
+            "RawMessage",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _CONTRACTAPIMESSAGE_RAWMESSAGE,
+                "__module__": "contract_api_pb2"
+                # @@protoc_insertion_point(class_scope:fetch.aea.ContractApi.ContractApiMessage.RawMessage)
             },
         ),
         "RawTransaction": _reflection.GeneratedProtocolMessageType(
@@ -985,6 +1246,15 @@ ContractApiMessage = _reflection.GeneratedProtocolMessageType(
                 # @@protoc_insertion_point(class_scope:fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Transaction_Performative)
             },
         ),
+        "Get_Raw_Message_Performative": _reflection.GeneratedProtocolMessageType(
+            "Get_Raw_Message_Performative",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE,
+                "__module__": "contract_api_pb2"
+                # @@protoc_insertion_point(class_scope:fetch.aea.ContractApi.ContractApiMessage.Get_Raw_Message_Performative)
+            },
+        ),
         "Get_State_Performative": _reflection.GeneratedProtocolMessageType(
             "Get_State_Performative",
             (_message.Message,),
@@ -1012,6 +1282,15 @@ ContractApiMessage = _reflection.GeneratedProtocolMessageType(
                 # @@protoc_insertion_point(class_scope:fetch.aea.ContractApi.ContractApiMessage.Raw_Transaction_Performative)
             },
         ),
+        "Raw_Message_Performative": _reflection.GeneratedProtocolMessageType(
+            "Raw_Message_Performative",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _CONTRACTAPIMESSAGE_RAW_MESSAGE_PERFORMATIVE,
+                "__module__": "contract_api_pb2"
+                # @@protoc_insertion_point(class_scope:fetch.aea.ContractApi.ContractApiMessage.Raw_Message_Performative)
+            },
+        ),
         "Error_Performative": _reflection.GeneratedProtocolMessageType(
             "Error_Performative",
             (_message.Message,),
@@ -1028,13 +1307,16 @@ ContractApiMessage = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(ContractApiMessage)
 _sym_db.RegisterMessage(ContractApiMessage.Kwargs)
+_sym_db.RegisterMessage(ContractApiMessage.RawMessage)
 _sym_db.RegisterMessage(ContractApiMessage.RawTransaction)
 _sym_db.RegisterMessage(ContractApiMessage.State)
 _sym_db.RegisterMessage(ContractApiMessage.Get_Deploy_Transaction_Performative)
 _sym_db.RegisterMessage(ContractApiMessage.Get_Raw_Transaction_Performative)
+_sym_db.RegisterMessage(ContractApiMessage.Get_Raw_Message_Performative)
 _sym_db.RegisterMessage(ContractApiMessage.Get_State_Performative)
 _sym_db.RegisterMessage(ContractApiMessage.State_Performative)
 _sym_db.RegisterMessage(ContractApiMessage.Raw_Transaction_Performative)
+_sym_db.RegisterMessage(ContractApiMessage.Raw_Message_Performative)
 _sym_db.RegisterMessage(ContractApiMessage.Error_Performative)
 
 

@@ -18,33 +18,45 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the aea.configurations.base module."""
+from pathlib import Path
 from unittest import TestCase, mock
 
 import pytest
 
+import semver
+
 import yaml
 
+import aea
 from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
+    ComponentConfiguration,
+    ComponentId,
+    ComponentType,
     ConnectionConfig,
     ContractConfig,
+    PackageId,
+    PackageType,
     ProtocolConfig,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
     PublicId,
     SkillConfig,
     SpeechActContentConfig,
+    _check_aea_version,
+    _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
 )
 
-from ..conftest import (
+from tests.conftest import (
     AUTHOR,
     agent_config_files,
     connection_config_files,
     contract_config_files,
     protocol_config_files,
     skill_config_files,
+    skip_test_windows,
 )
 
 
@@ -322,3 +334,251 @@ class ProtocolSpecificationTestCase(TestCase):
         read_all_mock = mock.Mock(return_value=[["1", speech_act_content_config]])
         obj.speech_acts.read_all = read_all_mock
         obj._check_consistency()
+
+
+def test_package_type_plural():
+    """Test PackageType.to_plural"""
+    assert PackageType.AGENT.to_plural() == "agents"
+    assert PackageType.PROTOCOL.to_plural() == "protocols"
+    assert PackageType.CONNECTION.to_plural() == "connections"
+    assert PackageType.CONTRACT.to_plural() == "contracts"
+    assert PackageType.SKILL.to_plural() == "skills"
+
+
+def test_package_type_str():
+    """Test PackageType.__str__"""
+    assert str(PackageType.AGENT) == "agent"
+    assert str(PackageType.PROTOCOL) == "protocol"
+    assert str(PackageType.CONNECTION) == "connection"
+    assert str(PackageType.CONTRACT) == "contract"
+    assert str(PackageType.SKILL) == "skill"
+
+
+def test_component_type_str():
+    """Test ComponentType.__str__"""
+    assert str(ComponentType.PROTOCOL) == "protocol"
+    assert str(ComponentType.CONNECTION) == "connection"
+    assert str(ComponentType.CONTRACT) == "contract"
+    assert str(ComponentType.SKILL) == "skill"
+
+
+def test_configuration_ordered_json():
+    """Test configuration ordered json."""
+    configuration = ProtocolConfig("name", "author", "0.1.0")
+    configuration._key_order = ["aea_version"]
+    configuration.ordered_json
+
+
+def test_public_id_versions():
+    """Test that a public id version can be initialized with different objects."""
+    PublicId("author", "name", "0.1.0")
+    PublicId("author", "name", semver.VersionInfo(major=0, minor=1, patch=0))
+
+
+def test_public_id_invalid_version():
+    """Test the case when the version id is of an invalid type."""
+    with pytest.raises(ValueError, match="Version type not valid."):
+        PublicId("author", "name", object())
+
+
+def test_public_id_from_uri_path():
+    """Test PublicId.from_uri_path"""
+    result = PublicId.from_uri_path("author/package_name/0.1.0")
+    assert result.name == "package_name"
+    assert result.author == "author"
+    assert result.version == "0.1.0"
+
+
+def test_public_id_from_uri_path_wrong_input():
+    """Test that when a bad formatted path is passed in input of PublicId.from_uri_path
+    an exception is raised."""
+    with pytest.raises(
+        ValueError, match="Input 'bad/formatted:input' is not well formatted."
+    ):
+        PublicId.from_uri_path("bad/formatted:input")
+
+
+def test_public_id_to_uri_path():
+    """Test PublicId.to_uri_path"""
+    public_id = PublicId("author", "name", "0.1.0")
+    assert public_id.to_uri_path == "author/name/0.1.0"
+
+
+def test_pubic_id_repr():
+    """Test PublicId.__repr__"""
+    public_id = PublicId("author", "name", "0.1.0")
+    assert repr(public_id) == "<author/name:0.1.0>"
+
+
+def test_public_id_comparator_when_author_is_different():
+    """Test PublicId.__lt__ when author is different."""
+    pid1 = PublicId("author_1", "name", "0.1.0")
+    pid2 = PublicId("author_2", "name", "0.1.0")
+    with pytest.raises(
+        ValueError,
+        match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
+    ):
+        pid1 < pid2
+
+
+def test_public_id_comparator_when_name_is_different():
+    """Test PublicId.__lt__ when author is different."""
+    pid1 = PublicId("author", "name_1", "0.1.0")
+    pid2 = PublicId("author", "name_2", "0.1.0")
+    with pytest.raises(
+        ValueError,
+        match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
+    ):
+        pid1 < pid2
+
+
+def test_package_id_version():
+    """Test PackageId.version"""
+    package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    assert package_id.version == "0.1.0"
+
+
+def test_package_id_str():
+    """Test PackageId.__str__"""
+    package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    assert str(package_id) == "(protocol, author/name:0.1.0)"
+
+
+def test_package_id_lt():
+    """Test PackageId.__lt__"""
+    package_id_1 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    package_id_2 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.2.0"))
+
+    assert package_id_1 < package_id_2
+
+
+def test_component_id_prefix_import_path():
+    """Test ComponentId.prefix_import_path"""
+    component_id = ComponentId(
+        ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0")
+    )
+    assert component_id.prefix_import_path == "packages.author.protocols.name"
+
+
+def test_component_configuration_load_file_not_found():
+    """Test Component.load when a file is not found."""
+    with mock.patch(f"builtins.open", side_effect=FileNotFoundError):
+        with pytest.raises(FileNotFoundError):
+            ComponentConfiguration.load(
+                ComponentType.PROTOCOL, mock.MagicMock(spec=Path)
+            )
+
+
+def test_component_configuration_check_fingerprint_bad_directory():
+    """Test ComponentConfiguration.check_fingerprint when a bad directory is provided."""
+    config = ProtocolConfig("name", "author", "0.1.0")
+    with pytest.raises(ValueError, match="Directory .* is not valid."):
+        config.check_fingerprint(Path("non_existing_directory"))
+
+
+@skip_test_windows
+def test_component_configuration_check_fingerprint_different_fingerprints_vendor():
+    """Test ComponentConfiguration.check_fingerprint when the fingerprints differ for a vendor package."""
+    config = ProtocolConfig("name", "author", "0.1.0")
+    package_dir = Path("path", "to", "dir")
+    error_regex = (
+        f"Fingerprints for package {package_dir} do not match:\nExpected: {dict()}\nActual: {dict(foo='bar')}\n"
+        + "Vendorized projects should not be tampered with, please revert any changes to protocol author/name:0.1.0"
+    )
+
+    with pytest.raises(ValueError, match=error_regex):
+        with mock.patch(
+            "aea.configurations.base._compute_fingerprint", return_value={"foo": "bar"}
+        ):
+            _compare_fingerprints(config, package_dir, True, PackageType.PROTOCOL)
+
+
+@skip_test_windows
+def test_component_configuration_check_fingerprint_different_fingerprints_no_vendor():
+    """Test ComponentConfiguration.check_fingerprint when the fingerprints differ for a non-vendor package."""
+    config = ProtocolConfig("name", "author", "0.1.0")
+    package_dir = Path("path", "to", "dir")
+    error_regex = (
+        f"Fingerprints for package {package_dir} do not match:\nExpected: {dict()}\nActual: {dict(foo='bar')}\n"
+        + "Please fingerprint the package before continuing: 'aea fingerprint protocol author/name:0.1.0"
+    )
+
+    with pytest.raises(ValueError, match=error_regex):
+        with mock.patch(
+            "aea.configurations.base._compute_fingerprint", return_value={"foo": "bar"}
+        ):
+            _compare_fingerprints(config, package_dir, False, PackageType.PROTOCOL)
+
+
+def test_check_aea_version_when_it_fails():
+    """Test the check for the AEA version when it fails."""
+    config = ProtocolConfig("name", "author", "0.1.0", aea_version=">0.1.0")
+    with mock.patch.object(aea, "__version__", "0.1.0"):
+        with pytest.raises(
+            ValueError,
+            match="The CLI version is 0.1.0, but package author/name:0.1.0 requires version >0.1.0",
+        ):
+            _check_aea_version(config)
+
+
+def test_connection_config_with_connection_id():
+    """Test construction of ConnectionConfig with connection id."""
+    ConnectionConfig(connection_id=PublicId("name", "author", "0.1.0"))
+
+
+def test_agent_config_package_dependencies():
+    """Test agent config package dependencies."""
+    agent_config = AgentConfig("name", "author")
+    assert agent_config.package_dependencies == set()
+
+    pid = PublicId("author", "name", "0.1.0")
+    agent_config.protocols.add(pid)
+    agent_config.connections.add(pid)
+    agent_config.contracts.add(pid)
+    agent_config.skills.add(pid)
+
+    assert agent_config.package_dependencies == {
+        PackageId(PackageType.PROTOCOL, pid),
+        PackageId(PackageType.CONNECTION, pid),
+        PackageId(PackageType.CONTRACT, pid),
+        PackageId(PackageType.SKILL, pid),
+    }
+
+
+def test_agent_config_to_json_with_optional_configurations():
+    """Test agent config to json with optional configurations."""
+    agent_config = AgentConfig(
+        "name",
+        "author",
+        timeout=0.1,
+        execution_timeout=1.0,
+        max_reactions=100,
+        decision_maker_handler=dict(dotted_path="", file_path=""),
+        skill_exception_policy="propagate",
+        default_routing={"author/name:0.1.0": "author/name:0.1.0"},
+        loop_mode="sync",
+        runtime_mode="async",
+    )
+    agent_config.default_connection = "author/name:0.1.0"
+    agent_config.default_ledger = "fetchai"
+    agent_config.json
+
+
+def test_protocol_specification_attributes():
+    protocol_specification = ProtocolSpecification("name", "author", "0.1.0")
+
+    # test getter and setter for 'protobuf_snippets'
+    assert protocol_specification.protobuf_snippets == {}
+    protocol_specification.protobuf_snippets = {"a": 1}
+    assert protocol_specification.protobuf_snippets == {"a": 1}
+
+    # test getter and setter for 'dialogue_config'
+    assert protocol_specification.dialogue_config == {}
+    protocol_specification.dialogue_config = {"a": 1}
+    assert protocol_specification.dialogue_config == {"a": 1}
+
+
+def test_contract_config_component_type():
+    """Test ContractConfig.component_type"""
+    config = ContractConfig("name", "author", "0.1.0")
+    assert config.component_type == ComponentType.CONTRACT

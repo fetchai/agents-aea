@@ -24,6 +24,8 @@ import tempfile
 import time
 from pathlib import Path
 
+from click.testing import CliRunner
+
 import pytest
 
 import yaml
@@ -32,7 +34,6 @@ from aea.cli.core import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.helpers.base import cd
 from aea.launcher import AEALauncher
-from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import CLI_LOG_OPTION
 
 

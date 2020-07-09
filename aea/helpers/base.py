@@ -295,7 +295,6 @@ def try_decorator(error_message: str, default_return=None, logger_method="error"
             try:
                 return fn(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
-                logger.exception(e)
                 if error_message:
                     log = get_logger_method(fn, logger_method)
                     log(error_message.format(e))

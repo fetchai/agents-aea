@@ -31,7 +31,7 @@ from aea.protocols.default.message import DefaultMessage
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
-from ....conftest import _make_local_connection
+from tests.conftest import _make_local_connection
 
 
 def test_connection():

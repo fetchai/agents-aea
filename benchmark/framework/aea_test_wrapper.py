@@ -216,14 +216,16 @@ class AEATestWrapper:
         """Contenxt manager enter."""
         self.start_loop()
 
-    def __exit__(self, exc_type=None, exc=None, traceback=None) -> None:
+    def __exit__(  # pylint: disable=useless-return
+        self, exc_type=None, exc=None, traceback=None
+    ) -> None:
         """
         Context manager exit, stop agent.
 
         :return: None
         """
         self.stop_loop()
-        return None  # pylint: disable=useless-return
+        return None
 
     def start_loop(self) -> None:
         """

@@ -81,7 +81,8 @@ async def ledger_apis_connection(request):
     await connection.disconnect()
 
 
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.mark.asyncio
 @ledger_ids
 async def test_get_balance(
@@ -126,6 +127,7 @@ async def test_get_balance(
 
 
 @pytest.mark.integration
+@pytest.mark.ledger
 @pytest.mark.asyncio
 async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connection):
     """Test send signed transaction with Ethereum APIs."""

@@ -28,6 +28,9 @@ from aea.protocols.base import Message
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs as CustomKwargs
 from packages.fetchai.protocols.contract_api.custom_types import (
+    RawMessage as CustomRawMessage,
+)
+from packages.fetchai.protocols.contract_api.custom_types import (
     RawTransaction as CustomRawTransaction,
 )
 from packages.fetchai.protocols.contract_api.custom_types import State as CustomState
@@ -44,6 +47,8 @@ class ContractApiMessage(Message):
 
     Kwargs = CustomKwargs
 
+    RawMessage = CustomRawMessage
+
     RawTransaction = CustomRawTransaction
 
     State = CustomState
@@ -53,8 +58,10 @@ class ContractApiMessage(Message):
 
         ERROR = "error"
         GET_DEPLOY_TRANSACTION = "get_deploy_transaction"
+        GET_RAW_MESSAGE = "get_raw_message"
         GET_RAW_TRANSACTION = "get_raw_transaction"
         GET_STATE = "get_state"
+        RAW_MESSAGE = "raw_message"
         RAW_TRANSACTION = "raw_transaction"
         STATE = "state"
 
@@ -88,8 +95,10 @@ class ContractApiMessage(Message):
         self._performatives = {
             "error",
             "get_deploy_transaction",
+            "get_raw_message",
             "get_raw_transaction",
             "get_state",
+            "raw_message",
             "raw_transaction",
             "state",
         }
@@ -168,6 +177,12 @@ class ContractApiMessage(Message):
     def message(self) -> Optional[str]:
         """Get the 'message' content from the message."""
         return cast(Optional[str], self.get("message"))
+
+    @property
+    def raw_message(self) -> CustomRawMessage:
+        """Get the 'raw_message' content from the message."""
+        assert self.is_set("raw_message"), "'raw_message' content is not set."
+        return cast(CustomRawMessage, self.get("raw_message"))
 
     @property
     def raw_transaction(self) -> CustomRawTransaction:
@@ -275,6 +290,33 @@ class ContractApiMessage(Message):
                 ), "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
                     type(self.kwargs)
                 )
+            elif self.performative == ContractApiMessage.Performative.GET_RAW_MESSAGE:
+                expected_nb_of_contents = 5
+                assert (
+                    type(self.ledger_id) == str
+                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.ledger_id)
+                )
+                assert (
+                    type(self.contract_id) == str
+                ), "Invalid type for content 'contract_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.contract_id)
+                )
+                assert (
+                    type(self.contract_address) == str
+                ), "Invalid type for content 'contract_address'. Expected 'str'. Found '{}'.".format(
+                    type(self.contract_address)
+                )
+                assert (
+                    type(self.callable) == str
+                ), "Invalid type for content 'callable'. Expected 'str'. Found '{}'.".format(
+                    type(self.callable)
+                )
+                assert (
+                    type(self.kwargs) == CustomKwargs
+                ), "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
+                    type(self.kwargs)
+                )
             elif self.performative == ContractApiMessage.Performative.GET_STATE:
                 expected_nb_of_contents = 5
                 assert (
@@ -315,6 +357,13 @@ class ContractApiMessage(Message):
                     type(self.raw_transaction) == CustomRawTransaction
                 ), "Invalid type for content 'raw_transaction'. Expected 'RawTransaction'. Found '{}'.".format(
                     type(self.raw_transaction)
+                )
+            elif self.performative == ContractApiMessage.Performative.RAW_MESSAGE:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.raw_message) == CustomRawMessage
+                ), "Invalid type for content 'raw_message'. Expected 'RawMessage'. Found '{}'.".format(
+                    type(self.raw_message)
                 )
             elif self.performative == ContractApiMessage.Performative.ERROR:
                 expected_nb_of_contents = 1

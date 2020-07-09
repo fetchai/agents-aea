@@ -34,7 +34,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 
-from ....conftest import (
+from tests.conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     get_host,
     get_unused_tcp_port,

@@ -25,6 +25,8 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from jsonschema import ValidationError
 
 import pytest
@@ -34,7 +36,6 @@ import yaml
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
-from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
@@ -475,11 +476,10 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
             pass
 
 
-@pytest.mark.integration
-@pytest.mark.unstable
 class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add connection from Registry command."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""

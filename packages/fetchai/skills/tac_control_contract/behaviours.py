@@ -339,7 +339,7 @@ class TACBehaviour(SimpleBehaviour):
         # )
         return None  # type: ignore
 
-    def _get_mint_goods_and_currency_tx_msg(  # pylint: disable=no-self-use
+    def _get_mint_goods_and_currency_tx_msg(  # pylint: disable=no-self-use,useless-return
         self, agent_state: AgentState, ledger_api: LedgerApi, contract: ERC1155Contract,
     ) -> SigningMessage:
         token_ids = []  # type: List[int]

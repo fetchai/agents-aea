@@ -26,6 +26,7 @@ from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.contract_api import contract_api_pb2
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
+from packages.fetchai.protocols.contract_api.custom_types import RawMessage
 from packages.fetchai.protocols.contract_api.custom_types import RawTransaction
 from packages.fetchai.protocols.contract_api.custom_types import State
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -75,6 +76,19 @@ class ContractApiSerializer(Serializer):
             kwargs = msg.kwargs
             Kwargs.encode(performative.kwargs, kwargs)
             contract_api_msg.get_raw_transaction.CopyFrom(performative)
+        elif performative_id == ContractApiMessage.Performative.GET_RAW_MESSAGE:
+            performative = contract_api_pb2.ContractApiMessage.Get_Raw_Message_Performative()  # type: ignore
+            ledger_id = msg.ledger_id
+            performative.ledger_id = ledger_id
+            contract_id = msg.contract_id
+            performative.contract_id = contract_id
+            contract_address = msg.contract_address
+            performative.contract_address = contract_address
+            callable = msg.callable
+            performative.callable = callable
+            kwargs = msg.kwargs
+            Kwargs.encode(performative.kwargs, kwargs)
+            contract_api_msg.get_raw_message.CopyFrom(performative)
         elif performative_id == ContractApiMessage.Performative.GET_STATE:
             performative = contract_api_pb2.ContractApiMessage.Get_State_Performative()  # type: ignore
             ledger_id = msg.ledger_id
@@ -98,6 +112,11 @@ class ContractApiSerializer(Serializer):
             raw_transaction = msg.raw_transaction
             RawTransaction.encode(performative.raw_transaction, raw_transaction)
             contract_api_msg.raw_transaction.CopyFrom(performative)
+        elif performative_id == ContractApiMessage.Performative.RAW_MESSAGE:
+            performative = contract_api_pb2.ContractApiMessage.Raw_Message_Performative()  # type: ignore
+            raw_message = msg.raw_message
+            RawMessage.encode(performative.raw_message, raw_message)
+            contract_api_msg.raw_message.CopyFrom(performative)
         elif performative_id == ContractApiMessage.Performative.ERROR:
             performative = contract_api_pb2.ContractApiMessage.Error_Performative()  # type: ignore
             if msg.is_set("code"):
@@ -159,6 +178,18 @@ class ContractApiSerializer(Serializer):
             pb2_kwargs = contract_api_pb.get_raw_transaction.kwargs
             kwargs = Kwargs.decode(pb2_kwargs)
             performative_content["kwargs"] = kwargs
+        elif performative_id == ContractApiMessage.Performative.GET_RAW_MESSAGE:
+            ledger_id = contract_api_pb.get_raw_message.ledger_id
+            performative_content["ledger_id"] = ledger_id
+            contract_id = contract_api_pb.get_raw_message.contract_id
+            performative_content["contract_id"] = contract_id
+            contract_address = contract_api_pb.get_raw_message.contract_address
+            performative_content["contract_address"] = contract_address
+            callable = contract_api_pb.get_raw_message.callable
+            performative_content["callable"] = callable
+            pb2_kwargs = contract_api_pb.get_raw_message.kwargs
+            kwargs = Kwargs.decode(pb2_kwargs)
+            performative_content["kwargs"] = kwargs
         elif performative_id == ContractApiMessage.Performative.GET_STATE:
             ledger_id = contract_api_pb.get_state.ledger_id
             performative_content["ledger_id"] = ledger_id
@@ -179,6 +210,10 @@ class ContractApiSerializer(Serializer):
             pb2_raw_transaction = contract_api_pb.raw_transaction.raw_transaction
             raw_transaction = RawTransaction.decode(pb2_raw_transaction)
             performative_content["raw_transaction"] = raw_transaction
+        elif performative_id == ContractApiMessage.Performative.RAW_MESSAGE:
+            pb2_raw_message = contract_api_pb.raw_message.raw_message
+            raw_message = RawMessage.decode(pb2_raw_message)
+            performative_content["raw_message"] = raw_message
         elif performative_id == ContractApiMessage.Performative.ERROR:
             if contract_api_pb.error.code_is_set:
                 code = contract_api_pb.error.code

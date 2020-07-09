@@ -84,7 +84,9 @@ class Component(ABC):
     @property
     def configuration(self) -> ComponentConfiguration:
         """Get the component configuration."""
-        assert self._configuration is not None, "The component is not associated with "
+        assert (
+            self._configuration is not None
+        ), "The component is not associated with a configuration."
         return self._configuration
 
     @property

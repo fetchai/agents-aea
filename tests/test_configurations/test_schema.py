@@ -18,13 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the JSON schemas of the configuration files."""
-
+import itertools
 import json
 import os
+from itertools import zip_longest
 from pathlib import Path
 
 import jsonschema
-from jsonschema import Draft4Validator, validate  # type: ignore
+from jsonschema import Draft4Validator  # type: ignore
 
 import pytest
 
@@ -32,17 +33,20 @@ import yaml
 
 from aea.configurations.loader import make_jsonschema_base_uri
 
-from ..conftest import (
+from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CONFIGURATION_SCHEMA_DIR,
     CONNECTION_CONFIGURATION_SCHEMA,
-    CUR_PATH,
+    CONTRACT_CONFIGURATION_SCHEMA,
     PROTOCOL_CONFIGURATION_SCHEMA,
+    PROTOCOL_SPEC_CONFIGURATION_SCHEMA,
     ROOT_DIR,
     SKILL_CONFIGURATION_SCHEMA,
     agent_config_files,
     connection_config_files,
+    contract_config_files,
     protocol_config_files,
+    protocol_specification_files,
     skill_config_files,
 )
 
@@ -115,93 +119,29 @@ def test_definitions_schema_is_valid_wrt_draft_04():
     Draft4Validator.check_schema(definitions_config_schema)
 
 
-def test_validate_agent_config():
-    """Test that the validation of the agent configuration file works correctly."""
-    agent_config_file = yaml.safe_load(
-        open(os.path.join(CUR_PATH, "data", "aea-config.example.yaml"))
-    )
-    agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+@pytest.mark.parametrize(
+    "schema_file_path, config_file_path",
+    itertools.chain.from_iterable(
+        [
+            zip_longest([], files, fillvalue=schema)
+            for files, schema in [
+                (agent_config_files, AGENT_CONFIGURATION_SCHEMA),
+                (protocol_config_files, PROTOCOL_CONFIGURATION_SCHEMA),
+                (contract_config_files, CONTRACT_CONFIGURATION_SCHEMA),
+                (connection_config_files, CONNECTION_CONFIGURATION_SCHEMA),
+                (skill_config_files, SKILL_CONFIGURATION_SCHEMA),
+                (protocol_specification_files, PROTOCOL_SPEC_CONFIGURATION_SCHEMA),
+            ]
+        ]
+    ),
+)
+def test_config_validation(schema_file_path, config_file_path):
+    """Test configuration validation."""
+    # TODO a bit inefficient to load each schema everytime; consider making the validators as fixtures.
+    schema = json.load(open(schema_file_path))
     resolver = jsonschema.RefResolver(
-        make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR)), agent_config_schema
+        make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()), schema,
     )
-    validate(instance=agent_config_file, schema=agent_config_schema, resolver=resolver)
-
-
-class TestAgentSchema:
-    """Test that the agent configuration validation works."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver(
-            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
-            cls.schema,
-        )
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
-    @pytest.mark.parametrize("agent_path", agent_config_files)
-    def test_validate_agent_config(self, agent_path):
-        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        protocol_config_file = yaml.safe_load(open(agent_path))
-        self.validator.validate(instance=protocol_config_file)
-
-
-class TestProtocolsSchema:
-    """Test that the protocol configuration files provided by the framework are compliant to the schema."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver(
-            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
-            cls.schema,
-        )
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
-    @pytest.mark.parametrize("protocol_path", protocol_config_files)
-    def test_validate_protocol_config(self, protocol_path):
-        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        protocol_config_file = yaml.safe_load(open(protocol_path))
-        self.validator.validate(instance=protocol_config_file)
-
-
-class TestConnectionsSchema:
-    """Test that the connection configuration files provided by the framework are compliant to the schema."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver(
-            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
-            cls.schema,
-        )
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
-    @pytest.mark.parametrize("connection_path", connection_config_files)
-    def test_validate_connection_config(self, connection_path):
-        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        connection_config_file = yaml.safe_load(open(connection_path))
-        self.validator.validate(instance=connection_config_file)
-
-
-class TestSkillsSchema:
-    """Test that the skill configuration files provided by the framework are compliant to the schema."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver(
-            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
-            cls.schema,
-        )
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
-    @pytest.mark.parametrize("skill_path", skill_config_files)
-    def test_validate_skill_config(self, skill_path):
-        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        skill_config_file = yaml.safe_load(open(os.path.join(skill_path,)))
-        self.validator.validate(instance=skill_config_file)
+    validator = Draft4Validator(schema, resolver=resolver)
+    config_data = list(yaml.safe_load_all(open(config_file_path)))
+    validator.validate(instance=config_data[0])

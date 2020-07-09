@@ -23,7 +23,7 @@ import os
 
 from aea.helpers.ipfs.base import IPFSHashOnly
 
-from ...conftest import CUR_PATH
+from tests.conftest import CUR_PATH
 
 FILE_PATH = "__init__.py"
 

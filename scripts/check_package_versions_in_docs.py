@@ -81,6 +81,8 @@ class PackageIdNotFound(Exception):
 DEFAULT_CONFIG_FILE_PATHS = [
     Path("aea", "connections", "stub", "connection.yaml"),
     Path("aea", "protocols", "default", "protocol.yaml"),
+    Path("aea", "protocols", "signing", "protocol.yaml"),
+    Path("aea", "protocols", "state_update", "protocol.yaml"),
     Path("aea", "skills", "error", "skill.yaml"),
 ]
 

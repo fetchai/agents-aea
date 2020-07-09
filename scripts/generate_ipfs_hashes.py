@@ -116,6 +116,7 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
     TEST_PACKAGES = [
         (PackageType.AGENT, TEST_PATH / "dummy_aea"),
         (PackageType.CONNECTION, TEST_PATH / "dummy_connection"),
+        (PackageType.CONTRACT, TEST_PATH / "dummy_contract"),
         (PackageType.SKILL, TEST_PATH / "dependencies_skill"),
         (PackageType.SKILL, TEST_PATH / "exception_skill"),
         (PackageType.SKILL, TEST_PATH / "dummy_skill"),
@@ -406,8 +407,6 @@ def update_hashes(arguments: argparse.Namespace) -> int:
                         package_path.name, package_type
                     )
                 )
-                if package_path.name == "dummy_aea":
-                    print("help")
                 configuration_obj = load_configuration(package_type, package_path)
                 sort_configuration_file(configuration_obj)
                 update_fingerprint(configuration_obj, client)

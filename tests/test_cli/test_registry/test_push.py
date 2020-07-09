@@ -25,9 +25,8 @@ from click import ClickException
 
 from aea.cli.registry.push import _compress_dir, _remove_pycache, push_item
 
+from tests.conftest import AUTHOR
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
-
-from ...conftest import AUTHOR
 
 
 @mock.patch("aea.cli.registry.push.check_is_author_logged_in")

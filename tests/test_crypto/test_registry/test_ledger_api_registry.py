@@ -25,7 +25,7 @@ import pytest
 
 import aea.crypto
 
-from ...conftest import (
+from tests.conftest import (
     COSMOS_ADDRESS_ONE,
     COSMOS_TESTNET_CONFIG,
     ETHEREUM_ADDRESS_ONE,

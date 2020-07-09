@@ -1,0 +1,14 @@
+name: dummy
+author: fetchai
+version: 0.1.0
+description: A test contract
+license: Apache-2.0
+aea_version: '>=0.5.0, <0.6.0'
+fingerprint:
+  __init__.py: QmWbNjFh6E5V4n2qBwyZyXZdmmHvcZSVnwKrcM34MAE56S
+  build/some.json: QmYaGXvpHsMRPE2iX8XPUFqRGtecPS7ZL2sQbV837KxekD
+  contract.py: QmWUCKRsEsDZRQEWv8zMDuNBo9UF3mmwfrSkPgnRUzr4Gc
+fingerprint_ignore_patterns: []
+class_name: DummyContract
+path_to_contract_interface: build/some.json
+dependencies: {}

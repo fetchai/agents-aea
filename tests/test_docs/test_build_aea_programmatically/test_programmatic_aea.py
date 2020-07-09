@@ -24,9 +24,10 @@ from pathlib import Path
 
 from aea.test_tools.test_cases import BaseAEATestCase
 
+from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
+from tests.test_docs.helper import extract_code_blocks, extract_python_code
+
 from .programmatic_aea import run
-from ..helper import extract_code_blocks, extract_python_code
-from ...conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 MD_FILE = "docs/build-aea-programmatically.md"
 PY_FILE = "test_docs/test_build_aea_programmatically/programmatic_aea.py"

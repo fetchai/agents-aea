@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.4.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.5.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -34,15 +34,15 @@ aea create my_gym_aea
 cd my_gym_aea
 ```
 
-### Add the gym skill 
+### Add the gym skill
 ``` bash
 aea add skill fetchai/gym:0.4.0
 ```
 
 ### Add a gym connection
 ``` bash
-aea add connection fetchai/gym:0.3.0
-aea config set agent.default_connection fetchai/gym:0.3.0
+aea add connection fetchai/gym:0.4.0
+aea config set agent.default_connection fetchai/gym:0.4.0
 ```
 
 ### Install the skill dependencies
@@ -90,13 +90,13 @@ aea delete my_gym_aea
 ```
 
 ## Communication
-This diagram shows the communication between the AEA and the gym environment 
+This diagram shows the communication between the AEA and the gym environment
 
 <div class="mermaid">
     sequenceDiagram
         participant AEA
         participant Environment
-    
+
         activate AEA
         activate Environment
         AEA->>Environment: reset
@@ -105,7 +105,7 @@ This diagram shows the communication between the AEA and the gym environment
             Environment->>AEA: percept
         end
         AEA->>Environment: close
-        
+
         deactivate AEA
         deactivate Environment
 </div>

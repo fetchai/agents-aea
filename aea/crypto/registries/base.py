@@ -151,7 +151,7 @@ class Registry(Generic[ItemType]):
     @property
     def supported_ids(self) -> Set[str]:
         """Get the supported item ids."""
-        return set([str(id_) for id_ in self.specs.keys()])
+        return {str(id_) for id_ in self.specs.keys()}
 
     def register(
         self,

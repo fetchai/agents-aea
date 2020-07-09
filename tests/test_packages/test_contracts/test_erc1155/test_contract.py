@@ -52,7 +52,8 @@ def crypto_api(request):
     yield api
 
 
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     expected_a = [
         340282366920938463463374607431768211456,
@@ -139,6 +140,8 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     ), "Error, found: {}".format(tx)
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     from_address = ETHEREUM_ADDRESS_ONE
@@ -159,9 +162,8 @@ def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
         value,
         trade_nonce,
     )
-    assert isinstance(tx_hash, dict) and "hash_single" in tx_hash
-    hash_single = tx_hash["hash_single"]
-    signature = crypto_api.sign_message(hash_single)
+    assert isinstance(tx_hash, bytes)
+    signature = crypto_api.sign_message(tx_hash)
     tx = erc1155_contract.get_atomic_swap_single_transaction(
         ledger_api=ledger_api,
         contract_address=contract_address,
@@ -185,6 +187,8 @@ def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     ), "Error, found: {}".format(tx)
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     from_address = ETHEREUM_ADDRESS_ONE
@@ -205,9 +209,8 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
         value,
         trade_nonce,
     )
-    assert isinstance(tx_hash, dict) and "hash_batch" in tx_hash
-    hash_batch = tx_hash["hash_batch"]
-    signature = crypto_api.sign_message(hash_batch)
+    assert isinstance(tx_hash, bytes)
+    signature = crypto_api.sign_message(tx_hash)
     tx = erc1155_contract.get_atomic_swap_batch_transaction(
         ledger_api=ledger_api,
         contract_address=contract_address,

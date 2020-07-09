@@ -37,7 +37,7 @@ from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from ....conftest import MAX_FLAKY_RERUNS, _make_local_connection
+from tests.conftest import MAX_FLAKY_RERUNS, _make_local_connection
 
 DEFAULT_OEF = "default_oef"
 

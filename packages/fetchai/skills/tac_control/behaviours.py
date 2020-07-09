@@ -64,8 +64,7 @@ class TACBehaviour(Behaviour):
         now = datetime.datetime.now()
         if (
             game.phase.value == Phase.PRE_GAME.value
-            and now > parameters.registration_start_time
-            and now < parameters.start_time
+            and parameters.registration_start_time < now < parameters.start_time
         ):
             game.phase = Phase.GAME_REGISTRATION
             self._register_tac()
@@ -76,8 +75,7 @@ class TACBehaviour(Behaviour):
             )
         elif (
             game.phase.value == Phase.GAME_REGISTRATION.value
-            and now > parameters.start_time
-            and now < parameters.end_time
+            and parameters.start_time < now < parameters.end_time
         ):
             if game.registration.nb_agents < parameters.min_nb_agents:
                 self._cancel_tac()

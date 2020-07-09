@@ -23,7 +23,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ....conftest import MAX_FLAKY_RERUNS, skip_test_windows
+from tests.conftest import MAX_FLAKY_RERUNS, skip_test_windows
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234

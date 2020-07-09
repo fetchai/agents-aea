@@ -29,17 +29,20 @@ from itertools import chain
 from pathlib import Path
 from typing import Set
 
+from click.testing import CliRunner
+
 import yaml
 
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId
-from aea.test_tools.click_testing import CliRunner
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_CONFIG_FILE_PATHS = [
     Path("aea", "connections", "stub", "connection.yaml"),
     Path("aea", "protocols", "default", "protocol.yaml"),
+    Path("aea", "protocols", "signing", "protocol.yaml"),
+    Path("aea", "protocols", "state_update", "protocol.yaml"),
     Path("aea", "skills", "error", "skill.yaml"),
 ]
 

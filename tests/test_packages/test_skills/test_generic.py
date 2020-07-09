@@ -21,7 +21,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestGenericSkills(AEATestCaseMany, UseOef):
@@ -123,7 +123,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
-    @pytest.mark.flaky(reruns=0)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"
@@ -204,7 +204,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=180, is_terminating=False
+            seller_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

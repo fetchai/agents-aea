@@ -25,10 +25,11 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from aea.cli import cli
-from aea.test_tools.click_testing import CliRunner
+from click.testing import CliRunner
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION
+from aea.cli import cli
+
+from tests.conftest import AUTHOR, CLI_LOG_OPTION
 
 
 class TestDelete:

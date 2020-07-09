@@ -24,7 +24,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import (
+from tests.conftest import (
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -124,7 +124,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             "Current good & money allocation & score:",
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, timeout=180, is_terminating=False
+            tac_controller_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -148,7 +148,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             "Declining propose",
         )
         missing_strings = self.missing_from_output(
-            tac_aea_one_process, check_strings, timeout=180, is_terminating=False
+            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -268,7 +268,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             "TAC open for registration until:",
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, timeout=180, is_terminating=False
+            tac_controller_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

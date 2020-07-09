@@ -292,7 +292,9 @@ class CRUDCollection(Generic[T]):
 
     def read_all(self) -> List[Tuple[str, T]]:
         """Read all the items."""
-        return [(k, v) for k, v in self._items_by_id.items()]
+        return [  # pylint: disable=unnecessary-comprehension
+            (k, v) for k, v in self._items_by_id.items()
+        ]
 
 
 class PublicId(JSONSerializable):
@@ -476,7 +478,7 @@ class PublicId(JSONSerializable):
         >>> public_id_1 < public_id_3
         Traceback (most recent call last):
         ...
-        ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author and name attributes are different.
+        ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author or name attributes are different.
 
         """
         if (
@@ -487,7 +489,7 @@ class PublicId(JSONSerializable):
             return self.version_info < other.version_info
         else:
             raise ValueError(
-                "The public IDs {} and {} cannot be compared. Their author and name attributes are different.".format(
+                "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
                     self, other
                 )
             )
@@ -1329,7 +1331,9 @@ class AgentConfig(PackageConfiguration):
     @property
     def private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of private key paths."""
-        return {key: path for key, path in self.private_key_paths.read_all()}
+        return {  # pylint: disable=unnecessary-comprehension
+            key: path for key, path in self.private_key_paths.read_all()
+        }
 
     @property
     def ledger_apis_dict(self) -> Dict[str, Dict[str, Union[str, int]]]:
@@ -1342,7 +1346,9 @@ class AgentConfig(PackageConfiguration):
     @property
     def connection_private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of connection private key paths."""
-        return {key: path for key, path in self.connection_private_key_paths.read_all()}
+        return {  # pylint: disable=unnecessary-comprehension
+            key: path for key, path in self.connection_private_key_paths.read_all()
+        }
 
     @property
     def default_connection(self) -> str:
