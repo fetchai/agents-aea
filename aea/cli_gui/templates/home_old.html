@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Home Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+    <link rel="stylesheet" href="../static/css/home.css">
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+</head>
+<body>
+    <div class="banner">
+        <table class="innerMargin center-me">
+            <tr>
+                <td class="leftBanner">
+                    <img src="static/logo.png" alt="Fetch Logo" class="logo">
+                </td>
+                <td class="rightBanner">
+                    <div class="pageTitle"> AEA CLI REST API </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="mainContent">
+        <div class="error"><br></div>
+        <table class="innerMargin center-me mainTable">
+            <tr>
+                <td class="mainTableSide">
+                    <div class="contentTitle">Local</div>
+                    <div class = "addLeftMarginBordered">
+                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
+                            <div class="simpleBox spaceAllRound">
+                                <label for="localAgentsCreateId">Create Agent name&nbsp;&nbsp;
+                                    <input id="localAgentsCreateId" type="text"/>&nbsp;&nbsp;
+                                    <button id="localAgentsCreate">Create Agent</button>
+                                </label>
+                            </div>
+
+                            <div class="spaceAllRound simpleOutlinedBox">
+                                <div class="simpleBox">
+                                    <div class="localAgents">
+
+                                        <table class="aea fullWidth  whiteFill">
+                                            <caption>Local Agents </caption>
+                                            <thead>
+                                                <tr>
+                                                    <th class="idWidth">Agent name</th>
+                                                    <th class="descriptionWidth">Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="localAgentsregisteredTable">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="spaceAllRound">Selected Agent: <span id="localAgentsSelectionId">NONE</span> </div>
+                            </div>
+
+                        </div>
+
+                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
+                            {% for i in range(0, len) %}
+                                {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
+                                    <div class="simpleBox bigSpaceBottom">
+                                        <div class="spaceAllRound simpleOutlinedBox">
+                                            <div class="{{htmlElements[i][2]}}">
+                                                <table class="aea fullWidth  whiteFill">
+                                                    <caption><span class="localItemHeading">Local</span>'s {{htmlElements[i][1]}}s</caption>
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="idWidth">{{htmlElements[i][1]}} id</th>
+                                                            <th class="descriptionWidth">Description</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="{{htmlElements[i][2]}}registeredTable"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="simpleBox">
+                                            <div class="spaceAllRound">Selected {{htmlElements[i][1]}}: <span id="{{htmlElements[i][2]}}SelectionId">NONE</span></div>
+                                            <button id="{{htmlElements[i][2]}}Remove"  class="spaceAllRoundNoTop">Remove {{htmlElements[i][1]}}</button>
+                                            <div class="spaceAllRoundNoTop">
+                                                <label for="{{htmlElements[i][2]}}ScaffoldId" >Scaffold {{htmlElements[i][1]}} id
+                                                    <input id="{{htmlElements[i][2]}}ScaffoldId" type="text" />
+                                                </label>
+                                                <button id="{{htmlElements[i][2]}}Scaffold">Scaffold new {{htmlElements[i][1]}}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            <button id="localAgentsDelete"  class="spaceAllRoundNoTop">Delete "<span class="localItemHeading">NONE</span>" Agent</button>
+                        </div>
+                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
+
+                            <div class="spaceAllRound sectionTitle">Running "<span class="localItemHeading">NONE</span>" Agent</div>
+                            <div class="spaceAllRound">
+                                <button id="startAgent">Start Agent</button>
+                                <label for="runConnectionId">with connection id:
+                                    <input id="runConnectionId" type="text" />
+                                </label>
+                            </div>
+                            <button id="stopAgent" class="spaceAllRound">Stop Agent</button>
+                            <div id="agentStatus" class="spaceAllRound">Agent Status: NONE</div>
+                            <div class="code spaceAllRound" id="agentTTY"></div>
+                            <div class="codeError spaceAllRound" id="agentError"></div>
+                        </div>
+
+                    </div>
+                </td>
+                <td class="mainTableSide">
+                    <div class="contentTitle">Registry</div>
+                    <div class = "addRightMarginBordered">
+                        <div class="simpleOutlinedBox  fullWidth halfSpaceBottom">
+                            <div class="spaceAllRound sectionTitle">Search registry</div>
+                            <div class="spaceAllRound simpleBox">
+                                <label for="agent" class="interactive">
+                                    <input type="radio" name="itemType" id="agent" class="interactive"> Agents<br>
+                                </label>
+                                <label for="connection" class="interactive">
+                                    <input type="radio" name="itemType" id="connection" class="interactive"> Connections<br>
+                                </label>
+                                  <label for="contract" class="interactive">
+                                      <input type="radio" name="itemType" id="contract" class="interactive"> Contracts<br>
+                                  </label>
+                                <label for="protocol" class="interactive">
+                                    <input type="radio" name="itemType" id="protocol" class="interactive"> Protocols<br>
+                                </label>
+                                <label for="skill" class="interactive">
+                                    <input type="radio" name="itemType" id="skill" class="interactive" checked="checked"> Skills<br>
+                                </label>
+
+                            </div>
+                            <div class="spaceAllRoundNoTop">
+                                <label for="searchInput" >Search for keywords:
+                                    <input id="searchInput" type="text" />
+                                </label>
+                                <button id="searchInputButton">Search</button>
+                            </div>
+                            <div class="spaceAllRound simpleOutlinedBox">
+
+                                <div class="searchItemsTable">
+                                    <table class="aea fullWidth  whiteFill">
+                                        <caption>Search results</caption>
+                                        <thead>
+                                            <tr>
+                                                <th class="idWidth"> <span id="searchItemTypeTable">NONE</span> id</th>
+                                                <th class="descriptionWidth">Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="searchItemsTableRegisteredTable">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="spaceAllRound">Selected <span id="searchItemTypeSelected">skill</span>: <span id="searchItemsTableSelectionId">NONE</span></div>
+                            </div>
+                            <button id="searchItemsAdd" class="spaceAllRoundNoTop"><< Add item</button>
+                            <button id="searchAgentsFetch" class="spaceAllRoundNoTop"><< Fetch agent</button>
+
+                        </div>
+
+                    </div>
+
+
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+
+
+
+
+</body>
+<script src="static/js/home.js"></script>
+</html>
