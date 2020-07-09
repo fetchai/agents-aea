@@ -137,8 +137,11 @@ class AwaitableProc:
         self.kwargs = kwargs
         self.proc = None
         self._thread = None
+        self.loop = None
+        self.future = None
 
     async def start(self):
+        """Start the subprocess"""
         self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
         self.loop = asyncio.get_event_loop()
         self.future = asyncio.futures.Future()
