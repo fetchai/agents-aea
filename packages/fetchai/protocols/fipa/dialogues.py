@@ -154,6 +154,7 @@ class FipaDialogues(Dialogues, ABC):
     def __init__(
         self,
         agent_address: Address,
+        role_from_first_message,
         dialogue_class=FipaDialogue,
         message_class=FipaMessage,
     ) -> None:
@@ -169,4 +170,5 @@ class FipaDialogues(Dialogues, ABC):
             end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),
             dialogue_class=dialogue_class,
             message_class=message_class,
+            role_from_first_message=role_from_first_message
         )

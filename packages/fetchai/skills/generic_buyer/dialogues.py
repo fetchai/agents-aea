@@ -161,18 +161,18 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
+
+        def role_from_first_message(message: Message) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :return: The role of the agent
+            """
+            return BaseFipaDialogue.Role.BUYER
+
         BaseFipaDialogues.__init__(
-            self, self.context.agent_address, dialogue_class=FipaDialogue
+            self, self.context.agent_address, dialogue_class=FipaDialogue, role_from_first_message=role_from_first_message
         )
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseFipaDialogue.Role.BUYER
 
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
