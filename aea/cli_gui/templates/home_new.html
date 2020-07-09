@@ -9,10 +9,10 @@
     <link rel="stylesheet" href="../static/css/home_new.css">
 </head>
 
-<body class="app-body">
+<body>
 
     <!-- Header navbar -->
-    <nav class="app-header navbar navbar-light">
+    <nav class="navbar navbar-light">
 
         <!-- Fetch.ai logo -->
         <a class="fetchai-logo navbar-brand" href="#">
@@ -27,28 +27,28 @@
 
     <!-- Main box container -->
     <div class="container text-white">
-
+        <!-- Top row: Local and Registry boxes -->
         <div class="row">
 
             <div class="col-md">
 
                 <!-- Local box -->
-                <div class="local-box app-box card mt-4">
+                <div class="app-box-green app-box card mt-4">
                     <div class="card-body">
-                        <h5 class="box-title card-title text-center">Local</h5>
+                        <h4 class="text-center">Local</h4>
                         <hr>
 
                         <!-- Create agent form -->
                         <form class="mt-4">
-                            <div class="form-row">
-                                <div class="form-group col-md-3">
-                                    <label class="form-label">Create agent</label>
+                            <div class="form-row align-baseline">
+                                <div class="form-group col-md-4">
+                                    <label class="form-label">Create agent name</label>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <input type="text" class="app-text-input form-control" id="inlineFormInputName2" placeholder="Name">
+                                <div class="form-group col-md-4">
+                                    <input type="text" class="app-create-agent-input" id="inlineFormInputName2">
                                 </div>
-                                <div class="form-group col-md-3">
-                                    <button type="submit" class="app-green-btn btn">Create agent</button>
+                                <div class="form-group col-md-4">
+                                    <button type="submit" class="app-btn-m app-btn-green float-right">Create agent</button>
                                 </div>
                             </div>
                         </form>
@@ -56,7 +56,7 @@
                         <hr>
 
                         <!-- Agents table -->
-                        <h5 class="box-title card-title text-center">Local agents</h5>
+                        <h5 class="text-center">Local agents</h5>
                         <table class="table">
                             <thead>
                                 <th scope="col">Agent name</th>
@@ -83,9 +83,81 @@
             <div class="col-md">
 
                 <!-- Registry box -->
-                <div class="registry-box app-box card mt-4">
+                <div class="app-box-blue app-box card mt-4">
                     <div class="card-body">
-                        This is some text within a card body.
+                        <h4 class="text-center">Registry</h4>
+                        <hr>
+                        <h5 class="text-center">Search in Registry</h5>
+
+                        <!-- Search in registry form -->
+                        <form class="mt-4">
+
+                            <!-- Item types radio row 1 -->
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label><input type="radio" name="searchRadios" id="searchRadio1" value="option1" checked>Connections</label>
+                                </div>
+                                <div class="form-group col-md-8">
+                                    <label><input type="radio" name="searchRadios" id="searchRadio2" value="option2">Protocols</label>
+                                </div>
+                            </div>
+
+                            <!-- Item types radio row 2 -->
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label><input type="radio" name="searchRadios" id="searchRadio3" value="option3">Contracts</label>
+                                </div>
+                                <div class="form-group col-md-8">
+                                    <label><input type="radio" name="searchRadios" id="searchRadio4" value="option4">Skills</label>
+                                </div>
+                            </div>
+
+                            <!-- Search input and submit -->
+                            <div class="form-row align-baseline">
+                                <div class="form-group col-md-4">
+                                    <label class="form-label">Search for keywords</label>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <input type="text" class="app-search-input">
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <button type="submit" class="app-btn-s app-btn-green float-right">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                        <hr>
+
+                        <!-- Search results table -->
+                        <h5 class="text-center">Search results</h5>
+                        <table class="table">
+                            <thead>
+                                <th scope="col-md-4">Item ID</th>
+                                <th scope="col-md-8">Description</th>
+                            </thead>
+                            <tbody>
+                                <tr scope="row">
+                                    <td scope="col-md-4">ID</td>
+                                    <td scope="col">Description</td>
+                                </tr>
+                                <tr scope="row">
+                                    <td scope="col-md-4">ID</td>
+                                    <td scope="col-md-8">Description</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Add item form -->
+                        <form class="mt-4">
+                            <div class="form-row">
+                                <div class="form-group col-md-9">
+                                    <label class="form-label">Selected item: NONE</label>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <button type="submit" class="app-btn-s app-btn-blue float-right">Add item</button>
+                                </div>
+                            </div>
+                        </form>
+
                     </div>
                 </div>
 
@@ -93,14 +165,139 @@
 
         </div>
 
+        <!-- Bottom row: Agent items and Running agent boxes -->
         <div class="row">
 
             <div class="col-md">
 
                 <!-- Agent items box -->
-                <div class="agent-details-box app-box card mt-4">
+                <div class="app-box-violet app-box card mt-4">
                     <div class="card-body">
-                        This is some text within a card body.
+
+                        <!-- Local protocols block -->
+                        <div>
+                            <!-- Local protocols table -->
+                            <h4 class="text-center">Local protocols</h4>
+                            <table class="table">
+                                <thead>
+                                    <th scope="col-md-4">Item ID</th>
+                                    <th scope="col-md-8">Description</th>
+                                </thead>
+                                <tbody>
+                                    <tr scope="row">
+                                        <td scope="col-md-4">ID</td>
+                                        <td scope="col">Description</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Remove protocol form -->
+                            <form class="mt-4">
+                                <div class="form-row">
+                                    <div class="form-group col-md-7">
+                                        <label class="form-label">Selected item: NONE</label>
+                                    </div>
+                                    <div class="form-group col-md-5">
+                                        <button type="submit" class="app-btn-l app-btn-blue float-right">Remove item</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <!-- Local connections block -->
+                        <div>
+                            <!-- Local connections table -->
+                            <h4 class="text-center">Local connections</h4>
+                            <table class="table">
+                                <thead>
+                                    <th scope="col-md-4">Item ID</th>
+                                    <th scope="col-md-8">Description</th>
+                                </thead>
+                                <tbody>
+                                    <tr scope="row">
+                                        <td scope="col-md-4">ID</td>
+                                        <td scope="col">Description</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Remove connections form -->
+                            <form class="mt-4">
+                                <div class="form-row">
+                                    <div class="form-group col-md-9">
+                                        <label class="form-label">Selected item: NONE</label>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <button type="submit"  class="app-btn-l app-btn-blue float-right">Remove item</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <!-- Local contracts block -->
+                        <div>
+                            <!-- Local contracts table -->
+                            <h4 class="text-center">Local contracts</h4>
+                            <table class="table">
+                                <thead>
+                                    <th scope="col-md-4">Item ID</th>
+                                    <th scope="col-md-8">Description</th>
+                                </thead>
+                                <tbody>
+                                    <tr scope="row">
+                                        <td scope="col-md-4">ID</td>
+                                        <td scope="col">Description</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Remove contracts form -->
+                            <form class="mt-4">
+                                <div class="form-row">
+                                    <div class="form-group col-md-9">
+                                        <label class="form-label">Selected item: NONE</label>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <button type="submit"  class="app-btn-l app-btn-blue float-right">Remove item</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <!-- Local skills block -->
+                        <div>
+                            <!-- Local skills table -->
+                            <h4 class="text-center">Local skills</h4>
+                            <table class="table">
+                                <thead>
+                                    <th scope="col-md-4">Item ID</th>
+                                    <th scope="col-md-8">Description</th>
+                                </thead>
+                                <tbody>
+                                    <tr scope="row">
+                                        <td scope="col-md-4">ID</td>
+                                        <td scope="col">Description</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Remove skills form -->
+                            <form class="mt-4">
+                                <div class="form-row">
+                                    <div class="form-group col-md-9">
+                                        <label class="form-label">Selected item: NONE</label>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <button type="submit"  class="app-btn-l app-btn-blue float-right">Remove item</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+
                     </div>
                 </div>
 
@@ -109,9 +306,35 @@
             <div class="col-md">
 
                 <!-- Agent run box -->
-                <div class="agent-details-box app-box card mt-4">
+                <div class="app-box-violet app-box card mt-4">
                     <div class="card-body">
-                        This is some text within a card body.
+                        <h4 class="text-center">Running agent</h4>
+                        <hr>
+
+                        <!-- Run agent form -->
+                        <form class="mt-4">
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <button type="submit" class="app-btn-m app-btn-blue">Create agent</button>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="float-right">with connection ID:</label>
+                                </div>
+                                <div class="form-group col-md-5">
+                                    <input type="text" class="app-connection-id-input float-right" id="connectionIdInput">
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Stop agent form -->
+                        <form class="mt-4">
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <button type="submit" class="app-btn-m app-btn-blue">Stop agent</button>
+                                </div>
+                            </div>
+                        </form>
+
                     </div>
                 </div>
 
