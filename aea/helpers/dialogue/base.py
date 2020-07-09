@@ -694,7 +694,9 @@ class Dialogues(ABC):
         """
         return str(self._dialogue_nonce + 1), ""
 
-    def create(self, counterparty: Address, performative: Message.Performative, **kwargs,) -> Tuple[Message, Dialogue]:
+    def create(
+        self, counterparty: Address, performative: Message.Performative, **kwargs,
+    ) -> Tuple[Message, Dialogue]:
         initial_message = self._message_class(
             dialogue_reference=self.new_self_initiated_dialogue_reference(),
             message_id=Dialogue.STARTING_MESSAGE_ID,
@@ -740,12 +742,12 @@ class Dialogues(ABC):
                 role=self._role_from_first_message(message),
             )  # type: Optional[Dialogue]
         elif (  # new dialogue by self
-                dialogue_reference[0] != ""
-                and dialogue_reference[1] == ""
-                and not message.is_incoming
+            dialogue_reference[0] != ""
+            and dialogue_reference[1] == ""
+            and not message.is_incoming
         ):
             assert (
-                    message.counterparty is not None
+                message.counterparty is not None
             ), "The message counter-party field is not set {}".format(message)
             dialogue = self._create_self_initiated(
                 dialogue_opponent_addr=message.counterparty,
@@ -905,7 +907,7 @@ class Dialogues(ABC):
         return dialogue
 
     def create_dialogue(
-            self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> Dialogue:
         """
         THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN THE NEXT VERSION. USE THE NEW CONSTRUCTOR ARGUMENTS INSTEAD.

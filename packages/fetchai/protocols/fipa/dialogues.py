@@ -170,5 +170,5 @@ class FipaDialogues(Dialogues, ABC):
             end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),
             dialogue_class=dialogue_class,
             message_class=message_class,
-            role_from_first_message=role_from_first_message
+            role_from_first_message=role_from_first_message,
         )

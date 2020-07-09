@@ -171,7 +171,10 @@ class FipaDialogues(Model, BaseFipaDialogues):
             return BaseFipaDialogue.Role.BUYER
 
         BaseFipaDialogues.__init__(
-            self, self.context.agent_address, dialogue_class=FipaDialogue, role_from_first_message=role_from_first_message
+            self,
+            self.context.agent_address,
+            dialogue_class=FipaDialogue,
+            role_from_first_message=role_from_first_message,
         )
 
 
