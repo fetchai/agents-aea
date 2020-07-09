@@ -139,7 +139,7 @@ class AwaitableProc:
         self._thread = None
 
     async def start(self):
-        self.proc = subprocess.Popen(*self.args, **self.kwargs)
+        self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
         self.loop = asyncio.get_event_loop()
         self.future = asyncio.futures.Future()
         self._thread = Thread(target=self._in_thread)
