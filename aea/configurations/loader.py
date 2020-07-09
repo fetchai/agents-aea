@@ -116,9 +116,7 @@ class ConfigLoader(Generic[T]):
         :raises
         """
         yaml_data = yaml.safe_load_all(file_pointer)
-        yaml_documents = []
-        for document in yaml_data:
-            yaml_documents.append(document)
+        yaml_documents = list(yaml_data)
         configuration_file_json = yaml_documents[0]
         if len(yaml_documents) == 1:
             protobuf_snippets_json = {}
