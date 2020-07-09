@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Application Home Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../static/css/home_new.css">
+</head>
+
+<body class="app-body">
+
+    <!-- Header navbar -->
+    <nav class="app-header navbar navbar-light">
+
+        <!-- Fetch.ai logo -->
+        <a class="fetchai-logo navbar-brand" href="#">
+            <img src="../static/logo.png" height="30" alt="">
+        </a>
+
+        <!-- Application title -->
+        <span class="app-title navbar-text">
+            AEA CLI REST API
+        </span>
+    </nav>
+
+    <!-- Main box container -->
+    <div class="container text-white">
+
+        <div class="row">
+
+            <div class="col-md">
+
+                <!-- Local box -->
+                <div class="local-box app-box card mt-4">
+                    <div class="card-body">
+                        <h5 class="box-title card-title text-center">Local</h5>
+                        <hr>
+
+                        <!-- Create agent form -->
+                        <form class="mt-4">
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label class="form-label">Create agent</label>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <input type="text" class="app-text-input form-control" id="inlineFormInputName2" placeholder="Name">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <button type="submit" class="app-green-btn btn">Create agent</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <hr>
+
+                        <!-- Agents table -->
+                        <h5 class="box-title card-title text-center">Local agents</h5>
+                        <table class="table">
+                            <thead>
+                                <th scope="col">Agent name</th>
+                                <th scope="col">Description</th>
+                            </thead>
+                            <tbody>
+                                <tr scope="row">
+                                    <td scope="col">Name</td>
+                                    <td scope="col">Description</td>
+                                </tr>
+                                <tr scope="row">
+                                    <td scope="col">Name</td>
+                                    <td scope="col">Description</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        Selected agent: NONE
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md">
+
+                <!-- Registry box -->
+                <div class="registry-box app-box card mt-4">
+                    <div class="card-body">
+                        This is some text within a card body.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-md">
+
+                <!-- Agent items box -->
+                <div class="agent-details-box app-box card mt-4">
+                    <div class="card-body">
+                        This is some text within a card body.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md">
+
+                <!-- Agent run box -->
+                <div class="agent-details-box app-box card mt-4">
+                    <div class="card-body">
+                        This is some text within a card body.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+<script src="../static/js/home.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+</html>

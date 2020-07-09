@@ -1,0 +1,90 @@
+hr {
+    border: 1px solid #FFFFFF;
+    opacity: 1;
+}
+
+::selection {
+    color: #FFFFFF;
+    background: green;
+}
+
+::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.fetchai-logo {
+    width: auto;
+    margin-left: 40px;
+    top: 20px;
+    left: 47px;
+    width: 164px;
+    height: 51px;
+}
+
+.app-title {
+    top: 31px;
+    left: 837px;
+    width: 182px;
+    height: 36px;
+    text-align: right;
+    letter-spacing: -0.2px;
+    color: #FFFFFF !important;
+}
+
+.app-header {
+    background: #1E2844 0% 0% no-repeat padding-box;
+    height: 80px;
+}
+
+.app-body {
+    background: #161E33 0% 0% no-repeat padding-box;
+}
+
+.app-box {
+    border-radius: 4px;
+}
+
+.local-box {
+    background: rgba(0, 185, 162, 0.1) 0% 0% no-repeat padding-box;
+}
+
+.registry-box {
+    background: rgba(0, 185, 162, 0.1) 0% 0% no-repeat padding-box;
+}
+
+.agent-details-box {
+    background: rgba(164, 90, 149, 0.1) 0% 0% no-repeat padding-box;
+}
+
+.box-title {
+    text-align: center;
+    letter-spacing: -0.18px;
+}
+
+.app-text-input {
+    border: 1px solid #FFFFFF;
+    color: #FFFFFF !important;
+    border-radius: 2px;
+    background: transparent;
+    /* height: 23px; */
+}
+
+.app-text-input:focus {
+    background: transparent;
+}
+
+.app-green-btn {
+    text-align: center;
+    letter-spacing: -0.14px;
+    color: #FFFFFF;
+    background-color: #00B9A2;
+    border: none;
+}
+
+table {
+    color: #A1B6C0 !important;
+}
+
+thead {
+    color: #FFFFFF;
+}
