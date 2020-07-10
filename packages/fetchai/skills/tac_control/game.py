@@ -35,6 +35,7 @@ from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
+from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.mail.base import Address
 from aea.skills.base import Model
 
@@ -64,6 +65,12 @@ GoodEndowment = Dict[GoodId, Quantity]
 UtilityParams = Dict[GoodId, Parameter]
 EquilibriumCurrencyHoldings = Dict[CurrencyId, EquilibriumQuantity]
 EquilibriumGoodHoldings = Dict[GoodId, EquilibriumQuantity]
+
+
+CONTROLLER_DATAMODEL = DataModel(
+    "tac",
+    [Attribute("version", str, True, "Version number of the TAC Controller Agent.")],
+)
 
 
 class Phase(Enum):
@@ -1050,3 +1057,11 @@ class Game(Model):
         self._current_agent_states.update(
             {tx.counterparty_addr: new_counterparty_state}
         )
+
+    def get_tac_description(self) -> Description:
+        """Get the tac description."""
+        desc = Description(
+            {"version": self.context.parameters.version_id},
+            data_model=CONTROLLER_DATAMODEL,
+        )
+        return desc

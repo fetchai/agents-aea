@@ -208,11 +208,16 @@ class OEFSearchHandler(Handler):
         game = cast(Game, self.context.game)
         game.update_expected_controller_addr(controller_addr)
         game.update_game_phase(Phase.GAME_REGISTRATION)
+        tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         tac_msg = TacMessage(
             performative=TacMessage.Performative.REGISTER,
+            dialogue_reference=tac_dialogues.new_self_initiated_dialogue_reference(),
             agent_name=self.context.agent_name,
         )
         tac_msg.counterparty = controller_addr
+        tac_dialogue = cast(Optional[TacDialogue], tac_dialogues.update(tac_dialogues))
+        assert tac_dialogue is not None, "TacDialogue not created."
+        game.tac_dialogue = tac_dialogue
         self.context.outbox.put_message(message=tac_msg)
         self.context.behaviours.tac.is_active = False
 
@@ -253,31 +258,19 @@ class TacHandler(Handler):
                 self.context.agent_name, tac_msg.performative
             )
         )
-        if message.counterparty != game.expected_controller_addr:
+        if tac_msg.counterparty != game.expected_controller_addr:
             raise ValueError(
                 "The sender of the message is not the controller agent we registered with."
             )
 
         if tac_msg.performative == TacMessage.Performative.TAC_ERROR:
             self._on_tac_error(tac_msg, tac_dialogue)
-        elif game.phase.value == Phase.PRE_GAME.value:
-            raise ValueError(
-                "We do not expect a controller agent message in the pre game phase."
-            )
-        elif game.phase.value == Phase.GAME_REGISTRATION.value:
-            if tac_msg.performative == TacMessage.Performative.GAME_DATA:
-                self._on_start(tac_msg, tac_dialogue)
-            elif tac_msg.performative == TacMessage.Performative.CANCELLED:
-                self._on_cancelled(tac_msg, tac_dialogue)
-        elif game.phase.value == Phase.GAME.value:
-            if tac_msg.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
-                self._on_transaction_confirmed(tac_msg, tac_dialogue)
-            elif tac_msg.performative == TacMessage.Performative.CANCELLED:
-                self._on_cancelled(tac_msg, tac_dialogue)
-        elif game.phase.value == Phase.POST_GAME.value:
-            raise ValueError(
-                "We do not expect a controller agent message in the post game phase."
-            )
+        elif tac_msg.performative == TacMessage.Performative.GAME_DATA:
+            self._on_start(tac_msg, tac_dialogue)
+        elif tac_msg.performative == TacMessage.Performative.CANCELLED:
+            self._on_cancelled(tac_msg, tac_dialogue)
+        elif tac_msg.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
+            self._on_transaction_confirmed(tac_msg, tac_dialogue)
         else:
             self._handle_invalid(tac_msg, tac_dialogue)
 
@@ -336,6 +329,10 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        if game.phase.value != Phase.GAME_REGISTRATION.value:
+            self.context.logger.warning("[{}]: We do not expect a start message in game phase={}".format(self.context.agent_name, game.phase.value))
+            return
+
         self.context.logger.info(
             "[{}]: Received start event from the controller. Starting to compete...".format(
                 self.context.agent_name
@@ -397,6 +394,10 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        if game.phase.value not in [Phase.GAME_REGISTRATION.value, Phase.GAME.value]:
+            self.context.logger.warning("[{}]: We do not expect a start message in game phase={}".format(self.context.agent_name, game.phase.value))
+            return
+
         self.context.logger.info(
             "[{}]: Received cancellation from the controller.".format(
                 self.context.agent_name
@@ -417,6 +418,10 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        if game.phase.value != Phase.GAME.value:
+            self.context.logger.warning("[{}]: We do not expect a tranasaction in game phase={}".format(self.context.agent_name, game.phase.value))
+            return
+
         self.context.logger.info(
             "[{}]: Received transaction confirmation from the controller: transaction_id={}".format(
                 self.context.agent_name, tac_msg.tx_id[-10:]
@@ -440,10 +445,9 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
-        game = cast(Game, self.context.game)
         self.context.logger.warning(
-            "[{}]: cannot handle tac message of performative={} in dialogue={} during game_phase={}.".format(
-                self.context.agent_name, tac_msg.performative, tac_dialogue, game.phase,
+            "[{}]: cannot handle tac message of performative={} in dialogue={}.".format(
+                self.context.agent_name, tac_msg.performative, tac_dialogue
             )
         )
 
@@ -533,8 +537,14 @@ class SigningHandler(Handler):
         tx_id = cast(str, signing_msg.skill_callback_info.get("tx_id"))
         if (tx_counterparty_signature is not None) and (tx_counterparty_id is not None):
             # tx_id = tx_message.tx_id + "_" + tx_counterparty_id
+            tac_dialogue = game.tac_dialogue
+            last_msg = tac_dialogue.last_message
+            assert last_msg is not None, "No last message available."
             msg = TacMessage(
                 performative=TacMessage.Performative.TRANSACTION,
+                dialogue_reference=tac_dialogue.dialogue_reference,
+                message_id=last_msg.message_id+1,
+                target=last_msg.message_id,
                 tx_id=tx_id,
                 tx_sender_addr=signing_msg.terms.sender_address,
                 tx_counterparty_addr=signing_msg.terms.counterparty_address,
@@ -546,6 +556,7 @@ class SigningHandler(Handler):
                 tx_nonce=signing_msg.terms.nonce,
             )
             msg.counterparty = game.conf.controller_addr
+            tac_dialogue.update()
             self.context.outbox.put_message(message=msg)
         else:
             self.context.logger.warning(

@@ -228,3 +228,19 @@ class LedgerApis:
         api_class = SUPPORTED_LEDGER_APIS[identifier]
         tx_nonce = api_class.generate_tx_nonce(seller=seller, client=client)
         return tx_nonce
+
+    @staticmethod
+    def get_hash(identifier: str, message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param identifier: ledger identifier.
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        assert (
+            identifier in SUPPORTED_LEDGER_APIS.keys()
+        ), "Not a registered ledger api identifier."
+        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        digest = api_class.get_hash(message=message)
+        return digest

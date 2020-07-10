@@ -21,15 +21,24 @@ skills: []
 behaviours:
   tac:
     args: {}
-    class_name: TACBehaviour
+    class_name: TacBehaviour
 handlers:
   oef:
     args: {}
-    class_name: OEFRegistrationHandler
+    class_name: OefSearchHandler
   tac:
     args: {}
-    class_name: TACHandler
+    class_name: TacHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  tac_dialogues:
+    args: {}
+    class_name: TacDialogues
   game:
     args: {}
     class_name: Game

@@ -22,6 +22,8 @@
 import pickle  # nosec
 from typing import Any, Dict, Optional
 
+from aea.crypto.ledger_apis import LedgerApis
+
 Address = str
 
 
@@ -425,6 +427,11 @@ class Terms:
         self._fee_by_currency_id = fee_by_currency_id
         self._kwargs = kwargs if kwargs is not None else {}
         self._check_consistency()
+        good_ids, sender_supplied_quantities, counterparty_supplied_quantities = self._get_lists()
+        self._good_ids = good_ids
+        self._sender_supplied_quantities = sender_supplied_quantities
+        self._counterparty_supplied_quantities = counterparty_supplied_quantities
+        self._id = self._get_hash()
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
@@ -475,6 +482,11 @@ class Terms:
         ), "fee must be None or Dict[str, int]"
 
     @property
+    def id(self) -> str:
+        """Get hash of the terms."""
+        return self._id
+
+    @property
     def ledger_id(self) -> str:
         """Get the id of the ledger on which the terms are to be settled."""
         return self._ledger_id
@@ -506,7 +518,8 @@ class Terms:
         assert (
             len(self._amount_by_currency_id) == 1
         ), "More than one currency id, cannot get amount."
-        return -next(iter(self._amount_by_currency_id.values()))
+        value = next(iter(self._amount_by_currency_id.values()))
+        return -value if value <=0 else 0
 
     @property
     def counterparty_payable_amount(self) -> int:
@@ -514,12 +527,28 @@ class Terms:
         assert (
             len(self._amount_by_currency_id) == 1
         ), "More than one currency id, cannot get amount."
-        return next(iter(self._amount_by_currency_id.values()))
+        value = next(iter(self._amount_by_currency_id.values()))
+        return value if value >= 0 else 0
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
         """Get the quantities by good id."""
         return self._quantities_by_good_id
+
+    @property
+    def good_ids(self) -> List[int]:
+        """Get the (ordered) good ids."""
+        return self._good_ids
+
+    @property
+    def sender_supplied_quantities(self) -> List[int]:
+        """Get the (ordered) quantities supplied by the sender."""
+        return self._sender_supplied_quantities
+
+    @property
+    def counterparty_supplied_quantities(self) -> List[int]:
+        """Get the (ordered) quantities supplied by the counterparty."""
+        return self._counterparty_supplied_quantities    
 
     @property
     def is_sender_payable_tx_fee(self) -> bool:
@@ -555,6 +584,71 @@ class Terms:
     def kwargs(self) -> Dict[str, Any]:
         """Get the kwargs."""
         return self._kwargs
+
+    def _get_lists(self) -> Tuple[List[int], List[int], List[int]]:
+        quantities_by_good_id = {
+            int(good_id): quantity for good_id, quantity in self.quantities_by_good_id.items()
+        }  # type: Dict[int, int]
+        ordered = collections.OrderedDict(sorted(quantities_by_good_id.items()))
+        good_ids = []  # type: List[int]
+        sender_supplied_quantities = []  # type: List[int]
+        counterparty_supplied_quantities = []  # type: List[int]
+        for good_id, quantity in ordered.items():
+            good_ids.append(good_id)
+            if quantity >= 0:
+                sender_supplied_quantities.append(quantity)
+                counterparty_supplied_quantities.append(0)
+            else:
+                sender_supplied_quantities.append(0)
+                counterparty_supplied_quantities.append(-quantity)
+        return good_ids, sender_supplied_quantities, counterparty_supplied_quantities
+
+    def _get_hash(self) -> bytes:
+        """
+        Generate a hash from transaction information.
+
+        :param tx_sender_addr: the sender address
+        :param tx_counterparty_addr: the counterparty address
+        :param good_ids: the list of good ids
+        :param sender_supplied_quantities: the quantities supplied by the sender (must all be positive)
+        :param counterparty_supplied_quantities: the quantities supplied by the counterparty (must all be positive)
+        :param tx_amount: the amount of the transaction
+        :param tx_nonce: the nonce of the transaction
+        :return: the hash
+        """
+        aggregate_hash = LedgerApis.get_hash(
+            b"".join(
+                [
+                    self.good_ids[0].to_bytes(32, "big"),
+                    self.sender_supplied_quantities[0].to_bytes(32, "big"),
+                    self.counterparty_supplied_quantities[0].to_bytes(32, "big"),
+                ]
+            )
+        )
+        for idx, good_id in enumerate(self.good_ids):
+            if idx == 0:
+                continue
+            aggregate_hash = LedgerApis.get_hash(
+                b"".join(
+                    [
+                        aggregate_hash,
+                        self.good_id.to_bytes(32, "big"),
+                        self.sender_supplied_quantities[idx].to_bytes(32, "big"),
+                        self.counterparty_supplied_quantities[idx].to_bytes(32, "big"),
+                    ]
+                )
+            )
+
+        m_list = []  # type: List[bytes]
+        m_list.append(self.sender_address.encode("utf-8"))
+        m_list.append(self.counterparty_address.encode("utf-8"))
+        m_list.append(aggregate_hash)
+        m_list.append(self.sender_payable_amount.to_bytes(32, "big"))
+        m_list.append(self.counterparty_payable_amount.to_bytes(32, "big"))
+        m_list.append(self.nonce.encode("utf-8"))
+        digest = LedgerApis.get_hash(b"".join(m_list))
+        return digest
+
 
     @staticmethod
     def encode(terms_protobuf_object, terms_object: "Terms") -> None:
