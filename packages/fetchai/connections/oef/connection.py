@@ -38,13 +38,12 @@ from aea.mail.base import Address, Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 
+from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
 from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-
-from .object_translator import OEFObjectTranslator
 
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
@@ -494,6 +493,9 @@ class OEFChannel(OEFAgent):
 
     async def disconnect(self) -> None:
         """Disconnect chgannel."""
+        if self._in_queue is None and self._loop is None:  # pragma: nocover
+            return  # not connected so nothing to do
+
         await self.in_queue.put(None)
         await self._run_in_executor(super().disconnect)
         await self._unset_loop_and_queue()

@@ -1137,7 +1137,7 @@ async def test_cannot_connect_to_oef():
     task = asyncio.ensure_future(
         oef_connection.connect(), loop=asyncio.get_event_loop()
     )
-    await asyncio.sleep(1.0)
+    await asyncio.sleep(3.0)
     mocked_logger_warning.assert_called_with(
         "Cannot connect to OEFChannel. Retrying in 5 seconds..."
     )
