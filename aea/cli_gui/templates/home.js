@@ -624,12 +624,6 @@ class Controller{
                 var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
                 var isDisabled =  !this.validateId(itemSelectionId);
                 $('#' + elements[j]["combined"] + 'Remove').prop('disabled', isDisabled);
-                if (isDisabled){
-                    $('#' + elements[j]["combined"] + 'Remove').html("Remove " + elements[j]["type"])
-                }
-                else{
-                    $('#' + elements[j]["combined"] + 'Remove').html("Remove " + itemSelectionId + " " + elements[j]["type"] + " from " + agentSelectionId + " agent")
-                }
 
                 var itemScaffoldId = $('#' + elements[j]["combined"] + 'ScaffoldId').val();
                 $('#' + elements[j]["combined"] + 'Scaffold').prop('disabled',
@@ -642,12 +636,6 @@ class Controller{
                 var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
                 var isDisabled =  !this.validateId(itemSelectionId) || !this.validateId(agentSelectionId);
                 $('#' + elements[j]["combined"] + 'Add').prop('disabled', isDisabled);
-                if (isDisabled){
-                    $('#' + elements[j]["combined"] + 'Add').html("<< Add " + elements[j]["type"])
-                }
-                else{
-                    $('#' + elements[j]["combined"] + 'Add').html("<< Add " + itemSelectionId + " " + elements[j]["type"] + " to " + agentSelectionId + " agent")
-                }
             }
         }
         // Search buttons
@@ -657,21 +645,14 @@ class Controller{
         var itemType = $("#searchItemTypeSelected").html();
         var isDisabled =  !this.validateId(searchItem) || !this.validateId(agentSelectionId) || (itemType == "agent");
         $('#searchItemsAdd').prop('disabled', isDisabled);
-        if (isDisabled){
-            $('#searchItemsAdd').html("<< Add " + itemType)
-        }
-        else{
-            $('#searchItemsAdd').html("<< Add " + searchItem + " "  + itemType + " to " + agentSelectionId + " agent")
-//            $('#searchItemsAdd').html("<< Add " + itemSelectionId + " " + elements[j]["type"] + " to " + agentSelectionId + " agent")
-        }
 
         var isDisabled =  !this.validateId(searchItem) || (itemType != "agent");
         $('#searchAgentsFetch').prop('disabled', isDisabled);
         if (isDisabled){
-            $('#searchAgentsFetch').html("<< Fetch agent")
+            $('#searchAgentsFetch').html("Fetch agent")
         }
         else {
-            $('#searchAgentsFetch').html("<< Fetch agent "  + searchItem)
+            $('#searchAgentsFetch').html("Fetch agent "  + searchItem)
         }
 
         if (agentSelectionId != "NONE"){

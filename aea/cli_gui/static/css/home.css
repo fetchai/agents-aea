@@ -18,6 +18,12 @@ table {
     line-height: 10px !important;
 }
 
+table.app-table-hover tr:hover td {
+    cursor: pointer;
+    color: #FFFFFF;
+    background: #b3d7ff;
+}
+
 thead {
     color: #FFFFFF;
 }
@@ -142,10 +148,13 @@ input:focus {
     border-radius: 4px;
 }
 
-.error{
-    position: fixed; /* Sit on top of the page content */
-    width: 100%; /* Full width (cover the whole page) */
-    height: 10%; /* A bit of the page */
+.error {
+    position: fixed;
+    /* Sit on top of the page content */
+    width: 100%;
+    /* Full width (cover the whole page) */
+    height: 10%;
+    /* A bit of the page */
     bottom: 0;
     visibility: hidden;
     border: 1px solid lightgrey;
