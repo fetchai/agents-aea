@@ -21,8 +21,9 @@
 import logging
 import types
 from abc import ABC
+from logging import Logger, LoggerAdapter
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -51,6 +52,7 @@ class Component(ABC):
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor
+        self._logger: Optional[Logger] = None
 
         # mapping from import path to module object
         # the keys are dotted paths of Python modules.
@@ -100,3 +102,12 @@ class Component(ABC):
         """Set the directory. Raise error if already set."""
         assert self._directory is None, "Directory already set."
         self._directory = path
+
+    @property
+    def logger(self) -> Union[Logger, LoggerAdapter]:
+        """Get the component logger."""
+        if self._logger is None:
+            # if not set (e.g. programmatic instantiation)
+            # return a default one with "aea" as logger namespace.
+            return logging.getLogger("aea")
+        return self._logger

@@ -45,6 +45,7 @@ from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.logging import AgentLoggerAdapter
 from aea.mail.base import Address
 from aea.multiplexer import OutBox
 from aea.protocols.base import Message
@@ -704,7 +705,9 @@ class Skill(Component):
         skill_context = SkillContext()
         skill_context.set_agent_context(agent_context)
         logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
-        skill_context.logger = logging.getLogger(logger_name)
+        logger = logging.getLogger(logger_name)
+        logger = AgentLoggerAdapter(logger, agent_context.agent_name)
+        skill_context.logger = logger
 
         skill = Skill(configuration, skill_context)
 
