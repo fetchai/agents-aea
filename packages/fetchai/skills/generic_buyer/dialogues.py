@@ -161,21 +161,34 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
+        BaseFipaDialogues.__init__(self, self.context.agent_address)
 
-        def role_from_first_message(message: Message) -> BaseDialogue.Role:
-            """Infer the role of the agent from an incoming/outgoing first message
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
 
-            :param message: an incoming/outgoing first message
-            :return: The role of the agent
-            """
-            return BaseFipaDialogue.Role.BUYER
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return BaseFipaDialogue.Role.BUYER
 
-        BaseFipaDialogues.__init__(
-            self,
-            self.context.agent_address,
-            dialogue_class=FipaDialogue,
-            role_from_first_message=role_from_first_message,
+    def create_dialogue(
+            self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> FipaDialogue:
+        """
+        THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN THE NEXT VERSION. USE THE NEW CONSTRUCTOR ARGUMENTS INSTEAD.
+
+        Create a dialogue instance.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = FipaDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
+        return dialogue
 
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):

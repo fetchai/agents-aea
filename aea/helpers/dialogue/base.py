@@ -407,7 +407,7 @@ class Dialogue(ABC):
 
     def reply(
         self, target_message: Message, performative, **kwargs
-    ) -> Optional[Message]:
+    ) -> Message:
         """
         Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
 
@@ -435,7 +435,7 @@ class Dialogue(ABC):
         if result:
             return reply
         else:
-            return None
+            raise Exception("Invalid message from performative and contents.")
 
     def _update_self_initiated_dialogue_label_on_second_message(
         self, second_message: Message
