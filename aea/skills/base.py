@@ -25,11 +25,11 @@ import logging
 import queue
 import re
 from abc import ABC, abstractmethod
-from logging import Logger
+from logging import Logger, LoggerAdapter
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
+from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, Union, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -74,16 +74,16 @@ class SkillContext:
 
         self._is_active = True  # type: bool
         self._new_behaviours_queue = queue.Queue()  # type: Queue
-        self._logger = None  # type: Optional[Logger]
+        self._logger: Optional[Union[Logger, LoggerAdapter]] = None
 
     @property
-    def logger(self) -> Logger:
+    def logger(self) -> Union[Logger, LoggerAdapter]:
         """Get the logger."""
         assert self._logger is not None, "Logger not set."
         return self._logger
 
     @logger.setter
-    def logger(self, logger_: Logger) -> None:
+    def logger(self, logger_: Union[Logger, AgentLoggerAdapter]) -> None:
         assert self._logger is None, "Logger already set."
         self._logger = logger_
 
@@ -705,8 +705,9 @@ class Skill(Component):
         skill_context = SkillContext()
         skill_context.set_agent_context(agent_context)
         logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
-        logger = logging.getLogger(logger_name)
-        logger = AgentLoggerAdapter(logger, agent_context.agent_name)
+        logger = AgentLoggerAdapter(
+            logging.getLogger(logger_name), agent_context.agent_name
+        )
         skill_context.logger = logger
 
         skill = Skill(configuration, skill_context)
