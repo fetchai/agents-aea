@@ -368,9 +368,9 @@ class OEFLocalConnection(Connection):
             assert self._reader is not None
             envelope = await self._reader.get()
             if envelope is None:
-                logger.debug("Receiving task terminated.")
+                self.logger.debug("Receiving task terminated.")
                 return None
-            logger.debug("Received envelope {}".format(envelope))
+            self.logger.debug("Received envelope {}".format(envelope))
             return envelope
         except Exception:  # pragma: nocover # pylint: disable=broad-except
             return None

@@ -85,8 +85,11 @@ class HTTPClientAsyncChannel:
         )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
         self.excluded_protocols = excluded_protocols
         self.is_stopped = True
-        logger.info("Initialised the HTTP client channel")
         self._tasks: Set[Task] = set()
+
+        self.logger = logger
+        # TODO logger at this point is the module-level one, not with the agent name.
+        self.logger.info("Initialised the HTTP client channel")
 
     async def connect(self, loop: AbstractEventLoop) -> None:
         """
@@ -160,7 +163,7 @@ class HTTPClientAsyncChannel:
                     await resp.read()
                 return resp
         except Exception:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception(
+            self.logger.exception(
                 f"Exception raised during http call: {request_http_message.method} {request_http_message.url}"
             )
             raise
@@ -186,7 +189,7 @@ class HTTPClientAsyncChannel:
             return
 
         if request_envelope.protocol_id in (self.excluded_protocols or []):
-            logger.error(
+            self.logger.error(
                 "This envelope cannot be sent with the http client connection: protocol_id={}".format(
                     request_envelope.protocol_id
                 )
@@ -202,7 +205,7 @@ class HTTPClientAsyncChannel:
         if (
             request_http_message.performative != HttpMessage.Performative.REQUEST
         ):  # pragma: nocover
-            logger.warning(
+            self.logger.warning(
                 "The HTTPMessage performative must be a REQUEST. Envelop dropped."
             )
             return
@@ -222,7 +225,7 @@ class HTTPClientAsyncChannel:
         :return: None
         """
         self._tasks.remove(task)
-        logger.debug(f"Task completed: {task}")
+        self.logger.debug(f"Task completed: {task}")
 
     async def get_message(self) -> Union["Envelope", None]:
         """
@@ -298,7 +301,7 @@ class HTTPClientAsyncChannel:
     async def disconnect(self) -> None:
         """Disconnect."""
         if not self.is_stopped:
-            logger.info("HTTP Client has shutdown on port: {}.".format(self.port))
+            self.logger.info("HTTP Client has shutdown on port: {}.".format(self.port))
             self.is_stopped = True
 
             await self._cancel_tasks()
@@ -331,6 +334,7 @@ class HTTPClientConnection(Connection):
         """
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
+            self.channel.logger = self.logger
             await self.channel.connect(self._loop)
 
     async def disconnect(self) -> None:
@@ -369,5 +373,5 @@ class HTTPClientConnection(Connection):
         try:
             return await self.channel.get_message()
         except Exception:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception("Exception on receive")
+            self.logger.exception("Exception on receive")
             return None

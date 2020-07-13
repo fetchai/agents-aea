@@ -165,7 +165,7 @@ class P2PLibp2pClientConnection(Connection):
             self.connection_status.is_connecting = False
             self.connection_status.is_connected = True
 
-            logger.info(
+            self.logger.info(
                 "Successfully connected to libp2p node {}".format(str(self.node_uri))
             )
 
@@ -202,7 +202,7 @@ class P2PLibp2pClientConnection(Connection):
             # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
             # self._process_messages_task = None
 
-        logger.debug("disconnecting libp2p client connection...")
+        self.logger.debug("disconnecting libp2p client connection...")
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
@@ -212,7 +212,7 @@ class P2PLibp2pClientConnection(Connection):
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
-            logger.debug("Called disconnect when input queue not initialized.")
+            self.logger.debug("Called disconnect when input queue not initialized.")
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -224,7 +224,7 @@ class P2PLibp2pClientConnection(Connection):
             assert self._in_queue is not None, "Input queue not initialized."
             data = await self._in_queue.get()
             if data is None:
-                logger.debug("Received None.")
+                self.logger.debug("Received None.")
                 if (
                     self._connection_status.is_connected
                     or self._connection_status.is_connecting
@@ -232,13 +232,13 @@ class P2PLibp2pClientConnection(Connection):
                     await self.disconnect()
                 return None
                 # TOFIX(LR) attempt restarting the node?
-            logger.debug("Received data: {}".format(data))
+            self.logger.debug("Received data: {}".format(data))
             return Envelope.decode(data)
         except CancelledError:
-            logger.debug("Receive cancelled.")
+            self.logger.debug("Receive cancelled.")
             return None
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception(e)
+            self.logger.exception(e)
             return None
 
     async def send(self, envelope: Envelope):
@@ -272,7 +272,7 @@ class P2PLibp2pClientConnection(Connection):
     async def _receive(self) -> Optional[bytes]:
         assert self._reader is not None
         try:
-            logger.debug("Waiting for messages...")
+            self.logger.debug("Waiting for messages...")
             buf = await self._reader.readexactly(4)
             if not buf:
                 return None
@@ -282,7 +282,7 @@ class P2PLibp2pClientConnection(Connection):
                 return None
             return data
         except asyncio.streams.IncompleteReadError as e:
-            logger.info(
+            self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )

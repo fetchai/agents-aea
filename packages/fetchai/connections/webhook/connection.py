@@ -78,7 +78,8 @@ class WebhookChannel:
 
         self.connection_id = connection_id
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
-        logger.info("Initialised a webhook channel")
+        self.logger = logger
+        self.logger.info("Initialised a webhook channel")
 
     async def connect(self) -> None:
         """
@@ -211,6 +212,7 @@ class WebhookConnection(Connection):
         """
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
+            self.channel.logger = self.logger
             self.channel.in_queue = asyncio.Queue()
             await self.channel.connect()
 
