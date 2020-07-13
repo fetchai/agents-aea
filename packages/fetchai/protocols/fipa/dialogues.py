@@ -150,7 +150,7 @@ class FipaDialogues(Dialogues, ABC):
         }
     )
 
-    def __init__(self, agent_address: Address,) -> None:
+    def __init__(self, agent_address: Address) -> None:
         """
         Initialize dialogues.
 

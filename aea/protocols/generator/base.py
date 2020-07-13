@@ -1137,9 +1137,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "END_STATES = frozenset(\n"
         cls_str += self.indent + "{" + end_states_str + "}"
         cls_str += self.indent + ")\n\n"
-        cls_str += (
-            self.indent + "def __init__(self, agent_address: Address,) -> None:\n"
-        )
+        cls_str += self.indent + "def __init__(self, agent_address: Address) -> None:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Initialize dialogues.\n\n"
@@ -1151,7 +1149,7 @@ class ProtocolGenerator:
         cls_str += self.indent + '"""\n'
         cls_str += (
             self.indent
-            + "Dialogues.__init__(self, agent_address=agent_address, end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),\n"
+            + "Dialogues.__init__(self, agent_address=agent_address, end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES))\n"
         )
         self._change_indent(-1)
         cls_str += self.indent + "def create_dialogue(\n"
