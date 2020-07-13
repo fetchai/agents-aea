@@ -55,7 +55,8 @@ class ContractApiDialogues(BaseContractApiDialogues):
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        """
+        Infer the role of the agent from an incoming/outgoing first message.
 
         :param message: an incoming/outgoing first message
         :return: The role of the agent
@@ -156,7 +157,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             response = self.get_error_message(e, api, message, dialogue)
         return response
 
@@ -187,7 +188,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             response = self.get_error_message(e, api, message, dialogue)
         return response
 
@@ -218,7 +219,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             response = self.get_error_message(e, api, message, dialogue)
         return response
 
@@ -249,6 +250,6 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             )
             response.counterparty = message.counterparty
             dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             response = self.get_error_message(e, api, message, dialogue)
         return response

@@ -55,7 +55,8 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        """
+        Infer the role of the agent from an incoming/outgoing first message.
 
         :param message: an incoming/outgoing first message
         :return: The role of the agent
@@ -211,18 +212,18 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             time.sleep(self.TIMEOUT)
             transaction = api.get_transaction(message.transaction_digest.body)
             attempts += 1
-        if not is_settled:
+        if not is_settled:  # pragma: nocover
             response = self.get_error_message(
                 ValueError("Transaction not settled within timeout"),
                 api,
                 message,
                 dialogue,
             )
-        elif transaction_receipt is None:
+        elif transaction_receipt is None:  # pragma: nocover
             response = self.get_error_message(
                 ValueError("No transaction_receipt returned"), api, message, dialogue
             )
-        elif transaction is None:
+        elif transaction is None:  # pragma: nocover
             response = self.get_error_message(
                 ValueError("No tx returned"), api, message, dialogue
             )
@@ -255,7 +256,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         transaction_digest = api.send_signed_transaction(
             message.signed_transaction.body
         )
-        if transaction_digest is None:
+        if transaction_digest is None:  # pragma: nocover
             response = self.get_error_message(
                 ValueError("No transaction_digest returned"), api, message, dialogue
             )
