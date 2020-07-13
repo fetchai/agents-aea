@@ -17,8 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """Logging helpers."""
+import logging
 from logging import Logger, LoggerAdapter
-from typing import Any, MutableMapping, Tuple
+from typing import Any, MutableMapping, Optional, Tuple, Union
 
 
 class AgentLoggerAdapter(LoggerAdapter):
@@ -37,3 +38,29 @@ class AgentLoggerAdapter(LoggerAdapter):
     ) -> Tuple[Any, MutableMapping[str, Any]]:
         """Prepend the agent name to every log message."""
         return "[%s] %s" % (self.extra["agent_name"], msg), kwargs
+
+
+class WithLogger:
+    """Interface to endow subclasses with a logger."""
+
+    def __init__(self, logger: Optional[Union[Logger, LoggerAdapter]] = None):
+        """
+        Initialize the logger.
+
+        :param logger: the logger object.
+        """
+        self._logger = logger
+
+    @property
+    def logger(self) -> Union[Logger, LoggerAdapter]:
+        """Get the component logger."""
+        if self._logger is None:
+            # if not set (e.g. programmatic instantiation)
+            # return a default one with "aea" as logger namespace.
+            return logging.getLogger("aea")
+        return self._logger
+
+    @logger.setter
+    def logger(self, logger: Union[Logger, LoggerAdapter]):
+        """Set the logger."""
+        self._logger = logger

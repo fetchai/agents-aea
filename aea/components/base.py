@@ -31,11 +31,12 @@ from aea.configurations.base import (
     ComponentType,
     PublicId,
 )
+from aea.helpers.logging import WithLogger
 
 logger = logging.getLogger(__name__)
 
 
-class Component(ABC):
+class Component(ABC, WithLogger):
     """Abstract class for an agent component."""
 
     def __init__(
@@ -49,6 +50,7 @@ class Component(ABC):
         :param configuration: the package configuration.
         :param is_vendor: whether the package is vendorized.
         """
+        WithLogger.__init__(self, logging.getLogger("aea"))
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor
@@ -102,17 +104,3 @@ class Component(ABC):
         """Set the directory. Raise error if already set."""
         assert self._directory is None, "Directory already set."
         self._directory = path
-
-    @property
-    def logger(self) -> Union[Logger, LoggerAdapter]:
-        """Get the component logger."""
-        if self._logger is None:
-            # if not set (e.g. programmatic instantiation)
-            # return a default one with "aea" as logger namespace.
-            return logging.getLogger("aea")
-        return self._logger
-
-    @logger.setter
-    def logger(self, logger: Union[Logger, LoggerAdapter]):
-        """Set the logger."""
-        self._logger = logger

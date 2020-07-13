@@ -64,6 +64,11 @@ class Resources:
         ]  # type: List[Registry]
 
     @property
+    def component_registry(self) -> AgentComponentRegistry:
+        """Get the agent component registry."""
+        return self._component_registry
+
+    @property
     def behaviour_registry(self) -> ComponentRegistry[Behaviour]:
         """Get the behaviour registry."""
         return self._behaviour_registry
@@ -72,6 +77,11 @@ class Resources:
     def handler_registry(self) -> HandlerRegistry:
         """Get the handler registry."""
         return self._handler_registry
+
+    @property
+    def model_registry(self) -> ComponentRegistry[Model]:
+        """Get the model registry."""
+        return self._model_registry
 
     def add_component(self, component: Component):
         """Add a component to resources."""
