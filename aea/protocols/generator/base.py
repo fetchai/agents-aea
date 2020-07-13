@@ -980,8 +980,7 @@ class ProtocolGenerator:
         # Imports
         cls_str += self.indent + "from abc import ABC\n"
         cls_str += (
-            self.indent
-            + "from typing import Callable, Dict, FrozenSet, Optional, Type, cast\n\n"
+            self.indent + "from typing import Dict, FrozenSet, Optional, cast\n\n"
         )
         cls_str += (
             self.indent
@@ -1069,9 +1068,6 @@ class ProtocolGenerator:
         cls_str += self.indent + "dialogue_label=dialogue_label,\n"
         cls_str += self.indent + "agent_address=agent_address,\n"
         cls_str += self.indent + "role=role,\n"
-        cls_str += self.indent + "message_class={}Message,\n".format(
-            self.protocol_specification_in_camel_case
-        )
         cls_str += self.indent + "rules=Dialogue.Rules(\n"
         self._change_indent(1)
         cls_str += (
@@ -1141,18 +1137,9 @@ class ProtocolGenerator:
         cls_str += self.indent + "END_STATES = frozenset(\n"
         cls_str += self.indent + "{" + end_states_str + "}"
         cls_str += self.indent + ")\n\n"
-        cls_str += self.indent + "def __init__(\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self,\n"
-        cls_str += self.indent + "agent_address: Address,\n"
         cls_str += (
-            self.indent
-            + "role_from_first_message: Optional[Callable[[Message], Dialogue.Role]] = None,\n"
+            self.indent + "def __init__(self, agent_address: Address,) -> None:\n"
         )
-        cls_str += self.indent + "dialogue_class: Optional[Type[Dialogue]] = None,\n"
-        cls_str += self.indent + "message_class: Optional[Type[Message]] = None,\n"
-        self._change_indent(-1)
-        cls_str += self.indent + ") -> None:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Initialize dialogues.\n\n"
@@ -1164,9 +1151,41 @@ class ProtocolGenerator:
         cls_str += self.indent + '"""\n'
         cls_str += (
             self.indent
-            + "Dialogues.__init__(self, agent_address=agent_address, end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES), dialogue_class = dialogue_class, "
-            "message_class = message_class, role_from_first_message = role_from_first_message,)\n"
+            + "Dialogues.__init__(self, agent_address=agent_address, end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),\n"
         )
+        self._change_indent(-1)
+        cls_str += self.indent + "def create_dialogue(\n"
+        self._change_indent(1)
+        cls_str += (
+            self.indent + "self, dialogue_label: DialogueLabel, role: Dialogue.Role,\n"
+        )
+        self._change_indent(-1)
+        cls_str += self.indent + ") -> {}Dialogue:\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        self._change_indent(1)
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "Create an instance of {} dialogue.\n\n"
+        cls_str += (
+            self.indent + ":param dialogue_label: the identifier of the dialogue\n"
+        )
+        cls_str += (
+            self.indent
+            + ":param role: the role of the agent this dialogue is maintained for\n\n"
+        )
+        cls_str += self.indent + ":return: the created dialogue\n"
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "dialogue = {}Dialogue(\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        self._change_indent(1)
+        cls_str += (
+            self.indent
+            + "dialogue_label=dialogue_label, agent_address=self.agent_address, role=role\n"
+        )
+        self._change_indent(-1)
+        cls_str += self.indent + ")\n"
+        cls_str += self.indent + "return dialogue\n"
         self._change_indent(-2)
         cls_str += self.indent + "\n"
 

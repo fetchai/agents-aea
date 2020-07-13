@@ -25,7 +25,7 @@ This module contains the classes required for fipa dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, Dict, FrozenSet, Optional, Type, cast
+from typing import Dict, FrozenSet, Optional, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
@@ -115,7 +115,6 @@ class FipaDialogue(Dialogue):
             dialogue_label=dialogue_label,
             agent_address=agent_address,
             role=role,
-            message_class=FipaMessage,
             rules=Dialogue.Rules(
                 cast(FrozenSet[Message.Performative], self.INITIAL_PERFORMATIVES),
                 cast(FrozenSet[Message.Performative], self.TERMINAL_PERFORMATIVES),
@@ -151,13 +150,7 @@ class FipaDialogues(Dialogues, ABC):
         }
     )
 
-    def __init__(
-        self,
-        agent_address: Address,
-        role_from_first_message: Optional[Callable[[Message], Dialogue.Role]] = None,
-        dialogue_class: Optional[Type[Dialogue]] = None,
-        message_class: Optional[Type[Message]] = None,
-    ) -> None:
+    def __init__(self, agent_address: Address,) -> None:
         """
         Initialize dialogues.
 
@@ -168,7 +161,20 @@ class FipaDialogues(Dialogues, ABC):
             self,
             agent_address=agent_address,
             end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),
-            dialogue_class=dialogue_class,
-            message_class=message_class,
-            role_from_first_message=role_from_first_message,
         )
+
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+    ) -> FipaDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = FipaDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
