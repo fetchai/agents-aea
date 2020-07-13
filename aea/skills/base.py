@@ -684,6 +684,21 @@ class Skill(Component):
         configuration.directory = Path(directory)
         return Skill.from_config(configuration, agent_context)
 
+    @property
+    def logger(self) -> Union[Logger, LoggerAdapter]:
+        """
+        Get the logger.
+
+        In the case of a skill, return the
+        logger provided by the skill context.
+        """
+        return self.skill_context.logger
+
+    @logger.setter
+    def logger(self, *args) -> None:
+        """Set the logger."""
+        raise ValueError("Cannot set logger to a skill component..")
+
     @classmethod
     def from_config(
         cls, configuration: SkillConfig, agent_context: AgentContext

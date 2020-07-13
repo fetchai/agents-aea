@@ -52,7 +52,7 @@ class Component(ABC):
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor
-        self._logger: Optional[Logger] = None
+        self._logger: Optional[Union[Logger, LoggerAdapter]] = None
 
         # mapping from import path to module object
         # the keys are dotted paths of Python modules.
@@ -111,3 +111,9 @@ class Component(ABC):
             # return a default one with "aea" as logger namespace.
             return logging.getLogger("aea")
         return self._logger
+
+    @logger.setter
+    def logger(self, logger: Union[Logger, LoggerAdapter]):
+        """Set the logger."""
+        assert self._logger is None, "Logger already set."
+        self._logger = logger
