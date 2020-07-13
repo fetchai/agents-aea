@@ -115,5 +115,4 @@ class Component(ABC):
     @logger.setter
     def logger(self, logger: Union[Logger, LoggerAdapter]):
         """Set the logger."""
-        assert self._logger is None, "Logger already set."
         self._logger = logger
