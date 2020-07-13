@@ -173,12 +173,10 @@ class FipaDialogues(Model, BaseFipaDialogues):
         return BaseFipaDialogue.Role.BUYER
 
     def create_dialogue(
-            self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
     ) -> FipaDialogue:
         """
-        THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN THE NEXT VERSION. USE THE NEW CONSTRUCTOR ARGUMENTS INSTEAD.
-
-        Create a dialogue instance.
+        Create an instance of fipa dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

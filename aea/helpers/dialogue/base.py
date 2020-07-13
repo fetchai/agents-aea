@@ -405,9 +405,7 @@ class Dialogue(ABC):
                 self._outgoing_messages.extend([message])
         return is_extendable
 
-    def reply(
-        self, target_message: Message, performative, **kwargs
-    ) -> Message:
+    def reply(self, target_message: Message, performative, **kwargs) -> Message:
         """
         Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
 
