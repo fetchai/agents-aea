@@ -25,7 +25,7 @@ This module contains the classes required for fipa dialogue management.
 """
 
 from abc import ABC
-from typing import Dict, FrozenSet, Optional, cast
+from typing import Callable, Dict, FrozenSet, Optional, Type, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
@@ -154,9 +154,9 @@ class FipaDialogues(Dialogues, ABC):
     def __init__(
         self,
         agent_address: Address,
-        role_from_first_message,
-        dialogue_class=FipaDialogue,
-        message_class=FipaMessage,
+        role_from_first_message: Optional[Callable[[Message], Dialogue.Role]] = None,
+        dialogue_class: Optional[Type[Dialogue]] = None,
+        message_class: Optional[Type[Message]] = None,
     ) -> None:
         """
         Initialize dialogues.
