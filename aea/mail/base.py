@@ -209,7 +209,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb.sender = envelope.sender
         envelope_pb.protocol_id = str(envelope.protocol_id)
         envelope_pb.message = envelope.message_bytes
-        if envelope.context.uri_raw != "":
+        if envelope.context is not None and envelope.context.uri_raw != "":
             envelope_pb.uri = envelope.context.uri_raw
 
         envelope_bytes = envelope_pb.SerializeToString()
