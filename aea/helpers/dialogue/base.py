@@ -742,7 +742,9 @@ class Dialogues(ABC):
         successfully_updated = dialogue.update(initial_message)
 
         if not successfully_updated:
-            raise Exception("Cannot create the a dialogue with the specified performative and contents.")
+            raise Exception(
+                "Cannot create the a dialogue with the specified performative and contents."
+            )
 
         return initial_message, dialogue
 
