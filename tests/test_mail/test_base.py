@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for Envelope of mail.base.py."""
-
+import logging
 import time
 import unittest.mock
 
@@ -245,7 +245,13 @@ def test_protobuf_envelope_serializer():
     serializer = ProtobufEnvelopeSerializer()
     # connection id is None because it is not included in the encoded envelope
     envelope_context = EnvelopeContext(connection_id=None, uri=URI("/uri"))
-    expected_envelope = Envelope(to="to", sender="sender", protocol_id=PublicId("author", "name", "0.1.0"), message=b"message", context=envelope_context)
+    expected_envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=PublicId("author", "name", "0.1.0"),
+        message=b"message",
+        context=envelope_context,
+    )
     encoded_envelope = serializer.encode(expected_envelope)
     actual_envelope = serializer.decode(encoded_envelope)
 
@@ -254,7 +260,12 @@ def test_protobuf_envelope_serializer():
 
 def test_envelope_serialization():
     """Test Envelope.encode and Envelope.decode methods."""
-    expected_envelope = Envelope(to="to", sender="sender", protocol_id=PublicId("author", "name", "0.1.0"), message=b"message")
+    expected_envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=PublicId("author", "name", "0.1.0"),
+        message=b"message",
+    )
     encoded_envelope = expected_envelope.encode()
     actual_envelope = Envelope.decode(encoded_envelope)
 
@@ -264,8 +275,12 @@ def test_envelope_serialization():
 def test_envelope_message_bytes():
     """Test the property Envelope.message_bytes."""
     message = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"message")
-    envelope = Envelope(to="to", sender="sender", protocol_id=PublicId("author", "name", "0.1.0"),
-                        message=message)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=PublicId("author", "name", "0.1.0"),
+        message=message,
+    )
 
     expected_message_bytes = message.encode()
     actual_message_bytes = envelope.message_bytes
@@ -275,20 +290,31 @@ def test_envelope_message_bytes():
 def test_envelope_skill_id():
     """Test the property Envelope.skill_id."""
     envelope_context = EnvelopeContext(uri=URI("author/skill_name/0.1.0"))
-    envelope = Envelope(to="to", sender="sender", protocol_id=PublicId("author", "name", "0.1.0"),
-                        message=b"message", context=envelope_context)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=PublicId("author", "name", "0.1.0"),
+        message=b"message",
+        context=envelope_context,
+    )
 
     assert envelope.skill_id == PublicId("author", "skill_name", "0.1.0")
 
 
 def test_envelope_skill_id_raises_value_error(caplog):
     """Test the property Envelope.skill_id raises ValueError if the URI is not a public id.."""
-    bad_uri = "author/skill_name/bad_version"
-    envelope_context = EnvelopeContext(uri=URI(bad_uri))
-    envelope = Envelope(to="to", sender="sender", protocol_id=PublicId("author", "name", "0.1.0"),
-                        message=b"message", context=envelope_context)
+    with caplog.at_level(logging.DEBUG, logger="aea.mail.base"):
+        bad_uri = "author/skill_name/bad_version"
+        envelope_context = EnvelopeContext(uri=URI(bad_uri))
+        envelope = Envelope(
+            to="to",
+            sender="sender",
+            protocol_id=PublicId("author", "name", "0.1.0"),
+            message=b"message",
+            context=envelope_context,
+        )
 
-    assert envelope.skill_id is None
-    assert (
+        assert envelope.skill_id is None
+        assert (
             f"URI - {bad_uri} - not a valid skill id." in caplog.text
-    ), f"Cannot find message in output: {caplog.text}"
+        ), f"Cannot find message in output: {caplog.text}"
