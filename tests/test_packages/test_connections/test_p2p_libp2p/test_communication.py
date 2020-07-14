@@ -29,6 +29,8 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
+from packages.fetchai.connections.p2p_libp2p.connection import Uri
+
 from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
@@ -508,3 +510,10 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+@skip_test_windows
+def test_libp2pconnection_uri():
+    uri = Uri(host="127.0.0.1")
+    uri = Uri(host="127.0.0.1", port=10000)
+    assert uri.host == "127.0.0.1" and uri.port == 10000

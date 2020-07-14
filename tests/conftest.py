@@ -732,7 +732,7 @@ def _make_libp2p_connection(
     identity = Identity("", address=FetchAICrypto().address)
     if relay and delegate:
         configuration = ConnectionConfig(
-            libp2p_key_file=None,
+            node_key_file=None,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -742,7 +742,7 @@ def _make_libp2p_connection(
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
-            libp2p_key_file=None,
+            node_key_file=None,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -751,7 +751,7 @@ def _make_libp2p_connection(
         )
     else:
         configuration = ConnectionConfig(
-            libp2p_key_file=None,
+            node_key_file=None,
             local_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
             log_file=log_file,
@@ -761,7 +761,7 @@ def _make_libp2p_connection(
 
 
 def _make_libp2p_client_connection(
-    node_port: int = 11234, node_host: str = "127.0.0.1",
+    node_port: int = 11234, node_host: str = "127.0.0.1"
 ) -> P2PLibp2pClientConnection:
     identity = Identity("", address=FetchAICrypto().address)
     configuration = ConnectionConfig(
