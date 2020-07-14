@@ -43,7 +43,7 @@ const (
 	DefaultAgentAddress = "2FRCqDBo7Yw3E2VJc1tAkggppWzLnCCYjPN9zHrQrj8Fupzmkr"
 	DefaultDelegatePort = 3000
 
-	EnvelopeDeliveryTimeout = 10 * time.Second
+	EnvelopeDeliveryTimeout = 20 * time.Second
 	DHTPeerSetupTimeout     = 5 * time.Second
 )
 

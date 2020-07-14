@@ -1153,17 +1153,17 @@ class ProtocolGenerator:
         )
         self._change_indent(-1)
         cls_str += self.indent + "def create_dialogue(\n"
+        self._change_indent(1)
         cls_str += (
-            self.indent
-            + self.indent
-            + "self, dialogue_label: DialogueLabel, role: Dialogue.Role,\n"
+            self.indent + "self, dialogue_label: DialogueLabel, role: Dialogue.Role,\n"
         )
+        self._change_indent(-1)
         cls_str += self.indent + ") -> {}Dialogue:\n".format(
             self.protocol_specification_in_camel_case
         )
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Create an instance of fipa dialogue.\n\n"
+        cls_str += self.indent + "Create an instance of {} dialogue.\n\n"
         cls_str += (
             self.indent + ":param dialogue_label: the identifier of the dialogue\n"
         )
@@ -1176,11 +1176,12 @@ class ProtocolGenerator:
         cls_str += self.indent + "dialogue = {}Dialogue(\n".format(
             self.protocol_specification_in_camel_case
         )
+        self._change_indent(1)
         cls_str += (
             self.indent
-            + self.indent
             + "dialogue_label=dialogue_label, agent_address=self.agent_address, role=role\n"
         )
+        self._change_indent(-1)
         cls_str += self.indent + ")\n"
         cls_str += self.indent + "return dialogue\n"
         self._change_indent(-2)

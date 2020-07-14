@@ -52,6 +52,10 @@ func ignore(err error) {
 	}
 }
 
+const (
+	newStreamTimeout = 5 * time.Second
+)
+
 // DHTClient A restricted libp2p node for the Agents Communication Network
 // It use a `DHTPeer` to communicate with other peers.
 type DHTClient struct {
@@ -268,7 +272,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		Str("target", target).
 		Msg("looking up peer ID for agent Address")
 	// client can get addresses only through bootstrap peer
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeout)
 	defer cancel()
 	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaAddressStream)
 	if err != nil {
@@ -348,7 +352,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		Str("op", "route").
 		Str("target", target).
 		Msgf("opening stream to target %s", peerID)
-	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), newStreamTimeout)
 	defer cancel()
 	stream, err = dhtClient.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
 	if err != nil {
@@ -446,7 +450,7 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 		Str("addr", dhtClient.myAgentAddress).
 		Msg("opening stream aea-register to relay peer...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeout)
 	defer cancel()
 	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaRegisterRelayStream)
 	if err != nil {

@@ -660,6 +660,9 @@ class BaseAEATestCase(ABC):
             cls.terminate_agents(process)
         if missing_strings != []:
             print("Non-empty missing strings, stderr:\n" + cls.stderr[process.pid])
+            print("=====================")
+            print("Non-empty missing strings, stdout:\n" + cls.stdout[process.pid])
+            print("=====================")
         return missing_strings
 
     @classmethod
@@ -675,6 +678,7 @@ class BaseAEATestCase(ABC):
         missing_strings = cls.missing_from_output(
             process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
         )
+
         return missing_strings == []
 
     @classmethod
