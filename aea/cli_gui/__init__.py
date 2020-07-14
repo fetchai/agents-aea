@@ -321,7 +321,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
             )  # 400 Bad request
     else:
         agent_process = call_aea_async(
-            [sys.executable, "-m", "aea.cli", "run"], agent_dir
+            [sys.executable, "-m", "aea.cli", "run", "--install-deps"], agent_dir
         )
 
     if agent_process is None:
