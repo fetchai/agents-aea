@@ -19,25 +19,24 @@
 
 """This test module contains Negative tests for Libp2p connection."""
 
-from os import close
-from aea.configurations.base import ConnectionConfig
-from aea.crypto.fetchai import FetchAICrypto
-from aea.identity.base import Identity
 import asyncio
 import os
 import shutil
 import tempfile
-import time
 
 import pytest
 
+from aea.configurations.base import ConnectionConfig
+from aea.crypto.fetchai import FetchAICrypto
+from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
-    P2PLibp2pConnection, _golang_module_build_async,
-    _golang_module_run,
-    LIBP2P_NODE_MODULE_NAME,
     AwaitableProc,
+    LIBP2P_NODE_MODULE_NAME,
+    P2PLibp2pConnection,
+    _golang_module_build_async,
+    _golang_module_run,
 )
 
 from tests.conftest import (
@@ -71,13 +70,12 @@ class TestP2PLibp2pConnectionFailureGolangBuild:
             await _golang_module_build_async(
                 self.connection.node.source, log_file_desc, timeout=0
             )
-    
+
     @pytest.mark.asyncio
     async def test_wrong_path(self):
         self.connection.node.source = self.wrong_path
         with pytest.raises(Exception):
             await self.connection.connect()
-        
 
     @classmethod
     def teardown_class(cls):
@@ -118,7 +116,6 @@ class TestP2PLibp2pConnectionFailureGolangRun:
             muxer = Multiplexer([self.connection])
             muxer.connect()
 
-
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
@@ -128,6 +125,7 @@ class TestP2PLibp2pConnectionFailureGolangRun:
             shutil.rmtree(cls.wrong_path)
         except (OSError, IOError):
             pass
+
 
 @skip_test_windows
 class TestP2PLibp2pConnectionFailureNodeDisconnect:
@@ -158,6 +156,7 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect:
         except (OSError, IOError):
             pass
 
+
 @skip_test_windows
 class TestP2PLibp2pConnectionFailureSetupNewConnection:
     """Test that connection constructor ensures proper configuration"""
@@ -168,11 +167,11 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        
+
         cls.identity = Identity("", address=FetchAICrypto().address)
         cls.host = "localhost"
         cls.port = "10000"
-        
+
         cls.key_file = os.path.join(cls.t, "keyfile")
         key_file_desc = open(cls.key_file, "ab")
         FetchAICrypto().dump(key_file_desc)
@@ -191,7 +190,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             P2PLibp2pConnection(configuration=configuration, identity=self.identity)
 
     def test_local_uri_provided_when_public_uri_provided(self):
-        
+
         configuration = ConnectionConfig(
             node_key_file=self.key_file,
             public_uri="{}:{}".format(self.host, self.port),
@@ -217,4 +216,3 @@ def test_libp2pconnection_awaitable_proc_cancelled():
     proc = AwaitableProc(["sleep", "100"], shell=False)
     proc_task = asyncio.ensure_future(proc.start())
     proc_task.cancel()
-

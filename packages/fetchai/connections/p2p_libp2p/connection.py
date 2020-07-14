@@ -25,7 +25,6 @@ import errno
 import logging
 import os
 import shutil
-from shutil import ExecError
 import struct
 import subprocess  # nosec
 import tempfile
@@ -76,7 +75,7 @@ async def _golang_module_build_async(
     cmd = ["go", "build"]
 
     env = os.environ
-    
+
     proc = AwaitableProc(
         cmd, env=env, cwd=path, stdout=log_file_desc, stderr=log_file_desc, shell=False,
     )
@@ -127,6 +126,7 @@ def _golang_module_run(
         raise e
 
     return proc
+
 
 class AwaitableProc:
     """
@@ -322,9 +322,9 @@ class Libp2pNode:
         out_path = self.aea_to_libp2p_path
         logger.debug("Creating pipes ({}, {})...".format(in_path, out_path))
         if os.path.exists(in_path):
-            os.remove(in_path) # pragma: no cover
+            os.remove(in_path)  # pragma: no cover
         if os.path.exists(out_path):
-            os.remove(out_path) # pragma: no cover
+            os.remove(out_path)  # pragma: no cover
         os.mkfifo(in_path)
         os.mkfifo(out_path)
 
