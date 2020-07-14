@@ -60,5 +60,3 @@ models:
     class_name: Parameters
 dependencies:
   numpy: {}
-  web3:
-    version: ==5.2.2

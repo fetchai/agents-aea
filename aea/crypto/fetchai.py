@@ -232,6 +232,17 @@ class FetchAIHelper(Helper):
         ]
         return tuple(addresses)
 
+    @staticmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        digest = sha256_hash(message)
+        return digest.hex()
+
 
 class FetchAIApi(LedgerApi, FetchAIHelper):
     """Class to interact with the Fetch ledger APIs."""

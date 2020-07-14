@@ -26,7 +26,7 @@ from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_participation.game import TacDialogue
+from packages.fetchai.skills.tac_participation.dialogues import TacDialogue
 
 DEFAULT_LEDGER_ID = "ethereum"
 
@@ -166,7 +166,7 @@ class Game(Model):
         self._phase = Phase.PRE_GAME
         self._conf = None  # type: Optional[Configuration]
         self._contract_address = None  # type: Optional[str]
-        self._tac_dialogue = None  # type: Optioanl[TacDialogue]
+        self._tac_dialogue = None  # type: Optional[TacDialogue]
 
     @property
     def ledger_id(self) -> str:
@@ -205,7 +205,7 @@ class Game(Model):
         """Retrieve the tac dialogue."""
         assert self._tac_dialogue is not None, "TacDialogue not set!"
         return self._tac_dialogue
-    
+
     @tac_dialogue.setter
     def tac_dialogue(self, tac_dialogue: TacDialogue) -> None:
         """Set the tac dialogue."""

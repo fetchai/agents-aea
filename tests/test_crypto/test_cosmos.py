@@ -66,6 +66,13 @@ def test_sign_and_recover_message():
     ), "Failed to recover the correct address."
 
 
+def test_get_hash():
+    """Test the get hash functionality."""
+    expected_hash = "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+    hash_ = CosmosApi.get_hash(message=b"hello")
+    assert expected_hash == hash_
+
+
 def test_dump_positive():
     """Test dump."""
     account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)

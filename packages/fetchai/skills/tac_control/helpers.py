@@ -20,16 +20,11 @@
 
 """This module contains the helpers methods for the controller agent."""
 
-import collections
 import math
 import random
 from typing import Dict, List, Tuple, cast
 
 import numpy as np
-
-from web3 import Web3  # pylint: disable=wrong-import-order
-
-from aea.mail.base import Address
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 DEFAULT_CURRENCY_ID_TO_NAME = {"0": "FET"}

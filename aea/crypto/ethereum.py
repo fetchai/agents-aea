@@ -243,7 +243,7 @@ class EthereumHelper(Helper):
         :param message: the message to be hashed.
         :return: the hash of the message.
         """
-        digest = Web3.keccak(message)
+        digest = Web3.keccak(message).hex()
         return digest
 
 

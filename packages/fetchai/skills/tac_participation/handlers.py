@@ -329,8 +329,13 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        game = cast(Game, self.context.game)
         if game.phase.value != Phase.GAME_REGISTRATION.value:
-            self.context.logger.warning("[{}]: We do not expect a start message in game phase={}".format(self.context.agent_name, game.phase.value))
+            self.context.logger.warning(
+                "[{}]: We do not expect a start message in game phase={}".format(
+                    self.context.agent_name, game.phase.value
+                )
+            )
             return
 
         self.context.logger.info(
@@ -394,8 +399,13 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        game = cast(Game, self.context.game)
         if game.phase.value not in [Phase.GAME_REGISTRATION.value, Phase.GAME.value]:
-            self.context.logger.warning("[{}]: We do not expect a start message in game phase={}".format(self.context.agent_name, game.phase.value))
+            self.context.logger.warning(
+                "[{}]: We do not expect a start message in game phase={}".format(
+                    self.context.agent_name, game.phase.value
+                )
+            )
             return
 
         self.context.logger.info(
@@ -418,8 +428,13 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        game = cast(Game, self.context.game)
         if game.phase.value != Phase.GAME.value:
-            self.context.logger.warning("[{}]: We do not expect a tranasaction in game phase={}".format(self.context.agent_name, game.phase.value))
+            self.context.logger.warning(
+                "[{}]: We do not expect a tranasaction in game phase={}".format(
+                    self.context.agent_name, game.phase.value
+                )
+            )
             return
 
         self.context.logger.info(
@@ -543,7 +558,7 @@ class SigningHandler(Handler):
             msg = TacMessage(
                 performative=TacMessage.Performative.TRANSACTION,
                 dialogue_reference=tac_dialogue.dialogue_reference,
-                message_id=last_msg.message_id+1,
+                message_id=last_msg.message_id + 1,
                 target=last_msg.message_id,
                 tx_id=tx_id,
                 tx_sender_addr=signing_msg.terms.sender_address,
