@@ -30,6 +30,7 @@ import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from random import randint
+from threading import Thread
 from typing import IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
@@ -50,6 +51,8 @@ LIBP2P_NODE_ENV_FILE = ".env.libp2p"
 
 LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
+LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
+
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
@@ -58,50 +61,39 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.3.0")
 MultiAddr = str
 
 
-# TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
-async def _async_golang_get_deps(
-    src: str, loop: AbstractEventLoop
-) -> asyncio.subprocess.Process:  # pylint: disable=no-member
-    """
-    Downloads dependencies of go 'src' file - asynchronous
-    """
-    cmd = ["go", "get", "-d", "-v", "./..."]
-
-    try:
-        logger.debug(cmd, loop)
-        proc = await asyncio.create_subprocess_exec(
-            *cmd, cwd=os.path.dirname(src), loop=loop
-        )  # nosec
-    except Exception as e:
-        logger.error("While executing go get : {}".format(str(e)))
-        raise e
-
-    return proc
-
-
-def _golang_module_build(path: str, log_file_desc: IO[str]) -> subprocess.Popen:
+async def _golang_module_build_async(
+    path: str, log_file_desc: IO[str], loop: Optional[asyncio.AbstractEventLoop] = None
+) -> int:
     """
     Builds go module located at `path`, downloads necessary dependencies
+
+    :return: build command returncode
     """
     cmd = ["go", "build"]
 
     env = os.environ
 
+    proc = AwaitableProc(
+        cmd, env=env, cwd=path, stdout=log_file_desc, stderr=log_file_desc, shell=False,
+    )
+
+    golang_build = asyncio.ensure_future(proc.start())
+
     try:
-        logger.debug(cmd)
-        proc = subprocess.Popen(  # nosec
-            cmd,
-            env=env,
-            cwd=path,
-            stdout=log_file_desc,
-            stderr=log_file_desc,
-            shell=False,
+        returncode = await asyncio.wait_for(
+            golang_build, LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT
         )
-    except Exception as e:
-        logger.error("While executing go build {} : {}".format(path, str(e)))
+    except asyncio.TimeoutError:
+        e = Exception(
+            "Failed to download libp2p dependencies within timeout({})".format(
+                LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT
+            )
+        )
+        logger.error(e)
+        golang_build.cancel()
         raise e
 
-    return proc
+    return returncode
 
 
 def _golang_module_run(
@@ -133,6 +125,39 @@ def _golang_module_run(
         raise e
 
     return proc
+
+
+class AwaitableProc:
+    """
+    Async-friendly subprocess.Popen
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.proc = None
+        self._thread = None
+        self.loop = None
+        self.future = None
+
+    async def start(self):
+        """Start the subprocess"""
+        self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
+        self.loop = asyncio.get_event_loop()
+        self.future = asyncio.futures.Future()
+        self._thread = Thread(target=self._in_thread)
+        self._thread.start()
+        try:
+            return await asyncio.shield(self.future)
+        except asyncio.CancelledError:
+            self.proc.terminate()
+            return await self.future
+        finally:
+            self._thread.join()
+
+    def _in_thread(self):
+        self.proc.wait()
+        self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)
 
 
 class Uri:
@@ -246,7 +271,8 @@ class Libp2pNode:
         self.aea_to_libp2p_path = "{}/{}-aea_to_libp2p".format(tmp_dir, self.pub[:5])
         self._libp2p_to_aea = -1
         self._aea_to_libp2p = -1
-        self._connection_attempts = 30
+        self._connection_attempts = 10
+        self._connection_timeout = 1.0
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
@@ -280,17 +306,16 @@ class Libp2pNode:
         # build the node
         # TOFIX(LR) fix async version
         logger.info("Downloading golang dependencies. This may take a while...")
-        proc = _golang_module_build(self.source, self._log_file_desc)
-        proc.wait()
+        returncode = await _golang_module_build_async(self.source, self._log_file_desc)
         with open(self.log_file, "r") as f:
             logger.debug(f.read())
         node_log = ""
         with open(self.log_file, "r") as f:
             node_log = f.read()
-        if proc.returncode != 0:
+        if returncode != 0:
             raise Exception(
                 "Error while downloading golang dependencies and building it: {}, {}".format(
-                    proc.returncode, node_log
+                    returncode, node_log
                 )
             )
         logger.info("Finished downloading golang dependencies.")
@@ -377,7 +402,8 @@ class Libp2pNode:
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                await asyncio.sleep(2)
+                logger.debug("Sleeping for {}...".format(self._connection_timeout))
+                await asyncio.sleep(self._connection_timeout)
                 await self._connect()
                 return
             else:

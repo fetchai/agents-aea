@@ -27,9 +27,10 @@ import socket
 import sys
 import threading
 import time
-from functools import wraps
+from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from threading import Timer
+from types import FunctionType, MethodType
 from typing import Callable, Optional, Sequence, cast
 from unittest.mock import patch
 
@@ -791,6 +792,52 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
             raise e
 
     return wrapper
+
+
+def libp2p_log_on_failure_all(cls):
+    """
+    Decorate every method of a class with `libp2p_log_on_failure`
+
+    :return: class with decorated methods.
+    """
+    # TODO(LR) test it is a type
+    for name, fn in inspect.getmembers(cls):
+        if isinstance(fn, FunctionType):
+            setattr(cls, name, libp2p_log_on_failure(fn))
+        # TOFIX(LR) decorate already @classmethod decorated methods
+        continue
+        if isinstance(fn, MethodType):
+            if fn.im_self is None:
+                wrapped_fn = libp2p_log_on_failure(fn.im_func)
+                method = MethodType(wrapped_fn, None, cls)
+                setattr(cls, name, method)
+            else:
+                wrapped_fn = libp2p_log_on_failure(fn.im_func)
+                clsmethod = MethodType(wrapped_fn, cls, type)
+                setattr(cls, name, clsmethod)
+    return cls
+
+
+def do_for_all(method_decorator):
+    def class_decorator(cls):
+        class GetAttributeMetaClass(type):
+            def __getattribute__(cls, name):
+                attr = super().__getattribute__(name)
+                return method_decorator(attr)
+
+        class DecoratedClass(cls, metaclass=GetAttributeMetaClass):
+            def __getattribute__(self, name):
+                attr = super().__getattribute__(name)
+                return method_decorator(attr)
+
+        for attr in WRAPPER_ASSIGNMENTS:
+            if not hasattr(cls, attr):
+                continue
+            setattr(DecoratedClass, attr, getattr(cls, attr))
+        DecoratedClass.__wrapped__ = cls
+        return DecoratedClass
+
+    return class_decorator
 
 
 class CwdException(Exception):

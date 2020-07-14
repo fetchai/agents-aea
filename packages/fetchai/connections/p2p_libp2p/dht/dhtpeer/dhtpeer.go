@@ -66,6 +66,13 @@ func ignore(err error) {
 	}
 }
 
+const (
+	addressLookupTimeout                = 20 * time.Second
+	routingTableConnectionUpdateTimeout = 5 * time.Second
+	newStreamTimeout                    = 5 * time.Second
+	addressRegisterTimeout              = 3 * time.Second
+)
+
 // DHTPeer A full libp2p node for the Agents Communication Network.
 // It is required to have a local address and a public one
 // and can acts as a relay for `DHTClient`.
@@ -493,7 +500,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 
 		linfo().Str("op", "route").Str("addr", target).
 			Msgf("opening stream to target %s...", peerID.Pretty())
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeout)
 		defer cancel()
 		stream, err := dhtPeer.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
 		if err != nil {
@@ -528,16 +535,24 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msgf("Querying for providers for cid %s...", addressCID.String())
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), addressLookupTimeout)
 	defer cancel()
 	providers := dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 1)
 	start := time.Now()
 	provider := <-providers
 	elapsed := time.Since(start)
-	if provider.ID == "" {
+	for provider.ID == "" {
 		err = errors.New("didn't found any provider for address within timeout")
 		lerror(err).Str("op", "lookup").Str("addr", address).Msg("")
-		return "", err
+		select {
+		default:
+			time.Sleep(200 * time.Millisecond)
+			providers = dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 1)
+			provider = <-providers
+			elapsed = time.Since(start)
+		case <-ctx.Done():
+			return "", err
+		}
 	}
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msgf("found provider %s after %s", provider, elapsed.String())
@@ -684,7 +699,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 		// workaround: to avoid getting `failed to find any peer in table`
 		//  when calling dht.Provide (happens occasionally)
 		ldebug().Msg("waiting for notifying peer to be added to dht routing table...")
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), routingTableConnectionUpdateTimeout)
 		defer cancel()
 		for dhtPeer.dht.RoutingTable().Find(stream.Conn().RemotePeer()) == "" {
 			select {
@@ -791,7 +806,7 @@ func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	}
 
 	// TOFIX(LR) tune timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), addressRegisterTimeout)
 	defer cancel()
 
 	linfo().Str("op", "register").
