@@ -68,7 +68,7 @@ A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` ne
 
 First, fetch the seller AEA, which will provide data:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.4.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.5.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 ```
@@ -80,11 +80,11 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/thermometer:0.5.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/thermometer:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -96,7 +96,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 
 </p>
@@ -107,7 +107,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/thermometer_client:0.4.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.5.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -119,11 +119,11 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/thermometer_client:0.4.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/thermometer_client:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -137,7 +137,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 
 </p>

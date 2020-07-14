@@ -133,19 +133,19 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         ledger_apis = {"fetchai": {"network": "testnet"}}
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.add_item("skill", "fetchai/thermometer:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.add_item("skill", "fetchai/thermometer:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.5.0")
+        self.eject_item("skill", "fetchai/thermometer:0.6.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.force_set_config(
             "skills.thermometer.models", seller_skill_config_replacement["models"],
@@ -166,10 +166,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.4.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)

@@ -54,7 +54,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.4.0")
 
 
 NOT_SPECIFIED = object()
@@ -630,7 +630,6 @@ class SOEFChannel:
 
         :return: None
         """
-        # TODO: add keep alive background tasks which ping the SOEF until the agent is deregistered
         await self._stop_periodic_ping_task()
         if self.unique_page_address is None:  # pragma: nocover
             raise SOEFException.error(

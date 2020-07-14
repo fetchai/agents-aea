@@ -2,32 +2,32 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.3.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.4.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/generic_seller:0.6.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/generic_seller:0.7.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.3.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.4.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/generic_buyer:0.5.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/generic_buyer:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 ``` bash
 aea generate-key fetchai
@@ -89,7 +89,7 @@ ledger_apis:
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 ``` yaml
 ledger_apis:
@@ -98,7 +98,7 @@ ledger_apis:
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 ``` yaml
 ledger_apis:
