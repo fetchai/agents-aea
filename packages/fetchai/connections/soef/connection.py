@@ -379,8 +379,12 @@ class SOEFChannel:
         """
         with suppress(asyncio.CancelledError):
             while True:
-                with suppress(Exception):
+                try:
                     await self._ping_command()
+                except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                    raise
+                except Exception:  # pylint: disable=broad-except
+                    logger.exception("Error on periodic ping command!")
                 await asyncio.sleep(period)
 
     async def _set_service_key_handler(self, service_description: Description) -> None:
@@ -643,6 +647,7 @@ class SOEFChannel:
     async def _stop_periodic_ping_task(self) -> None:
         """Cancel periodic ping task."""
         if self._ping_periodic_task and not self._ping_periodic_task.done():
+            self._ping_periodic_task.cancel()
             self._ping_periodic_task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._ping_periodic_task
