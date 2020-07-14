@@ -631,6 +631,7 @@ class SOEFChannel:
         :return: None
         """
         # TODO: add keep alive background tasks which ping the SOEF until the agent is deregistered
+        await self._stop_periodic_ping_task()
         if self.unique_page_address is None:  # pragma: nocover
             raise SOEFException.error(
                 "The service is not registered to the simple OEF. Cannot unregister."
@@ -639,6 +640,14 @@ class SOEFChannel:
         response = await self._generic_oef_command("unregister", check_success=False)
         assert "<response><message>Goodbye!</message></response>" in response
         self.unique_page_address = None
+
+    async def _stop_periodic_ping_task(self) -> None:
+        """Cancel periodic ping task."""
+        if self._ping_periodic_task and not self._ping_periodic_task.done():
+            self._ping_periodic_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await self._ping_periodic_task
+            self._ping_periodic_task = None
 
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
@@ -652,11 +661,7 @@ class SOEFChannel:
 
         :return: None
         """
-        if self._ping_periodic_task and not self._ping_periodic_task.done():
-            self._ping_periodic_task.cancel()
-            with suppress(asyncio.CancelledError):
-                await self._ping_periodic_task
-            self._ping_periodic_task = None
+        await self._stop_periodic_ping_task()
 
         assert self.in_queue, ValueError("Queue is not set, use connect first!")
         await self._unregister_agent()
