@@ -187,8 +187,8 @@ aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.3.0
+aea add connection fetchai/http_client:0.5.0
+aea add connection fetchai/webhook:0.4.0
 aea add connection fetchai/oef:0.6.0
 ```
 
@@ -323,8 +323,8 @@ aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.a
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.3.0
+aea add connection fetchai/http_client:0.5.0
+aea add connection fetchai/webhook:0.4.0
 aea add connection fetchai/oef:0.6.0
 ```
 
@@ -347,7 +347,7 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 Now you must ensure **Faber_AEA**'s default connection is `http_client`.
 
 ``` bash
-aea config set agent.default_connection fetchai/http_client:0.4.0
+aea config set agent.default_connection fetchai/http_client:0.5.0
 ```
 
 ### Alice_AEA -- Method 2: Fetch the Agent

@@ -60,7 +60,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.4.0"
+        cls.connection_id = "fetchai/http_client:0.5.0"
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
@@ -151,7 +151,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.4.0"
+        cls.connection_id = "fetchai/http_client:0.5.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -348,7 +348,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.4.0"
+        cls.connection_id = "fetchai/http_client:0.5.0"
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -416,7 +416,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.4.0"
+        cls.connection_id = "fetchai/http_client:0.5.0"
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.

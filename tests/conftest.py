@@ -159,7 +159,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.4.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.5.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -670,6 +670,7 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
     oef_connection = OEFConnection(
         configuration=configuration, identity=Identity("name", address),
     )
+    oef_connection._default_logger_name = "aea.packages.fetchai.connections.oef"
     return oef_connection
 
 
@@ -680,6 +681,9 @@ def _make_tcp_server_connection(address: str, host: str, port: int):
     tcp_connection = TCPServerConnection(
         configuration=configuration, identity=Identity("name", address),
     )
+    tcp_connection._default_logger_name = (
+        "aea.packages.fetchai.connections.tcp.tcp_server"
+    )
     return tcp_connection
 
 
@@ -689,6 +693,9 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
     )
     tcp_connection = TCPClientConnection(
         configuration=configuration, identity=Identity("name", address),
+    )
+    tcp_connection._default_logger_name = (
+        "aea.packages.fetchai.connections.tcp.tcp_client"
     )
     return tcp_connection
 

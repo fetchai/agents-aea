@@ -14,13 +14,13 @@ cd my_aea
 Add the http server connection package
 
 ``` bash
-aea add connection fetchai/http_server:0.4.0
+aea add connection fetchai/http_server:0.5.0
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.4.0
+aea config set agent.default_connection fetchai/http_server:0.5.0
 ```
 
 Modify the `api_spec_path`:

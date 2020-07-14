@@ -281,6 +281,8 @@ class Libp2pNode:
         self._reader_protocol = None  # type: Optional[asyncio.StreamReaderProtocol]
         self._fileobj = None  # type: Optional[IO[str]]
 
+        self.logger = logger
+
     @property
     def reader_protocol(self) -> asyncio.StreamReaderProtocol:
         """Get reader protocol."""
@@ -308,7 +310,7 @@ class Libp2pNode:
         logger.info("Downloading golang dependencies. This may take a while...")
         returncode = await _golang_module_build_async(self.source, self._log_file_desc)
         with open(self.log_file, "r") as f:
-            logger.debug(f.read())
+            self.logger.debug(f.read())
         node_log = ""
         with open(self.log_file, "r") as f:
             node_log = f.read()
@@ -318,12 +320,12 @@ class Libp2pNode:
                     returncode, node_log
                 )
             )
-        logger.info("Finished downloading golang dependencies.")
+        self.logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
         in_path = self.libp2p_to_aea_path
         out_path = self.aea_to_libp2p_path
-        logger.debug("Creating pipes ({}, {})...".format(in_path, out_path))
+        self.logger.debug("Creating pipes ({}, {})...".format(in_path, out_path))
         if os.path.exists(in_path):
             os.remove(in_path)
         if os.path.exists(out_path):
@@ -364,12 +366,12 @@ class Libp2pNode:
             )
 
         # run node
-        logger.info("Starting libp2p node...")
+        self.logger.info("Starting libp2p node...")
         self.proc = _golang_module_run(
             self.source, LIBP2P_NODE_MODULE_NAME, [self.env_file], self._log_file_desc
         )
 
-        logger.info("Connecting to libp2p node...")
+        self.logger.info("Connecting to libp2p node...")
         await self._connect()
 
     async def _connect(self) -> None:
@@ -380,13 +382,13 @@ class Libp2pNode:
         """
         if self._connection_attempts == 1:
             with open(self.log_file, "r") as f:
-                logger.debug("Couldn't connect to libp2p p2p process, logs:")
-                logger.debug(f.read())
+                self.logger.debug("Couldn't connect to libp2p p2p process, logs:")
+                self.logger.debug(f.read())
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
 
-        logger.debug(
+        self.logger.debug(
             "Attempt opening pipes {}, {}...".format(
                 self.libp2p_to_aea_path, self.aea_to_libp2p_path
             )
@@ -422,9 +424,9 @@ class Libp2pNode:
         self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self.reader_protocol, self._fileobj)
 
-        logger.info("Successfully connected to libp2p node!")
+        self.logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
-        logger.info("My libp2p addresses: {}".format(self.multiaddrs))
+        self.logger.info("My libp2p addresses: {}".format(self.multiaddrs))
 
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
@@ -448,7 +450,7 @@ class Libp2pNode:
             self._stream_reader is not None
         ), "StreamReader not set, call connect first!"
         try:
-            logger.debug("Waiting for messages...")
+            self.logger.debug("Waiting for messages...")
             buf = await self._stream_reader.readexactly(4)
             if not buf:
                 return None
@@ -458,7 +460,7 @@ class Libp2pNode:
                 return None
             return data
         except asyncio.streams.IncompleteReadError as e:
-            logger.info(
+            self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )
@@ -503,14 +505,14 @@ class Libp2pNode:
         """
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
-            logger.debug("Terminating node process {}...".format(self.proc.pid))
+            self.logger.debug("Terminating node process {}...".format(self.proc.pid))
             self.proc.terminate()
-            logger.debug(
+            self.logger.debug(
                 "Waiting for node process {} to terminate...".format(self.proc.pid)
             )
             self.proc.wait()
         else:
-            logger.debug("Called stop when process not set!")
+            self.logger.debug("Called stop when process not set!")
         if os.path.exists(LIBP2P_NODE_ENV_FILE):
             os.remove(LIBP2P_NODE_ENV_FILE)
 
@@ -630,6 +632,7 @@ class P2PLibp2pConnection(Connection):
         try:
             # start libp2p node
             self.connection_status.is_connecting = True
+            self.node.logger = self.logger
             await self.node.start()
             self.connection_status.is_connecting = False
             self.connection_status.is_connected = True
@@ -663,7 +666,7 @@ class P2PLibp2pConnection(Connection):
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
-            logger.debug("Called disconnect when input queue not initialized.")
+            self.logger.debug("Called disconnect when input queue not initialized.")
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -675,18 +678,18 @@ class P2PLibp2pConnection(Connection):
             assert self._in_queue is not None, "Input queue not initialized."
             data = await self._in_queue.get()
             if data is None:
-                logger.debug("Received None.")
+                self.logger.debug("Received None.")
                 self.node.stop()
                 self.connection_status.is_connected = False
                 return None
                 # TOFIX(LR) attempt restarting the node?
-            logger.debug("Received data: {}".format(data))
+            self.logger.debug("Received data: {}".format(data))
             return Envelope.decode(data)
         except CancelledError:
-            logger.debug("Receive cancelled.")
+            self.logger.debug("Receive cancelled.")
             return None
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception(e)
+            self.logger.exception(e)
             return None
 
     async def send(self, envelope: Envelope):

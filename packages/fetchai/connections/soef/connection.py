@@ -847,15 +847,15 @@ class SOEFConnection(Connection):
             assert self.in_queue is not None
             envelope = await self.in_queue.get()
             if envelope is None:  # pragma: nocover
-                logger.debug("Received None.")
+                self.logger.debug("Received None.")
                 return None
-            logger.debug("Received envelope: {}".format(envelope))
+            self.logger.debug("Received envelope: {}".format(envelope))
             return envelope
         except CancelledError:
-            logger.debug("Receive cancelled.")
+            self.logger.debug("Receive cancelled.")
             return None
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception(e)
+            self.logger.exception(e)
             return None
 
     async def send(self, envelope: "Envelope") -> None:

@@ -67,7 +67,7 @@ SERVER_ERROR = 500
 logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = str
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.5.0")
 
 
 def headers_to_string(headers: Dict):
@@ -348,6 +348,8 @@ class HTTPChannel(BaseAsyncChannel):
         self.http_server: Optional[web.TCPSite] = None
         self.pending_requests: Dict[RequestId, Future] = {}
 
+        self.logger = logger
+
     @property
     def api_spec(self) -> APISpec:
         """Get the api spec."""
@@ -368,11 +370,13 @@ class HTTPChannel(BaseAsyncChannel):
 
             try:
                 await self._start_http_server()
-                logger.info("HTTP Server has connected to port: {}.".format(self.port))
+                self.logger.info(
+                    "HTTP Server has connected to port: {}.".format(self.port)
+                )
             except Exception:  # pragma: nocover # pylint: disable=broad-except
                 self.is_stopped = True
                 self._in_queue = None
-                logger.exception(
+                self.logger.exception(
                     "Failed to start server on {}:{}.".format(self.host, self.port)
                 )
 
@@ -390,7 +394,7 @@ class HTTPChannel(BaseAsyncChannel):
         is_valid_request = self.api_spec.verify(request)
 
         if not is_valid_request:
-            logger.warning(f"request is not valid: {request}")
+            self.logger.warning(f"request is not valid: {request}")
             return Response(status=NOT_FOUND, reason="Request Not Found")
 
         try:
@@ -433,7 +437,7 @@ class HTTPChannel(BaseAsyncChannel):
         assert self.http_server is not None, "Server not connected, call connect first!"
 
         if envelope.protocol_id not in self.restricted_to_protocols:
-            logger.error(
+            self.logger.error(
                 "This envelope cannot be sent with the http connection: protocol_id={}".format(
                     envelope.protocol_id
                 )
@@ -443,7 +447,7 @@ class HTTPChannel(BaseAsyncChannel):
         future = self.pending_requests.pop(envelope.to, None)
 
         if not future:
-            logger.warning(
+            self.logger.warning(
                 "Dropping envelope for request id {} which has timed out.".format(
                     envelope.to
                 )
@@ -461,7 +465,7 @@ class HTTPChannel(BaseAsyncChannel):
 
         if not self.is_stopped:
             await self.http_server.stop()
-            logger.info("HTTP Server has shutdown on port: {}.".format(self.port))
+            self.logger.info("HTTP Server has shutdown on port: {}.".format(self.port))
             self.is_stopped = True
             self._in_queue = None
 
@@ -494,6 +498,7 @@ class HTTPServerConnection(Connection):
         :return: None
         """
         if not self.connection_status.is_connected:
+            self.channel.logger = self.logger
             await self.channel.connect(loop=self.loop)
             self.connection_status.is_connected = not self.channel.is_stopped
 

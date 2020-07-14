@@ -32,6 +32,7 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
+from aea.helpers.logging import WithLogger
 from aea.skills.base import Behaviour, Handler, Model
 
 logger = logging.getLogger(__name__)
@@ -41,8 +42,12 @@ ItemId = TypeVar("ItemId")
 SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 
 
-class Registry(Generic[ItemId, Item], ABC):
+class Registry(Generic[ItemId, Item], WithLogger, ABC):
     """This class implements an abstract registry."""
+
+    def __init__(self):
+        """Initialize the registry."""
+        super().__init__(logger)
 
     @abstractmethod
     def register(self, item_id: ItemId, item: Item) -> None:
@@ -108,6 +113,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :return: None
         """
+        super().__init__()
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
@@ -157,7 +163,9 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         )
         self._registered_keys.discard(component_id)
         if item is not None:
-            logger.debug("Component '{}' has been removed.".format(item.component_id))
+            self.logger.debug(
+                "Component '{}' has been removed.".format(item.component_id)
+            )
 
     def unregister(
         self, component_id: ComponentId
@@ -236,6 +244,7 @@ class ComponentRegistry(
 
         :return: None
         """
+        super().__init__()
         self._items = {}  # type: Dict[SkillId, Dict[str, SkillComponentType]]
 
     def register(self, item_id: Tuple[SkillId, str], item: SkillComponentType) -> None:
@@ -272,7 +281,7 @@ class ComponentRegistry(
             raise ValueError(
                 "No item registered with component id '{}'".format(item_id)
             )
-        logger.debug("Unregistering item with id {}".format(item_id))
+        self.logger.debug("Unregistering item with id {}".format(item_id))
         name_to_item.pop(item_name)
 
         if len(name_to_item) == 0:
@@ -315,14 +324,14 @@ class ComponentRegistry(
         """
         for item in self.fetch_all():
             if item.context.is_active:
-                logger.debug(
+                self.logger.debug(
                     "Calling setup() of component {} of skill {}".format(
                         item.name, item.skill_id
                     )
                 )
                 item.setup()
             else:
-                logger.debug(
+                self.logger.debug(
                     "Ignoring setup() of component {} of skill {}, because the skill is not active.".format(
                         item.name, item.skill_id
                     )
@@ -339,7 +348,7 @@ class ComponentRegistry(
                 try:
                     item.teardown()
                 except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-                    logger.warning(
+                    self.logger.warning(
                         "An error occurred while tearing down item {}/{}: {}".format(
                             skill_id, type(item).__name__, str(e)
                         )
@@ -411,7 +420,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
             raise ValueError(
                 "No item registered with component id '{}'".format(item_id)
             )
-        logger.debug("Unregistering item with id {}".format(item_id))
+        self.logger.debug("Unregistering item with id {}".format(item_id))
         handler = name_to_item.pop(item_name)
 
         if len(name_to_item) == 0:

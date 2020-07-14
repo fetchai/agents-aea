@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the p2p stub connection."""
 
-import logging
 import os
 import tempfile
 from pathlib import Path
@@ -29,9 +28,7 @@ from aea.connections.stub.connection import StubConnection, write_envelope
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-logger = logging.getLogger(__name__)
-
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.4.0")
 
 
 class P2PStubConnection(StubConnection):
