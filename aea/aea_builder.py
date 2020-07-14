@@ -880,12 +880,12 @@ class AEABuilder:
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
         identity = self._build_identity_from_wallet(wallet)
-        self._load_and_add_components(ComponentType.PROTOCOL, resources, identity)
-        self._load_and_add_components(ComponentType.CONTRACT, resources, identity)
+        self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)
+        self._load_and_add_components(ComponentType.CONTRACT, resources, identity.name)
         self._load_and_add_components(
             ComponentType.CONNECTION,
             resources,
-            identity,
+            identity.name,
             identity=identity,
             crypto_store=wallet.connection_cryptos,
         )
@@ -910,7 +910,7 @@ class AEABuilder:
             **deepcopy(self._context_namespace),
         )
         self._load_and_add_components(
-            ComponentType.SKILL, resources, identity, agent_context=aea.context
+            ComponentType.SKILL, resources, identity.name, agent_context=aea.context
         )
         self._build_called = True
         self._populate_contract_registry()
@@ -1351,7 +1351,7 @@ class AEABuilder:
         self,
         component_type: ComponentType,
         resources: Resources,
-        aea_identity: Identity,
+        agent_name: str,
         **kwargs,
     ) -> None:
         """
@@ -1359,7 +1359,7 @@ class AEABuilder:
 
         :param component_type: the component type for which
         :param resources: the resources object to populate.
-        :param aea_identity: the identity of the AEA.
+        :param agent_name: the AEA name for logging purposes.
         :param kwargs: keyword argument to forward to the component loader.
         :return: None
         """
@@ -1376,7 +1376,7 @@ class AEABuilder:
                 configuration = deepcopy(configuration)
                 component = load_component_from_config(configuration, **kwargs)
 
-            _set_logger_to_component(component, configuration, aea_identity)
+            _set_logger_to_component(component, configuration, agent_name)
             resources.add_component(component)
 
     def _populate_contract_registry(self):
@@ -1424,21 +1424,21 @@ class AEABuilder:
 
 
 def _set_logger_to_component(
-    component: Component, configuration: ComponentConfiguration, identity: Identity,
+    component: Component, configuration: ComponentConfiguration, agent_name: str,
 ) -> None:
     """
     Set the logger to the component.
 
     :param component: the component instance.
     :param configuration: the component configuration
-    :param identity: the identity object of the AEA.
+    :param agent_name: the agent name
     :return: None
     """
     if configuration.component_type == ComponentType.SKILL:
         # skip because skill object already have their own logger from the skill context.
         return
     logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
-    logger = AgentLoggerAdapter(logging.getLogger(logger_name), identity.name)
+    logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
     component.logger = logger
 
 

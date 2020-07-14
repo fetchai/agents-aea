@@ -88,7 +88,6 @@ class HTTPClientAsyncChannel:
         self._tasks: Set[Task] = set()
 
         self.logger = logger
-        # TODO logger at this point is the module-level one, not with the agent name.
         self.logger.info("Initialised the HTTP client channel")
 
     async def connect(self, loop: AbstractEventLoop) -> None:
