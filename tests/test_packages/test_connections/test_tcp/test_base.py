@@ -63,7 +63,7 @@ async def test_connect_raises_exception(caplog):
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
 
-    with caplog.at_level(logging.ERROR, "packages.fetchai.connections.tcp.base.logger"):
+    with caplog.at_level(logging.ERROR, "aea.packages.fetchai.connections.tcp"):
         with unittest.mock.patch.object(
             tcp_connection, "setup", side_effect=Exception("error during setup")
         ):

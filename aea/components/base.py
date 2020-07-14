@@ -49,7 +49,7 @@ class Component(ABC, WithLogger):
         :param configuration: the package configuration.
         :param is_vendor: whether the package is vendorized.
         """
-        WithLogger.__init__(self, logging.getLogger("aea"))
+        WithLogger.__init__(self)
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor
