@@ -35,7 +35,7 @@ from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_client:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_client:0.3.0")
 
 
 class PeerToPeerChannel:
@@ -63,7 +63,8 @@ class PeerToPeerChannel:
         self.thread = Thread(target=self.receiving_loop)
         self.lock = threading.Lock()
         self.stopped = True
-        logger.info("Initialised the peer to peer channel")
+        self.logger = logger
+        self.logger.info("Initialised the peer to peer channel")
 
     def connect(self):
         """
@@ -78,18 +79,18 @@ class PeerToPeerChannel:
                 )
                 self.stopped = False
                 self.thread.start()
-                logger.debug("P2P Channel is connected.")
+                self.logger.debug("P2P Channel is connected.")
                 self.try_register()
 
     def try_register(self) -> bool:
         """Try to register to the provider."""
         try:
             assert self._httpCall is not None
-            logger.info(self.address)
+            self.logger.info(self.address)
             query = self._httpCall.register(sender_address=self.address, mailbox=True)
             return query["status"] == "OK"
         except Exception:  # pragma: no cover
-            logger.warning("Could not register to the provider.")
+            self.logger.warning("Could not register to the provider.")
             raise AEAConnectionError()
 
     def send(self, envelope: Envelope) -> None:
@@ -103,7 +104,7 @@ class PeerToPeerChannel:
 
         if self.excluded_protocols is not None:
             if envelope.protocol_id in self.excluded_protocols:  # pragma: nocover
-                logger.error(
+                self.logger.error(
                     "This envelope cannot be sent with the oef connection: protocol_id={}".format(
                         envelope.protocol_id
                     )
@@ -128,7 +129,7 @@ class PeerToPeerChannel:
                 sender_address=self.address
             )  # type: List[Dict[str, Any]]
             for message in messages:
-                logger.debug("Received message: {}".format(message))
+                self.logger.debug("Received message: {}".format(message))
                 envelope = Envelope(
                     to=message["TO"]["RECEIVER_ADDRESS"],
                     sender=message["FROM"]["SENDER_ADDRESS"],
@@ -137,7 +138,7 @@ class PeerToPeerChannel:
                 )
                 self.loop.call_soon_threadsafe(self.in_queue.put_nowait, envelope)
             time.sleep(0.5)
-        logger.debug("Receiving loop stopped.")
+        self.logger.debug("Receiving loop stopped.")
 
     def disconnect(self) -> None:
         """
@@ -174,6 +175,7 @@ class PeerToPeerClientConnection(Connection):
         :return: None
         """
         if not self.connection_status.is_connected:
+            self.channel.logger = self.logger
             self.connection_status.is_connected = True
             self.channel.in_queue = asyncio.Queue()
             self.channel.loop = self.loop

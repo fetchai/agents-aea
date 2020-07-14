@@ -53,7 +53,6 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import UseOef
 
-import packages
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -1063,7 +1062,7 @@ class TestSendWithOEF(UseOef):
         await oef_connection.disconnect()
 
     @pytest.mark.asyncio
-    async def test_cancelled_receive(self, pytestconfig):
+    async def test_cancelled_receive(self, pytestconfig, caplog):
         """Test the case when a receive request is cancelled."""
         oef_connection = _make_oef_connection(
             address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
@@ -1071,21 +1070,18 @@ class TestSendWithOEF(UseOef):
         oef_connection.loop = asyncio.get_event_loop()
         await oef_connection.connect()
 
-        patch = unittest.mock.patch.object(
-            packages.fetchai.connections.oef.connection.logger, "debug"
-        )
-        mocked_logger_debug = patch.start()
+        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
 
-        async def receive():
-            await oef_connection.receive()
+            async def receive():
+                await oef_connection.receive()
 
-        task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
-        await asyncio.sleep(0.1)
-        task.cancel()
-        await asyncio.sleep(0.1)
-        await oef_connection.disconnect()
+            task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
+            await asyncio.sleep(0.1)
+            task.cancel()
+            await asyncio.sleep(0.1)
+            await oef_connection.disconnect()
 
-        mocked_logger_debug.assert_called_once_with("Receive cancelled.")
+            assert "Receive cancelled." in caplog.text
 
     @pytest.mark.asyncio
     async def test_exception_during_receive(self, pytestconfig):
@@ -1125,7 +1121,7 @@ class TestSendWithOEF(UseOef):
 @pytest.mark.skipif(
     sys.version_info < (3, 7), reason="Python version < 3.7 not supported by the OEF."
 )
-async def test_cannot_connect_to_oef():
+async def test_cannot_connect_to_oef(caplog):
     """Test the case when we can't connect to the OEF."""
     oef_connection = _make_oef_connection(
         address=FETCHAI_ADDRESS_ONE,
@@ -1133,20 +1129,16 @@ async def test_cannot_connect_to_oef():
         oef_port=61234,  # use addr instead of hostname to avoid name resolution
     )
 
-    patch = unittest.mock.patch.object(
-        packages.fetchai.connections.oef.connection.logger, "warning"
-    )
-    mocked_logger_warning = patch.start()
+    with caplog.at_level(logging.DEBUG, logger="aea.packages.fetchai.connections.oef"):
 
-    task = asyncio.ensure_future(
-        oef_connection.connect(), loop=asyncio.get_event_loop()
-    )
-    await asyncio.sleep(3.0)
-    mocked_logger_warning.assert_called_with(
-        "Cannot connect to OEFChannel. Retrying in 5 seconds..."
-    )
-    await cancel_and_wait(task)
-    await oef_connection.disconnect()
+        task = asyncio.ensure_future(
+            oef_connection.connect(), loop=asyncio.get_event_loop()
+        )
+        await asyncio.sleep(3.0)
+        assert "Cannot connect to OEFChannel. Retrying in 5 seconds..." in caplog.text
+
+        await cancel_and_wait(task)
+        await oef_connection.disconnect()
 
 
 @pytest.mark.asyncio

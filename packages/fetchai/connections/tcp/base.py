@@ -76,14 +76,14 @@ class TCPConnection(Connection, ABC):
         :raises ConnectionError: if a problem occurred during the connection.
         """
         if self.connection_status.is_connected:
-            logger.warning("Connection already set up.")
+            self.logger.warning("Connection already set up.")
             return
 
         try:
             await self.setup()
             self.connection_status.is_connected = True
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.error(str(e))
+            self.logger.error(str(e))
             self.connection_status.is_connected = False
 
     async def disconnect(self) -> None:
@@ -93,7 +93,7 @@ class TCPConnection(Connection, ABC):
         :return: None.
         """
         if not self.connection_status.is_connected:
-            logger.warning("Connection already disconnected.")
+            self.logger.warning("Connection already disconnected.")
             return
 
         await self.teardown()
@@ -113,9 +113,9 @@ class TCPConnection(Connection, ABC):
         return data
 
     async def _send(self, writer, data):
-        logger.debug("[{}] Send a message".format(self.address))
+        self.logger.debug("[{}] Send a message".format(self.address))
         nbytes = struct.pack("I", len(data))
-        logger.debug("#bytes: {!r}".format(nbytes))
+        self.logger.debug("#bytes: {!r}".format(nbytes))
         try:
             writer.write(nbytes)
             writer.write(data)
@@ -135,4 +135,6 @@ class TCPConnection(Connection, ABC):
             data = envelope.encode()
             await self._send(writer, data)
         else:
-            logger.error("[{}]: Cannot send envelope {}".format(self.address, envelope))
+            self.logger.error(
+                "[{}]: Cannot send envelope {}".format(self.address, envelope)
+            )

@@ -20,6 +20,7 @@
 """This module contains the tests for the TCP connection communication."""
 
 import asyncio
+import logging
 import struct
 import unittest.mock
 
@@ -28,8 +29,6 @@ import pytest
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
-
-import packages
 
 from tests.conftest import (
     _make_tcp_client_connection,
@@ -157,7 +156,7 @@ class TestTCPClientConnection:
     """Test TCP Client code."""
 
     @pytest.mark.asyncio
-    async def test_receive_cancelled(self):
+    async def test_receive_cancelled(self, caplog):
         """Test that cancelling a receive task works correctly."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
@@ -166,23 +165,21 @@ class TestTCPClientConnection:
         await tcp_server.connect()
         await tcp_client.connect()
 
-        with unittest.mock.patch.object(
-            packages.fetchai.connections.tcp.tcp_client.logger, "debug"
-        ) as mock_logger_debug:
+        with caplog.at_level(
+            logging.DEBUG, "aea.packages.fetchai.connections.tcp.tcp_client"
+        ):
             task = asyncio.ensure_future(tcp_client.receive())
             await asyncio.sleep(0.1)
             task.cancel()
             await asyncio.sleep(0.1)
-            mock_logger_debug.assert_called_with(
-                "[{}] Read cancelled.".format("address_client")
-            )
+            assert "[{}] Read cancelled.".format("address_client") in caplog.text
             assert task.result() is None
 
         await tcp_client.disconnect()
         await tcp_server.disconnect()
 
     @pytest.mark.asyncio
-    async def test_receive_raises_struct_error(self):
+    async def test_receive_raises_struct_error(self, caplog):
         """Test the case when a receive raises a struct error."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
@@ -191,15 +188,15 @@ class TestTCPClientConnection:
         await tcp_server.connect()
         await tcp_client.connect()
 
-        with unittest.mock.patch.object(
-            packages.fetchai.connections.tcp.tcp_client.logger, "debug"
-        ) as mock_logger_debug:
+        with caplog.at_level(
+            logging.DEBUG, "aea.packages.fetchai.connections.tcp.tcp_client"
+        ):
             with unittest.mock.patch.object(
                 tcp_client, "_recv", side_effect=struct.error
             ):
                 task = asyncio.ensure_future(tcp_client.receive())
                 await asyncio.sleep(0.1)
-                mock_logger_debug.assert_called_with("Struct error: ")
+                assert "Struct error: " in caplog.text
                 assert task.result() is None
 
         await tcp_client.disconnect()
@@ -231,7 +228,7 @@ class TestTCPServerConnection:
     """Test TCP Server code."""
 
     @pytest.mark.asyncio
-    async def test_receive_raises_exception(self):
+    async def test_receive_raises_exception(self, caplog):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
@@ -240,17 +237,15 @@ class TestTCPServerConnection:
         await tcp_server.connect()
         await tcp_client.connect()
         await asyncio.sleep(0.1)
-        with unittest.mock.patch.object(
-            packages.fetchai.connections.tcp.tcp_server.logger, "error"
-        ) as mock_logger_error:
+        with caplog.at_level(
+            logging.DEBUG, "aea.packages.fetchai.connections.tcp.tcp_server"
+        ):
             with unittest.mock.patch(
                 "asyncio.wait", side_effect=Exception("generic exception")
             ):
                 result = await tcp_server.receive()
                 assert result is None
-                mock_logger_error.assert_called_with(
-                    "Error in the receiving loop: generic exception"
-                )
+                assert "Error in the receiving loop: generic exception" in caplog.text
 
         await tcp_client.disconnect()
         await tcp_server.disconnect()

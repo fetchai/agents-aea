@@ -139,6 +139,8 @@ class OEFChannel(OEFAgent):
 
         self._threaded_pool = ThreadPoolExecutor(self.THREAD_POOL_SIZE)
 
+        self.aea_logger = logger
+
     async def _run_in_executor(self, fn, *args):
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
 
@@ -193,7 +195,7 @@ class OEFChannel(OEFAgent):
         :return: None
         """
         self._check_loop_and_queue()
-        logger.warning(
+        self.aea_logger.warning(
             "Dropping incompatible on_cfp: msg_id={}, dialogue_id={}, origin={}, target={}, query={}".format(
                 msg_id, dialogue_id, origin, target, query
             )
@@ -218,7 +220,7 @@ class OEFChannel(OEFAgent):
         :return: None
         """
         self._check_loop_and_queue()
-        logger.warning(
+        self.aea_logger.warning(
             "Dropping incompatible on_propose: msg_id={}, dialogue_id={}, origin={}, target={}".format(
                 msg_id, dialogue_id, origin, target
             )
@@ -237,7 +239,7 @@ class OEFChannel(OEFAgent):
         :return: None
         """
         self._check_loop_and_queue()
-        logger.warning(
+        self.aea_logger.warning(
             "Dropping incompatible on_accept: msg_id={}, dialogue_id={}, origin={}, target={}".format(
                 msg_id, dialogue_id, origin, target
             )
@@ -256,7 +258,7 @@ class OEFChannel(OEFAgent):
         :return: None
         """
         self._check_loop_and_queue()
-        logger.warning(
+        self.aea_logger.warning(
             "Dropping incompatible on_decline: msg_id={}, dialogue_id={}, origin={}, target={}".format(
                 msg_id, dialogue_id, origin, target
             )
@@ -273,13 +275,13 @@ class OEFChannel(OEFAgent):
         self._check_loop_and_queue()
         oef_search_dialogue = self.oef_msg_id_to_dialogue.pop(search_id, None)
         if oef_search_dialogue is None:
-            logger.warning(
+            self.aea_logger.warning(
                 "Could not find dialogue for search_id={}".format(search_id)
             )  # pragma: nocover
             return  # pragma: nocover
         last_msg = oef_search_dialogue.last_incoming_message
         if last_msg is None:
-            logger.warning("Could not find last message.")  # pragma: nocover
+            self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
@@ -315,13 +317,13 @@ class OEFChannel(OEFAgent):
             operation = OefSearchMessage.OefErrorOperation.OTHER
         oef_search_dialogue = self.oef_msg_id_to_dialogue.pop(answer_id, None)
         if oef_search_dialogue is None:
-            logger.warning(
+            self.aea_logger.warning(
                 "Could not find dialogue for answer_id={}".format(answer_id)
             )  # pragma: nocover
             return  # pragma: nocover
         last_msg = oef_search_dialogue.last_incoming_message
         if last_msg is None:
-            logger.warning("Could not find last message.")  # pragma: nocover
+            self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.OEF_ERROR,
@@ -378,7 +380,7 @@ class OEFChannel(OEFAgent):
         """
         if self.excluded_protocols is not None:  # pragma: nocover
             if envelope.protocol_id in self.excluded_protocols:
-                logger.error(
+                self.aea_logger.error(
                     "This envelope cannot be sent with the oef connection: protocol_id={}".format(
                         envelope.protocol_id
                     )
@@ -412,7 +414,7 @@ class OEFChannel(OEFAgent):
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )
         if oef_search_dialogue is None:
-            logger.warning(
+            self.aea_logger.warning(
                 "Could not create dialogue for message={}".format(oef_message)
             )  # pragma: nocover
             return  # pragma: nocover
@@ -443,7 +445,7 @@ class OEFChannel(OEFAgent):
         self, exception: Exception, conn
     ) -> None:
         """Handle failure."""
-        logger.exception(exception)  # pragma: nocover
+        self.aea_logger.exception(exception)  # pragma: nocover
 
     async def _set_loop_and_queue(self):
         self._loop = asyncio.get_event_loop()
@@ -474,7 +476,9 @@ class OEFChannel(OEFAgent):
                 )
                 if is_connected:
                     return
-                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds...")
+                self.aea_logger.warning(
+                    "Cannot connect to OEFChannel. Retrying in 5 seconds..."
+                )
                 await asyncio.sleep(self.CONNECT_RETRY_DELAY)
 
             raise ValueError("Connect attempts limit!")  # pragma: nocover
@@ -538,6 +542,7 @@ class OEFConnection(Connection):
         if self.connection_status.is_connected:
             return
         try:
+            self.channel.aea_logger = self.logger
             self.connection_status.is_connecting = True
             self._loop = asyncio.get_event_loop()
             await self.channel.connect()
@@ -563,12 +568,14 @@ class OEFConnection(Connection):
             if not self.channel.get_state() == "connected":  # pragma: no cover
                 self.connection_status.is_connected = False
                 self.connection_status.is_connecting = True
-                logger.warning(
+                self.logger.warning(
                     "Lost connection to OEFChannel. Retrying to connect soon ..."
                 )
                 await self.channel.connect()
                 self.connection_status.is_connected = True
-                logger.warning("Successfully re-established connection to OEFChannel.")
+                self.logger.warning(
+                    "Successfully re-established connection to OEFChannel."
+                )
 
     async def disconnect(self) -> None:
         """
@@ -595,15 +602,15 @@ class OEFConnection(Connection):
         try:
             envelope = await self.channel.get()
             if envelope is None:
-                logger.debug("Received None.")
+                self.logger.debug("Received None.")
                 return None
-            logger.debug("Received envelope: {}".format(envelope))
+            self.logger.debug("Received envelope: {}".format(envelope))
             return envelope
         except CancelledError:
-            logger.debug("Receive cancelled.")
+            self.logger.debug("Receive cancelled.")
             return None
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception(e)
+            self.logger.exception(e)
             return None
 
     async def send(self, envelope: "Envelope") -> None:

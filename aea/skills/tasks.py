@@ -25,6 +25,8 @@ from abc import abstractmethod
 from multiprocessing.pool import AsyncResult, Pool
 from typing import Any, Callable, Dict, Optional, Sequence, cast
 
+from aea.helpers.logging import WithLogger
+
 logger = logging.getLogger(__name__)
 
 
@@ -120,7 +122,7 @@ def init_worker() -> None:
     # signal.signal(signal.CTRL_C_EVENT, signal.SIG_IGN)
 
 
-class TaskManager:
+class TaskManager(WithLogger):
     """A Task manager."""
 
     def __init__(self, nb_workers: int = 1, is_lazy_pool_start: bool = True):
@@ -130,6 +132,7 @@ class TaskManager:
         :param nb_workers: the number of worker processes.
         :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
         """
+        WithLogger.__init__(self, logger)
         self._nb_workers = nb_workers
         self._is_lazy_pool_start = is_lazy_pool_start
         self._pool = None  # type: Optional[Pool]
@@ -207,9 +210,9 @@ class TaskManager:
         """
         with self._lock:
             if self._stopped is False:
-                logger.debug("Task manager already running.")
+                self.logger.debug("Task manager already running.")
             else:
-                logger.debug("Start the task manager.")
+                self.logger.debug("Start the task manager.")
                 self._stopped = False
                 if not self._is_lazy_pool_start:
                     self._start_pool()
@@ -222,9 +225,9 @@ class TaskManager:
         """
         with self._lock:
             if self._stopped is True:
-                logger.debug("Task manager already stopped.")
+                self.logger.debug("Task manager already stopped.")
             else:
-                logger.debug("Stop the task manager.")
+                self.logger.debug("Stop the task manager.")
                 self._stopped = True
                 self._stop_pool()
 
@@ -237,7 +240,7 @@ class TaskManager:
         :return: None
         """
         if self._pool:
-            logger.debug("Pool was already started!.")
+            self.logger.debug("Pool was already started!.")
             return
         self._pool = Pool(self._nb_workers, initializer=init_worker)
 
@@ -248,7 +251,7 @@ class TaskManager:
         :return: None
         """
         if not self._pool:
-            logger.debug("Pool is not started!.")
+            self.logger.debug("Pool is not started!.")
             return
 
         self._pool = cast(Pool, self._pool)

@@ -42,7 +42,7 @@ RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.4.0")
 
 
 class LocalNode:
@@ -368,9 +368,9 @@ class OEFLocalConnection(Connection):
             assert self._reader is not None
             envelope = await self._reader.get()
             if envelope is None:
-                logger.debug("Receiving task terminated.")
+                self.logger.debug("Receiving task terminated.")
                 return None
-            logger.debug("Received envelope {}".format(envelope))
+            self.logger.debug("Received envelope {}".format(envelope))
             return envelope
         except Exception:  # pragma: nocover # pylint: disable=broad-except
             return None
