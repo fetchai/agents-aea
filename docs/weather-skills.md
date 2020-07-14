@@ -70,7 +70,7 @@ trusts the seller AEA to send the data upon successful payment.
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.6.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.7.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -82,11 +82,11 @@ The following steps create the weather station from scratch:
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/weather_station:0.5.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/weather_station:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 In `weather_station/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -98,7 +98,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 
 </p>
@@ -109,7 +109,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.6.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.7.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -121,11 +121,11 @@ The following steps create the weather client from scratch:
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/weather_client:0.4.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/weather_client:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 In `my_weather_client/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -139,7 +139,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 
 </p>

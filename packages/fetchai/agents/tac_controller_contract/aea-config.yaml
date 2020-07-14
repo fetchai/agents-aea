@@ -1,6 +1,6 @@
 agent_name: tac_controller_contract
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: An AEA to manage an instance of the TAC (trading agent competition) using
   an ERC1155 smart contract.
 license: Apache-2.0
@@ -8,7 +8,7 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/oef:0.5.0
+- fetchai/oef:0.6.0
 - fetchai/stub:0.6.0
 contracts:
 - fetchai/erc1155:0.6.0
@@ -20,7 +20,7 @@ protocols:
 skills:
 - fetchai/error:0.3.0
 - fetchai/tac_control_contract:0.4.0
-default_connection: fetchai/oef:0.5.0
+default_connection: fetchai/oef:0.6.0
 default_ledger: ethereum
 ledger_apis:
   ethereum:

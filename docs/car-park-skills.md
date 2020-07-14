@@ -64,7 +64,7 @@ Keep it running for all the following.
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.6.0
+aea fetch fetchai/car_detector:0.7.0
 cd car_detector
 aea install
 ```
@@ -76,11 +76,11 @@ The following steps create the car detector from scratch:
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/carpark_detection:0.5.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/carpark_detection:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 In `car_detector/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -92,7 +92,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 
 </p>
@@ -102,7 +102,7 @@ default_routing:
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.6.0
+aea fetch fetchai/car_data_buyer:0.7.0
 cd car_data_buyer
 aea install
 ```
@@ -114,11 +114,11 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/oef:0.5.0
-aea add connection fetchai/ledger:0.1.0
-aea add skill fetchai/carpark_client:0.5.0
+aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/ledger:0.2.0
+aea add skill fetchai/carpark_client:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 In `car_data_buyer/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -132,7 +132,7 @@ ledger_apis:
 and add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.1.0
+  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 
 </p>
