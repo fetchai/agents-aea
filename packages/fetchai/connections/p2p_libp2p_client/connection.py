@@ -108,7 +108,7 @@ class P2PLibp2pClientConnection(Connection):
             and self.crypto_store.crypto_objects.get("fetchai", None) is not None
         ):  # pragma: no cover
             key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
-        elif key_file is not None:
+        elif key_file is not None:  # pragma: no cover
             key = FetchAICrypto(key_file)
         else:
             key = FetchAICrypto()
@@ -174,7 +174,7 @@ class P2PLibp2pClientConnection(Connection):
             self._process_messages_task = asyncio.ensure_future(
                 self._process_messages(), loop=self._loop
             )
-        except (CancelledError, Exception) as e:
+        except (CancelledError, Exception) as e:  # pragma: no cover
             self.connection_status.is_connected = False
             raise e
 
@@ -229,7 +229,7 @@ class P2PLibp2pClientConnection(Connection):
                     self._connection_status.is_connected
                     or self._connection_status.is_connecting
                 ):
-                    await self.disconnect()
+                    await self.disconnect()  # pragma: no cover
                 return None
                 # TOFIX(LR) attempt restarting the node?
             logger.debug("Received data: {}".format(data))
@@ -260,7 +260,7 @@ class P2PLibp2pClientConnection(Connection):
             assert self._in_queue is not None, "Input queue not initialized."
             self._in_queue.put_nowait(data)
             if data is None:
-                break
+                break  # pragma: no cover
 
     async def _send(self, data: bytes) -> None:
         assert self._writer is not None
@@ -281,7 +281,7 @@ class P2PLibp2pClientConnection(Connection):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:
+        except asyncio.streams.IncompleteReadError as e:  # pragma: no cover
             logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected

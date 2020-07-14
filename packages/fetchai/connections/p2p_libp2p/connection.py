@@ -150,7 +150,7 @@ class AwaitableProc:
         self._thread.start()
         try:
             return await asyncio.shield(self.future)
-        except asyncio.CancelledError:
+        except asyncio.CancelledError:  # pragma: no cover
             self.proc.terminate()
             return await self.future
         finally:
@@ -454,7 +454,7 @@ class Libp2pNode:
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:
+        except asyncio.streams.IncompleteReadError as e:  # pragma: no cover
             logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
@@ -705,7 +705,7 @@ class P2PLibp2pConnection(Connection):
             assert self._in_queue is not None, "Input queue not initialized."
             self._in_queue.put_nowait(data)
             if data is None:
-                break
+                break  # pragma: no cover
 
     @staticmethod
     def _check_go_installed() -> None:
