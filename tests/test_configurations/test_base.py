@@ -462,7 +462,7 @@ def test_component_id_prefix_import_path():
 
 def test_component_configuration_load_file_not_found():
     """Test Component.load when a file is not found."""
-    with mock.patch(f"builtins.open", side_effect=FileNotFoundError):
+    with mock.patch("builtins.open", side_effect=FileNotFoundError):
         with pytest.raises(FileNotFoundError):
             ComponentConfiguration.load(
                 ComponentType.PROTOCOL, mock.MagicMock(spec=Path)

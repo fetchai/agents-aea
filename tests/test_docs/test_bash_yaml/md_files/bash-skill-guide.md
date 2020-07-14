@@ -34,16 +34,16 @@ aea fingerprint skill fetchai/my_search:0.1.0
 aea add protocol fetchai/oef_search:0.3.0
 ```
 ``` bash
-aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/oef:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.6.0 && cd simple_service_registration
-aea run --connections fetchai/oef:0.5.0
+aea fetch fetchai/simple_service_registration:0.7.0 && cd simple_service_registration
+aea run --connections fetchai/oef:0.6.0
 ```
 ``` yaml
 name: simple_service_registration
@@ -86,5 +86,5 @@ models:
 dependencies: {}
 ```
 ```bash
-aea run --connections fetchai/oef:0.5.0
+aea run --connections fetchai/oef:0.6.0
 ```

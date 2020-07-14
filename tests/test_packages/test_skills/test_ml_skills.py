@@ -41,14 +41,14 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         model_trainer_aea_name = "ml_model_trainer"
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.6.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -59,10 +59,10 @@ class TestMLSkills(AEATestCaseMany, UseOef):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/ml_train:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/ml_train:0.6.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -131,14 +131,14 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         ledger_apis = {"fetchai": {"network": "testnet"}}
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.6.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         setting_path = "agent.default_routing"
@@ -146,7 +146,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.6.0", data_provider_aea_name
+            "fetchai/ml_data_provider:0.7.0", data_provider_aea_name
         )
         assert (
             diff == []
@@ -154,10 +154,10 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/ml_train:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/ml_train:0.6.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         setting_path = "agent.default_routing"
@@ -165,7 +165,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.6.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.7.0", model_trainer_aea_name
         )
         assert (
             diff == []

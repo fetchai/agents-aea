@@ -55,7 +55,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.6.0")
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -457,7 +457,7 @@ class OEFChannel(OEFAgent):
         assert self.in_queue is not None
         assert self.loop is not None
 
-    async def connect(self) -> None:
+    async def connect(self) -> None:  # pylint: disable=invalid-overridden-method
         """Connect channel."""
         await self._set_loop_and_queue()
         self.core.__init__(loop=self._loop, logger=logger)
@@ -491,7 +491,7 @@ class OEFChannel(OEFAgent):
         """
         return super().connect(timeout)
 
-    async def disconnect(self) -> None:
+    async def disconnect(self) -> None:  # pylint: disable=invalid-overridden-method
         """Disconnect chgannel."""
         if self._in_queue is None and self._loop is None:  # pragma: nocover
             return  # not connected so nothing to do
