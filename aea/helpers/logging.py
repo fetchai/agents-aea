@@ -37,7 +37,7 @@ class AgentLoggerAdapter(LoggerAdapter):
         self, msg: Any, kwargs: MutableMapping[str, Any]
     ) -> Tuple[Any, MutableMapping[str, Any]]:
         """Prepend the agent name to every log message."""
-        return "[%s] %s" % (self.extra["agent_name"], msg), kwargs
+        return f"[{self.extra['agent_name']}] {msg}", kwargs
 
 
 class WithLogger:
