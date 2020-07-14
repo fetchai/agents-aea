@@ -65,7 +65,7 @@ async def _golang_module_build_async(
     path: str,
     log_file_desc: IO[str],
     loop: Optional[asyncio.AbstractEventLoop] = None,
-    timeout: Optional[float] = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+    timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
 ) -> int:
     """
     Builds go module located at `path`, downloads necessary dependencies
