@@ -420,7 +420,9 @@ class HandlerRegistry(ComponentRegistry[Handler]):
             raise ValueError(
                 "No item registered with component id '{}'".format(item_id)
             )
-        self.logger.debug("Unregistering item with id {}".format(item_id))
+        self.logger.debug(  # pylint: disable=no-member
+            "Unregistering item with id {}".format(item_id)
+        )
         handler = name_to_item.pop(item_name)
 
         if len(name_to_item) == 0:
