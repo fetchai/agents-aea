@@ -62,7 +62,10 @@ MultiAddr = str
 
 
 async def _golang_module_build_async(
-    path: str, log_file_desc: IO[str], loop: Optional[asyncio.AbstractEventLoop] = None
+    path: str,
+    log_file_desc: IO[str],
+    loop: Optional[asyncio.AbstractEventLoop] = None,
+    timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
 ) -> int:
     """
     Builds go module located at `path`, downloads necessary dependencies
@@ -80,9 +83,7 @@ async def _golang_module_build_async(
     golang_build = asyncio.ensure_future(proc.start())
 
     try:
-        returncode = await asyncio.wait_for(
-            golang_build, LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT
-        )
+        returncode = await asyncio.wait_for(golang_build, timeout)
     except asyncio.TimeoutError:
         e = Exception(
             "Failed to download libp2p dependencies within timeout({})".format(
@@ -186,7 +187,7 @@ class Uri:
     def __str__(self):
         return "{}:{}".format(self._host, self._port)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return self.__str__()
 
     @property
@@ -295,10 +296,6 @@ class Libp2pNode:
 
         :return: None
         """
-        which = shutil.which("go")
-        if which is None:
-            raise Exception("Libp2p Go should me installed")
-
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
@@ -327,9 +324,9 @@ class Libp2pNode:
         out_path = self.aea_to_libp2p_path
         self.logger.debug("Creating pipes ({}, {})...".format(in_path, out_path))
         if os.path.exists(in_path):
-            os.remove(in_path)
+            os.remove(in_path)  # pragma: no cover
         if os.path.exists(out_path):
-            os.remove(out_path)
+            os.remove(out_path)  # pragma: no cover
         os.mkfifo(in_path)
         os.mkfifo(out_path)
 
@@ -409,7 +406,7 @@ class Libp2pNode:
                 await self._connect()
                 return
             else:
-                raise e
+                raise e  # pragma: no cover
 
         # setup reader
         assert (
@@ -452,11 +449,11 @@ class Libp2pNode:
         try:
             self.logger.debug("Waiting for messages...")
             buf = await self._stream_reader.readexactly(4)
-            if not buf:
+            if not buf:  # pragma: no cover
                 return None
             size = struct.unpack("!I", buf)[0]
             data = await self._stream_reader.readexactly(size)
-            if not data:
+            if not data:  # pragma: no cover
                 return None
             return data
         except asyncio.streams.IncompleteReadError as e:
@@ -512,7 +509,7 @@ class Libp2pNode:
             )
             self.proc.wait()
         else:
-            self.logger.debug("Called stop when process not set!")
+            self.logger.debug("Called stop when process not set!")  # pragma: no cover
         if os.path.exists(LIBP2P_NODE_ENV_FILE):
             os.remove(LIBP2P_NODE_ENV_FILE)
 
@@ -546,7 +543,7 @@ class P2PLibp2pConnection(Connection):
         if (
             self.has_crypto_store
             and self.crypto_store.crypto_objects.get("fetchai", None) is not None
-        ):
+        ):  # pragma: no cover
             key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
         elif libp2p_key_file is not None:
             key = FetchAICrypto(libp2p_key_file)
@@ -578,7 +575,7 @@ class P2PLibp2pConnection(Connection):
                 raise ValueError(
                     "At least one Entry Peer should be provided when node can not be publically reachable"
                 )
-            if delegate_uri is not None:
+            if delegate_uri is not None:  # pragma: no cover
                 logger.warning(
                     "Ignoring Delegate Uri configuration as node can not be publically reachable"
                 )
@@ -612,12 +609,12 @@ class P2PLibp2pConnection(Connection):
         self._receive_from_node_task = None  # type: Optional[asyncio.Future]
 
     @property
-    def libp2p_address(self) -> str:
+    def libp2p_address(self) -> str:  # pragma: no cover
         """The address used by the node."""
         return self.node.pub
 
     @property
-    def libp2p_address_id(self) -> str:
+    def libp2p_address_id(self) -> str:  # pragma: no cover
         """The identifier for the address."""
         return LIBP2P
 
@@ -627,7 +624,7 @@ class P2PLibp2pConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:
+        if self.connection_status.is_connected:  # pragma: no cover
             return
         try:
             # start libp2p node
@@ -685,7 +682,7 @@ class P2PLibp2pConnection(Connection):
                 # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))
             return Envelope.decode(data)
-        except CancelledError:
+        except CancelledError:  # pragma: no cover
             self.logger.debug("Receive cancelled.")
             return None
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
@@ -708,17 +705,17 @@ class P2PLibp2pConnection(Connection):
         """
         while True:
             data = await self.node.read()
-            if data is None:
-                break
             assert self._in_queue is not None, "Input queue not initialized."
             self._in_queue.put_nowait(data)
+            if data is None:
+                break
 
     @staticmethod
     def _check_go_installed() -> None:
         """Checks if go is installed. Sys.exits if not"""
         res = shutil.which("go")
         if res is None:
-            raise AEAException(
+            raise AEAException(  # pragma: nocover
                 "Please install go before running the `fetchai/p2p_libp2p:0.1.0` connection. "
                 "Go is available for download here: https://golang.org/doc/install"
             )

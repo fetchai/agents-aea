@@ -30,6 +30,8 @@ from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
+from packages.fetchai.connections.p2p_libp2p_client.connection import Uri
+
 from tests.conftest import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
@@ -489,3 +491,10 @@ class TestLibp2pClientConnectionRouting:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+@skip_test_windows
+def test_libp2pclientconnection_uri():
+    uri = Uri(host="127.0.0.1")
+    uri = Uri(host="127.0.0.1", port=10000)
+    assert uri.host == "127.0.0.1" and uri.port == 10000

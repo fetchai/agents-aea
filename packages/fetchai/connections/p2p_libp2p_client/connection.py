@@ -63,7 +63,7 @@ class Uri:
     def __str__(self):
         return "{}:{}".format(self._host, self._port)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return self.__str__()
 
     @property
@@ -106,12 +106,12 @@ class P2PLibp2pClientConnection(Connection):
         if (
             self.has_crypto_store
             and self.crypto_store.crypto_objects.get("fetchai", None) is not None
-        ):
+        ):  # pragma: no cover
             key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
-        elif key_file is None:
-            key = FetchAICrypto()
-        else:
+        elif key_file is not None:
             key = FetchAICrypto(key_file)
+        else:
+            key = FetchAICrypto()
 
         # client connection id
         self.key = key
@@ -144,7 +144,7 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:
+        if self.connection_status.is_connected:  # pragma: no cover
             return
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
@@ -211,7 +211,7 @@ class P2PLibp2pClientConnection(Connection):
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
-        else:
+        else:  # pragma: no cover
             self.logger.debug("Called disconnect when input queue not initialized.")
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
@@ -234,10 +234,10 @@ class P2PLibp2pClientConnection(Connection):
                 # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))
             return Envelope.decode(data)
-        except CancelledError:
+        except CancelledError:  # pragma: no cover
             self.logger.debug("Receive cancelled.")
             return None
-        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
+        except Exception as e:  # pragma: no cover # pylint: disable=broad-except
             self.logger.exception(e)
             return None
 
@@ -257,10 +257,10 @@ class P2PLibp2pClientConnection(Connection):
         """
         while True:
             data = await self._receive()
-            if data is None:
-                break
             assert self._in_queue is not None, "Input queue not initialized."
             self._in_queue.put_nowait(data)
+            if data is None:
+                break
 
     async def _send(self, data: bytes) -> None:
         assert self._writer is not None
@@ -274,11 +274,11 @@ class P2PLibp2pClientConnection(Connection):
         try:
             self.logger.debug("Waiting for messages...")
             buf = await self._reader.readexactly(4)
-            if not buf:
+            if not buf:  # pragma: no cover
                 return None
             size = struct.unpack("!I", buf)[0]
             data = await self._reader.readexactly(size)
-            if not data:
+            if not data:  # pragma: no cover
                 return None
             return data
         except asyncio.streams.IncompleteReadError as e:
