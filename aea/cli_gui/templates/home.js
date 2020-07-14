@@ -648,13 +648,6 @@ class Controller{
 
         var isDisabled =  !this.validateId(searchItem) || (itemType != "agent");
         $('#searchAgentsFetch').prop('disabled', isDisabled);
-        if (isDisabled){
-            $('#searchAgentsFetch').html("Fetch agent")
-        }
-        else {
-            $('#searchAgentsFetch').html("Fetch agent "  + searchItem)
-        }
-
         if (agentSelectionId != "NONE"){
             $('.localItemHeading').html(agentSelectionId);
         }

@@ -15,13 +15,6 @@ body {
 table {
     color: #A1B6C0 !important;
     border-color: #A1B6C0;
-    line-height: 10px !important;
-}
-
-table.app-table-hover tr:hover td {
-    cursor: pointer;
-    color: #FFFFFF;
-    background: #b3d7ff;
 }
 
 thead {
@@ -52,7 +45,9 @@ input[type="text"] {
 }
 
 input[type="radio"] {
-    background-color: #2BB4A1 0% 0% no-repeat padding-box;
+    width: 19px;
+    height: 19px;
+    border: 1px solid #FFFFFF;
 }
 
 input:focus {
@@ -137,15 +132,11 @@ input:focus {
 }
 
 /* miscellaneous */
-.app-code-block {
-    border: 1px solid #FFFFFF;
-    border-radius: 4px;
-}
-
 .app-output {
     height: 230px;
     border: 1px solid #FFFFFF;
     border-radius: 4px;
+    overflow: auto !important;
 }
 
 .error {

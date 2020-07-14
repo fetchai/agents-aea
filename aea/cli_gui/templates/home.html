@@ -92,13 +92,13 @@
                             <!-- Item types radio row 1 -->
                             <div class="form-row">
                                 <div class="form-group col-md-4">
-                                    <label><input id="agent" name="itemType" type="radio" name="searchRadios" value="option1" checked>Agents</label>
+                                    <label><input id="agent" name="itemType" type="radio" checked>Agents</label>
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label><input id="connection" name="itemType" type="radio" name="searchRadios" value="option1">Connections</label>
+                                    <label><input id="connection" name="itemType" type="radio">Connections</label>
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label><input id="protocol" name="itemType" type="radio" name="searchRadios" value="option2">Protocols</label>
+                                    <label><input id="protocol" name="itemType" type="radio">Protocols</label>
                                 </div>
                             </div>
 
@@ -106,10 +106,10 @@
                             <div class="form-row">
                                 <div class="form-group col-md-4"></div>  <!-- empty column -->
                                 <div class="form-group col-md-4">
-                                    <label><input id="contract" name="itemType" type="radio" name="searchRadios" id="searchRadio3" value="option3">Contracts</label>
+                                    <label><input id="contract" name="itemType" type="radio">Contracts</label>
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label><input id="skill" name="itemType" type="radio" name="searchRadios" id="searchRadio4" value="option4">Skills</label>
+                                    <label><input id="skill" name="itemType" type="radio">Skills</label>
                                 </div>
                             </div>
 
@@ -180,7 +180,7 @@
                             {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
                                 <div class="{{htmlElements[i][2]}}">
                                     <!-- Local items table -->
-                                    <h4 class="text-center">Local {{htmlElements[i][1]}}s</h4>
+                                    <h4 class="text-center"><span class="localItemHeading">NONE</span>'s {{htmlElements[i][1]}}s</h4>
                                     <table class="table table-hover">
                                         <thead>
                                             <th scope="col-md-4">{{htmlElements[i][1]}} ID</th>
@@ -224,10 +224,11 @@
                                 <div class="form-group col-md-3">
                                     <button id="startAgent" type="submit" class="app-btn-m app-btn-blue">Start agent</button>
                                 </div>
-                                <div class="form-group col-md-4">
+                                <!-- Currently disabled input: connection ID -->
+                                <div hidden class="form-group col-md-4">
                                     <label for="runConnectionId" class="float-right">with connection ID:</label>
                                 </div>
-                                <div class="form-group col-md-5">
+                                <div hidden class="form-group col-md-5">
                                     <input id="runConnectionId" type="text" class="app-connection-id-input float-right" id="connectionIdInput">
                                 </div>
                             </div>
