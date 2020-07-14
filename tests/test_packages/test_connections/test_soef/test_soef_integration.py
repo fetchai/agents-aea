@@ -204,10 +204,26 @@ def test_soef():
         multiplexer.put(envelope)
         wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
 
-        # check for search results
         envelope = multiplexer.get()
         message = envelope.message
         assert len(message.agents) >= 0
+
+        # test ping command
+        service_description = Description({}, data_model=models.PING_MODEL)
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=service_description,
+        )
+        envelope = Envelope(
+            to="soef",
+            sender=crypto.address,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
+        logger.info("Registering agent service key")
+        multiplexer.put(envelope)
+        time.sleep(3)
+        assert multiplexer.in_queue.empty()
 
     finally:
         # Shut down the multiplexer
