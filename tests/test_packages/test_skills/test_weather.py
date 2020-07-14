@@ -35,14 +35,14 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         weather_client_aea_name = "my_weather_client"
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.add_item("skill", "fetchai/weather_station:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.add_item("skill", "fetchai/weather_station:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
@@ -53,10 +53,10 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.add_item("skill", "fetchai/weather_client:0.4.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.add_item("skill", "fetchai/weather_client:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
@@ -120,24 +120,24 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         weather_client_aea_name = "my_weather_client"
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # prepare ledger configurations
         ledger_apis = {"fetchai": {"network": "testnet"}}
 
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/weather_station:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/weather_station:0.6.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.6.0", weather_station_aea_name
+            "fetchai/weather_station:0.7.0", weather_station_aea_name
         )
         assert (
             diff == []
@@ -145,17 +145,17 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/weather_client:0.4.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/weather_client:0.5.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.6.0", weather_client_aea_name
+            "fetchai/weather_client:0.7.0", weather_client_aea_name
         )
         assert (
             diff == []

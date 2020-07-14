@@ -1,6 +1,10 @@
 This page provides some tipps of how to upgrade between versions.
 
 
+## v0.5.0 to 0.5.1
+
+No public APIs have been changed.
+
 ## v0.4.1 to 0.5.0
 
 A number of breaking changes where introduced which make backwards compatibility of skills rare.

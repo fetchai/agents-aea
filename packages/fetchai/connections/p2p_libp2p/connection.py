@@ -57,7 +57,7 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.4.0")
 
 MultiAddr = str
 
@@ -517,7 +517,6 @@ class P2PLibp2pConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    # TODO 'key' must be removed in favor of 'cryptos'
     def __init__(self, **kwargs):
         """Initialize a p2p libp2p connection."""
 

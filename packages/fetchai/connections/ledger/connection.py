@@ -47,10 +47,7 @@ class LedgerConnection(Connection):
     connection_id = CONNECTION_ID
 
     def __init__(self, **kwargs):
-        """
-        Initialize a connection to interact with a ledger APIs.
-
-        """
+        """Initialize a connection to interact with a ledger APIs."""
         super().__init__(**kwargs)
 
         self._ledger_dispatcher: Optional[LedgerApiRequestDispatcher] = None
@@ -84,7 +81,7 @@ class LedgerConnection(Connection):
         """Tear down the connection."""
         self.connection_status.is_connected = False
         for task in self.receiving_tasks:
-            if not task.cancelled():
+            if not task.cancelled():  # pragma: nocover
                 task.cancel()
         self._ledger_dispatcher = None
         self._contract_dispatcher = None
@@ -129,7 +126,7 @@ class LedgerConnection(Connection):
         :return: the envelope received, or None.
         """
         # if there are done tasks, return the result
-        if len(self.done_tasks) > 0:
+        if len(self.done_tasks) > 0:  # pragma: nocover
             done_task = self.done_tasks.pop()
             return self._handle_done_task(done_task)
 

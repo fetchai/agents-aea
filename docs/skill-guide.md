@@ -222,9 +222,9 @@ This adds the protocol to our AEA and makes it available on the path `packages.f
 
 We also need to add the oef connection and install its dependencies:
 ``` bash
-aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/oef:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 ## Step 8: Run a service provider AEA
@@ -237,8 +237,8 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.6.0 && cd simple_service_registration
-aea run --connections fetchai/oef:0.5.0
+aea fetch fetchai/simple_service_registration:0.7.0 && cd simple_service_registration
+aea run --connections fetchai/oef:0.6.0
 ```
 
 This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.
@@ -447,7 +447,7 @@ dependencies: {}
 We can then launch our AEA.
 
 ``` bash
-aea run --connections fetchai/oef:0.5.0
+aea run --connections fetchai/oef:0.6.0
 ```
 
 We can see that the AEA sends search requests to the [OEF search node](../oef-ledger) and receives search responses from the [OEF search node](../oef-ledger). Since our AEA is only searching on the [OEF search node](../oef-ledger) - and not registered on the [OEF search node](../oef-ledger) - the search response returns a single agent (the service provider).

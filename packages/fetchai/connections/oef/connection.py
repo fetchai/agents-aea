@@ -16,71 +16,35 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Extension to the OEF Python SDK."""
 
 import asyncio
 import logging
 from asyncio import AbstractEventLoop, CancelledError
+from concurrent.futures.thread import ThreadPoolExecutor
+from itertools import cycle
 from typing import Dict, List, Optional, Set, cast
 
 import oef
 from oef.agents import OEFAgent
 from oef.core import AsyncioCore
 from oef.messages import CFP_TYPES, PROPOSE_TYPES
-from oef.query import (
-    And as OEFAnd,
-    Constraint as OEFConstraint,
-    ConstraintExpr as OEFConstraintExpr,
-    ConstraintType as OEFConstraintType,
-    Distance,
-    Eq,
-    Gt,
-    GtEq,
-    In,
-    Location as OEFLocation,
-    Lt,
-    LtEq,
-    Not as OEFNot,
-    NotEq,
-    NotIn,
-    Or as OEFOr,
-    Query as OEFQuery,
-    Range,
-)
-from oef.schema import (
-    AttributeSchema as OEFAttribute,
-    DataModel as OEFDataModel,
-    Description as OEFDescription,
-)
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.helpers.search.models import (
-    And,
-    Attribute,
-    Constraint,
-    ConstraintExpr,
-    ConstraintType,
-    ConstraintTypes,
-    DataModel,
-    Description,
-    Location,
-    Not,
-    Or,
-    Query,
-)
 from aea.mail.base import Address, Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 
+from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
 from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
@@ -91,7 +55,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.6.0")
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -107,7 +71,8 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        """
+        Infer the role of the agent from an incoming/outgoing first message.
 
         :param message: an incoming/outgoing first message
         :return: The role of the agent
@@ -133,261 +98,19 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         return dialogue
 
 
-class OEFObjectTranslator:
-    """Translate our OEF object to object of OEF SDK classes."""
-
-    @classmethod
-    def to_oef_description(cls, desc: Description) -> OEFDescription:
-        """From our description to OEF description."""
-        oef_data_model = (
-            cls.to_oef_data_model(desc.data_model)
-            if desc.data_model is not None
-            else None
-        )
-
-        new_values = {}
-        location_keys = set()
-        loggers_by_key = {}
-        for key, value in desc.values.items():
-            if isinstance(value, Location):
-                oef_location = OEFLocation(value.latitude, value.longitude)
-                location_keys.add(key)
-                new_values[key] = oef_location
-            else:
-                new_values[key] = value
-
-        # this is a workaround to make OEFLocation objects deep-copyable.
-        # Indeed, there is a problem in deep-copying such objects
-        # because of the logger object they have attached.
-        # Steps:
-        # 1) we remove the loggers attached to each Location obj,
-        # 2) then we instantiate the description (it runs deepcopy on the values),
-        # 3) and then we reattach the loggers.
-        for key in location_keys:
-            loggers_by_key[key] = new_values[key].log
-            # in this way we remove the logger
-            new_values[key].log = None
-
-        description = OEFDescription(new_values, oef_data_model)
-
-        for key in location_keys:
-            new_values[key].log = loggers_by_key[key]
-
-        return description
-
-    @classmethod
-    def to_oef_data_model(cls, data_model: DataModel) -> OEFDataModel:
-        """From our data model to OEF data model."""
-        oef_attributes = [
-            cls.to_oef_attribute(attribute) for attribute in data_model.attributes
-        ]
-        return OEFDataModel(data_model.name, oef_attributes, data_model.description)
-
-    @classmethod
-    def to_oef_attribute(cls, attribute: Attribute) -> OEFAttribute:
-        """From our attribute to OEF attribute."""
-
-        # in case the attribute type is Location, replace with the `oef` class.
-        attribute_type = OEFLocation if attribute.type == Location else attribute.type
-        return OEFAttribute(
-            attribute.name, attribute_type, attribute.is_required, attribute.description
-        )
-
-    @classmethod
-    def to_oef_query(cls, query: Query) -> OEFQuery:
-        """From our query to OEF query."""
-        oef_data_model = (
-            cls.to_oef_data_model(query.model) if query.model is not None else None
-        )
-        constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
-        return OEFQuery(constraints, oef_data_model)
-
-    @classmethod
-    def to_oef_location(cls, location: Location) -> OEFLocation:
-        """From our location to OEF location."""
-        return OEFLocation(location.latitude, location.longitude)  # type: ignore
-
-    @classmethod
-    def to_oef_constraint_expr(
-        cls, constraint_expr: ConstraintExpr
-    ) -> OEFConstraintExpr:
-        """From our constraint expression to the OEF constraint expression."""
-        if isinstance(constraint_expr, And):
-            return OEFAnd(
-                [cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints]
-            )
-        elif isinstance(constraint_expr, Or):
-            return OEFOr(
-                [cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints]
-            )
-        elif isinstance(constraint_expr, Not):
-            return OEFNot(cls.to_oef_constraint_expr(constraint_expr.constraint))
-        elif isinstance(constraint_expr, Constraint):
-            oef_constraint_type = cls.to_oef_constraint_type(
-                constraint_expr.constraint_type
-            )
-            return OEFConstraint(constraint_expr.attribute_name, oef_constraint_type)
-        else:
-            raise ValueError("Constraint expression not supported.")
-
-    @classmethod
-    def to_oef_constraint_type(
-        cls, constraint_type: ConstraintType
-    ) -> OEFConstraintType:
-        """From our constraint type to OEF constraint type."""
-        value = constraint_type.value
-        if constraint_type.type == ConstraintTypes.EQUAL:
-            return Eq(value)
-        elif constraint_type.type == ConstraintTypes.NOT_EQUAL:
-            return NotEq(value)
-        elif constraint_type.type == ConstraintTypes.LESS_THAN:
-            return Lt(value)
-        elif constraint_type.type == ConstraintTypes.LESS_THAN_EQ:
-            return LtEq(value)
-        elif constraint_type.type == ConstraintTypes.GREATER_THAN:
-            return Gt(value)
-        elif constraint_type.type == ConstraintTypes.GREATER_THAN_EQ:
-            return GtEq(value)
-        elif constraint_type.type == ConstraintTypes.WITHIN:
-            return Range(value)
-        elif constraint_type.type == ConstraintTypes.IN:
-            return In(value)
-        elif constraint_type.type == ConstraintTypes.NOT_IN:
-            return NotIn(value)
-        elif constraint_type.type == ConstraintTypes.DISTANCE:
-            location = cls.to_oef_location(location=value[0])
-            return Distance(center=location, distance=value[1])
-        else:
-            raise ValueError("Constraint type not recognized.")
-
-    @classmethod
-    def from_oef_description(cls, oef_desc: OEFDescription) -> Description:
-        """From an OEF description to our description."""
-        data_model = (
-            cls.from_oef_data_model(oef_desc.data_model)
-            if oef_desc.data_model is not None
-            else None
-        )
-
-        new_values = {}
-        for key, value in oef_desc.values.items():
-            if isinstance(value, OEFLocation):
-                new_values[key] = Location(value.latitude, value.longitude)
-            else:
-                new_values[key] = value
-
-        return Description(new_values, data_model=data_model)
-
-    @classmethod
-    def from_oef_data_model(cls, oef_data_model: OEFDataModel) -> DataModel:
-        """From an OEF data model to our data model."""
-        attributes = [
-            cls.from_oef_attribute(oef_attribute)
-            for oef_attribute in oef_data_model.attribute_schemas
-        ]
-        return DataModel(oef_data_model.name, attributes, oef_data_model.description)
-
-    @classmethod
-    def from_oef_attribute(cls, oef_attribute: OEFAttribute) -> Attribute:
-        """From an OEF attribute to our attribute."""
-        oef_attribute_type = (
-            Location if oef_attribute.type == OEFLocation else oef_attribute.type
-        )
-        return Attribute(
-            oef_attribute.name,
-            oef_attribute_type,
-            oef_attribute.required,
-            oef_attribute.description,
-        )
-
-    @classmethod
-    def from_oef_query(cls, oef_query: OEFQuery) -> Query:
-        """From our query to OrOEF query."""
-        data_model = (
-            cls.from_oef_data_model(oef_query.model)
-            if oef_query.model is not None
-            else None
-        )
-        constraints = [cls.from_oef_constraint_expr(c) for c in oef_query.constraints]
-        return Query(constraints, data_model)
-
-    @classmethod
-    def from_oef_location(cls, oef_location: OEFLocation) -> Location:
-        """From oef location to our location."""
-        return Location(oef_location.latitude, oef_location.longitude)
-
-    @classmethod
-    def from_oef_constraint_expr(
-        cls, oef_constraint_expr: OEFConstraintExpr
-    ) -> ConstraintExpr:
-        """From our query to OEF query."""
-        if isinstance(oef_constraint_expr, OEFAnd):
-            return And(
-                [
-                    cls.from_oef_constraint_expr(c)
-                    for c in oef_constraint_expr.constraints
-                ]
-            )
-        elif isinstance(oef_constraint_expr, OEFOr):
-            return Or(
-                [
-                    cls.from_oef_constraint_expr(c)
-                    for c in oef_constraint_expr.constraints
-                ]
-            )
-        elif isinstance(oef_constraint_expr, OEFNot):
-            return Not(cls.from_oef_constraint_expr(oef_constraint_expr.constraint))
-        elif isinstance(oef_constraint_expr, OEFConstraint):
-            constraint_type = cls.from_oef_constraint_type(
-                oef_constraint_expr.constraint
-            )
-            return Constraint(oef_constraint_expr.attribute_name, constraint_type)
-        else:
-            raise ValueError("OEF Constraint not supported.")
-
-    @classmethod
-    def from_oef_constraint_type(
-        cls, constraint_type: OEFConstraintType
-    ) -> ConstraintType:
-        """From OEF constraint type to our constraint type."""
-        if isinstance(constraint_type, Eq):
-            return ConstraintType(ConstraintTypes.EQUAL, constraint_type.value)
-        elif isinstance(constraint_type, NotEq):
-            return ConstraintType(ConstraintTypes.NOT_EQUAL, constraint_type.value)
-        elif isinstance(constraint_type, Lt):
-            return ConstraintType(ConstraintTypes.LESS_THAN, constraint_type.value)
-        elif isinstance(constraint_type, LtEq):
-            return ConstraintType(ConstraintTypes.LESS_THAN_EQ, constraint_type.value)
-        elif isinstance(constraint_type, Gt):
-            return ConstraintType(ConstraintTypes.GREATER_THAN, constraint_type.value)
-        elif isinstance(constraint_type, GtEq):
-            return ConstraintType(
-                ConstraintTypes.GREATER_THAN_EQ, constraint_type.value
-            )
-        elif isinstance(constraint_type, Range):
-            return ConstraintType(ConstraintTypes.WITHIN, constraint_type.values)
-        elif isinstance(constraint_type, In):
-            return ConstraintType(ConstraintTypes.IN, constraint_type.values)
-        elif isinstance(constraint_type, NotIn):
-            return ConstraintType(ConstraintTypes.NOT_IN, constraint_type.values)
-        elif isinstance(constraint_type, Distance):
-            location = cls.from_oef_location(constraint_type.center)
-            return ConstraintType(
-                ConstraintTypes.DISTANCE, (location, constraint_type.distance)
-            )
-        else:
-            raise ValueError("Constraint type not recognized.")
-
-
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
+
+    THREAD_POOL_SIZE = 3
+    CONNECT_RETRY_DELAY = 5.0
+    CONNECT_TIMEOUT = 2
+    CONNECT_ATTEMPTS_LIMIT = 0
 
     def __init__(
         self,
         address: Address,
         oef_addr: str,
         oef_port: int,
-        core: AsyncioCore,
         excluded_protocols: Optional[Set[str]] = None,
     ):
         """
@@ -401,17 +124,37 @@ class OEFChannel(OEFAgent):
             address,
             oef_addr=oef_addr,
             oef_port=oef_port,
-            core=core,
+            core=AsyncioCore(logger=logger),
             logger=lambda *x: None,
             logger_debug=lambda *x: None,
         )
         self.address = address
-        self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.loop = None  # type: Optional[AbstractEventLoop]
+        self._in_queue = None  # type: Optional[asyncio.Queue]
+        self._loop = None  # type: Optional[AbstractEventLoop]
+
         self.excluded_protocols = excluded_protocols
         self.oef_search_dialogues = OefSearchDialogues()
         self.oef_msg_id = 0
         self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
+
+        self._threaded_pool = ThreadPoolExecutor(self.THREAD_POOL_SIZE)
+
+    async def _run_in_executor(self, fn, *args):
+        return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
+
+    @property
+    def in_queue(self) -> asyncio.Queue:
+        """Get input messages queue."""
+        if not self._in_queue:  # pragma: nocover
+            raise ValueError("Channel not connected!")
+        return self._in_queue
+
+    @property
+    def loop(self) -> AbstractEventLoop:
+        """Get event loop."""
+        if not self._loop:  # pragma: nocover
+            raise ValueError("Channel not connected!")
+        return self._loop
 
     def on_message(
         self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
@@ -427,12 +170,9 @@ class OEFChannel(OEFAgent):
         """
         # We are not using the 'msg_id', 'dialogue_id' and 'origin' parameters because 'content' contains a
         # serialized instance of 'Envelope', hence it already contains this information.
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         envelope = Envelope.decode(content)
-        asyncio.run_coroutine_threadsafe(
-            self.in_queue.put(envelope), self.loop
-        ).result()
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def on_cfp(
         self,
@@ -452,8 +192,7 @@ class OEFChannel(OEFAgent):
         :param query: the query.
         :return: None
         """
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         logger.warning(
             "Dropping incompatible on_cfp: msg_id={}, dialogue_id={}, origin={}, target={}, query={}".format(
                 msg_id, dialogue_id, origin, target, query
@@ -478,8 +217,7 @@ class OEFChannel(OEFAgent):
         :param proposals: the proposals.
         :return: None
         """
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         logger.warning(
             "Dropping incompatible on_propose: msg_id={}, dialogue_id={}, origin={}, target={}".format(
                 msg_id, dialogue_id, origin, target
@@ -498,8 +236,7 @@ class OEFChannel(OEFAgent):
         :param target: the message target.
         :return: None
         """
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         logger.warning(
             "Dropping incompatible on_accept: msg_id={}, dialogue_id={}, origin={}, target={}".format(
                 msg_id, dialogue_id, origin, target
@@ -518,8 +255,7 @@ class OEFChannel(OEFAgent):
         :param target: the message target.
         :return: None
         """
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         logger.warning(
             "Dropping incompatible on_decline: msg_id={}, dialogue_id={}, origin={}, target={}".format(
                 msg_id, dialogue_id, origin, target
@@ -534,16 +270,17 @@ class OEFChannel(OEFAgent):
         :param agents: the list of agents.
         :return: None
         """
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         oef_search_dialogue = self.oef_msg_id_to_dialogue.pop(search_id, None)
         if oef_search_dialogue is None:
-            logger.warning("Could not find dialogue for search_id={}".format(search_id))
-            return
+            logger.warning(
+                "Could not find dialogue for search_id={}".format(search_id)
+            )  # pragma: nocover
+            return  # pragma: nocover
         last_msg = oef_search_dialogue.last_incoming_message
         if last_msg is None:
-            logger.warning("Could not find last message.")
-            return
+            logger.warning("Could not find last message.")  # pragma: nocover
+            return  # pragma: nocover
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
             dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
@@ -559,9 +296,7 @@ class OEFChannel(OEFAgent):
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
         )
-        asyncio.run_coroutine_threadsafe(
-            self.in_queue.put(envelope), self.loop
-        ).result()
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def on_oef_error(
         self, answer_id: int, operation: oef.messages.OEFErrorOperation
@@ -573,20 +308,21 @@ class OEFChannel(OEFAgent):
         :param operation: the error operation.
         :return: None
         """
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         try:
             operation = OefSearchMessage.OefErrorOperation(operation)
         except ValueError:
             operation = OefSearchMessage.OefErrorOperation.OTHER
         oef_search_dialogue = self.oef_msg_id_to_dialogue.pop(answer_id, None)
         if oef_search_dialogue is None:
-            logger.warning("Could not find dialogue for answer_id={}".format(answer_id))
-            return
+            logger.warning(
+                "Could not find dialogue for answer_id={}".format(answer_id)
+            )  # pragma: nocover
+            return  # pragma: nocover
         last_msg = oef_search_dialogue.last_incoming_message
         if last_msg is None:
-            logger.warning("Could not find last message.")
-            return
+            logger.warning("Could not find last message.")  # pragma: nocover
+            return  # pragma: nocover
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.OEF_ERROR,
             dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
@@ -602,9 +338,7 @@ class OEFChannel(OEFAgent):
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
         )
-        asyncio.run_coroutine_threadsafe(
-            self.in_queue.put(envelope), self.loop
-        ).result()
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def on_dialogue_error(
         self, answer_id: int, dialogue_id: int, origin: Address
@@ -617,8 +351,7 @@ class OEFChannel(OEFAgent):
         :param origin: the message sender.
         :return: None
         """
-        assert self.in_queue is not None
-        assert self.loop is not None
+        self._check_loop_and_queue()
         msg = DefaultMessage(
             performative=DefaultMessage.Performative.ERROR,
             dialogue_reference=(str(answer_id), ""),
@@ -634,9 +367,7 @@ class OEFChannel(OEFAgent):
             protocol_id=DefaultMessage.protocol_id,
             message=msg,
         )
-        asyncio.run_coroutine_threadsafe(
-            self.in_queue.put(envelope), self.loop
-        ).result()
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -645,7 +376,7 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if self.excluded_protocols is not None:
+        if self.excluded_protocols is not None:  # pragma: nocover
             if envelope.protocol_id in self.excluded_protocols:
                 logger.error(
                     "This envelope cannot be sent with the oef connection: protocol_id={}".format(
@@ -653,6 +384,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
+
         if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.3.0"):
             self.send_oef_message(envelope)
         else:
@@ -682,8 +414,8 @@ class OEFChannel(OEFAgent):
         if oef_search_dialogue is None:
             logger.warning(
                 "Could not create dialogue for message={}".format(oef_message)
-            )
-            return
+            )  # pragma: nocover
+            return  # pragma: nocover
         self.oef_msg_id += 1
         self.oef_msg_id_to_dialogue[self.oef_msg_id] = oef_search_dialogue
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
@@ -711,7 +443,66 @@ class OEFChannel(OEFAgent):
         self, exception: Exception, conn
     ) -> None:
         """Handle failure."""
-        logger.exception(exception)
+        logger.exception(exception)  # pragma: nocover
+
+    async def _set_loop_and_queue(self):
+        self._loop = asyncio.get_event_loop()
+        self._in_queue = asyncio.Queue()
+
+    async def _unset_loop_and_queue(self):
+        self._loop = None
+        self._in_queue = None
+
+    def _check_loop_and_queue(self):
+        assert self.in_queue is not None
+        assert self.loop is not None
+
+    async def connect(self) -> None:  # pylint: disable=invalid-overridden-method
+        """Connect channel."""
+        await self._set_loop_and_queue()
+        self.core.__init__(loop=self._loop, logger=logger)
+
+        if self.CONNECT_ATTEMPTS_LIMIT != 0:  # pragma: nocover
+            gen = range(self.CONNECT_ATTEMPTS_LIMIT)
+        else:
+            gen = cycle(range(1))  # type: ignore
+
+        try:
+            for _ in gen:
+                is_connected = await self._run_in_executor(
+                    self._oef_agent_connect, self.CONNECT_TIMEOUT
+                )
+                if is_connected:
+                    return
+                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds...")
+                await asyncio.sleep(self.CONNECT_RETRY_DELAY)
+
+            raise ValueError("Connect attempts limit!")  # pragma: nocover
+        except Exception:  # pragma: nocover
+            await self._unset_loop_and_queue()
+            raise
+
+    def _oef_agent_connect(self, timeout: float = 2) -> bool:
+        """
+        Connect OEF agent.
+
+        :param timeout: timeout to wait on connection
+        :return: bool, connected or not
+        """
+        return super().connect(timeout)
+
+    async def disconnect(self) -> None:  # pylint: disable=invalid-overridden-method
+        """Disconnect chgannel."""
+        if self._in_queue is None and self._loop is None:  # pragma: nocover
+            return  # not connected so nothing to do
+
+        await self.in_queue.put(None)
+        await self._run_in_executor(super().disconnect)
+        await self._unset_loop_and_queue()
+
+    async def get(self) -> Optional[Envelope]:
+        """Get incoming envelope."""
+        return await self.in_queue.get()
 
 
 class OEFConnection(Connection):
@@ -733,10 +524,9 @@ class OEFConnection(Connection):
         assert addr is not None and port is not None, "addr and port must be set!"
         self.oef_addr = addr
         self.oef_port = port
-        self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
-        self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
+        self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port)  # type: ignore
         self._connection_check_task = None  # type: Optional[asyncio.Future]
+        self._loop: Optional[AbstractEventLoop] = None
 
     async def connect(self) -> None:
         """
@@ -749,35 +539,16 @@ class OEFConnection(Connection):
             return
         try:
             self.connection_status.is_connecting = True
-            self._core.run_threaded()
-            loop = asyncio.get_event_loop()
-            self.in_queue = asyncio.Queue()
-            await self._try_connect()
+            self._loop = asyncio.get_event_loop()
+            await self.channel.connect()
             self.connection_status.is_connecting = False
             self.connection_status.is_connected = True
-            self.channel.loop = loop
-            self.channel.in_queue = self.in_queue
-            self._connection_check_task = asyncio.ensure_future(
-                self._connection_check(), loop=self._loop
+            self._connection_check_task = self._loop.create_task(
+                self._connection_check()
             )
         except (CancelledError, Exception) as e:  # pragma: no cover
-            self._core.stop()
             self.connection_status.is_connected = False
             raise e
-
-    async def _try_connect(self) -> None:
-        """
-        Try connect to the channel.
-
-        :return: None
-        :raises Exception if the connection to the OEF fails.
-        """
-        while not self.connection_status.is_connected:
-            if not self.channel.connect():
-                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds...")
-                await asyncio.sleep(5.0)
-            else:
-                break
 
     async def _connection_check(self) -> None:
         """
@@ -795,7 +566,7 @@ class OEFConnection(Connection):
                 logger.warning(
                     "Lost connection to OEFChannel. Retrying to connect soon ..."
                 )
-                await self._try_connect()
+                await self.channel.connect()
                 self.connection_status.is_connected = True
                 logger.warning("Successfully re-established connection to OEFChannel.")
 
@@ -808,15 +579,12 @@ class OEFConnection(Connection):
         assert (
             self.connection_status.is_connected or self.connection_status.is_connecting
         ), "Call connect before disconnect."
-        assert self.in_queue is not None
         self.connection_status.is_connected = False
         self.connection_status.is_connecting = False
         if self._connection_check_task is not None:
             self._connection_check_task.cancel()
             self._connection_check_task = None
-        self.channel.disconnect()
-        await self.in_queue.put(None)
-        self._core.stop()
+        await self.channel.disconnect()
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -825,8 +593,7 @@ class OEFConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
-            assert self.in_queue is not None
-            envelope = await self.in_queue.get()
+            envelope = await self.channel.get()
             if envelope is None:
                 logger.debug("Received None.")
                 return None

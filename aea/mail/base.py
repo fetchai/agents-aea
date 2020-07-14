@@ -155,7 +155,7 @@ class EnvelopeContext:
     @property
     def uri_raw(self) -> str:
         """Get uri in string format."""
-        return str(self.uri)
+        return str(self.uri) if self.uri is not None else ""
 
     def __str__(self):
         """Get the string representation."""
@@ -209,7 +209,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb.sender = envelope.sender
         envelope_pb.protocol_id = str(envelope.protocol_id)
         envelope_pb.message = envelope.message_bytes
-        if envelope.context is not None:
+        if envelope.context is not None and envelope.context.uri_raw != "":
             envelope_pb.uri = envelope.context.uri_raw
 
         envelope_bytes = envelope_pb.SerializeToString()
@@ -231,7 +231,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         protocol_id = PublicId.from_str(raw_protocol_id)
         message = envelope_pb.message  # pylint: disable=no-member
         uri_raw = envelope_pb.uri  # pylint: disable=no-member
-        if uri_raw == "":  # empty string means this field is not set in proto3
+        if uri_raw != "":  # empty string means this field is not set in proto3
             uri = URI(uri_raw=uri_raw)
             context = EnvelopeContext(uri=uri)
             envelope = Envelope(
