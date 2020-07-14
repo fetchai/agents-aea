@@ -761,7 +761,7 @@ def _make_libp2p_connection(
 
 
 def _make_libp2p_client_connection(
-    node_port: int = 11234, node_host: str = "127.0.0.1",
+    node_port: int = 11234, node_host: str = "127.0.0.1"
 ) -> P2PLibp2pClientConnection:
     identity = Identity("", address=FetchAICrypto().address)
     configuration = ConnectionConfig(
