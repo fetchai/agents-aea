@@ -669,6 +669,7 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
     oef_connection = OEFConnection(
         configuration=configuration, identity=Identity("name", address),
     )
+    oef_connection._default_logger_name = "aea.packages.fetchai.connections.oef"
     return oef_connection
 
 
@@ -679,6 +680,9 @@ def _make_tcp_server_connection(address: str, host: str, port: int):
     tcp_connection = TCPServerConnection(
         configuration=configuration, identity=Identity("name", address),
     )
+    tcp_connection._default_logger_name = (
+        "aea.packages.fetchai.connections.tcp.tcp_server"
+    )
     return tcp_connection
 
 
@@ -688,6 +692,9 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
     )
     tcp_connection = TCPClientConnection(
         configuration=configuration, identity=Identity("name", address),
+    )
+    tcp_connection._default_logger_name = (
+        "aea.packages.fetchai.connections.tcp.tcp_client"
     )
     return tcp_connection
 

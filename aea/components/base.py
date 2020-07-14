@@ -21,9 +21,8 @@
 import logging
 import types
 from abc import ABC
-from logging import Logger, LoggerAdapter
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -54,7 +53,6 @@ class Component(ABC, WithLogger):
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor
-        self._logger: Optional[Union[Logger, LoggerAdapter]] = None
 
         # mapping from import path to module object
         # the keys are dotted paths of Python modules.

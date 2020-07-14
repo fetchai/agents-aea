@@ -43,21 +43,27 @@ class AgentLoggerAdapter(LoggerAdapter):
 class WithLogger:
     """Interface to endow subclasses with a logger."""
 
-    def __init__(self, logger: Optional[Union[Logger, LoggerAdapter]] = None):
+    def __init__(
+        self,
+        logger: Optional[Union[Logger, LoggerAdapter]] = None,
+        default_logger_name: str = "aea",
+    ):
         """
         Initialize the logger.
 
         :param logger: the logger object.
+        :param default_logger_name: the default logger name, if a logger is not provided.
         """
         self._logger = logger
+        self._default_logger_name = default_logger_name
 
     @property
     def logger(self) -> Union[Logger, LoggerAdapter]:
         """Get the component logger."""
         if self._logger is None:
             # if not set (e.g. programmatic instantiation)
-            # return a default one with "aea" as logger namespace.
-            return logging.getLogger("aea")
+            # return a default one with the default logger name.
+            return logging.getLogger(self._default_logger_name)
         return self._logger
 
     @logger.setter
