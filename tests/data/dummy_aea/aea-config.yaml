@@ -18,16 +18,6 @@ skills:
 - fetchai/error:0.3.0
 default_connection: fetchai/local:0.4.0
 default_ledger: fetchai
-ledger_apis:
-  ethereum:
-    args:
-      address: example.ethereum.com
-      chain_id: 8080
-      gas_price: 20
-  fetchai:
-    args:
-      address: example.fetch-ai.com
-      port: 8080
 logging_config:
   disable_existing_loggers: false
   version: 1

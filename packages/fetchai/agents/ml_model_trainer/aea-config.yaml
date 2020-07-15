@@ -1,6 +1,6 @@
 agent_name: ml_model_trainer
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: An agent buying data and training a model from it.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -21,10 +21,7 @@ skills:
 - fetchai/generic_buyer:0.6.0
 - fetchai/ml_train:0.6.0
 default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis:
-  fetchai:
-    network: testnet
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

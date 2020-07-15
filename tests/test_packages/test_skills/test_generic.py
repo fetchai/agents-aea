@@ -21,7 +21,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import FUNDED_COSMOS_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestGenericSkills(AEATestCaseMany, UseOef):
@@ -130,12 +130,10 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         buyer_aea_name = "my_generic_buyer"
         self.create_agents(seller_aea_name, buyer_aea_name)
 
-        ledger_apis = {"fetchai": {"network": "testnet"}}
         default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
@@ -145,7 +143,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.4.0", seller_aea_name
+            "fetchai/generic_seller:0.5.0", seller_aea_name
         )
         assert (
             diff == []
@@ -153,7 +151,6 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
@@ -163,7 +160,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.4.0", buyer_aea_name
+            "fetchai/generic_buyer:0.5.0", buyer_aea_name
         )
         assert (
             diff == []
@@ -179,10 +176,10 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_config(setting_path, False, "bool")
 
         # add funded key
-        self.generate_private_key("fetchai")
-        self.add_private_key("fetchai", "fet_private_key.txt")
+        self.generate_private_key("cosmos")
+        self.add_private_key("cosmos", "cosmos_private_key.txt")
         self.replace_private_key_in_file(
-            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, "cosmos_private_key.txt"
         )
 
         # run AEAs

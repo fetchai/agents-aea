@@ -67,7 +67,7 @@ Keep it running for all the following demos.
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.4.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.5.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
@@ -86,13 +86,7 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
-In `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_seller_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -105,7 +99,7 @@ default_routing:
 
 Then, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.4.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.5.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
@@ -124,13 +118,7 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
-In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_buyer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -157,30 +145,6 @@ aea generate-wealth fetchai
 
 <details><summary>Alternatively, create wealth for other test networks.</summary>
 <p>
-
-<strong>Ledger Config:</strong>
-<br>
-
-In `my_buyer_aea/aea-config.yaml` and `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Ethereum:
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-
-Alternatively, to connect to Cosmos:
-``` yaml
-ledger_apis:
-  cosmos:
-    address: https://rest-agent-land.prod.fetch-ai.com:443
-```
-
-<strong>Wealth:</strong>
-<br>
 
 To generate and add a private-public key pair for Ethereum use:
 ``` bash

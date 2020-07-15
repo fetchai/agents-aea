@@ -537,29 +537,29 @@ def test_run_ledger_apis():
     )
     assert result.exit_code == 0
 
-    # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode="r")
+    # # Load the agent yaml file and manually insert the things we need
+    # file = open("aea-config.yaml", mode="r")
 
-    # read all lines at once
-    whole_file = file.read()
+    # # read all lines at once
+    # whole_file = file.read()
 
-    # add in the ledger address
-    find_text = "ledger_apis: {}"
-    replace_text = """ledger_apis:
-    ethereum:
-        address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-        chain_id: 3
-        gas_price: 20
-    fetchai:
-        network: testnet"""
+    # # add in the ledger address
+    # find_text = "ledger_apis: {}"
+    # replace_text = """ledger_apis:
+    # ethereum:
+    #     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    #     chain_id: 3
+    #     gas_price: 20
+    # fetchai:
+    #     network: testnet"""
 
-    whole_file = whole_file.replace(find_text, replace_text)
+    # whole_file = whole_file.replace(find_text, replace_text)
 
-    # close the file
-    file.close()
+    # # close the file
+    # file.close()
 
-    with open("aea-config.yaml", "w") as f:
-        f.write(whole_file)
+    # with open("aea-config.yaml", "w") as f:
+    #     f.write(whole_file)
 
     try:
         process = subprocess.Popen(  # nosec
@@ -633,26 +633,26 @@ def test_run_fet_ledger_apis():
     )
     assert result.exit_code == 0
 
-    # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode="r")
+    # # Load the agent yaml file and manually insert the things we need
+    # file = open("aea-config.yaml", mode="r")
 
-    # read all lines at once
-    whole_file = file.read()
+    # # read all lines at once
+    # whole_file = file.read()
 
-    # add in the ledger address
+    # # add in the ledger address
 
-    find_text = "ledger_apis: {}"
-    replace_text = """ledger_apis:
-    fetchai:
-        network: testnet"""
+    # find_text = "ledger_apis: {}"
+    # replace_text = """ledger_apis:
+    # fetchai:
+    #     network: testnet"""
 
-    whole_file = whole_file.replace(find_text, replace_text)
+    # whole_file = whole_file.replace(find_text, replace_text)
 
-    # close the file
-    file.close()
+    # # close the file
+    # file.close()
 
-    with open("aea-config.yaml", "w") as f:
-        f.write(whole_file)
+    # with open("aea-config.yaml", "w") as f:
+    #     f.write(whole_file)
 
     try:
         process = subprocess.Popen(  # nosec

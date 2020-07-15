@@ -1,6 +1,6 @@
 agent_name: car_data_buyer
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: An agent which searches for an instance of a `car_detector` agent and
   attempts to purchase car park data from it.
 license: Apache-2.0
@@ -22,10 +22,7 @@ skills:
 - fetchai/error:0.3.0
 - fetchai/generic_buyer:0.6.0
 default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis:
-  fetchai:
-    network: testnet
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

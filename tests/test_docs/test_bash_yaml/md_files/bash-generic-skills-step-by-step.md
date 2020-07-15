@@ -5,13 +5,13 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.4.0
+aea fetch fetchai/generic_seller:0.5.0
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.7.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.4.0
+aea fetch fetchai/generic_buyer:0.5.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.6.0
 cd ..
@@ -235,20 +235,8 @@ dependencies: {}
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
 ``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
-```
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
 ```
 ``` yaml
 currency_id: 'ETH'

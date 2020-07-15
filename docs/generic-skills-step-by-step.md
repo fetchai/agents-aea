@@ -41,14 +41,14 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.4.0
+aea fetch fetchai/generic_seller:0.5.0
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.7.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.4.0
+aea fetch fetchai/generic_buyer:0.5.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.6.0
 cd ..
@@ -2992,13 +2992,7 @@ aea add-key fetchai fet_private_key.txt
 
 #### Update the AEA configs
 
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, replace ```ledger_apis```: {} with the following.
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and
+Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -3035,18 +3029,6 @@ Create the private key for the `my_generic_buyer` AEA.
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-```
-
-#### Update the AEA configs
-
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, replace `ledger_apis: {}` with the following.
-
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
 ```
 
 #### Update the skill configs

@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/weather_station:0.7.0
+aea fetch fetchai/weather_station:0.8.0
 cd weather_station
 ```
 ``` bash

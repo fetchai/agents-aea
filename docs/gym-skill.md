@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.5.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.6.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```

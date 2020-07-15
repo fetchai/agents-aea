@@ -94,8 +94,6 @@ class TestWealthCommands(AEATestCaseMany):
         self.create_agents(agent_name)
 
         self.set_agent_context(agent_name)
-        ledger_apis = {"fetchai": {"network": "testnet"}}
-        self.force_set_config("agent.ledger_apis", ledger_apis)
 
         self.generate_private_key()
         self.add_private_key()

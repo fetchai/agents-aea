@@ -49,17 +49,6 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             tac_aea_one, tac_aea_two, tac_controller_name,
         )
 
-        # Note, the ledger apis are not needed; but for comparison with the
-        # fetched agents we add them.
-        ledger_apis = {
-            "ethereum": {
-                "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-                "chain_id": 3,
-                "gas_price": 50,
-            }
-        }
-        setting_path = "agent.ledger_apis"
-
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/oef:0.6.0")
@@ -69,7 +58,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.4.0", tac_controller_name
+            "fetchai/tac_controller:0.5.0", tac_controller_name
         )
         assert (
             diff == []
@@ -78,7 +67,6 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         # prepare agents for test
         for agent_name in (tac_aea_one, tac_aea_two):
             self.set_agent_context(agent_name)
-            self.force_set_config(setting_path, ledger_apis)
             self.add_item("connection", "fetchai/oef:0.6.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
@@ -86,7 +74,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             self.set_config("agent.default_ledger", "ethereum")
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.5.0", agent_name
+                "fetchai/tac_participant:0.6.0", agent_name
             )
             assert (
                 diff == []
@@ -181,18 +169,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             tac_aea_one, tac_aea_two, tac_controller_name,
         )
 
-        ledger_apis = {
-            "ethereum": {
-                "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-                "chain_id": 3,
-                "gas_price": 50,
-            }
-        }
-        setting_path = "agent.ledger_apis"
-
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.4.0")
@@ -203,7 +181,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.5.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.6.0", tac_controller_name
         )
         assert (
             diff == []
@@ -221,7 +199,6 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             (FUNDED_ETH_PRIVATE_KEY_2, FUNDED_ETH_PRIVATE_KEY_3),
         ):
             self.set_agent_context(agent_name)
-            self.force_set_config(setting_path, ledger_apis)
             self.add_item("connection", "fetchai/oef:0.6.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
@@ -239,7 +216,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.5.0", agent_name
+                "fetchai/tac_participant:0.6.0", agent_name
             )
             assert (
                 diff == []

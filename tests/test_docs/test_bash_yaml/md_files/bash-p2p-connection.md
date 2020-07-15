@@ -15,8 +15,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.4.0
 aea run --connections fetchai/p2p_libp2p:0.4.0
 ```
 ``` bash
-aea fetch fetchai/weather_station:0.7.0
-aea fetch fetchai/weather_client:0.7.0
+aea fetch fetchai/weather_station:0.8.0
+aea fetch fetchai/weather_client:0.8.0
 ```
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.4.0

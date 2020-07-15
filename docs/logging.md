@@ -30,7 +30,6 @@ skills:
 - fetchai/error:0.3.0
 default_connection: fetchai/stub:0.6.0
 default_ledger: fetchai
-ledger_apis: {}
 logging_config:
   disable_existing_loggers: false
   version: 1

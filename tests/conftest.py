@@ -135,6 +135,9 @@ FUNDED_ETH_PRIVATE_KEY_3 = (
 FUNDED_FET_PRIVATE_KEY_1 = (
     "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
 )
+FUNDED_COSMOS_PRIVATE_KEY_1 = (
+    "0aea4a45c40776f138a22655819519fe213030f6df7c14bf628fdc41de33a7c8"
+)
 
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"

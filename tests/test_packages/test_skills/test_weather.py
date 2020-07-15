@@ -22,7 +22,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import FUNDED_COSMOS_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestWeatherSkills(AEATestCaseMany, UseOef):
@@ -122,22 +122,18 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
-        # prepare ledger configurations
-        ledger_apis = {"fetchai": {"network": "testnet"}}
-
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/weather_station:0.6.0")
-        self.force_set_config("agent.ledger_apis", ledger_apis)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.7.0", weather_station_aea_name
+            "fetchai/weather_station:0.8.0", weather_station_aea_name
         )
         assert (
             diff == []
@@ -149,23 +145,22 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/weather_client:0.5.0")
-        self.force_set_config("agent.ledger_apis", ledger_apis)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.7.0", weather_client_aea_name
+            "fetchai/weather_client:0.8.0", weather_client_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # set funded keys
-        self.generate_private_key("fetchai")
-        self.add_private_key("fetchai", "fet_private_key.txt")
+        self.generate_private_key("cosmos")
+        self.add_private_key("cosmos", "cosmos_private_key.txt")
         self.replace_private_key_in_file(
-            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, "cosmos_private_key.txt"
         )
 
         self.set_agent_context(weather_station_aea_name)

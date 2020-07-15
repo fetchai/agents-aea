@@ -1,6 +1,6 @@
 agent_name: tac_participant
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: An AEA to participate in the TAC (trading agent competition)
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -22,11 +22,6 @@ skills:
 - fetchai/tac_participation:0.4.0
 default_connection: fetchai/oef:0.6.0
 default_ledger: ethereum
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
 logging_config:
   disable_existing_loggers: false
   version: 1

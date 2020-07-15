@@ -70,7 +70,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.5.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.6.0 --alias my_thermometer_aea
 cd thermometer_aea
 aea install
 ```
@@ -89,13 +89,7 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
-In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -108,7 +102,7 @@ default_routing:
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.5.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.6.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -122,20 +116,12 @@ aea create my_thermometer_client
 cd my_thermometer_client
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/thermometer_client:0.5.0
+aea add skill fetchai/thermometer_client:0.6.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
-In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -161,30 +147,6 @@ aea generate-wealth fetchai
 
 <details><summary>Alternatively, create wealth for other test networks.</summary>
 <p>
-
-<strong>Ledger Config:</strong>
-<br>
-
-In `my_thermometer_aea/aea-config.yaml` and `my_thermometer_client/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Ethereum:
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-
-Alternatively, to connect to Cosmos:
-``` yaml
-ledger_apis:
-  cosmos:
-    address: https://rest-agent-land.prod.fetch-ai.com:443
-```
-
-<strong>Wealth:</strong>
-<br>
 
 To generate and add a private-public key pair for Ethereum use:
 ``` bash
