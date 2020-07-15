@@ -268,7 +268,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(dialogue_label: DialogueLabel, agent_address: Optional[Address] = None, role: Optional[Role] = None, rules: Optional[Rules] = None) -> None
+ | __init__(dialogue_label: DialogueLabel, message_class: Optional[Type[Message]] = None, agent_address: Optional[Address] = None, role: Optional[Role] = None, rules: Optional[Rules] = None) -> None
 ```
 
 Initialize a dialogue.
@@ -446,6 +446,25 @@ Extend the list of incoming/outgoing messages with 'message', if 'message' is va
 
 True if message successfully added, false otherwise
 
+<a name=".aea.helpers.dialogue.base.Dialogue.reply"></a>
+#### reply
+
+```python
+ | reply(target_message: Message, performative, **kwargs) -> Message
+```
+
+Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
+
+**Arguments**:
+
+- `target_message`: the message to reply to.
+- `performative`: the performative of the reply message.
+- `kwargs`: the content of the reply message.
+
+**Returns**:
+
+the reply message if it was successfully added as a reply, None otherwise.
+
 <a name=".aea.helpers.dialogue.base.Dialogue.is_valid_next_message"></a>
 #### is`_`valid`_`next`_`message
 
@@ -588,7 +607,7 @@ The dialogues class keeps track of all dialogues for an agent.
 #### `__`init`__`
 
 ```python
- | __init__(agent_address: Address, end_states: FrozenSet[Dialogue.EndState]) -> None
+ | __init__(agent_address: Address, end_states: FrozenSet[Dialogue.EndState], message_class: Optional[Type[Message]] = None, dialogue_class: Optional[Type[Dialogue]] = None, role_from_first_message: Optional[Callable[[Message], Dialogue.Role]] = None) -> None
 ```
 
 Initialize dialogues.
@@ -649,6 +668,25 @@ Return a dialogue label for a new self initiated dialogue.
 
 the next nonce
 
+<a name=".aea.helpers.dialogue.base.Dialogues.create"></a>
+#### create
+
+```python
+ | create(counterparty: Address, performative: Message.Performative, **kwargs, ,) -> Tuple[Message, Dialogue]
+```
+
+Create a dialogue with 'counterparty', with an initial message whose performative is 'performative' and contents are from 'kwargs'.
+
+**Arguments**:
+
+- `counterparty`: the counterparty of the dialogue.
+- `performative`: the performative of the initial message.
+- `kwargs`: the content of the initial message.
+
+**Returns**:
+
+the initial message and the dialogue.
+
 <a name=".aea.helpers.dialogue.base.Dialogues.update"></a>
 #### update
 
@@ -656,7 +694,7 @@ the next nonce
  | update(message: Message) -> Optional[Dialogue]
 ```
 
-Update the state of dialogues with a new message.
+Update the state of dialogues with a new incoming message.
 
 If the message is for a new dialogue, a new dialogue is created with 'message' as its first message, and returned.
 If the message is addressed to an existing dialogue, the dialogue is retrieved, extended with this message and returned.
@@ -712,6 +750,8 @@ the dialogue if present
  | create_dialogue(dialogue_label: DialogueLabel, role: Dialogue.Role) -> Dialogue
 ```
 
+THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN THE NEXT VERSION. USE THE NEW CONSTRUCTOR ARGUMENTS INSTEAD.
+
 Create a dialogue instance.
 
 **Arguments**:
@@ -728,7 +768,6 @@ the created dialogue
 
 ```python
  | @staticmethod
- | @abstractmethod
  | role_from_first_message(message: Message) -> Dialogue.Role
 ```
 
