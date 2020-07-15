@@ -19,9 +19,11 @@
 
 """This test module contains the integration test for the weather skills."""
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1
+from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestCarPark(AEATestCaseMany, UseOef):
@@ -113,6 +115,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
 class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that carpark skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_carpark(self):
         """Run the weather skills sequence."""
         carpark_aea_name = "my_carpark_aea"

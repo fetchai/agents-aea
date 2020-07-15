@@ -7,7 +7,7 @@ This module contains definitions of agent components.
 ## Component Objects
 
 ```python
-class Component(ABC)
+class Component(ABC,  WithLogger)
 ```
 
 Abstract class for an agent component.

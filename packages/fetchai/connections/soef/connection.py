@@ -428,7 +428,7 @@ class SOEFChannel:
                 el = root.find("./success")
                 assert el is not None, "No success element"
                 assert str(el.text).strip() == "1", "Success is not 1"
-            logger.debug(f"`{command}` SUCCSESS!")
+            logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
             raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")

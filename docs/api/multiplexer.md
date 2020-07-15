@@ -7,7 +7,7 @@ Module for the multiplexer class and related classes.
 ## AsyncMultiplexer Objects
 
 ```python
-class AsyncMultiplexer()
+class AsyncMultiplexer(WithLogger)
 ```
 
 This class can handle multiple connections at once.
@@ -28,6 +28,7 @@ Initialize the connection multiplexer.
 This information is used for envelopes which don't specify any routing context.
 If connections is None, this parameter is ignored.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
+- `agent_name`: the name of the agent that owns the multiplexer, for logging purposes.
 
 <a name=".aea.multiplexer.AsyncMultiplexer.default_connection"></a>
 #### default`_`connection

@@ -7,7 +7,7 @@ This module contains the implementation of an agent loop using asyncio.
 ## BaseAgentLoop Objects
 
 ```python
-class BaseAgentLoop(ABC)
+class BaseAgentLoop(WithLogger,  ABC)
 ```
 
 Base abstract  agent loop class.
