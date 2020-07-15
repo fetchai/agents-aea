@@ -43,7 +43,7 @@ class CliRunner(ClickCliRunner):
         self,
         cli,
         args=None,
-        input=None,
+        input_=None,
         env=None,
         catch_exceptions=True,
         color=False,
@@ -51,7 +51,7 @@ class CliRunner(ClickCliRunner):
     ):
         """Patch click.testing.CliRunner.invoke()."""
         exc_info = None
-        with self.isolation(input=input, env=env, color=color) as outstreams:
+        with self.isolation(input=input_, env=env, color=color) as outstreams:
             exception = None
             exit_code = 0
 
@@ -79,7 +79,7 @@ class CliRunner(ClickCliRunner):
                     sys.stdout.write("\n")
                     exit_code = 1
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 if not catch_exceptions:
                     raise
                 exception = e
