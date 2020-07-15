@@ -43,7 +43,7 @@ class CliRunner(ClickCliRunner):
         self,
         cli,
         args=None,
-        input_=None,
+        input=None,  # pylint: disable=redefined-builtin
         env=None,
         catch_exceptions=True,
         color=False,
@@ -51,7 +51,7 @@ class CliRunner(ClickCliRunner):
     ):
         """Patch click.testing.CliRunner.invoke()."""
         exc_info = None
-        with self.isolation(input=input_, env=env, color=color) as outstreams:
+        with self.isolation(input=input, env=env, color=color) as outstreams:
             exception = None
             exit_code = 0
 
