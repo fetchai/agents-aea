@@ -170,8 +170,7 @@ class SkillContextTestCase(TestCase):
     def test_logger_positive(self):
         """Test logger property positive result"""
         obj = SkillContext("agent_context")
-        with self.assertRaises(AssertionError):
-            obj.logger
+        obj.logger
         obj._logger = mock.Mock()
         obj.logger
 
