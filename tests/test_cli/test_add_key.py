@@ -24,8 +24,6 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 import yaml
 
 import aea
@@ -39,7 +37,7 @@ from aea.crypto.helpers import (
     FETCHAI_PRIVATE_KEY_FILE,
 )
 
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, ROOT_DIR
 from tests.test_cli.tools_for_testing import ContextMock
 
 

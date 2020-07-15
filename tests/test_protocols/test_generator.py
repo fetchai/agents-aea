@@ -29,8 +29,6 @@ from threading import Thread
 from typing import Optional
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 import pytest
 
 from aea.aea_builder import AEABuilder
@@ -56,7 +54,7 @@ from aea.protocols.generator.extract_specification import (
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import CliRunner, ROOT_DIR
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )

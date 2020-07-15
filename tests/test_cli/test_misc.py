@@ -19,10 +19,10 @@
 
 """This test module contains the tests for the `aea` sub-commands."""
 
-from click.testing import CliRunner
-
 import aea
 from aea.cli import cli
+
+from ..conftest import CliRunner
 
 
 def test_no_argument():
