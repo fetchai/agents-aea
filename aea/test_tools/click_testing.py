@@ -32,8 +32,8 @@ Links:
 import shlex
 import sys
 
+from click._compat import string_types  # type: ignore
 from click.testing import CliRunner as ClickCliRunner, Result
-from click._compat import string_types  # noqa
 
 
 class CliRunner(ClickCliRunner):
