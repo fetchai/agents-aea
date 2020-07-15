@@ -128,7 +128,7 @@ None
 ## TaskManager Objects
 
 ```python
-class TaskManager()
+class TaskManager(WithLogger)
 ```
 
 A Task manager.

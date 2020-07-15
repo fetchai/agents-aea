@@ -34,6 +34,7 @@ from aea.decision_maker.default import (
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
+from aea.helpers.logging import AgentLoggerAdapter
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -134,6 +135,8 @@ class AEA(Agent):
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
         self._skills_exception_policy = skill_exception_policy
+
+        self._setup_loggers()
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -383,3 +386,18 @@ class AEA(Agent):
         self.task_manager.stop()
         self.resources.teardown()
         ExecTimeoutThreadGuard.stop()
+
+    def _setup_loggers(self):
+        """Setup logger with agent name. """
+        for element in [
+            self.main_loop,
+            self.multiplexer,
+            self.task_manager,
+            self.resources.component_registry,
+            self.resources.behaviour_registry,
+            self.resources.handler_registry,
+            self.resources.model_registry,
+        ]:
+            element.logger = AgentLoggerAdapter(
+                element.logger, agent_name=self._identity.name
+            )

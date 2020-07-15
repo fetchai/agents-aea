@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
 from pathlib import Path
@@ -24,7 +23,7 @@ from typing import cast
 
 import pytest
 
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStatus
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import CryptoStore
@@ -32,7 +31,10 @@ from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.ledger.contract_dispatcher import ContractApiDialogues
+from packages.fetchai.connections.ledger.contract_dispatcher import (
+    ContractApiDialogues,
+    ContractApiRequestDispatcher,
+)
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 
 from tests.conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
@@ -40,6 +42,7 @@ from tests.conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
 
 @pytest.fixture()
 async def ledger_apis_connection(request):
+    """Create connection."""
     identity = Identity("name", FetchAICrypto().address)
     crypto_store = CryptoStore()
     directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
@@ -243,3 +246,43 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     result = response_message.state.body.get("balance", None)
     expected_result = {token_id: 0}
     assert result is not None and result == expected_result
+
+
+@pytest.mark.asyncio
+async def test_run_async():
+    """Test run async error handled."""
+    # for pydocstyle
+    def _raise():
+        raise Exception("Expected")
+
+    contract_api_dialogues = ContractApiDialogues()
+    message = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=EthereumCrypto.identifier,
+        contract_id="fetchai/erc1155:0.6.0",
+        contract_address="test addr",
+        callable="get_create_batch_transaction",
+        kwargs=ContractApiMessage.Kwargs(
+            {
+                "deployer_address": "test_addr",
+                "token_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            }
+        ),
+    )
+    message.counterparty = "test"
+    dialogue = contract_api_dialogues.update(message)
+    api = None
+    msg = await ContractApiRequestDispatcher(ConnectionStatus()).run_async(
+        _raise, api, message, dialogue
+    )
+    assert msg.performative == ContractApiMessage.Performative.ERROR
+
+
+@pytest.mark.asyncio
+async def test_get_handler():
+    """Test failed to get handler."""
+    with pytest.raises(Exception, match="Performative not recognized."):
+        ContractApiRequestDispatcher(ConnectionStatus()).get_handler(
+            ContractApiMessage.Performative.ERROR
+        )

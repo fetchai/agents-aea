@@ -187,9 +187,9 @@ aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.3.0
-aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/http_client:0.5.0
+aea add connection fetchai/webhook:0.4.0
+aea add connection fetchai/oef:0.6.0
 ```
 
 You now need to configure the `webhook` connection.
@@ -211,7 +211,7 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 Now you must ensure **Alice_AEA**'s default connection is `oef`.
 
 ``` bash
-aea config set agent.default_connection fetchai/oef:0.5.0
+aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
 ### Alice_AEA -- Method 2: Fetch the Agent
@@ -219,7 +219,7 @@ aea config set agent.default_connection fetchai/oef:0.5.0
 Alternatively, in the third terminal, fetch **Alice_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_alice:0.4.0
+aea fetch fetchai/aries_alice:0.5.0
 cd aries_alice
 ```
 
@@ -323,9 +323,9 @@ aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.a
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add connection fetchai/http_client:0.4.0
-aea add connection fetchai/webhook:0.3.0
-aea add connection fetchai/oef:0.5.0
+aea add connection fetchai/http_client:0.5.0
+aea add connection fetchai/webhook:0.4.0
+aea add connection fetchai/oef:0.6.0
 ```
 
 You now need to configure the `webhook` connection.
@@ -347,7 +347,7 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 Now you must ensure **Faber_AEA**'s default connection is `http_client`.
 
 ``` bash
-aea config set agent.default_connection fetchai/http_client:0.4.0
+aea config set agent.default_connection fetchai/http_client:0.5.0
 ```
 
 ### Alice_AEA -- Method 2: Fetch the Agent
@@ -355,7 +355,7 @@ aea config set agent.default_connection fetchai/http_client:0.4.0
 Alternatively, in the fourth terminal, fetch **Faber_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_faber:0.4.0
+aea fetch fetchai/aries_faber:0.5.0
 cd aries_faber
 ```
 

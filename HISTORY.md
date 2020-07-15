@@ -1,5 +1,17 @@
 # Release History
 
+## 0.5.1 (2020-07-14)
+
+- Adds support for agent name being appended to all log statements
+- Adds redesigned GUI
+- Extends dialogue api for easier dialogue maintenance
+- Resolves blocking logic in oef and gym connections
+- Adds full test coverage on aea modules configurations, components and mail
+- Adds ping background task for soef connection
+- Adds full test coverage for all connection packages
+- Multiple docs updates
+- Multiple additional tests and test stability fixes
+
 ## 0.5.0 (2020-07-06)
 
 - Refactors all connections to be fully async friendly

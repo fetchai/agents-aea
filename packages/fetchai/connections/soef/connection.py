@@ -22,6 +22,7 @@ import asyncio
 import logging
 from asyncio import CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
+from contextlib import suppress
 from typing import Dict, List, Optional, Set, Tuple, Union, cast
 from urllib import parse
 from uuid import uuid4
@@ -53,7 +54,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.4.0")
 
 
 NOT_SPECIFIED = object()
@@ -78,6 +79,7 @@ class ModelNames:
     remove_service_key = "remove_service_key"
     personality_agent = "personality_agent"
     search_model = "search_model"
+    ping = "ping"
 
 
 class SOEFException(Exception):
@@ -118,6 +120,8 @@ class SOEFChannel:
     ]
 
     DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
+
+    PING_PERIOD = 30 * 60  # 30 minutes
 
     def __init__(
         self,
@@ -164,6 +168,7 @@ class SOEFChannel:
         self._executor_pool: Optional[ThreadPoolExecutor] = None
         self.chain_identifier: str = chain_identifier or "fetchai"
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
+        self._ping_periodic_task: Optional[asyncio.Task] = None
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -337,6 +342,7 @@ class SOEFChannel:
             "personality_agent": self._set_personality_piece_handler,
             "set_service_key": self._set_service_key_handler,
             "remove_service_key": self._remove_service_key_handler,
+            "ping": self._ping_handler,
         }
         data_model_name = service_description.data_model.name
 
@@ -347,6 +353,39 @@ class SOEFChannel:
 
         handler = data_model_handlers[data_model_name]
         await handler(service_description)
+
+    async def _ping_handler(self, service_description: Description) -> None:
+        """
+        Perform ping command.
+
+        :param service_description: Service description
+
+        :return None
+        """
+        self._check_data_model(service_description, ModelNames.ping)
+        await self._ping_command()
+
+    async def _ping_command(self) -> None:
+        """Perform ping on registered agent."""
+        await self._generic_oef_command("ping", {})
+
+    async def _ping_periodic(self, period: float = 30 * 60) -> None:
+        """
+        Send ping command every `period`.
+
+        :param period: period of ping in secinds
+
+        :return: None
+        """
+        with suppress(asyncio.CancelledError):
+            while True:
+                try:
+                    await self._ping_command()
+                except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                    raise
+                except Exception:  # pylint: disable=broad-except
+                    logger.exception("Error on periodic ping command!")
+                await asyncio.sleep(period)
 
     async def _set_service_key_handler(self, service_description: Description) -> None:
         """
@@ -389,7 +428,7 @@ class SOEFChannel:
                 el = root.find("./success")
                 assert el is not None, "No success element"
                 assert str(el.text).strip() == "1", "Success is not 1"
-            logger.debug(f"`{command}` SUCCSESS!")
+            logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
             raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
@@ -552,6 +591,11 @@ class SOEFChannel:
         )
         self.unique_page_address = unique_page_address
 
+        if self._loop and not self._ping_periodic_task:
+            self._ping_periodic_task = self._loop.create_task(
+                self._ping_periodic(self.PING_PERIOD)
+            )
+
     async def _send_error_response(
         self,
         oef_error_operation: OefErrorOperation = OefSearchMessage.OefErrorOperation.OTHER,
@@ -590,7 +634,7 @@ class SOEFChannel:
 
         :return: None
         """
-        # TODO: add keep alive background tasks which ping the SOEF until the agent is deregistered
+        await self._stop_periodic_ping_task()
         if self.unique_page_address is None:  # pragma: nocover
             raise SOEFException.error(
                 "The service is not registered to the simple OEF. Cannot unregister."
@@ -599,6 +643,15 @@ class SOEFChannel:
         response = await self._generic_oef_command("unregister", check_success=False)
         assert "<response><message>Goodbye!</message></response>" in response
         self.unique_page_address = None
+
+    async def _stop_periodic_ping_task(self) -> None:
+        """Cancel periodic ping task."""
+        if self._ping_periodic_task and not self._ping_periodic_task.done():
+            self._ping_periodic_task.cancel()
+            self._ping_periodic_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await self._ping_periodic_task
+            self._ping_periodic_task = None
 
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
@@ -612,6 +665,8 @@ class SOEFChannel:
 
         :return: None
         """
+        await self._stop_periodic_ping_task()
+
         assert self.in_queue, ValueError("Queue is not set, use connect first!")
         await self._unregister_agent()
         await self.in_queue.put(None)
@@ -792,15 +847,15 @@ class SOEFConnection(Connection):
             assert self.in_queue is not None
             envelope = await self.in_queue.get()
             if envelope is None:  # pragma: nocover
-                logger.debug("Received None.")
+                self.logger.debug("Received None.")
                 return None
-            logger.debug("Received envelope: {}".format(envelope))
+            self.logger.debug("Received envelope: {}".format(envelope))
             return envelope
         except CancelledError:
-            logger.debug("Receive cancelled.")
+            self.logger.debug("Receive cancelled.")
             return None
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception(e)
+            self.logger.exception(e)
             return None
 
     async def send(self, envelope: "Envelope") -> None:

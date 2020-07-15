@@ -27,9 +27,10 @@ import socket
 import sys
 import threading
 import time
-from functools import wraps
+from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from threading import Timer
+from types import FunctionType, MethodType
 from typing import Callable, Optional, Sequence, cast
 from unittest.mock import patch
 
@@ -158,7 +159,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.4.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.5.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -669,6 +670,7 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
     oef_connection = OEFConnection(
         configuration=configuration, identity=Identity("name", address),
     )
+    oef_connection._default_logger_name = "aea.packages.fetchai.connections.oef"
     return oef_connection
 
 
@@ -679,6 +681,9 @@ def _make_tcp_server_connection(address: str, host: str, port: int):
     tcp_connection = TCPServerConnection(
         configuration=configuration, identity=Identity("name", address),
     )
+    tcp_connection._default_logger_name = (
+        "aea.packages.fetchai.connections.tcp.tcp_server"
+    )
     return tcp_connection
 
 
@@ -688,6 +693,9 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
     )
     tcp_connection = TCPClientConnection(
         configuration=configuration, identity=Identity("name", address),
+    )
+    tcp_connection._default_logger_name = (
+        "aea.packages.fetchai.connections.tcp.tcp_client"
     )
     return tcp_connection
 
@@ -731,7 +739,7 @@ def _make_libp2p_connection(
     identity = Identity("", address=FetchAICrypto().address)
     if relay and delegate:
         configuration = ConnectionConfig(
-            libp2p_key_file=None,
+            node_key_file=None,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -741,7 +749,7 @@ def _make_libp2p_connection(
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
-            libp2p_key_file=None,
+            node_key_file=None,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -750,7 +758,7 @@ def _make_libp2p_connection(
         )
     else:
         configuration = ConnectionConfig(
-            libp2p_key_file=None,
+            node_key_file=None,
             local_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
             log_file=log_file,
@@ -760,7 +768,7 @@ def _make_libp2p_connection(
 
 
 def _make_libp2p_client_connection(
-    node_port: int = 11234, node_host: str = "127.0.0.1",
+    node_port: int = 11234, node_host: str = "127.0.0.1"
 ) -> P2PLibp2pClientConnection:
     identity = Identity("", address=FetchAICrypto().address)
     configuration = ConnectionConfig(
@@ -791,6 +799,52 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
             raise e
 
     return wrapper
+
+
+def libp2p_log_on_failure_all(cls):
+    """
+    Decorate every method of a class with `libp2p_log_on_failure`
+
+    :return: class with decorated methods.
+    """
+    # TODO(LR) test it is a type
+    for name, fn in inspect.getmembers(cls):
+        if isinstance(fn, FunctionType):
+            setattr(cls, name, libp2p_log_on_failure(fn))
+        # TOFIX(LR) decorate already @classmethod decorated methods
+        continue
+        if isinstance(fn, MethodType):
+            if fn.im_self is None:
+                wrapped_fn = libp2p_log_on_failure(fn.im_func)
+                method = MethodType(wrapped_fn, None, cls)
+                setattr(cls, name, method)
+            else:
+                wrapped_fn = libp2p_log_on_failure(fn.im_func)
+                clsmethod = MethodType(wrapped_fn, cls, type)
+                setattr(cls, name, clsmethod)
+    return cls
+
+
+def do_for_all(method_decorator):
+    def class_decorator(cls):
+        class GetAttributeMetaClass(type):
+            def __getattribute__(cls, name):
+                attr = super().__getattribute__(name)
+                return method_decorator(attr)
+
+        class DecoratedClass(cls, metaclass=GetAttributeMetaClass):
+            def __getattribute__(self, name):
+                attr = super().__getattribute__(name)
+                return method_decorator(attr)
+
+        for attr in WRAPPER_ASSIGNMENTS:
+            if not hasattr(cls, attr):
+                continue
+            setattr(DecoratedClass, attr, getattr(cls, attr))
+        DecoratedClass.__wrapped__ = cls
+        return DecoratedClass
+
+    return class_decorator
 
 
 class CwdException(Exception):

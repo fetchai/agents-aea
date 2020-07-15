@@ -23,6 +23,16 @@ Instantiate the resources.
 
 :return None
 
+<a name=".aea.registries.resources.Resources.component_registry"></a>
+#### component`_`registry
+
+```python
+ | @property
+ | component_registry() -> AgentComponentRegistry
+```
+
+Get the agent component registry.
+
 <a name=".aea.registries.resources.Resources.behaviour_registry"></a>
 #### behaviour`_`registry
 
@@ -42,6 +52,16 @@ Get the behaviour registry.
 ```
 
 Get the handler registry.
+
+<a name=".aea.registries.resources.Resources.model_registry"></a>
+#### model`_`registry
+
+```python
+ | @property
+ | model_registry() -> ComponentRegistry[Model]
+```
+
+Get the model registry.
 
 <a name=".aea.registries.resources.Resources.add_component"></a>
 #### add`_`component

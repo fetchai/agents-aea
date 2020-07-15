@@ -104,7 +104,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.0
+v0.5.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -191,7 +191,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.0
+v0.5.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -339,7 +339,7 @@ aea delete my_first_aea
 
 To gain an understanding of the core components of the framework, please continue to the next step of 'Getting Started':
 
-- <a href="../core-components/">Core components</a>
+- <a href="../core-components-1/">Core components</a>
 
 For more demos, use cases or step by step guides, please check the following:
 

@@ -631,6 +631,16 @@ Load the skill from a directory.
 
 the skill object.
 
+<a name=".aea.skills.base.Skill.logger"></a>
+#### logger
+
+```python
+ | @logger.setter
+ | logger(*args) -> None
+```
+
+Set the logger.
+
 <a name=".aea.skills.base.Skill.from_config"></a>
 #### from`_`config
 

@@ -32,7 +32,7 @@ from packages.fetchai.skills.erc1155_client.dialogues import (
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.1.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
 
 
 class SearchBehaviour(TickerBehaviour):

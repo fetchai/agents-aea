@@ -39,6 +39,7 @@ from aea.helpers.async_utils import (
     PeriodicCaller,
     ensure_loop,
 )
+from aea.helpers.logging import WithLogger
 from aea.multiplexer import InBox
 from aea.skills.base import Behaviour
 
@@ -50,7 +51,7 @@ if TYPE_CHECKING:
     from aea.agent import Agent  # pragma: no cover
 
 
-class BaseAgentLoop(ABC):
+class BaseAgentLoop(WithLogger, ABC):
     """Base abstract  agent loop class."""
 
     def __init__(
@@ -61,6 +62,7 @@ class BaseAgentLoop(ABC):
         :params agent: Agent or AEA to run.
         :params loop: optional asyncio event loop. if not specified a new loop will be created.
         """
+        WithLogger.__init__(self, logger)
         self._agent: "Agent" = agent
         self.set_loop(ensure_loop(loop))
         self._tasks: List[asyncio.Task] = []
@@ -77,7 +79,7 @@ class BaseAgentLoop(ABC):
 
     async def run_loop(self) -> None:
         """Run agent loop."""
-        logger.debug("agent loop started")
+        self.logger.debug("agent loop started")
         self._state.set(AgentLoopStates.started)
         self._set_tasks()
         try:
@@ -171,7 +173,9 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :return: None
         """
-        logger.exception(f"Loop: Exception: `{exc}` occured during `{fn}` processing")
+        self.logger.exception(
+            f"Loop: Exception: `{exc}` occured during `{fn}` processing"
+        )
         self._exceptions.append(exc)
         self._state.set(AgentLoopStates.error)
 
@@ -200,7 +204,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         )
         self._behaviours_registry[behaviour] = periodic_caller
         periodic_caller.start()
-        logger.debug(f"Behaviour {behaviour} registered.")
+        self.logger.debug(f"Behaviour {behaviour} registered.")
 
     def _register_all_behaviours(self) -> None:
         """Register all AEA behaviours to run periodically."""
@@ -237,7 +241,7 @@ class AsyncAgentLoop(BaseAgentLoop):
     def _set_tasks(self):
         """Set run loop tasks."""
         self._tasks = self._create_tasks()
-        logger.debug("tasks created!")
+        self.logger.debug("tasks created!")
 
     def _create_tasks(self) -> List[Task]:
         """
@@ -256,7 +260,7 @@ class AsyncAgentLoop(BaseAgentLoop):
     async def _task_process_inbox(self) -> None:
         """Process incoming messages."""
         inbox: InBox = self._agent.inbox
-        logger.info("[{}]: Start processing messages...".format(self._agent.name))
+        self.logger.info("[{}]: Start processing messages...".format(self._agent.name))
         while self.is_running:
             await inbox.async_wait()
 

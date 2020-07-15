@@ -24,7 +24,7 @@ import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Optional, cast
+from typing import Optional, Union, cast
 
 import gym
 
@@ -57,6 +57,7 @@ class GymChannel:
         self._threaded_pool: ThreadPoolExecutor = ThreadPoolExecutor(
             self.THREAD_POOL_SIZE
         )
+        self.logger: Union[logging.Logger, logging.LoggerAdapter] = logger
 
     @property
     def queue(self) -> asyncio.Queue:
@@ -83,7 +84,7 @@ class GymChannel:
         :return: None
         """
         sender = envelope.sender
-        logger.debug("Processing message from {}: {}".format(sender, envelope))
+        self.logger.debug("Processing message from {}: {}".format(sender, envelope))
         if envelope.protocol_id != GymMessage.protocol_id:
             raise ValueError("This protocol is not valid for gym.")
         await self.handle_gym_message(envelope)
@@ -183,6 +184,7 @@ class GymConnection(Connection):
         """
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
+            self.channel.logger = self.logger
             await self.channel.connect()
 
     async def disconnect(self) -> None:

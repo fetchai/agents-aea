@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
+# pragma: nocover
 """Base classes for TCP communication."""
 
 from .tcp_client import (  # noqa: F401 # pylint: disable=unused-import

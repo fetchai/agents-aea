@@ -19,6 +19,7 @@
 
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
 import copy
+import logging
 import os
 import random
 import shutil
@@ -60,6 +61,8 @@ from aea.test_tools.generic import (
 )
 
 from tests.conftest import ROOT_DIR
+
+logger = logging.getLogger(__name__)
 
 FETCHAI_NAME = FetchAICrypto.identifier
 
@@ -659,7 +662,14 @@ class BaseAEATestCase(ABC):
         if is_terminating:
             cls.terminate_agents(process)
         if missing_strings != []:
-            print("Non-empty missing strings, stderr:\n" + cls.stderr[process.pid])
+            logger.info(
+                "Non-empty missing strings, stderr:\n{}".format(cls.stderr[process.pid])
+            )
+            logger.info("=====================")
+            logger.info(
+                "Non-empty missing strings, stdout:\n{}".format(cls.stdout[process.pid])
+            )
+            logger.info("=====================")
         return missing_strings
 
     @classmethod
@@ -675,6 +685,7 @@ class BaseAEATestCase(ABC):
         missing_strings = cls.missing_from_output(
             process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
         )
+
         return missing_strings == []
 
     @classmethod
