@@ -28,7 +28,7 @@ protocols:                                      # The list of protocol public id
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 - fetchai/error:0.3.0
 default_connection: fetchai/oef:0.6.0           # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
-default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
+default_ledger: cosmos                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 logging_config:                                 # The logging configurations the AEA project uses
   disable_existing_loggers: false
   version: 1
