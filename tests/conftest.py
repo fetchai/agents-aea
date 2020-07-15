@@ -65,6 +65,7 @@ from aea.contracts import Contract, contract_registry
 from aea.crypto.fetchai import FetchAICrypto
 from aea.identity.base import Identity
 from aea.mail.base import Address
+from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
@@ -85,6 +86,7 @@ from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
+CliRunner = ImportedCliRunner
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")

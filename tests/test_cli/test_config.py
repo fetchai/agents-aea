@@ -24,12 +24,10 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from click.testing import CliRunner
-
 from aea.cli import cli
 from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
 
-from tests.conftest import CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
 class TestConfigGet:
