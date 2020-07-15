@@ -65,6 +65,7 @@ from aea.contracts import Contract, contract_registry
 from aea.crypto.fetchai import FetchAICrypto
 from aea.identity.base import Identity
 from aea.mail.base import Address
+from aea.test_tools.click_testing import CliRunner  # noqa
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection

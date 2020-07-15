@@ -28,8 +28,6 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator, List, Optional
 
-from click.testing import CliRunner
-
 from pexpect.exceptions import EOF  # type: ignore
 
 import pytest
@@ -40,7 +38,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, MAX_FLAKY_RERUNS
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, MAX_FLAKY_RERUNS
 
 logger = logging.getLogger(__name__)
 

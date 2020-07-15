@@ -20,8 +20,6 @@
 
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 import pytest
 
 from aea.cli import cli
@@ -30,7 +28,7 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock
 
 

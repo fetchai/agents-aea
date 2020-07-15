@@ -25,8 +25,6 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from click.testing import CliRunner
-
 from jsonschema import ValidationError
 
 import pytest
@@ -42,6 +40,7 @@ from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CUR_PATH,
+    CliRunner,
     MAX_FLAKY_RERUNS,
     double_escape_windows_path_separator,
 )

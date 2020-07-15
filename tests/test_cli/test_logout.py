@@ -20,11 +20,9 @@
 
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 from aea.cli import cli
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, CliRunner
 
 
 @mock.patch("aea.cli.logout.registry_logout")
