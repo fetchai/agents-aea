@@ -28,7 +28,7 @@ import pytest
 
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 
-from ..conftest import (
+from tests.conftest import (
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
@@ -97,7 +97,8 @@ def test_generate_nonce():
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
     account = FetchAICrypto(FETCHAI_PRIVATE_KEY_PATH)
@@ -149,7 +150,8 @@ def test_construct_sign_and_submit_transfer_transaction():
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_get_balance():
     """Test the balance is zero for a new account."""
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
@@ -162,7 +164,8 @@ def test_get_balance():
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.network
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.fetchai"):

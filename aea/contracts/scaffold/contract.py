@@ -19,16 +19,12 @@
 
 """This module contains the scaffold contract definition."""
 
-from aea.contracts.base import Contract
+from aea.contracts.ethereum import Contract
 
 
 class MyScaffoldContract(Contract):
-    """The scaffold contract class."""
+    """
+    The scaffold contract class for an ethereum based smart contract.
 
-    def __init__(self, **kwargs):
-        """
-        Initialize the contract.
-
-        :param kwargs: keyword arguments for the parent constructor.
-        """
-        super().__init__(**kwargs)
+    For non-ethereum based contracts import `from aea.contracts.base import Contract` and extend accordingly.
+    """

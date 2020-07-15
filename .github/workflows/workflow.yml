@@ -54,7 +54,7 @@ jobs:
         sudo apt-get install -y protobuf-compiler
     - name: Integrational tests and coverage
       run: |
-        tox -e py3.8 -- --aea-loop sync -m 'integration and not unstable and not ethereum'
+        tox -e py3.8 -- --aea-loop sync -m 'integration and not unstable and not ledger'
   
   common_checks:
     runs-on: ubuntu-latest
@@ -102,10 +102,12 @@ jobs:
       - name: Golang code style check
         uses: golangci/golangci-lint-action@v1
         with:
-          version: v1.26
+          version: v1.28
           working-directory: packages/fetchai/connections/p2p_libp2p/
       - name: Check package versions in documentation
         run: tox -e package_version_checks
+      - name: Check package dependencies
+        run: tox -e package_dependencies_checks
       - name: Generate Documentation
         run: tox -e docs
 
@@ -128,9 +130,9 @@ jobs:
           pip install pipenv
           pip install tox
       - name: Integration tests
-        run: tox -e py3.7 -- -m 'integration and not unstable and not ethereum'
+        run: tox -e py3.7 -- -m 'integration and not unstable and not ledger'
 
-  integration_checks_eth:
+  integration_checks_ledger:
     continue-on-error: True
     runs-on: ubuntu-latest
 
@@ -149,7 +151,7 @@ jobs:
           pip install pipenv
           pip install tox
       - name: Integration tests
-        run: tox -e py3.7 -- -m 'integration and not unstable and ethereum'
+        run: tox -e py3.7 -- -m 'integration and not unstable and ledger'
         continue-on-error: true
       - name: Force green exit
         run: exit 0

@@ -16,10 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the gym connection module."""
-
+import asyncio
 import logging
+import os
+from unittest.mock import patch
 
 import gym
 
@@ -29,10 +30,10 @@ from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.gym.connection import GymChannel, GymConnection
+from packages.fetchai.connections.gym.connection import GymConnection
 from packages.fetchai.protocols.gym.message import GymMessage
 
-from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
+from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 logger = logging.getLogger(__name__)
 
@@ -40,33 +41,41 @@ logger = logging.getLogger(__name__)
 class TestGymConnection:
     """Test the packages/connection/gym/connection.py."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Initialise the class."""
-        cls.env = gym.GoalEnv()
+        self.env = gym.GoalEnv()
         configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
-        identity = Identity("name", address="my_key")
-        cls.gym_con = GymConnection(
-            gym_env=cls.env, identity=identity, configuration=configuration
+        self.my_address = "my_key"
+        identity = Identity("name", address=self.my_address)
+        self.gym_con = GymConnection(
+            gym_env=self.env, identity=identity, configuration=configuration
         )
-        cls.gym_con.channel = GymChannel("my_key", gym.GoalEnv())
-        cls.gym_con._connection = None
+        self.loop = asyncio.get_event_loop()
 
-    def test_gym_connection_initialization(self):
+    def teardown(self):
+        """Clean up after tests."""
+        self.loop.run_until_complete(self.gym_con.disconnect())
+
+    @pytest.mark.asyncio
+    async def test_gym_connection_connect(self):
         """Test the connection None return value after connect()."""
-        self.gym_con.channel._queues["my_key"] = None
-        assert self.gym_con.channel.connect() is None
+        assert self.gym_con.channel._queue is None
+        await self.gym_con.channel.connect()
+        assert self.gym_con.channel._queue is not None
 
-    def test_decode_envelope_error(self):
+    @pytest.mark.asyncio
+    async def test_decode_envelope_error(self):
         """Test the decoding error for the envelopes."""
+        await self.gym_con.connect()
         envelope = Envelope(
             to="_to_key",
-            sender="_from_key",
+            sender=self.my_address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=b"hello",
         )
+
         with pytest.raises(ValueError):
-            self.gym_con.channel._decode_envelope(envelope)
+            await self.gym_con.send(envelope)
 
     @pytest.mark.asyncio
     async def test_send_connection_error(self):
@@ -84,12 +93,88 @@ class TestGymConnection:
             message=msg,
         )
 
-        self.gym_con.connection_status.is_connected = False
         with pytest.raises(ConnectionError):
             await self.gym_con.send(envelope)
+
+    @pytest.mark.asyncio
+    async def test_send_act(self):
+        """Test send act message."""
+        msg = GymMessage(
+            performative=GymMessage.Performative.ACT,
+            action=GymMessage.AnyObject("any_action"),
+            step_id=1,
+        )
+        msg.counterparty = "_to_key"
+        envelope = Envelope(
+            to="_to_key",
+            sender=self.my_address,
+            protocol_id=GymMessage.protocol_id,
+            message=msg,
+        )
+        await self.gym_con.connect()
+
+        with patch.object(
+            self.env, "step", return_value=(1, 1.0, True, "some info")
+        ) as mock:
+            await self.gym_con.send(envelope)
+            mock.assert_called()
+
+        assert await asyncio.wait_for(self.gym_con.receive(), timeout=3) is not None
+
+    @pytest.mark.asyncio
+    async def test_send_reset(self):
+        """Test send reset message."""
+        msg = GymMessage(performative=GymMessage.Performative.RESET,)
+        msg.counterparty = "_to_key"
+        envelope = Envelope(
+            to="_to_key",
+            sender=self.my_address,
+            protocol_id=GymMessage.protocol_id,
+            message=msg,
+        )
+        await self.gym_con.connect()
+
+        with pytest.raises(gym.error.Error):
+            await self.gym_con.send(envelope)
+
+        with pytest.raises(asyncio.TimeoutError):
+            await asyncio.wait_for(self.gym_con.receive(), timeout=0.5)
+
+    @pytest.mark.asyncio
+    async def test_send_close(self):
+        """Test send close message."""
+        msg = GymMessage(performative=GymMessage.Performative.CLOSE,)
+        msg.counterparty = "_to_key"
+        envelope = Envelope(
+            to="_to_key",
+            sender=self.my_address,
+            protocol_id=GymMessage.protocol_id,
+            message=msg,
+        )
+        await self.gym_con.connect()
+
+        await self.gym_con.send(envelope)
+
+        with pytest.raises(asyncio.TimeoutError):
+            await asyncio.wait_for(self.gym_con.receive(), timeout=0.5)
 
     @pytest.mark.asyncio
     async def test_receive_connection_error(self):
         """Test receive connection error and Cancel Error."""
         with pytest.raises(ConnectionError):
             await self.gym_con.receive()
+
+    def test_gym_env_load(self):
+        """Load gym env from file."""
+        curdir = os.getcwd()
+        os.chdir(os.path.join(ROOT_DIR, "examples", "gym_ex"))
+        gym_env_path = "gyms.env.BanditNArmedRandom"
+        configuration = ConnectionConfig(
+            connection_id=GymConnection.connection_id, env=gym_env_path
+        )
+        identity = Identity("name", address=self.my_address)
+        gym_con = GymConnection(
+            gym_env=None, identity=identity, configuration=configuration
+        )
+        assert gym_con.channel.gym_env is not None
+        os.chdir(curdir)

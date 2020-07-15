@@ -21,7 +21,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestThermometerSkill(AEATestCaseMany, UseOef):
@@ -35,14 +35,14 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         thermometer_client_aea_name = "my_thermometer_client"
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/thermometer:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/thermometer:0.6.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
         )
@@ -53,10 +53,10 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.4.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
         )
@@ -123,16 +123,16 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         thermometer_client_aea_name = "my_thermometer_client"
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.1.0"}
+        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         ledger_apis = {"fetchai": {"network": "testnet"}}
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/thermometer:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/thermometer:0.6.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         setting_path = "agent.default_routing"
@@ -140,7 +140,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.4.0", thermometer_aea_name
+            "fetchai/thermometer_aea:0.5.0", thermometer_aea_name
         )
         assert (
             diff == []
@@ -148,10 +148,10 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.add_item("connection", "fetchai/ledger:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.4.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.5.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         setting_path = "agent.default_routing"
@@ -159,7 +159,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.4.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.5.0", thermometer_client_aea_name
         )
         assert (
             diff == []
@@ -190,7 +190,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=180, is_terminating=False
+            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []

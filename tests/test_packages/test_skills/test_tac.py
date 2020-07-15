@@ -24,7 +24,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import (
+from tests.conftest import (
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -62,14 +62,14 @@ class TestTacSkills(AEATestCaseMany, UseOef):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/tac_control:0.3.0")
         self.set_config("agent.default_ledger", "ethereum")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.3.0", tac_controller_name
+            "fetchai/tac_controller:0.4.0", tac_controller_name
         )
         assert (
             diff == []
@@ -79,14 +79,14 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         for agent_name in (tac_aea_one, tac_aea_two):
             self.set_agent_context(agent_name)
             self.force_set_config(setting_path, ledger_apis)
-            self.add_item("connection", "fetchai/oef:0.5.0")
-            self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+            self.add_item("connection", "fetchai/oef:0.6.0")
+            self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.4.0")
             self.set_config("agent.default_ledger", "ethereum")
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.4.0", agent_name
+                "fetchai/tac_participant:0.5.0", agent_name
             )
             assert (
                 diff == []
@@ -104,14 +104,14 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             "vendor.fetchai.skills.tac_control.models.parameters.args.start_time"
         )
         self.set_config(setting_path, start_time)
-        tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.6.0")
 
         # run two agents (participants)
         self.set_agent_context(tac_aea_one)
-        tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.6.0")
 
         self.set_agent_context(tac_aea_two)
-        tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.6.0")
 
         check_strings = (
             "Registering TAC data model",
@@ -124,7 +124,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             "Current good & money allocation & score:",
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, timeout=180, is_terminating=False
+            tac_controller_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -148,7 +148,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             "Declining propose",
         )
         missing_strings = self.missing_from_output(
-            tac_aea_one_process, check_strings, timeout=180, is_terminating=False
+            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -193,8 +193,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.force_set_config(setting_path, ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.4.0")
         self.set_config("agent.default_ledger", "ethereum")
         # stdout = self.get_wealth("ethereum")
@@ -203,7 +203,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.4.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.5.0", tac_controller_name
         )
         assert (
             diff == []
@@ -222,8 +222,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         ):
             self.set_agent_context(agent_name)
             self.force_set_config(setting_path, ledger_apis)
-            self.add_item("connection", "fetchai/oef:0.5.0")
-            self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+            self.add_item("connection", "fetchai/oef:0.6.0")
+            self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.4.0")
             self.set_config("agent.default_ledger", "ethereum")
@@ -239,7 +239,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.4.0", agent_name
+                "fetchai/tac_participant:0.5.0", agent_name
             )
             assert (
                 diff == []
@@ -258,7 +258,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         start_time = fut.strftime("%d %m %Y %H:%M")
         setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time"
         self.set_config(setting_path, start_time)
-        tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.6.0")
 
         check_strings = (
             "Sending deploy transaction to decision maker.",
@@ -268,7 +268,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             "TAC open for registration until:",
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, timeout=180, is_terminating=False
+            tac_controller_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -276,10 +276,10 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
 
         # run two participants as well
         self.set_agent_context(tac_aea_one)
-        tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.6.0")
 
         self.set_agent_context(tac_aea_two)
-        tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.6.0")
 
         check_strings = (
             "Agent registered:",

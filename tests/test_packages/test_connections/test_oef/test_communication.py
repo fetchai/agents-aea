@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This test module contains the tests for the OEF communication using an OEF."""
 
 import asyncio
@@ -25,6 +27,7 @@ import time
 import unittest
 from typing import Dict, cast
 from unittest import mock
+from unittest.mock import patch
 
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
@@ -50,7 +53,6 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import UseOef
 
-import packages
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -60,7 +62,11 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from ....conftest import FETCHAI_ADDRESS_ONE, FETCHAI_ADDRESS_TWO, _make_oef_connection
+from tests.conftest import (
+    FETCHAI_ADDRESS_ONE,
+    FETCHAI_ADDRESS_TWO,
+    _make_oef_connection,
+)
 
 DEFAULT_OEF = "default_oef"
 
@@ -81,7 +87,8 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        """
+        Infer the role of the agent from an incoming/outgoing first message.
 
         :param message: an incoming/outgoing first message
         :return: The role of the agent
@@ -1055,7 +1062,7 @@ class TestSendWithOEF(UseOef):
         await oef_connection.disconnect()
 
     @pytest.mark.asyncio
-    async def test_cancelled_receive(self, pytestconfig):
+    async def test_cancelled_receive(self, pytestconfig, caplog):
         """Test the case when a receive request is cancelled."""
         oef_connection = _make_oef_connection(
             address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
@@ -1063,21 +1070,18 @@ class TestSendWithOEF(UseOef):
         oef_connection.loop = asyncio.get_event_loop()
         await oef_connection.connect()
 
-        patch = unittest.mock.patch.object(
-            packages.fetchai.connections.oef.connection.logger, "debug"
-        )
-        mocked_logger_debug = patch.start()
+        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
 
-        async def receive():
-            await oef_connection.receive()
+            async def receive():
+                await oef_connection.receive()
 
-        task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
-        await asyncio.sleep(0.1)
-        task.cancel()
-        await asyncio.sleep(0.1)
-        await oef_connection.disconnect()
+            task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
+            await asyncio.sleep(0.1)
+            task.cancel()
+            await asyncio.sleep(0.1)
+            await oef_connection.disconnect()
 
-        mocked_logger_debug.assert_called_once_with("Receive cancelled.")
+            assert "Receive cancelled." in caplog.text
 
     @pytest.mark.asyncio
     async def test_exception_during_receive(self, pytestconfig):
@@ -1089,7 +1093,7 @@ class TestSendWithOEF(UseOef):
         await oef_connection.connect()
 
         with unittest.mock.patch.object(
-            oef_connection.in_queue, "get", side_effect=Exception
+            oef_connection.channel._in_queue, "get", side_effect=Exception
         ):
             result = await oef_connection.receive()
             assert result is None
@@ -1117,27 +1121,51 @@ class TestSendWithOEF(UseOef):
 @pytest.mark.skipif(
     sys.version_info < (3, 7), reason="Python version < 3.7 not supported by the OEF."
 )
-async def test_cannot_connect_to_oef():
+async def test_cannot_connect_to_oef(caplog):
     """Test the case when we can't connect to the OEF."""
     oef_connection = _make_oef_connection(
         address=FETCHAI_ADDRESS_ONE,
         oef_addr="127.0.0.1",
         oef_port=61234,  # use addr instead of hostname to avoid name resolution
     )
-    oef_connection.loop = asyncio.get_event_loop()
-    patch = unittest.mock.patch.object(
-        packages.fetchai.connections.oef.connection.logger, "warning"
-    )
-    mocked_logger_warning = patch.start()
 
-    async def try_to_connect():
+    with caplog.at_level(logging.DEBUG, logger="aea.packages.fetchai.connections.oef"):
+
+        task = asyncio.ensure_future(
+            oef_connection.connect(), loop=asyncio.get_event_loop()
+        )
+        await asyncio.sleep(3.0)
+        assert "Cannot connect to OEFChannel. Retrying in 5 seconds..." in caplog.text
+
+        await cancel_and_wait(task)
+        await oef_connection.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.skipif(
+    sys.version_info < (3, 7), reason="Python version < 3.7 not supported by the OEF."
+)
+async def test_methods_with_logging_only():
+    """Test the case when we can't connect to the OEF."""
+    oef_connection = _make_oef_connection(
+        address=FETCHAI_ADDRESS_ONE,
+        oef_addr="127.0.0.1",
+        oef_port=61234,  # use addr instead of hostname to avoid name resolution
+    )
+
+    with patch.object(oef_connection.channel, "_oef_agent_connect", return_value=True):
         await oef_connection.connect()
 
-    task = asyncio.ensure_future(try_to_connect(), loop=asyncio.get_event_loop())
-    await asyncio.sleep(1.0)
-    mocked_logger_warning.assert_called_with(
-        "Cannot connect to OEFChannel. Retrying in 5 seconds..."
+    oef_connection.channel.on_cfp(
+        msg_id=1, dialogue_id=1, origin="some", target=1, query=b""
     )
-    await cancel_and_wait(task)
-    oef_connection.channel.disconnect()
-    oef_connection.disconnect()
+    oef_connection.channel.on_decline(msg_id=1, dialogue_id=1, origin="some", target=1)
+    oef_connection.channel.on_propose(
+        msg_id=1, dialogue_id=1, origin="some", target=1, proposals=b""
+    )
+    oef_connection.channel.on_accept(msg_id=1, dialogue_id=1, origin="some", target=1)
+
+    try:
+        await oef_connection.disconnect()
+    except Exception:  # nosec
+        pass

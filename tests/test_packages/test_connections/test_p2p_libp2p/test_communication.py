@@ -22,7 +22,6 @@
 import os
 import shutil
 import tempfile
-import time
 
 import pytest
 
@@ -30,9 +29,12 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
-from ....conftest import (
+from packages.fetchai.connections.p2p_libp2p.connection import Uri
+
+from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
+    libp2p_log_on_failure_all,
     skip_test_windows,
 )
 
@@ -78,17 +80,23 @@ class TestP2PLibp2pConnectionConnectDisconnect:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionEchoEnvelope:
     """Test that connection will route envelope to destination"""
 
     @classmethod
+    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
+        cls.log_files = []
+
         cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer1 = Multiplexer([cls.connection1])
+        cls.log_files.append(cls.connection1.node.log_file)
         cls.multiplexer1.connect()
 
         genesis_peer = cls.connection1.node.multiaddrs[0]
@@ -97,16 +105,13 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             port=DEFAULT_PORT + 2, entry_peers=[genesis_peer]
         )
         cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.log_files.append(cls.connection2.node.log_file)
         cls.multiplexer2.connect()
 
-        cls.log_files = [cls.connection1.node.log_file, cls.connection2.node.log_file]
-
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection1.connection_status.is_connected is True
         assert self.connection2.connection_status.is_connected is True
 
-    @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -136,7 +141,6 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
         assert envelope.message == msg
 
-    @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -186,21 +190,26 @@ class TestP2PLibp2pConnectionEchoEnvelope:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
 
     @classmethod
+    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
+        cls.log_files = []
+
         port_genesis = DEFAULT_PORT + 10
         cls.connection_genesis = _make_libp2p_connection(port_genesis)
         cls.multiplexer_genesis = Multiplexer([cls.connection_genesis])
+        cls.log_files.append(cls.connection_genesis.node.log_file)
         cls.multiplexer_genesis.connect()
 
-        time.sleep(2)
         genesis_peer = cls.connection_genesis.node.multiaddrs[0]
 
         cls.connections = [cls.connection_genesis]
@@ -215,18 +224,14 @@ class TestP2PLibp2pConnectionRouting:
             cls.connections.append(conn)
             cls.multiplexers.append(muxer)
 
+            cls.log_files.append(conn.node.log_file)
             muxer.connect()
 
-        cls.log_files = [conn.node.log_file for conn in cls.connections]
-        cls.log_files.append(cls.connection_genesis.node.log_file)
-
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection_genesis.connection_status.is_connected is True
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
-    @libp2p_log_on_failure
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]
 
@@ -276,47 +281,46 @@ class TestP2PLibp2pConnectionRouting:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
     """Test that connection will route envelope to destination using the same relay node"""
 
     @classmethod
+    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
+        cls.log_files = []
+
         cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer = Multiplexer([cls.relay])
+        cls.log_files.append(cls.relay.node.log_file)
         cls.multiplexer.connect()
 
-        time.sleep(2)
         relay_peer = cls.relay.node.multiaddrs[0]
 
         cls.connection1 = _make_libp2p_connection(
             DEFAULT_PORT + 2, relay=False, entry_peers=[relay_peer]
         )
         cls.multiplexer1 = Multiplexer([cls.connection1])
+        cls.log_files.append(cls.connection1.node.log_file)
         cls.multiplexer1.connect()
 
         cls.connection2 = _make_libp2p_connection(
             port=DEFAULT_PORT + 3, entry_peers=[relay_peer]
         )
         cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.log_files.append(cls.connection2.node.log_file)
         cls.multiplexer2.connect()
 
-        cls.log_files = [
-            cls.relay.node.log_file,
-            cls.connection1.node.log_file,
-            cls.connection2.node.log_file,
-        ]
-
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.relay.connection_status.is_connected is True
         assert self.connection1.connection_status.is_connected is True
         assert self.connection2.connection_status.is_connected is True
 
-    @libp2p_log_on_failure
     def test_envelope_routed(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -346,7 +350,6 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
         assert envelope.message == msg
 
-    @libp2p_log_on_failure
     def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
@@ -397,19 +400,24 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
 
 
 @skip_test_windows
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
     """Test that libp2p DHT network will reliably route envelopes from relay/non-relay to relay/non-relay nodes"""
 
     @classmethod
+    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
+        cls.log_files = []
+
         port_relay_1 = DEFAULT_PORT + 10
         cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)
         cls.multiplexer_relay_1 = Multiplexer([cls.connection_relay_1])
+        cls.log_files.append(cls.connection_relay_1.node.log_file)
         cls.multiplexer_relay_1.connect()
 
         relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
@@ -419,6 +427,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             port=port_relay_2, entry_peers=[relay_peer_1]
         )
         cls.multiplexer_relay_2 = Multiplexer([cls.connection_relay_2])
+        cls.log_files.append(cls.connection_relay_2.node.log_file)
         cls.multiplexer_relay_2.connect()
 
         relay_peer_2 = cls.connection_relay_2.node.multiaddrs[0]
@@ -435,6 +444,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             muxer = Multiplexer([conn])
             cls.connections.append(conn)
             cls.multiplexers.append(muxer)
+            cls.log_files.append(conn.node.log_file)
             muxer.connect()
 
         port = port_relay_2
@@ -446,23 +456,15 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             muxer = Multiplexer([conn])
             cls.connections.append(conn)
             cls.multiplexers.append(muxer)
+            cls.log_files.append(conn.node.log_file)
             muxer.connect()
 
-        cls.log_files = [
-            cls.connection_relay_1.node.log_file,
-            cls.connection_relay_2.node.log_file,
-        ]
-        cls.log_files.extend([conn.node.log_file for conn in cls.connections])
-        time.sleep(2)
-
-    @libp2p_log_on_failure
     def test_connection_is_established(self):
         assert self.connection_relay_1.connection_status.is_connected is True
         assert self.connection_relay_2.connection_status.is_connected is True
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
-    @libp2p_log_on_failure
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]
 
@@ -508,3 +510,10 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+@skip_test_windows
+def test_libp2pconnection_uri():
+    uri = Uri(host="127.0.0.1")
+    uri = Uri(host="127.0.0.1", port=10000)
+    assert uri.host == "127.0.0.1" and uri.port == 10000

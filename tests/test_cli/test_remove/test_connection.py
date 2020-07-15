@@ -25,15 +25,16 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
+from click.testing import CliRunner
+
 import yaml
 
 import aea
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.test_tools.click_testing import CliRunner
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
 class TestRemoveConnectionWithPublicId:
@@ -48,7 +49,7 @@ class TestRemoveConnectionWithPublicId:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.connection_id = "fetchai/http_client:0.4.0"
+        cls.connection_id = "fetchai/http_client:0.5.0"
         cls.connection_name = "http_client"
 
         os.chdir(cls.t)
@@ -110,7 +111,7 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/local:0.3.0"
+        cls.connection_id = "fetchai/local:0.4.0"
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -165,7 +166,7 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.connection_id = "fetchai/http_client:0.4.0"
+        cls.connection_id = "fetchai/http_client:0.5.0"
         cls.connection_name = "http_client"
 
         os.chdir(cls.t)

@@ -33,11 +33,11 @@ from aea.cli.utils.context import Context
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
-from .test_base import TempCWD, create_app
-from ..conftest import CUR_PATH, skip_test_windows
+from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, skip_test_windows
+from tests.test_cli_gui.test_base import TempCWD, create_app
 
 
-@pytest.mark.unstable
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @skip_test_windows
 def test_create_and_run_agent():
     """Test for running and agent, reading TTY and errors."""
@@ -64,7 +64,7 @@ def test_create_and_run_agent():
             response_add = app.post(
                 "api/agent/" + agent_id + "/connection",
                 content_type="application/json",
-                data=json.dumps("fetchai/local:0.3.0"),
+                data=json.dumps("fetchai/local:0.4.0"),
             )
             assert response_add.status_code == 201
 

@@ -1,22 +1,26 @@
 name: erc1155_client
 author: fetchai
-version: 0.6.0
-description: The weather client skill implements the skill to purchase weather data.
+version: 0.7.0
+description: The erc1155 client interacts with the erc1155 deployer to conduct an
+  atomic swap.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmW66aJ6bNi8M4rnKakWnVPkQubjwQGhzaZRz1ir9s9mVe
+  behaviours.py: QmNkEycwsuyBQ2Ay7s3zzYJHCQTSGwmcSfS2YQ3km6mg2X
   dialogues.py: QmXd6KC9se6qZWaAsoqJpRYNF6BvVPBd5KJBxSKq9xhLLh
-  handlers.py: QmZNNiLQE56qZajCjhcdyZin8tZGGQU8DSBCDC3GiJ2MHp
+  handlers.py: QmcDbeow6ebn5Q9JbxyanVb8MH5hs4imqLGb9b2hvEhuvF
   strategy.py: QmXzAiLUSd1vDgnN4WiHS7TmjHtTwmppvF331A3vj4icJx
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
 protocols:
+- fetchai/contract_api:0.1.0
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
+- fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
+- fetchai/signing:0.1.0
 skills: []
 behaviours:
   search:

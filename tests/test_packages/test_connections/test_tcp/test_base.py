@@ -20,6 +20,7 @@
 """This module contains the tests for the TCP base module."""
 
 import asyncio
+import logging
 import unittest.mock
 from asyncio import CancelledError
 
@@ -28,9 +29,7 @@ import pytest
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 
-import packages
-
-from ....conftest import (
+from tests.conftest import (
     _make_tcp_client_connection,
     _make_tcp_server_connection,
     get_unused_tcp_port,
@@ -38,7 +37,7 @@ from ....conftest import (
 
 
 @pytest.mark.asyncio
-async def test_connect_twice():
+async def test_connect_twice(caplog):
     """Test that connecting twice the tcp connection works correctly."""
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
@@ -48,17 +47,15 @@ async def test_connect_twice():
 
     await tcp_connection.connect()
     await asyncio.sleep(0.1)
-    with unittest.mock.patch.object(
-        packages.fetchai.connections.tcp.base.logger, "warning"
-    ) as mock_logger_warning:
+    with caplog.at_level(logging.WARNING, "aea.packages.fetchai.connections.tcp"):
         await tcp_connection.connect()
-        mock_logger_warning.assert_called_with("Connection already set up.")
+        assert "Connection already set up." in caplog.text
 
     await tcp_connection.disconnect()
 
 
 @pytest.mark.asyncio
-async def test_connect_raises_exception():
+async def test_connect_raises_exception(caplog):
     """Test the case that a connection attempt raises an exception."""
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
@@ -66,31 +63,27 @@ async def test_connect_raises_exception():
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
 
-    with unittest.mock.patch.object(
-        packages.fetchai.connections.tcp.base.logger, "error"
-    ) as mock_logger_error:
+    with caplog.at_level(logging.ERROR, "aea.packages.fetchai.connections.tcp"):
         with unittest.mock.patch.object(
             tcp_connection, "setup", side_effect=Exception("error during setup")
         ):
             await tcp_connection.connect()
-            mock_logger_error.assert_called_with("error during setup")
+            assert "error during setup" in caplog.text
 
 
 @pytest.mark.asyncio
-async def test_disconnect_when_already_disconnected():
+async def test_disconnect_when_already_disconnected(caplog):
     """Test that disconnecting a connection already disconnected works correctly."""
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
 
-    with unittest.mock.patch.object(
-        packages.fetchai.connections.tcp.base.logger, "warning"
-    ) as mock_logger_warning:
+    with caplog.at_level(logging.WARNING, "aea.packages.fetchai.connections.tcp"):
         await tcp_connection.disconnect()
-        mock_logger_warning.assert_called_with("Connection already disconnected.")
+        assert "Connection already disconnected." in caplog.text
 
 
 @pytest.mark.asyncio
-async def test_send_to_unknown_destination():
+async def test_send_to_unknown_destination(caplog):
     """Test that a message to an unknown destination logs an error."""
     address = "address"
     port = get_unused_tcp_port()
@@ -101,13 +94,9 @@ async def test_send_to_unknown_destination():
         protocol_id=DefaultMessage.protocol_id,
         message=b"",
     )
-    with unittest.mock.patch.object(
-        packages.fetchai.connections.tcp.base.logger, "error"
-    ) as mock_logger_error:
+    with caplog.at_level(logging.ERROR, "aea.packages.fetchai.connections.tcp"):
         await tcp_connection.send(envelope)
-        mock_logger_error.assert_called_with(
-            "[{}]: Cannot send envelope {}".format(address, envelope)
-        )
+        assert "[{}]: Cannot send envelope {}".format(address, envelope) in caplog.text
 
 
 @pytest.mark.asyncio

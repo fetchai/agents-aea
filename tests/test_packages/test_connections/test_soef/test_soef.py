@@ -47,8 +47,8 @@ from . import models
 
 
 def make_async(return_value: Any) -> Callable:
-    """Wrap value into asyn function."""
-
+    """Wrap value into async function."""
+    # pydocstyle
     async def fn(*args, **kwargs):
         return return_value
 
@@ -454,6 +454,7 @@ class TestSoef:
             side_effect=[wrap_future(resp_text1), wrap_future(resp_text2)],
         ):
             await self.connection.channel._register_agent()
+            assert self.connection.channel._ping_periodic_task is not None
 
     @pytest.mark.asyncio
     async def test_request(self):
@@ -558,3 +559,48 @@ class TestSoef:
         connection = SOEFConnection(configuration=configuration, identity=identity,)
 
         assert connection.channel.chain_identifier == chain_identifier
+
+    @pytest.mark.asyncio
+    async def test_ping_command(self):
+        """Test set service key."""
+        service_description = Description({}, data_model=models.PING_MODEL)
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=service_description,
+        )
+        envelope = Envelope(
+            to="soef",
+            sender=self.crypto.address,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
+
+        with patch.object(
+            self.connection.channel,
+            "_request_text",
+            make_async(self.generic_success_response),
+        ):
+            await self.connection.send(envelope)
+
+        with pytest.raises(asyncio.TimeoutError):  # got no message back
+            await asyncio.wait_for(self.connection.receive(), timeout=1)
+
+    @pytest.mark.asyncio
+    async def test_periodic_ping_task_is_set(self):
+        """Test periodic ping task is set on agent register."""
+        resp_text1 = '<?xml version="1.0" encoding="UTF-8"?><response><encrypted>0</encrypted><token>672DB3B67780F98984ABF1123BD11</token><page_address>oef_C95B21A4D5759C8FE7A6304B62B726AB8077BEE4BA191A7B92B388F9B1</page_address></response>'
+        resp_text2 = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
+        self.connection.channel.PING_PERIOD = 0.1
+
+        with patch.object(
+            self.connection.channel,
+            "_request_text",
+            new_callable=MagicMock,
+            side_effect=[wrap_future(resp_text1), wrap_future(resp_text2)],
+        ):
+            with patch.object(self.connection.channel, "_ping_command",) as mocked_ping:
+                await self.connection.channel._register_agent()
+
+                assert self.connection.channel._ping_periodic_task is not None
+                await asyncio.sleep(0.3)
+                assert mocked_ping.call_count > 1

@@ -34,7 +34,7 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 
-logger = logging.getLogger("aea.packages.fetchai.connections.tcp_client")
+logger = logging.getLogger("aea.packages.fetchai.connections.tcp.tcp_client")
 
 STUB_DIALOGUE_ID = 0
 
@@ -86,20 +86,22 @@ class TCPClientConnection(TCPConnection):
             assert self._reader is not None
             data = await self._recv(self._reader)
             if data is None:  # pragma: nocover
-                logger.debug("[{}] No data received.".format(self.address))
+                self.logger.debug("[{}] No data received.".format(self.address))
                 return None
-            logger.debug("[{}] Message received: {!r}".format(self.address, data))
+            self.logger.debug("[{}] Message received: {!r}".format(self.address, data))
             envelope = Envelope.decode(data)  # TODO handle decoding error
-            logger.debug("[{}] Decoded envelope: {}".format(self.address, envelope))
+            self.logger.debug(
+                "[{}] Decoded envelope: {}".format(self.address, envelope)
+            )
             return envelope
         except CancelledError:
-            logger.debug("[{}] Read cancelled.".format(self.address))
+            self.logger.debug("[{}] Read cancelled.".format(self.address))
             return None
         except struct.error as e:
-            logger.debug("Struct error: {}".format(str(e)))
+            self.logger.debug("Struct error: {}".format(str(e)))
             return None
         except Exception as e:
-            logger.exception(e)
+            self.logger.exception(e)
             raise
 
     def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:

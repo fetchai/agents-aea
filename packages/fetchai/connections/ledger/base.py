@@ -33,7 +33,7 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.1.0")
+CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.2.0")
 
 
 class RequestDispatcher(ABC):
@@ -61,13 +61,19 @@ class RequestDispatcher(ABC):
         self._api_configs = api_configs
 
     def api_config(self, ledger_id: str) -> Dict[str, str]:
-        """Get api config"""
+        """Get api config."""
         config = {}  # type: Dict[str, str]
         if self._api_configs is not None and ledger_id in self._api_configs:
             config = self._api_configs[ledger_id]
         return config
 
-    async def run_async(self, func: Callable[[Any], Task], *args):
+    async def run_async(
+        self,
+        func: Callable[[Any], Task],
+        api: LedgerApi,
+        message: Message,
+        dialogue: Dialogue,
+    ):
         """
         Run a function in executor.
 
@@ -76,10 +82,12 @@ class RequestDispatcher(ABC):
         :return: the return value of the function.
         """
         try:
-            response = await self.loop.run_in_executor(self.executor, func, *args)
+            response = await self.loop.run_in_executor(
+                self.executor, func, api, message, dialogue
+            )
             return response
         except Exception as e:  # pylint: disable=broad-except
-            return self.get_error_message(e, *args)
+            return self.get_error_message(e, api, message, dialogue)
 
     def dispatch(self, envelope: Envelope) -> Task:
         """
@@ -106,7 +114,7 @@ class RequestDispatcher(ABC):
         :param performative: the message performative.
         :return: the method that will send the request.
         """
-        handler = getattr(self, performative.value, lambda *args, **kwargs: None)
+        handler = getattr(self, performative.value, None)
         if handler is None:
             raise Exception("Performative not recognized.")
         return handler

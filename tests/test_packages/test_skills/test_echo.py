@@ -25,7 +25,7 @@ from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ...conftest import skip_test_windows
+from tests.conftest import skip_test_windows
 
 
 class TestEchoSkill(AEATestCaseEmpty):

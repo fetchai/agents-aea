@@ -30,11 +30,12 @@ from aea.configurations.base import (
     ComponentType,
     PublicId,
 )
+from aea.helpers.logging import WithLogger
 
 logger = logging.getLogger(__name__)
 
 
-class Component(ABC):
+class Component(ABC, WithLogger):
     """Abstract class for an agent component."""
 
     def __init__(
@@ -48,6 +49,7 @@ class Component(ABC):
         :param configuration: the package configuration.
         :param is_vendor: whether the package is vendorized.
         """
+        WithLogger.__init__(self)
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor
@@ -84,7 +86,9 @@ class Component(ABC):
     @property
     def configuration(self) -> ComponentConfiguration:
         """Get the component configuration."""
-        assert self._configuration is not None, "The component is not associated with "
+        assert (
+            self._configuration is not None
+        ), "The component is not associated with a configuration."
         return self._configuration
 
     @property

@@ -21,9 +21,10 @@
 
 import asyncio
 import logging
-import threading
 from asyncio import CancelledError
-from typing import Dict, Optional, cast
+from asyncio.events import AbstractEventLoop
+from concurrent.futures.thread import ThreadPoolExecutor
+from typing import Optional, Union, cast
 
 import gym
 
@@ -39,57 +40,59 @@ logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
 """default 'to' field for Gym envelopes."""
 DEFAULT_GYM = "gym"
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.4.0")
 
 
 class GymChannel:
     """A wrapper of the gym environment."""
 
+    THREAD_POOL_SIZE = 3
+
     def __init__(self, address: Address, gym_env: gym.Env):
         """Initialize a gym channel."""
         self.address = address
         self.gym_env = gym_env
-        self._lock = threading.Lock()
+        self._loop: Optional[AbstractEventLoop] = None
+        self._queue: Optional[asyncio.Queue] = None
+        self._threaded_pool: ThreadPoolExecutor = ThreadPoolExecutor(
+            self.THREAD_POOL_SIZE
+        )
+        self.logger: Union[logging.Logger, logging.LoggerAdapter] = logger
 
-        self._queues = {}  # type: Dict[str, asyncio.Queue]
+    @property
+    def queue(self) -> asyncio.Queue:
+        """Check queue is set and return queue."""
+        if self._queue is None:  # pragma: nocover
+            raise ValueError("Channel is not connected")
+        return self._queue
 
-    def connect(self) -> Optional[asyncio.Queue]:
+    async def connect(self) -> None:
         """
         Connect an address to the gym.
 
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        if self.address in self._queues:
+        if self._queue:  # pragma: nocover
             return None
+        self._loop = asyncio.get_event_loop()
+        self._queue = asyncio.Queue()
 
-        assert len(self._queues.keys()) == 0, "Only one address can register to a gym."
-        q = asyncio.Queue()  # type: asyncio.Queue
-        self._queues[self.address] = q
-        return q
-
-    def send(self, envelope: Envelope) -> None:
+    async def send(self, envelope: Envelope) -> None:
         """
         Process the envelopes to the gym.
 
         :return: None
         """
         sender = envelope.sender
-        logger.debug("Processing message from {}: {}".format(sender, envelope))
-        self._decode_envelope(envelope)
-
-    def _decode_envelope(self, envelope: Envelope) -> None:
-        """
-        Decode the envelope.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        if envelope.protocol_id == GymMessage.protocol_id:
-            self.handle_gym_message(envelope)
-        else:
+        self.logger.debug("Processing message from {}: {}".format(sender, envelope))
+        if envelope.protocol_id != GymMessage.protocol_id:
             raise ValueError("This protocol is not valid for gym.")
+        await self.handle_gym_message(envelope)
 
-    def handle_gym_message(self, envelope: Envelope) -> None:
+    async def _run_in_executor(self, fn, *args):
+        return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
+
+    async def handle_gym_message(self, envelope: Envelope) -> None:
         """
         Forward a message to gym.
 
@@ -103,7 +106,11 @@ class GymChannel:
         if gym_message.performative == GymMessage.Performative.ACT:
             action = gym_message.action.any
             step_id = gym_message.step_id
-            observation, reward, done, info = self.gym_env.step(action)  # type: ignore
+
+            observation, reward, done, info = await self._run_in_executor(
+                self.gym_env.step, action
+            )
+
             msg = GymMessage(
                 performative=GymMessage.Performative.PERCEPT,
                 observation=GymMessage.AnyObject(observation),
@@ -118,29 +125,34 @@ class GymChannel:
                 protocol_id=GymMessage.protocol_id,
                 message=msg,
             )
-            self._send(envelope)
+            await self._send(envelope)
         elif gym_message.performative == GymMessage.Performative.RESET:
-            self.gym_env.reset()  # type: ignore
+            await self._run_in_executor(self.gym_env.reset)
         elif gym_message.performative == GymMessage.Performative.CLOSE:
-            self.gym_env.close()  # type: ignore
+            await self._run_in_executor(self.gym_env.close)
 
-    def _send(self, envelope: Envelope) -> None:
+    async def _send(self, envelope: Envelope) -> None:
         """Send a message.
 
         :param envelope: the envelope
         :return: None
         """
-        destination = envelope.to
-        self._queues[destination].put_nowait(envelope)
+        assert envelope.to == self.address, "Invalid destination address"
+        await self.queue.put(envelope)
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """
         Disconnect.
 
         :return: None
         """
-        with self._lock:
-            self._queues.pop(self.address, None)
+        if self._queue is not None:
+            await self._queue.put(None)
+            self._queue = None
+
+    async def get(self) -> Optional[Envelope]:
+        """Get incoming envelope."""
+        return await self.queue.get()
 
 
 class GymConnection(Connection):
@@ -172,7 +184,8 @@ class GymConnection(Connection):
         """
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
-            self._connection = self.channel.connect()
+            self.channel.logger = self.logger
+            await self.channel.connect()
 
     async def disconnect(self) -> None:
         """
@@ -181,12 +194,8 @@ class GymConnection(Connection):
         :return: None
         """
         if self.connection_status.is_connected:
-            assert self._connection is not None
             self.connection_status.is_connected = False
-            await self._connection.put(None)
-            self.channel.disconnect()
-            self._connection = None
-            self.stop()
+            await self.channel.disconnect()
 
     async def send(self, envelope: Envelope) -> None:
         """
@@ -199,7 +208,7 @@ class GymConnection(Connection):
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )
-        self.channel.send(envelope)
+        await self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
@@ -208,18 +217,7 @@ class GymConnection(Connection):
                 "Connection not established yet. Please use 'connect()'."
             )
         try:
-            assert self._connection is not None
-            envelope = await self._connection.get()
-            if envelope is None:
-                return None
+            envelope = await self.channel.get()
             return envelope
         except CancelledError:  # pragma: no cover
             return None
-
-    def stop(self) -> None:
-        """
-        Tear down the connection.
-
-        :return: None
-        """
-        self._connection = None

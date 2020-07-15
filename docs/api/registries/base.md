@@ -7,10 +7,19 @@ This module contains registries.
 ## Registry Objects
 
 ```python
-class Registry(Generic[ItemId, Item],  ABC)
+class Registry(Generic[ItemId, Item],  WithLogger,  ABC)
 ```
 
 This class implements an abstract registry.
+
+<a name=".aea.registries.base.Registry.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__()
+```
+
+Initialize the registry.
 
 <a name=".aea.registries.base.Registry.register"></a>
 #### register

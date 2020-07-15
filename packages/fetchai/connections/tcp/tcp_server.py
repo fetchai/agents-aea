@@ -60,12 +60,12 @@ class TCPServerConnection(TCPConnection):
         :param writer: the stream writer.
         :return: None
         """
-        logger.debug("Waiting for client address...")
+        self.logger.debug("Waiting for client address...")
         address_bytes = await self._recv(reader)
         if address_bytes is not None:
             address_bytes = cast(bytes, address_bytes)
             address = address_bytes.decode("utf-8")
-            logger.debug("Public key of the client: {}".format(address))
+            self.logger.debug("Public key of the client: {}".format(address))
             self.connections[address] = (reader, writer)
             read_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
             self._read_tasks_to_address[read_task] = address
@@ -77,20 +77,20 @@ class TCPServerConnection(TCPConnection):
         :return: the received envelope, or None if an error occurred.
         """
         if len(self._read_tasks_to_address) == 0:
-            logger.warning(
+            self.logger.warning(
                 "Tried to read from the TCP server. However, there is no open connection to read from."
             )
             return None
 
         try:
-            logger.debug("Waiting for incoming messages...")
+            self.logger.debug("Waiting for incoming messages...")
             done, _ = await asyncio.wait(self._read_tasks_to_address.keys(), return_when=asyncio.FIRST_COMPLETED)  # type: ignore
 
             # take the first
             task = next(iter(done))
             envelope_bytes = task.result()
             if envelope_bytes is None:  # pragma: no cover
-                logger.debug("[{}]: No data received.")
+                self.logger.debug("[{}]: No data received.")
                 return None
             envelope = Envelope.decode(envelope_bytes)
             address = self._read_tasks_to_address.pop(task)
@@ -99,10 +99,10 @@ class TCPServerConnection(TCPConnection):
             self._read_tasks_to_address[new_task] = address
             return envelope
         except asyncio.CancelledError:
-            logger.debug("Receiving loop cancelled.")
+            self.logger.debug("Receiving loop cancelled.")
             return None
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-            logger.error("Error in the receiving loop: {}".format(str(e)))
+            self.logger.error("Error in the receiving loop: {}".format(str(e)))
             return None
 
     async def setup(self):
@@ -110,7 +110,7 @@ class TCPServerConnection(TCPConnection):
         self._server = await asyncio.start_server(
             self.handle, host=self.host, port=self.port
         )
-        logger.debug("Start listening on {}:{}".format(self.host, self.port))
+        self.logger.debug("Start listening on {}:{}".format(self.host, self.port))
 
     async def teardown(self):
         """Tear the connection down."""

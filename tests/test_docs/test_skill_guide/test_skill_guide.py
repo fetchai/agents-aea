@@ -27,11 +27,12 @@ from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ..helper import extract_code_blocks
-from ...conftest import (
+from tests.conftest import (
     AUTHOR,
     ROOT_DIR,
 )
+from tests.test_docs.helper import extract_code_blocks
+
 
 MD_FILE = "docs/skill-guide.md"
 
@@ -56,7 +57,7 @@ class TestBuildSkill(AEATestCaseMany, UseOef):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.6.0", simple_service_registration_aea
+            "fetchai/simple_service_registration:0.7.0", simple_service_registration_aea
         )
 
         search_aea = "search_aea"
@@ -65,8 +66,8 @@ class TestBuildSkill(AEATestCaseMany, UseOef):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/oef:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.5.0")
+        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
 
         # manually change the files:
         path = Path(self.t, search_aea, "skills", skill_name, "behaviours.py")
@@ -95,11 +96,11 @@ class TestBuildSkill(AEATestCaseMany, UseOef):
         # run agents
         self.set_agent_context(simple_service_registration_aea)
         simple_service_registration_aea_process = self.run_agent(
-            "--connections", "fetchai/oef:0.5.0"
+            "--connections", "fetchai/oef:0.6.0"
         )
 
         self.set_agent_context(search_aea)
-        search_aea_process = self.run_agent("--connections", "fetchai/oef:0.5.0")
+        search_aea_process = self.run_agent("--connections", "fetchai/oef:0.6.0")
 
         check_strings = (
             "updating services on OEF service directory.",
