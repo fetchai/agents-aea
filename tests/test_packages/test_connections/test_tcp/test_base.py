@@ -47,7 +47,7 @@ async def test_connect_twice(caplog):
 
     await tcp_connection.connect()
     await asyncio.sleep(0.1)
-    with caplog.at_level(logging.WARNING, "aea.packages.fetchai.connections.tcp"):
+    with caplog.at_level(logging.WARNING, "aea.packages.fetchai.connections.tcp.tcp_server"):
         await tcp_connection.connect()
         assert "Connection already set up." in caplog.text
 
@@ -63,7 +63,7 @@ async def test_connect_raises_exception(caplog):
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
 
-    with caplog.at_level(logging.ERROR, "aea.packages.fetchai.connections.tcp"):
+    with caplog.at_level(logging.ERROR, "aea.packages.fetchai.connections.tcp.tcp_server"):
         with unittest.mock.patch.object(
             tcp_connection, "setup", side_effect=Exception("error during setup")
         ):
@@ -77,7 +77,7 @@ async def test_disconnect_when_already_disconnected(caplog):
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
 
-    with caplog.at_level(logging.WARNING, "aea.packages.fetchai.connections.tcp"):
+    with caplog.at_level(logging.WARNING, "aea.packages.fetchai.connections.tcp.tcp_server"):
         await tcp_connection.disconnect()
         assert "Connection already disconnected." in caplog.text
 
@@ -94,7 +94,7 @@ async def test_send_to_unknown_destination(caplog):
         protocol_id=DefaultMessage.protocol_id,
         message=b"",
     )
-    with caplog.at_level(logging.ERROR, "aea.packages.fetchai.connections.tcp"):
+    with caplog.at_level(logging.ERROR, "aea.packages.fetchai.connections.tcp.tcp_server"):
         await tcp_connection.send(envelope)
         assert "[{}]: Cannot send envelope {}".format(address, envelope) in caplog.text
 
