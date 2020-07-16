@@ -28,9 +28,12 @@ from aea.identity.base import Identity
 def test_init_identity_positive():
     """Test initialization of the identity object."""
     assert Identity("some_name", address="some_address")
-    assert Identity("some_name", address="some_address", default_address_key=DEFAULT_LEDGER)
     assert Identity(
-        "some_name", addresses={DEFAULT_LEDGER: "some_address", "fetchai": "some_address"}
+        "some_name", address="some_address", default_address_key=DEFAULT_LEDGER
+    )
+    assert Identity(
+        "some_name",
+        addresses={DEFAULT_LEDGER: "some_address", "fetchai": "some_address"},
     )
     assert Identity(
         "some_name",

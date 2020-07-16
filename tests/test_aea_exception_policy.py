@@ -25,7 +25,7 @@ import pytest
 
 from aea.aea import logger
 from aea.aea_builder import AEABuilder
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.skills.base import Skill, SkillConfig, SkillContext
@@ -35,7 +35,7 @@ from tests.common.utils import (
     make_behaviour_cls_from_funcion,
     make_handler_cls_from_funcion,
 )
-from tests.conftest import FETCHAI_PRIVATE_KEY_PATH
+from tests.conftest import COSMOS_PRIVATE_KEY_PATH
 
 
 class ExpectedExcepton(Exception):
@@ -56,7 +56,7 @@ class TestAeaExceptionPolicy:
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH)
+        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
 
         self.handler_called = 0
 

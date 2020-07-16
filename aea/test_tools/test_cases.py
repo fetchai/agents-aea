@@ -42,7 +42,7 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_PATH
+from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
@@ -475,7 +475,7 @@ class BaseAEATestCase(ABC):
     def add_private_key(
         cls,
         ledger_api_id: str = DEFAULT_LEDGER,
-        private_key_filepath: str = DEFAULT_PRIVATE_KEY_PATH,
+        private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE,
     ) -> None:
         """
         Add private key with CLI command.
@@ -492,7 +492,7 @@ class BaseAEATestCase(ABC):
 
     @classmethod
     def replace_private_key_in_file(
-        cls, private_key: str, private_key_filepath: str = DEFAULT_PRIVATE_KEY_PATH
+        cls, private_key: str, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE
     ) -> None:
         """
         Replace the private key in the provided file with the provided key.
