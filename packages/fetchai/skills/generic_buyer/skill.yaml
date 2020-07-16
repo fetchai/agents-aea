@@ -1,6 +1,6 @@
 name: generic_buyer
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -9,7 +9,7 @@ fingerprint:
   behaviours.py: QmXDoPfA7w8HyGZbkWcCffLGLG4haHDZviWKvQzon5Yzwg
   dialogues.py: QmYMR28TDqE56GdUxP9LwerktaJrD9SBkGoeJsoLSMHpx6
   handlers.py: QmYsRmqDRbczJsLiLaWBaKrF5od73QDECDxj57SUGD2vog
-  strategy.py: QmdeUGoSq4owF3AkcGkpPZAZY5fWW6n645uCdAfjsuPtVa
+  strategy.py: QmPRYu1Y1TrcrwA2hQHuK98UC5htFFnzbmcYt5HFcx6di8
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -66,7 +66,7 @@ models:
           type: str
       data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20

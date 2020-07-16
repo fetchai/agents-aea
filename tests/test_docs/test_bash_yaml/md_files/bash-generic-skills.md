@@ -11,7 +11,7 @@ aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/generic_seller:0.7.0
+aea add skill fetchai/generic_seller:0.8.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
@@ -25,7 +25,7 @@ aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/generic_buyer:0.6.0
+aea add skill fetchai/generic_buyer:0.7.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```

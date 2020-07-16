@@ -1,6 +1,6 @@
 name: weather_client
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -18,7 +18,7 @@ protocols:
 - fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
 skills:
-- fetchai/generic_buyer:0.6.0
+- fetchai/generic_buyer:0.7.0
 behaviours:
   search:
     args:
@@ -67,7 +67,7 @@ models:
           type: str
       data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20

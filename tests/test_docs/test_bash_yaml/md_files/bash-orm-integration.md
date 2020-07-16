@@ -11,7 +11,7 @@ aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/thermometer:0.6.0
+aea add skill fetchai/thermometer:0.7.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
@@ -54,7 +54,7 @@ aea generate-wealth cosmos
 aea install
 ```
 ``` bash
-aea eject skill fetchai/thermometer:0.6.0
+aea eject skill fetchai/thermometer:0.7.0
 ```
 ``` bash
 aea fingerprint skill {YOUR_AUTHOR_HANDLE}/thermometer:0.1.0

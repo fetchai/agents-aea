@@ -45,7 +45,6 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _FETCHAI = "fetchai"
-FETCHAI_CURRENCY = "FET"
 DEFAULT_NETWORK = "testnet"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"

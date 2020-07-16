@@ -1,6 +1,6 @@
 name: generic_seller
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
@@ -10,7 +10,7 @@ fingerprint:
   behaviours.py: QmZuzm2azaDub7XSCKjiGgaeNCGBXkg6ErGcmguxKL4GrJ
   dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
   handlers.py: QmYkWCmn6g8ivoohNUun5PdJcD4cBGEzQEQEcKfuWQM324
-  strategy.py: QmP5fNiD5ARzKiHrT68EwmLUnPC578vUrbqvDM7vMDRHFv
+  strategy.py: QmTBHdMfMJBBxauT6pzwWnUm8dronrKEhxNgkgtSmxDs9q
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -64,7 +64,7 @@ models:
       data_model_name: location
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       service_data:
         city: Cambridge
         country: UK

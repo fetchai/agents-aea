@@ -20,7 +20,7 @@ protocols:
 - fetchai/oef_search:0.3.0
 - fetchai/signing:0.1.0
 skills:
-- fetchai/erc1155_deploy:0.8.0
+- fetchai/erc1155_client:0.9.0
 - fetchai/error:0.3.0
 default_connection: fetchai/oef:0.6.0
 default_ledger: ethereum

@@ -65,6 +65,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
+    DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
@@ -352,9 +353,7 @@ class AEABuilder:
         self._build_called: bool = False
         if not is_full_reset:
             return
-        self._default_ledger = (
-            "fetchai"  # set by the user, or instantiate a default one.
-        )
+        self._default_ledger = DEFAULT_LEDGER
         self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
         self._timeout: Optional[float] = None

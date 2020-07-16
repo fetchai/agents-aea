@@ -7,13 +7,13 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ``` bash
 aea fetch fetchai/generic_seller:0.5.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.7.0
+aea eject skill fetchai/generic_seller:0.8.0
 cd ..
 ```
 ``` bash
 aea fetch fetchai/generic_buyer:0.5.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.6.0
+aea eject skill fetchai/generic_buyer:0.7.0
 cd ..
 ```
 ``` bash
@@ -136,7 +136,7 @@ models:
       data_model_name: location
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       service_data:
         city: Cambridge
         country: UK
@@ -214,7 +214,7 @@ models:
           type: str
       data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20

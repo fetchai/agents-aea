@@ -41,7 +41,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/generic_seller:0.7.0")
+        self.add_item("skill", "fetchai/generic_seller:0.8.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -55,7 +55,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.6.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.7.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -137,7 +137,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/generic_seller:0.7.0")
+        self.add_item("skill", "fetchai/generic_seller:0.8.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
@@ -154,7 +154,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.6.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()

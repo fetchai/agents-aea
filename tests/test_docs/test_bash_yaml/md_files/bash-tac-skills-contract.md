@@ -45,7 +45,7 @@ aea create tac_participant_two
 cd tac_participant_one
 aea add connection fetchai/oef:0.6.0
 aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.4.0
+aea add skill fetchai/tac_negotiation:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 aea config set agent.default_ledger ethereum
@@ -56,7 +56,7 @@ aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_con
 cd tac_participant_two
 aea add connection fetchai/oef:0.6.0
 aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.4.0
+aea add skill fetchai/tac_negotiation:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 aea config set agent.default_ledger ethereum

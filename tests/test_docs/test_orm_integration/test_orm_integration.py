@@ -28,7 +28,7 @@ import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import FUNDED_COSMOS_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
 
 seller_strategy_replacement = """models:
   default_dialogues:
@@ -60,7 +60,7 @@ seller_strategy_replacement = """models:
       data_model_name: location
       has_data_source: true
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       service_data:
         city: Cambridge
         country: UK
@@ -100,7 +100,7 @@ buyer_strategy_replacement = """models:
           type: str
       data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
@@ -138,12 +138,12 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/thermometer:0.6.0")
+        self.add_item("skill", "fetchai/thermometer:0.7.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.6.0")
+        self.eject_item("skill", "fetchai/thermometer:0.7.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.force_set_config(
             "skills.thermometer.models", seller_skill_config_replacement["models"],
@@ -178,10 +178,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.run_install()
 
         # add funded key
-        self.generate_private_key("fetchai")
-        self.add_private_key("fetchai", "fet_private_key.txt")
+        self.generate_private_key("cosmos")
+        self.add_private_key("cosmos", "cosmos_private_key.txt")
         self.replace_private_key_in_file(
-            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, "cosmos_private_key.txt"
         )
 
         # Fire the sub-processes and the threads.

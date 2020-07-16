@@ -41,7 +41,6 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
-COSMOS_CURRENCY = "ATOM"
 COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
@@ -231,7 +230,7 @@ class CosmosHelper(Helper):
         r = hashlib.new("ripemd160", s).digest()
         five_bit_r = convertbits(r, 8, 5)
         assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
-        address = bech32_encode("cosmos", five_bit_r)
+        address = bech32_encode(_COSMOS, five_bit_r)
         return address
 
     @staticmethod

@@ -82,7 +82,7 @@ aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/thermometer:0.6.0
+aea add skill fetchai/thermometer:0.7.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
@@ -199,7 +199,7 @@ models:
       data_model_name: location
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       service_data:
         city: Cambridge
         country: UK
@@ -230,7 +230,7 @@ models:
           type: str
       data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
@@ -330,7 +330,7 @@ aea install
 Before being able to modify a package we need to eject it from vendor:
 
 ``` bash
-aea eject skill fetchai/thermometer:0.6.0
+aea eject skill fetchai/thermometer:0.7.0
 ```
 
 This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.

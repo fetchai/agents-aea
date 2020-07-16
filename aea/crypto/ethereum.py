@@ -42,7 +42,6 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _ETHEREUM = "ethereum"
-ETHEREUM_CURRENCY = "ETH"
 GAS_ID = "gwei"
 ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
 DEFAULT_ADDRESS = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"

@@ -22,6 +22,7 @@
 import random  # nosec
 from typing import Any, Dict, List, Optional
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
@@ -47,7 +48,7 @@ DEFAULT_DATA_MODEL = {
     },
 }  # type: Optional[Dict[str, Any]]
 DEFAULT_SERVICE_DATA = {"has_erc1155_contract": True}
-DEFAULT_LEDGER_ID = "ethereum"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 
 class Strategy(Model):

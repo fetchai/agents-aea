@@ -43,14 +43,14 @@ This step-by-step guide recreates two AEAs already developed by Fetch.ai. You ca
 ``` bash
 aea fetch fetchai/generic_seller:0.5.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.7.0
+aea eject skill fetchai/generic_seller:0.8.0
 cd ..
 ```
 
 ``` bash
 aea fetch fetchai/generic_buyer:0.5.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.6.0
+aea eject skill fetchai/generic_buyer:0.7.0
 cd ..
 ```
 
@@ -864,6 +864,7 @@ Next, we are going to create the strategy that we want our `my_generic_seller` A
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query
@@ -871,7 +872,7 @@ from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
@@ -1358,7 +1359,7 @@ models:
       data_model_name: location
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       service_data:
         city: Cambridge
         country: UK
@@ -2288,13 +2289,14 @@ We are going to create the strategy that we want our AEA to follow. Rename the `
 ``` python
 from typing import Any, Dict, Optional
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
@@ -2926,7 +2928,7 @@ models:
           type: str
       data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20

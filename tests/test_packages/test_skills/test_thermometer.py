@@ -42,7 +42,7 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/thermometer:0.6.0")
+        self.add_item("skill", "fetchai/thermometer:0.7.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
         )
@@ -130,7 +130,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/thermometer:0.6.0")
+        self.add_item("skill", "fetchai/thermometer:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()

@@ -70,7 +70,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             self.add_item("connection", "fetchai/oef:0.6.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.4.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.5.0")
             self.set_config("agent.default_ledger", "ethereum")
             self.run_install()
             diff = self.difference_to_fetched_agent(
@@ -202,7 +202,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             self.add_item("connection", "fetchai/oef:0.6.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.4.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.5.0")
             self.set_config("agent.default_ledger", "ethereum")
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",
