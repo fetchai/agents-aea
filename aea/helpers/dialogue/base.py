@@ -396,7 +396,12 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
-        if message.is_incoming and not self.is_empty and self.last_message.message_id == 1:  # type: ignore
+        if (
+            message.is_incoming
+            and not self.is_empty
+            and self.last_message.message_id == 1  # type: ignore
+            and self.dialogue_label.dialogue_reference[1] == ""
+        ):  # type: ignore
             self._update_self_initiated_dialogue_label_on_second_message(message)
 
         is_extendable = self.is_valid_next_message(message)
@@ -514,11 +519,10 @@ class Dialogue(ABC):
         target = message.target
         performative = message.performative
 
-        if dialogue_reference != self.dialogue_label.dialogue_reference:
-            result = False
-        elif self.last_message is None:
+        if self.last_message is None:
             result = (
-                message_id == Dialogue.STARTING_MESSAGE_ID
+                dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
+                and message_id == Dialogue.STARTING_MESSAGE_ID
                 and target == Dialogue.STARTING_TARGET
                 and performative in self.rules.initial_performatives
             )
@@ -528,7 +532,8 @@ class Dialogue(ABC):
             if target_message is not None:
                 target_performative = target_message.performative
                 result = (
-                    message_id == last_message_id + 1
+                    dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
+                    and message_id == last_message_id + 1
                     and 1 <= target <= last_message_id
                     and performative
                     in self.rules.get_valid_replies(target_performative)
