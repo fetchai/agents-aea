@@ -54,7 +54,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.5.0")
 
 
 NOT_SPECIFIED = object()
@@ -113,9 +113,11 @@ class SOEFException(Exception):
 class SOEFChannel:
     """The OEFChannel connects the OEF Agent with the connection."""
 
+    DEFAULT_CHAIN_IDENTIFIER = "fetchai_cosmos"
+
     SUPPORTED_CHAIN_IDENTIFIERS = [
         "fetchai",
-        "cosmos",
+        "fetchai_cosmos",
         "ethereum",
     ]
 
@@ -166,7 +168,7 @@ class SOEFChannel:
         self.agent_location = None  # type: Optional[Location]
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self._executor_pool: Optional[ThreadPoolExecutor] = None
-        self.chain_identifier: str = chain_identifier or "fetchai"
+        self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
 
@@ -731,9 +733,7 @@ class SOEFChannel:
         )
         root = ET.fromstring(response_text)
         agents = {
-            "fetchai": {},
-            "cosmos": {},
-            "ethereum": {},
+            key: {} for key in self.SUPPORTED_CHAIN_IDENTIFIERS
         }  # type: Dict[str, Dict[str, str]]
         agents_l = []  # type: List[str]
         for agent in root.findall(path=".//agent"):

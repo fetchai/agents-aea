@@ -547,7 +547,7 @@ class TestSoef:
 
     def test_chain_identifier_ok(self):
         """Test set valid chain id."""
-        chain_identifier = "cosmos"
+        chain_identifier = "fetchai_cosmos"
         identity = Identity("", "")
 
         configuration = ConnectionConfig(

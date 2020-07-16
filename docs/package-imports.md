@@ -11,7 +11,7 @@ When we create a new agent with the command `aea create my_aea` we create the fi
 ``` bash
 aea_name/
   aea-config.yaml       YAML configuration of the AEA
-  fet_private_key.txt   The private key file
+  cosmos_private_key.txt   The private key file
   connections/          Directory containing all the connections developed as part of the given project.
     connection_1/       First connection
     ...                 ...
