@@ -20,6 +20,14 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for the entire demo.
 
+## Get required packages
+
+Copy the packages directory into your local working directory:
+
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
 ## Demo instructions
 
 If you want to create the weather station AEA step by step you can follow this guide <a href='/weather-skills/'>here</a>

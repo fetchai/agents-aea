@@ -20,6 +20,7 @@
 """This module contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
 import os
+import shutil
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
@@ -31,6 +32,7 @@ from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
 MD_FILE = "docs/cli-vs-programmatic-aeas.md"
 PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
+DEST = "programmatic_aea.py"
 
 
 class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
@@ -58,8 +60,10 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         self.run_install()
         weather_station_process = self.run_agent()
 
-        file_path = os.path.join("tests", PY_FILE)
-        weather_client_process = self.start_subprocess(file_path, cwd=ROOT_DIR)
+        src_file_path = os.path.join(ROOT_DIR, "tests", PY_FILE)
+        dst_file_path = os.path.join(ROOT_DIR, self.t, DEST)
+        shutil.copyfile(src_file_path, dst_file_path)
+        weather_client_process = self.start_subprocess(DEST, cwd=self.t)
 
         check_strings = (
             "updating services on OEF service directory.",
