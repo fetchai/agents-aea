@@ -33,16 +33,16 @@ class Dialogue(BaseDialogue):
 
     INITIAL_PERFORMATIVES = frozenset(
         {DefaultMessage.Performative.BYTES}
-    )  # type: FrozenSet[Message.Performative]
+    )  # type: FrozenSet[DefaultMessage.Performative]
     TERMINAL_PERFORMATIVES = frozenset(
         {DefaultMessage.Performative.ERROR}
-    )  # type: FrozenSet[Message.Performative]
+    )  # type: FrozenSet[DefaultMessage.Performative]
     VALID_REPLIES = {
         DefaultMessage.Performative.BYTES: frozenset(
             {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
         ),
         DefaultMessage.Performative.ERROR: frozenset(),
-    }  # type: Dict[Message.Performative, FrozenSet[Message.Performative]]
+    }  # type: Dict[DefaultMessage.Performative, FrozenSet[DefaultMessage.Performative]]
 
     class Role(BaseDialogue.Role):
         """This class defines the agent's role in a fipa dialogue."""
@@ -97,7 +97,12 @@ class Dialogues(BaseDialogues):
 
     END_STATES = frozenset({})  # type: FrozenSet[BaseDialogue.EndState]
 
-    def __init__(self, agent_address: Address, message_class=DefaultMessage, dialogue_class=Dialogue) -> None:
+    def __init__(
+        self,
+        agent_address: Address,
+        message_class=DefaultMessage,
+        dialogue_class=Dialogue,
+    ) -> None:
         """
         Initialize dialogues.
 
@@ -113,7 +118,7 @@ class Dialogues(BaseDialogues):
         )
 
     def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
     ) -> Dialogue:
         """
         Create a dialogue instance.
@@ -292,14 +297,18 @@ class TestDialogueBase:
         valid_second_msg._is_incoming = True
 
         try:
-            self.dialogue._update_self_initiated_dialogue_label_on_second_message(valid_second_msg)
+            self.dialogue._update_self_initiated_dialogue_label_on_second_message(
+                valid_second_msg
+            )
             result = True
         except Exception:
             result = False
 
         assert result
 
-    def test_update_self_initiated_dialogue_label_on_second_message_negative_empty_dialogue(self):
+    def test_update_self_initiated_dialogue_label_on_second_message_negative_empty_dialogue(
+        self,
+    ):
         initial_msg = DefaultMessage(
             dialogue_reference=(str(0), ""),
             message_id=1,
@@ -311,14 +320,18 @@ class TestDialogueBase:
         initial_msg._is_incoming = False
 
         try:
-            self.dialogue._update_self_initiated_dialogue_label_on_second_message(initial_msg)
+            self.dialogue._update_self_initiated_dialogue_label_on_second_message(
+                initial_msg
+            )
             result = True
         except Exception:
             result = False
 
         assert not result
 
-    def test_update_self_initiated_dialogue_label_on_second_message_negative_not_second_message(self):
+    def test_update_self_initiated_dialogue_label_on_second_message_negative_not_second_message(
+        self,
+    ):
         initial_msg = DefaultMessage(
             dialogue_reference=(str(0), ""),
             message_id=1,
@@ -354,7 +367,9 @@ class TestDialogueBase:
         third_msg._is_incoming = False
 
         try:
-            self.dialogue._update_self_initiated_dialogue_label_on_second_message(third_msg)
+            self.dialogue._update_self_initiated_dialogue_label_on_second_message(
+                third_msg
+            )
             result = True
         except Exception:
             result = False
@@ -375,7 +390,11 @@ class TestDialogueBase:
 
         assert self.dialogue.update(initial_msg)
 
-        self.dialogue.reply(target_message=initial_msg, performative=DefaultMessage.Performative.BYTES, content=b"Hello Back")
+        self.dialogue.reply(
+            target_message=initial_msg,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello Back",
+        )
 
         assert self.dialogue.last_message.message_id == 2
 
@@ -404,7 +423,11 @@ class TestDialogueBase:
         invalid_initial_msg._is_incoming = False
 
         try:
-            self.dialogue.reply(target_message=invalid_initial_msg, performative=DefaultMessage.Performative.BYTES, content=b"Hello Back")
+            self.dialogue.reply(
+                target_message=invalid_initial_msg,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"Hello Back",
+            )
             result = True
         except Exception:
             result = False
@@ -672,7 +695,9 @@ class TestDialogueBase:
 
         assert self.dialogue.update(valid_initial_msg)
 
-        new_label = DialogueLabel((str(0), str(1)), valid_initial_msg.counterparty, "agent 1")
+        new_label = DialogueLabel(
+            (str(0), str(1)), valid_initial_msg.counterparty, "agent 1"
+        )
         self.dialogue.update_dialogue_label(new_label)
 
         assert self.dialogue.dialogue_label == new_label
@@ -703,7 +728,9 @@ class TestDialogueBase:
 
         assert self.dialogue.update(valid_second_msg)
 
-        new_label = DialogueLabel((str(0), str(2)), valid_initial_msg.counterparty, "agent 1")
+        new_label = DialogueLabel(
+            (str(0), str(2)), valid_initial_msg.counterparty, "agent 1"
+        )
         try:
             self.dialogue.update_dialogue_label(new_label)
             result = True
@@ -726,7 +753,9 @@ class TestDialogueBase:
 
         assert self.dialogue.update(valid_initial_msg)
 
-        new_label = DialogueLabel((str(1), ""), valid_initial_msg.counterparty, "agent 1")
+        new_label = DialogueLabel(
+            (str(1), ""), valid_initial_msg.counterparty, "agent 1"
+        )
         try:
             self.dialogue.update_dialogue_label(new_label)
             result = True
@@ -772,7 +801,9 @@ class TestDialogueBase:
 
         assert self.dialogue.update(valid_third_msg)
 
-        dialogue_str = "Dialogue Label: 0_1_agent 2_agent 1\nbytes( )\nbytes( )\nbytes( )"
+        dialogue_str = (
+            "Dialogue Label: 0_1_agent 2_agent 1\nbytes( )\nbytes( )\nbytes( )"
+        )
 
         assert str(self.dialogue) == dialogue_str
 
@@ -807,19 +838,24 @@ class TestDialoguesBase:
     def test_new_self_initiated_dialogue_reference(self):
         assert self.dialogues.new_self_initiated_dialogue_reference() == ("1", "")
 
-        self.dialogues._create_opponent_initiated("agent 2", ("1", ""), Dialogue.Role.ROLE1)
+        self.dialogues._create_opponent_initiated(
+            "agent 2", ("1", ""), Dialogue.Role.ROLE1
+        )
         assert self.dialogues.new_self_initiated_dialogue_reference() == ("2", "")
 
     def test_create_positive(self):
         assert len(self.dialogues.dialogues) == 0
-        self.dialogues.create("agent 2", DefaultMessage.Performative.BYTES, content=b"Hello")
+        self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
         assert len(self.dialogues.dialogues) == 1
 
     def test_create_negative_incorrect_performative_content_combination(self):
         assert len(self.dialogues.dialogues) == 0
         try:
-            self.dialogues.create("agent 2", DefaultMessage.Performative.ERROR, content=b"Hello")
+            self.dialogues.create(
+                "agent 2", DefaultMessage.Performative.ERROR, content=b"Hello"
+            )
         except Exception:
             pass
         assert len(self.dialogues.dialogues) == 0
-

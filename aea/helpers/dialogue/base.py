@@ -396,7 +396,7 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
-        if message.is_incoming and not self.is_empty and self.last_message.message_id == 1:
+        if message.is_incoming and not self.is_empty and self.last_message.message_id == 1:  # type: ignore
             self._update_self_initiated_dialogue_label_on_second_message(message)
 
         is_extendable = self.is_valid_next_message(message)
@@ -469,9 +469,13 @@ class Dialogue(ABC):
                 )
                 self.update_dialogue_label(updated_dialogue_label)
             else:
-                raise Exception("Invalid call to update dialogue's reference. This call must be made only after receiving dialogue's second message by the counterparty.")
+                raise Exception(
+                    "Invalid call to update dialogue's reference. This call must be made only after receiving dialogue's second message by the counterparty."
+                )
         else:
-            raise Exception("Cannot update dialogue's reference after the first message.")
+            raise Exception(
+                "Cannot update dialogue's reference after the first message."
+            )
 
     def is_valid_next_message(self, message: Message) -> bool:
         """
