@@ -856,6 +856,9 @@ class TestDialoguesBase:
             self.dialogues.create(
                 "agent 2", DefaultMessage.Performative.ERROR, content=b"Hello"
             )
+            result = True
         except Exception:
-            pass
+            result = False
+
+        assert not result
         assert len(self.dialogues.dialogues) == 0
