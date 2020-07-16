@@ -53,16 +53,18 @@ class TestHelperFile:
 
     def tests_private_keys(self):
         """Test the private keys."""
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        try_validate_private_key_path(FetchAICrypto.identifier, private_key_path)
+        try_validate_private_key_path(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH
+        )
         with pytest.raises(SystemExit):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"
             )
             try_validate_private_key_path(FetchAICrypto.identifier, private_key_path)
 
-        private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
-        try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
+        try_validate_private_key_path(
+            EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_PATH
+        )
         with pytest.raises(SystemExit):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"

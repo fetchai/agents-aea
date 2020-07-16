@@ -25,7 +25,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.registries import make_crypto
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -74,7 +75,8 @@ class TestSoef:
 
     def setup(self):
         """Set up."""
-        self.crypto = FetchAICrypto()
+        self.crypto = make_crypto(DEFAULT_LEDGER)
+        self.crypto2 = make_crypto(DEFAULT_LEDGER)
         identity = Identity("", address=self.crypto.address)
 
         # create the connection and multiplexer objects
@@ -91,7 +93,7 @@ class TestSoef:
         self.connection.channel.unique_page_address = "some addr"
         self.connection2 = SOEFConnection(
             configuration=configuration,
-            identity=Identity("", address=FetchAICrypto().address),
+            identity=Identity("", address=self.crypto2.address),
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.connection.connect())

@@ -23,6 +23,8 @@ import pytest
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from tests.conftest import (
+    ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_FILE,
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     MAX_FLAKY_RERUNS_ETH,
@@ -65,10 +67,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("ethereum")
-        self.add_private_key("ethereum", "eth_private_key.txt")
+        self.generate_private_key(ETHEREUM)
+        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_1, "eth_private_key.txt"
+            FUNDED_ETH_PRIVATE_KEY_1, ETHEREUM_PRIVATE_KEY_FILE
         )
         # stdout = self.get_wealth("ethereum")
         # if int(stdout) < 100000000000000000:
@@ -92,10 +94,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("ethereum")
-        self.add_private_key("ethereum", "eth_private_key.txt")
+        self.generate_private_key(ETHEREUM)
+        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_2, "eth_private_key.txt"
+            FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
         # stdout = self.get_wealth("ethereum")
         # if int(stdout) < 100000000000000000:

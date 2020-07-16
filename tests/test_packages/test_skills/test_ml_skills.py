@@ -25,7 +25,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_COSMOS_PRIVATE_KEY_1
+from tests.conftest import COSMOS, COSMOS_PRIVATE_KEY_FILE, FUNDED_COSMOS_PRIVATE_KEY_1
 
 
 class TestMLSkills(AEATestCaseMany, UseOef):
@@ -165,10 +165,10 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("cosmos")
-        self.add_private_key("cosmos", "cosmos_private_key.txt")
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_COSMOS_PRIVATE_KEY_1, "cosmos_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
 
         self.set_agent_context(data_provider_aea_name)

@@ -40,8 +40,7 @@ from aea.configurations.base import (
     ProtocolId,
     SkillConfig,
 )
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
+from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -168,11 +167,11 @@ class TestAEAToACA:
     @pytest.mark.asyncio
     async def test_end_to_end_aea_aca(self):
         # AEA components
-        wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE})
+        wallet = Wallet({DEFAULT_LEDGER: DEFAULT_PRIVATE_KEY_FILE})
         identity = Identity(
             name="my_aea_1",
-            address=wallet.addresses.get(FetchAICrypto.identifier),
-            default_address_key=FetchAICrypto.identifier,
+            address=wallet.addresses.get(DEFAULT_LEDGER),
+            default_address_key=DEFAULT_LEDGER,
         )
         configuration = ConnectionConfig(
             host=self.aca_admin_address,

@@ -20,21 +20,21 @@
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
 import pytest
 
-from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 
 from tests.conftest import (
+    ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
     ETHEREUM_TESTNET_CONFIG,
 )
 
 ledger = [
-    (EthereumCrypto.identifier, ETHEREUM_TESTNET_CONFIG),
+    (ETHEREUM, ETHEREUM_TESTNET_CONFIG),
 ]
 
 crypto = [
-    (EthereumCrypto.identifier,),
+    (ETHEREUM,),
 ]
 
 

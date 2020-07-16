@@ -22,6 +22,7 @@
 import os
 from pathlib import Path
 
+from aea.configurations.constants import DEFAULT_PRIVATE_KEY_FILE
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
@@ -57,7 +58,7 @@ class TestProgrammaticAEA(BaseAEATestCase):
         run()
         assert os.path.exists(Path(self.t, "input_file"))
         assert os.path.exists(Path(self.t, "output_file"))
-        assert os.path.exists(Path(self.t, "cosmos_private_key.txt"))
+        assert os.path.exists(Path(self.t, DEFAULT_PRIVATE_KEY_FILE))
 
         message_text = (
             "other_agent,my_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"

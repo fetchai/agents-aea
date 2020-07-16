@@ -25,6 +25,8 @@ import pytest
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from tests.conftest import (
+    ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_FILE,
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -187,10 +189,10 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("ethereum")
-        self.add_private_key("ethereum", "eth_private_key.txt")
+        self.generate_private_key(ETHEREUM)
+        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_1, "eth_private_key.txt"
+            FUNDED_ETH_PRIVATE_KEY_1, ETHEREUM_PRIVATE_KEY_FILE
         )
 
         # prepare agents for test
@@ -223,9 +225,9 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             ), "Difference between created and fetched project for files={}".format(
                 diff
             )
-            self.generate_private_key("ethereum")
-            self.add_private_key("ethereum", "eth_private_key.txt")
-            self.replace_private_key_in_file(eth_private_key, "eth_private_key.txt")
+            self.generate_private_key(ETHEREUM)
+            self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+            self.replace_private_key_in_file(eth_private_key, ETHEREUM_PRIVATE_KEY_FILE)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)

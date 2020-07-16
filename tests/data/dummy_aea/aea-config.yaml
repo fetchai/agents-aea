@@ -22,6 +22,6 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths:
+  cosmos: cosmos_private_key.txt
   ethereum: eth_private_key.txt
-  fetchai: fet_private_key.txt
 registry_path: ../../packages

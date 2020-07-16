@@ -26,7 +26,7 @@ logging_config:                                 # The logging configurations the
   disable_existing_loggers: false
   version: 1
 private_key_paths:                              # The private key paths the AEA project uses (keys must satisfy LEDGER_ID_REGEX, values must be file paths)
-  fetchai: fet_private_key.txt
+  cosmos: cosmos_private_key.txt
 registry_path: ../packages                      # The path to the local package registry (must be a directory path and point to a directory called `packages`)
 ```
 ``` yaml

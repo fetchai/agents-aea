@@ -25,7 +25,6 @@ from threading import Thread
 
 from aea.aea import AEA
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -70,7 +69,7 @@ class TestSkillError:
 
         self.connection = _make_dummy_connection()
         self.identity = Identity(
-            self.agent_name, address=self.wallet.addresses[FetchAICrypto.identifier]
+            self.agent_name, address=self.wallet.addresses[DEFAULT_LEDGER]
         )
         self.address = self.identity.address
 

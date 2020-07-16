@@ -28,7 +28,13 @@ import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_COSMOS_PRIVATE_KEY_1, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_FILE,
+    FUNDED_COSMOS_PRIVATE_KEY_1,
+    MAX_FLAKY_RERUNS,
+    ROOT_DIR,
+)
 
 seller_strategy_replacement = """models:
   default_dialogues:
@@ -178,10 +184,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.run_install()
 
         # add funded key
-        self.generate_private_key("cosmos")
-        self.add_private_key("cosmos", "cosmos_private_key.txt")
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_COSMOS_PRIVATE_KEY_1, "cosmos_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
 
         # Fire the sub-processes and the threads.

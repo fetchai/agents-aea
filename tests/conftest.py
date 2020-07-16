@@ -62,7 +62,15 @@ from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.contracts import Contract, contract_registry
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.cosmos import _COSMOS
+from aea.crypto.ethereum import _ETHEREUM
+from aea.crypto.fetchai import _FETCHAI
+from aea.crypto.helpers import (
+    COSMOS_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+)
+from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
@@ -115,15 +123,20 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 
 DUMMY_ENV = gym.GoalEnv
 
+# Ledger identifiers
+COSMOS = _COSMOS
+ETHEREUM = _ETHEREUM
+FETCHAI = _FETCHAI
+
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
+    ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE
 )
 ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", "eth_private_key.txt"
+    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
 )
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", "fet_private_key.txt"
+    ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
 )
 FUNDED_ETH_PRIVATE_KEY_1 = (
     "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
@@ -741,7 +754,8 @@ def _make_libp2p_connection(
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
         os.remove(log_file)
-    identity = Identity("", address=FetchAICrypto().address)
+    crypto = make_crypto(FETCHAI)
+    identity = Identity("", address=crypto.address)
     if relay and delegate:
         configuration = ConnectionConfig(
             node_key_file=None,
@@ -775,7 +789,8 @@ def _make_libp2p_connection(
 def _make_libp2p_client_connection(
     node_port: int = 11234, node_host: str = "127.0.0.1"
 ) -> P2PLibp2pClientConnection:
-    identity = Identity("", address=FetchAICrypto().address)
+    crypto = make_crypto(FETCHAI)
+    identity = Identity("", address=crypto.address)
     configuration = ConnectionConfig(
         client_key_file=None,
         nodes=[{"uri": "{}:{}".format(node_host, node_port)}],
