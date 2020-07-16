@@ -11,7 +11,7 @@ aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/erc1155_client:0.9.0
+aea add skill fetchai/erc1155_deploy:0.9.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```

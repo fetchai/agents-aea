@@ -56,7 +56,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.set_config("agent.default_ledger", "ethereum")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.9.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.9.0")
 
         diff = self.difference_to_fetched_agent(
             "fetchai/erc1155_deployer:0.9.0", deploy_aea_name
