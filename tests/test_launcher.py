@@ -17,12 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea launcher."""
-
 import os
 import shutil
 import tempfile
 import time
+from multiprocessing import Event
 from pathlib import Path
+from threading import Thread
+
 
 from click.testing import CliRunner
 
@@ -33,7 +35,7 @@ import yaml
 from aea.cli.core import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.helpers.base import cd
-from aea.launcher import AEALauncher
+from aea.launcher import AEALauncher, _run_agent
 from aea.test_tools.test_cases import CLI_LOG_OPTION
 
 
@@ -119,10 +121,12 @@ class TestThreadLauncherMode:
             )
             runner.start(True)
             wait_for_condition(lambda: runner.is_running, timeout=5)
+            assert runner.num_failed == 0
             time.sleep(1)
         finally:
             runner.stop()
             assert not runner.is_running
+            assert runner.num_failed == 0
 
     def test_one_fails(self) -> None:
         """Test agents started, one agent failed, exception is raised."""
@@ -137,6 +141,14 @@ class TestThreadLauncherMode:
             time.sleep(1)
         finally:
             runner.stop()
+
+    def test_run_agent_in_thread(self):
+        """Test agent started ans stopped in thread."""
+        stop_event = Event()
+        t = Thread(target=_run_agent, args=(self.agent_name_1, stop_event))
+        t.start()
+        stop_event.set()
+        t.join(10)
 
 
 class TestAsyncLauncherMode(TestThreadLauncherMode):

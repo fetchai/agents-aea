@@ -208,6 +208,7 @@ class _DependenciesManager:
         component = self._dependencies.pop(component_id)
         # remove from the index of all dependencies grouped by type
         self._all_dependencies_by_type[component_id.component_type].pop(component_id)
+
         if len(self._all_dependencies_by_type[component_id.component_type]) == 0:
             self._all_dependencies_by_type.pop(component_id.component_type)
         # remove from prefix to id index
@@ -237,7 +238,9 @@ class _DependenciesManager:
         return all_pypi_dependencies
 
     @staticmethod
-    def _build_dotted_part(component, relative_import_path) -> str:
+    def _build_dotted_part(
+        component, relative_import_path: str
+    ) -> str:  # pragma: nocover # TODO: remove? not in use at the moment!
         """Given a component, build a dotted path for import."""
         if relative_import_path == "":
             return component.prefix_import_path
@@ -430,7 +433,7 @@ class AEABuilder:
         try:
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
-        except Exception as e:
+        except Exception as e:  # pragma: nocover
             logger.error(
                 "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
                     dotted_path, class_name, file_path, e
@@ -442,7 +445,7 @@ class AEABuilder:
 
     def set_skill_exception_policy(
         self, skill_exception_policy: Optional[ExceptionPolicyEnum]
-    ) -> "AEABuilder":
+    ) -> "AEABuilder":  # pragma: nocover
         """
         Set skill exception policy.
 
@@ -465,10 +468,12 @@ class AEABuilder:
 
         :return: self
         """
-        self._default_routing = default_routing
+        self._default_routing = default_routing  # pragma: nocover
         return self
 
-    def set_loop_mode(self, loop_mode: Optional[str]) -> "AEABuilder":
+    def set_loop_mode(
+        self, loop_mode: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
         """
         Set the loop mode.
 
@@ -478,7 +483,9 @@ class AEABuilder:
         self._loop_mode = loop_mode
         return self
 
-    def set_runtime_mode(self, runtime_mode: Optional[str]) -> "AEABuilder":
+    def set_runtime_mode(
+        self, runtime_mode: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
         """
         Set the runtime mode.
 
@@ -488,7 +495,9 @@ class AEABuilder:
         self._runtime_mode = runtime_mode
         return self
 
-    def set_search_service_address(self, search_service_address: str) -> "AEABuilder":
+    def set_search_service_address(
+        self, search_service_address: str
+    ) -> "AEABuilder":  # pragma: nocover
         """
         Set the search service address.
 
@@ -515,6 +524,7 @@ class AEABuilder:
         :return: None
         :raises ValueError: if the component is already present.
         """
+        print(self._package_dependency_manager.all_dependencies)
         if component_id not in self._package_dependency_manager.all_dependencies:
             raise ValueError(
                 "Component {} of type {} not present.".format(
@@ -533,7 +543,7 @@ class AEABuilder:
         self._check_package_dependencies(configuration)
         self._check_pypi_dependencies(configuration)
 
-    def set_name(self, name: str) -> "AEABuilder":
+    def set_name(self, name: str) -> "AEABuilder":  # pragma: nocover
         """
         Set the name of the agent.
 
@@ -543,7 +553,9 @@ class AEABuilder:
         self._name = name
         return self
 
-    def set_default_connection(self, public_id: PublicId) -> "AEABuilder":
+    def set_default_connection(
+        self, public_id: PublicId
+    ) -> "AEABuilder":  # pragma: nocover
         """
         Set the default connection.
 
@@ -628,11 +640,13 @@ class AEABuilder:
         return self
 
     @property
-    def ledger_apis_config(self) -> Dict[str, Dict[str, Union[str, int]]]:
+    def ledger_apis_config(
+        self,
+    ) -> Dict[str, Dict[str, Union[str, int]]]:  # pragma: nocover
         """Get the ledger api configurations."""
         return self._ledger_apis_configs
 
-    def set_default_ledger(self, identifier: str) -> "AEABuilder":
+    def set_default_ledger(self, identifier: str) -> "AEABuilder":  # pragma: nocover
         """
         Set a default ledger API to use.
 
@@ -689,7 +703,9 @@ class AEABuilder:
         ] = component
         return self
 
-    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> "AEABuilder":
+    def set_context_namespace(
+        self, context_namespace: Dict[str, Any]
+    ) -> "AEABuilder":  # pragma: nocover
         """Set the context namespace."""
         self._context_namespace = context_namespace
         return self
@@ -1123,13 +1139,13 @@ class AEABuilder:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
                 logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: nocover
             raise Exception(
                 "Agent configuration file '{}' not found in the current directory.".format(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-        except jsonschema.exceptions.ValidationError:
+        except jsonschema.exceptions.ValidationError:  # pragma: nocover
             raise Exception(
                 "Agent configuration file '{}' is invalid. Please check the documentation.".format(
                     DEFAULT_AEA_CONFIG_FILE
@@ -1284,6 +1300,7 @@ class AEABuilder:
 
             if len(configuration.skills) != 0:
                 roots.remove(skill_id)
+
             depends_on[skill_id].update(
                 [
                     ComponentId(ComponentType.SKILL, skill)
@@ -1300,7 +1317,9 @@ class AEABuilder:
         while len(queue) > 0:
             current = queue.pop()
             order.append(current)
-            for node in supports[current]:
+            for node in supports[
+                current
+            ]:  # pragma: nocover # TODO: extract method and test properly
                 depends_on[node].discard(current)
                 if len(depends_on[node]) == 0:
                     queue.append(node)
@@ -1405,7 +1424,7 @@ class AEABuilder:
                     class_kwargs={"contract_interface": contract_interface},
                     contract_config=configuration,  # TODO: resolve configuration being applied globally
                 )
-            except AEAException as e:
+            except AEAException as e:  # pragma: nocover
                 if "Cannot re-register id:" in str(e):
                     logger.warning(
                         "Already registered: {}".format(configuration.class_name)
@@ -1452,7 +1471,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     for identifier, _value in agent_configuration.private_key_paths.read_all():
         if identifier not in crypto_registry.supported_ids:
-            ValueError("Unsupported identifier in private key paths.")
+            raise ValueError(f"Item not registered with id '{identifier}'.")
 
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
         config_private_key_path = agent_configuration.private_key_paths.read(identifier)
