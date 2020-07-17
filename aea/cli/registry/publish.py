@@ -32,6 +32,7 @@ from aea.cli.registry.utils import (
 )
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
+from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_README_FILE
 
@@ -59,7 +60,7 @@ def publish_agent(ctx: Context):
         os.makedirs(package_dir)
         config_file_target_path = os.path.join(package_dir, DEFAULT_AEA_CONFIG_FILE)
         shutil.copy(config_file_source_path, config_file_target_path)
-        if os.path.exists(readme_source_path):
+        if is_readme_present(readme_source_path):
             readme_file_target_path = os.path.join(package_dir, DEFAULT_README_FILE)
             shutil.copy(readme_source_path, readme_file_target_path)
 
@@ -76,7 +77,7 @@ def publish_agent(ctx: Context):
     }
 
     files = {"file": open(output_tar, "rb")}
-    if os.path.exists(readme_source_path):
+    if is_readme_present(readme_source_path):
         files["readme"] = open(readme_source_path, "rb")
 
     path = "/agents/create"
