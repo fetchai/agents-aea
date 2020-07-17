@@ -219,7 +219,7 @@ aea config set agent.default_connection fetchai/oef:0.6.0
 Alternatively, in the third terminal, fetch **Alice_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_alice:0.5.0
+aea fetch fetchai/aries_alice:0.6.0
 cd aries_alice
 ```
 
@@ -355,7 +355,7 @@ aea config set agent.default_connection fetchai/http_client:0.5.0
 Alternatively, in the fourth terminal, fetch **Faber_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_faber:0.5.0
+aea fetch fetchai/aries_faber:0.6.0
 cd aries_faber
 ```
 

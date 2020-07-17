@@ -70,7 +70,7 @@ trusts the seller AEA to send the data upon successful payment.
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.7.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.8.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -84,18 +84,12 @@ aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/weather_station:0.6.0
+aea add skill fetchai/weather_station:0.7.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
-In `weather_station/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `weather_station/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -109,7 +103,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.7.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.8.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -123,20 +117,12 @@ aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/weather_client:0.5.0
+aea add skill fetchai/weather_client:0.6.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 
-In `my_weather_client/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_weather_client/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -163,30 +149,6 @@ aea generate-wealth fetchai
 
 <details><summary>Alternatively, create wealth for other test networks.</summary>
 <p>
-
-<strong>Ledger Config:</strong>
-<br>
-
-In `my_weather_station/aea-config.yaml` and `my_weather_client/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Ethereum:
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-
-Alternatively, to connect to Cosmos:
-``` yaml
-ledger_apis:
-  cosmos:
-    address: https://rest-agent-land.prod.fetch-ai.com:443
-```
-
-<strong>Wealth:</strong>
-<br>
 
 To generate and add a private-public key pair for Ethereum use:
 ``` bash

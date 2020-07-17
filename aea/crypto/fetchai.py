@@ -45,7 +45,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _FETCHAI = "fetchai"
-FETCHAI_CURRENCY = "FET"
+DEFAULT_NETWORK = "testnet"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
 
@@ -244,11 +244,9 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
 
         :param kwargs: key word arguments (expects either a pair of 'host' and 'port' or a 'network')
         """
-        assert (
-            "host" in kwargs and "port" in kwargs
-        ) or "network" in kwargs, (
-            "expects either a pair of 'host' and 'port' or a 'network'"
-        )
+        if not ("host" in kwargs and "port" in kwargs):
+            network = kwargs.pop("network", DEFAULT_NETWORK)
+            kwargs["network"] = network
         self._api = FetchaiLedgerApi(**kwargs)
 
     @property

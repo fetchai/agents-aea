@@ -42,9 +42,9 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _ETHEREUM = "ethereum"
-ETHEREUM_CURRENCY = "ETH"
 GAS_ID = "gwei"
 ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
+DEFAULT_ADDRESS = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"
 DEFAULT_CHAIN_ID = 3
 DEFAULT_GAS_PRICE = "50"
 
@@ -241,14 +241,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     identifier = _ETHEREUM
 
-    def __init__(self, address: str, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initialize the Ethereum ledger APIs.
 
         :param address: the endpoint for Web3 APIs.
         """
-        assert address is not None, "address is a required key word argument"
-        self._api = Web3(HTTPProvider(endpoint_uri=address))
+        self._api = Web3(
+            HTTPProvider(endpoint_uri=kwargs.pop("address", DEFAULT_ADDRESS))
+        )
         self._gas_price = kwargs.pop("gas_price", DEFAULT_GAS_PRICE)
         self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
 

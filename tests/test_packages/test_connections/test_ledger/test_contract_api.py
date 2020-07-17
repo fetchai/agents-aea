@@ -23,9 +23,9 @@ from typing import cast
 
 import pytest
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStatus
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.identity.base import Identity
@@ -37,13 +37,14 @@ from packages.fetchai.connections.ledger.contract_dispatcher import (
 )
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 
-from tests.conftest import ETHEREUM_ADDRESS_ONE, ROOT_DIR
+from tests.conftest import ETHEREUM, ETHEREUM_ADDRESS_ONE, ROOT_DIR
 
 
 @pytest.fixture()
 async def ledger_apis_connection(request):
     """Create connection."""
-    identity = Identity("name", FetchAICrypto().address)
+    crypto = make_crypto(DEFAULT_LEDGER)
+    identity = Identity("name", crypto.address)
     crypto_store = CryptoStore()
     directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
@@ -65,7 +66,7 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=EthereumCrypto.identifier,
+        ledger_id=ETHEREUM,
         contract_id="fetchai/erc1155:0.6.0",
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
@@ -93,7 +94,7 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
     response_dialogue = contract_api_dialogues.update(response_message)
     assert response_dialogue == contract_api_dialogue
     assert type(response_message.raw_transaction) == RawTransaction
-    assert response_message.raw_transaction.ledger_id == EthereumCrypto.identifier
+    assert response_message.raw_transaction.ledger_id == ETHEREUM
     assert len(response.message.raw_transaction.body) == 6
     assert len(response.message.raw_transaction.body["data"]) > 0
 
@@ -109,7 +110,7 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=EthereumCrypto.identifier,
+        ledger_id=ETHEREUM,
         contract_id="fetchai/erc1155:0.6.0",
         contract_address=contract_address,
         callable="get_create_batch_transaction",
@@ -140,7 +141,7 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
     response_dialogue = contract_api_dialogues.update(response_message)
     assert response_dialogue == contract_api_dialogue
     assert type(response_message.raw_transaction) == RawTransaction
-    assert response_message.raw_transaction.ledger_id == EthereumCrypto.identifier
+    assert response_message.raw_transaction.ledger_id == ETHEREUM
     assert len(response.message.raw_transaction.body) == 7
     assert len(response.message.raw_transaction.body["data"]) > 0
 
@@ -156,7 +157,7 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=EthereumCrypto.identifier,
+        ledger_id=ETHEREUM,
         contract_id="fetchai/erc1155:0.6.0",
         contract_address=contract_address,
         callable="get_hash_single",
@@ -195,7 +196,7 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
     response_dialogue = contract_api_dialogues.update(response_message)
     assert response_dialogue == contract_api_dialogue
     assert type(response_message.raw_message) == RawMessage
-    assert response_message.raw_message.ledger_id == EthereumCrypto.identifier
+    assert response_message.raw_message.ledger_id == ETHEREUM
     assert type(response.message.raw_message.body) == bytes
 
 
@@ -211,7 +212,7 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_STATE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=EthereumCrypto.identifier,
+        ledger_id=ETHEREUM,
         contract_id="fetchai/erc1155:0.6.0",
         contract_address=contract_address,
         callable="get_balance",
@@ -242,7 +243,7 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     response_dialogue = contract_api_dialogues.update(response_message)
     assert response_dialogue == contract_api_dialogue
     assert type(response_message.state) == State
-    assert response_message.state.ledger_id == EthereumCrypto.identifier
+    assert response_message.state.ledger_id == ETHEREUM
     result = response_message.state.body.get("balance", None)
     expected_result = {token_id: 0}
     assert result is not None and result == expected_result
@@ -259,7 +260,7 @@ async def test_run_async():
     message = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=EthereumCrypto.identifier,
+        ledger_id=ETHEREUM,
         contract_id="fetchai/erc1155:0.6.0",
         contract_address="test addr",
         callable="get_create_batch_transaction",

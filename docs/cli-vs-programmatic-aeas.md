@@ -20,6 +20,14 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for the entire demo.
 
+## Get required packages
+
+Copy the packages directory into your local working directory:
+
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
 ## Demo instructions
 
 If you want to create the weather station AEA step by step you can follow this guide <a href='/weather-skills/'>here</a>
@@ -29,7 +37,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.7.0
+aea fetch fetchai/weather_station:0.8.0
 cd weather_station
 ```
 
@@ -63,8 +71,8 @@ from typing import cast
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, create_private_key
+from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.helpers import COSMOS_PRIVATE_KEY_FILE, create_private_key
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
@@ -85,13 +93,11 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def run():
     # Create a private key
-    create_private_key(FetchAICrypto.identifier)
+    create_private_key(CosmosCrypto.identifier)
 
     # Set up the wallet, identity and (empty) resources
-    wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE})
-    identity = Identity(
-        "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
-    )
+    wallet = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE})
+    identity = Identity("my_aea", address=wallet.addresses.get(CosmosCrypto.identifier))
     resources = Resources()
 
     # specify the default routing for some protocols

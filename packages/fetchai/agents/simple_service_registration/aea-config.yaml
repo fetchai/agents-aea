@@ -1,6 +1,6 @@
 agent_name: simple_service_registration
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: A simple example of service registration.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -18,8 +18,7 @@ skills:
 - fetchai/error:0.3.0
 - fetchai/simple_service_registration:0.4.0
 default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis: {}
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

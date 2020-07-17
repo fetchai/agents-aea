@@ -32,9 +32,13 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import ComponentId, ComponentType, PublicId
-from aea.configurations.constants import DEFAULT_PROTOCOL, DEFAULT_SKILL
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    DEFAULT_PRIVATE_KEY_FILE,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+)
 from aea.contracts.base import Contract
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
@@ -427,11 +431,9 @@ class TestFilter:
         os.chdir(cls.agent_folder)
 
         connection = _make_dummy_connection()
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FetchAICrypto.identifier: private_key_path})
-        identity = Identity(
-            cls.agent_name, address=wallet.addresses[FetchAICrypto.identifier]
-        )
+        private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+        wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+        identity = Identity(cls.agent_name, address=wallet.addresses[DEFAULT_LEDGER])
         resources = Resources()
 
         resources.add_component(

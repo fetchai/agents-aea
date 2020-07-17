@@ -26,7 +26,8 @@ from threading import Thread
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.registries import make_crypto
 from aea.helpers.search.models import (
     Constraint,
     ConstraintType,
@@ -54,7 +55,7 @@ logger = logging.getLogger(__name__)
 def test_soef():
     """Perform tests over real network."""
     # First run OEF in a separate terminal: python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-    crypto = FetchAICrypto()
+    crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("", address=crypto.address)
 
     # create the connection and multiplexer objects

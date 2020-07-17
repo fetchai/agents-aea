@@ -111,7 +111,7 @@ def _generate_item(click_context, item_type, specification_path):
             "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
         )
         existing_id_list.add(
-            PublicId("fetchai", protocol_spec.name, protocol_spec.version)
+            PublicId(protocol_spec.author, protocol_spec.name, protocol_spec.version)
         )
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")

@@ -23,6 +23,8 @@ import pytest
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from tests.conftest import (
+    ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_FILE,
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     MAX_FLAKY_RERUNS_ETH,
@@ -43,14 +45,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.create_agents(deploy_aea_name, client_aea_name)
 
         # add ethereum ledger in both configuration files
-        ledger_apis = {
-            "ethereum": {
-                "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-                "chain_id": 3,
-                "gas_price": 50,
-            }
-        }
-        setting_path = "agent.ledger_apis"
         default_routing = {
             "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
             "fetchai/contract_api:0.1.0": "fetchai/ledger:0.2.0",
@@ -58,26 +52,25 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_ledger", "ethereum")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.8.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.9.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.8.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.9.0", deploy_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("ethereum")
-        self.add_private_key("ethereum", "eth_private_key.txt")
+        self.generate_private_key(ETHEREUM)
+        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_1, "eth_private_key.txt"
+            FUNDED_ETH_PRIVATE_KEY_1, ETHEREUM_PRIVATE_KEY_FILE
         )
         # stdout = self.get_wealth("ethereum")
         # if int(stdout) < 100000000000000000:
@@ -85,28 +78,26 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.run_install()
 
         # add packages for agent two
-        setting_path = "agent.ledger_apis"
         self.set_agent_context(client_aea_name)
-        self.force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_ledger", "ethereum")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.7.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.8.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.8.0", client_aea_name
+            "fetchai/erc1155_client:0.9.0", client_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("ethereum")
-        self.add_private_key("ethereum", "eth_private_key.txt")
+        self.generate_private_key(ETHEREUM)
+        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_2, "eth_private_key.txt"
+            FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
         # stdout = self.get_wealth("ethereum")
         # if int(stdout) < 100000000000000000:

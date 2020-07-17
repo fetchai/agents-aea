@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for decision_maker."""
-import os
+
 from queue import Queue
 from typing import Optional, cast
 from unittest import mock
@@ -34,8 +34,6 @@ import pytest
 import aea
 import aea.decision_maker.default
 from aea.configurations.base import PublicId
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
@@ -58,7 +56,14 @@ from aea.protocols.state_update.dialogues import (
 )
 from aea.protocols.state_update.message import StateUpdateMessage
 
-from tests.conftest import CUR_PATH
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_PATH,
+    ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_PATH,
+)
 
 
 class SigningDialogues(BaseSigningDialogues):
@@ -155,19 +160,16 @@ class TestDecisionMaker:
     def setup_class(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
             {
-                FetchAICrypto.identifier: private_key_pem_path,
-                EthereumCrypto.identifier: eth_private_key_pem_path,
+                COSMOS: COSMOS_PRIVATE_KEY_PATH,
+                ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
+                FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
             }
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name,
-            addresses=cls.wallet.addresses,
-            default_address_key=FetchAICrypto.identifier,
+            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=COSMOS,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet
@@ -281,19 +283,16 @@ class TestDecisionMaker2:
     def setup_class(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
             {
-                FetchAICrypto.identifier: private_key_pem_path,
-                EthereumCrypto.identifier: eth_private_key_pem_path,
+                COSMOS: COSMOS_PRIVATE_KEY_PATH,
+                ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
+                FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
             }
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name,
-            addresses=cls.wallet.addresses,
-            default_address_key=FetchAICrypto.identifier,
+            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=COSMOS,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet

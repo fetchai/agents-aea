@@ -47,7 +47,7 @@ from aea.crypto.helpers import (
     create_private_key,
     try_validate_private_key_path,
 )
-from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 
@@ -428,13 +428,9 @@ def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> in
     :retun: token balance.
     """
     try:
-        if type_ not in agent_config.ledger_apis_dict:  # pragma: no cover
-            raise ValueError(
-                "No ledger api config for {} provided in aea-config.yaml.".format(type_)
-            )
-        ledger_apis = LedgerApis(
-            agent_config.ledger_apis_dict, agent_config.default_ledger
-        )
+        if type_ not in DEFAULT_LEDGER_CONFIGS:  # pragma: no cover
+            raise ValueError("No ledger api config for {} available.".format(type_))
+        ledger_apis = LedgerApis(DEFAULT_LEDGER_CONFIGS, agent_config.default_ledger)
         address = wallet.addresses[type_]
         balance = ledger_apis.get_balance(type_, address)
         if balance is None:  # pragma: no cover

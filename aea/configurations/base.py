@@ -1272,7 +1272,6 @@ class AgentConfig(PackageConfiguration):
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
         self.connection_private_key_paths = CRUDCollection[str]()
-        self.ledger_apis = CRUDCollection[Dict]()
 
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_ledger = None  # type: Optional[str]
@@ -1333,14 +1332,6 @@ class AgentConfig(PackageConfiguration):
         """Get dictionary version of private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
             key: path for key, path in self.private_key_paths.read_all()
-        }
-
-    @property
-    def ledger_apis_dict(self) -> Dict[str, Dict[str, Union[str, int]]]:
-        """Get dictionary version of ledger apis."""
-        return {
-            cast(str, key): cast(Dict[str, Union[str, int]], config)
-            for key, config in self.ledger_apis.read_all()
         }
 
     @property
@@ -1406,7 +1397,6 @@ class AgentConfig(PackageConfiguration):
                 "skills": sorted(map(str, self.skills)),
                 "default_connection": self.default_connection,
                 "default_ledger": self.default_ledger,
-                "ledger_apis": self.ledger_apis_dict,
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
@@ -1468,9 +1458,6 @@ class AgentConfig(PackageConfiguration):
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)
-
-        for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():
-            agent_config.ledger_apis.create(ledger_id, ledger_data)
 
         for crypto_id, path in obj.get("connection_private_key_paths", {}).items():
             agent_config.connection_private_key_paths.create(crypto_id, path)

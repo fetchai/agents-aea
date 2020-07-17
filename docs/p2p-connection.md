@@ -53,8 +53,8 @@ You can inspect the `libp2p_node.log` log files of the AEA to see how they disco
 Create one AEA as follows:
 
 ``` bash
-aea fetch fetchai/weather_station:0.7.0
-aea fetch fetchai/weather_client:0.7.0
+aea fetch fetchai/weather_station:0.8.0
+aea fetch fetchai/weather_client:0.8.0
 ```
 
 Then enter each project individually and execute the following to add the `p2p_libp2p` connection:
