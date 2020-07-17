@@ -941,3 +941,15 @@ def erc1155_contract():
 
     contract = contract_registry.make(str(configuration.public_id))
     yield contract
+
+
+def env_path_separator() -> str:
+    """
+    Get the separator between path items in PATH variables, cross platform.
+
+    E.g. on Linux and MacOS, it returns ':', whereas on Windows ';'.
+    """
+    if sys.platform == "win32":
+        return ";"
+    else:
+        return ":"
