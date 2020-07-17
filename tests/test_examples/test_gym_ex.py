@@ -25,8 +25,7 @@ import tempfile
 from pathlib import Path
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import ROOT_DIR
-
+from tests.conftest import ROOT_DIR, env_path_separator
 
 DIRECTORIES = ["packages", "examples"]
 
@@ -48,7 +47,9 @@ class TestGymExt:
         """Run the gym ex sequence."""
         try:
             env = os.environ.copy()
-            env["PYTHONPATH"] = f"{self.t}:{env.get('PYTHONPATH', '')}"
+            env[
+                "PYTHONPATH"
+            ] = f"{self.t}{env_path_separator()}{env.get('PYTHONPATH', '')}"
             process = PexpectWrapper(  # nosec
                 [
                     sys.executable,
