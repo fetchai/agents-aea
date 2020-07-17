@@ -84,6 +84,15 @@ class Crypto(Generic[EntityClass], ABC):
 
     @property
     @abstractmethod
+    def private_key(self) -> str:
+        """
+        Return a private key.
+
+        :return: a private key string
+        """
+
+    @property
+    @abstractmethod
     def public_key(self) -> str:
         """
         Return a public key.

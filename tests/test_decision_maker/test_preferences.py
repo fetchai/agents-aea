@@ -26,6 +26,8 @@ import pytest
 from aea.decision_maker.default import OwnershipState, Preferences
 from aea.helpers.transaction.base import Terms
 
+from tests.conftest import ETHEREUM
+
 
 def test_preferences_properties():
     """Test the properties of the preferences class."""
@@ -149,7 +151,7 @@ def test_score_diff_from_transaction():
         exchange_params_by_currency_id=exchange_params,
     )
     terms = Terms(
-        ledger_id="ethereum",
+        ledger_id=ETHEREUM,
         sender_address="agent_1",
         counterparty_address="pk",
         amount_by_currency_id={"FET": -20},
@@ -182,7 +184,7 @@ def test_is_utility_enhancing_uninitialized():
     ownership_state = OwnershipState()
     preferences = Preferences()
     terms = Terms(
-        ledger_id="ethereum",
+        ledger_id=ETHEREUM,
         sender_address="agent_1",
         counterparty_address="pk",
         amount_by_currency_id={"FET": -20},

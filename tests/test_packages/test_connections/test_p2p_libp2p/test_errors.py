@@ -27,7 +27,7 @@ import tempfile
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
@@ -40,6 +40,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 )
 
 from tests.conftest import (
+    COSMOS,
     _make_libp2p_connection,
     skip_test_windows,
 )
@@ -167,14 +168,14 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-
-        cls.identity = Identity("", address=FetchAICrypto().address)
+        crypto = make_crypto(COSMOS)
+        cls.identity = Identity("", address=crypto.address)
         cls.host = "localhost"
         cls.port = "10000"
 
         cls.key_file = os.path.join(cls.t, "keyfile")
         key_file_desc = open(cls.key_file, "ab")
-        FetchAICrypto().dump(key_file_desc)
+        crypto.dump(key_file_desc)
         key_file_desc.close()
 
     def test_entry_peers_when_no_public_uri_provided(self):

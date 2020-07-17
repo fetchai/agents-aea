@@ -179,7 +179,7 @@ class TestDecisionMaker:
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
-        cls.ledger_id = "fetchai"
+        cls.ledger_id = FETCHAI
 
         cls.decision_maker.start()
 
@@ -302,7 +302,7 @@ class TestDecisionMaker2:
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
-        cls.ledger_id = "fetchai"
+        cls.ledger_id = FETCHAI
 
         cls.decision_maker.start()
 
@@ -340,7 +340,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="fetchai",
+                ledger_id=FETCHAI,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -348,7 +348,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_transaction=RawTransaction("fetchai", tx),
+            raw_transaction=RawTransaction(FETCHAI, tx),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -370,7 +370,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="ethereum",
+                ledger_id=ETHEREUM,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -378,7 +378,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_transaction=RawTransaction("ethereum", tx),
+            raw_transaction=RawTransaction(ETHEREUM, tx),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -433,7 +433,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="fetchai",
+                ledger_id=FETCHAI,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -441,7 +441,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage("fetchai", message),
+            raw_message=RawMessage(FETCHAI, message),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -463,7 +463,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="ethereum",
+                ledger_id=ETHEREUM,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -471,7 +471,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage("ethereum", message),
+            raw_message=RawMessage(ETHEREUM, message),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -493,7 +493,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="ethereum",
+                ledger_id=ETHEREUM,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -501,7 +501,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage("ethereum", message, is_deprecated_mode=True),
+            raw_message=RawMessage(ETHEREUM, message, is_deprecated_mode=True),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)

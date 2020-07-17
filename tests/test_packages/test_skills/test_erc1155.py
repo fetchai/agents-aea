@@ -55,7 +55,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.set_config("agent.default_ledger", "ethereum")
+        self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_deploy:0.9.0")
@@ -72,7 +72,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_1, ETHEREUM_PRIVATE_KEY_FILE
         )
-        # stdout = self.get_wealth("ethereum")
+        # stdout = self.get_wealth(ETHEREUM)
         # if int(stdout) < 100000000000000000:
         #     pytest.skip("The agent needs more funds for the test to pass.")
         self.run_install()
@@ -82,7 +82,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.set_config("agent.default_ledger", "ethereum")
+        self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_client:0.8.0")
@@ -99,7 +99,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
-        # stdout = self.get_wealth("ethereum")
+        # stdout = self.get_wealth(ETHEREUM)
         # if int(stdout) < 100000000000000000:
         #     pytest.skip("The agent needs more funds for the test to pass.")
         self.run_install()

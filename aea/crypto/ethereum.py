@@ -66,6 +66,15 @@ class EthereumCrypto(Crypto[Account]):
         self._address = str(self.entity.address)
 
     @property
+    def private_key(self) -> str:
+        """
+        Return a private key.
+
+        :return: a private key string
+        """
+        return self.entity.key.hex()
+
+    @property
     def public_key(self) -> str:
         """
         Return a public key in hex format.
@@ -140,7 +149,7 @@ class EthereumCrypto(Crypto[Account]):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self.entity.key.hex().encode("utf-8"))
+        fp.write(self.private_key.encode("utf-8"))
 
 
 class EthereumHelper(Helper):

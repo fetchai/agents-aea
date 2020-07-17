@@ -49,6 +49,7 @@ from aea.cli.utils.package_utils import (
     validate_package_name,
 )
 
+from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,
     ContextMock,
@@ -405,8 +406,8 @@ class TryGetBalanceTestCase(TestCase):
     def test_try_get_balance_positive(self):
         """Test for try_get_balance method positive result."""
         agent_config = mock.Mock()
-        agent_config.default_ledger_config = "fetchai"
+        agent_config.default_ledger_config = FETCHAI
 
         wallet_mock = mock.Mock()
-        wallet_mock.addresses = {"fetchai": "some-adress"}
-        try_get_balance(agent_config, wallet_mock, "fetchai")
+        wallet_mock.addresses = {FETCHAI: "some-adress"}
+        try_get_balance(agent_config, wallet_mock, FETCHAI)

@@ -29,6 +29,8 @@ from aea.helpers.transaction.base import (
 )
 from aea.protocols.signing.message import SigningMessage
 
+from tests.conftest import COSMOS
+
 
 class TestSigningMessage:
     """Test the signing message module."""
@@ -36,7 +38,7 @@ class TestSigningMessage:
     @classmethod
     def setup_class(cls):
         """Setup class for test case."""
-        cls.ledger_id = "fetchai"
+        cls.ledger_id = COSMOS
         cls.terms = Terms(
             ledger_id=cls.ledger_id,
             sender_address="address1",

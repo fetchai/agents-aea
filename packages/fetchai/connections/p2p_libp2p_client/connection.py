@@ -28,13 +28,16 @@ from random import randint
 from typing import List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.4.0")
+
+SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
 
 class Uri:
@@ -92,6 +95,15 @@ class P2PLibp2pClientConnection(Connection):
         """
         super().__init__(**kwargs)
 
+        ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
+        if ledger_id not in SUPPORTED_LEDGER_IDS:
+            raise ValueError(
+                "Ledger id '{}' is not supported. Supported ids: '{}'".format(
+                    ledger_id, SUPPORTED_LEDGER_IDS
+                )
+            )
+        # TODO: ensure ledger_id matches with provided key of p2p node.
+
         key_file = self.configuration.config.get("client_key_file")  # Optional[str]
         nodes = self.configuration.config.get("nodes")
 
@@ -105,13 +117,13 @@ class P2PLibp2pClientConnection(Connection):
 
         if (
             self.has_crypto_store
-            and self.crypto_store.crypto_objects.get("fetchai", None) is not None
+            and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
         ):  # pragma: no cover
-            key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
+            key = self.crypto_store.crypto_objects[ledger_id]
         elif key_file is not None:
-            key = FetchAICrypto(key_file)
+            key = make_crypto(ledger_id, private_key_path=key_file)
         else:
-            key = FetchAICrypto()
+            key = make_crypto(ledger_id)
 
         # client connection id
         self.key = key

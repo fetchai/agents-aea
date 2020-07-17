@@ -65,6 +65,15 @@ class FetchAICrypto(Crypto[Entity]):
         self._address = str(FetchaiAddress(Identity.from_hex(self.public_key)))
 
     @property
+    def private_key(self) -> str:
+        """
+        Return a private key.
+
+        :return: a private key string
+        """
+        return self.entity.private_key_hex
+
+    @property
     def public_key(self) -> str:
         """
         Return a public key in hex format.
@@ -136,7 +145,7 @@ class FetchAICrypto(Crypto[Entity]):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self.entity.private_key_hex.encode("utf-8"))
+        fp.write(self.private_key.encode("utf-8"))
 
 
 class FetchAIHelper(Helper):

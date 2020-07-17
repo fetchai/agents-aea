@@ -56,7 +56,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/tac_control:0.3.0")
-        self.set_config("agent.default_ledger", "ethereum")
+        self.set_config("agent.default_ledger", ETHEREUM)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -73,7 +73,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.5.0")
-            self.set_config("agent.default_ledger", "ethereum")
+            self.set_config("agent.default_ledger", ETHEREUM)
             self.run_install()
             diff = self.difference_to_fetched_agent(
                 "fetchai/tac_participant:0.6.0", agent_name
@@ -176,8 +176,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.4.0")
-        self.set_config("agent.default_ledger", "ethereum")
-        # stdout = self.get_wealth("ethereum")
+        self.set_config("agent.default_ledger", ETHEREUM)
+        # stdout = self.get_wealth(ETHEREUM)
         # if int(stdout) < 100000000000000000:
         #     pytest.skip("The agent needs more funds for the test to pass.")
         self.run_install()
@@ -205,7 +205,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.5.0")
-            self.set_config("agent.default_ledger", "ethereum")
+            self.set_config("agent.default_ledger", ETHEREUM)
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",
                 True,
