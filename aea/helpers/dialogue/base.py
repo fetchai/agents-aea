@@ -139,6 +139,7 @@ class Dialogue(ABC):
 
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0
+    OPPONENT_STARTER_REFERENCE = ""
 
     class Rules:
         """This class defines the rules for the dialogue."""
@@ -398,10 +399,11 @@ class Dialogue(ABC):
         """
         if (
             message.is_incoming
-            and not self.is_empty
-            and self.last_message.message_id == 1  # type: ignore
-            and self.dialogue_label.dialogue_reference[1] == ""
-        ):  # type: ignore
+            and self.last_message is not None
+            and self.last_message.message_id == self.STARTING_MESSAGE_ID
+            and self.dialogue_label.dialogue_reference[1]
+            == self.OPPONENT_STARTER_REFERENCE
+        ):
             self._update_self_initiated_dialogue_label_on_second_message(message)
 
         is_extendable = self.is_valid_next_message(message)
@@ -453,7 +455,10 @@ class Dialogue(ABC):
         """
         dialogue_reference = second_message.dialogue_reference
 
-        self_initiated_dialogue_reference = (dialogue_reference[0], "")
+        self_initiated_dialogue_reference = (
+            dialogue_reference[0],
+            self.OPPONENT_STARTER_REFERENCE,
+        )
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference,
             second_message.counterparty,
@@ -569,8 +574,9 @@ class Dialogue(ABC):
         :param final_dialogue_label: the final dialogue label
         """
         assert (
-            self.dialogue_label.dialogue_reference[1] == ""
-            and final_dialogue_label.dialogue_reference[1] != ""
+            self.dialogue_label.dialogue_reference[1] == self.OPPONENT_STARTER_REFERENCE
+            and final_dialogue_label.dialogue_reference[1]
+            != self.OPPONENT_STARTER_REFERENCE
         ), "Dialogue label cannot be updated."
         self._dialogue_label = final_dialogue_label
 
@@ -726,7 +732,7 @@ class Dialogues(ABC):
 
         :return: the next nonce
         """
-        return str(self._dialogue_nonce + 1), ""
+        return str(self._dialogue_nonce + 1), Dialogue.OPPONENT_STARTER_REFERENCE
 
     def create(
         self, counterparty: Address, performative: Message.Performative, **kwargs,
@@ -783,8 +789,8 @@ class Dialogues(ABC):
         dialogue_reference = message.dialogue_reference
 
         if (  # new dialogue by other
-            dialogue_reference[0] != ""
-            and dialogue_reference[1] == ""
+            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
             and message.is_incoming
         ):
             dialogue = self._create_opponent_initiated(
@@ -793,8 +799,8 @@ class Dialogues(ABC):
                 role=self._role_from_first_message(message),
             )  # type: Optional[Dialogue]
         elif (  # new dialogue by self
-            dialogue_reference[0] != ""
-            and dialogue_reference[1] == ""
+            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
             and not message.is_incoming
         ):
             assert (
@@ -834,7 +840,10 @@ class Dialogues(ABC):
         :return: None
         """
         dialogue_reference = second_message.dialogue_reference
-        self_initiated_dialogue_reference = (dialogue_reference[0], "")
+        self_initiated_dialogue_reference = (
+            dialogue_reference[0],
+            Dialogue.OPPONENT_STARTER_REFERENCE,
+        )
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference,
             second_message.counterparty,
@@ -907,7 +916,10 @@ class Dialogues(ABC):
 
         :return: the created dialogue.
         """
-        dialogue_reference = (str(self._next_dialogue_nonce()), "")
+        dialogue_reference = (
+            str(self._next_dialogue_nonce()),
+            Dialogue.OPPONENT_STARTER_REFERENCE,
+        )
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
@@ -939,7 +951,8 @@ class Dialogues(ABC):
         :return: the created dialogue
         """
         assert (
-            dialogue_reference[0] != "" and dialogue_reference[1] == ""
+            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
         ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
         new_dialogue_reference = (
             dialogue_reference[0],

@@ -212,6 +212,7 @@ class TestDialogueBase:
         assert self.dialogue.agent_address == "this agent's address"
 
         assert self.dialogue.role == Dialogue.Role.ROLE1
+        assert str(self.dialogue.role) == "role1"
 
         self.dialogue.role = Dialogue.Role.ROLE2
         assert self.dialogue.role == Dialogue.Role.ROLE2
