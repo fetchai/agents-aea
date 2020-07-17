@@ -396,10 +396,17 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
+        if (
+            message.is_incoming
+            and not self.is_empty
+            and self.last_message.message_id == 1  # type: ignore
+            and self.dialogue_label.dialogue_reference[1] == ""
+        ):  # type: ignore
+            self._update_self_initiated_dialogue_label_on_second_message(message)
+
         is_extendable = self.is_valid_next_message(message)
         if is_extendable:
             if message.is_incoming:
-                self._update_self_initiated_dialogue_label_on_second_message(message)
                 self._incoming_messages.extend([message])
             else:
                 self._outgoing_messages.extend([message])
@@ -445,6 +452,7 @@ class Dialogue(ABC):
         :return: None
         """
         dialogue_reference = second_message.dialogue_reference
+
         self_initiated_dialogue_reference = (dialogue_reference[0], "")
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference,
@@ -465,6 +473,14 @@ class Dialogue(ABC):
                     self_initiated_dialogue_label.dialogue_starter_addr,
                 )
                 self.update_dialogue_label(updated_dialogue_label)
+            else:
+                raise Exception(
+                    "Invalid call to update dialogue's reference. This call must be made only after receiving dialogue's second message by the counterparty."
+                )
+        else:
+            raise Exception(
+                "Cannot update dialogue's reference after the first message."
+            )
 
     def is_valid_next_message(self, message: Message) -> bool:
         """
@@ -498,13 +514,15 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
+        dialogue_reference = message.dialogue_reference
         message_id = message.message_id
         target = message.target
         performative = message.performative
 
         if self.last_message is None:
             result = (
-                message_id == Dialogue.STARTING_MESSAGE_ID
+                dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
+                and message_id == Dialogue.STARTING_MESSAGE_ID
                 and target == Dialogue.STARTING_TARGET
                 and performative in self.rules.initial_performatives
             )
@@ -514,7 +532,8 @@ class Dialogue(ABC):
             if target_message is not None:
                 target_performative = target_message.performative
                 result = (
-                    message_id == last_message_id + 1
+                    dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
+                    and message_id == last_message_id + 1
                     and 1 <= target <= last_message_id
                     and performative
                     in self.rules.get_valid_replies(target_performative)
@@ -742,6 +761,8 @@ class Dialogues(ABC):
         successfully_updated = dialogue.update(initial_message)
 
         if not successfully_updated:
+            self._dialogues.pop(dialogue.dialogue_label)
+            self._dialogue_nonce -= 1
             raise Exception(
                 "Cannot create the a dialogue with the specified performative and contents."
             )
