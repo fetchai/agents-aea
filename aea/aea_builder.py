@@ -522,7 +522,6 @@ class AEABuilder:
         :return: None
         :raises ValueError: if the component is already present.
         """
-        print(self._package_dependency_manager.all_dependencies)
         if component_id not in self._package_dependency_manager.all_dependencies:
             raise ValueError(
                 "Component {} of type {} not present.".format(
