@@ -238,16 +238,6 @@ class _DependenciesManager:
             )
         return all_pypi_dependencies
 
-    @staticmethod
-    def _build_dotted_part(
-        component, relative_import_path: str
-    ) -> str:  # pragma: nocover # TODO: remove? not in use at the moment!
-        """Given a component, build a dotted path for import."""
-        if relative_import_path == "":
-            return component.prefix_import_path
-        else:
-            return component.prefix_import_path + "." + relative_import_path
-
 
 class AEABuilder:
     """
