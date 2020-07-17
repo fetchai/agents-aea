@@ -33,7 +33,7 @@ from aea.cli.registry.utils import (
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_README_FILE
 
 
 def _compress(output_filename: str, *filepaths):
@@ -51,6 +51,7 @@ def publish_agent(ctx: Context):
 
     name = ctx.agent_config.agent_name
     config_file_source_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
+    readme_source_path = os.path.join(ctx.cwd, DEFAULT_README_FILE)
     output_tar = os.path.join(ctx.cwd, "{}.tar.gz".format(name))
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -58,6 +59,9 @@ def publish_agent(ctx: Context):
         os.makedirs(package_dir)
         config_file_target_path = os.path.join(package_dir, DEFAULT_AEA_CONFIG_FILE)
         shutil.copy(config_file_source_path, config_file_target_path)
+        if os.path.exists(readme_source_path):
+            readme_file_target_path = os.path.join(package_dir, DEFAULT_README_FILE)
+            shutil.copy(readme_source_path, readme_file_target_path)
 
         _compress(output_tar, package_dir)
 
@@ -71,9 +75,13 @@ def publish_agent(ctx: Context):
         "skills": ctx.agent_config.skills,
     }
 
+    files = {"file": open(output_tar, "rb")}
+    if os.path.exists(readme_source_path):
+        files["readme"] = open(readme_source_path, "rb")
+
     path = "/agents/create"
     logger.debug("Publishing agent {} to Registry ...".format(name))
-    resp = request_api("POST", path, data=data, is_auth=True, filepath=output_tar)
+    resp = request_api("POST", path, data=data, is_auth=True, files=files)
     click.echo(
         "Successfully published agent {} to the Registry. Public ID: {}".format(
             name, resp["public_id"]

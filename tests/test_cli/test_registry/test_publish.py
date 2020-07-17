@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Test module for Registry publish methods."""
-import os
+
 from unittest import TestCase, mock
 
 from aea.cli.registry.publish import _compress, publish_agent
@@ -25,6 +25,8 @@ from aea.cli.registry.publish import _compress, publish_agent
 from tests.test_cli.tools_for_testing import ContextMock
 
 
+@mock.patch("builtins.open", return_value="opened_file")
+@mock.patch("aea.cli.registry.publish.os.path.exists", return_value=True)
 @mock.patch("aea.cli.registry.publish.shutil.copy")
 @mock.patch("aea.cli.registry.publish.try_to_load_agent_config")
 @mock.patch("aea.cli.registry.publish.check_is_author_logged_in")
@@ -56,7 +58,7 @@ class PublishAgentTestCase(TestCase):
                 "skills": [],
             },
             is_auth=True,
-            filepath=os.path.join("cwd", "agent-name.tar.gz"),
+            files={"file": "opened_file", "readme": "opened_file"},
         )
 
 

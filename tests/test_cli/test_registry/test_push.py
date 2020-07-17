@@ -29,6 +29,7 @@ from tests.conftest import AUTHOR
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
+@mock.patch("builtins.open", return_value="opened_file")
 @mock.patch("aea.cli.registry.push.check_is_author_logged_in")
 @mock.patch("aea.cli.registry.utils._rm_tarfiles")
 @mock.patch("aea.cli.registry.push.os.getcwd", return_value="cwd")
@@ -58,6 +59,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
+        open_mock,
     ):
         """Test for push_item positive result."""
         public_id = PublicIdMock(
@@ -76,7 +78,7 @@ class PushItemTestCase(TestCase):
                 "protocols": ["protocol_id"],
             },
             is_auth=True,
-            filepath=os.path.join("cwd", "some-name.tar.gz"),
+            files={"file": "opened_file", "readme": "opened_file"},
         )
 
     @mock.patch("aea.cli.registry.push.os.path.exists", return_value=False)
@@ -89,6 +91,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
+        open_mock,
     ):
         """Test for push_item - item not found."""
         with self.assertRaises(ClickException):

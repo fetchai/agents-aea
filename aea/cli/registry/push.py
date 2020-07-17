@@ -32,7 +32,7 @@ from aea.cli.registry.utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.generic import load_yaml
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import PublicId
+from aea.configurations.base import DEFAULT_README_FILE, PublicId
 
 
 def _remove_pycache(source_dir: str):
@@ -97,9 +97,14 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
         if deps_list:
             data.update({key: deps_list})
 
+    files = {"file": open(output_filepath, "rb")}
+    readme_path = os.path.join(item_path, DEFAULT_README_FILE)
+    if os.path.exists(readme_path):
+        files["readme"] = open(readme_path, "rb")
+
     path = "/{}/create".format(item_type_plural)
     logger.debug("Pushing {} {} to Registry ...".format(item_id.name, item_type))
-    resp = request_api("POST", path, data=data, is_auth=True, filepath=output_filepath)
+    resp = request_api("POST", path, data=data, is_auth=True, files=files)
     click.echo(
         "Successfully pushed {} {} to the Registry. Public ID: {}".format(
             item_type, item_id.name, resp["public_id"]
