@@ -48,7 +48,7 @@ def request_api(
     params=None,
     data=None,
     is_auth=False,
-    filepath=None,
+    files=None,
     handle_400=True,
     return_code=False,
 ):
@@ -60,7 +60,7 @@ def request_api(
     :param params: dict GET params.
     :param data: dict POST data.
     :param is_auth: bool is auth requied (default False).
-    :param filepath: str path to file to upload (default None).
+    :param files: optional dict {file_field_name: open(filepath, "rb")} (default None).
 
     :return: dict response from Registry API or tuple (dict response, status code).
     """
@@ -74,10 +74,6 @@ def request_api(
             )
         else:
             headers.update({"Authorization": "Token {}".format(token)})
-
-    files = None
-    if filepath:
-        files = {"file": open(filepath, "rb")}
 
     request_kwargs = dict(
         method=method,

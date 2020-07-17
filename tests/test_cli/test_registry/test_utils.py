@@ -165,7 +165,7 @@ class RequestAPITestCase(TestCase):
         self.assertEqual(result, expected_result)
 
     @mock.patch("builtins.open", mock.mock_open())
-    def test_request_api_with_file_positive(self, request_mock):
+    def test_request_api_with_files_positive(self, request_mock):
         """Test for request_api method with file positive result."""
         expected_result = {"correct": "json"}
 
@@ -174,7 +174,11 @@ class RequestAPITestCase(TestCase):
         resp_mock.status_code = 200
         request_mock.return_value = resp_mock
 
-        result = request_api("GET", "/path", filepath="filepath")
+        test_files = {
+            "file": open("file.tar.gz", "rb"),
+            "readme": open("file.md", "rb"),
+        }
+        result = request_api("GET", "/path", files=test_files)
         self.assertEqual(result, expected_result)
 
 

@@ -29,6 +29,7 @@ from tests.conftest import AUTHOR
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
+@mock.patch("builtins.open", return_value="opened_file")
 @mock.patch("aea.cli.registry.push.check_is_author_logged_in")
 @mock.patch("aea.cli.registry.utils._rm_tarfiles")
 @mock.patch("aea.cli.registry.push.os.getcwd", return_value="cwd")
@@ -49,8 +50,10 @@ class PushItemTestCase(TestCase):
     """Test case for push_item method."""
 
     @mock.patch("aea.cli.registry.push.os.path.exists", return_value=True)
+    @mock.patch("aea.cli.registry.push.is_readme_present", return_value=True)
     def test_push_item_positive(
         self,
+        is_readme_present_mock,
         path_exists_mock,
         request_api_mock,
         load_yaml_mock,
@@ -58,6 +61,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
+        open_mock,
     ):
         """Test for push_item positive result."""
         public_id = PublicIdMock(
@@ -76,7 +80,32 @@ class PushItemTestCase(TestCase):
                 "protocols": ["protocol_id"],
             },
             is_auth=True,
-            filepath=os.path.join("cwd", "some-name.tar.gz"),
+            files={"file": "opened_file", "readme": "opened_file"},
+        )
+
+    @mock.patch("aea.cli.registry.push.os.path.exists", return_value=True)
+    @mock.patch("aea.cli.registry.push.is_readme_present", return_value=False)
+    def test_push_item_positive_without_readme(
+        self, is_readme_present_mock, path_exists_mock, request_api_mock, *mocks
+    ):
+        """Test for push_item without readme positive result."""
+        public_id = PublicIdMock(
+            name="some-name",
+            author="some-author",
+            version="{}".format(PublicIdMock.DEFAULT_VERSION),
+        )
+        push_item(ContextMock(), "some-type", public_id)
+        request_api_mock.assert_called_once_with(
+            "POST",
+            "/some-types/create",
+            data={
+                "name": "some-name",
+                "description": "some-description",
+                "version": "some-version",
+                "protocols": ["protocol_id"],
+            },
+            is_auth=True,
+            files={"file": "opened_file"},
         )
 
     @mock.patch("aea.cli.registry.push.os.path.exists", return_value=False)
@@ -89,6 +118,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
+        open_mock,
     ):
         """Test for push_item - item not found."""
         with self.assertRaises(ClickException):

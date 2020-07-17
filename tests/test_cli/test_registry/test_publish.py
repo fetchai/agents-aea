@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Test module for Registry publish methods."""
-import os
+
 from unittest import TestCase, mock
 
 from aea.cli.registry.publish import _compress, publish_agent
@@ -25,6 +25,7 @@ from aea.cli.registry.publish import _compress, publish_agent
 from tests.test_cli.tools_for_testing import ContextMock
 
 
+@mock.patch("builtins.open", return_value="opened_file")
 @mock.patch("aea.cli.registry.publish.shutil.copy")
 @mock.patch("aea.cli.registry.publish.try_to_load_agent_config")
 @mock.patch("aea.cli.registry.publish.check_is_author_logged_in")
@@ -37,7 +38,10 @@ from tests.test_cli.tools_for_testing import ContextMock
 class PublishAgentTestCase(TestCase):
     """Test case for publish_agent method."""
 
-    def test_push_item_positive(self, request_api_mock, *mocks):
+    @mock.patch("aea.cli.registry.publish.is_readme_present", return_value=True)
+    def test_publish_agent_positive(
+        self, is_readme_present_mock, request_api_mock, *mocks
+    ):
         """Test for publish_agent positive result."""
         description = "Some description."
         version = "0.1.0"
@@ -56,7 +60,32 @@ class PublishAgentTestCase(TestCase):
                 "skills": [],
             },
             is_auth=True,
-            filepath=os.path.join("cwd", "agent-name.tar.gz"),
+            files={"file": "opened_file", "readme": "opened_file"},
+        )
+
+    @mock.patch("aea.cli.registry.publish.is_readme_present", return_value=False)
+    def test_publish_agent_without_readme_positive(
+        self, is_readme_present_mock, request_api_mock, *mocks
+    ):
+        """Test for publish_agent without readme positive result."""
+        description = "Some description."
+        version = "0.1.0"
+        context_mock = ContextMock(description=description, version=version)
+        publish_agent(context_mock)
+        request_api_mock.assert_called_once_with(
+            "POST",
+            "/agents/create",
+            data={
+                "name": "agent-name",
+                "description": description,
+                "version": version,
+                "connections": [],
+                "contracts": [],
+                "protocols": [],
+                "skills": [],
+            },
+            is_auth=True,
+            files={"file": "opened_file"},
         )
 
 
