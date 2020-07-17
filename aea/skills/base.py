@@ -79,7 +79,8 @@ class SkillContext:
     @property
     def logger(self) -> Union[Logger, LoggerAdapter]:
         """Get the logger."""
-        assert self._logger is not None, "Logger not set."
+        if self._logger is None:
+            return logging.getLogger("aea")
         return self._logger
 
     @logger.setter

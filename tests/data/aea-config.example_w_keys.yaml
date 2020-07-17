@@ -17,20 +17,14 @@ protocols:
 skills:
 - fetchai/echo:0.3.0
 default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis:
-   fetchai:
-     addr: example.fetch-ai.com
-     port: 8080
-   ethereum:
-     addr: example.ethereum.com
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths:
-   fetchai: 'fet_private_key.txt'
-   ethereum: 'eth_private_key.txt'
+   cosmos: cosmos_private_key.txt
+   ethereum: eth_private_key.txt
 connection_private_key_paths:
-   fetchai: 'fet_private_key.txt'
-   ethereum: 'eth_private_key.txt'
+   cosmos: cosmos_private_key.txt
+   ethereum: eth_private_key.txt
 registry_path: ../../packages

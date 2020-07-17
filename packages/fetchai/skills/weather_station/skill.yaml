@@ -1,6 +1,6 @@
 name: weather_station
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
@@ -23,7 +23,7 @@ protocols:
 - fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
 skills:
-- fetchai/generic_seller:0.7.0
+- fetchai/generic_seller:0.8.0
 behaviours:
   service_registration:
     args:
@@ -71,7 +71,7 @@ models:
       data_model_name: location
       has_data_source: true
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       service_data:
         city: Cambridge
         country: UK

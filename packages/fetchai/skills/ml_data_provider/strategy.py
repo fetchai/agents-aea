@@ -23,6 +23,7 @@ import numpy as np
 
 from tensorflow import keras
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.models import Attribute, DataModel, Description, Query
 from aea.skills.base import Model
 
@@ -32,7 +33,7 @@ DEFAULT_BATCH_SIZE = 32
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_BUYER_TX_FEE = 0
 DEFAULT_CURRENCY_PBK = "FET"
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 
 class Strategy(Model):

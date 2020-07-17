@@ -27,8 +27,8 @@ from typing import cast
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, create_private_key
+from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.helpers import COSMOS_PRIVATE_KEY_FILE, create_private_key
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
@@ -49,13 +49,11 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def run():
     # Create a private key
-    create_private_key(FetchAICrypto.identifier)
+    create_private_key(CosmosCrypto.identifier)
 
     # Set up the wallet, identity and (empty) resources
-    wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE})
-    identity = Identity(
-        "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
-    )
+    wallet = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE})
+    identity = Identity("my_aea", address=wallet.addresses.get(CosmosCrypto.identifier))
     resources = Resources()
 
     # specify the default routing for some protocols

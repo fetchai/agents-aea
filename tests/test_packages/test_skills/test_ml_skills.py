@@ -25,7 +25,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1
+from tests.conftest import COSMOS, COSMOS_PRIVATE_KEY_FILE, FUNDED_COSMOS_PRIVATE_KEY_1
 
 
 class TestMLSkills(AEATestCaseMany, UseOef):
@@ -48,7 +48,7 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.6.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -62,7 +62,7 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/ml_train:0.6.0")
+        self.add_item("skill", "fetchai/ml_train:0.7.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -129,8 +129,6 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         model_trainer_aea_name = "ml_model_trainer"
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
-        ledger_apis = {"fetchai": {"network": "testnet"}}
-
         default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
         # prepare data provider agent
@@ -138,15 +136,13 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.6.0")
-        setting_path = "agent.ledger_apis"
-        self.force_set_config(setting_path, ledger_apis)
+        self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.7.0", data_provider_aea_name
+            "fetchai/ml_data_provider:0.8.0", data_provider_aea_name
         )
         assert (
             diff == []
@@ -157,24 +153,22 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/ml_train:0.6.0")
-        setting_path = "agent.ledger_apis"
-        self.force_set_config(setting_path, ledger_apis)
+        self.add_item("skill", "fetchai/ml_train:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.7.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.8.0", model_trainer_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("fetchai")
-        self.add_private_key("fetchai", "fet_private_key.txt")
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
 
         self.set_agent_context(data_provider_aea_name)

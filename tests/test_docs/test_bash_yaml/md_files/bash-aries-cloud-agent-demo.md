@@ -44,7 +44,7 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
 ``` bash
-aea fetch fetchai/aries_alice:0.5.0
+aea fetch fetchai/aries_alice:0.6.0
 cd aries_alice
 ```
 ``` bash
@@ -111,7 +111,7 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 aea config set agent.default_connection fetchai/http_client:0.5.0
 ```
 ``` bash
-aea fetch fetchai/aries_faber:0.5.0
+aea fetch fetchai/aries_faber:0.6.0
 cd aries_faber
 ```
 ``` bash

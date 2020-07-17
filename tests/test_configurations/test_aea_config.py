@@ -56,14 +56,11 @@ contracts: []
 protocols: []
 skills: []
 default_connection: fetchai/stub:0.6.0
-default_ledger: fetchai
-ledger_apis:
-  fetchai:
-    network: testnet
+default_ledger: cosmos
 private_key_paths:
-    fetchai: tests/data/fet_private_key.txt
+    cosmos: tests/data/cosmos_private_key.txt
 connection_private_key_paths:
-    fetchai: tests/data/fet_private_key.txt
+    cosmos: tests/data/cosmos_private_key.txt
 registry_path: ../packages
 """
 )

@@ -20,17 +20,14 @@
 
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 import pytest
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth, _wait_funds_release
-from aea.crypto.fetchai import FetchAICrypto
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -78,7 +75,7 @@ class GenerateWealthCommandTestCase(TestCase):
                 "--skip-consistency-check",
                 "generate-wealth",
                 "--sync",
-                FetchAICrypto.identifier,
+                FETCHAI,
             ],
             standalone_mode=False,
         )
@@ -94,8 +91,6 @@ class TestWealthCommands(AEATestCaseMany):
         self.create_agents(agent_name)
 
         self.set_agent_context(agent_name)
-        ledger_apis = {"fetchai": {"network": "testnet"}}
-        self.force_set_config("agent.ledger_apis", ledger_apis)
 
         self.generate_private_key()
         self.add_private_key()

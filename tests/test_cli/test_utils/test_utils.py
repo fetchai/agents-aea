@@ -405,9 +405,8 @@ class TryGetBalanceTestCase(TestCase):
     def test_try_get_balance_positive(self):
         """Test for try_get_balance method positive result."""
         agent_config = mock.Mock()
-        ledger_apis = {"type_": {"address": "some-adress"}}
-        agent_config.ledger_apis_dict = ledger_apis
+        agent_config.default_ledger_config = "fetchai"
 
         wallet_mock = mock.Mock()
-        wallet_mock.addresses = {"type_": "some-adress"}
-        try_get_balance(agent_config, wallet_mock, "type_")
+        wallet_mock.addresses = {"fetchai": "some-adress"}
+        try_get_balance(agent_config, wallet_mock, "fetchai")

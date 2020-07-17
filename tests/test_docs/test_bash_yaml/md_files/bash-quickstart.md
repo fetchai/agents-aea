@@ -41,7 +41,7 @@ v0.5.1
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.6.0
+aea fetch fetchai/my_first_aea:0.7.0
 cd my_first_aea
 ```
 ``` bash

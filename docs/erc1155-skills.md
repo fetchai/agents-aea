@@ -34,7 +34,7 @@ Keep it running for all the following demos.
 Fetch the AEA that will deploy the contract.
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.8.0
+aea fetch fetchai/erc1155_deployer:0.9.0
 cd erc1155_deployer
 aea install
 ```
@@ -49,7 +49,7 @@ aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/erc1155_deploy:0.8.0
+aea add skill fetchai/erc1155_deploy:0.9.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
@@ -81,7 +81,7 @@ aea add-key ethereum eth_private_key.txt
 In another terminal, fetch the AEA that will get some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.8.0
+aea fetch fetchai/erc1155_client:0.9.0
 cd erc1155_client
 aea install
 ```
@@ -96,7 +96,7 @@ aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/erc1155_client:0.7.0
+aea add skill fetchai/erc1155_client:0.8.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 ```
@@ -121,20 +121,6 @@ Additionally, create the private key for the client AEA. Generate and add a key 
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-```
-
-### Update the AEA configs
-
-Both in `erc1155_deployer/aea-config.yaml` and
-`erc1155_client/aea-config.yaml`, replace `ledger_apis: {}` with the following based on the network you want to connect
-
-Connect to Ethereum:
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
 ```
 
 ### Fund the AEAs

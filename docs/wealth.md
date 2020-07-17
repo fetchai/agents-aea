@@ -12,29 +12,6 @@ aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 
-Ensure the ledger apis are set in the aea config:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-for Fetch.ai, or
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-```
-for Ethereum, or both
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-  fetchai:
-    network: testnet
-```
-
 ## Using a faucet website
 
 First, print the address:

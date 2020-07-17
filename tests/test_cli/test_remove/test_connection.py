@@ -25,8 +25,6 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from click.testing import CliRunner
-
 import yaml
 
 import aea
@@ -34,7 +32,7 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
 class TestRemoveConnectionWithPublicId:

@@ -19,22 +19,25 @@
 
 """This module contains the tests for the base classes for the skills."""
 
-import os
 from queue import Queue
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
 from aea.aea import AEA
 from aea.connections.base import ConnectionStatus
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 from aea.skills.base import SkillComponent, SkillContext
 
-from tests.conftest import CUR_PATH, _make_dummy_connection
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_PATH,
+    ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    _make_dummy_connection,
+)
 
 
 class TestSkillContext:
@@ -43,21 +46,14 @@ class TestSkillContext:
     @classmethod
     def setup_class(cls):
         """Test the initialisation of the AEA."""
-        eth_private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
-        fet_private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
-            {
-                EthereumCrypto.identifier: eth_private_key_path,
-                FetchAICrypto.identifier: fet_private_key_path,
-            }
+            {COSMOS: COSMOS_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
         )
         cls.connection = _make_dummy_connection()
         cls.identity = Identity(
-            "name",
-            addresses=cls.wallet.addresses,
-            default_address_key=FetchAICrypto.identifier,
+            "name", addresses=cls.wallet.addresses, default_address_key=COSMOS,
         )
-        cls.my_aea = AEA(cls.identity, cls.wallet, resources=Resources(),)
+        cls.my_aea = AEA(cls.identity, cls.wallet, resources=Resources())
         cls.my_aea.resources.add_connection(cls.connection)
         cls.skill_context = SkillContext(cls.my_aea.context)
 
@@ -170,8 +166,7 @@ class SkillContextTestCase(TestCase):
     def test_logger_positive(self):
         """Test logger property positive result"""
         obj = SkillContext("agent_context")
-        with self.assertRaises(AssertionError):
-            obj.logger
+        obj.logger
         obj._logger = mock.Mock()
         obj.logger
 

@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.4.0
+aea fetch fetchai/generic_seller:0.5.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.7.0
+aea eject skill fetchai/generic_seller:0.8.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.4.0
+aea fetch fetchai/generic_buyer:0.5.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.6.0
+aea eject skill fetchai/generic_buyer:0.7.0
 cd ..
 ```
 
@@ -864,6 +864,7 @@ Next, we are going to create the strategy that we want our `my_generic_seller` A
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query
@@ -871,7 +872,7 @@ from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
@@ -1358,7 +1359,7 @@ models:
       data_model_name: location
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       service_data:
         city: Cambridge
         country: UK
@@ -2288,13 +2289,14 @@ We are going to create the strategy that we want our AEA to follow. Rename the `
 ``` python
 from typing import Any, Dict, Optional
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
@@ -2926,7 +2928,7 @@ models:
           type: str
       data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
@@ -2992,13 +2994,7 @@ aea add-key fetchai fet_private_key.txt
 
 #### Update the AEA configs
 
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, replace ```ledger_apis```: {} with the following.
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and
+Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -3035,18 +3031,6 @@ Create the private key for the `my_generic_buyer` AEA.
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-```
-
-#### Update the AEA configs
-
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, replace `ledger_apis: {}` with the following.
-
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
 ```
 
 #### Update the skill configs

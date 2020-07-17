@@ -139,6 +139,7 @@ class Dialogue(ABC):
 
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0
+    OPPONENT_STARTER_REFERENCE = ""
 
     class Rules:
         """This class defines the rules for the dialogue."""
@@ -396,10 +397,18 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
+        if (
+            message.is_incoming
+            and self.last_message is not None
+            and self.last_message.message_id == self.STARTING_MESSAGE_ID
+            and self.dialogue_label.dialogue_reference[1]
+            == self.OPPONENT_STARTER_REFERENCE
+        ):
+            self._update_self_initiated_dialogue_label_on_second_message(message)
+
         is_extendable = self.is_valid_next_message(message)
         if is_extendable:
             if message.is_incoming:
-                self._update_self_initiated_dialogue_label_on_second_message(message)
                 self._incoming_messages.extend([message])
             else:
                 self._outgoing_messages.extend([message])
@@ -445,7 +454,11 @@ class Dialogue(ABC):
         :return: None
         """
         dialogue_reference = second_message.dialogue_reference
-        self_initiated_dialogue_reference = (dialogue_reference[0], "")
+
+        self_initiated_dialogue_reference = (
+            dialogue_reference[0],
+            self.OPPONENT_STARTER_REFERENCE,
+        )
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference,
             second_message.counterparty,
@@ -465,6 +478,14 @@ class Dialogue(ABC):
                     self_initiated_dialogue_label.dialogue_starter_addr,
                 )
                 self.update_dialogue_label(updated_dialogue_label)
+            else:
+                raise Exception(
+                    "Invalid call to update dialogue's reference. This call must be made only after receiving dialogue's second message by the counterparty."
+                )
+        else:
+            raise Exception(
+                "Cannot update dialogue's reference after the first message."
+            )
 
     def is_valid_next_message(self, message: Message) -> bool:
         """
@@ -498,13 +519,15 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
+        dialogue_reference = message.dialogue_reference
         message_id = message.message_id
         target = message.target
         performative = message.performative
 
         if self.last_message is None:
             result = (
-                message_id == Dialogue.STARTING_MESSAGE_ID
+                dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
+                and message_id == Dialogue.STARTING_MESSAGE_ID
                 and target == Dialogue.STARTING_TARGET
                 and performative in self.rules.initial_performatives
             )
@@ -514,7 +537,8 @@ class Dialogue(ABC):
             if target_message is not None:
                 target_performative = target_message.performative
                 result = (
-                    message_id == last_message_id + 1
+                    dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
+                    and message_id == last_message_id + 1
                     and 1 <= target <= last_message_id
                     and performative
                     in self.rules.get_valid_replies(target_performative)
@@ -550,8 +574,9 @@ class Dialogue(ABC):
         :param final_dialogue_label: the final dialogue label
         """
         assert (
-            self.dialogue_label.dialogue_reference[1] == ""
-            and final_dialogue_label.dialogue_reference[1] != ""
+            self.dialogue_label.dialogue_reference[1] == self.OPPONENT_STARTER_REFERENCE
+            and final_dialogue_label.dialogue_reference[1]
+            != self.OPPONENT_STARTER_REFERENCE
         ), "Dialogue label cannot be updated."
         self._dialogue_label = final_dialogue_label
 
@@ -707,7 +732,7 @@ class Dialogues(ABC):
 
         :return: the next nonce
         """
-        return str(self._dialogue_nonce + 1), ""
+        return str(self._dialogue_nonce + 1), Dialogue.OPPONENT_STARTER_REFERENCE
 
     def create(
         self, counterparty: Address, performative: Message.Performative, **kwargs,
@@ -742,6 +767,8 @@ class Dialogues(ABC):
         successfully_updated = dialogue.update(initial_message)
 
         if not successfully_updated:
+            self._dialogues.pop(dialogue.dialogue_label)
+            self._dialogue_nonce -= 1
             raise Exception(
                 "Cannot create the a dialogue with the specified performative and contents."
             )
@@ -762,8 +789,8 @@ class Dialogues(ABC):
         dialogue_reference = message.dialogue_reference
 
         if (  # new dialogue by other
-            dialogue_reference[0] != ""
-            and dialogue_reference[1] == ""
+            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
             and message.is_incoming
         ):
             dialogue = self._create_opponent_initiated(
@@ -772,8 +799,8 @@ class Dialogues(ABC):
                 role=self._role_from_first_message(message),
             )  # type: Optional[Dialogue]
         elif (  # new dialogue by self
-            dialogue_reference[0] != ""
-            and dialogue_reference[1] == ""
+            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
             and not message.is_incoming
         ):
             assert (
@@ -813,7 +840,10 @@ class Dialogues(ABC):
         :return: None
         """
         dialogue_reference = second_message.dialogue_reference
-        self_initiated_dialogue_reference = (dialogue_reference[0], "")
+        self_initiated_dialogue_reference = (
+            dialogue_reference[0],
+            Dialogue.OPPONENT_STARTER_REFERENCE,
+        )
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference,
             second_message.counterparty,
@@ -886,7 +916,10 @@ class Dialogues(ABC):
 
         :return: the created dialogue.
         """
-        dialogue_reference = (str(self._next_dialogue_nonce()), "")
+        dialogue_reference = (
+            str(self._next_dialogue_nonce()),
+            Dialogue.OPPONENT_STARTER_REFERENCE,
+        )
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
@@ -918,7 +951,8 @@ class Dialogues(ABC):
         :return: the created dialogue
         """
         assert (
-            dialogue_reference[0] != "" and dialogue_reference[1] == ""
+            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
         ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
         new_dialogue_reference = (
             dialogue_reference[0],

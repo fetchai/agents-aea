@@ -65,6 +65,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
+    DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
@@ -355,10 +356,7 @@ class AEABuilder:
         self._build_called: bool = False
         if not is_full_reset:
             return
-        self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
-        self._default_ledger = (
-            "fetchai"  # set by the user, or instantiate a default one.
-        )
+        self._default_ledger = DEFAULT_LEDGER
         self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
         self._timeout: Optional[float] = None
@@ -617,34 +615,6 @@ class AEABuilder:
     def connection_private_key_paths(self) -> Dict[str, Optional[str]]:
         """Get the connection private key paths."""
         return self._connection_private_key_paths
-
-    def add_ledger_api_config(self, identifier: str, config: Dict) -> "AEABuilder":
-        """
-        Add a configuration for a ledger API to be supported by the agent.
-
-        :param identifier: the identifier of the ledger api
-        :param config: the configuration of the ledger api
-        :return: the AEABuilder
-        """
-        self._ledger_apis_configs[identifier] = config
-        return self
-
-    def remove_ledger_api_config(self, identifier: str) -> "AEABuilder":
-        """
-        Remove a ledger API configuration.
-
-        :param identifier: the identifier of the ledger api
-        :return: the AEABuilder
-        """
-        self._ledger_apis_configs.pop(identifier, None)
-        return self
-
-    @property
-    def ledger_apis_config(
-        self,
-    ) -> Dict[str, Dict[str, Union[str, int]]]:  # pragma: nocover
-        """Get the ledger api configurations."""
-        return self._ledger_apis_configs
 
     def set_default_ledger(self, identifier: str) -> "AEABuilder":  # pragma: nocover
         """
@@ -1213,13 +1183,6 @@ class AEABuilder:
             self.add_private_key(
                 ledger_identifier, private_key_path, is_connection=True
             )
-
-        # load ledger API configurations
-        for (
-            ledger_identifier,
-            ledger_api_conf,
-        ) in agent_configuration.ledger_apis_dict.items():
-            self.add_ledger_api_config(ledger_identifier, ledger_api_conf)
 
         component_ids = itertools.chain(
             [

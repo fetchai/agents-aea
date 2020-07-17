@@ -17,16 +17,7 @@ protocols:
 skills:
 - fetchai/echo:0.3.0
 default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis:
-   fetchai:
-     args:
-       address: example.fetch-ai.com
-       port: 8080
-   ethereum:
-     args:
-       address: example.ethereum.com
-       chain_id: 8080
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

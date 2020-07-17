@@ -20,13 +20,10 @@
 
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 from aea.cli import cli
 from aea.cli.get_address import _try_get_address
-from aea.crypto.fetchai import FetchAICrypto
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -56,12 +53,7 @@ class GetAddressCommandTestCase(TestCase):
         """Test for CLI get_address positive result."""
         result = self.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "--skip-consistency-check",
-                "get-address",
-                FetchAICrypto.identifier,
-            ],
+            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-address", FETCHAI],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)

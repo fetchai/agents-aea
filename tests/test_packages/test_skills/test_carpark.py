@@ -23,7 +23,12 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_FILE,
+    FUNDED_COSMOS_PRIVATE_KEY_1,
+    MAX_FLAKY_RERUNS,
+)
 
 
 class TestCarPark(AEATestCaseMany, UseOef):
@@ -41,7 +46,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         self.set_agent_context(carpark_aea_name)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.6.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.7.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
@@ -55,7 +60,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         self.set_agent_context(carpark_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/carpark_client:0.6.0")
+        self.add_item("skill", "fetchai/carpark_client:0.7.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
@@ -124,21 +129,18 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
 
         default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
 
-        ledger_apis = {"fetchai": {"network": "testnet"}}
-
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.6.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.7.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_detector:0.7.0", carpark_aea_name
+            "fetchai/car_detector:0.8.0", carpark_aea_name
         )
         assert (
             diff == []
@@ -146,26 +148,25 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/carpark_client:0.6.0")
+        self.add_item("skill", "fetchai/carpark_client:0.7.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_data_buyer:0.7.0", carpark_client_aea_name
+            "fetchai/car_data_buyer:0.8.0", carpark_client_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("fetchai")
-        self.add_private_key("fetchai", "fet_private_key.txt")
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
 
         # Fire the sub-processes and the threads.

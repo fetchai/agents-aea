@@ -1,6 +1,6 @@
 agent_name: thermometer_aea
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: An AEA to represent a thermometer and sell temperature data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -18,13 +18,10 @@ protocols:
 - fetchai/oef_search:0.3.0
 skills:
 - fetchai/error:0.3.0
-- fetchai/generic_seller:0.7.0
-- fetchai/thermometer:0.6.0
+- fetchai/generic_seller:0.8.0
+- fetchai/thermometer:0.7.0
 default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis:
-  fetchai:
-    network: testnet
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

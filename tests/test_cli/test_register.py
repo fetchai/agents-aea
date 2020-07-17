@@ -20,13 +20,11 @@
 
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 from aea.cli import cli
 from aea.cli.register import do_register
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, CliRunner
 
 
 @mock.patch("aea.cli.register.do_register")

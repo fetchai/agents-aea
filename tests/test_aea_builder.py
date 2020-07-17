@@ -37,8 +37,8 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
+from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.contracts.base import Contract
-from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.protocols.base import Protocol
@@ -46,35 +46,33 @@ from aea.protocols.default import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
-from .conftest import (
+from tests.conftest import (
     CUR_PATH,
+    FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
     skip_test_windows,
 )
 
-FETCHAI = FetchAICrypto.identifier
-
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
-
 
 @skip_test_windows
 def test_default_timeout_for_agent():
     """Tests agents loop sleep timeout set by AEABuilder.DEFAULT_AGENT_LOOP_TIMEOUT."""
     agent_name = "MyAgent"
-    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
 
     aea = builder.build()
     assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
 
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
     builder.set_timeout(100)
 
     aea = builder.build()
@@ -143,7 +141,7 @@ class TestReentrancy:
 
         builder = AEABuilder()
         builder.set_name("aea1")
-        builder.add_private_key("fetchai")
+        builder.add_private_key(DEFAULT_LEDGER)
         builder.add_protocol(protocol_path)
         builder.add_contract(contract_path)
         builder.add_connection(connection_path)
@@ -207,7 +205,7 @@ def test_multiple_builds_with_private_keys():
     """Test multiple calls to the 'build()' method when adding custom private keys."""
     builder = AEABuilder()
     builder.set_name("aea_1")
-    builder.add_private_key("fetchai", FETCHAI_PRIVATE_KEY_PATH)
+    builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
 
     # the first call works
     aea_1 = builder.build()
@@ -220,7 +218,7 @@ def test_multiple_builds_with_private_keys():
     # after reset, it works
     builder.reset()
     builder.set_name("aea_1")
-    builder.add_private_key("fetchai", FETCHAI_PRIVATE_KEY_PATH)
+    builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
     aea_2 = builder.build()
     assert isinstance(aea_2, AEA)
 
@@ -229,7 +227,7 @@ def test_multiple_builds_with_component_instance():
     """Test multiple calls to the 'build()' method when adding component instances."""
     builder = AEABuilder()
     builder.set_name("aea_1")
-    builder.add_private_key("fetchai")
+    builder.add_private_key(DEFAULT_LEDGER)
 
     a_protocol = Protocol(
         ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
@@ -247,7 +245,7 @@ def test_multiple_builds_with_component_instance():
     # after reset, it works
     builder.reset()
     builder.set_name("aea_1")
-    builder.add_private_key("fetchai")
+    builder.add_private_key(DEFAULT_LEDGER)
     builder.add_component_instance(a_protocol)
     aea_2 = builder.build()
     assert isinstance(aea_2, AEA)

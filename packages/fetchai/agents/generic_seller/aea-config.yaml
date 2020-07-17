@@ -1,6 +1,6 @@
 agent_name: generic_seller
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: The seller AEA sells the services specified in the `skill.yaml` file
   and delivers them upon payment to the buyer.
 license: Apache-2.0
@@ -19,12 +19,9 @@ protocols:
 - fetchai/oef_search:0.3.0
 skills:
 - fetchai/error:0.3.0
-- fetchai/generic_seller:0.7.0
+- fetchai/generic_seller:0.8.0
 default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis:
-  fetchai:
-    network: testnet
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

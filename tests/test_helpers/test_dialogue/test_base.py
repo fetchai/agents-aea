@@ -31,17 +31,31 @@ from aea.protocols.default.message import DefaultMessage
 
 class Dialogue(BaseDialogue):
 
-    INITIAL_PERFORMATIVES = frozenset({})  # type: FrozenSet[Message.Performative]
-    TERMINAL_PERFORMATIVES = frozenset({})  # type: FrozenSet[Message.Performative]
-    VALID_REPLIES = (
-        {}
-    )  # type: Dict[Message.Performative, FrozenSet[Message.Performative]]
+    INITIAL_PERFORMATIVES = frozenset(
+        {DefaultMessage.Performative.BYTES}
+    )  # type: FrozenSet[DefaultMessage.Performative]
+    TERMINAL_PERFORMATIVES = frozenset(
+        {DefaultMessage.Performative.ERROR}
+    )  # type: FrozenSet[DefaultMessage.Performative]
+    VALID_REPLIES = {
+        DefaultMessage.Performative.BYTES: frozenset(
+            {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
+        ),
+        DefaultMessage.Performative.ERROR: frozenset(),
+    }  # type: Dict[DefaultMessage.Performative, FrozenSet[DefaultMessage.Performative]]
+
+    class Role(BaseDialogue.Role):
+        """This class defines the agent's role in a fipa dialogue."""
+
+        ROLE1 = "role1"
+        ROLE2 = "role2"
 
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Optional[Address] = None,
-        role: Optional[BaseDialogue.Role] = None,
+        message_class=DefaultMessage,
+        agent_address: Optional[Address] = "agent 1",
+        role: Optional[BaseDialogue.Role] = Role.ROLE1,
     ) -> None:
         """
         Initialize a dialogue.
@@ -56,6 +70,7 @@ class Dialogue(BaseDialogue):
             dialogue_label=dialogue_label,
             agent_address=agent_address,
             role=role,
+            message_class=message_class,
             rules=BaseDialogue.Rules(
                 cast(FrozenSet[Message.Performative], self.INITIAL_PERFORMATIVES),
                 cast(FrozenSet[Message.Performative], self.TERMINAL_PERFORMATIVES),
@@ -75,14 +90,19 @@ class Dialogue(BaseDialogue):
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
-        pass
+        return True
 
 
 class Dialogues(BaseDialogues):
 
     END_STATES = frozenset({})  # type: FrozenSet[BaseDialogue.EndState]
 
-    def __init__(self, agent_address: Address) -> None:
+    def __init__(
+        self,
+        agent_address: Address,
+        message_class=DefaultMessage,
+        dialogue_class=Dialogue,
+    ) -> None:
         """
         Initialize dialogues.
 
@@ -93,10 +113,12 @@ class Dialogues(BaseDialogues):
             self,
             agent_address=agent_address,
             end_states=cast(FrozenSet[BaseDialogue.EndState], self.END_STATES),
+            message_class=message_class,
+            dialogue_class=dialogue_class,
         )
 
     def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
     ) -> Dialogue:
         """
         Create a dialogue instance.
@@ -119,26 +141,25 @@ class Dialogues(BaseDialogues):
         pass
 
 
-class TestDialogueBase:
+class TestDialogueLabel:
     """Test the dialogue/base.py."""
 
     @classmethod
     def setup(cls):
         """Initialise the class."""
         cls.dialogue_label = DialogueLabel(
-            dialogue_reference=(str(0), ""),
-            dialogue_opponent_addr="opponent",
-            dialogue_starter_addr="starter",
+            dialogue_reference=(str(1), ""),
+            dialogue_opponent_addr="agent 2",
+            dialogue_starter_addr="agent 1",
         )
-        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
-        cls.dialogues = Dialogues("address")
 
     def test_dialogue_label(self):
         """Test the dialogue_label."""
-        assert self.dialogue_label.dialogue_starter_reference == str(0)
+        assert self.dialogue_label.dialogue_reference == (str(1), "")
+        assert self.dialogue_label.dialogue_starter_reference == str(1)
         assert self.dialogue_label.dialogue_responder_reference == ""
-        assert self.dialogue_label.dialogue_opponent_addr == "opponent"
-        assert self.dialogue_label.dialogue_starter_addr == "starter"
+        assert self.dialogue_label.dialogue_opponent_addr == "agent 2"
+        assert self.dialogue_label.dialogue_starter_addr == "agent 1"
         assert str(self.dialogue_label) == "{}_{}_{}_{}".format(
             self.dialogue_label.dialogue_starter_reference,
             self.dialogue_label.dialogue_responder_reference,
@@ -146,50 +167,991 @@ class TestDialogueBase:
             self.dialogue_label.dialogue_starter_addr,
         )
 
-        dialogue_label2 = DialogueLabel(
-            dialogue_reference=(str(0), ""),
-            dialogue_opponent_addr="opponent",
-            dialogue_starter_addr="starter",
+        dialogue_label_eq = DialogueLabel(
+            dialogue_reference=(str(1), ""),
+            dialogue_opponent_addr="agent 2",
+            dialogue_starter_addr="agent 1",
         )
 
-        assert dialogue_label2 == self.dialogue_label
+        assert dialogue_label_eq == self.dialogue_label
 
-        dialogue_label3 = "This is a test"
+        dialogue_label_not_eq = "This is a test"
 
-        assert not dialogue_label3 == self.dialogue_label
+        assert not dialogue_label_not_eq == self.dialogue_label
 
-        assert hash(self.dialogue_label) == hash(self.dialogue.dialogue_label)
+        assert hash(dialogue_label_eq) == hash(self.dialogue_label)
 
         assert self.dialogue_label.json == dict(
-            dialogue_starter_reference=str(0),
+            dialogue_starter_reference=str(1),
             dialogue_responder_reference="",
-            dialogue_opponent_addr="opponent",
-            dialogue_starter_addr="starter",
+            dialogue_opponent_addr="agent 2",
+            dialogue_starter_addr="agent 1",
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
 
-    def test_dialogue(self):
+
+class TestDialogueBase:
+    """Test the dialogue/base.py."""
+
+    @classmethod
+    def setup(cls):
+        """Initialise the class."""
+        cls.dialogue_label = DialogueLabel(
+            dialogue_reference=(str(1), ""),
+            dialogue_opponent_addr="agent 2",
+            dialogue_starter_addr="agent 1",
+        )
+        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
+
+    def test_dialogue_properties(self):
         """Test the dialogue."""
+        assert self.dialogue.dialogue_label == self.dialogue_label
+        assert self.dialogue.agent_address == "agent 1"
+
+        self.dialogue.agent_address = "this agent's address"
+        assert self.dialogue.agent_address == "this agent's address"
+
+        assert self.dialogue.role == Dialogue.Role.ROLE1
+        assert str(self.dialogue.role) == "role1"
+
+        self.dialogue.role = Dialogue.Role.ROLE2
+        assert self.dialogue.role == Dialogue.Role.ROLE2
+
+        assert self.dialogue.rules.initial_performatives == frozenset(
+            {DefaultMessage.Performative.BYTES}
+        )
+        assert self.dialogue.rules.terminal_performatives == frozenset(
+            {DefaultMessage.Performative.ERROR}
+        )
+        assert self.dialogue.rules.valid_replies == {
+            DefaultMessage.Performative.BYTES: frozenset(
+                {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
+            ),
+            DefaultMessage.Performative.ERROR: frozenset(),
+        }
+        assert self.dialogue.rules.get_valid_replies(
+            DefaultMessage.Performative.BYTES
+        ) == frozenset(
+            {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
+        )
+        assert self.dialogue.rules.get_valid_replies(
+            DefaultMessage.Performative.ERROR
+        ) == frozenset({})
+
         assert self.dialogue.is_self_initiated
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
+
+        assert self.dialogue.last_incoming_message is None
+        assert self.dialogue.last_outgoing_message is None
+        assert self.dialogue.last_message is None
+        assert self.dialogue.get_message(3) is None
+        assert self.dialogue.is_empty
+
+    def test_update_positive(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        msg.counterparty = "my_agent"
-        assert self.dialogue.last_incoming_message is None
+        valid_initial_msg.counterparty = "agent 2"
+
+        assert self.dialogue.update(valid_initial_msg)
+        assert self.dialogue.last_outgoing_message == valid_initial_msg
+
+    def test_update_negative_not_is_extendible(self):
+        """Test the dialogue."""
+        invalid_message_id = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=0,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_message_id.counterparty = "agent 2"
+
+        assert not self.dialogue.update(invalid_message_id)
         assert self.dialogue.last_outgoing_message is None
 
-        self.dialogue._outgoing_messages.extend([msg])
-        assert self.dialogue.last_outgoing_message == msg
+    def test_update_self_initiated_dialogue_label_on_second_message_positive(self):
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
 
-        self.dialogue._incoming_messages.extend([msg])
-        assert self.dialogue.last_incoming_message == msg
+        assert self.dialogue.update(valid_initial_msg)
 
-    def test_dialogues(self):
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello Back",
+        )
+        valid_second_msg.counterparty = "agent 2"
+        valid_second_msg._is_incoming = True
+
+        try:
+            self.dialogue._update_self_initiated_dialogue_label_on_second_message(
+                valid_second_msg
+            )
+            result = True
+        except Exception:
+            result = False
+
+        assert result
+
+    def test_update_self_initiated_dialogue_label_on_second_message_negative_empty_dialogue(
+        self,
+    ):
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.counterparty = "agent 2"
+        initial_msg._is_incoming = False
+
+        try:
+            self.dialogue._update_self_initiated_dialogue_label_on_second_message(
+                initial_msg
+            )
+            result = True
+        except Exception:
+            result = False
+
+        assert not result
+
+    def test_update_self_initiated_dialogue_label_on_second_message_negative_not_second_message(
+        self,
+    ):
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.counterparty = "agent 2"
+        initial_msg._is_incoming = False
+
+        assert self.dialogue.update(initial_msg)
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.counterparty = "agent 2"
+        second_msg._is_incoming = True
+
+        assert self.dialogue.update(second_msg)
+
+        third_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=2,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back 2",
+        )
+        third_msg.counterparty = "agent 2"
+        third_msg._is_incoming = False
+
+        try:
+            self.dialogue._update_self_initiated_dialogue_label_on_second_message(
+                third_msg
+            )
+            result = True
+        except Exception:
+            result = False
+
+        assert not result
+
+    def test_reply_positive(self):
+        """Test the dialogue."""
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.counterparty = "agent 2"
+        initial_msg._is_incoming = False
+
+        assert self.dialogue.update(initial_msg)
+
+        self.dialogue.reply(
+            target_message=initial_msg,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello Back",
+        )
+
+        assert self.dialogue.last_message.message_id == 2
+
+    def test_reply_negative_invalid_target(self):
+        """Test the dialogue."""
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.counterparty = "agent 2"
+        initial_msg._is_incoming = False
+
+        assert self.dialogue.update(initial_msg)
+
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello There",
+        )
+        invalid_initial_msg.counterparty = "agent 2"
+        invalid_initial_msg._is_incoming = False
+
+        try:
+            self.dialogue.reply(
+                target_message=invalid_initial_msg,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"Hello Back",
+            )
+            result = True
+        except Exception:
+            result = False
+
+        assert not result
+
+    def test_basic_rules_positive(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+
+        assert self.dialogue._basic_rules(valid_initial_msg)
+
+    def test_basic_rules_negative_initial_message_invalid_dialogue_reference(self):
+        """Test the dialogue."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(2), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_initial_msg.counterparty = "agent 2"
+
+        assert not self.dialogue._basic_rules(invalid_initial_msg)
+
+    def test_basic_rules_negative_initial_message_invalid_message_id(self):
+        """Test the dialogue."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_initial_msg.counterparty = "agent 2"
+
+        assert not self.dialogue._basic_rules(invalid_initial_msg)
+
+    def test_basic_rules_negative_initial_message_invalid_target(self):
+        """Test the dialogue."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_initial_msg.counterparty = "agent 2"
+
+        assert not self.dialogue._basic_rules(invalid_initial_msg)
+
+    def test_basic_rules_negative_initial_message_invalid_performative(self):
+        """Test the dialogue."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
+            error_msg="some_error_message",
+            error_data={"some_data": b"some_bytes"},
+        )
+        invalid_initial_msg.counterparty = "agent 2"
+
+        assert not self.dialogue._basic_rules(invalid_initial_msg)
+
+    def test_basic_rules_negative_non_initial_message_invalid_dialogue_reference(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        invalid_msg = DefaultMessage(
+            dialogue_reference=(str(2), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        invalid_msg.counterparty = "agent 2"
+
+        assert not self.dialogue._basic_rules(invalid_msg)
+
+    def test_basic_rules_negative_non_initial_message_invalid_message_id(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        invalid_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        invalid_msg.counterparty = "agent 2"
+
+        assert not self.dialogue._basic_rules(invalid_msg)
+
+    def test_basic_rules_negative_non_initial_message_invalid_target(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        invalid_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        invalid_msg.counterparty = "agent 2"
+
+        assert not self.dialogue._basic_rules(invalid_msg)
+
+    # ToDo change to another Message class to test invalid non-initial performative
+    # since default message does not provide this
+    # def test_basic_rules_negative_non_initial_message_invalid_performative(self):
+    #     """Test the dialogue."""
+    #     valid_initial_msg = DefaultMessage(
+    #         dialogue_reference=(str(1), ""),
+    #         message_id=1,
+    #         target=0,
+    #         performative=DefaultMessage.Performative.BYTES,
+    #         content=b"Hello",
+    #     )
+    #     valid_initial_msg.counterparty = "agent 2"
+    #     valid_initial_msg._is_incoming = False
+    #
+    #     assert self.dialogue.update(valid_initial_msg)
+    #
+    #     invalid_msg = DefaultMessage(
+    #         dialogue_reference=(str(1), str(1)),
+    #         message_id=1,
+    #         target=0,
+    #         performative=DefaultMessage.Performative.ERROR,
+    #         error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
+    #         error_msg="some_error_message",
+    #         error_data={"some_data": b"some_bytes"},
+    #     )
+    #     invalid_msg.counterparty = "agent 2"
+    #
+    #     assert not self.dialogue._basic_rules(invalid_msg)
+
+    def test_additional_rules_positive(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        valid_second_msg.counterparty = "agent 2"
+        valid_second_msg._is_incoming = True
+
+        assert self.dialogue.update(valid_second_msg)
+
+        valid_third_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=2,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back 2",
+        )
+        valid_third_msg.counterparty = "agent 2"
+        valid_third_msg._is_incoming = False
+
+        assert self.dialogue._additional_rules(valid_third_msg)
+
+    def test_additional_rules_negative_invalid_target(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        valid_second_msg.counterparty = "agent 2"
+        valid_second_msg._is_incoming = True
+
+        assert self.dialogue.update(valid_second_msg)
+
+        invalid_third_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back 2",
+        )
+        invalid_third_msg.counterparty = "agent 2"
+        invalid_third_msg._is_incoming = False
+
+        assert not self.dialogue._additional_rules(invalid_third_msg)
+
+    def test_update_dialogue_label_positive(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        new_label = DialogueLabel(
+            (str(1), str(1)), valid_initial_msg.counterparty, "agent 1"
+        )
+        self.dialogue.update_dialogue_label(new_label)
+
+        assert self.dialogue.dialogue_label == new_label
+
+    def test_update_dialogue_label_negative_invalid_existing_label(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        valid_second_msg.counterparty = "agent 2"
+        valid_second_msg._is_incoming = True
+
+        assert self.dialogue.update(valid_second_msg)
+
+        new_label = DialogueLabel(
+            (str(1), str(2)), valid_initial_msg.counterparty, "agent 1"
+        )
+        try:
+            self.dialogue.update_dialogue_label(new_label)
+            result = True
+        except AssertionError:
+            result = False
+
+        assert not result and self.dialogue.dialogue_label != new_label
+
+    def test_update_dialogue_label_negative_invalid_input_label(self):
+        """Test the dialogue."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        new_label = DialogueLabel(
+            (str(2), ""), valid_initial_msg.counterparty, "agent 1"
+        )
+        try:
+            self.dialogue.update_dialogue_label(new_label)
+            result = True
+        except AssertionError:
+            result = False
+
+        assert not result
+        assert self.dialogue.dialogue_label != new_label
+
+    def test___str__(self):
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.counterparty = "agent 2"
+        valid_initial_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        valid_second_msg.counterparty = "agent 2"
+        valid_second_msg._is_incoming = True
+
+        assert self.dialogue.update(valid_second_msg)
+
+        valid_third_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=2,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back 2",
+        )
+        valid_third_msg.counterparty = "agent 2"
+        valid_third_msg._is_incoming = False
+
+        assert self.dialogue.update(valid_third_msg)
+
+        dialogue_str = (
+            "Dialogue Label: 1_1_agent 2_agent 1\nbytes( )\nbytes( )\nbytes( )"
+        )
+
+        assert str(self.dialogue) == dialogue_str
+
+
+class TestDialoguesBase:
+    """Test the dialogue/base.py."""
+
+    @classmethod
+    def setup(cls):
+        """Initialise the class."""
+        cls.dialogue_label = DialogueLabel(
+            dialogue_reference=(str(1), ""),
+            dialogue_opponent_addr="agent 2",
+            dialogue_starter_addr="agent 1",
+        )
+        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
+        cls.dialogues = Dialogues("agent 1")
+
+    def test_constructor(self):
         """Test the dialogues."""
         assert isinstance(self.dialogues.dialogues, Dict)
         id = self.dialogues._next_dialogue_nonce()
         assert id > 0
+
+    def test_dialogues_properties(self):
+        """Test dialogues properties."""
+        assert self.dialogues.dialogues == dict()
+        assert self.dialogues.agent_address == "agent 1"
+        assert self.dialogues.dialogue_stats.other_initiated == dict()
+        assert self.dialogues.dialogue_stats.self_initiated == dict()
+
+    def test_new_self_initiated_dialogue_reference(self):
+        assert self.dialogues.new_self_initiated_dialogue_reference() == ("1", "")
+
+        self.dialogues._create_opponent_initiated(
+            "agent 2", ("1", ""), Dialogue.Role.ROLE1
+        )
+        assert self.dialogues.new_self_initiated_dialogue_reference() == ("2", "")
+
+    def test_create_positive(self):
+        assert len(self.dialogues.dialogues) == 0
+        self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        assert len(self.dialogues.dialogues) == 1
+
+    def test_create_negative_incorrect_performative_content_combination(self):
+        assert len(self.dialogues.dialogues) == 0
+        try:
+            self.dialogues.create(
+                "agent 2", DefaultMessage.Performative.ERROR, content=b"Hello"
+            )
+            result = True
+        except Exception:
+            result = False
+
+        assert not result
+        assert len(self.dialogues.dialogues) == 0
+
+    def test_update_positive_new_dialogue_by_other(self):
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.counterparty = "agent 2"
+        initial_msg._is_incoming = True
+
+        assert len(self.dialogues.dialogues) == 0
+
+        dialogue = self.dialogues.update(initial_msg)
+
+        assert len(self.dialogues.dialogues) == 1
+        assert dialogue is not None
+        assert dialogue.last_message.dialogue_reference == (str(1), "")
+        assert dialogue.last_message.message_id == 1
+        assert dialogue.last_message.target == 0
+        assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
+        assert dialogue.last_message.content == b"Hello"
+
+    def test_update_positive_new_dialogue_by_self(self):
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.counterparty = "agent 2"
+        initial_msg._is_incoming = False
+
+        assert len(self.dialogues.dialogues) == 0
+
+        dialogue = self.dialogues.update(initial_msg)
+
+        assert len(self.dialogues.dialogues) == 1
+        assert dialogue is not None
+        assert dialogue.last_message.dialogue_reference == (str(1), "")
+        assert dialogue.last_message.message_id == 1
+        assert dialogue.last_message.target == 0
+        assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
+        assert dialogue.last_message.content == b"Hello"
+
+    def test_update_positive_existing_dialogue(self):
+        self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.counterparty = "agent 2"
+        second_msg._is_incoming = True
+
+        assert len(self.dialogues.dialogues) == 1
+
+        dialogue = self.dialogues.update(second_msg)
+
+        assert len(self.dialogues.dialogues) == 1
+        assert dialogue is not None
+        assert dialogue.last_message.dialogue_reference == (str(1), str(1))
+        assert dialogue.last_message.message_id == 2
+        assert dialogue.last_message.target == 1
+        assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
+        assert dialogue.last_message.content == b"Hello back"
+
+    def test_update_negative_new_dialogue_by_self_no_counterparty(self):
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg._is_incoming = False
+
+        assert len(self.dialogues.dialogues) == 0
+
+        try:
+            self.dialogues.update(initial_msg)
+            result = True
+        except AssertionError:
+            result = False
+
+        assert not result
+
+        assert len(self.dialogues.dialogues) == 0
+
+    def test_update_negative_existing_dialogue_non_nonexistent(self):
+        _, dialogue = self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(2), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.counterparty = "agent 2"
+        second_msg._is_incoming = True
+
+        updated_dialogue = self.dialogues.update(second_msg)
+
+        assert updated_dialogue is None
+        assert self.dialogues.dialogues[
+            dialogue.dialogue_label
+        ].last_message.dialogue_reference == (str(1), "")
+        assert (
+            self.dialogues.dialogues[dialogue.dialogue_label].last_message.message_id
+            == 1
+        )
+        assert (
+            self.dialogues.dialogues[dialogue.dialogue_label].last_message.target == 0
+        )
+        assert (
+            self.dialogues.dialogues[dialogue.dialogue_label].last_message.performative
+            == DefaultMessage.Performative.BYTES
+        )
+        assert (
+            self.dialogues.dialogues[dialogue.dialogue_label].last_message.content
+            == b"Hello"
+        )
+
+    def test_update_self_initiated_dialogue_label_on_second_message_positive(self):
+        _, dialogue = self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.counterparty = "agent 2"
+        second_msg._is_incoming = True
+
+        self.dialogues._update_self_initiated_dialogue_label_on_second_message(
+            second_msg
+        )
+
+        assert self.dialogues.dialogues[
+            dialogue.dialogue_label
+        ].dialogue_label.dialogue_reference == (str(1), str(1))
+
+    def test_update_self_initiated_dialogue_label_on_second_message_negative_incorrect_reference(
+        self,
+    ):
+        _, dialogue = self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(2), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.counterparty = "agent 2"
+        second_msg._is_incoming = True
+
+        self.dialogues._update_self_initiated_dialogue_label_on_second_message(
+            second_msg
+        )
+
+        assert self.dialogues.dialogues[
+            dialogue.dialogue_label
+        ].dialogue_label.dialogue_reference == (str(1), "")
+
+    def test_get_dialogue_positive(self):
+        _, dialogue = self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.counterparty = "agent 2"
+        second_msg._is_incoming = True
+
+        self.dialogues._update_self_initiated_dialogue_label_on_second_message(
+            second_msg
+        )
+
+        assert self.dialogues.dialogues[
+            dialogue.dialogue_label
+        ].dialogue_label.dialogue_reference == (str(1), str(1))
+
+        retrieved_dialogue = self.dialogues.get_dialogue(second_msg)
+
+        assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
+
+    def test_get_dialogue_negative_invalid_reference(self):
+        _, dialogue = self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.counterparty = "agent 2"
+        second_msg._is_incoming = True
+
+        self.dialogues.update(second_msg)
+
+        third_msg = DefaultMessage(
+            dialogue_reference=(str(2), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        third_msg.counterparty = "agent 2"
+        third_msg._is_incoming = False
+
+        retrieved_dialogue = self.dialogues.get_dialogue(third_msg)
+
+        assert retrieved_dialogue is None
+
+    def test_get_dialogue_from_label_positive(self):
+        _, dialogue = self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        retrieved_dialogue = self.dialogues.get_dialogue_from_label(
+            dialogue.dialogue_label
+        )
+        assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
+
+    def test_get_dialogue_from_label_negative_incorrect_input_label(self):
+        _, dialogue = self.dialogues.create(
+            "agent 2", DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        incorrect_label = DialogueLabel((str(1), "error"), "agent 2", "agent 1")
+
+        retrieved_dialogue = self.dialogues.get_dialogue_from_label(incorrect_label)
+        assert retrieved_dialogue is None
+
+    def test_create_self_initiated_positive(self):
+        assert len(self.dialogues.dialogues) == 0
+
+        self.dialogues._create_self_initiated("agent 2", Dialogue.Role.ROLE1)
+        assert len(self.dialogues.dialogues) == 1
+
+    def test_create_opponent_initiated_positive(self):
+        assert len(self.dialogues.dialogues) == 0
+
+        self.dialogues._create_opponent_initiated(
+            "agent 2", (str(1), ""), Dialogue.Role.ROLE2
+        )
+        assert len(self.dialogues.dialogues) == 1
+
+    def test_create_opponent_initiated_negative_invalid_input_dialogue_reference(self):
+        assert len(self.dialogues.dialogues) == 0
+
+        try:
+            self.dialogues._create_opponent_initiated(
+                "agent 2", ("", str(1)), Dialogue.Role.ROLE2
+            )
+            result = True
+        except AssertionError:
+            result = False
+
+        assert not result
+        assert len(self.dialogues.dialogues) == 0
+
+    def test_next_dialogue_nonce(self):
+        assert self.dialogues._dialogue_nonce == 0
+        assert self.dialogues._next_dialogue_nonce() == 1
+        assert self.dialogues._dialogue_nonce == 1

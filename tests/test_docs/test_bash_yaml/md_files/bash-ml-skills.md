@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/ml_data_provider:0.7.0
+aea fetch fetchai/ml_data_provider:0.8.0
 cd ml_data_provider
 aea install
 ``` 
@@ -11,12 +11,12 @@ aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/ml_data_provider:0.6.0
+aea add skill fetchai/ml_data_provider:0.7.0
 aea config set agent.default_connection fetchai/oef:0.6.0
 aea install
 ```
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.7.0
+aea fetch fetchai/ml_model_trainer:0.8.0
 cd ml_model_trainer
 aea install
 ```
@@ -25,7 +25,7 @@ aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.6.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/ml_train:0.6.0
+aea add skill fetchai/ml_train:0.7.0
 aea config set agent.default_connection fetchai/oef:0.6.0
 aea install
 ```
@@ -75,32 +75,10 @@ aea delete ml_data_provider
 aea delete ml_model_trainer
 ```
 ``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
 ```
 ``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
-```
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-``` yaml
-ledger_apis:
-  cosmos:
-    address: https://rest-agent-land.prod.fetch-ai.com:443
 ```

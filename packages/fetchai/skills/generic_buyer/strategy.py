@@ -21,13 +21,14 @@
 
 from typing import Any, Dict, Optional
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
