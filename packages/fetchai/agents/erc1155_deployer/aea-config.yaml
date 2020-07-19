@@ -8,7 +8,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.2.0
-- fetchai/oef:0.6.0
+- fetchai/p2p_libp2p:0.5.0
 - fetchai/stub:0.6.0
 contracts:
 - fetchai/erc1155:0.6.0
@@ -22,7 +22,7 @@ protocols:
 skills:
 - fetchai/erc1155_deploy:0.9.0
 - fetchai/error:0.3.0
-default_connection: fetchai/oef:0.6.0
+default_connection: fetchai/p2p_libp2p:0.5.0
 default_ledger: ethereum
 logging_config:
   disable_existing_loggers: false

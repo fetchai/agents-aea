@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmZuzm2azaDub7XSCKjiGgaeNCGBXkg6ErGcmguxKL4GrJ
+  behaviours.py: QmZuzEpqCZjW1rAYT1PZXoYRPjCXxKNQ2ZEkL32WQhxtwf
   dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
-  handlers.py: QmYkWCmn6g8ivoohNUun5PdJcD4cBGEzQEQEcKfuWQM324
-  strategy.py: QmTBHdMfMJBBxauT6pzwWnUm8dronrKEhxNgkgtSmxDs9q
+  handlers.py: QmfFY8HGULapXzCHHLuwWhgADXvBw8NJvfX155pY3qWS1h
+  strategy.py: QmRVkBtcCUKXf68RAqnHAi6UWqcygesppUNzSm9oceYNHH
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -52,22 +52,15 @@ models:
       currency_id: FET
       data_for_sale:
         generic: data
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       has_data_source: false
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
+        key: seller_service
+        value: generic_service
       service_id: generic_service
       unit_price: 10
     class_name: GenericStrategy

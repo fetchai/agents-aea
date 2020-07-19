@@ -21,7 +21,7 @@
 
 from typing import Any, Dict, List
 
-from aea.helpers.search.models import Attribute, DataModel
+from aea.helpers.search.models import Attribute, DataModel, Location
 
 SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 
@@ -49,3 +49,44 @@ class GenericDataModel(DataModel):
             )
 
         super().__init__(data_model_name, self.attributes)
+
+
+AGENT_LOCATION_MODEL = DataModel(
+    "location_agent",
+    [Attribute("location", Location, True, "The location where the agent is.")],
+    "A data model to describe location of an agent.",
+)
+
+
+AGENT_PERSONALITY_MODEL = DataModel(
+    "personality_agent",
+    [
+        Attribute("piece", str, True, "The personality piece key."),
+        Attribute("value", str, True, "The personality piece value."),
+    ],
+    "A data model to describe the personality of an agent.",
+)
+
+
+AGENT_SET_SERVICE_MODEL = DataModel(
+    "set_service_key",
+    [
+        Attribute("key", str, True, "Service key name."),
+        Attribute("value", str, True, "Service key value."),
+    ],
+    "A data model to set service key.",
+)
+
+
+SIMPLE_SERVICE_MODEL = DataModel(
+    "simple_service",
+    [Attribute("seller_service", str, True, "Service key name.")],
+    "A data model to represent a search for a service.",
+)
+
+
+AGENT_REMOVE_SERVICE_MODEL = DataModel(
+    "remove_service_key",
+    [Attribute("key", str, True, "Service key name.")],
+    "A data model to remove service key.",
+)

@@ -26,6 +26,8 @@ from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,
     FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS,
+    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_GENESIS_CONFIG,
 )
 
 
@@ -43,8 +45,8 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_seller:0.8.0")
         setting_path = (
@@ -57,8 +59,8 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_buyer:0.7.0")
         setting_path = (
@@ -125,22 +127,26 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
-class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
+class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
     """Test that generic skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(reruns=0)  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"
         buyer_aea_name = "my_generic_buyer"
         self.create_agents(seller_aea_name, buyer_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_seller:0.8.0")
         setting_path = "agent.default_routing"
@@ -154,10 +160,23 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+
+        # make runable:
+        setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
+        self.set_config(setting_path, False, "bool")
+
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_buyer:0.7.0")
         setting_path = "agent.default_routing"
@@ -171,21 +190,18 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        # make runable:
-        self.set_agent_context(seller_aea_name)
-        setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
-        self.set_config(setting_path, False, "bool")
-
-        self.set_agent_context(buyer_aea_name)
         setting_path = "vendor.fetchai.skills.generic_buyer.is_abstract"
         self.set_config(setting_path, False, "bool")
 
         # add funded key
         self.generate_private_key(COSMOS)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
@@ -195,8 +211,8 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         buyer_aea_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
-            "unregistering services from OEF service directory.",
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",

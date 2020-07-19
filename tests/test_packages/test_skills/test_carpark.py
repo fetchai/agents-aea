@@ -28,6 +28,7 @@ from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,
     FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS,
+    NON_GENESIS_CONFIG,
 )
 
 
@@ -44,10 +45,10 @@ class TestCarPark(AEATestCaseMany, UseOef):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/carpark_detection:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
         )
@@ -58,10 +59,10 @@ class TestCarPark(AEATestCaseMany, UseOef):
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
         )
@@ -117,7 +118,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
-class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
+class TestCarParkFetchaiLedger(AEATestCaseMany):
     """Test that carpark skills work."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
@@ -131,10 +132,10 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/carpark_detection:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
@@ -146,12 +147,15 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
@@ -165,6 +169,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
 
         self.generate_private_key(COSMOS)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )

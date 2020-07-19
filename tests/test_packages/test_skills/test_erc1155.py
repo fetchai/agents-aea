@@ -52,9 +52,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
@@ -79,9 +79,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)

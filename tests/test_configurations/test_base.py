@@ -228,6 +228,12 @@ class PublicIdTestCase(TestCase):
         obj = {"author": AUTHOR, "name": "name", "version": "0.1.0"}
         PublicId.from_json(obj)
 
+    def test_public_id_latest_positive(self):
+        """Test case for latest property positive result."""
+        name = "name"
+        obj = PublicId(AUTHOR, name, "0.1.0")
+        assert obj.latest == "{}/{}:*".format(AUTHOR, name)
+
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
         obj = PublicId(AUTHOR, "name", "0.1.0")
