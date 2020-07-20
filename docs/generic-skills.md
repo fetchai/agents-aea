@@ -53,14 +53,6 @@ This diagram shows the communication between the various entities as data is suc
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF search and communication node
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for all the following demos.
-
 ## Demo instructions
 
 ### Create the seller AEA
@@ -134,7 +126,7 @@ default_routing:
 
 ### Add keys for the seller AEA
 
-First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+First, create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
 aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt
@@ -156,35 +148,6 @@ Then, create some wealth for your buyer based on the network you want to transac
 ``` bash
 aea generate-wealth cosmos
 ```
-
-<!-- <details><summary>Alternatively, create wealth for other test networks.</summary>
-<p>
-
-To generate and add a private-public key pair for Ethereum use:
-``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-
-On the Ethereum `ropsten` network.
-``` bash
-aea generate-wealth ethereum
-```
-
-Alternatively, to generate and add a private-public key pair for Cosmos use:
-``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-```
-
-On the Cosmos `testnet` network.
-``` bash
-aea generate-wealth cosmos
-```
-
-</p>
-</details> -->
-
 
 ### Update the skill configs
 
@@ -238,49 +201,6 @@ models:
       service_id: generic_service
     class_name: GenericStrategy
 ```
-
-<!-- <details><summary>Alternatively, configure skills for other test networks.</summary>
-<p>
-
-<strong>Seller:</strong>
-<br>
-Ensure you are in the seller project directory.
-
-For ethereum, update the skill config of the seller via the `aea config get/set` command like so:
-``` bash
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.ledger_id ethereum
-```
-
-Or for cosmos, like so:
-``` bash
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.ledger_id cosmos
-```
-
-This updates the generic seller skill config (`my_seller_aea/vendor/fetchai/skills/generic_seller/skill.yaml`).
-
-
-<strong>Buyer:</strong>
-<br>
-Ensure you are in the buyer project directory.
-
-For ethereum, update the skill config of the buyer via the `aea config get/set` command like so:
-``` bash
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.ledger_id ethereum
-```
-
-Or for cosmos, like so:
-``` bash
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.ledger_id cosmos
-```
-
-This updates the buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`).
-
-</p>
-</details> -->
 
 ### Update the skill configs
 

@@ -122,8 +122,8 @@ class TestLaunch(BaseLaunchTestCase):
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
             process_launch.expect_all(
                 [
-                    f"[{self.agent_name_1}]: Start processing messages...",
-                    f"[{self.agent_name_2}]: Start processing messages...",
+                    f"[{self.agent_name_1}] Start processing messages...",
+                    f"[{self.agent_name_2}] Start processing messages...",
                 ],
                 timeout=20,
             )
@@ -158,7 +158,7 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
             process_launch.expect_all(
                 [
-                    f"[{self.agent_name_1}]: Start processing messages...",
+                    f"[{self.agent_name_1}] Start processing messages...",
                     "Expected exception!",
                     "Receiving loop terminated",  # cause race condition in close/interrupt agent 2, so wait it closed by exception before call ctrl+c
                 ],
@@ -211,8 +211,8 @@ class TestLaunchMultithreaded(BaseLaunchTestCase):
         ) as process_launch:
             process_launch.expect_all(
                 [
-                    f"[{self.agent_name_1}]: Start processing messages",
-                    f"[{self.agent_name_2}]: Start processing messages",
+                    f"[{self.agent_name_1}] Start processing messages",
+                    f"[{self.agent_name_2}] Start processing messages",
                 ],
                 timeout=20,
             )
@@ -229,7 +229,7 @@ class TestLaunchOneAgent(BaseLaunchTestCase):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch([self.agent_name_1]) as process_launch:
             process_launch.expect_all(
-                [f"[{self.agent_name_1}]: Start processing messages..."], timeout=20
+                [f"[{self.agent_name_1}] Start processing messages..."], timeout=20
             )
             process_launch.control_c()
             process_launch.expect_all(

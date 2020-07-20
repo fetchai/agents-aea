@@ -46,7 +46,7 @@ reply:
   search_services: [search_result, error]
   success: []
   search_result: []
-  oef_error: []
+  error: []
 termination: [success, error, search_result]
 roles: {agent, oef_node}
 end_states: [successful, failed]
