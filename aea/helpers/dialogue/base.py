@@ -406,6 +406,17 @@ class Dialogue(ABC):
         ):
             self._update_self_initiated_dialogue_label_on_second_message(message)
 
+        counterparty = None
+        try:
+            counterparty = message.counterparty
+        except AssertionError:
+            message.counterparty = self.dialogue_label.dialogue_opponent_addr
+
+        if counterparty is not None:
+            assert (
+                message.counterparty == self.dialogue_label.dialogue_opponent_addr
+            ), "The counterparty specified in the message is different from the opponent in this dialogue."
+
         is_extendable = self.is_valid_next_message(message)
         if is_extendable:
             if message.is_incoming:
@@ -815,14 +826,6 @@ class Dialogues(ABC):
             dialogue = self.get_dialogue(message)
 
         if dialogue is not None:
-            if message.counterparty is None:
-                message.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
-            else:
-                assert (
-                    message.counterparty
-                    == dialogue.dialogue_label.dialogue_opponent_addr
-                ), "The counterparty specified in the message is different from the opponent in this dialogue."
-
             dialogue.update(message)
             result = dialogue  # type: Optional[Dialogue]
         else:  # couldn't find the dialogue
