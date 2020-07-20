@@ -28,7 +28,7 @@ from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
-    SIMPLE_SERVICE_MODEL,
+    SIMPLE_DATA_MODEL,
 )
 from aea.helpers.search.models import Description, Location, Query
 from aea.skills.base import Model
@@ -121,7 +121,7 @@ class Strategy(Model):
         :return: a description of the offered services
         """
         description = Description(
-            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
+            self._simple_service_data, data_model=SIMPLE_DATA_MODEL,
         )
         return description
 

@@ -40,7 +40,7 @@ from tests.conftest import (
 class TestMLSkills(AEATestCaseMany):
     """Test that ml skills work."""
 
-    @pytest.mark.flaky(reruns=0)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     @pytest.mark.skipif(
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
@@ -189,7 +189,7 @@ class TestMLSkills(AEATestCaseMany):
 class TestMLSkillsFetchaiLedger(AEATestCaseMany):
     """Test that ml skills work."""
 
-    @pytest.mark.flaky(reruns=0)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     @pytest.mark.skipif(
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
