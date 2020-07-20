@@ -64,7 +64,6 @@ models:
   strategy:
     args:
       currency_id: FET
-      dataset_id: fmnist
       is_ledger_tx: true
       ledger_id: cosmos
       location:
@@ -78,7 +77,7 @@ models:
         search_key: dataset_id
         search_value: fmnist
       search_radius: 5.0
-    class_name: GenericStrategy
+    class_name: Strategy
 dependencies:
   numpy: {}
   tensorflow:
