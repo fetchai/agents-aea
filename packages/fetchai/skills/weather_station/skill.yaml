@@ -13,7 +13,6 @@ fingerprint:
   dummy_weather_station_data.py: QmQTTo8ZF7VgQHKjeGDkyyLJueuNMzyX1vkcYoRG4yGRsT
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
   strategy.py: Qmdqw5XB7biCSY8G7dhJZ7nVzy22ffSbGCvQtUD3jqP7ij
-  weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:
 - '*.db'
 contracts: []
@@ -59,23 +58,16 @@ models:
         pressure: 20
         temperature: 26
         wind: 10
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
-      has_data_source: true
+      has_data_source: false
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
-      service_id: generic_service
+        key: seller_service
+        value: weather_data
+      service_id: weather_data
       unit_price: 10
     class_name: Strategy
 dependencies: {}

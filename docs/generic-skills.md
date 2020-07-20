@@ -79,17 +79,19 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/generic_seller:0.8.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
 In `my_seller_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
@@ -111,39 +113,51 @@ The following steps create the buyer from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/generic_buyer:0.7.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
 </details>
 
 
-### Generate wealth for the buyer AEA
+### Add keys for the seller AEA
+
+First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
+```
+
+### Add keys and generate wealth for the buyer AEA
 
 The buyer needs to have some wealth to purchase the service from the seller.
 
-First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
+First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
-Then, create some wealth for your buyer based on the network you want to transact with. On the Fetch.ai `testnet` network:
+Then, create some wealth for your buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
-aea generate-wealth fetchai
+aea generate-wealth cosmos
 ```
 
-<details><summary>Alternatively, create wealth for other test networks.</summary>
+<!-- <details><summary>Alternatively, create wealth for other test networks.</summary>
 <p>
 
 To generate and add a private-public key pair for Ethereum use:
@@ -169,7 +183,7 @@ aea generate-wealth cosmos
 ```
 
 </p>
-</details>
+</details> -->
 
 
 ### Update the skill configs
@@ -184,28 +198,19 @@ models:
     args:
       currency_id: FET
       data_for_sale:
-        pressure: 20
-        temperature: 26
-        wind: 10
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
+        generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
+        key: seller_service
+        value: generic_service
       service_id: generic_service
       unit_price: 10
-    class_name: GenericStrategy 
+    class_name: GenericStrategy
 ```
 The `data_model`, `data_model_name` and the `service_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
 
@@ -217,35 +222,24 @@ models:
   strategy:
     args:
       currency_id: FET
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
       search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
+        constraint_type: ==
+        search_key: seller_service
+        search_value: generic_service
+      search_radius: 5.0
       service_id: generic_service
     class_name: GenericStrategy
 ```
 
-<details><summary>Alternatively, configure skills for other test networks.</summary>
+<!-- <details><summary>Alternatively, configure skills for other test networks.</summary>
 <p>
 
 <strong>Seller:</strong>
@@ -286,7 +280,7 @@ aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.ledger_i
 This updates the buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`).
 
 </p>
-</details>
+</details> -->
 
 ### Update the skill configs
 
@@ -304,11 +298,34 @@ aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
 
 ## Run the AEAs
 
-Run both AEAs from their respective terminals
+Run both AEAs from their respective terminals.
+
+First, run the seller AEA:
 
 ``` bash
 aea run
 ```
+
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
+Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
+
+Then run the buyer AEA:
+``` bash
+aea run
+```
+
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
 ## Delete the AEAs

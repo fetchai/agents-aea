@@ -719,6 +719,7 @@ class BaseAEATestCase(ABC):
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
+        cls.terminate_agents(*cls.subprocesses)
         cls._terminate_subprocesses()
         cls._join_threads()
         cls.unset_agent_context()

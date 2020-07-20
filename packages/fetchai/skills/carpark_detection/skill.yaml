@@ -55,22 +55,15 @@ models:
       currency_id: FET
       data_for_sale:
         free_spaces: 0
-      data_model:
-        attribute_one:
-          is_required: true
-          name: latitude
-          type: float
-        attribute_two:
-          is_required: true
-          name: longitude
-          type: float
-      data_model_name: location
-      has_data_source: true
+      has_data_source: false
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        latitude: 52.2053
-        longitude: 0.1218
+        key: seller_service
+        value: car_park_service
       service_id: car_park_service
       unit_price: 10
     class_name: Strategy
