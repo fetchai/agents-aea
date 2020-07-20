@@ -16,10 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of AsyncFriendlyQueue."""
 import asyncio
 import queue
 from collections import deque
+from contextlib import suppress
 from typing import Any
 
 
@@ -81,7 +83,6 @@ class AsyncFriendlyQueue(queue.Queue):
         """
         while True:
             await self.async_wait()
-            try:
+
+            with suppress(queue.Empty):
                 return self.get_nowait()
-            except queue.Empty:
-                pass

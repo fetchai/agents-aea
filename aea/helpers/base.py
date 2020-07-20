@@ -50,7 +50,7 @@ def yaml_load(stream: TextIO) -> Dict[str, str]:
     :param stream: the file pointer
     :return: the yaml
     """
-
+    # for pydocstyle
     def ordered_load(stream: TextIO, object_pairs_hook=OrderedDict):
         class OrderedLoader(yaml.SafeLoader):
             """A wrapper for safe yaml loader."""
@@ -76,7 +76,7 @@ def yaml_dump(data, stream: TextIO) -> None:
     :param data: the data to be dumped
     :param stream: the file pointer
     """
-
+    # for pydocstyle
     def ordered_dump(data, stream=None, **kwds):
         class OrderedDumper(yaml.SafeDumper):
             """A wrapper for safe yaml loader."""
@@ -123,7 +123,7 @@ def locate(path: str) -> Any:
 
         if nextmodule:
             module, n = nextmodule, n + 1
-        else:
+        else:  # pragma: nocover
             break
     if module:
         object_ = module
@@ -167,6 +167,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
             import_path = prefix_pkg
         else:
             import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
+
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
         module = importlib.util.module_from_spec(spec)
         sys.modules[import_path] = module
@@ -199,7 +200,7 @@ def load_env_file(env_file: str):
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
-def sigint_crossplatform(process: subprocess.Popen) -> None:
+def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
     """
     Send a SIGINT, cross-platform.
 
@@ -248,7 +249,7 @@ class RegexConstrainedString(UserString):
 
 
 @contextlib.contextmanager
-def cd(path):
+def cd(path):  # pragma: nocover
     """Change working directory temporarily."""
     old_path = os.getcwd()
     os.chdir(path)
@@ -270,7 +271,7 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
 
     :return: callable to write log with
     """
-    if callable(logger_method):
+    if callable(logger_method):  # pragma: nocover
         return logger_method
 
     logger = fn.__globals__.get("logger", logging.getLogger(fn.__globals__["__name__"]))  # type: ignore
@@ -288,7 +289,7 @@ def try_decorator(error_message: str, default_return=None, logger_method="error"
     :param default_return: value to return on exception, by default None
     :param logger_method: name of the logger method or callable to print logs
     """
-
+    # for pydocstyle
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
@@ -322,7 +323,7 @@ def retry_decorator(
     :param delay: num of seconds to sleep between retries. default 0
     :param logger_method: name of the logger method or callable to print logs
     """
-
+    # for pydocstyle
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
