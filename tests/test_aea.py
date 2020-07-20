@@ -42,6 +42,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from tests.common.utils import run_in_thread, wait_for_condition
 
 from .conftest import (
+    COSMOS,
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
@@ -506,7 +507,7 @@ def test_no_handlers_registered(caplog):
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(COSMOS, private_key_path)
     # local_connection_id = PublicId.from_str("fetchai/stub:0.4.0")
     # builder.set_default_connection(local_connection_id)
     aea = builder.build()

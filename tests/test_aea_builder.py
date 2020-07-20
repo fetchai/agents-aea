@@ -48,7 +48,6 @@ from aea.skills.base import Skill
 
 from tests.conftest import (
     CUR_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
@@ -57,6 +56,7 @@ from tests.conftest import (
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+
 
 @skip_test_windows
 def test_default_timeout_for_agent():
@@ -317,17 +317,6 @@ def test_private_keys():
 
     assert not builder._connection_private_key_paths
     assert not builder._private_key_paths
-
-
-def test_ledger_apis():
-    """Test add/remove ledger api."""
-    builder = AEABuilder()
-    builder.set_name("aea_1")
-
-    builder.add_ledger_api_config("id1", {})
-    assert builder._ledger_apis_configs
-    builder.remove_ledger_api_config("id1")
-    assert not builder._ledger_apis_configs
 
 
 def test_can_remove_not_exists_component():
