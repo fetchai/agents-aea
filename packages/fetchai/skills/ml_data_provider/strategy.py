@@ -24,16 +24,24 @@ import numpy as np
 from tensorflow import keras
 
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.helpers.search.models import Attribute, DataModel, Description, Query
+from aea.helpers.search.generic import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
+    SIMPLE_SERVICE_MODEL,
+)
+from aea.helpers.search.models import Description, Location, Query
 from aea.skills.base import Model
 
 DEFAULT_PRICE_PER_DATA_BATCH = 10
-DEFAULT_DATASET_ID = "fmnist"
 DEFAULT_BATCH_SIZE = 32
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_BUYER_TX_FEE = 0
 DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
+
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SERVICE_DATA = {"key": "dataset_id", "value": "fmnist"}
 
 
 class Strategy(Model):
@@ -45,12 +53,27 @@ class Strategy(Model):
             "price_per_data_batch", DEFAULT_PRICE_PER_DATA_BATCH
         )
         self.batch_size = kwargs.pop("batch_size", DEFAULT_BATCH_SIZE)
-        self.dataset_id = kwargs.pop("dataset_id", DEFAULT_DATASET_ID)
         self.seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
         self.buyer_tx_fee = kwargs.pop("buyer_tx_fee", DEFAULT_BUYER_TX_FEE)
         self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", False)
+
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = {
+            "location": Location(location["longitude"], location["latitude"])
+        }
+        self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        assert (
+            len(self._set_service_data) == 2
+            and "key" in self._set_service_data
+            and "value" in self._set_service_data
+        ), "service_data must contain keys `key` and `value`"
+        self._remove_service_data = {"key": self._set_service_data["key"]}
+        self._simple_service_data = {
+            self._set_service_data["key"]: self._set_service_data["value"]
+        }
+
         super().__init__(**kwargs)
         # loading ML dataset
         # TODO this should be parametrized
@@ -69,15 +92,49 @@ class Strategy(Model):
         """Get the is_ledger_tx."""
         return self._is_ledger_tx
 
-    def get_service_description(self) -> Description:
+    def get_location_description(self) -> Description:
         """
-        Get the service description.
+        Get the location description.
+
+        :return: a description of the agent's location
+        """
+        description = Description(
+            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+        )
+        return description
+
+    def get_register_service_description(self) -> Description:
+        """
+        Get the register service description.
 
         :return: a description of the offered services
         """
-        dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
-        desc = Description({"dataset_id": self.dataset_id}, data_model=dm)
-        return desc
+        description = Description(
+            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_service_description(self) -> Description:
+        """
+        Get the simple service description.
+
+        :return: a description of the offered services
+        """
+        description = Description(
+            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
+        )
+        return description
+
+    def get_unregister_service_description(self) -> Description:
+        """
+        Get the unregister service description.
+
+        :return: a description of the to be removed service
+        """
+        description = Description(
+            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+        )
+        return description
 
     def sample_data(self, n: int):
         """Sample N rows from data."""

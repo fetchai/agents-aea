@@ -89,8 +89,8 @@ class MlTradeHandler(Handler):
         :param fipa_msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ml_trade message={}, unidentified dialogue.".format(
-                self.context.agent_name, ml_trade_msg
+            "received invalid ml_trade message={}, unidentified dialogue.".format(
+                ml_trade_msg
             )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
@@ -117,18 +117,16 @@ class MlTradeHandler(Handler):
         """
         query = ml_trade_msg.query
         self.context.logger.info(
-            "Got a Call for Terms from {}.".format(ml_trade_msg.counterparty[-5:])
+            "got a Call for Terms from {}.".format(ml_trade_msg.counterparty[-5:])
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_matching_supply(query):
-            self.context.logger.info(
-                "[{}]: query does not match supply.".format(self.context.agent_name)
-            )
+            self.context.logger.info("query does not match supply.")
             return
         terms = strategy.generate_terms()
         self.context.logger.info(
-            "[{}]: sending to the address={} a Terms message: {}".format(
-                self.context.agent_name, ml_trade_msg.counterparty[-5:], terms.values
+            "sending to the address={} a Terms message: {}".format(
+                ml_trade_msg.counterparty[-5:], terms.values
             )
         )
         terms_msg = MlTradeMessage(
@@ -154,20 +152,18 @@ class MlTradeHandler(Handler):
         """
         terms = ml_trade_msg.terms
         self.context.logger.info(
-            "Got an Accept from {}: {}".format(
+            "got an Accept from {}: {}".format(
                 ml_trade_msg.counterparty[-5:], terms.values
             )
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_valid_terms(terms):
-            self.context.logger.info(
-                "[{}]: terms are not valid.".format(self.context.agent_name)
-            )
+            self.context.logger.info("terms are not valid.")
             return
         data = strategy.sample_data(terms.values["batch_size"])
         self.context.logger.info(
-            "[{}]: sending to address={} a Data message: shape={}".format(
-                self.context.agent_name, ml_trade_msg.counterparty[-5:], data[0].shape
+            "sending to address={} a Data message: shape={}".format(
+                ml_trade_msg.counterparty[-5:], data[0].shape
             )
         )
         payload = pickle.dumps(data)  # nosec
@@ -194,8 +190,8 @@ class MlTradeHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle ml_trade message of performative={} in dialogue={}.".format(
-                self.context.agent_name, ml_trade_msg.performative, ml_trade_dialogue
+            "cannot handle ml_trade message of performative={} in dialogue={}.".format(
+                ml_trade_msg.performative, ml_trade_dialogue
             )
         )
 
@@ -252,8 +248,8 @@ class LedgerApiHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
-                self.context.agent_name, ledger_api_msg
+            "received invalid ledger_api message={}, unidentified dialogue.".format(
+                ledger_api_msg
             )
         )
 
@@ -267,10 +263,8 @@ class LedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "[{}]: starting balance on {} ledger={}.".format(
-                self.context.agent_name,
-                ledger_api_msg.ledger_id,
-                ledger_api_msg.balance,
+            "starting balance on {} ledger={}.".format(
+                ledger_api_msg.ledger_id, ledger_api_msg.balance,
             )
         )
 
@@ -284,8 +278,8 @@ class LedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "[{}]: received ledger_api error message={} in dialogue={}.".format(
-                self.context.agent_name, ledger_api_msg, ledger_api_dialogue
+            "received ledger_api error message={} in dialogue={}.".format(
+                ledger_api_msg, ledger_api_dialogue
             )
         )
 
@@ -299,9 +293,7 @@ class LedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
-            "[{}]: cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                ledger_api_msg.performative,
-                ledger_api_dialogue,
+            "cannot handle ledger_api message of performative={} in dialogue={}.".format(
+                ledger_api_msg.performative, ledger_api_dialogue,
             )
         )

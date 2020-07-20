@@ -85,6 +85,13 @@ SIMPLE_SERVICE_MODEL = DataModel(
 )
 
 
+SIMPLE_DATA_MODEL = DataModel(
+    "simple_data",
+    [Attribute("dataset_id", str, True, "Data set key name.")],
+    "A data model to represent a search for a data set.",
+)
+
+
 AGENT_REMOVE_SERVICE_MODEL = DataModel(
     "remove_service_key",
     [Attribute("key", str, True, "Service key name.")],

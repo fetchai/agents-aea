@@ -23,14 +23,24 @@ import sys
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany, UseOef
+from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import COSMOS, COSMOS_PRIVATE_KEY_FILE, FUNDED_COSMOS_PRIVATE_KEY_1
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_FILE,
+    FUNDED_COSMOS_PRIVATE_KEY_1,
+    MAX_FLAKY_RERUNS,
+    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_GENESIS_CONFIG,
+    wait_for_localhost_ports_to_close,
+)
 
 
-class TestMLSkills(AEATestCaseMany, UseOef):
+@pytest.mark.integration
+class TestMLSkills(AEATestCaseMany):
     """Test that ml skills work."""
 
+    @pytest.mark.flaky(reruns=0)  # cause possible network issues
     @pytest.mark.skipif(
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
@@ -41,13 +51,17 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         model_trainer_aea_name = "ml_model_trainer"
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
@@ -57,11 +71,20 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/ml_train:0.7.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
@@ -71,17 +94,62 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
+        # add funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
         self.set_agent_context(data_provider_aea_name)
         data_provider_aea_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in data_provider_aea output.".format(
+            missing_strings
+        )
 
         self.set_agent_context(model_trainer_aea_name)
         model_trainer_aea_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
-            "Got a Call for Terms from",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+            missing_strings
+        )
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
+            "got a Call for Terms from",
             "a Terms message:",
-            "Got an Accept from",
+            "got an Accept from",
             "a Data message:",
         )
         missing_strings = self.missing_from_output(
@@ -96,9 +164,9 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         check_strings = (
             "found agents=",
             "sending CFT to agent=",
-            "Received terms message from",
+            "received terms message from",
             "sending dummy transaction digest ...",
-            "Received data message from",
+            "received data message from",
             "Loss:",
         )
         missing_strings = self.missing_from_output(
@@ -114,11 +182,14 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])
 
 
-class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
+@pytest.mark.integration
+class TestMLSkillsFetchaiLedger(AEATestCaseMany):
     """Test that ml skills work."""
 
+    @pytest.mark.flaky(reruns=0)  # cause possible network issues
     @pytest.mark.skipif(
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
@@ -129,13 +200,17 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         model_trainer_aea_name = "ml_model_trainer"
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
@@ -148,11 +223,20 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         self.add_item("skill", "fetchai/ml_train:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
@@ -165,23 +249,62 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        # add funded key
         self.generate_private_key(COSMOS)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         self.set_agent_context(data_provider_aea_name)
         data_provider_aea_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in data_provider_aea output.".format(
+            missing_strings
+        )
 
         self.set_agent_context(model_trainer_aea_name)
         model_trainer_aea_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
-            "Got a Call for Terms from",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+            missing_strings
+        )
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
+            "got a Call for Terms from",
             "a Terms message:",
-            "Got an Accept from",
+            "got an Accept from",
             "a Data message:",
         )
         missing_strings = self.missing_from_output(
@@ -196,7 +319,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         check_strings = (
             "found agents=",
             "sending CFT to agent=",
-            "Received terms message from",
+            "received terms message from",
             "requesting transfer transaction from ledger api...",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
@@ -204,7 +327,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
             "sending transaction to ledger.",
             "transaction was successfully submitted. Transaction digest=",
             "informing counterparty=",
-            "Received data message from",
+            "received data message from",
             "Loss:",
         )
         missing_strings = self.missing_from_output(
@@ -220,3 +343,4 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])

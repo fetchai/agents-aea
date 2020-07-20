@@ -9,8 +9,8 @@ fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: Qmct8ZJie2AtvN3jEJCsJM1LCbcUhaVgD4swKw1FvAFgvt
-  handlers.py: QmPmTwojRvD11rpf1twKezvzv5cVSpdwYj81qqTMF89VLm
-  strategy.py: QmPDNk4RYGCeGeGyazhzFKgD7X2Y4iQQM5xmuYP4yqkvtt
+  handlers.py: QmXyumHzsnUarYTrmEcD5gEfybbgK5bBhKsCnhK66UxCcv
+  strategy.py: QmTGPR5WSCzmac4qtfR8QngtaZWc2hxN9Xa7iYJ4SCr2fS
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -53,8 +53,14 @@ models:
       dataset_id: fmnist
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       price_per_data_batch: 100
       seller_tx_fee: 0
+      service_data:
+        key: dataset_id
+        value: fmnist
     class_name: Strategy
 dependencies:
   numpy: {}
