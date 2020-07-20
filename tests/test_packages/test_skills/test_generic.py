@@ -32,6 +32,7 @@ from tests.conftest import (
 )
 
 
+@pytest.mark.integration
 class TestGenericSkills(AEATestCaseMany):
     """Test that generic skills work."""
 
@@ -181,6 +182,7 @@ class TestGenericSkills(AEATestCaseMany):
         wait_for_localhost_ports_to_close([9000, 9001])
 
 
+@pytest.mark.integration
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
     """Test that generic skills work."""
 

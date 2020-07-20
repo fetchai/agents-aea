@@ -33,6 +33,7 @@ from tests.conftest import (
 )
 
 
+@pytest.mark.integration
 class TestWeatherSkills(AEATestCaseMany):
     """Test that weather skills work."""
 
@@ -175,6 +176,7 @@ class TestWeatherSkills(AEATestCaseMany):
         wait_for_localhost_ports_to_close([9000, 9001])
 
 
+@pytest.mark.integration
 class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
     """Test that weather skills work."""
 

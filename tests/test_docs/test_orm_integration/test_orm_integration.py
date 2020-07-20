@@ -113,6 +113,7 @@ ORM_SELLER_STRATEGY_PATH = Path(
 )
 
 
+@pytest.mark.integration
 class TestOrmIntegrationDocs(AEATestCaseMany):
     """This class contains the tests for the orm-integration.md guide."""
 
