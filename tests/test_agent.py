@@ -21,7 +21,9 @@
 
 from threading import Thread
 
-from aea.agent import Agent, AgentState, Identity
+import pytest
+
+from aea.agent import Agent, AgentState, Identity, Liveness
 from aea.multiplexer import InBox, OutBox
 
 from packages.fetchai.connections.local.connection import LocalNode
@@ -105,3 +107,36 @@ def test_run_agent():
         finally:
             agent.stop()
             agent_thread.join()
+
+
+def test_liveness():
+    """Test liveness object states."""
+    liveness = Liveness()
+    assert liveness.is_stopped
+    liveness.start()
+    assert not liveness.is_stopped
+    liveness.stop()
+    assert liveness.is_stopped
+
+
+def test_runtime_modes():
+    """Test runtime modes are set."""
+    agent_name = "dummyagent"
+    agent_address = "some_address"
+    identity = Identity(agent_name, address=agent_address)
+    agent = DummyAgent(identity, [],)
+
+    assert not agent.is_running
+    assert agent.is_stopped
+
+    agent._runtime_mode = "not exists"
+
+    with pytest.raises(ValueError):
+        agent._get_runtime_class()
+
+    agent._loop_mode = "not exists"
+
+    with pytest.raises(ValueError):
+        agent._get_main_loop_class()
+
+    assert agent._loop_mode == agent.loop_mode

@@ -16,12 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of runtime for economic agent (AEA)."""
 
 import asyncio
 import logging
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
+from contextlib import suppress
 from enum import Enum
 from typing import Optional, TYPE_CHECKING
 
@@ -29,7 +31,7 @@ from aea.agent_loop import AsyncState
 from aea.helpers.async_utils import ensure_loop
 from aea.multiplexer import AsyncMultiplexer
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: nocover
     from aea.agent import Agent
 
 
@@ -68,7 +70,7 @@ class BaseRuntime(ABC):
 
     def start(self) -> None:
         """Start agent using runtime."""
-        if self._state.get() is RuntimeStates.started:
+        if self._state.get() is RuntimeStates.started:  # pragma: nocover
             logger.error("[{}]: Runtime already started".format(self._agent.name))
             return
         self._start()
@@ -86,12 +88,12 @@ class BaseRuntime(ABC):
         logger.debug("[{}]: Runtime teardown completed".format(self._agent.name))
 
     @abstractmethod
-    def _start(self) -> None:
+    def _start(self) -> None:  # pragma: nocover
         """Implement runtime start function here."""
         raise NotImplementedError
 
     @abstractmethod
-    def _stop(self) -> None:
+    def _stop(self) -> None:  # pragma: nocover
         """Implement runtime stop function here."""
         raise NotImplementedError
 
@@ -103,7 +105,7 @@ class BaseRuntime(ABC):
     @property
     def is_stopped(self) -> bool:
         """Get stopped state of the runtime."""
-        return self._state.get() == RuntimeStates.stopped
+        return self._state.get() in [RuntimeStates.stopped, RuntimeStates.initial]
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
@@ -152,9 +154,6 @@ class AsyncRuntime(BaseRuntime):
 
         Start runtime asynchonously in own event loop.
         """
-        if self._state.get() is RuntimeStates.started:
-            raise ValueError("Runtime already started!")
-
         self.set_loop(self._loop)
 
         self._state.set(RuntimeStates.started)
@@ -210,7 +209,7 @@ class AsyncRuntime(BaseRuntime):
         Stop agent main loop.
         """
         try:
-            if self._async_stop_lock is None:
+            if self._async_stop_lock is None:  # pragma: nocover
                 return  # even not started
 
             async with self._async_stop_lock:
@@ -221,17 +220,14 @@ class AsyncRuntime(BaseRuntime):
                 self._state.set(RuntimeStates.stopping)
                 self._agent.main_loop.stop()
 
-                try:
+                with suppress(BaseException):
                     await self._agent.main_loop.wait_run_loop_stopped()
-                except BaseException:  # nosec # pylint: disable=broad-except
-                    # on stop we do not care about exceptions here, it should be raised in _start.
-                    pass  # nosec
 
                 self._teardown()
 
                 await self._multiplexer_disconnect()
 
-        except BaseException:
+        except BaseException:  # pragma: nocover
             logger.exception("Runtime exception during stop:")
             raise
         finally:
@@ -249,11 +245,9 @@ class AsyncRuntime(BaseRuntime):
             logger.debug(
                 "Runtime event loop is not running, start loop with `stop` coroutine"
             )
-            try:
-                # dummy spin to cleanup some stuff if it was interrupted
+
+            with suppress(BaseException):
                 self._loop.run_until_complete(asyncio.sleep(0.01))
-            except BaseException:  # nosec # pylint: disable=broad-except
-                pass  # nosec
 
             self._loop.run_until_complete(self._stop_runtime())
             return
