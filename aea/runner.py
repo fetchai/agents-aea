@@ -69,7 +69,7 @@ class AEAInstanceTask(AbstractExecutorTask):
         :return: task to run runtime
         """
         self._agent.runtime.set_loop(loop)
-        if not isinstance(self._agent.runtime, AsyncRuntime):
+        if not isinstance(self._agent.runtime, AsyncRuntime):  # pragma: nocover
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )

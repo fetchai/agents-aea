@@ -96,7 +96,7 @@ class BaseAgentLoop(WithLogger, ABC):
         await asyncio.gather(*self._tasks, loop=self._loop)
 
     @abstractmethod
-    def _set_tasks(self) -> None:
+    def _set_tasks(self) -> None:  # pragma: nocover
         """Set run loop tasks."""
         raise NotImplementedError
 
@@ -219,7 +219,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         :return: None
         """
         periodic_caller = self._behaviours_registry.pop(behaviour, None)
-        if periodic_caller is None:
+        if periodic_caller is None:  # pragma: nocover
             return
         periodic_caller.stop()
 
@@ -263,10 +263,6 @@ class AsyncAgentLoop(BaseAgentLoop):
         self.logger.info("[{}]: Start processing messages...".format(self._agent.name))
         while self.is_running:
             await inbox.async_wait()
-
-            if not self.is_running:  # make it close faster
-                return
-
             self._agent.react()
 
     async def _task_process_internal_messages(self) -> None:

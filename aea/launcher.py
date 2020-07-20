@@ -60,7 +60,9 @@ def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
         return AEABuilder.from_aea_project(".").build()
 
 
-def _set_logger(log_level: Optional[str]):
+def _set_logger(
+    log_level: Optional[str],
+):  # pragma: nocover # used in spawned process and pytest does not see this code
     from aea.cli.utils.loggers import (  # pylint: disable=import-outside-toplevel
         default_logging_config,  # pylint: disable=import-outside-toplevel
     )
@@ -91,7 +93,7 @@ def _run_agent(
     def stop_event_thread():
         try:
             stop_event.wait()
-        except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:
+        except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:  # pragma: nocover
             logger.error(
                 f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
             )
@@ -101,7 +103,7 @@ def _run_agent(
     Thread(target=stop_event_thread, daemon=True).start()
     try:
         agent.start()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # pragma: nocover
         logger.debug("_run_agent: keyboard interrupt")
     except BaseException as e:
         logger.exception("exception in _run_agent")
@@ -131,14 +133,14 @@ class AEADirTask(AbstractExecutorTask):
 
     def stop(self):
         """Stop task."""
-        if not self._agent:
+        if not self._agent:  # pragma: nocover
             raise Exception("Task was not started!")
         self._agent.stop()
 
     def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
         """Return asyncio Task for task run in asyncio loop."""
         self._agent.runtime.set_loop(loop)
-        if not isinstance(self._agent.runtime, AsyncRuntime):
+        if not isinstance(self._agent.runtime, AsyncRuntime):  # pragma: nocover
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
@@ -183,7 +185,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
             return
         try:
             self._stop_event.set()
-        except (FileNotFoundError, BrokenPipeError, EOFError) as e:
+        except (FileNotFoundError, BrokenPipeError, EOFError) as e:  # pragma: nocover
             logger.error(
                 f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
             )
@@ -202,11 +204,17 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
 
         :rerurn: bool
         """
-        if not self._future or not super().failed:
+        if not self._future:
             return False
-        if isinstance(self._future.exception(), BrokenProcessPool):
+
+        if (
+            self._future.done()
+            and self._future.exception()
+            and isinstance(self._future.exception(), BrokenProcessPool)
+        ):  # pragma: nocover
             return False
-        return True
+
+        return super().failed
 
 
 class AEALauncher(AbstractMultipleRunner):

@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
-
+import logging
 import os
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -41,6 +42,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from tests.common.utils import run_in_thread, wait_for_condition
 
 from .conftest import (
+    COSMOS,
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
@@ -431,7 +433,6 @@ def test_initialize_aea_programmatically_build_resources():
 
 def test_add_behaviour_dynamically():
     """Test that we can add a behaviour dynamically."""
-
     agent_name = "MyAgent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     wallet = Wallet({DEFAULT_LEDGER: private_key_path})
@@ -469,11 +470,73 @@ def test_add_behaviour_dynamically():
         )
 
 
+def test_error_handler_is_not_set():
+    """Test stop on no error handler presents."""
+    agent_name = "my_agent"
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    wallet = Wallet({FETCHAI: private_key_path})
+    identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+    resources = Resources()
+    context_namespace = {"key1": 1, "key2": 2}
+    agent = AEA(identity, wallet, resources, **context_namespace)
+
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
+    msg.counterparty = agent.identity.address
+    envelope = Envelope(
+        to=agent.identity.address,
+        sender=agent.identity.address,
+        protocol_id=DefaultMessage.protocol_id,
+        message=msg,
+    )
+
+    with patch.object(agent, "stop") as mocked_stop:
+        agent._handle(envelope)
+
+    mocked_stop.assert_called()
+
+
+def test_no_handlers_registered(caplog):
+    """Test no handlers are registered for message processing."""
+    agent_name = "MyAgent"
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    builder = AEABuilder()
+    builder.set_name(agent_name)
+    builder.add_private_key(COSMOS, private_key_path)
+    # local_connection_id = PublicId.from_str("fetchai/stub:0.4.0")
+    # builder.set_default_connection(local_connection_id)
+    aea = builder.build()
+
+    with caplog.at_level(
+        logging.WARNING, logger=aea._get_error_handler().context.logger.name
+    ):
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        msg.counterparty = aea.identity.address
+        envelope = Envelope(
+            to=aea.identity.address,
+            sender=aea.identity.address,
+            protocol_id=DefaultMessage.protocol_id,
+            message=msg,
+        )
+        with patch.object(aea.filter, "get_active_handlers", return_value=[]):
+            aea._handle(envelope)
+
+        assert "Cannot handle envelope: no active handler registered" in caplog.text
+
+
 class TestContextNamespace:
-    """
-    Test that the keyword arguments to AEA constructor
-    can be accessible from the skill context.
-    """
+    """Test that the keyword arguments to AEA constructor can be accessible from the skill context."""
 
     @classmethod
     def setup_class(cls):
