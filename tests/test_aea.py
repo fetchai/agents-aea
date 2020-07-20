@@ -42,7 +42,6 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from tests.common.utils import run_in_thread, wait_for_condition
 
 from .conftest import (
-    COSMOS,
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
@@ -473,9 +472,9 @@ def test_add_behaviour_dynamically():
 def test_error_handler_is_not_set():
     """Test stop on no error handler presents."""
     agent_name = "my_agent"
-    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-    wallet = Wallet({FETCHAI: private_key_path})
-    identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+    wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+    identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
     resources = Resources()
     context_namespace = {"key1": 1, "key2": 2}
     agent = AEA(identity, wallet, resources, **context_namespace)
@@ -504,10 +503,10 @@ def test_error_handler_is_not_set():
 def test_no_handlers_registered(caplog):
     """Test no handlers are registered for message processing."""
     agent_name = "MyAgent"
-    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     builder = AEABuilder()
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder.set_name(agent_name)
-    builder.add_private_key(COSMOS, private_key_path)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
     # local_connection_id = PublicId.from_str("fetchai/stub:0.4.0")
     # builder.set_default_connection(local_connection_id)
     aea = builder.build()
