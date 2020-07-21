@@ -232,7 +232,7 @@ def bump_version_in_yaml(
     configuration_file_path: Path, type_: str, version: str
 ) -> None:
     """Bump the package version in the package yaml."""
-    loader = ConfigLoader.from_configuration_type(type_)
+    loader = ConfigLoader.from_configuration_type(type_[:-1])
     config = loader.load(configuration_file_path.open())
     config.version = version
     loader.dump(config, open(configuration_file_path, "w"))
