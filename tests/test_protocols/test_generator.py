@@ -326,103 +326,257 @@ class TestSerialisations:
         assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
         assert decoded_message.content_dict_str_str == message.content_dict_str_str
 
-    # def test_generated_protocol_serialisation_mt(self):
-    #     """Test serialisation and deserialisation of a message involving an mt type."""
-    #     message = TProtocolMessage(
-    #         message_id=1,
-    #         dialogue_reference=(str(0), ""),
-    #         target=0,
-    #         performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
-    #         content_dict_int_bytes={1: b"bytes1", 2: b"bytes2", 3: b"bytes3"},
-    #         content_dict_int_int={1: 2, 2: 3, 3: 4},
-    #         content_dict_int_float={1: 3.4, 2: 4.7, 3: 4.6},
-    #         content_dict_int_bool={1: True, 2: True, 3: False},
-    #         content_dict_int_str={1: "string1", 2: "string2", 3: "string3"},
-    #         content_dict_bool_bytes={True: b"bytes1", False: b"bytes2"},
-    #         content_dict_bool_int={True: 5, False: 7},
-    #         content_dict_bool_float={True: 5.4, False: 4.6},
-    #         content_dict_bool_bool={True: False, False: False},
-    #         content_dict_bool_str={True: "string1", False: "string2"},
-    #         content_dict_str_bytes={"string1": b"bytes1", "string2": b"bytes2", "string3": b"bytes3"},
-    #         content_dict_str_int={"string1": 2, "string2": 3, "string3": 4},
-    #         content_dict_str_float={"string1": 3.4, "string2": 4.7, "string3": 4.6},
-    #         content_dict_str_bool={"string1": True, "string2": True, "string3": False},
-    #         content_dict_str_str={"string1": "string4", "string2": "string5", "string3": "string6"},
-    #     )
-    #
-    #     encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
-    #     decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
-    #
-    #     assert decoded_message.message_id == message.message_id
-    #     assert decoded_message.dialogue_reference == message.dialogue_reference
-    #     assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
-    #     assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
-    #     assert decoded_message.target == message.target
-    #     assert decoded_message.performative == message.performative
-    #     assert decoded_message.content_dict_int_bytes == message.content_dict_int_bytes
-    #     assert decoded_message.content_dict_int_int == message.content_dict_int_int
-    #     # assert decoded_message.content_dict_int_float == message.content_dict_int_float
-    #     assert decoded_message.content_dict_int_bool == message.content_dict_int_bool
-    #     assert decoded_message.content_dict_int_str == message.content_dict_int_str
-    #     assert decoded_message.content_dict_bool_bytes == message.content_dict_bool_bytes
-    #     assert decoded_message.content_dict_bool_int == message.content_dict_bool_int
-    #     # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float
-    #     assert decoded_message.content_dict_bool_bool == message.content_dict_bool_bool
-    #     assert decoded_message.content_dict_bool_str == message.content_dict_bool_str
-    #     assert decoded_message.content_dict_str_bytes == message.content_dict_str_bytes
-    #     assert decoded_message.content_dict_str_int == message.content_dict_str_int
-    #     # assert decoded_message.content_dict_str_float == message.content_dict_str_float
-    #     assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
-    #     assert decoded_message.content_dict_str_str == message.content_dict_str_str
-    #
-    # def test_generated_protocol_serialisation_o(self):
-    #     """Test serialisation and deserialisation of a message involving an optional type."""
-    #     message = TProtocolMessage(
-    #         message_id=1,
-    #         dialogue_reference=(str(0), ""),
-    #         target=0,
-    #         performative=TProtocolMessage.Performative.PERFORMATIVE_PMT,
-    #         content_dict_int_bytes={1: b"bytes1", 2: b"bytes2", 3: b"bytes3"},
-    #         content_dict_int_int={1: 2, 2: 3, 3: 4},
-    #         content_dict_int_float={1: 3.4, 2: 4.7, 3: 4.6},
-    #         content_dict_int_bool={1: True, 2: True, 3: False},
-    #         content_dict_int_str={1: "string1", 2: "string2", 3: "string3"},
-    #         content_dict_bool_bytes={True: b"bytes1", False: b"bytes2"},
-    #         content_dict_bool_int={True: 5, False: 7},
-    #         content_dict_bool_float={True: 5.4, False: 4.6},
-    #         content_dict_bool_bool={True: False, False: False},
-    #         content_dict_bool_str={True: "string1", False: "string2"},
-    #         content_dict_str_bytes={"string1": b"bytes1", "string2": b"bytes2", "string3": b"bytes3"},
-    #         content_dict_str_int={"string1": 2, "string2": 3, "string3": 4},
-    #         content_dict_str_float={"string1": 3.4, "string2": 4.7, "string3": 4.6},
-    #         content_dict_str_bool={"string1": True, "string2": True, "string3": False},
-    #         content_dict_str_str={"string1": "string4", "string2": "string5", "string3": "string6"},
-    #     )
-    #
-    #     encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
-    #     decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
-    #
-    #     assert decoded_message.message_id == message.message_id
-    #     assert decoded_message.dialogue_reference == message.dialogue_reference
-    #     assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
-    #     assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
-    #     assert decoded_message.target == message.target
-    #     assert decoded_message.performative == message.performative
-    #     assert decoded_message.content_dict_int_bytes == message.content_dict_int_bytes
-    #     assert decoded_message.content_dict_int_int == message.content_dict_int_int
-    #     # assert decoded_message.content_dict_int_float == message.content_dict_int_float
-    #     assert decoded_message.content_dict_int_bool == message.content_dict_int_bool
-    #     assert decoded_message.content_dict_int_str == message.content_dict_int_str
-    #     assert decoded_message.content_dict_bool_bytes == message.content_dict_bool_bytes
-    #     assert decoded_message.content_dict_bool_int == message.content_dict_bool_int
-    #     # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float
-    #     assert decoded_message.content_dict_bool_bool == message.content_dict_bool_bool
-    #     assert decoded_message.content_dict_bool_str == message.content_dict_bool_str
-    #     assert decoded_message.content_dict_str_bytes == message.content_dict_str_bytes
-    #     assert decoded_message.content_dict_str_int == message.content_dict_str_int
-    #     # assert decoded_message.content_dict_str_float == message.content_dict_str_float
-    #     assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
-    #     assert decoded_message.content_dict_str_str == message.content_dict_str_str
+    def test_generated_protocol_serialisation_mt(self):
+        """Test serialisation and deserialisation of a message involving an mt type."""
+        some_dict = {1: True, 2: False, 3: True, 4: False}
+        data_model = TProtocolMessage.DataModel(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
+        message_ct = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1=data_model,
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_ct)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_ct.message_id
+        assert decoded_message.dialogue_reference == message_ct.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_ct.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_ct.dialogue_reference[1]
+        assert decoded_message.target == message_ct.target
+        assert decoded_message.performative == message_ct.performative
+        assert decoded_message.content_union_1 == message_ct.content_union_1
+
+        #####################
+
+        message_pt_bytes = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1=b"some bytes",
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_bytes)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_pt_bytes.message_id
+        assert decoded_message.dialogue_reference == message_pt_bytes.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_pt_bytes.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_pt_bytes.dialogue_reference[1]
+        assert decoded_message.target == message_pt_bytes.target
+        assert decoded_message.performative == message_pt_bytes.performative
+        assert decoded_message.content_union_1 == message_pt_bytes.content_union_1
+
+        #####################
+
+        message_pt_int = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1=3453,
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_int)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_pt_int.message_id
+        assert decoded_message.dialogue_reference == message_pt_int.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_pt_int.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_pt_int.dialogue_reference[1]
+        assert decoded_message.target == message_pt_int.target
+        assert decoded_message.performative == message_pt_int.performative
+        assert decoded_message.content_union_1 == message_pt_int.content_union_1
+
+        #####################
+
+        message_pt_float = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1=34.64,
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_float)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_pt_float.message_id
+        assert decoded_message.dialogue_reference == message_pt_float.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_pt_float.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_pt_float.dialogue_reference[1]
+        assert decoded_message.target == message_pt_float.target
+        assert decoded_message.performative == message_pt_float.performative
+        assert decoded_message.content_union_1 == message_pt_float.content_union_1
+
+        #####################
+
+        message_pt_bool = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1=True,
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_bool)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_pt_bool.message_id
+        assert decoded_message.dialogue_reference == message_pt_bool.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_pt_bool.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_pt_bool.dialogue_reference[1]
+        assert decoded_message.target == message_pt_bool.target
+        assert decoded_message.performative == message_pt_bool.performative
+        assert decoded_message.content_union_1 == message_pt_bool.content_union_1
+
+        #####################
+
+        message_pt_str = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1="some string",
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_str)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_pt_str.message_id
+        assert decoded_message.dialogue_reference == message_pt_str.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_pt_str.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_pt_str.dialogue_reference[1]
+        assert decoded_message.target == message_pt_str.target
+        assert decoded_message.performative == message_pt_str.performative
+        assert decoded_message.content_union_1 == message_pt_str.content_union_1
+
+        #####################
+
+        message_set_int = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1=frozenset([1, 2, 3]),
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_set_int)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_set_int.message_id
+        assert decoded_message.dialogue_reference == message_set_int.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_set_int.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_set_int.dialogue_reference[1]
+        assert decoded_message.target == message_set_int.target
+        assert decoded_message.performative == message_set_int.performative
+        assert decoded_message.content_union_1 == message_set_int.content_union_1
+
+        #####################
+
+        message_list_bool = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1=(True, False, False, True, True),
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_list_bool)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_list_bool.message_id
+        assert decoded_message.dialogue_reference == message_list_bool.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_list_bool.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_list_bool.dialogue_reference[1]
+        assert decoded_message.target == message_list_bool.target
+        assert decoded_message.performative == message_list_bool.performative
+        assert decoded_message.content_union_1 == message_list_bool.content_union_1
+
+        #####################
+
+        message_dict_str_int = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+            content_union_1={"string1": 2, "string2": 3, "string3": 4},
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_dict_str_int)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_dict_str_int.message_id
+        assert decoded_message.dialogue_reference == message_dict_str_int.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_dict_str_int.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_dict_str_int.dialogue_reference[1]
+        assert decoded_message.target == message_dict_str_int.target
+        assert decoded_message.performative == message_dict_str_int.performative
+        assert decoded_message.content_union_1 == message_dict_str_int.content_union_1
+
+    def test_generated_protocol_serialisation_o(self):
+        """Test serialisation and deserialisation of a message involving an optional type."""
+        some_dict = {1: True, 2: False, 3: True, 4: False}
+        data_model = TProtocolMessage.DataModel(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
+        message_o_ct_set = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
+            content_ct=data_model,
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_o_ct_set)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_o_ct_set.message_id
+        assert decoded_message.dialogue_reference == message_o_ct_set.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_o_ct_set.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_o_ct_set.dialogue_reference[1]
+        assert decoded_message.target == message_o_ct_set.target
+        assert decoded_message.performative == message_o_ct_set.performative
+        assert decoded_message.content_ct == message_o_ct_set.content_ct
+
+        #####################
+
+        message_o_ct_not_set = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_o_ct_not_set)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message_o_ct_not_set.message_id
+        assert decoded_message.dialogue_reference == message_o_ct_not_set.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message_o_ct_not_set.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message_o_ct_not_set.dialogue_reference[1]
+        assert decoded_message.target == message_o_ct_not_set.target
+        assert decoded_message.performative == message_o_ct_not_set.performative
+        assert decoded_message.content_ct == message_o_ct_not_set.content_ct
 
     @classmethod
     def teardown_class(cls):
