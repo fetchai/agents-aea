@@ -1,9 +1,9 @@
-<a name=".aea.components.loader"></a>
+<a name="aea.components.loader"></a>
 # aea.components.loader
 
 This module contains utilities for loading components.
 
-<a name=".aea.components.loader.component_type_to_class"></a>
+<a name="aea.components.loader.component_type_to_class"></a>
 #### component`_`type`_`to`_`class
 
 ```python
@@ -20,7 +20,7 @@ Get the component class from the component type.
 
 the component class
 
-<a name=".aea.components.loader.load_component_from_config"></a>
+<a name="aea.components.loader.load_component_from_config"></a>
 #### load`_`component`_`from`_`config
 
 ```python

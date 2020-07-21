@@ -1,9 +1,9 @@
-<a name=".aea.context.base"></a>
+<a name="aea.context.base"></a>
 # aea.context.base
 
 This module contains the agent context class.
 
-<a name=".aea.context.base.AgentContext"></a>
+<a name="aea.context.base.AgentContext"></a>
 ## AgentContext Objects
 
 ```python
@@ -12,7 +12,7 @@ class AgentContext()
 
 Provide read access to relevant objects of the agent for the skills.
 
-<a name=".aea.context.base.AgentContext.__init__"></a>
+<a name="aea.context.base.AgentContext.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -31,7 +31,7 @@ Initialize an agent context.
 - `task_manager`: the task manager
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
-<a name=".aea.context.base.AgentContext.shared_state"></a>
+<a name="aea.context.base.AgentContext.shared_state"></a>
 #### shared`_`state
 
 ```python
@@ -45,7 +45,7 @@ The shared state is the only object which skills can use
 to exchange state directly. It is accessible (read and write) from
 all skills.
 
-<a name=".aea.context.base.AgentContext.identity"></a>
+<a name="aea.context.base.AgentContext.identity"></a>
 #### identity
 
 ```python
@@ -55,7 +55,7 @@ all skills.
 
 Get the identity.
 
-<a name=".aea.context.base.AgentContext.agent_name"></a>
+<a name="aea.context.base.AgentContext.agent_name"></a>
 #### agent`_`name
 
 ```python
@@ -65,7 +65,7 @@ Get the identity.
 
 Get agent name.
 
-<a name=".aea.context.base.AgentContext.addresses"></a>
+<a name="aea.context.base.AgentContext.addresses"></a>
 #### addresses
 
 ```python
@@ -75,7 +75,7 @@ Get agent name.
 
 Get addresses.
 
-<a name=".aea.context.base.AgentContext.address"></a>
+<a name="aea.context.base.AgentContext.address"></a>
 #### address
 
 ```python
@@ -85,7 +85,7 @@ Get addresses.
 
 Get the default address.
 
-<a name=".aea.context.base.AgentContext.connection_status"></a>
+<a name="aea.context.base.AgentContext.connection_status"></a>
 #### connection`_`status
 
 ```python
@@ -95,7 +95,7 @@ Get the default address.
 
 Get connection status of the multiplexer.
 
-<a name=".aea.context.base.AgentContext.outbox"></a>
+<a name="aea.context.base.AgentContext.outbox"></a>
 #### outbox
 
 ```python
@@ -105,7 +105,7 @@ Get connection status of the multiplexer.
 
 Get outbox.
 
-<a name=".aea.context.base.AgentContext.decision_maker_message_queue"></a>
+<a name="aea.context.base.AgentContext.decision_maker_message_queue"></a>
 #### decision`_`maker`_`message`_`queue
 
 ```python
@@ -115,7 +115,7 @@ Get outbox.
 
 Get decision maker queue.
 
-<a name=".aea.context.base.AgentContext.decision_maker_handler_context"></a>
+<a name="aea.context.base.AgentContext.decision_maker_handler_context"></a>
 #### decision`_`maker`_`handler`_`context
 
 ```python
@@ -125,7 +125,7 @@ Get decision maker queue.
 
 Get the decision maker handler context.
 
-<a name=".aea.context.base.AgentContext.task_manager"></a>
+<a name="aea.context.base.AgentContext.task_manager"></a>
 #### task`_`manager
 
 ```python
@@ -135,7 +135,7 @@ Get the decision maker handler context.
 
 Get the task manager.
 
-<a name=".aea.context.base.AgentContext.search_service_address"></a>
+<a name="aea.context.base.AgentContext.search_service_address"></a>
 #### search`_`service`_`address
 
 ```python
@@ -145,7 +145,7 @@ Get the task manager.
 
 Get the address of the search service.
 
-<a name=".aea.context.base.AgentContext.default_connection"></a>
+<a name="aea.context.base.AgentContext.default_connection"></a>
 #### default`_`connection
 
 ```python
@@ -155,7 +155,7 @@ Get the address of the search service.
 
 Get the default connection.
 
-<a name=".aea.context.base.AgentContext.default_routing"></a>
+<a name="aea.context.base.AgentContext.default_routing"></a>
 #### default`_`routing
 
 ```python
@@ -165,7 +165,7 @@ Get the default connection.
 
 Get the default routing.
 
-<a name=".aea.context.base.AgentContext.namespace"></a>
+<a name="aea.context.base.AgentContext.namespace"></a>
 #### namespace
 
 ```python

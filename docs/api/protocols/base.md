@@ -1,9 +1,9 @@
-<a name=".aea.protocols.base"></a>
+<a name="aea.protocols.base"></a>
 # aea.protocols.base
 
 This module contains the base message and serialization definition.
 
-<a name=".aea.protocols.base.Message"></a>
+<a name="aea.protocols.base.Message"></a>
 ## Message Objects
 
 ```python
@@ -12,7 +12,7 @@ class Message()
 
 This class implements a message.
 
-<a name=".aea.protocols.base.Message.Performative"></a>
+<a name="aea.protocols.base.Message.Performative"></a>
 ## Performative Objects
 
 ```python
@@ -21,7 +21,7 @@ class Performative(Enum)
 
 Performatives for the base message.
 
-<a name=".aea.protocols.base.Message.Performative.__str__"></a>
+<a name="aea.protocols.base.Message.Performative.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -30,7 +30,7 @@ Performatives for the base message.
 
 Get the string representation.
 
-<a name=".aea.protocols.base.Message.__init__"></a>
+<a name="aea.protocols.base.Message.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -44,7 +44,19 @@ Initialize a Message object.
 - `body`: the dictionary of values to hold.
 - `kwargs`: any additional value to add to the body. It will overwrite the body values.
 
-<a name=".aea.protocols.base.Message.counterparty"></a>
+<a name="aea.protocols.base.Message.counterparty"></a>
+#### counterparty
+
+```python
+ | @property
+ | counterparty() -> Address
+```
+
+Get the counterparty of the message in Address form.
+
+:return the address
+
+<a name="aea.protocols.base.Message.counterparty"></a>
 #### counterparty
 
 ```python
@@ -54,7 +66,19 @@ Initialize a Message object.
 
 Set the counterparty of the message.
 
-<a name=".aea.protocols.base.Message.is_incoming"></a>
+<a name="aea.protocols.base.Message.is_incoming"></a>
+#### is`_`incoming
+
+```python
+ | @property
+ | is_incoming() -> bool
+```
+
+Get the is_incoming value of the message.
+
+:return whether the message is incoming or is out going
+
+<a name="aea.protocols.base.Message.is_incoming"></a>
 #### is`_`incoming
 
 ```python
@@ -64,7 +88,21 @@ Set the counterparty of the message.
 
 Set the is_incoming of the message.
 
-<a name=".aea.protocols.base.Message.body"></a>
+<a name="aea.protocols.base.Message.body"></a>
+#### body
+
+```python
+ | @property
+ | body() -> Dict
+```
+
+Get the body of the message (in dictionary form).
+
+**Returns**:
+
+the body
+
+<a name="aea.protocols.base.Message.body"></a>
 #### body
 
 ```python
@@ -82,7 +120,7 @@ Set the body of hte message.
 
 None
 
-<a name=".aea.protocols.base.Message.dialogue_reference"></a>
+<a name="aea.protocols.base.Message.dialogue_reference"></a>
 #### dialogue`_`reference
 
 ```python
@@ -92,7 +130,7 @@ None
 
 Get the dialogue_reference of the message.
 
-<a name=".aea.protocols.base.Message.message_id"></a>
+<a name="aea.protocols.base.Message.message_id"></a>
 #### message`_`id
 
 ```python
@@ -102,7 +140,7 @@ Get the dialogue_reference of the message.
 
 Get the message_id of the message.
 
-<a name=".aea.protocols.base.Message.performative"></a>
+<a name="aea.protocols.base.Message.performative"></a>
 #### performative
 
 ```python
@@ -112,7 +150,7 @@ Get the message_id of the message.
 
 Get the performative of the message.
 
-<a name=".aea.protocols.base.Message.target"></a>
+<a name="aea.protocols.base.Message.target"></a>
 #### target
 
 ```python
@@ -122,7 +160,7 @@ Get the performative of the message.
 
 Get the target of the message.
 
-<a name=".aea.protocols.base.Message.set"></a>
+<a name="aea.protocols.base.Message.set"></a>
 #### set
 
 ```python
@@ -140,7 +178,7 @@ Set key and value pair.
 
 None
 
-<a name=".aea.protocols.base.Message.get"></a>
+<a name="aea.protocols.base.Message.get"></a>
 #### get
 
 ```python
@@ -149,7 +187,7 @@ None
 
 Get value for key.
 
-<a name=".aea.protocols.base.Message.unset"></a>
+<a name="aea.protocols.base.Message.unset"></a>
 #### unset
 
 ```python
@@ -158,7 +196,7 @@ Get value for key.
 
 Unset valye for key.
 
-<a name=".aea.protocols.base.Message.is_set"></a>
+<a name="aea.protocols.base.Message.is_set"></a>
 #### is`_`set
 
 ```python
@@ -167,7 +205,7 @@ Unset valye for key.
 
 Check value is set for key.
 
-<a name=".aea.protocols.base.Message.__eq__"></a>
+<a name="aea.protocols.base.Message.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -176,7 +214,7 @@ Check value is set for key.
 
 Compare with another object.
 
-<a name=".aea.protocols.base.Message.__str__"></a>
+<a name="aea.protocols.base.Message.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -185,7 +223,7 @@ Compare with another object.
 
 Get the string representation of the message.
 
-<a name=".aea.protocols.base.Message.encode"></a>
+<a name="aea.protocols.base.Message.encode"></a>
 #### encode
 
 ```python
@@ -194,7 +232,7 @@ Get the string representation of the message.
 
 Encode the message.
 
-<a name=".aea.protocols.base.Encoder"></a>
+<a name="aea.protocols.base.Encoder"></a>
 ## Encoder Objects
 
 ```python
@@ -203,7 +241,7 @@ class Encoder(ABC)
 
 Encoder interface.
 
-<a name=".aea.protocols.base.Encoder.encode"></a>
+<a name="aea.protocols.base.Encoder.encode"></a>
 #### encode
 
 ```python
@@ -222,7 +260,7 @@ Encode a message.
 
 the encoded message.
 
-<a name=".aea.protocols.base.Decoder"></a>
+<a name="aea.protocols.base.Decoder"></a>
 ## Decoder Objects
 
 ```python
@@ -231,7 +269,7 @@ class Decoder(ABC)
 
 Decoder interface.
 
-<a name=".aea.protocols.base.Decoder.decode"></a>
+<a name="aea.protocols.base.Decoder.decode"></a>
 #### decode
 
 ```python
@@ -250,7 +288,7 @@ Decode a message.
 
 the decoded message.
 
-<a name=".aea.protocols.base.Serializer"></a>
+<a name="aea.protocols.base.Serializer"></a>
 ## Serializer Objects
 
 ```python
@@ -259,7 +297,7 @@ class Serializer(Encoder,  Decoder,  ABC)
 
 The implementations of this class defines a serialization layer for a protocol.
 
-<a name=".aea.protocols.base.ProtobufSerializer"></a>
+<a name="aea.protocols.base.ProtobufSerializer"></a>
 ## ProtobufSerializer Objects
 
 ```python
@@ -270,7 +308,7 @@ Default Protobuf serializer.
 
 It assumes that the Message contains a JSON-serializable body.
 
-<a name=".aea.protocols.base.ProtobufSerializer.encode"></a>
+<a name="aea.protocols.base.ProtobufSerializer.encode"></a>
 #### encode
 
 ```python
@@ -280,7 +318,7 @@ It assumes that the Message contains a JSON-serializable body.
 
 Encode a message into bytes using Protobuf.
 
-<a name=".aea.protocols.base.ProtobufSerializer.decode"></a>
+<a name="aea.protocols.base.ProtobufSerializer.decode"></a>
 #### decode
 
 ```python
@@ -290,7 +328,7 @@ Encode a message into bytes using Protobuf.
 
 Decode bytes into a message using Protobuf.
 
-<a name=".aea.protocols.base.JSONSerializer"></a>
+<a name="aea.protocols.base.JSONSerializer"></a>
 ## JSONSerializer Objects
 
 ```python
@@ -301,7 +339,7 @@ Default serialization in JSON for the Message object.
 
 It assumes that the Message contains a JSON-serializable body.
 
-<a name=".aea.protocols.base.JSONSerializer.encode"></a>
+<a name="aea.protocols.base.JSONSerializer.encode"></a>
 #### encode
 
 ```python
@@ -319,7 +357,7 @@ Encode a message into bytes using JSON format.
 
 the serialized message.
 
-<a name=".aea.protocols.base.JSONSerializer.decode"></a>
+<a name="aea.protocols.base.JSONSerializer.decode"></a>
 #### decode
 
 ```python
@@ -337,7 +375,7 @@ Decode bytes into a message using JSON.
 
 the decoded message.
 
-<a name=".aea.protocols.base.Protocol"></a>
+<a name="aea.protocols.base.Protocol"></a>
 ## Protocol Objects
 
 ```python
@@ -348,7 +386,7 @@ This class implements a specifications for a protocol.
 
 It includes a serializer to encode/decode a message.
 
-<a name=".aea.protocols.base.Protocol.__init__"></a>
+<a name="aea.protocols.base.Protocol.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -362,7 +400,7 @@ Initialize the protocol manager.
 - `configuration`: the protocol configurations.
 - `serializer`: the serializer.
 
-<a name=".aea.protocols.base.Protocol.serializer"></a>
+<a name="aea.protocols.base.Protocol.serializer"></a>
 #### serializer
 
 ```python
@@ -372,7 +410,7 @@ Initialize the protocol manager.
 
 Get the serializer.
 
-<a name=".aea.protocols.base.Protocol.from_dir"></a>
+<a name="aea.protocols.base.Protocol.from_dir"></a>
 #### from`_`dir
 
 ```python
@@ -390,7 +428,7 @@ Load the protocol from a directory.
 
 the protocol object.
 
-<a name=".aea.protocols.base.Protocol.from_config"></a>
+<a name="aea.protocols.base.Protocol.from_config"></a>
 #### from`_`config
 
 ```python

@@ -1,9 +1,9 @@
-<a name=".aea.connections.base"></a>
+<a name="aea.connections.base"></a>
 # aea.connections.base
 
 The base connection package.
 
-<a name=".aea.connections.base.ConnectionStatus"></a>
+<a name="aea.connections.base.ConnectionStatus"></a>
 ## ConnectionStatus Objects
 
 ```python
@@ -12,7 +12,7 @@ class ConnectionStatus()
 
 The connection status class.
 
-<a name=".aea.connections.base.ConnectionStatus.__init__"></a>
+<a name="aea.connections.base.ConnectionStatus.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -21,7 +21,7 @@ The connection status class.
 
 Initialize the connection status.
 
-<a name=".aea.connections.base.Connection"></a>
+<a name="aea.connections.base.Connection"></a>
 ## Connection Objects
 
 ```python
@@ -30,7 +30,7 @@ class Connection(Component,  ABC)
 
 Abstract definition of a connection.
 
-<a name=".aea.connections.base.Connection.__init__"></a>
+<a name="aea.connections.base.Connection.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -50,7 +50,17 @@ parameters are None: connection_id, excluded_protocols or restricted_to_protocol
 - `restricted_to_protocols`: the set of protocols ids of the only supported protocols for this connection.
 - `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
 
-<a name=".aea.connections.base.Connection.loop"></a>
+<a name="aea.connections.base.Connection.loop"></a>
+#### loop
+
+```python
+ | @property
+ | loop() -> Optional[AbstractEventLoop]
+```
+
+Get the event loop.
+
+<a name="aea.connections.base.Connection.loop"></a>
 #### loop
 
 ```python
@@ -68,7 +78,7 @@ Set the event loop.
 
 None
 
-<a name=".aea.connections.base.Connection.address"></a>
+<a name="aea.connections.base.Connection.address"></a>
 #### address
 
 ```python
@@ -78,7 +88,7 @@ None
 
 Get the address.
 
-<a name=".aea.connections.base.Connection.crypto_store"></a>
+<a name="aea.connections.base.Connection.crypto_store"></a>
 #### crypto`_`store
 
 ```python
@@ -88,7 +98,7 @@ Get the address.
 
 Get the crypto store.
 
-<a name=".aea.connections.base.Connection.has_crypto_store"></a>
+<a name="aea.connections.base.Connection.has_crypto_store"></a>
 #### has`_`crypto`_`store
 
 ```python
@@ -98,7 +108,7 @@ Get the crypto store.
 
 Check if the connection has the crypto store.
 
-<a name=".aea.connections.base.Connection.component_type"></a>
+<a name="aea.connections.base.Connection.component_type"></a>
 #### component`_`type
 
 ```python
@@ -108,7 +118,7 @@ Check if the connection has the crypto store.
 
 Get the component type.
 
-<a name=".aea.connections.base.Connection.configuration"></a>
+<a name="aea.connections.base.Connection.configuration"></a>
 #### configuration
 
 ```python
@@ -118,7 +128,7 @@ Get the component type.
 
 Get the connection configuration.
 
-<a name=".aea.connections.base.Connection.restricted_to_protocols"></a>
+<a name="aea.connections.base.Connection.restricted_to_protocols"></a>
 #### restricted`_`to`_`protocols
 
 ```python
@@ -128,7 +138,7 @@ Get the connection configuration.
 
 Get the ids of the protocols this connection is restricted to.
 
-<a name=".aea.connections.base.Connection.excluded_protocols"></a>
+<a name="aea.connections.base.Connection.excluded_protocols"></a>
 #### excluded`_`protocols
 
 ```python
@@ -138,7 +148,7 @@ Get the ids of the protocols this connection is restricted to.
 
 Get the ids of the excluded protocols for this connection.
 
-<a name=".aea.connections.base.Connection.connection_status"></a>
+<a name="aea.connections.base.Connection.connection_status"></a>
 #### connection`_`status
 
 ```python
@@ -148,7 +158,7 @@ Get the ids of the excluded protocols for this connection.
 
 Get the connection status.
 
-<a name=".aea.connections.base.Connection.connect"></a>
+<a name="aea.connections.base.Connection.connect"></a>
 #### connect
 
 ```python
@@ -158,7 +168,7 @@ Get the connection status.
 
 Set up the connection.
 
-<a name=".aea.connections.base.Connection.disconnect"></a>
+<a name="aea.connections.base.Connection.disconnect"></a>
 #### disconnect
 
 ```python
@@ -168,7 +178,7 @@ Set up the connection.
 
 Tear down the connection.
 
-<a name=".aea.connections.base.Connection.send"></a>
+<a name="aea.connections.base.Connection.send"></a>
 #### send
 
 ```python
@@ -186,7 +196,7 @@ Send an envelope.
 
 None
 
-<a name=".aea.connections.base.Connection.receive"></a>
+<a name="aea.connections.base.Connection.receive"></a>
 #### receive
 
 ```python
@@ -200,7 +210,7 @@ Receive an envelope.
 
 the received envelope, or None if an error occurred.
 
-<a name=".aea.connections.base.Connection.from_dir"></a>
+<a name="aea.connections.base.Connection.from_dir"></a>
 #### from`_`dir
 
 ```python
@@ -220,7 +230,7 @@ Load the connection from a directory.
 
 the connection object.
 
-<a name=".aea.connections.base.Connection.from_config"></a>
+<a name="aea.connections.base.Connection.from_config"></a>
 #### from`_`config
 
 ```python

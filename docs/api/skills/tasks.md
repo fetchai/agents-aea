@@ -1,9 +1,9 @@
-<a name=".aea.skills.tasks"></a>
+<a name="aea.skills.tasks"></a>
 # aea.skills.tasks
 
 This module contains the classes for tasks.
 
-<a name=".aea.skills.tasks.Task"></a>
+<a name="aea.skills.tasks.Task"></a>
 ## Task Objects
 
 ```python
@@ -12,7 +12,7 @@ class Task()
 
 This class implements an abstract task.
 
-<a name=".aea.skills.tasks.Task.__init__"></a>
+<a name="aea.skills.tasks.Task.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -21,7 +21,7 @@ This class implements an abstract task.
 
 Initialize a task.
 
-<a name=".aea.skills.tasks.Task.__call__"></a>
+<a name="aea.skills.tasks.Task.__call__"></a>
 #### `__`call`__`
 
 ```python
@@ -40,7 +40,7 @@ Execute the task.
 
 - `ValueError`: if the task has already been executed.
 
-<a name=".aea.skills.tasks.Task.is_executed"></a>
+<a name="aea.skills.tasks.Task.is_executed"></a>
 #### is`_`executed
 
 ```python
@@ -50,7 +50,7 @@ Execute the task.
 
 Check if the task has already been executed.
 
-<a name=".aea.skills.tasks.Task.result"></a>
+<a name="aea.skills.tasks.Task.result"></a>
 #### result
 
 ```python
@@ -66,7 +66,7 @@ Get the result.
 
 - `ValueError`: if the task has not been executed yet.
 
-<a name=".aea.skills.tasks.Task.setup"></a>
+<a name="aea.skills.tasks.Task.setup"></a>
 #### setup
 
 ```python
@@ -80,7 +80,7 @@ Implement the behaviour setup.
 
 None
 
-<a name=".aea.skills.tasks.Task.execute"></a>
+<a name="aea.skills.tasks.Task.execute"></a>
 #### execute
 
 ```python
@@ -94,7 +94,7 @@ Run the task logic.
 
 None
 
-<a name=".aea.skills.tasks.Task.teardown"></a>
+<a name="aea.skills.tasks.Task.teardown"></a>
 #### teardown
 
 ```python
@@ -108,7 +108,7 @@ Implement the behaviour teardown.
 
 None
 
-<a name=".aea.skills.tasks.init_worker"></a>
+<a name="aea.skills.tasks.init_worker"></a>
 #### init`_`worker
 
 ```python
@@ -124,7 +124,7 @@ Related to a well-known bug: https://bugs.python.org/issue8296
 
 None
 
-<a name=".aea.skills.tasks.TaskManager"></a>
+<a name="aea.skills.tasks.TaskManager"></a>
 ## TaskManager Objects
 
 ```python
@@ -133,7 +133,7 @@ class TaskManager(WithLogger)
 
 A Task manager.
 
-<a name=".aea.skills.tasks.TaskManager.__init__"></a>
+<a name="aea.skills.tasks.TaskManager.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -147,7 +147,7 @@ Initialize the task manager.
 - `nb_workers`: the number of worker processes.
 - `is_lazy_pool_start`: option to postpone pool creation till the first enqueue_task called.
 
-<a name=".aea.skills.tasks.TaskManager.is_started"></a>
+<a name="aea.skills.tasks.TaskManager.is_started"></a>
 #### is`_`started
 
 ```python
@@ -161,7 +161,7 @@ Get started status of TaskManager.
 
 bool
 
-<a name=".aea.skills.tasks.TaskManager.nb_workers"></a>
+<a name="aea.skills.tasks.TaskManager.nb_workers"></a>
 #### nb`_`workers
 
 ```python
@@ -175,7 +175,7 @@ Get the number of workers.
 
 int
 
-<a name=".aea.skills.tasks.TaskManager.enqueue_task"></a>
+<a name="aea.skills.tasks.TaskManager.enqueue_task"></a>
 #### enqueue`_`task
 
 ```python
@@ -195,7 +195,7 @@ Enqueue a task with the executor.
 
 - `ValueError`: if the task manager is not running.
 
-<a name=".aea.skills.tasks.TaskManager.get_task_result"></a>
+<a name="aea.skills.tasks.TaskManager.get_task_result"></a>
 #### get`_`task`_`result
 
 ```python
@@ -208,7 +208,7 @@ Get the result from a task.
 
 async result for task_id
 
-<a name=".aea.skills.tasks.TaskManager.start"></a>
+<a name="aea.skills.tasks.TaskManager.start"></a>
 #### start
 
 ```python
@@ -221,7 +221,7 @@ Start the task manager.
 
 None
 
-<a name=".aea.skills.tasks.TaskManager.stop"></a>
+<a name="aea.skills.tasks.TaskManager.stop"></a>
 #### stop
 
 ```python

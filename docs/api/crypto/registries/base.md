@@ -1,9 +1,9 @@
-<a name=".aea.crypto.registries.base"></a>
+<a name="aea.crypto.registries.base"></a>
 # aea.crypto.registries.base
 
 This module implements the base registry.
 
-<a name=".aea.crypto.registries.base.ItemId"></a>
+<a name="aea.crypto.registries.base.ItemId"></a>
 ## ItemId Objects
 
 ```python
@@ -12,7 +12,7 @@ class ItemId(RegexConstrainedString)
 
 The identifier of an item class.
 
-<a name=".aea.crypto.registries.base.ItemId.__init__"></a>
+<a name="aea.crypto.registries.base.ItemId.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -21,7 +21,7 @@ The identifier of an item class.
 
 Initialize the item id.
 
-<a name=".aea.crypto.registries.base.ItemId.name"></a>
+<a name="aea.crypto.registries.base.ItemId.name"></a>
 #### name
 
 ```python
@@ -31,7 +31,7 @@ Initialize the item id.
 
 Get the id name.
 
-<a name=".aea.crypto.registries.base.EntryPoint"></a>
+<a name="aea.crypto.registries.base.EntryPoint"></a>
 ## EntryPoint Objects
 
 ```python
@@ -44,7 +44,7 @@ The regular expression matches the strings in the following format:
 
     path.to.module:className
 
-<a name=".aea.crypto.registries.base.EntryPoint.__init__"></a>
+<a name="aea.crypto.registries.base.EntryPoint.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -53,7 +53,7 @@ The regular expression matches the strings in the following format:
 
 Initialize the entrypoint.
 
-<a name=".aea.crypto.registries.base.EntryPoint.import_path"></a>
+<a name="aea.crypto.registries.base.EntryPoint.import_path"></a>
 #### import`_`path
 
 ```python
@@ -63,7 +63,7 @@ Initialize the entrypoint.
 
 Get the import path.
 
-<a name=".aea.crypto.registries.base.EntryPoint.class_name"></a>
+<a name="aea.crypto.registries.base.EntryPoint.class_name"></a>
 #### class`_`name
 
 ```python
@@ -73,7 +73,7 @@ Get the import path.
 
 Get the class name.
 
-<a name=".aea.crypto.registries.base.EntryPoint.load"></a>
+<a name="aea.crypto.registries.base.EntryPoint.load"></a>
 #### load
 
 ```python
@@ -86,7 +86,7 @@ Load the item object.
 
 the cyrpto object, loaded following the spec.
 
-<a name=".aea.crypto.registries.base.ItemSpec"></a>
+<a name="aea.crypto.registries.base.ItemSpec"></a>
 ## ItemSpec Objects
 
 ```python
@@ -95,7 +95,7 @@ class ItemSpec(Generic[ItemType])
 
 A specification for a particular instance of an object.
 
-<a name=".aea.crypto.registries.base.ItemSpec.__init__"></a>
+<a name="aea.crypto.registries.base.ItemSpec.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -111,7 +111,7 @@ Initialize an item specification.
 - `class_kwargs`: keyword arguments to be attached on the class as class variables.
 - `kwargs`: other custom keyword arguments.
 
-<a name=".aea.crypto.registries.base.ItemSpec.make"></a>
+<a name="aea.crypto.registries.base.ItemSpec.make"></a>
 #### make
 
 ```python
@@ -128,7 +128,7 @@ Instantiate an instance of the item object with appropriate arguments.
 
 an item
 
-<a name=".aea.crypto.registries.base.Registry"></a>
+<a name="aea.crypto.registries.base.Registry"></a>
 ## Registry Objects
 
 ```python
@@ -137,7 +137,7 @@ class Registry(Generic[ItemType])
 
 Registry for generic classes.
 
-<a name=".aea.crypto.registries.base.Registry.__init__"></a>
+<a name="aea.crypto.registries.base.Registry.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -146,7 +146,7 @@ Registry for generic classes.
 
 Initialize the registry.
 
-<a name=".aea.crypto.registries.base.Registry.supported_ids"></a>
+<a name="aea.crypto.registries.base.Registry.supported_ids"></a>
 #### supported`_`ids
 
 ```python
@@ -156,7 +156,7 @@ Initialize the registry.
 
 Get the supported item ids.
 
-<a name=".aea.crypto.registries.base.Registry.register"></a>
+<a name="aea.crypto.registries.base.Registry.register"></a>
 #### register
 
 ```python
@@ -176,7 +176,7 @@ Register an item type.
 
 None.
 
-<a name=".aea.crypto.registries.base.Registry.make"></a>
+<a name="aea.crypto.registries.base.Registry.make"></a>
 #### make
 
 ```python
@@ -203,7 +203,7 @@ the make can then find the identifier.
 
 the new item instance.
 
-<a name=".aea.crypto.registries.base.Registry.has_spec"></a>
+<a name="aea.crypto.registries.base.Registry.has_spec"></a>
 #### has`_`spec
 
 ```python

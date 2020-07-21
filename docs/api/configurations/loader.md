@@ -1,9 +1,9 @@
-<a name=".aea.configurations.loader"></a>
+<a name="aea.configurations.loader"></a>
 # aea.configurations.loader
 
 Implementation of the parser for configuration file.
 
-<a name=".aea.configurations.loader.make_jsonschema_base_uri"></a>
+<a name="aea.configurations.loader.make_jsonschema_base_uri"></a>
 #### make`_`jsonschema`_`base`_`uri
 
 ```python
@@ -20,7 +20,7 @@ Make the JSONSchema base URI, cross-platform.
 
 the string in URI form.
 
-<a name=".aea.configurations.loader.ConfigLoader"></a>
+<a name="aea.configurations.loader.ConfigLoader"></a>
 ## ConfigLoader Objects
 
 ```python
@@ -29,7 +29,7 @@ class ConfigLoader(Generic[T])
 
 This class implement parsing, serialization and validation functionalities for the 'aea' configuration files.
 
-<a name=".aea.configurations.loader.ConfigLoader.__init__"></a>
+<a name="aea.configurations.loader.ConfigLoader.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -43,7 +43,7 @@ Initialize the parser for configuration files.
 - `schema_filename`: the path to the JSON-schema file in 'aea/configurations/schemas'.
 - `configuration_class`: the configuration class (e.g. AgentConfig, SkillConfig etc.)
 
-<a name=".aea.configurations.loader.ConfigLoader.validator"></a>
+<a name="aea.configurations.loader.ConfigLoader.validator"></a>
 #### validator
 
 ```python
@@ -53,7 +53,7 @@ Initialize the parser for configuration files.
 
 Get the json schema validator.
 
-<a name=".aea.configurations.loader.ConfigLoader.required_fields"></a>
+<a name="aea.configurations.loader.ConfigLoader.required_fields"></a>
 #### required`_`fields
 
 ```python
@@ -67,7 +67,7 @@ Get required fields.
 
 list of required fields.
 
-<a name=".aea.configurations.loader.ConfigLoader.configuration_class"></a>
+<a name="aea.configurations.loader.ConfigLoader.configuration_class"></a>
 #### configuration`_`class
 
 ```python
@@ -77,7 +77,7 @@ list of required fields.
 
 Get the configuration class of the loader.
 
-<a name=".aea.configurations.loader.ConfigLoader.load_protocol_specification"></a>
+<a name="aea.configurations.loader.ConfigLoader.load_protocol_specification"></a>
 #### load`_`protocol`_`specification
 
 ```python
@@ -95,7 +95,7 @@ Load an agent configuration file.
 the configuration object.
 :raises
 
-<a name=".aea.configurations.loader.ConfigLoader.load"></a>
+<a name="aea.configurations.loader.ConfigLoader.load"></a>
 #### load
 
 ```python
@@ -113,7 +113,7 @@ Load an agent configuration file.
 the configuration object.
 :raises
 
-<a name=".aea.configurations.loader.ConfigLoader.dump"></a>
+<a name="aea.configurations.loader.ConfigLoader.dump"></a>
 #### dump
 
 ```python
@@ -131,7 +131,7 @@ Dump a configuration.
 
 None
 
-<a name=".aea.configurations.loader.ConfigLoader.from_configuration_type"></a>
+<a name="aea.configurations.loader.ConfigLoader.from_configuration_type"></a>
 #### from`_`configuration`_`type
 
 ```python
@@ -141,7 +141,7 @@ None
 
 Get the configuration loader from the type.
 
-<a name=".aea.configurations.loader.ConfigLoaders"></a>
+<a name="aea.configurations.loader.ConfigLoaders"></a>
 ## ConfigLoaders Objects
 
 ```python
@@ -150,7 +150,7 @@ class ConfigLoaders()
 
 Configuration Loader class to load any package type.
 
-<a name=".aea.configurations.loader.ConfigLoaders.from_package_type"></a>
+<a name="aea.configurations.loader.ConfigLoaders.from_package_type"></a>
 #### from`_`package`_`type
 
 ```python

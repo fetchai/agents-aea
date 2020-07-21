@@ -1,9 +1,9 @@
-<a name=".aea.test_tools.generic"></a>
+<a name="aea.test_tools.generic"></a>
 # aea.test`_`tools.generic
 
 This module contains generic tools for AEA end-to-end testing.
 
-<a name=".aea.test_tools.generic.write_envelope_to_file"></a>
+<a name="aea.test_tools.generic.write_envelope_to_file"></a>
 #### write`_`envelope`_`to`_`file
 
 ```python
@@ -21,7 +21,7 @@ Write an envelope to a file.
 
 None
 
-<a name=".aea.test_tools.generic.read_envelope_from_file"></a>
+<a name="aea.test_tools.generic.read_envelope_from_file"></a>
 #### read`_`envelope`_`from`_`file
 
 ```python
@@ -36,7 +36,7 @@ Read an envelope from a file.
 
 envelope
 
-<a name=".aea.test_tools.generic.force_set_config"></a>
+<a name="aea.test_tools.generic.force_set_config"></a>
 #### force`_`set`_`config
 
 ```python

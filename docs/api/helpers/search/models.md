@@ -1,9 +1,9 @@
-<a name=".aea.helpers.search.models"></a>
+<a name="aea.helpers.search.models"></a>
 # aea.helpers.search.models
 
 Useful classes for the OEF search.
 
-<a name=".aea.helpers.search.models.Location"></a>
+<a name="aea.helpers.search.models.Location"></a>
 ## Location Objects
 
 ```python
@@ -12,7 +12,7 @@ class Location()
 
 Data structure to represent locations (i.e. a pair of latitude and longitude).
 
-<a name=".aea.helpers.search.models.Location.__init__"></a>
+<a name="aea.helpers.search.models.Location.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -26,7 +26,7 @@ Initialize a location.
 - `latitude`: the latitude of the location.
 - `longitude`: the longitude of the location.
 
-<a name=".aea.helpers.search.models.Location.distance"></a>
+<a name="aea.helpers.search.models.Location.distance"></a>
 #### distance
 
 ```python
@@ -40,7 +40,7 @@ Get the distance to another location.
 - `other`: the other location
 :retun: the distance
 
-<a name=".aea.helpers.search.models.Location.__eq__"></a>
+<a name="aea.helpers.search.models.Location.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -49,7 +49,7 @@ Get the distance to another location.
 
 Compare equality of two locations.
 
-<a name=".aea.helpers.search.models.AttributeInconsistencyException"></a>
+<a name="aea.helpers.search.models.AttributeInconsistencyException"></a>
 ## AttributeInconsistencyException Objects
 
 ```python
@@ -61,7 +61,7 @@ Raised when the attributes in a Description are inconsistent.
 Inconsistency is defined when values do not meet their respective schema, or if the values
 are not of an allowed type.
 
-<a name=".aea.helpers.search.models.Attribute"></a>
+<a name="aea.helpers.search.models.Attribute"></a>
 ## Attribute Objects
 
 ```python
@@ -70,7 +70,7 @@ class Attribute()
 
 Implements an attribute for an OEF data model.
 
-<a name=".aea.helpers.search.models.Attribute.__init__"></a>
+<a name="aea.helpers.search.models.Attribute.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -86,7 +86,7 @@ Initialize an attribute.
 - `is_required`: whether the attribute is required by the data model.
 - `description`: an (optional) human-readable description for the attribute.
 
-<a name=".aea.helpers.search.models.Attribute.__eq__"></a>
+<a name="aea.helpers.search.models.Attribute.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -95,7 +95,7 @@ Initialize an attribute.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.DataModel"></a>
+<a name="aea.helpers.search.models.DataModel"></a>
 ## DataModel Objects
 
 ```python
@@ -104,7 +104,7 @@ class DataModel()
 
 Implements an OEF data model.
 
-<a name=".aea.helpers.search.models.DataModel.__init__"></a>
+<a name="aea.helpers.search.models.DataModel.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -118,7 +118,7 @@ Initialize a data model.
 - `name`: the name of the data model.
 - `attributes`: the attributes of the data model.
 
-<a name=".aea.helpers.search.models.DataModel.__eq__"></a>
+<a name="aea.helpers.search.models.DataModel.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -127,7 +127,7 @@ Initialize a data model.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.generate_data_model"></a>
+<a name="aea.helpers.search.models.generate_data_model"></a>
 #### generate`_`data`_`model
 
 ```python
@@ -148,7 +148,7 @@ It is assumed that each attribute is required.
 
 the schema compliant with the values specified.
 
-<a name=".aea.helpers.search.models.Description"></a>
+<a name="aea.helpers.search.models.Description"></a>
 ## Description Objects
 
 ```python
@@ -157,7 +157,7 @@ class Description()
 
 Implements an OEF description.
 
-<a name=".aea.helpers.search.models.Description.__init__"></a>
+<a name="aea.helpers.search.models.Description.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -172,7 +172,7 @@ Initialize the description object.
 - `data_model`: the data model (optional)
 :pram data_model_name: the data model name if a datamodel is created on the fly.
 
-<a name=".aea.helpers.search.models.Description.values"></a>
+<a name="aea.helpers.search.models.Description.values"></a>
 #### values
 
 ```python
@@ -182,7 +182,7 @@ Initialize the description object.
 
 Get the values.
 
-<a name=".aea.helpers.search.models.Description.__eq__"></a>
+<a name="aea.helpers.search.models.Description.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -191,7 +191,7 @@ Get the values.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.Description.__iter__"></a>
+<a name="aea.helpers.search.models.Description.__iter__"></a>
 #### `__`iter`__`
 
 ```python
@@ -200,7 +200,7 @@ Compare with another object.
 
 Create an iterator.
 
-<a name=".aea.helpers.search.models.Description.encode"></a>
+<a name="aea.helpers.search.models.Description.encode"></a>
 #### encode
 
 ```python
@@ -221,7 +221,7 @@ The protocol buffer object in the description_protobuf_object argument must be m
 
 None
 
-<a name=".aea.helpers.search.models.Description.decode"></a>
+<a name="aea.helpers.search.models.Description.decode"></a>
 #### decode
 
 ```python
@@ -241,7 +241,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
 
-<a name=".aea.helpers.search.models.ConstraintTypes"></a>
+<a name="aea.helpers.search.models.ConstraintTypes"></a>
 ## ConstraintTypes Objects
 
 ```python
@@ -250,7 +250,7 @@ class ConstraintTypes(Enum)
 
 Types of constraint.
 
-<a name=".aea.helpers.search.models.ConstraintTypes.__str__"></a>
+<a name="aea.helpers.search.models.ConstraintTypes.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -259,7 +259,7 @@ Types of constraint.
 
 Get the string representation.
 
-<a name=".aea.helpers.search.models.ConstraintType"></a>
+<a name="aea.helpers.search.models.ConstraintType"></a>
 ## ConstraintType Objects
 
 ```python
@@ -283,7 +283,7 @@ Used with the Constraint class, this class allows to specify constraint over att
   >>> in_a_set = ConstraintType("in", [1, 2, 3])
   >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
 
-<a name=".aea.helpers.search.models.ConstraintType.__init__"></a>
+<a name="aea.helpers.search.models.ConstraintType.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -303,7 +303,7 @@ Initialize a constraint type.
 
 - `ValueError`: if the type of the constraint is not
 
-<a name=".aea.helpers.search.models.ConstraintType.check_validity"></a>
+<a name="aea.helpers.search.models.ConstraintType.check_validity"></a>
 #### check`_`validity
 
 ```python
@@ -320,7 +320,7 @@ None
 
 - `ValueError`: if the value is not valid wrt the constraint type.
 
-<a name=".aea.helpers.search.models.ConstraintType.is_valid"></a>
+<a name="aea.helpers.search.models.ConstraintType.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -356,7 +356,7 @@ False
 
 ``True`` if the constraint type is valid wrt the attribute, ``False`` otherwise.
 
-<a name=".aea.helpers.search.models.ConstraintType.get_data_type"></a>
+<a name="aea.helpers.search.models.ConstraintType.get_data_type"></a>
 #### get`_`data`_`type
 
 ```python
@@ -370,7 +370,7 @@ For instance:
 >>> c.get_data_type()
 <class 'int'>
 
-<a name=".aea.helpers.search.models.ConstraintType.check"></a>
+<a name="aea.helpers.search.models.ConstraintType.check"></a>
 #### check
 
 ```python
@@ -393,7 +393,7 @@ True if the value satisfy the constraint, False otherwise.
 
 - `ValueError`: if the constraint type is not recognized.
 
-<a name=".aea.helpers.search.models.ConstraintType.__eq__"></a>
+<a name="aea.helpers.search.models.ConstraintType.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -402,7 +402,7 @@ True if the value satisfy the constraint, False otherwise.
 
 Check equality with another object.
 
-<a name=".aea.helpers.search.models.ConstraintExpr"></a>
+<a name="aea.helpers.search.models.ConstraintExpr"></a>
 ## ConstraintExpr Objects
 
 ```python
@@ -411,7 +411,7 @@ class ConstraintExpr(ABC)
 
 Implementation of the constraint language to query the OEF node.
 
-<a name=".aea.helpers.search.models.ConstraintExpr.check"></a>
+<a name="aea.helpers.search.models.ConstraintExpr.check"></a>
 #### check
 
 ```python
@@ -429,7 +429,7 @@ Check if a description satisfies the constraint expression.
 
 True if the description satisfy the constraint expression, False otherwise.
 
-<a name=".aea.helpers.search.models.ConstraintExpr.is_valid"></a>
+<a name="aea.helpers.search.models.ConstraintExpr.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -450,7 +450,7 @@ Specifically, check the following conditions:
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
-<a name=".aea.helpers.search.models.ConstraintExpr.check_validity"></a>
+<a name="aea.helpers.search.models.ConstraintExpr.check_validity"></a>
 #### check`_`validity
 
 ```python
@@ -465,7 +465,7 @@ Check whether a Constraint Expression satisfies some basic requirements.
 
 - `ValueError`: if the object does not satisfy some requirements.
 
-<a name=".aea.helpers.search.models.And"></a>
+<a name="aea.helpers.search.models.And"></a>
 ## And Objects
 
 ```python
@@ -474,7 +474,7 @@ class And(ConstraintExpr)
 
 Implementation of the 'And' constraint expression.
 
-<a name=".aea.helpers.search.models.And.__init__"></a>
+<a name="aea.helpers.search.models.And.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -487,7 +487,7 @@ Initialize an 'And' expression.
 
 - `constraints`: the list of constraints expression (in conjunction).
 
-<a name=".aea.helpers.search.models.And.check"></a>
+<a name="aea.helpers.search.models.And.check"></a>
 #### check
 
 ```python
@@ -504,7 +504,7 @@ Check if a value satisfies the 'And' constraint expression.
 
 True if the description satisfy the constraint expression, False otherwise.
 
-<a name=".aea.helpers.search.models.And.is_valid"></a>
+<a name="aea.helpers.search.models.And.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -521,7 +521,7 @@ Check whether the constraint expression is valid wrt a data model.
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
-<a name=".aea.helpers.search.models.And.check_validity"></a>
+<a name="aea.helpers.search.models.And.check_validity"></a>
 #### check`_`validity
 
 ```python
@@ -536,7 +536,7 @@ Check whether the Constraint Expression satisfies some basic requirements.
 
 - `ValueError`: if the object does not satisfy some requirements.
 
-<a name=".aea.helpers.search.models.And.__eq__"></a>
+<a name="aea.helpers.search.models.And.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -545,7 +545,7 @@ Check whether the Constraint Expression satisfies some basic requirements.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.Or"></a>
+<a name="aea.helpers.search.models.Or"></a>
 ## Or Objects
 
 ```python
@@ -554,7 +554,7 @@ class Or(ConstraintExpr)
 
 Implementation of the 'Or' constraint expression.
 
-<a name=".aea.helpers.search.models.Or.__init__"></a>
+<a name="aea.helpers.search.models.Or.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -567,7 +567,7 @@ Initialize an 'Or' expression.
 
 - `constraints`: the list of constraints expressions (in disjunction).
 
-<a name=".aea.helpers.search.models.Or.check"></a>
+<a name="aea.helpers.search.models.Or.check"></a>
 #### check
 
 ```python
@@ -584,7 +584,7 @@ Check if a value satisfies the 'Or' constraint expression.
 
 True if the description satisfy the constraint expression, False otherwise.
 
-<a name=".aea.helpers.search.models.Or.is_valid"></a>
+<a name="aea.helpers.search.models.Or.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -601,7 +601,7 @@ Check whether the constraint expression is valid wrt a data model.
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
-<a name=".aea.helpers.search.models.Or.check_validity"></a>
+<a name="aea.helpers.search.models.Or.check_validity"></a>
 #### check`_`validity
 
 ```python
@@ -616,7 +616,7 @@ Check whether the Constraint Expression satisfies some basic requirements.
 
 - `ValueError`: if the object does not satisfy some requirements.
 
-<a name=".aea.helpers.search.models.Or.__eq__"></a>
+<a name="aea.helpers.search.models.Or.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -625,7 +625,7 @@ Check whether the Constraint Expression satisfies some basic requirements.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.Not"></a>
+<a name="aea.helpers.search.models.Not"></a>
 ## Not Objects
 
 ```python
@@ -634,7 +634,7 @@ class Not(ConstraintExpr)
 
 Implementation of the 'Not' constraint expression.
 
-<a name=".aea.helpers.search.models.Not.__init__"></a>
+<a name="aea.helpers.search.models.Not.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -647,7 +647,7 @@ Initialize a 'Not' expression.
 
 - `constraint`: the constraint expression to negate.
 
-<a name=".aea.helpers.search.models.Not.check"></a>
+<a name="aea.helpers.search.models.Not.check"></a>
 #### check
 
 ```python
@@ -664,7 +664,7 @@ Check if a value satisfies the 'Not' constraint expression.
 
 True if the description satisfy the constraint expression, False otherwise.
 
-<a name=".aea.helpers.search.models.Not.is_valid"></a>
+<a name="aea.helpers.search.models.Not.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -681,7 +681,7 @@ Check whether the constraint expression is valid wrt a data model.
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
-<a name=".aea.helpers.search.models.Not.__eq__"></a>
+<a name="aea.helpers.search.models.Not.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -690,7 +690,7 @@ Check whether the constraint expression is valid wrt a data model.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.Constraint"></a>
+<a name="aea.helpers.search.models.Constraint"></a>
 ## Constraint Objects
 
 ```python
@@ -699,7 +699,7 @@ class Constraint(ConstraintExpr)
 
 The atomic component of a constraint expression.
 
-<a name=".aea.helpers.search.models.Constraint.__init__"></a>
+<a name="aea.helpers.search.models.Constraint.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -713,7 +713,7 @@ Initialize a constraint.
 - `attribute_name`: the name of the attribute to be constrained.
 - `constraint_type`: the constraint type.
 
-<a name=".aea.helpers.search.models.Constraint.check"></a>
+<a name="aea.helpers.search.models.Constraint.check"></a>
 #### check
 
 ```python
@@ -765,7 +765,7 @@ False
 >>> c3.check(Description({"author": "Stephen King", "genre": False}))
 False
 
-<a name=".aea.helpers.search.models.Constraint.is_valid"></a>
+<a name="aea.helpers.search.models.Constraint.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -782,7 +782,7 @@ Check whether the constraint expression is valid wrt a data model.
 
 ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
-<a name=".aea.helpers.search.models.Constraint.__eq__"></a>
+<a name="aea.helpers.search.models.Constraint.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -791,7 +791,7 @@ Check whether the constraint expression is valid wrt a data model.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.Query"></a>
+<a name="aea.helpers.search.models.Query"></a>
 ## Query Objects
 
 ```python
@@ -800,7 +800,7 @@ class Query()
 
 This class lets you build a query for the OEF.
 
-<a name=".aea.helpers.search.models.Query.__init__"></a>
+<a name="aea.helpers.search.models.Query.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -814,7 +814,7 @@ Initialize a query.
 - `constraints`: a list of constraint expressions.
 - `model`: the data model that the query refers to.
 
-<a name=".aea.helpers.search.models.Query.check"></a>
+<a name="aea.helpers.search.models.Query.check"></a>
 #### check
 
 ```python
@@ -833,7 +833,7 @@ The constraints are interpreted as conjunction.
 
 True if the description satisfies all the constraints, False otherwise.
 
-<a name=".aea.helpers.search.models.Query.is_valid"></a>
+<a name="aea.helpers.search.models.Query.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -846,7 +846,7 @@ Given a data model, check whether the query is valid for that data model.
 
 ``True`` if the query is compliant with the data model, ``False`` otherwise.
 
-<a name=".aea.helpers.search.models.Query.check_validity"></a>
+<a name="aea.helpers.search.models.Query.check_validity"></a>
 #### check`_`validity
 
 ```python
@@ -861,7 +861,7 @@ Check whether the` object is valid.
 
 - `ValueError`: if the query does not satisfy some sanity requirements.
 
-<a name=".aea.helpers.search.models.Query.__eq__"></a>
+<a name="aea.helpers.search.models.Query.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -870,7 +870,7 @@ Check whether the` object is valid.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.Query.encode"></a>
+<a name="aea.helpers.search.models.Query.encode"></a>
 #### encode
 
 ```python
@@ -891,7 +891,7 @@ The protocol buffer object in the query_protobuf_object argument must be matched
 
 None
 
-<a name=".aea.helpers.search.models.Query.decode"></a>
+<a name="aea.helpers.search.models.Query.decode"></a>
 #### decode
 
 ```python
@@ -911,7 +911,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'query_protobuf_object' argument.
 
-<a name=".aea.helpers.search.models.haversine"></a>
+<a name="aea.helpers.search.models.haversine"></a>
 #### haversine
 
 ```python

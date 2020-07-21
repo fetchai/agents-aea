@@ -1,9 +1,9 @@
-<a name=".aea.decision_maker.base"></a>
+<a name="aea.decision_maker.base"></a>
 # aea.decision`_`maker.base
 
 This module contains the decision maker class.
 
-<a name=".aea.decision_maker.base.OwnershipState"></a>
+<a name="aea.decision_maker.base.OwnershipState"></a>
 ## OwnershipState Objects
 
 ```python
@@ -12,7 +12,7 @@ class OwnershipState(ABC)
 
 Represent the ownership state of an agent (can proxy a ledger).
 
-<a name=".aea.decision_maker.base.OwnershipState.set"></a>
+<a name="aea.decision_maker.base.OwnershipState.set"></a>
 #### set
 
 ```python
@@ -30,7 +30,7 @@ Set values on the ownership state.
 
 None
 
-<a name=".aea.decision_maker.base.OwnershipState.apply_delta"></a>
+<a name="aea.decision_maker.base.OwnershipState.apply_delta"></a>
 #### apply`_`delta
 
 ```python
@@ -50,7 +50,7 @@ This method is used to apply a raw state update without a transaction.
 
 None
 
-<a name=".aea.decision_maker.base.OwnershipState.is_initialized"></a>
+<a name="aea.decision_maker.base.OwnershipState.is_initialized"></a>
 #### is`_`initialized
 
 ```python
@@ -61,7 +61,7 @@ None
 
 Get the initialization status.
 
-<a name=".aea.decision_maker.base.OwnershipState.is_affordable_transaction"></a>
+<a name="aea.decision_maker.base.OwnershipState.is_affordable_transaction"></a>
 #### is`_`affordable`_`transaction
 
 ```python
@@ -79,7 +79,7 @@ Check if the transaction is affordable (and consistent).
 
 True if the transaction is legal wrt the current state, false otherwise.
 
-<a name=".aea.decision_maker.base.OwnershipState.apply_transactions"></a>
+<a name="aea.decision_maker.base.OwnershipState.apply_transactions"></a>
 #### apply`_`transactions
 
 ```python
@@ -97,7 +97,7 @@ Apply a list of transactions to (a copy of) the current state.
 
 the final state.
 
-<a name=".aea.decision_maker.base.OwnershipState.__copy__"></a>
+<a name="aea.decision_maker.base.OwnershipState.__copy__"></a>
 #### `__`copy`__`
 
 ```python
@@ -107,7 +107,7 @@ the final state.
 
 Copy the object.
 
-<a name=".aea.decision_maker.base.Preferences"></a>
+<a name="aea.decision_maker.base.Preferences"></a>
 ## Preferences Objects
 
 ```python
@@ -116,7 +116,7 @@ class Preferences(ABC)
 
 Class to represent the preferences.
 
-<a name=".aea.decision_maker.base.Preferences.set"></a>
+<a name="aea.decision_maker.base.Preferences.set"></a>
 #### set
 
 ```python
@@ -130,7 +130,7 @@ Set values on the preferences.
 
 - `kwargs`: the relevant key word arguments
 
-<a name=".aea.decision_maker.base.Preferences.is_initialized"></a>
+<a name="aea.decision_maker.base.Preferences.is_initialized"></a>
 #### is`_`initialized
 
 ```python
@@ -143,7 +143,7 @@ Get the initialization status.
 
 Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
 
-<a name=".aea.decision_maker.base.Preferences.marginal_utility"></a>
+<a name="aea.decision_maker.base.Preferences.marginal_utility"></a>
 #### marginal`_`utility
 
 ```python
@@ -162,7 +162,7 @@ Compute the marginal utility.
 
 the marginal utility score
 
-<a name=".aea.decision_maker.base.Preferences.utility_diff_from_transaction"></a>
+<a name="aea.decision_maker.base.Preferences.utility_diff_from_transaction"></a>
 #### utility`_`diff`_`from`_`transaction
 
 ```python
@@ -181,7 +181,7 @@ Simulate a transaction and get the resulting utility difference (taking into acc
 
 the score.
 
-<a name=".aea.decision_maker.base.Preferences.__copy__"></a>
+<a name="aea.decision_maker.base.Preferences.__copy__"></a>
 #### `__`copy`__`
 
 ```python
@@ -191,7 +191,7 @@ the score.
 
 Copy the object.
 
-<a name=".aea.decision_maker.base.ProtectedQueue"></a>
+<a name="aea.decision_maker.base.ProtectedQueue"></a>
 ## ProtectedQueue Objects
 
 ```python
@@ -200,7 +200,7 @@ class ProtectedQueue(Queue)
 
 A wrapper of a queue to protect which object can read from it.
 
-<a name=".aea.decision_maker.base.ProtectedQueue.__init__"></a>
+<a name="aea.decision_maker.base.ProtectedQueue.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -213,7 +213,7 @@ Initialize the protected queue.
 
 - `access_code`: the access code to read from the queue
 
-<a name=".aea.decision_maker.base.ProtectedQueue.put"></a>
+<a name="aea.decision_maker.base.ProtectedQueue.put"></a>
 #### put
 
 ```python
@@ -239,7 +239,7 @@ ignored in that case).
 
 None
 
-<a name=".aea.decision_maker.base.ProtectedQueue.put_nowait"></a>
+<a name="aea.decision_maker.base.ProtectedQueue.put_nowait"></a>
 #### put`_`nowait
 
 ```python
@@ -259,7 +259,7 @@ Equivalent to put(item, False).
 
 None
 
-<a name=".aea.decision_maker.base.ProtectedQueue.get"></a>
+<a name="aea.decision_maker.base.ProtectedQueue.get"></a>
 #### get
 
 ```python
@@ -274,7 +274,7 @@ Inaccessible get method.
 
 None
 
-<a name=".aea.decision_maker.base.ProtectedQueue.get_nowait"></a>
+<a name="aea.decision_maker.base.ProtectedQueue.get_nowait"></a>
 #### get`_`nowait
 
 ```python
@@ -289,7 +289,7 @@ Inaccessible get_nowait method.
 
 None
 
-<a name=".aea.decision_maker.base.ProtectedQueue.protected_get"></a>
+<a name="aea.decision_maker.base.ProtectedQueue.protected_get"></a>
 #### protected`_`get
 
 ```python
@@ -309,7 +309,7 @@ Access protected get method.
 
 internal message
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler"></a>
 ## DecisionMakerHandler Objects
 
 ```python
@@ -318,7 +318,7 @@ class DecisionMakerHandler(ABC)
 
 This class implements the decision maker.
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler.__init__"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -333,7 +333,7 @@ Initialize the decision maker handler.
 - `wallet`: the wallet
 - `kwargs`: the key word arguments
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler.agent_name"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler.agent_name"></a>
 #### agent`_`name
 
 ```python
@@ -343,7 +343,7 @@ Initialize the decision maker handler.
 
 Get the agent name.
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler.identity"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler.identity"></a>
 #### identity
 
 ```python
@@ -353,7 +353,7 @@ Get the agent name.
 
 Get identity of the agent.
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler.wallet"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler.wallet"></a>
 #### wallet
 
 ```python
@@ -363,7 +363,7 @@ Get identity of the agent.
 
 Get wallet of the agent.
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler.context"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler.context"></a>
 #### context
 
 ```python
@@ -373,7 +373,7 @@ Get wallet of the agent.
 
 Get the context.
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler.message_out_queue"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler.message_out_queue"></a>
 #### message`_`out`_`queue
 
 ```python
@@ -383,7 +383,7 @@ Get the context.
 
 Get (out) queue.
 
-<a name=".aea.decision_maker.base.DecisionMakerHandler.handle"></a>
+<a name="aea.decision_maker.base.DecisionMakerHandler.handle"></a>
 #### handle
 
 ```python
@@ -401,7 +401,7 @@ Handle an internal message from the skills.
 
 None
 
-<a name=".aea.decision_maker.base.DecisionMaker"></a>
+<a name="aea.decision_maker.base.DecisionMaker"></a>
 ## DecisionMaker Objects
 
 ```python
@@ -410,7 +410,7 @@ class DecisionMaker()
 
 This class implements the decision maker.
 
-<a name=".aea.decision_maker.base.DecisionMaker.__init__"></a>
+<a name="aea.decision_maker.base.DecisionMaker.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -424,7 +424,7 @@ Initialize the decision maker.
 - `agent_name`: the agent name
 - `decision_maker_handler`: the decision maker handler
 
-<a name=".aea.decision_maker.base.DecisionMaker.message_in_queue"></a>
+<a name="aea.decision_maker.base.DecisionMaker.message_in_queue"></a>
 #### message`_`in`_`queue
 
 ```python
@@ -434,7 +434,7 @@ Initialize the decision maker.
 
 Get (in) queue.
 
-<a name=".aea.decision_maker.base.DecisionMaker.message_out_queue"></a>
+<a name="aea.decision_maker.base.DecisionMaker.message_out_queue"></a>
 #### message`_`out`_`queue
 
 ```python
@@ -444,7 +444,7 @@ Get (in) queue.
 
 Get (out) queue.
 
-<a name=".aea.decision_maker.base.DecisionMaker.decision_maker_handler"></a>
+<a name="aea.decision_maker.base.DecisionMaker.decision_maker_handler"></a>
 #### decision`_`maker`_`handler
 
 ```python
@@ -454,7 +454,7 @@ Get (out) queue.
 
 Get the decision maker handler.
 
-<a name=".aea.decision_maker.base.DecisionMaker.start"></a>
+<a name="aea.decision_maker.base.DecisionMaker.start"></a>
 #### start
 
 ```python
@@ -463,7 +463,7 @@ Get the decision maker handler.
 
 Start the decision maker.
 
-<a name=".aea.decision_maker.base.DecisionMaker.stop"></a>
+<a name="aea.decision_maker.base.DecisionMaker.stop"></a>
 #### stop
 
 ```python
@@ -472,7 +472,7 @@ Start the decision maker.
 
 Stop the decision maker.
 
-<a name=".aea.decision_maker.base.DecisionMaker.execute"></a>
+<a name="aea.decision_maker.base.DecisionMaker.execute"></a>
 #### execute
 
 ```python
@@ -489,7 +489,7 @@ Performs the following while not stopped:
 
 None
 
-<a name=".aea.decision_maker.base.DecisionMaker.handle"></a>
+<a name="aea.decision_maker.base.DecisionMaker.handle"></a>
 #### handle
 
 ```python
