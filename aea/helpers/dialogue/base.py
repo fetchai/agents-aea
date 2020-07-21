@@ -715,7 +715,7 @@ class Dialogues(ABC):
         if role_from_first_message is not None:
             self._role_from_first_message = role_from_first_message
         else:
-            self._role_from_first_message = self.role_from_first_message
+            self._role_from_first_message = self.role_from_first_message  # pragma: no cover
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
@@ -934,7 +934,7 @@ class Dialogues(ABC):
                 role=role,
             )
         else:
-            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)
+            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)  # pragma: no cover
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -974,7 +974,7 @@ class Dialogues(ABC):
                 role=role,
             )
         else:
-            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)
+            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)  # pragma: no cover
         self.dialogues.update({dialogue_label: dialogue})
 
         return dialogue
@@ -1002,7 +1002,7 @@ class Dialogues(ABC):
         :param message: an incoming/outgoing first message
         :return: the agent's role
         """
-        pass
+        pass  # pragma: no cover
 
     def _next_dialogue_nonce(self) -> int:
         """
