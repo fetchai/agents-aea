@@ -715,7 +715,9 @@ class Dialogues(ABC):
         if role_from_first_message is not None:
             self._role_from_first_message = role_from_first_message
         else:
-            self._role_from_first_message = self.role_from_first_message  # pragma: no cover
+            self._role_from_first_message = (
+                self.role_from_first_message
+            )  # pragma: no cover
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
@@ -934,7 +936,9 @@ class Dialogues(ABC):
                 role=role,
             )
         else:
-            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)  # pragma: no cover
+            dialogue = self.create_dialogue(
+                dialogue_label=dialogue_label, role=role,
+            )  # pragma: no cover
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -974,7 +978,9 @@ class Dialogues(ABC):
                 role=role,
             )
         else:
-            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)  # pragma: no cover
+            dialogue = self.create_dialogue(
+                dialogue_label=dialogue_label, role=role,
+            )  # pragma: no cover
         self.dialogues.update({dialogue_label: dialogue})
 
         return dialogue
