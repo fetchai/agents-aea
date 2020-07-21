@@ -20,8 +20,9 @@
 """This module contains the tests for the base classes for the skills."""
 
 from queue import Queue
+from types import SimpleNamespace
 from unittest import TestCase, mock
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 from aea.aea import AEA
 from aea.connections.base import ConnectionStatus
@@ -55,7 +56,9 @@ class TestSkillContext:
         )
         cls.my_aea = AEA(cls.identity, cls.wallet, resources=Resources())
         cls.my_aea.resources.add_connection(cls.connection)
-        cls.skill_context = SkillContext(cls.my_aea.context)
+        cls.skill_context = SkillContext(
+            cls.my_aea.context, skill=MagicMock(contracts={})
+        )
 
     def test_agent_name(self):
         """Test the agent's name."""
@@ -100,6 +103,44 @@ class TestSkillContext:
     def test_message_in_queue(self):
         """Test the 'message_in_queue' property."""
         assert isinstance(self.skill_context.message_in_queue, Queue)
+
+    def test_logger_setter(self):
+        """Test the logger setter."""
+        logger = self.skill_context.logger
+        self.skill_context._logger = None
+        self.skill_context.logger = logger
+        assert self.skill_context.logger == logger
+
+    def test_agent_context_setter(self):
+        """Test the agent context setter."""
+        agent_context = self.skill_context._agent_context
+        self.skill_context.set_agent_context(agent_context)
+        assert self.skill_context.agent_name == agent_context.agent_name
+        assert self.skill_context.agent_address == agent_context.address
+        assert self.skill_context.agent_addresses == agent_context.addresses
+
+    def test_is_active_property(self):
+        """Test is_active property getter."""
+        assert self.skill_context.is_active is True
+
+    def test_new_behaviours_queue(self):
+        """Test 'new_behaviours_queue' property getter."""
+        assert isinstance(self.skill_context.new_behaviours, Queue)
+
+    def test_search_service_address(self):
+        """Test 'search_service_address' property getter."""
+        assert (
+            self.skill_context.search_service_address
+            == self.my_aea.context.search_service_address
+        )
+
+    def test_contracts(self):
+        """Test the 'contracts' property getter."""
+        assert isinstance(self.skill_context.contracts, SimpleNamespace)
+
+    def test_namespace(self):
+        """Test the 'namespace' property getter."""
+        assert isinstance(self.skill_context.namespace, SimpleNamespace)
 
     @classmethod
     def teardown_class(cls):
