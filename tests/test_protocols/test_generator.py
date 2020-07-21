@@ -543,7 +543,7 @@ class TestSerialisations:
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_O,
             content_ct=data_model,
         )
 
@@ -558,25 +558,46 @@ class TestSerialisations:
         assert decoded_message.performative == message_o_ct_set.performative
         assert decoded_message.content_ct == message_o_ct_set.content_ct
 
+        # #####################
+        #
+        # message_o_ct_not_set = TProtocolMessage(
+        #     message_id=1,
+        #     dialogue_reference=(str(0), ""),
+        #     target=0,
+        #     performative=TProtocolMessage.Performative.PERFORMATIVE_O,
+        #     content_ct=data_model,
+        # )
+        #
+        # encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_o_ct_not_set)
+        # decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+        #
+        # assert decoded_message.message_id == message_o_ct_not_set.message_id
+        # assert decoded_message.dialogue_reference == message_o_ct_not_set.dialogue_reference
+        # assert decoded_message.dialogue_reference[0] == message_o_ct_not_set.dialogue_reference[0]
+        # assert decoded_message.dialogue_reference[1] == message_o_ct_not_set.dialogue_reference[1]
+        # assert decoded_message.target == message_o_ct_not_set.target
+        # assert decoded_message.performative == message_o_ct_not_set.performative
+        # assert decoded_message.content_ct == message_o_ct_not_set.content_ct
+
         #####################
 
-        message_o_ct_not_set = TProtocolMessage(
-            message_id=1,
-            dialogue_reference=(str(0), ""),
-            target=0,
-            performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
-        )
-
-        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_o_ct_not_set)
-        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
-
-        assert decoded_message.message_id == message_o_ct_not_set.message_id
-        assert decoded_message.dialogue_reference == message_o_ct_not_set.dialogue_reference
-        assert decoded_message.dialogue_reference[0] == message_o_ct_not_set.dialogue_reference[0]
-        assert decoded_message.dialogue_reference[1] == message_o_ct_not_set.dialogue_reference[1]
-        assert decoded_message.target == message_o_ct_not_set.target
-        assert decoded_message.performative == message_o_ct_not_set.performative
-        assert decoded_message.content_ct == message_o_ct_not_set.content_ct
+        # message_o_bool_set = TProtocolMessage(
+        #     message_id=1,
+        #     dialogue_reference=(str(0), ""),
+        #     target=0,
+        #     performative=TProtocolMessage.Performative.PERFORMATIVE_O,
+        # )
+        #
+        # encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_o_ct_not_set)
+        # decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+        #
+        # assert decoded_message.message_id == message_o_ct_not_set.message_id
+        # assert decoded_message.dialogue_reference == message_o_ct_not_set.dialogue_reference
+        # assert decoded_message.dialogue_reference[0] == message_o_ct_not_set.dialogue_reference[0]
+        # assert decoded_message.dialogue_reference[1] == message_o_ct_not_set.dialogue_reference[1]
+        # assert decoded_message.target == message_o_ct_not_set.target
+        # assert decoded_message.performative == message_o_ct_not_set.performative
+        # assert decoded_message.content_ct == message_o_ct_not_set.content_ct
 
     @classmethod
     def teardown_class(cls):
