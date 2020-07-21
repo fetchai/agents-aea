@@ -198,6 +198,9 @@ def process_packages(
                 is_bumped = process_package(type_, key)
             if is_bumped:
                 break
+        else:
+            continue
+        break
     return is_bumped
 
 
@@ -288,7 +291,7 @@ def process_package(type_: str, name: str) -> bool:
 
 def run_once() -> bool:
     """Run the upgrade logic once."""
-    # check_if_running_allowed()
+    check_if_running_allowed()
     last = get_hashes_from_last_release()
     now = get_hashes_from_current_release()
     last_by_type = split_hashes_by_type(last)
@@ -300,5 +303,4 @@ def run_once() -> bool:
 if __name__ == "__main__":
     while run_once():
         run_hashing()
-
     sys.exit(0)
