@@ -406,7 +406,7 @@ class Dialogue(ABC):
         ):
             self._update_self_initiated_dialogue_label_on_second_message(message)
 
-        counterparty = None
+        counterparty = None  # type: Optional[str]
         try:
             counterparty = message.counterparty
         except AssertionError:
