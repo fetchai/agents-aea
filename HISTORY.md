@@ -1,5 +1,15 @@
 # Release History
 
+## 0.5.2 (2020-07-21)
+
+- Transitions demos to agent-land test network, P2P and SOEF connections
+- Adds full test coverage for helpers modules
+- Adds full test coverage for core modules
+- Adds CLI functionality to upload README.md files with packages
+- Adds full test coverage for registries module
+- Multiple docs updates
+- Multiple additional tests and test stability fixes
+
 ## 0.5.1 (2020-07-14)
 
 - Adds support for agent name being appended to all log statements

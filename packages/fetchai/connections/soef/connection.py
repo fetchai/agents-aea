@@ -376,7 +376,7 @@ class SOEFChannel:
             }
 
             if oef_message.performative not in handlers_and_errors:
-                raise ValueError("OEF request not recognized.")
+                raise ValueError("OEF request not recognized.")  # pragma: nocover
 
             handler, oef_error_operation = handlers_and_errors[oef_message.performative]
             await handler(oef_message, oef_search_dialogue)
@@ -387,7 +387,7 @@ class SOEFChannel:
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except # pragma: nocover
             logger.exception("Exception during envelope processing")
             await self._send_error_response(
                 oef_message,

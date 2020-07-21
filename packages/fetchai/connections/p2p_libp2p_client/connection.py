@@ -97,7 +97,7 @@ class P2PLibp2pClientConnection(Connection):
 
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
         if ledger_id not in SUPPORTED_LEDGER_IDS:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Ledger id '{}' is not supported. Supported ids: '{}'".format(
                     ledger_id, SUPPORTED_LEDGER_IDS
                 )

@@ -461,12 +461,12 @@ class Libp2pNode:
                 return None
             return data
         except asyncio.streams.IncompleteReadError as e:
-            self.logger.info(
+            self.logger.info(  # pragma: nocover
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )
             )
-            return None
+            return None  # pragma: nocover
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
     def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
@@ -531,7 +531,7 @@ class P2PLibp2pConnection(Connection):
         super().__init__(**kwargs)
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
         if ledger_id not in SUPPORTED_LEDGER_IDS:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Ledger id '{}' is not supported. Supported ids: '{}'".format(
                     ledger_id, SUPPORTED_LEDGER_IDS
                 )
