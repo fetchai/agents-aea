@@ -38,6 +38,7 @@ from aea.cli.utils.config import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import _validate_config_consistency, clean_after
 from aea.cli.utils.formatting import format_items
+from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
@@ -411,3 +412,12 @@ class TryGetBalanceTestCase(TestCase):
         wallet_mock = mock.Mock()
         wallet_mock.addresses = {FETCHAI: "some-adress"}
         try_get_balance(agent_config, wallet_mock, FETCHAI)
+
+
+@mock.patch("aea.cli.utils.generic.os.path.exists", return_value=True)
+class IsReadmePresentTestCase(TestCase):
+    """Test case for is_readme_present method."""
+
+    def test_is_readme_present_positive(self, *mocks):
+        """Test is_readme_present for positive result."""
+        self.assertTrue(is_readme_present("readme/path"))
