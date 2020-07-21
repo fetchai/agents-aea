@@ -28,7 +28,7 @@ from aea.protocols.base import Message
 
 from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
 
-logger = logging.getLogger("packages.fetchai.protocols.t_protocol.message")
+logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -324,37 +324,9 @@ class TProtocolMessage(Message):
         return cast(Optional[Tuple[bytes, ...]], self.get("content_o_list_bytes"))
 
     @property
-    def content_o_set_float(self) -> Optional[FrozenSet[float]]:
-        """Get the 'content_o_set_float' content from the message."""
-        return cast(Optional[FrozenSet[float]], self.get("content_o_set_float"))
-
-    @property
-    def content_o_union(
-        self,
-    ) -> Optional[
-        Union[
-            str,
-            Dict[str, int],
-            FrozenSet[int],
-            FrozenSet[bytes],
-            Tuple[bool, ...],
-            Dict[str, float],
-        ]
-    ]:
-        """Get the 'content_o_union' content from the message."""
-        return cast(
-            Optional[
-                Union[
-                    str,
-                    Dict[str, int],
-                    FrozenSet[int],
-                    FrozenSet[bytes],
-                    Tuple[bool, ...],
-                    Dict[str, float],
-                ]
-            ],
-            self.get("content_o_union"),
-        )
+    def content_o_set_int(self) -> Optional[FrozenSet[int]]:
+        """Get the 'content_o_set_int' content from the message."""
+        return cast(Optional[FrozenSet[int]], self.get("content_o_set_int"))
 
     @property
     def content_set_bool(self) -> FrozenSet[bool]:
@@ -993,19 +965,17 @@ class TProtocolMessage(Message):
                     ), "Invalid type for content 'content_o_bool'. Expected 'bool'. Found '{}'.".format(
                         type(content_o_bool)
                     )
-                if self.is_set("content_o_set_float"):
+                if self.is_set("content_o_set_int"):
                     expected_nb_of_contents += 1
-                    content_o_set_float = cast(
-                        FrozenSet[float], self.content_o_set_float
-                    )
+                    content_o_set_int = cast(FrozenSet[int], self.content_o_set_int)
                     assert (
-                        type(content_o_set_float) == frozenset
-                    ), "Invalid type for content 'content_o_set_float'. Expected 'frozenset'. Found '{}'.".format(
-                        type(content_o_set_float)
+                        type(content_o_set_int) == frozenset
+                    ), "Invalid type for content 'content_o_set_int'. Expected 'frozenset'. Found '{}'.".format(
+                        type(content_o_set_int)
                     )
                     assert all(
-                        type(element) == float for element in content_o_set_float
-                    ), "Invalid type for frozenset elements in content 'content_o_set_float'. Expected 'float'."
+                        type(element) == int for element in content_o_set_int
+                    ), "Invalid type for frozenset elements in content 'content_o_set_int'. Expected 'int'."
                 if self.is_set("content_o_list_bytes"):
                     expected_nb_of_contents += 1
                     content_o_list_bytes = cast(
@@ -1043,46 +1013,6 @@ class TProtocolMessage(Message):
                         ), "Invalid type for dictionary values in content 'content_o_dict_str_int'. Expected 'int'. Found '{}'.".format(
                             type(value_of_content_o_dict_str_int)
                         )
-                if self.is_set("content_o_union"):
-                    expected_nb_of_contents += 1
-                    content_o_union = cast(
-                        Union[
-                            str,
-                            Dict[str, int],
-                            FrozenSet[int],
-                            FrozenSet[bytes],
-                            Tuple[bool, ...],
-                            Dict[str, float],
-                        ],
-                        self.content_o_union,
-                    )
-                    assert (
-                        type(content_o_union) == dict
-                        or type(content_o_union) == frozenset
-                        or type(content_o_union) == str
-                        or type(content_o_union) == tuple
-                    ), "Invalid type for content 'content_o_union'. Expected either of '['dict', 'frozenset', 'str', 'tuple']'. Found '{}'.".format(
-                        type(content_o_union)
-                    )
-                    if type(content_o_union) == frozenset:
-                        assert all(
-                            type(element) == bytes for element in content_o_union
-                        ) or all(
-                            type(element) == int for element in content_o_union
-                        ), "Invalid type for frozenset elements in content 'content_o_union'. Expected either 'bytes' or 'int'."
-                    if type(content_o_union) == tuple:
-                        assert all(
-                            type(element) == bool for element in content_o_union
-                        ), "Invalid type for tuple elements in content 'content_o_union'. Expected 'bool'."
-                    if type(content_o_union) == dict:
-                        for (
-                            key_of_content_o_union,
-                            value_of_content_o_union,
-                        ) in content_o_union.items():
-                            assert (
-                                type(key_of_content_o_union) == str
-                                and type(value_of_content_o_union) == float
-                            ), "Invalid type for dictionary key, value in content 'content_o_union'. Expected 'str', 'float'."
             elif (
                 self.performative
                 == TProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS

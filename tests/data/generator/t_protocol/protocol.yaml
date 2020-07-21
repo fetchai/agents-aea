@@ -7,10 +7,10 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmTwLir2v2eYMkDeUomf9uL1hrQhjzVTTqrQwamGG5iwn4
   custom_types.py: Qmd5CrULVdtcNQLz5R1i9LpJi9Nhzd7nQnwN737FqibgLs
-  message.py: Qmdyzp6sGcFxWSJ9z54ENojq3v5KcumbBDmnY9H8sdfYsh
-  serialization.py: Qme61dKWRByF88yvbsXhtAJgkBETrues1Tk9onS7y4jd5T
-  t_protocol.proto: QmaDVYfntPr19MjCp3zHj3pN1rnKDabchkEACFEQw68s27
-  t_protocol_pb2.py: QmNqVoNGZzJi91xsTKQJ7ag8VTrSm5NsSFdx8tcfn815bT
+  message.py: QmcNg3PinK4LsqaiJ7tmRfuSc7ohkeQeRgqiRoU64q9eNT
+  serialization.py: QmcS33k6rHgCCkhBuQ5kiXVKFMxxEzcZManshPD51MEHbw
+  t_protocol.proto: QmRuYvnojwkyZLzeECH3snomgoMJTB3m48yJiLq8LYsVb8
+  t_protocol_pb2.py: QmXrSgBBJCj8hbGCynKrvdkSDohQzHLPBA2vi5hDHmaGid
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

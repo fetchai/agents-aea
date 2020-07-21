@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="fetch.aea.TProtocol",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x10t_protocol.proto\x12\x13\x66\x65tch.aea.TProtocol"\xac\x38\n\x10TProtocolMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12]\n\x0fperformative_ct\x18\x05 \x01(\x0b\x32\x42.fetch.aea.TProtocol.TProtocolMessage.Performative_Ct_PerformativeH\x00\x12u\n\x1bperformative_empty_contents\x18\x06 \x01(\x0b\x32N.fetch.aea.TProtocol.TProtocolMessage.Performative_Empty_Contents_PerformativeH\x00\x12]\n\x0fperformative_mt\x18\x07 \x01(\x0b\x32\x42.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_PerformativeH\x00\x12[\n\x0eperformative_o\x18\x08 \x01(\x0b\x32\x41.fetch.aea.TProtocol.TProtocolMessage.Performative_O_PerformativeH\x00\x12_\n\x10performative_pct\x18\t \x01(\x0b\x32\x43.fetch.aea.TProtocol.TProtocolMessage.Performative_Pct_PerformativeH\x00\x12_\n\x10performative_pmt\x18\n \x01(\x0b\x32\x43.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_PerformativeH\x00\x12]\n\x0fperformative_pt\x18\x0b \x01(\x0b\x32\x42.fetch.aea.TProtocol.TProtocolMessage.Performative_Pt_PerformativeH\x00\x1a\x9c\x02\n\tDataModel\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x05\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x05\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12R\n\ndict_field\x18\x08 \x03(\x0b\x32>.fetch.aea.TProtocol.TProtocolMessage.DataModel.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x63\n\x1cPerformative_Ct_Performative\x12\x43\n\ncontent_ct\x18\x01 \x01(\x0b\x32/.fetch.aea.TProtocol.TProtocolMessage.DataModel\x1a\x8c\x01\n\x1cPerformative_Pt_Performative\x12\x15\n\rcontent_bytes\x18\x01 \x01(\x0c\x12\x13\n\x0b\x63ontent_int\x18\x02 \x01(\x05\x12\x15\n\rcontent_float\x18\x03 \x01(\x02\x12\x14\n\x0c\x63ontent_bool\x18\x04 \x01(\x08\x12\x13\n\x0b\x63ontent_str\x18\x05 \x01(\t\x1a\xa8\x02\n\x1dPerformative_Pct_Performative\x12\x19\n\x11\x63ontent_set_bytes\x18\x01 \x03(\x0c\x12\x17\n\x0f\x63ontent_set_int\x18\x02 \x03(\x05\x12\x19\n\x11\x63ontent_set_float\x18\x03 \x03(\x02\x12\x18\n\x10\x63ontent_set_bool\x18\x04 \x03(\x08\x12\x17\n\x0f\x63ontent_set_str\x18\x05 \x03(\t\x12\x1a\n\x12\x63ontent_list_bytes\x18\x06 \x03(\x0c\x12\x18\n\x10\x63ontent_list_int\x18\x07 \x03(\x05\x12\x1a\n\x12\x63ontent_list_float\x18\x08 \x03(\x02\x12\x19\n\x11\x63ontent_list_bool\x18\t \x03(\x08\x12\x18\n\x10\x63ontent_list_str\x18\n \x03(\t\x1a\xe7\x15\n\x1dPerformative_Pmt_Performative\x12|\n\x16\x63ontent_dict_int_bytes\x18\x01 \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry\x12x\n\x14\x63ontent_dict_int_int\x18\x02 \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntIntEntry\x12|\n\x16\x63ontent_dict_int_float\x18\x03 \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry\x12z\n\x15\x63ontent_dict_int_bool\x18\x04 \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry\x12x\n\x14\x63ontent_dict_int_str\x18\x05 \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntStrEntry\x12~\n\x17\x63ontent_dict_bool_bytes\x18\x06 \x03(\x0b\x32].fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry\x12z\n\x15\x63ontent_dict_bool_int\x18\x07 \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry\x12~\n\x17\x63ontent_dict_bool_float\x18\x08 \x03(\x0b\x32].fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry\x12|\n\x16\x63ontent_dict_bool_bool\x18\t \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry\x12z\n\x15\x63ontent_dict_bool_str\x18\n \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry\x12|\n\x16\x63ontent_dict_str_bytes\x18\x0b \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry\x12x\n\x14\x63ontent_dict_str_int\x18\x0c \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrIntEntry\x12|\n\x16\x63ontent_dict_str_float\x18\r \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry\x12z\n\x15\x63ontent_dict_str_bool\x18\x0e \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry\x12x\n\x14\x63ontent_dict_str_str\x18\x0f \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrStrEntry\x1a:\n\x18\x43ontentDictIntBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictIntBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a:\n\x18\x43ontentDictBoolBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictStrBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xf9\x0b\n\x1cPerformative_Mt_Performative\x12W\n\x1e\x63ontent_union_1_type_DataModel\x18\x01 \x01(\x0b\x32/.fetch.aea.TProtocol.TProtocolMessage.DataModel\x12"\n\x1a\x63ontent_union_1_type_bytes\x18\x02 \x01(\x0c\x12 \n\x18\x63ontent_union_1_type_int\x18\x03 \x01(\x05\x12"\n\x1a\x63ontent_union_1_type_float\x18\x04 \x01(\x02\x12!\n\x19\x63ontent_union_1_type_bool\x18\x05 \x01(\x08\x12 \n\x18\x63ontent_union_1_type_str\x18\x06 \x01(\t\x12\'\n\x1f\x63ontent_union_1_type_set_of_int\x18\x07 \x03(\x05\x12)\n!content_union_1_type_list_of_bool\x18\x08 \x03(\x08\x12\x93\x01\n$content_union_1_type_dict_of_str_int\x18\t \x03(\x0b\x32\x65.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry\x12)\n!content_union_2_type_set_of_bytes\x18\n \x03(\x0c\x12\'\n\x1f\x63ontent_union_2_type_set_of_int\x18\x0b \x03(\x05\x12\'\n\x1f\x63ontent_union_2_type_set_of_str\x18\x0c \x03(\t\x12*\n"content_union_2_type_list_of_float\x18\r \x03(\x02\x12)\n!content_union_2_type_list_of_bool\x18\x0e \x03(\x08\x12*\n"content_union_2_type_list_of_bytes\x18\x0f \x03(\x0c\x12\x93\x01\n$content_union_2_type_dict_of_str_int\x18\x10 \x03(\x0b\x32\x65.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry\x12\x97\x01\n&content_union_2_type_dict_of_int_float\x18\x11 \x03(\x0b\x32g.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry\x12\x99\x01\n\'content_union_2_type_dict_of_bool_bytes\x18\x12 \x03(\x0b\x32h.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry\x1a\x44\n"ContentUnion1TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x44\n"ContentUnion2TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x46\n$ContentUnion2TypeDictOfIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1aG\n%ContentUnion2TypeDictOfBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x96\t\n\x1bPerformative_O_Performative\x12\x45\n\x0c\x63ontent_o_ct\x18\x01 \x01(\x0b\x32/.fetch.aea.TProtocol.TProtocolMessage.DataModel\x12\x1b\n\x13\x63ontent_o_ct_is_set\x18\x02 \x01(\x08\x12\x16\n\x0e\x63ontent_o_bool\x18\x03 \x01(\x08\x12\x1d\n\x15\x63ontent_o_bool_is_set\x18\x04 \x01(\x08\x12\x1b\n\x13\x63ontent_o_set_float\x18\x05 \x03(\x02\x12"\n\x1a\x63ontent_o_set_float_is_set\x18\x06 \x01(\x08\x12\x1c\n\x14\x63ontent_o_list_bytes\x18\x07 \x03(\x0c\x12#\n\x1b\x63ontent_o_list_bytes_is_set\x18\x08 \x01(\x08\x12y\n\x16\x63ontent_o_dict_str_int\x18\t \x03(\x0b\x32Y.fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentODictStrIntEntry\x12%\n\x1d\x63ontent_o_dict_str_int_is_set\x18\n \x01(\x08\x12 \n\x18\x63ontent_o_union_type_str\x18\x0b \x01(\t\x12\x92\x01\n$content_o_union_type_dict_of_str_int\x18\x0c \x03(\x0b\x32\x64.fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrIntEntry\x12\'\n\x1f\x63ontent_o_union_type_set_of_int\x18\r \x03(\x05\x12)\n!content_o_union_type_set_of_bytes\x18\x0e \x03(\x0c\x12)\n!content_o_union_type_list_of_bool\x18\x0f \x03(\x08\x12\x96\x01\n&content_o_union_type_dict_of_str_float\x18\x10 \x03(\x0b\x32\x66.fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrFloatEntry\x12\x1e\n\x16\x63ontent_o_union_is_set\x18\x11 \x01(\x08\x1a\x39\n\x17\x43ontentODictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x44\n"ContentOUnionTypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x46\n$ContentOUnionTypeDictOfStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a*\n(Performative_Empty_Contents_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x10t_protocol.proto\x12\x13\x66\x65tch.aea.TProtocol"\xab\x33\n\x10TProtocolMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12]\n\x0fperformative_ct\x18\x05 \x01(\x0b\x32\x42.fetch.aea.TProtocol.TProtocolMessage.Performative_Ct_PerformativeH\x00\x12u\n\x1bperformative_empty_contents\x18\x06 \x01(\x0b\x32N.fetch.aea.TProtocol.TProtocolMessage.Performative_Empty_Contents_PerformativeH\x00\x12]\n\x0fperformative_mt\x18\x07 \x01(\x0b\x32\x42.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_PerformativeH\x00\x12[\n\x0eperformative_o\x18\x08 \x01(\x0b\x32\x41.fetch.aea.TProtocol.TProtocolMessage.Performative_O_PerformativeH\x00\x12_\n\x10performative_pct\x18\t \x01(\x0b\x32\x43.fetch.aea.TProtocol.TProtocolMessage.Performative_Pct_PerformativeH\x00\x12_\n\x10performative_pmt\x18\n \x01(\x0b\x32\x43.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_PerformativeH\x00\x12]\n\x0fperformative_pt\x18\x0b \x01(\x0b\x32\x42.fetch.aea.TProtocol.TProtocolMessage.Performative_Pt_PerformativeH\x00\x1a\x9c\x02\n\tDataModel\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x05\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x05\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12R\n\ndict_field\x18\x08 \x03(\x0b\x32>.fetch.aea.TProtocol.TProtocolMessage.DataModel.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x63\n\x1cPerformative_Ct_Performative\x12\x43\n\ncontent_ct\x18\x01 \x01(\x0b\x32/.fetch.aea.TProtocol.TProtocolMessage.DataModel\x1a\x8c\x01\n\x1cPerformative_Pt_Performative\x12\x15\n\rcontent_bytes\x18\x01 \x01(\x0c\x12\x13\n\x0b\x63ontent_int\x18\x02 \x01(\x05\x12\x15\n\rcontent_float\x18\x03 \x01(\x02\x12\x14\n\x0c\x63ontent_bool\x18\x04 \x01(\x08\x12\x13\n\x0b\x63ontent_str\x18\x05 \x01(\t\x1a\xa8\x02\n\x1dPerformative_Pct_Performative\x12\x19\n\x11\x63ontent_set_bytes\x18\x01 \x03(\x0c\x12\x17\n\x0f\x63ontent_set_int\x18\x02 \x03(\x05\x12\x19\n\x11\x63ontent_set_float\x18\x03 \x03(\x02\x12\x18\n\x10\x63ontent_set_bool\x18\x04 \x03(\x08\x12\x17\n\x0f\x63ontent_set_str\x18\x05 \x03(\t\x12\x1a\n\x12\x63ontent_list_bytes\x18\x06 \x03(\x0c\x12\x18\n\x10\x63ontent_list_int\x18\x07 \x03(\x05\x12\x1a\n\x12\x63ontent_list_float\x18\x08 \x03(\x02\x12\x19\n\x11\x63ontent_list_bool\x18\t \x03(\x08\x12\x18\n\x10\x63ontent_list_str\x18\n \x03(\t\x1a\xe7\x15\n\x1dPerformative_Pmt_Performative\x12|\n\x16\x63ontent_dict_int_bytes\x18\x01 \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry\x12x\n\x14\x63ontent_dict_int_int\x18\x02 \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntIntEntry\x12|\n\x16\x63ontent_dict_int_float\x18\x03 \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry\x12z\n\x15\x63ontent_dict_int_bool\x18\x04 \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry\x12x\n\x14\x63ontent_dict_int_str\x18\x05 \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntStrEntry\x12~\n\x17\x63ontent_dict_bool_bytes\x18\x06 \x03(\x0b\x32].fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry\x12z\n\x15\x63ontent_dict_bool_int\x18\x07 \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry\x12~\n\x17\x63ontent_dict_bool_float\x18\x08 \x03(\x0b\x32].fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry\x12|\n\x16\x63ontent_dict_bool_bool\x18\t \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry\x12z\n\x15\x63ontent_dict_bool_str\x18\n \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry\x12|\n\x16\x63ontent_dict_str_bytes\x18\x0b \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry\x12x\n\x14\x63ontent_dict_str_int\x18\x0c \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrIntEntry\x12|\n\x16\x63ontent_dict_str_float\x18\r \x03(\x0b\x32\\.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry\x12z\n\x15\x63ontent_dict_str_bool\x18\x0e \x03(\x0b\x32[.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry\x12x\n\x14\x63ontent_dict_str_str\x18\x0f \x03(\x0b\x32Z.fetch.aea.TProtocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrStrEntry\x1a:\n\x18\x43ontentDictIntBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictIntBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a:\n\x18\x43ontentDictBoolBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictStrBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xf9\x0b\n\x1cPerformative_Mt_Performative\x12W\n\x1e\x63ontent_union_1_type_DataModel\x18\x01 \x01(\x0b\x32/.fetch.aea.TProtocol.TProtocolMessage.DataModel\x12"\n\x1a\x63ontent_union_1_type_bytes\x18\x02 \x01(\x0c\x12 \n\x18\x63ontent_union_1_type_int\x18\x03 \x01(\x05\x12"\n\x1a\x63ontent_union_1_type_float\x18\x04 \x01(\x02\x12!\n\x19\x63ontent_union_1_type_bool\x18\x05 \x01(\x08\x12 \n\x18\x63ontent_union_1_type_str\x18\x06 \x01(\t\x12\'\n\x1f\x63ontent_union_1_type_set_of_int\x18\x07 \x03(\x05\x12)\n!content_union_1_type_list_of_bool\x18\x08 \x03(\x08\x12\x93\x01\n$content_union_1_type_dict_of_str_int\x18\t \x03(\x0b\x32\x65.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry\x12)\n!content_union_2_type_set_of_bytes\x18\n \x03(\x0c\x12\'\n\x1f\x63ontent_union_2_type_set_of_int\x18\x0b \x03(\x05\x12\'\n\x1f\x63ontent_union_2_type_set_of_str\x18\x0c \x03(\t\x12*\n"content_union_2_type_list_of_float\x18\r \x03(\x02\x12)\n!content_union_2_type_list_of_bool\x18\x0e \x03(\x08\x12*\n"content_union_2_type_list_of_bytes\x18\x0f \x03(\x0c\x12\x93\x01\n$content_union_2_type_dict_of_str_int\x18\x10 \x03(\x0b\x32\x65.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry\x12\x97\x01\n&content_union_2_type_dict_of_int_float\x18\x11 \x03(\x0b\x32g.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry\x12\x99\x01\n\'content_union_2_type_dict_of_bool_bytes\x18\x12 \x03(\x0b\x32h.fetch.aea.TProtocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry\x1a\x44\n"ContentUnion1TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x44\n"ContentUnion2TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x46\n$ContentUnion2TypeDictOfIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1aG\n%ContentUnion2TypeDictOfBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x95\x04\n\x1bPerformative_O_Performative\x12\x45\n\x0c\x63ontent_o_ct\x18\x01 \x01(\x0b\x32/.fetch.aea.TProtocol.TProtocolMessage.DataModel\x12\x1b\n\x13\x63ontent_o_ct_is_set\x18\x02 \x01(\x08\x12\x16\n\x0e\x63ontent_o_bool\x18\x03 \x01(\x08\x12\x1d\n\x15\x63ontent_o_bool_is_set\x18\x04 \x01(\x08\x12\x19\n\x11\x63ontent_o_set_int\x18\x05 \x03(\x05\x12 \n\x18\x63ontent_o_set_int_is_set\x18\x06 \x01(\x08\x12\x1c\n\x14\x63ontent_o_list_bytes\x18\x07 \x03(\x0c\x12#\n\x1b\x63ontent_o_list_bytes_is_set\x18\x08 \x01(\x08\x12y\n\x16\x63ontent_o_dict_str_int\x18\t \x03(\x0b\x32Y.fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentODictStrIntEntry\x12%\n\x1d\x63ontent_o_dict_str_int_is_set\x18\n \x01(\x08\x1a\x39\n\x17\x43ontentODictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a*\n(Performative_Empty_Contents_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -2360,120 +2360,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY = _descrip
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6995,
-    serialized_end=7052,
-)
-
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRINTENTRY = _descriptor.Descriptor(
-    name="ContentOUnionTypeDictOfStrIntEntry",
-    full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrIntEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrIntEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrIntEntry.value",
-            index=1,
-            number=2,
-            type=5,
-            cpp_type=1,
-            label=1,
-            has_default_value=False,
-            default_value=0,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=b"8\001",
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=7054,
-    serialized_end=7122,
-)
-
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRFLOATENTRY = _descriptor.Descriptor(
-    name="ContentOUnionTypeDictOfStrFloatEntry",
-    full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrFloatEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrFloatEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrFloatEntry.value",
-            index=1,
-            number=2,
-            type=2,
-            cpp_type=6,
-            label=1,
-            has_default_value=False,
-            default_value=float(0),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=b"8\001",
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=7124,
-    serialized_end=7194,
+    serialized_start=6496,
+    serialized_end=6553,
 )
 
 _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
@@ -2556,12 +2444,12 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="content_o_set_float",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_set_float",
+            name="content_o_set_int",
+            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_set_int",
             index=4,
             number=5,
-            type=2,
-            cpp_type=6,
+            type=5,
+            cpp_type=1,
             label=3,
             has_default_value=False,
             default_value=[],
@@ -2574,8 +2462,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="content_o_set_float_is_set",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_set_float_is_set",
+            name="content_o_set_int_is_set",
+            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_set_int_is_set",
             index=5,
             number=6,
             type=8,
@@ -2663,138 +2551,10 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             serialized_options=None,
             file=DESCRIPTOR,
         ),
-        _descriptor.FieldDescriptor(
-            name="content_o_union_type_str",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_union_type_str",
-            index=10,
-            number=11,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="content_o_union_type_dict_of_str_int",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_union_type_dict_of_str_int",
-            index=11,
-            number=12,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="content_o_union_type_set_of_int",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_union_type_set_of_int",
-            index=12,
-            number=13,
-            type=5,
-            cpp_type=1,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="content_o_union_type_set_of_bytes",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_union_type_set_of_bytes",
-            index=13,
-            number=14,
-            type=12,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="content_o_union_type_list_of_bool",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_union_type_list_of_bool",
-            index=14,
-            number=15,
-            type=8,
-            cpp_type=7,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="content_o_union_type_dict_of_str_float",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_union_type_dict_of_str_float",
-            index=15,
-            number=16,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="content_o_union_is_set",
-            full_name="fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.content_o_union_is_set",
-            index=16,
-            number=17,
-            type=8,
-            cpp_type=7,
-            label=1,
-            has_default_value=False,
-            default_value=False,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
     ],
     extensions=[],
     nested_types=[
         _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY,
-        _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRINTENTRY,
-        _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRFLOATENTRY,
     ],
     enum_types=[],
     serialized_options=None,
@@ -2803,7 +2563,7 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=6020,
-    serialized_end=7194,
+    serialized_end=6553,
 )
 
 _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE = _descriptor.Descriptor(
@@ -2821,8 +2581,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE = _descriptor.Descrip
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=7196,
-    serialized_end=7238,
+    serialized_start=6555,
+    serialized_end=6597,
 )
 
 _TPROTOCOLMESSAGE = _descriptor.Descriptor(
@@ -3057,7 +2817,7 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=42,
-    serialized_end=7254,
+    serialized_end=6613,
 )
 
 _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY.containing_type = _TPROTOCOLMESSAGE_DATAMODEL
@@ -3215,28 +2975,12 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE.containing_type = _TPROTOCOLMESSA
 _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY.containing_type = (
     _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE
 )
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRINTENTRY.containing_type = (
-    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRFLOATENTRY.containing_type = (
-    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE
-)
 _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE.fields_by_name[
     "content_o_ct"
 ].message_type = _TPROTOCOLMESSAGE_DATAMODEL
 _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE.fields_by_name[
     "content_o_dict_str_int"
 ].message_type = _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE.fields_by_name[
-    "content_o_union_type_dict_of_str_int"
-].message_type = (
-    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRINTENTRY
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE.fields_by_name[
-    "content_o_union_type_dict_of_str_float"
-].message_type = (
-    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRFLOATENTRY
-)
 _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE.containing_type = _TPROTOCOLMESSAGE
 _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE.containing_type = (
     _TPROTOCOLMESSAGE
@@ -3558,24 +3302,6 @@ TProtocolMessage = _reflection.GeneratedProtocolMessageType(
                         # @@protoc_insertion_point(class_scope:fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentODictStrIntEntry)
                     },
                 ),
-                "ContentOUnionTypeDictOfStrIntEntry": _reflection.GeneratedProtocolMessageType(
-                    "ContentOUnionTypeDictOfStrIntEntry",
-                    (_message.Message,),
-                    {
-                        "DESCRIPTOR": _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRINTENTRY,
-                        "__module__": "t_protocol_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrIntEntry)
-                    },
-                ),
-                "ContentOUnionTypeDictOfStrFloatEntry": _reflection.GeneratedProtocolMessageType(
-                    "ContentOUnionTypeDictOfStrFloatEntry",
-                    (_message.Message,),
-                    {
-                        "DESCRIPTOR": _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRFLOATENTRY,
-                        "__module__": "t_protocol_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrFloatEntry)
-                    },
-                ),
                 "DESCRIPTOR": _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE,
                 "__module__": "t_protocol_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.TProtocol.TProtocolMessage.Performative_O_Performative)
@@ -3664,12 +3390,6 @@ _sym_db.RegisterMessage(TProtocolMessage.Performative_O_Performative)
 _sym_db.RegisterMessage(
     TProtocolMessage.Performative_O_Performative.ContentODictStrIntEntry
 )
-_sym_db.RegisterMessage(
-    TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrIntEntry
-)
-_sym_db.RegisterMessage(
-    TProtocolMessage.Performative_O_Performative.ContentOUnionTypeDictOfStrFloatEntry
-)
 _sym_db.RegisterMessage(TProtocolMessage.Performative_Empty_Contents_Performative)
 
 
@@ -3706,10 +3426,4 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESE
     None
 )
 _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY._options = None
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRINTENTRY._options = (
-    None
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTOUNIONTYPEDICTOFSTRFLOATENTRY._options = (
-    None
-)
 # @@protoc_insertion_point(module_scope)

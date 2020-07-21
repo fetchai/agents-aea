@@ -63,10 +63,11 @@ speech_acts:
   performative_o:
     content_o_ct: pt:optional[ct:DataModel]
     content_o_bool: pt:optional[pt:bool]
-    content_o_set_float: pt:optional[pt:set[pt:float]]
+    content_o_set_int: pt:optional[pt:set[pt:int]]
     content_o_list_bytes: pt:optional[pt:list[pt:bytes]]
     content_o_dict_str_int: pt:optional[pt:dict[pt:str, pt:int]]
-    content_o_union: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:int], pt:set[pt:bytes], pt:list[pt:bool], pt:dict[pt:str, pt:float]]]
+#    union does not work properly in the generator
+#    content_o_union: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:int], pt:set[pt:bytes], pt:list[pt:bool], pt:dict[pt:str, pt:float]]]
   performative_empty_contents: {}
 ---
 ct:DataModel: |

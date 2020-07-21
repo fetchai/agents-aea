@@ -87,19 +87,12 @@ message TProtocolMessage{
         bool content_o_ct_is_set = 2;
         bool content_o_bool = 3;
         bool content_o_bool_is_set = 4;
-        repeated float content_o_set_float = 5;
-        bool content_o_set_float_is_set = 6;
+        repeated int32 content_o_set_int = 5;
+        bool content_o_set_int_is_set = 6;
         repeated bytes content_o_list_bytes = 7;
         bool content_o_list_bytes_is_set = 8;
         map<string, int32> content_o_dict_str_int = 9;
         bool content_o_dict_str_int_is_set = 10;
-        string content_o_union_type_str = 11;
-        map<string, int32> content_o_union_type_dict_of_str_int = 12;
-        repeated int32 content_o_union_type_set_of_int = 13;
-        repeated bytes content_o_union_type_set_of_bytes = 14;
-        repeated bool content_o_union_type_list_of_bool = 15;
-        map<string, float> content_o_union_type_dict_of_str_float = 16;
-        bool content_o_union_is_set = 17;
     }
 
     message Performative_Empty_Contents_Performative{}
