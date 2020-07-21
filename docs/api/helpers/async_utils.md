@@ -1,9 +1,9 @@
-<a name=".aea.helpers.async_utils"></a>
+<a name="aea.helpers.async_utils"></a>
 # aea.helpers.async`_`utils
 
 This module contains the misc utils for async code.
 
-<a name=".aea.helpers.async_utils.ensure_list"></a>
+<a name="aea.helpers.async_utils.ensure_list"></a>
 #### ensure`_`list
 
 ```python
@@ -12,7 +12,7 @@ ensure_list(value: Any) -> List
 
 Return [value] or list(value) if value is a sequence.
 
-<a name=".aea.helpers.async_utils.AsyncState"></a>
+<a name="aea.helpers.async_utils.AsyncState"></a>
 ## AsyncState Objects
 
 ```python
@@ -21,7 +21,7 @@ class AsyncState()
 
 Awaitable state.
 
-<a name=".aea.helpers.async_utils.AsyncState.__init__"></a>
+<a name="aea.helpers.async_utils.AsyncState.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -34,7 +34,17 @@ Init async state.
 
 - `initial_state`: state to set on start.
 
-<a name=".aea.helpers.async_utils.AsyncState.state"></a>
+<a name="aea.helpers.async_utils.AsyncState.state"></a>
+#### state
+
+```python
+ | @property
+ | state() -> Any
+```
+
+Return current state.
+
+<a name="aea.helpers.async_utils.AsyncState.state"></a>
 #### state
 
 ```python
@@ -44,7 +54,7 @@ Init async state.
 
 Set state.
 
-<a name=".aea.helpers.async_utils.AsyncState.set"></a>
+<a name="aea.helpers.async_utils.AsyncState.set"></a>
 #### set
 
 ```python
@@ -53,7 +63,7 @@ Set state.
 
 Set state.
 
-<a name=".aea.helpers.async_utils.AsyncState.get"></a>
+<a name="aea.helpers.async_utils.AsyncState.get"></a>
 #### get
 
 ```python
@@ -62,7 +72,7 @@ Set state.
 
 Get state.
 
-<a name=".aea.helpers.async_utils.AsyncState.wait"></a>
+<a name="aea.helpers.async_utils.AsyncState.wait"></a>
 #### wait
 
 ```python
@@ -77,7 +87,7 @@ Wait state to be set.
 
 tuple of previous state and new state.
 
-<a name=".aea.helpers.async_utils.PeriodicCaller"></a>
+<a name="aea.helpers.async_utils.PeriodicCaller"></a>
 ## PeriodicCaller Objects
 
 ```python
@@ -88,7 +98,7 @@ Schedule a periodic call of callable using event loop.
 
 Used for periodic function run using asyncio.
 
-<a name=".aea.helpers.async_utils.PeriodicCaller.__init__"></a>
+<a name="aea.helpers.async_utils.PeriodicCaller.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -105,7 +115,7 @@ Init periodic caller.
 - `exception_callback`: optional handler to call on exception raised.
 - `loop`: optional asyncio event loop
 
-<a name=".aea.helpers.async_utils.PeriodicCaller.start"></a>
+<a name="aea.helpers.async_utils.PeriodicCaller.start"></a>
 #### start
 
 ```python
@@ -114,7 +124,7 @@ Init periodic caller.
 
 Activate period calls.
 
-<a name=".aea.helpers.async_utils.PeriodicCaller.stop"></a>
+<a name="aea.helpers.async_utils.PeriodicCaller.stop"></a>
 #### stop
 
 ```python
@@ -123,7 +133,7 @@ Activate period calls.
 
 Remove from schedule.
 
-<a name=".aea.helpers.async_utils.ensure_loop"></a>
+<a name="aea.helpers.async_utils.ensure_loop"></a>
 #### ensure`_`loop
 
 ```python
@@ -142,7 +152,7 @@ Return loop passed if its provided,not closed and not running, otherwise returns
 
 asyncio event loop
 
-<a name=".aea.helpers.async_utils.AnotherThreadTask"></a>
+<a name="aea.helpers.async_utils.AnotherThreadTask"></a>
 ## AnotherThreadTask Objects
 
 ```python
@@ -153,7 +163,7 @@ Schedule a task to run on the loop in another thread.
 
 Provides better cancel behaviour: on cancel it will wait till cancelled completely.
 
-<a name=".aea.helpers.async_utils.AnotherThreadTask.__init__"></a>
+<a name="aea.helpers.async_utils.AnotherThreadTask.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -167,7 +177,7 @@ Init the task.
 - `coro`: coroutine to schedule
 - `loop`: an event loop to schedule on.
 
-<a name=".aea.helpers.async_utils.AnotherThreadTask.result"></a>
+<a name="aea.helpers.async_utils.AnotherThreadTask.result"></a>
 #### result
 
 ```python
@@ -180,7 +190,7 @@ Wait for coroutine execution result.
 
 - `timeout`: optional timeout to wait in seconds.
 
-<a name=".aea.helpers.async_utils.AnotherThreadTask.cancel"></a>
+<a name="aea.helpers.async_utils.AnotherThreadTask.cancel"></a>
 #### cancel
 
 ```python
@@ -189,7 +199,7 @@ Wait for coroutine execution result.
 
 Cancel coroutine task execution in a target loop.
 
-<a name=".aea.helpers.async_utils.AnotherThreadTask.future_cancel"></a>
+<a name="aea.helpers.async_utils.AnotherThreadTask.future_cancel"></a>
 #### future`_`cancel
 
 ```python
@@ -200,7 +210,7 @@ Cancel task waiting future.
 
 In this case future result will raise CanclledError not waiting for real task exit.
 
-<a name=".aea.helpers.async_utils.AnotherThreadTask.done"></a>
+<a name="aea.helpers.async_utils.AnotherThreadTask.done"></a>
 #### done
 
 ```python
@@ -209,7 +219,7 @@ In this case future result will raise CanclledError not waiting for real task ex
 
 Check task is done.
 
-<a name=".aea.helpers.async_utils.ThreadedAsyncRunner"></a>
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner"></a>
 ## ThreadedAsyncRunner Objects
 
 ```python
@@ -218,7 +228,7 @@ class ThreadedAsyncRunner(Thread)
 
 Util to run thread with event loop and execute coroutines inside.
 
-<a name=".aea.helpers.async_utils.ThreadedAsyncRunner.__init__"></a>
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -231,7 +241,7 @@ Init threaded runner.
 
 - `loop`: optional event loop. is it's running loop, threaded runner will use it.
 
-<a name=".aea.helpers.async_utils.ThreadedAsyncRunner.start"></a>
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.start"></a>
 #### start
 
 ```python
@@ -240,7 +250,7 @@ Init threaded runner.
 
 Start event loop in dedicated thread.
 
-<a name=".aea.helpers.async_utils.ThreadedAsyncRunner.run"></a>
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.run"></a>
 #### run
 
 ```python
@@ -249,7 +259,7 @@ Start event loop in dedicated thread.
 
 Run code inside thread.
 
-<a name=".aea.helpers.async_utils.ThreadedAsyncRunner.call"></a>
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.call"></a>
 #### call
 
 ```python
@@ -262,7 +272,7 @@ Run a coroutine inside the event loop.
 
 - `coro`: a coroutine to run.
 
-<a name=".aea.helpers.async_utils.ThreadedAsyncRunner.stop"></a>
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.stop"></a>
 #### stop
 
 ```python
@@ -271,7 +281,7 @@ Run a coroutine inside the event loop.
 
 Stop event loop in thread.
 
-<a name=".aea.helpers.async_utils.cancel_and_wait"></a>
+<a name="aea.helpers.async_utils.cancel_and_wait"></a>
 #### cancel`_`and`_`wait
 
 ```python

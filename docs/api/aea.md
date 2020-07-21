@@ -1,9 +1,9 @@
-<a name=".aea.aea"></a>
+<a name="aea.aea"></a>
 # aea.aea
 
 This module contains the implementation of an autonomous economic agent (AEA).
 
-<a name=".aea.aea.AEA"></a>
+<a name="aea.aea.AEA"></a>
 ## AEA Objects
 
 ```python
@@ -12,13 +12,13 @@ class AEA(Agent)
 
 This class implements an autonomous economic agent.
 
-<a name=".aea.aea.AEA.__init__"></a>
+<a name="aea.aea.AEA.__init__"></a>
 #### `__`init`__`
 
 ```python
  | __init__(identity: Identity, wallet: Wallet, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, decision_maker_handler_class: Type[
  |             DecisionMakerHandler
- |         ] = DefaultDecisionMakerHandler, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = "oef", **kwargs, ,) -> None
+ |         ] = DefaultDecisionMakerHandler, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = "fetchai/soef:*", **kwargs, ,) -> None
 ```
 
 Instantiate the agent.
@@ -46,7 +46,7 @@ Instantiate the agent.
 
 None
 
-<a name=".aea.aea.AEA.decision_maker"></a>
+<a name="aea.aea.AEA.decision_maker"></a>
 #### decision`_`maker
 
 ```python
@@ -56,7 +56,7 @@ None
 
 Get decision maker.
 
-<a name=".aea.aea.AEA.context"></a>
+<a name="aea.aea.AEA.context"></a>
 #### context
 
 ```python
@@ -66,7 +66,17 @@ Get decision maker.
 
 Get (agent) context.
 
-<a name=".aea.aea.AEA.resources"></a>
+<a name="aea.aea.AEA.resources"></a>
+#### resources
+
+```python
+ | @property
+ | resources() -> Resources
+```
+
+Get resources.
+
+<a name="aea.aea.AEA.resources"></a>
 #### resources
 
 ```python
@@ -76,7 +86,7 @@ Get (agent) context.
 
 Set resources.
 
-<a name=".aea.aea.AEA.task_manager"></a>
+<a name="aea.aea.AEA.task_manager"></a>
 #### task`_`manager
 
 ```python
@@ -86,16 +96,16 @@ Set resources.
 
 Get the task manager.
 
-<a name=".aea.aea.AEA.setup_multiplexer"></a>
+<a name="aea.aea.AEA.setup_multiplexer"></a>
 #### setup`_`multiplexer
 
 ```python
  | setup_multiplexer() -> None
 ```
 
-Set up the multiplexer
+Set up the multiplexer.
 
-<a name=".aea.aea.AEA.filter"></a>
+<a name="aea.aea.AEA.filter"></a>
 #### filter
 
 ```python
@@ -105,7 +115,7 @@ Set up the multiplexer
 
 Get the filter.
 
-<a name=".aea.aea.AEA.active_behaviours"></a>
+<a name="aea.aea.AEA.active_behaviours"></a>
 #### active`_`behaviours
 
 ```python
@@ -115,7 +125,7 @@ Get the filter.
 
 Get all active behaviours to use in act.
 
-<a name=".aea.aea.AEA.setup"></a>
+<a name="aea.aea.AEA.setup"></a>
 #### setup
 
 ```python
@@ -135,7 +145,7 @@ Performs the following:
 
 None
 
-<a name=".aea.aea.AEA.act"></a>
+<a name="aea.aea.AEA.act"></a>
 #### act
 
 ```python
@@ -150,7 +160,7 @@ Calls act() of each active behaviour.
 
 None
 
-<a name=".aea.aea.AEA.react"></a>
+<a name="aea.aea.AEA.react"></a>
 #### react
 
 ```python
@@ -172,7 +182,7 @@ handles each envelope, which entailes:
 
 None
 
-<a name=".aea.aea.AEA.update"></a>
+<a name="aea.aea.AEA.update"></a>
 #### update
 
 ```python
@@ -185,7 +195,7 @@ Handles the internal messages from the skills to the decision maker.
 
 :return None
 
-<a name=".aea.aea.AEA.teardown"></a>
+<a name="aea.aea.AEA.teardown"></a>
 #### teardown
 
 ```python

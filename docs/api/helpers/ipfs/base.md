@@ -1,9 +1,9 @@
-<a name=".aea.helpers.ipfs.base"></a>
+<a name="aea.helpers.ipfs.base"></a>
 # aea.helpers.ipfs.base
 
 This module contains helper methods and classes for the 'aea' package.
 
-<a name=".aea.helpers.ipfs.base.IPFSHashOnly"></a>
+<a name="aea.helpers.ipfs.base.IPFSHashOnly"></a>
 ## IPFSHashOnly Objects
 
 ```python
@@ -12,7 +12,7 @@ class IPFSHashOnly()
 
 A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon.
 
-<a name=".aea.helpers.ipfs.base.IPFSHashOnly.get"></a>
+<a name="aea.helpers.ipfs.base.IPFSHashOnly.get"></a>
 #### get
 
 ```python

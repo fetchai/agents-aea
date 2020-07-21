@@ -1,9 +1,9 @@
-<a name=".aea.crypto.ethereum"></a>
+<a name="aea.crypto.ethereum"></a>
 # aea.crypto.ethereum
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto"></a>
 ## EthereumCrypto Objects
 
 ```python
@@ -12,7 +12,7 @@ class EthereumCrypto(Crypto[Account])
 
 Class wrapping the Account Generation from Ethereum ledger.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.__init__"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -25,7 +25,21 @@ Instantiate an ethereum crypto object.
 
 - `private_key_path`: the private key path of the agent
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.public_key"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.private_key"></a>
+#### private`_`key
+
+```python
+ | @property
+ | private_key() -> str
+```
+
+Return a private key.
+
+**Returns**:
+
+a private key string
+
+<a name="aea.crypto.ethereum.EthereumCrypto.public_key"></a>
 #### public`_`key
 
 ```python
@@ -39,7 +53,7 @@ Return a public key in hex format.
 
 a public key string in hex format
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.address"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.address"></a>
 #### address
 
 ```python
@@ -53,7 +67,7 @@ Return the address for the key pair.
 
 a display_address str
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.load_private_key_from_path"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.load_private_key_from_path"></a>
 #### load`_`private`_`key`_`from`_`path
 
 ```python
@@ -71,7 +85,7 @@ Load a private key in hex format from a file.
 
 the Entity.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.sign_message"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.sign_message"></a>
 #### sign`_`message
 
 ```python
@@ -89,7 +103,7 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.sign_transaction"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python
@@ -106,7 +120,7 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.generate_private_key"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.generate_private_key"></a>
 #### generate`_`private`_`key
 
 ```python
@@ -116,7 +130,7 @@ signed transaction
 
 Generate a key pair for ethereum network.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.dump"></a>
+<a name="aea.crypto.ethereum.EthereumCrypto.dump"></a>
 #### dump
 
 ```python
@@ -133,7 +147,7 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
-<a name=".aea.crypto.ethereum.EthereumHelper"></a>
+<a name="aea.crypto.ethereum.EthereumHelper"></a>
 ## EthereumHelper Objects
 
 ```python
@@ -142,7 +156,7 @@ class EthereumHelper(Helper)
 
 Helper class usable as Mixin for EthereumApi or as standalone class.
 
-<a name=".aea.crypto.ethereum.EthereumHelper.is_transaction_settled"></a>
+<a name="aea.crypto.ethereum.EthereumHelper.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
@@ -160,7 +174,7 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
-<a name=".aea.crypto.ethereum.EthereumHelper.is_transaction_valid"></a>
+<a name="aea.crypto.ethereum.EthereumHelper.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
@@ -182,7 +196,7 @@ Check whether a transaction is valid or not.
 
 True if the random_message is equals to tx['input']
 
-<a name=".aea.crypto.ethereum.EthereumHelper.generate_tx_nonce"></a>
+<a name="aea.crypto.ethereum.EthereumHelper.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
 
 ```python
@@ -201,7 +215,7 @@ Generate a unique hash to distinguish txs with the same terms.
 
 return the hash in hex.
 
-<a name=".aea.crypto.ethereum.EthereumHelper.get_address_from_public_key"></a>
+<a name="aea.crypto.ethereum.EthereumHelper.get_address_from_public_key"></a>
 #### get`_`address`_`from`_`public`_`key
 
 ```python
@@ -219,7 +233,7 @@ Get the address from the public key.
 
 str
 
-<a name=".aea.crypto.ethereum.EthereumHelper.recover_message"></a>
+<a name="aea.crypto.ethereum.EthereumHelper.recover_message"></a>
 #### recover`_`message
 
 ```python
@@ -239,7 +253,7 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
-<a name=".aea.crypto.ethereum.EthereumApi"></a>
+<a name="aea.crypto.ethereum.EthereumApi"></a>
 ## EthereumApi Objects
 
 ```python
@@ -248,11 +262,11 @@ class EthereumApi(LedgerApi,  EthereumHelper)
 
 Class to interact with the Ethereum Web3 APIs.
 
-<a name=".aea.crypto.ethereum.EthereumApi.__init__"></a>
+<a name="aea.crypto.ethereum.EthereumApi.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(address: str, **kwargs)
+ | __init__(**kwargs)
 ```
 
 Initialize the Ethereum ledger APIs.
@@ -261,7 +275,7 @@ Initialize the Ethereum ledger APIs.
 
 - `address`: the endpoint for Web3 APIs.
 
-<a name=".aea.crypto.ethereum.EthereumApi.api"></a>
+<a name="aea.crypto.ethereum.EthereumApi.api"></a>
 #### api
 
 ```python
@@ -271,7 +285,7 @@ Initialize the Ethereum ledger APIs.
 
 Get the underlying API object.
 
-<a name=".aea.crypto.ethereum.EthereumApi.get_balance"></a>
+<a name="aea.crypto.ethereum.EthereumApi.get_balance"></a>
 #### get`_`balance
 
 ```python
@@ -280,7 +294,7 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
-<a name=".aea.crypto.ethereum.EthereumApi.get_transfer_transaction"></a>
+<a name="aea.crypto.ethereum.EthereumApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
@@ -303,7 +317,7 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
-<a name=".aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
+<a name="aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
@@ -320,7 +334,7 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name=".aea.crypto.ethereum.EthereumApi.get_transaction_receipt"></a>
+<a name="aea.crypto.ethereum.EthereumApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
@@ -337,7 +351,7 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a name=".aea.crypto.ethereum.EthereumApi.get_transaction"></a>
+<a name="aea.crypto.ethereum.EthereumApi.get_transaction"></a>
 #### get`_`transaction
 
 ```python
@@ -354,7 +368,7 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a name=".aea.crypto.ethereum.EthereumFaucetApi"></a>
+<a name="aea.crypto.ethereum.EthereumFaucetApi"></a>
 ## EthereumFaucetApi Objects
 
 ```python
@@ -363,7 +377,7 @@ class EthereumFaucetApi(FaucetApi)
 
 Ethereum testnet faucet API.
 
-<a name=".aea.crypto.ethereum.EthereumFaucetApi.get_wealth"></a>
+<a name="aea.crypto.ethereum.EthereumFaucetApi.get_wealth"></a>
 #### get`_`wealth
 
 ```python

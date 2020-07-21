@@ -1,9 +1,9 @@
-<a name=".aea.contracts.base"></a>
+<a name="aea.contracts.base"></a>
 # aea.contracts.base
 
 The base contract.
 
-<a name=".aea.contracts.base.Contract"></a>
+<a name="aea.contracts.base.Contract"></a>
 ## Contract Objects
 
 ```python
@@ -12,7 +12,7 @@ class Contract(Component,  ABC)
 
 Abstract definition of a contract.
 
-<a name=".aea.contracts.base.Contract.__init__"></a>
+<a name="aea.contracts.base.Contract.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -25,7 +25,7 @@ Initialize the contract.
 
 - `contract_config`: the contract configurations.
 
-<a name=".aea.contracts.base.Contract.id"></a>
+<a name="aea.contracts.base.Contract.id"></a>
 #### id
 
 ```python
@@ -35,7 +35,7 @@ Initialize the contract.
 
 Get the name.
 
-<a name=".aea.contracts.base.Contract.configuration"></a>
+<a name="aea.contracts.base.Contract.configuration"></a>
 #### configuration
 
 ```python
@@ -45,7 +45,7 @@ Get the name.
 
 Get the configuration.
 
-<a name=".aea.contracts.base.Contract.get_instance"></a>
+<a name="aea.contracts.base.Contract.get_instance"></a>
 #### get`_`instance
 
 ```python
@@ -65,7 +65,7 @@ Get the instance.
 
 the contract instance
 
-<a name=".aea.contracts.base.Contract.from_dir"></a>
+<a name="aea.contracts.base.Contract.from_dir"></a>
 #### from`_`dir
 
 ```python
@@ -83,7 +83,7 @@ Load the protocol from a directory.
 
 the contract object.
 
-<a name=".aea.contracts.base.Contract.from_config"></a>
+<a name="aea.contracts.base.Contract.from_config"></a>
 #### from`_`config
 
 ```python

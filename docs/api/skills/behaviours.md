@@ -1,9 +1,9 @@
-<a name=".aea.skills.behaviours"></a>
+<a name="aea.skills.behaviours"></a>
 # aea.skills.behaviours
 
 This module contains the classes for specific behaviours.
 
-<a name=".aea.skills.behaviours.SimpleBehaviour"></a>
+<a name="aea.skills.behaviours.SimpleBehaviour"></a>
 ## SimpleBehaviour Objects
 
 ```python
@@ -12,7 +12,7 @@ class SimpleBehaviour(Behaviour,  ABC)
 
 This class implements a simple behaviour.
 
-<a name=".aea.skills.behaviours.SimpleBehaviour.__init__"></a>
+<a name="aea.skills.behaviours.SimpleBehaviour.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -26,7 +26,7 @@ Initialize a simple behaviour.
 - `act`: the act callable.
 - `kwargs`: the keyword arguments to be passed to the parent class.
 
-<a name=".aea.skills.behaviours.SimpleBehaviour.setup"></a>
+<a name="aea.skills.behaviours.SimpleBehaviour.setup"></a>
 #### setup
 
 ```python
@@ -35,7 +35,7 @@ Initialize a simple behaviour.
 
 Set the behaviour up.
 
-<a name=".aea.skills.behaviours.SimpleBehaviour.act"></a>
+<a name="aea.skills.behaviours.SimpleBehaviour.act"></a>
 #### act
 
 ```python
@@ -44,7 +44,7 @@ Set the behaviour up.
 
 Do the action.
 
-<a name=".aea.skills.behaviours.SimpleBehaviour.teardown"></a>
+<a name="aea.skills.behaviours.SimpleBehaviour.teardown"></a>
 #### teardown
 
 ```python
@@ -53,7 +53,7 @@ Do the action.
 
 Tear the behaviour down.
 
-<a name=".aea.skills.behaviours.CompositeBehaviour"></a>
+<a name="aea.skills.behaviours.CompositeBehaviour"></a>
 ## CompositeBehaviour Objects
 
 ```python
@@ -62,7 +62,7 @@ class CompositeBehaviour(Behaviour,  ABC)
 
 This class implements a composite behaviour.
 
-<a name=".aea.skills.behaviours.CyclicBehaviour"></a>
+<a name="aea.skills.behaviours.CyclicBehaviour"></a>
 ## CyclicBehaviour Objects
 
 ```python
@@ -71,7 +71,7 @@ class CyclicBehaviour(SimpleBehaviour,  ABC)
 
 This behaviour is executed until the agent is stopped.
 
-<a name=".aea.skills.behaviours.CyclicBehaviour.__init__"></a>
+<a name="aea.skills.behaviours.CyclicBehaviour.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -80,7 +80,7 @@ This behaviour is executed until the agent is stopped.
 
 Initialize the cyclic behaviour.
 
-<a name=".aea.skills.behaviours.CyclicBehaviour.act_wrapper"></a>
+<a name="aea.skills.behaviours.CyclicBehaviour.act_wrapper"></a>
 #### act`_`wrapper
 
 ```python
@@ -89,7 +89,7 @@ Initialize the cyclic behaviour.
 
 Wrap the call of the action. This method must be called only by the framework.
 
-<a name=".aea.skills.behaviours.CyclicBehaviour.is_done"></a>
+<a name="aea.skills.behaviours.CyclicBehaviour.is_done"></a>
 #### is`_`done
 
 ```python
@@ -100,7 +100,7 @@ Return True if the behaviour is terminated, False otherwise.
 
 The user should implement it properly to determine the stopping condition.
 
-<a name=".aea.skills.behaviours.OneShotBehaviour"></a>
+<a name="aea.skills.behaviours.OneShotBehaviour"></a>
 ## OneShotBehaviour Objects
 
 ```python
@@ -109,7 +109,7 @@ class OneShotBehaviour(SimpleBehaviour,  ABC)
 
 This behaviour is executed only once.
 
-<a name=".aea.skills.behaviours.OneShotBehaviour.__init__"></a>
+<a name="aea.skills.behaviours.OneShotBehaviour.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -118,7 +118,7 @@ This behaviour is executed only once.
 
 Initialize the cyclic behaviour.
 
-<a name=".aea.skills.behaviours.OneShotBehaviour.is_done"></a>
+<a name="aea.skills.behaviours.OneShotBehaviour.is_done"></a>
 #### is`_`done
 
 ```python
@@ -127,7 +127,7 @@ Initialize the cyclic behaviour.
 
 Return True if the behaviour is terminated, False otherwise.
 
-<a name=".aea.skills.behaviours.OneShotBehaviour.act_wrapper"></a>
+<a name="aea.skills.behaviours.OneShotBehaviour.act_wrapper"></a>
 #### act`_`wrapper
 
 ```python
@@ -136,7 +136,7 @@ Return True if the behaviour is terminated, False otherwise.
 
 Wrap the call of the action. This method must be called only by the framework.
 
-<a name=".aea.skills.behaviours.TickerBehaviour"></a>
+<a name="aea.skills.behaviours.TickerBehaviour"></a>
 ## TickerBehaviour Objects
 
 ```python
@@ -145,7 +145,7 @@ class TickerBehaviour(SimpleBehaviour,  ABC)
 
 This behaviour is executed periodically with an interval.
 
-<a name=".aea.skills.behaviours.TickerBehaviour.__init__"></a>
+<a name="aea.skills.behaviours.TickerBehaviour.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -159,7 +159,7 @@ Initialize the ticker behaviour.
 - `tick_interval`: interval of the behaviour in seconds.
 - `start_at`: whether to start the behaviour with an offset.
 
-<a name=".aea.skills.behaviours.TickerBehaviour.tick_interval"></a>
+<a name="aea.skills.behaviours.TickerBehaviour.tick_interval"></a>
 #### tick`_`interval
 
 ```python
@@ -169,7 +169,7 @@ Initialize the ticker behaviour.
 
 Get the tick_interval in seconds.
 
-<a name=".aea.skills.behaviours.TickerBehaviour.start_at"></a>
+<a name="aea.skills.behaviours.TickerBehaviour.start_at"></a>
 #### start`_`at
 
 ```python
@@ -179,7 +179,7 @@ Get the tick_interval in seconds.
 
 Get the start time.
 
-<a name=".aea.skills.behaviours.TickerBehaviour.last_act_time"></a>
+<a name="aea.skills.behaviours.TickerBehaviour.last_act_time"></a>
 #### last`_`act`_`time
 
 ```python
@@ -189,7 +189,7 @@ Get the start time.
 
 Get the last time the act method has been called.
 
-<a name=".aea.skills.behaviours.TickerBehaviour.act_wrapper"></a>
+<a name="aea.skills.behaviours.TickerBehaviour.act_wrapper"></a>
 #### act`_`wrapper
 
 ```python
@@ -198,7 +198,7 @@ Get the last time the act method has been called.
 
 Wrap the call of the action. This method must be called only by the framework.
 
-<a name=".aea.skills.behaviours.TickerBehaviour.is_time_to_act"></a>
+<a name="aea.skills.behaviours.TickerBehaviour.is_time_to_act"></a>
 #### is`_`time`_`to`_`act
 
 ```python
@@ -211,7 +211,7 @@ Check whether it is time to act, according to the tick_interval constraint and t
 
 True if it is time to act, false otherwise.
 
-<a name=".aea.skills.behaviours.SequenceBehaviour"></a>
+<a name="aea.skills.behaviours.SequenceBehaviour"></a>
 ## SequenceBehaviour Objects
 
 ```python
@@ -220,7 +220,7 @@ class SequenceBehaviour(CompositeBehaviour,  ABC)
 
 This behaviour executes sub-behaviour serially.
 
-<a name=".aea.skills.behaviours.SequenceBehaviour.__init__"></a>
+<a name="aea.skills.behaviours.SequenceBehaviour.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -234,7 +234,7 @@ Initialize the sequence behaviour.
 - `behaviour_sequence`: the sequence of behaviour.
 - `kwargs`: 
 
-<a name=".aea.skills.behaviours.SequenceBehaviour.current_behaviour"></a>
+<a name="aea.skills.behaviours.SequenceBehaviour.current_behaviour"></a>
 #### current`_`behaviour
 
 ```python
@@ -246,7 +246,7 @@ Get the current behaviour.
 
 If None, the sequence behaviour can be considered done.
 
-<a name=".aea.skills.behaviours.SequenceBehaviour.act"></a>
+<a name="aea.skills.behaviours.SequenceBehaviour.act"></a>
 #### act
 
 ```python
@@ -255,7 +255,7 @@ If None, the sequence behaviour can be considered done.
 
 Implement the behaviour.
 
-<a name=".aea.skills.behaviours.SequenceBehaviour.is_done"></a>
+<a name="aea.skills.behaviours.SequenceBehaviour.is_done"></a>
 #### is`_`done
 
 ```python
@@ -264,7 +264,7 @@ Implement the behaviour.
 
 Return True if the behaviour is terminated, False otherwise.
 
-<a name=".aea.skills.behaviours.State"></a>
+<a name="aea.skills.behaviours.State"></a>
 ## State Objects
 
 ```python
@@ -279,7 +279,7 @@ by the implementer. The event is read by the framework
 when the behaviour is done in order to pick the
 transition to trigger.
 
-<a name=".aea.skills.behaviours.State.__init__"></a>
+<a name="aea.skills.behaviours.State.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -288,7 +288,7 @@ transition to trigger.
 
 Initialize a state of the state machine.
 
-<a name=".aea.skills.behaviours.State.event"></a>
+<a name="aea.skills.behaviours.State.event"></a>
 #### event
 
 ```python
@@ -298,7 +298,7 @@ Initialize a state of the state machine.
 
 Get the event to be triggered at the end of the behaviour.
 
-<a name=".aea.skills.behaviours.State.is_done"></a>
+<a name="aea.skills.behaviours.State.is_done"></a>
 #### is`_`done
 
 ```python
@@ -308,7 +308,7 @@ Get the event to be triggered at the end of the behaviour.
 
 Return True if the behaviour is terminated, False otherwise.
 
-<a name=".aea.skills.behaviours.State.reset"></a>
+<a name="aea.skills.behaviours.State.reset"></a>
 #### reset
 
 ```python
@@ -317,7 +317,7 @@ Return True if the behaviour is terminated, False otherwise.
 
 Reset initial conditions.
 
-<a name=".aea.skills.behaviours.FSMBehaviour"></a>
+<a name="aea.skills.behaviours.FSMBehaviour"></a>
 ## FSMBehaviour Objects
 
 ```python
@@ -326,7 +326,7 @@ class FSMBehaviour(CompositeBehaviour,  ABC)
 
 This class implements a finite-state machine behaviour.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.__init__"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -335,7 +335,7 @@ This class implements a finite-state machine behaviour.
 
 Initialize the finite-state machine behaviour.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.is_started"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.is_started"></a>
 #### is`_`started
 
 ```python
@@ -345,7 +345,7 @@ Initialize the finite-state machine behaviour.
 
 Check if the behaviour is started.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.register_state"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.register_state"></a>
 #### register`_`state
 
 ```python
@@ -368,7 +368,7 @@ None
 
 - `ValueError`: if a state with the provided name already exists.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.register_final_state"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.register_final_state"></a>
 #### register`_`final`_`state
 
 ```python
@@ -390,7 +390,7 @@ None
 
 - `ValueError`: if a state with the provided name already exists.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.unregister_state"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.unregister_state"></a>
 #### unregister`_`state
 
 ```python
@@ -411,7 +411,7 @@ None
 
 - `ValueError`: if the state is not registered.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.states"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.states"></a>
 #### states
 
 ```python
@@ -421,7 +421,17 @@ None
 
 Get all the state names.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.initial_state"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.initial_state"></a>
+#### initial`_`state
+
+```python
+ | @property
+ | initial_state() -> Optional[str]
+```
+
+Get the initial state name.
+
+<a name="aea.skills.behaviours.FSMBehaviour.initial_state"></a>
 #### initial`_`state
 
 ```python
@@ -431,7 +441,7 @@ Get all the state names.
 
 Set the initial state.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.final_states"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.final_states"></a>
 #### final`_`states
 
 ```python
@@ -441,7 +451,7 @@ Set the initial state.
 
 Get the final state names.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.get_state"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.get_state"></a>
 #### get`_`state
 
 ```python
@@ -450,7 +460,7 @@ Get the final state names.
 
 Get a state from its name.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.act"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.act"></a>
 #### act
 
 ```python
@@ -459,7 +469,7 @@ Get a state from its name.
 
 Implement the behaviour.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.is_done"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.is_done"></a>
 #### is`_`done
 
 ```python
@@ -468,7 +478,7 @@ Implement the behaviour.
 
 Return True if the behaviour is terminated, False otherwise.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.register_transition"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.register_transition"></a>
 #### register`_`transition
 
 ```python
@@ -493,7 +503,7 @@ None
 
 - `ValueError`: if a transition from source with event is already present.
 
-<a name=".aea.skills.behaviours.FSMBehaviour.unregister_transition"></a>
+<a name="aea.skills.behaviours.FSMBehaviour.unregister_transition"></a>
 #### unregister`_`transition
 
 ```python

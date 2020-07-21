@@ -1,9 +1,9 @@
-<a name=".aea.contracts.ethereum"></a>
+<a name="aea.contracts.ethereum"></a>
 # aea.contracts.ethereum
 
 The base ethereum contract.
 
-<a name=".aea.contracts.ethereum.Contract"></a>
+<a name="aea.contracts.ethereum.Contract"></a>
 ## Contract Objects
 
 ```python
@@ -12,7 +12,7 @@ class Contract(BaseContract)
 
 Definition of an ethereum contract.
 
-<a name=".aea.contracts.ethereum.Contract.get_instance"></a>
+<a name="aea.contracts.ethereum.Contract.get_instance"></a>
 #### get`_`instance
 
 ```python

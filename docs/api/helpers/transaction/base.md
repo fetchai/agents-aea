@@ -1,9 +1,9 @@
-<a name=".aea.helpers.transaction.base"></a>
+<a name="aea.helpers.transaction.base"></a>
 # aea.helpers.transaction.base
 
 This module contains terms related classes.
 
-<a name=".aea.helpers.transaction.base.RawTransaction"></a>
+<a name="aea.helpers.transaction.base.RawTransaction"></a>
 ## RawTransaction Objects
 
 ```python
@@ -12,7 +12,7 @@ class RawTransaction()
 
 This class represents an instance of RawTransaction.
 
-<a name=".aea.helpers.transaction.base.RawTransaction.__init__"></a>
+<a name="aea.helpers.transaction.base.RawTransaction.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -21,7 +21,7 @@ This class represents an instance of RawTransaction.
 
 Initialise an instance of RawTransaction.
 
-<a name=".aea.helpers.transaction.base.RawTransaction.ledger_id"></a>
+<a name="aea.helpers.transaction.base.RawTransaction.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -31,7 +31,7 @@ Initialise an instance of RawTransaction.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.RawTransaction.body"></a>
+<a name="aea.helpers.transaction.base.RawTransaction.body"></a>
 #### body
 
 ```python
@@ -41,7 +41,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the body.
 
-<a name=".aea.helpers.transaction.base.RawTransaction.encode"></a>
+<a name="aea.helpers.transaction.base.RawTransaction.encode"></a>
 #### encode
 
 ```python
@@ -62,7 +62,7 @@ The protocol buffer object in the raw_transaction_protobuf_object argument must 
 
 None
 
-<a name=".aea.helpers.transaction.base.RawTransaction.decode"></a>
+<a name="aea.helpers.transaction.base.RawTransaction.decode"></a>
 #### decode
 
 ```python
@@ -82,7 +82,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
 
-<a name=".aea.helpers.transaction.base.RawMessage"></a>
+<a name="aea.helpers.transaction.base.RawMessage"></a>
 ## RawMessage Objects
 
 ```python
@@ -91,7 +91,7 @@ class RawMessage()
 
 This class represents an instance of RawMessage.
 
-<a name=".aea.helpers.transaction.base.RawMessage.__init__"></a>
+<a name="aea.helpers.transaction.base.RawMessage.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -100,7 +100,7 @@ This class represents an instance of RawMessage.
 
 Initialise an instance of RawMessage.
 
-<a name=".aea.helpers.transaction.base.RawMessage.ledger_id"></a>
+<a name="aea.helpers.transaction.base.RawMessage.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -110,7 +110,7 @@ Initialise an instance of RawMessage.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.RawMessage.body"></a>
+<a name="aea.helpers.transaction.base.RawMessage.body"></a>
 #### body
 
 ```python
@@ -120,7 +120,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the body.
 
-<a name=".aea.helpers.transaction.base.RawMessage.is_deprecated_mode"></a>
+<a name="aea.helpers.transaction.base.RawMessage.is_deprecated_mode"></a>
 #### is`_`deprecated`_`mode
 
 ```python
@@ -130,7 +130,7 @@ Get the body.
 
 Get the is_deprecated_mode.
 
-<a name=".aea.helpers.transaction.base.RawMessage.encode"></a>
+<a name="aea.helpers.transaction.base.RawMessage.encode"></a>
 #### encode
 
 ```python
@@ -151,7 +151,7 @@ The protocol buffer object in the raw_message_protobuf_object argument must be m
 
 None
 
-<a name=".aea.helpers.transaction.base.RawMessage.decode"></a>
+<a name="aea.helpers.transaction.base.RawMessage.decode"></a>
 #### decode
 
 ```python
@@ -171,7 +171,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'raw_message_protobuf_object' argument.
 
-<a name=".aea.helpers.transaction.base.SignedTransaction"></a>
+<a name="aea.helpers.transaction.base.SignedTransaction"></a>
 ## SignedTransaction Objects
 
 ```python
@@ -180,7 +180,7 @@ class SignedTransaction()
 
 This class represents an instance of SignedTransaction.
 
-<a name=".aea.helpers.transaction.base.SignedTransaction.__init__"></a>
+<a name="aea.helpers.transaction.base.SignedTransaction.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -189,7 +189,7 @@ This class represents an instance of SignedTransaction.
 
 Initialise an instance of SignedTransaction.
 
-<a name=".aea.helpers.transaction.base.SignedTransaction.ledger_id"></a>
+<a name="aea.helpers.transaction.base.SignedTransaction.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -199,7 +199,7 @@ Initialise an instance of SignedTransaction.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.SignedTransaction.body"></a>
+<a name="aea.helpers.transaction.base.SignedTransaction.body"></a>
 #### body
 
 ```python
@@ -209,7 +209,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the body.
 
-<a name=".aea.helpers.transaction.base.SignedTransaction.encode"></a>
+<a name="aea.helpers.transaction.base.SignedTransaction.encode"></a>
 #### encode
 
 ```python
@@ -230,7 +230,7 @@ The protocol buffer object in the signed_transaction_protobuf_object argument mu
 
 None
 
-<a name=".aea.helpers.transaction.base.SignedTransaction.decode"></a>
+<a name="aea.helpers.transaction.base.SignedTransaction.decode"></a>
 #### decode
 
 ```python
@@ -250,7 +250,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
 
-<a name=".aea.helpers.transaction.base.SignedMessage"></a>
+<a name="aea.helpers.transaction.base.SignedMessage"></a>
 ## SignedMessage Objects
 
 ```python
@@ -259,7 +259,7 @@ class SignedMessage()
 
 This class represents an instance of RawMessage.
 
-<a name=".aea.helpers.transaction.base.SignedMessage.__init__"></a>
+<a name="aea.helpers.transaction.base.SignedMessage.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -268,7 +268,7 @@ This class represents an instance of RawMessage.
 
 Initialise an instance of SignedMessage.
 
-<a name=".aea.helpers.transaction.base.SignedMessage.ledger_id"></a>
+<a name="aea.helpers.transaction.base.SignedMessage.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -278,7 +278,7 @@ Initialise an instance of SignedMessage.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.SignedMessage.body"></a>
+<a name="aea.helpers.transaction.base.SignedMessage.body"></a>
 #### body
 
 ```python
@@ -288,7 +288,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the body.
 
-<a name=".aea.helpers.transaction.base.SignedMessage.is_deprecated_mode"></a>
+<a name="aea.helpers.transaction.base.SignedMessage.is_deprecated_mode"></a>
 #### is`_`deprecated`_`mode
 
 ```python
@@ -298,7 +298,7 @@ Get the body.
 
 Get the is_deprecated_mode.
 
-<a name=".aea.helpers.transaction.base.SignedMessage.encode"></a>
+<a name="aea.helpers.transaction.base.SignedMessage.encode"></a>
 #### encode
 
 ```python
@@ -319,7 +319,7 @@ The protocol buffer object in the signed_message_protobuf_object argument must b
 
 None
 
-<a name=".aea.helpers.transaction.base.SignedMessage.decode"></a>
+<a name="aea.helpers.transaction.base.SignedMessage.decode"></a>
 #### decode
 
 ```python
@@ -339,7 +339,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'signed_message_protobuf_object' argument.
 
-<a name=".aea.helpers.transaction.base.State"></a>
+<a name="aea.helpers.transaction.base.State"></a>
 ## State Objects
 
 ```python
@@ -348,7 +348,7 @@ class State()
 
 This class represents an instance of State.
 
-<a name=".aea.helpers.transaction.base.State.__init__"></a>
+<a name="aea.helpers.transaction.base.State.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -357,7 +357,7 @@ This class represents an instance of State.
 
 Initialise an instance of State.
 
-<a name=".aea.helpers.transaction.base.State.ledger_id"></a>
+<a name="aea.helpers.transaction.base.State.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -367,7 +367,7 @@ Initialise an instance of State.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.State.body"></a>
+<a name="aea.helpers.transaction.base.State.body"></a>
 #### body
 
 ```python
@@ -377,7 +377,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the body.
 
-<a name=".aea.helpers.transaction.base.State.encode"></a>
+<a name="aea.helpers.transaction.base.State.encode"></a>
 #### encode
 
 ```python
@@ -398,7 +398,7 @@ The protocol buffer object in the state_protobuf_object argument must be matched
 
 None
 
-<a name=".aea.helpers.transaction.base.State.decode"></a>
+<a name="aea.helpers.transaction.base.State.decode"></a>
 #### decode
 
 ```python
@@ -418,7 +418,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'state_protobuf_object' argument.
 
-<a name=".aea.helpers.transaction.base.Terms"></a>
+<a name="aea.helpers.transaction.base.Terms"></a>
 ## Terms Objects
 
 ```python
@@ -427,7 +427,7 @@ class Terms()
 
 Class to represent the terms of a multi-currency & multi-token ledger transaction.
 
-<a name=".aea.helpers.transaction.base.Terms.__init__"></a>
+<a name="aea.helpers.transaction.base.Terms.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -447,7 +447,7 @@ Instantiate terms.
 - `nonce`: nonce to be included in transaction to discriminate otherwise identical transactions.
 - `fee_by_currency_id`: the fee associated with the transaction.
 
-<a name=".aea.helpers.transaction.base.Terms.ledger_id"></a>
+<a name="aea.helpers.transaction.base.Terms.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -457,7 +457,7 @@ Instantiate terms.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.Terms.sender_address"></a>
+<a name="aea.helpers.transaction.base.Terms.sender_address"></a>
 #### sender`_`address
 
 ```python
@@ -467,7 +467,17 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the sender address.
 
-<a name=".aea.helpers.transaction.base.Terms.counterparty_address"></a>
+<a name="aea.helpers.transaction.base.Terms.counterparty_address"></a>
+#### counterparty`_`address
+
+```python
+ | @property
+ | counterparty_address() -> Address
+```
+
+Get the counterparty address.
+
+<a name="aea.helpers.transaction.base.Terms.counterparty_address"></a>
 #### counterparty`_`address
 
 ```python
@@ -477,7 +487,7 @@ Get the sender address.
 
 Set the counterparty address.
 
-<a name=".aea.helpers.transaction.base.Terms.amount_by_currency_id"></a>
+<a name="aea.helpers.transaction.base.Terms.amount_by_currency_id"></a>
 #### amount`_`by`_`currency`_`id
 
 ```python
@@ -487,7 +497,7 @@ Set the counterparty address.
 
 Get the amount by currency id.
 
-<a name=".aea.helpers.transaction.base.Terms.sender_payable_amount"></a>
+<a name="aea.helpers.transaction.base.Terms.sender_payable_amount"></a>
 #### sender`_`payable`_`amount
 
 ```python
@@ -497,7 +507,7 @@ Get the amount by currency id.
 
 Get the amount the sender must pay.
 
-<a name=".aea.helpers.transaction.base.Terms.counterparty_payable_amount"></a>
+<a name="aea.helpers.transaction.base.Terms.counterparty_payable_amount"></a>
 #### counterparty`_`payable`_`amount
 
 ```python
@@ -507,7 +517,7 @@ Get the amount the sender must pay.
 
 Get the amount the counterparty must pay.
 
-<a name=".aea.helpers.transaction.base.Terms.quantities_by_good_id"></a>
+<a name="aea.helpers.transaction.base.Terms.quantities_by_good_id"></a>
 #### quantities`_`by`_`good`_`id
 
 ```python
@@ -517,7 +527,7 @@ Get the amount the counterparty must pay.
 
 Get the quantities by good id.
 
-<a name=".aea.helpers.transaction.base.Terms.is_sender_payable_tx_fee"></a>
+<a name="aea.helpers.transaction.base.Terms.is_sender_payable_tx_fee"></a>
 #### is`_`sender`_`payable`_`tx`_`fee
 
 ```python
@@ -527,7 +537,7 @@ Get the quantities by good id.
 
 Bool indicating whether the tx fee is paid by sender or counterparty.
 
-<a name=".aea.helpers.transaction.base.Terms.nonce"></a>
+<a name="aea.helpers.transaction.base.Terms.nonce"></a>
 #### nonce
 
 ```python
@@ -537,7 +547,7 @@ Bool indicating whether the tx fee is paid by sender or counterparty.
 
 Get the nonce.
 
-<a name=".aea.helpers.transaction.base.Terms.has_fee"></a>
+<a name="aea.helpers.transaction.base.Terms.has_fee"></a>
 #### has`_`fee
 
 ```python
@@ -547,7 +557,7 @@ Get the nonce.
 
 Check if fee is set.
 
-<a name=".aea.helpers.transaction.base.Terms.fee"></a>
+<a name="aea.helpers.transaction.base.Terms.fee"></a>
 #### fee
 
 ```python
@@ -557,7 +567,7 @@ Check if fee is set.
 
 Get the fee.
 
-<a name=".aea.helpers.transaction.base.Terms.fee_by_currency_id"></a>
+<a name="aea.helpers.transaction.base.Terms.fee_by_currency_id"></a>
 #### fee`_`by`_`currency`_`id
 
 ```python
@@ -567,7 +577,7 @@ Get the fee.
 
 Get fee by currency.
 
-<a name=".aea.helpers.transaction.base.Terms.kwargs"></a>
+<a name="aea.helpers.transaction.base.Terms.kwargs"></a>
 #### kwargs
 
 ```python
@@ -577,7 +587,7 @@ Get fee by currency.
 
 Get the kwargs.
 
-<a name=".aea.helpers.transaction.base.Terms.encode"></a>
+<a name="aea.helpers.transaction.base.Terms.encode"></a>
 #### encode
 
 ```python
@@ -598,7 +608,7 @@ The protocol buffer object in the terms_protobuf_object argument must be matched
 
 None
 
-<a name=".aea.helpers.transaction.base.Terms.decode"></a>
+<a name="aea.helpers.transaction.base.Terms.decode"></a>
 #### decode
 
 ```python
@@ -618,7 +628,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'terms_protobuf_object' argument.
 
-<a name=".aea.helpers.transaction.base.TransactionDigest"></a>
+<a name="aea.helpers.transaction.base.TransactionDigest"></a>
 ## TransactionDigest Objects
 
 ```python
@@ -627,7 +637,7 @@ class TransactionDigest()
 
 This class represents an instance of TransactionDigest.
 
-<a name=".aea.helpers.transaction.base.TransactionDigest.__init__"></a>
+<a name="aea.helpers.transaction.base.TransactionDigest.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -636,7 +646,7 @@ This class represents an instance of TransactionDigest.
 
 Initialise an instance of TransactionDigest.
 
-<a name=".aea.helpers.transaction.base.TransactionDigest.ledger_id"></a>
+<a name="aea.helpers.transaction.base.TransactionDigest.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -646,7 +656,7 @@ Initialise an instance of TransactionDigest.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.TransactionDigest.body"></a>
+<a name="aea.helpers.transaction.base.TransactionDigest.body"></a>
 #### body
 
 ```python
@@ -656,7 +666,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the receipt.
 
-<a name=".aea.helpers.transaction.base.TransactionDigest.encode"></a>
+<a name="aea.helpers.transaction.base.TransactionDigest.encode"></a>
 #### encode
 
 ```python
@@ -677,7 +687,7 @@ The protocol buffer object in the transaction_digest_protobuf_object argument mu
 
 None
 
-<a name=".aea.helpers.transaction.base.TransactionDigest.decode"></a>
+<a name="aea.helpers.transaction.base.TransactionDigest.decode"></a>
 #### decode
 
 ```python
@@ -697,7 +707,7 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'transaction_digest_protobuf_object' argument.
 
-<a name=".aea.helpers.transaction.base.TransactionReceipt"></a>
+<a name="aea.helpers.transaction.base.TransactionReceipt"></a>
 ## TransactionReceipt Objects
 
 ```python
@@ -706,7 +716,7 @@ class TransactionReceipt()
 
 This class represents an instance of TransactionReceipt.
 
-<a name=".aea.helpers.transaction.base.TransactionReceipt.__init__"></a>
+<a name="aea.helpers.transaction.base.TransactionReceipt.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -715,7 +725,7 @@ This class represents an instance of TransactionReceipt.
 
 Initialise an instance of TransactionReceipt.
 
-<a name=".aea.helpers.transaction.base.TransactionReceipt.ledger_id"></a>
+<a name="aea.helpers.transaction.base.TransactionReceipt.ledger_id"></a>
 #### ledger`_`id
 
 ```python
@@ -725,7 +735,7 @@ Initialise an instance of TransactionReceipt.
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a name=".aea.helpers.transaction.base.TransactionReceipt.receipt"></a>
+<a name="aea.helpers.transaction.base.TransactionReceipt.receipt"></a>
 #### receipt
 
 ```python
@@ -735,7 +745,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 Get the receipt.
 
-<a name=".aea.helpers.transaction.base.TransactionReceipt.transaction"></a>
+<a name="aea.helpers.transaction.base.TransactionReceipt.transaction"></a>
 #### transaction
 
 ```python
@@ -745,7 +755,7 @@ Get the receipt.
 
 Get the transaction.
 
-<a name=".aea.helpers.transaction.base.TransactionReceipt.encode"></a>
+<a name="aea.helpers.transaction.base.TransactionReceipt.encode"></a>
 #### encode
 
 ```python
@@ -766,7 +776,7 @@ The protocol buffer object in the transaction_receipt_protobuf_object argument m
 
 None
 
-<a name=".aea.helpers.transaction.base.TransactionReceipt.decode"></a>
+<a name="aea.helpers.transaction.base.TransactionReceipt.decode"></a>
 #### decode
 
 ```python
