@@ -565,9 +565,7 @@ class And(ConstraintExpr):
 
     def __eq__(self, other):  # pragma: nocover
         """Compare with another object."""
-        return isinstance(other, And) and set(self.constraints) == set(
-            other.constraints
-        )
+        return isinstance(other, And) and self.constraints == other.constraints
 
 
 class Or(ConstraintExpr):
@@ -616,7 +614,7 @@ class Or(ConstraintExpr):
 
     def __eq__(self, other):  # pragma: nocover
         """Compare with another object."""
-        return isinstance(other, Or) and set(self.constraints) == set(other.constraints)
+        return isinstance(other, Or) and self.constraints == other.constraints
 
 
 class Not(ConstraintExpr):
