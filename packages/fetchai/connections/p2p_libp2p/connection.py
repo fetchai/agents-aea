@@ -34,8 +34,10 @@ from threading import Thread
 from typing import IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.base import Crypto
+from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.mail.base import Address, Envelope
 
@@ -56,9 +58,11 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.5.0")
 
 MultiAddr = str
+
+SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
 
 async def _golang_module_build_async(
@@ -209,7 +213,7 @@ class Libp2pNode:
     def __init__(
         self,
         agent_addr: Address,
-        key: FetchAICrypto,
+        key: Crypto,
         module_path: str,
         clargs: Optional[List[str]] = None,
         uri: Optional[Uri] = None,
@@ -222,7 +226,7 @@ class Libp2pNode:
         """
         Initialize a p2p libp2p node.
 
-        :param key: FET secp256k1 curve private key.
+        :param key: secp256k1 curve private key.
         :param source: the source path
         :param clargs: the command line arguments for the libp2p node
         :param uri: libp2p node ip address and port number in format ipaddress:port.
@@ -236,7 +240,7 @@ class Libp2pNode:
         self.address = agent_addr
 
         # node id in the p2p network
-        self.key = key.entity.private_key_hex
+        self.key = key.private_key
         self.pub = key.public_key
 
         # node uri
@@ -457,12 +461,12 @@ class Libp2pNode:
                 return None
             return data
         except asyncio.streams.IncompleteReadError as e:
-            self.logger.info(
+            self.logger.info(  # pragma: nocover
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )
             )
-            return None
+            return None  # pragma: nocover
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
     def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
@@ -525,6 +529,13 @@ class P2PLibp2pConnection(Connection):
         self._check_go_installed()
         # we put it here so below we can access the address
         super().__init__(**kwargs)
+        ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
+        if ledger_id not in SUPPORTED_LEDGER_IDS:
+            raise ValueError(  # pragma: nocover
+                "Ledger id '{}' is not supported. Supported ids: '{}'".format(
+                    ledger_id, SUPPORTED_LEDGER_IDS
+                )
+            )
         libp2p_key_file = self.configuration.config.get(
             "node_key_file"
         )  # Optional[str]
@@ -542,13 +553,13 @@ class P2PLibp2pConnection(Connection):
 
         if (
             self.has_crypto_store
-            and self.crypto_store.crypto_objects.get("fetchai", None) is not None
+            and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
         ):  # pragma: no cover
-            key = cast(FetchAICrypto, self.crypto_store.crypto_objects["fetchai"])
+            key = self.crypto_store.crypto_objects[ledger_id]
         elif libp2p_key_file is not None:
-            key = FetchAICrypto(libp2p_key_file)
+            key = make_crypto(ledger_id, private_key_path=libp2p_key_file)
         else:
-            key = FetchAICrypto()
+            key = make_crypto(ledger_id)
 
         uri = None
         if libp2p_local_uri is not None:

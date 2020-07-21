@@ -1,9 +1,9 @@
-<a name=".aea.protocols.default.message"></a>
+<a name="aea.protocols.default.message"></a>
 # aea.protocols.default.message
 
 This module contains default's message definition.
 
-<a name=".aea.protocols.default.message.DefaultMessage"></a>
+<a name="aea.protocols.default.message.DefaultMessage"></a>
 ## DefaultMessage Objects
 
 ```python
@@ -12,7 +12,7 @@ class DefaultMessage(Message)
 
 A protocol for exchanging any bytes message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.Performative"></a>
+<a name="aea.protocols.default.message.DefaultMessage.Performative"></a>
 ## Performative Objects
 
 ```python
@@ -21,7 +21,7 @@ class Performative(Enum)
 
 Performatives for the default protocol.
 
-<a name=".aea.protocols.default.message.DefaultMessage.Performative.__str__"></a>
+<a name="aea.protocols.default.message.DefaultMessage.Performative.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -30,7 +30,7 @@ Performatives for the default protocol.
 
 Get the string representation.
 
-<a name=".aea.protocols.default.message.DefaultMessage.__init__"></a>
+<a name="aea.protocols.default.message.DefaultMessage.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -46,7 +46,7 @@ Initialise an instance of DefaultMessage.
 - `target`: the message target.
 - `performative`: the message performative.
 
-<a name=".aea.protocols.default.message.DefaultMessage.valid_performatives"></a>
+<a name="aea.protocols.default.message.DefaultMessage.valid_performatives"></a>
 #### valid`_`performatives
 
 ```python
@@ -56,7 +56,7 @@ Initialise an instance of DefaultMessage.
 
 Get valid performatives.
 
-<a name=".aea.protocols.default.message.DefaultMessage.dialogue_reference"></a>
+<a name="aea.protocols.default.message.DefaultMessage.dialogue_reference"></a>
 #### dialogue`_`reference
 
 ```python
@@ -66,7 +66,7 @@ Get valid performatives.
 
 Get the dialogue_reference of the message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.message_id"></a>
+<a name="aea.protocols.default.message.DefaultMessage.message_id"></a>
 #### message`_`id
 
 ```python
@@ -76,7 +76,7 @@ Get the dialogue_reference of the message.
 
 Get the message_id of the message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.performative"></a>
+<a name="aea.protocols.default.message.DefaultMessage.performative"></a>
 #### performative
 
 ```python
@@ -86,7 +86,7 @@ Get the message_id of the message.
 
 Get the performative of the message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.target"></a>
+<a name="aea.protocols.default.message.DefaultMessage.target"></a>
 #### target
 
 ```python
@@ -96,7 +96,7 @@ Get the performative of the message.
 
 Get the target of the message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.content"></a>
+<a name="aea.protocols.default.message.DefaultMessage.content"></a>
 #### content
 
 ```python
@@ -106,7 +106,7 @@ Get the target of the message.
 
 Get the 'content' content from the message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.error_code"></a>
+<a name="aea.protocols.default.message.DefaultMessage.error_code"></a>
 #### error`_`code
 
 ```python
@@ -116,7 +116,7 @@ Get the 'content' content from the message.
 
 Get the 'error_code' content from the message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.error_data"></a>
+<a name="aea.protocols.default.message.DefaultMessage.error_data"></a>
 #### error`_`data
 
 ```python
@@ -126,7 +126,7 @@ Get the 'error_code' content from the message.
 
 Get the 'error_data' content from the message.
 
-<a name=".aea.protocols.default.message.DefaultMessage.error_msg"></a>
+<a name="aea.protocols.default.message.DefaultMessage.error_msg"></a>
 #### error`_`msg
 
 ```python

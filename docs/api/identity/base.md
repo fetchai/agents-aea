@@ -1,9 +1,9 @@
-<a name=".aea.identity.base"></a>
+<a name="aea.identity.base"></a>
 # aea.identity.base
 
 This module contains the identity class.
 
-<a name=".aea.identity.base.Identity"></a>
+<a name="aea.identity.base.Identity"></a>
 ## Identity Objects
 
 ```python
@@ -17,7 +17,7 @@ It includes:
 - the agent name
 - the addresses, a map from address identifier to address (can be a single key-value pair)
 
-<a name=".aea.identity.base.Identity.__init__"></a>
+<a name="aea.identity.base.Identity.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -33,7 +33,7 @@ Instantiate the identity.
 - `addresses`: the addresses of the agent.
 - `default_address_key`: the key for the default address.
 
-<a name=".aea.identity.base.Identity.name"></a>
+<a name="aea.identity.base.Identity.name"></a>
 #### name
 
 ```python
@@ -43,7 +43,7 @@ Instantiate the identity.
 
 Get the agent name.
 
-<a name=".aea.identity.base.Identity.addresses"></a>
+<a name="aea.identity.base.Identity.addresses"></a>
 #### addresses
 
 ```python
@@ -53,7 +53,7 @@ Get the agent name.
 
 Get the addresses.
 
-<a name=".aea.identity.base.Identity.address"></a>
+<a name="aea.identity.base.Identity.address"></a>
 #### address
 
 ```python

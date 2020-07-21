@@ -1,9 +1,9 @@
-<a name=".aea.agent"></a>
+<a name="aea.agent"></a>
 # aea.agent
 
 This module contains the implementation of a generic agent.
 
-<a name=".aea.agent.AgentState"></a>
+<a name="aea.agent.AgentState"></a>
 ## AgentState Objects
 
 ```python
@@ -18,7 +18,7 @@ In particular, it can be one of the following states:
 - AgentState.CONNECTED: when the agent is connected.
 - AgentState.RUNNING: when the agent is running.
 
-<a name=".aea.agent.Liveness"></a>
+<a name="aea.agent.Liveness"></a>
 ## Liveness Objects
 
 ```python
@@ -27,7 +27,7 @@ class Liveness()
 
 Determines the liveness of the agent.
 
-<a name=".aea.agent.Liveness.__init__"></a>
+<a name="aea.agent.Liveness.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -36,7 +36,7 @@ Determines the liveness of the agent.
 
 Instantiate the liveness.
 
-<a name=".aea.agent.Liveness.is_stopped"></a>
+<a name="aea.agent.Liveness.is_stopped"></a>
 #### is`_`stopped
 
 ```python
@@ -46,7 +46,7 @@ Instantiate the liveness.
 
 Check whether the liveness is stopped.
 
-<a name=".aea.agent.Liveness.start"></a>
+<a name="aea.agent.Liveness.start"></a>
 #### start
 
 ```python
@@ -55,7 +55,7 @@ Check whether the liveness is stopped.
 
 Start the liveness.
 
-<a name=".aea.agent.Liveness.stop"></a>
+<a name="aea.agent.Liveness.stop"></a>
 #### stop
 
 ```python
@@ -64,7 +64,7 @@ Start the liveness.
 
 Stop the liveness.
 
-<a name=".aea.agent.Agent"></a>
+<a name="aea.agent.Agent"></a>
 ## Agent Objects
 
 ```python
@@ -73,7 +73,7 @@ class Agent(ABC)
 
 This class provides an abstract base class for a generic agent.
 
-<a name=".aea.agent.Agent.__init__"></a>
+<a name="aea.agent.Agent.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -95,7 +95,7 @@ Instantiate the agent.
 
 None
 
-<a name=".aea.agent.Agent.is_running"></a>
+<a name="aea.agent.Agent.is_running"></a>
 #### is`_`running
 
 ```python
@@ -105,7 +105,7 @@ None
 
 Get running state of the runtime and agent.
 
-<a name=".aea.agent.Agent.is_stopped"></a>
+<a name="aea.agent.Agent.is_stopped"></a>
 #### is`_`stopped
 
 ```python
@@ -115,7 +115,7 @@ Get running state of the runtime and agent.
 
 Get running state of the runtime and agent.
 
-<a name=".aea.agent.Agent.identity"></a>
+<a name="aea.agent.Agent.identity"></a>
 #### identity
 
 ```python
@@ -125,7 +125,7 @@ Get running state of the runtime and agent.
 
 Get the identity.
 
-<a name=".aea.agent.Agent.multiplexer"></a>
+<a name="aea.agent.Agent.multiplexer"></a>
 #### multiplexer
 
 ```python
@@ -135,7 +135,7 @@ Get the identity.
 
 Get the multiplexer.
 
-<a name=".aea.agent.Agent.inbox"></a>
+<a name="aea.agent.Agent.inbox"></a>
 #### inbox
 
 ```python
@@ -148,7 +148,7 @@ Get the inbox.
 The inbox contains Envelopes from the Multiplexer.
 The agent can pick these messages for processing.
 
-<a name=".aea.agent.Agent.outbox"></a>
+<a name="aea.agent.Agent.outbox"></a>
 #### outbox
 
 ```python
@@ -161,7 +161,7 @@ Get the outbox.
 The outbox contains Envelopes for the Multiplexer.
 Envelopes placed in the Outbox are processed by the Multiplexer.
 
-<a name=".aea.agent.Agent.name"></a>
+<a name="aea.agent.Agent.name"></a>
 #### name
 
 ```python
@@ -171,7 +171,7 @@ Envelopes placed in the Outbox are processed by the Multiplexer.
 
 Get the agent name.
 
-<a name=".aea.agent.Agent.liveness"></a>
+<a name="aea.agent.Agent.liveness"></a>
 #### liveness
 
 ```python
@@ -181,7 +181,7 @@ Get the agent name.
 
 Get the liveness.
 
-<a name=".aea.agent.Agent.tick"></a>
+<a name="aea.agent.Agent.tick"></a>
 #### tick
 
 ```python
@@ -193,7 +193,7 @@ Get the tick or agent loop count.
 
 Each agent loop (one call to each one of act(), react(), update()) increments the tick.
 
-<a name=".aea.agent.Agent.timeout"></a>
+<a name="aea.agent.Agent.timeout"></a>
 #### timeout
 
 ```python
@@ -203,7 +203,7 @@ Each agent loop (one call to each one of act(), react(), update()) increments th
 
 Get the time in (fractions of) seconds to time out an agent between act and react.
 
-<a name=".aea.agent.Agent.agent_state"></a>
+<a name="aea.agent.Agent.agent_state"></a>
 #### agent`_`state
 
 ```python
@@ -221,7 +221,7 @@ Get the state of the agent.
 
 None
 
-<a name=".aea.agent.Agent.loop_mode"></a>
+<a name="aea.agent.Agent.loop_mode"></a>
 #### loop`_`mode
 
 ```python
@@ -231,7 +231,7 @@ None
 
 Get the agent loop mode.
 
-<a name=".aea.agent.Agent.main_loop"></a>
+<a name="aea.agent.Agent.main_loop"></a>
 #### main`_`loop
 
 ```python
@@ -241,7 +241,7 @@ Get the agent loop mode.
 
 Get the main agent loop.
 
-<a name=".aea.agent.Agent.runtime"></a>
+<a name="aea.agent.Agent.runtime"></a>
 #### runtime
 
 ```python
@@ -251,7 +251,7 @@ Get the main agent loop.
 
 Get the runtime.
 
-<a name=".aea.agent.Agent.setup_multiplexer"></a>
+<a name="aea.agent.Agent.setup_multiplexer"></a>
 #### setup`_`multiplexer
 
 ```python
@@ -260,7 +260,7 @@ Get the runtime.
 
 Set up the multiplexer
 
-<a name=".aea.agent.Agent.start"></a>
+<a name="aea.agent.Agent.start"></a>
 #### start
 
 ```python
@@ -288,7 +288,7 @@ While the liveness of the agent is not stopped it continues to loop over:
 
 None
 
-<a name=".aea.agent.Agent.start_setup"></a>
+<a name="aea.agent.Agent.start_setup"></a>
 #### start`_`setup
 
 ```python
@@ -305,7 +305,7 @@ Set up Agent on start.
 
 None
 
-<a name=".aea.agent.Agent.stop"></a>
+<a name="aea.agent.Agent.stop"></a>
 #### stop
 
 ```python
@@ -324,7 +324,7 @@ Performs the following:
 
 None
 
-<a name=".aea.agent.Agent.setup"></a>
+<a name="aea.agent.Agent.setup"></a>
 #### setup
 
 ```python
@@ -338,7 +338,7 @@ Set up the agent.
 
 None
 
-<a name=".aea.agent.Agent.act"></a>
+<a name="aea.agent.Agent.act"></a>
 #### act
 
 ```python
@@ -352,7 +352,7 @@ Perform actions.
 
 None
 
-<a name=".aea.agent.Agent.react"></a>
+<a name="aea.agent.Agent.react"></a>
 #### react
 
 ```python
@@ -366,7 +366,7 @@ React to events.
 
 None
 
-<a name=".aea.agent.Agent.update"></a>
+<a name="aea.agent.Agent.update"></a>
 #### update
 
 ```python
@@ -378,7 +378,7 @@ Update the internals of the agent which are not exposed to the skills.
 
 :return None
 
-<a name=".aea.agent.Agent.teardown"></a>
+<a name="aea.agent.Agent.teardown"></a>
 #### teardown
 
 ```python

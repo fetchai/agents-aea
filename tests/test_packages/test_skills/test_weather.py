@@ -20,29 +20,45 @@
 import pytest
 
 
-from aea.test_tools.test_cases import AEATestCaseMany, UseOef
+from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_FILE,
+    FUNDED_COSMOS_PRIVATE_KEY_1,
+    MAX_FLAKY_RERUNS_INTEGRATION,
+    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_GENESIS_CONFIG,
+    wait_for_localhost_ports_to_close,
+)
 
 
-class TestWeatherSkills(AEATestCaseMany, UseOef):
+@pytest.mark.integration
+class TestWeatherSkills(AEATestCaseMany):
     """Test that weather skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
         weather_client_aea_name = "my_weather_client"
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/weather_station:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/weather_station:0.7.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
@@ -51,12 +67,22 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/weather_client:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
+        self.add_item("skill", "fetchai/weather_client:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
@@ -65,15 +91,56 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
+        # add funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
         # run agents
         self.set_agent_context(weather_station_aea_name)
         weather_station_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            weather_station_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
         self.set_agent_context(weather_client_aea_name)
         weather_client_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, timeout=240, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
@@ -108,75 +175,120 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])
 
 
-class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
+@pytest.mark.integration
+class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
     """Test that weather skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
         weather_client_aea_name = "my_weather_client"
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
-
-        # prepare ledger configurations
-        ledger_apis = {"fetchai": {"network": "testnet"}}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/weather_station:0.6.0")
-        self.force_set_config("agent.ledger_apis", ledger_apis)
+        self.add_item("skill", "fetchai/weather_station:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.7.0", weather_station_aea_name
+            "fetchai/weather_station:0.8.0", weather_station_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
+
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/weather_client:0.5.0")
-        self.force_set_config("agent.ledger_apis", ledger_apis)
+        self.add_item("skill", "fetchai/weather_client:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.7.0", weather_client_aea_name
+            "fetchai/weather_client:0.8.0", weather_client_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        # set funded keys
-        self.generate_private_key("fetchai")
-        self.add_private_key("fetchai", "fet_private_key.txt")
+        # add funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
-            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         self.set_agent_context(weather_station_aea_name)
         weather_station_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            weather_station_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
         self.set_agent_context(weather_client_aea_name)
         weather_client_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
-            "unregistering services from OEF service directory.",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, timeout=240, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
@@ -219,3 +331,4 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])

@@ -32,6 +32,7 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
 
+from tests.conftest import COSMOS, ETHEREUM, FETCHAI
 from tests.data.custom_crypto import CustomCrypto
 
 logger = logging.getLogger(__name__)
@@ -43,36 +44,36 @@ forbidden_special_characters = "".join(
 
 def test_make_fetchai():
     """Test the 'make' method for 'fetchai' crypto."""
-    fetchai_crypto = aea.crypto.registries.make_crypto("fetchai")
+    fetchai_crypto = aea.crypto.registries.make_crypto(FETCHAI)
 
     assert type(fetchai_crypto) == FetchAICrypto
 
     # calling 'make' again will give a different object.
-    fetchai_crypto_1 = aea.crypto.registries.make_crypto("fetchai")
+    fetchai_crypto_1 = aea.crypto.registries.make_crypto(FETCHAI)
     assert type(fetchai_crypto) == type(fetchai_crypto_1)
     assert fetchai_crypto.address != fetchai_crypto_1
 
 
 def test_make_ethereum():
     """Test the 'make' method for 'ethereum' crypto."""
-    ethereum_crypto = aea.crypto.registries.make_crypto("ethereum")
+    ethereum_crypto = aea.crypto.registries.make_crypto(ETHEREUM)
 
     assert type(ethereum_crypto) == EthereumCrypto
 
     # calling 'make' again will give a different object.
-    ethereum_crypto_1 = aea.crypto.registries.make_crypto("ethereum")
+    ethereum_crypto_1 = aea.crypto.registries.make_crypto(ETHEREUM)
     assert type(ethereum_crypto) == type(ethereum_crypto_1)
     assert ethereum_crypto.address != ethereum_crypto_1.address
 
 
 def test_make_cosmos():
     """Test the 'make' method for 'cosmos' crypto."""
-    cosmos_crypto = aea.crypto.registries.make_crypto("cosmos")
+    cosmos_crypto = aea.crypto.registries.make_crypto(COSMOS)
 
     assert type(cosmos_crypto) == CosmosCrypto
 
     # calling 'make' again will give a different object.
-    cosmos_crypto_1 = aea.crypto.registries.make_crypto("cosmos")
+    cosmos_crypto_1 = aea.crypto.registries.make_crypto(COSMOS)
     assert type(cosmos_crypto) == type(cosmos_crypto_1)
     assert cosmos_crypto.address != cosmos_crypto_1.address
 

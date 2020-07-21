@@ -1,9 +1,9 @@
-<a name=".aea.runner"></a>
+<a name="aea.runner"></a>
 # aea.runner
 
 This module contains the implementation of AEA multiple instances runner.
 
-<a name=".aea.runner.AEAInstanceTask"></a>
+<a name="aea.runner.AEAInstanceTask"></a>
 ## AEAInstanceTask Objects
 
 ```python
@@ -12,7 +12,7 @@ class AEAInstanceTask(AbstractExecutorTask)
 
 Task to run agent instance.
 
-<a name=".aea.runner.AEAInstanceTask.__init__"></a>
+<a name="aea.runner.AEAInstanceTask.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -25,7 +25,7 @@ Init aea instance task.
 
 - `agent`: AEA instance to run within task.
 
-<a name=".aea.runner.AEAInstanceTask.start"></a>
+<a name="aea.runner.AEAInstanceTask.start"></a>
 #### start
 
 ```python
@@ -34,7 +34,7 @@ Init aea instance task.
 
 Start task.
 
-<a name=".aea.runner.AEAInstanceTask.stop"></a>
+<a name="aea.runner.AEAInstanceTask.stop"></a>
 #### stop
 
 ```python
@@ -43,7 +43,7 @@ Start task.
 
 Stop task.
 
-<a name=".aea.runner.AEAInstanceTask.create_async_task"></a>
+<a name="aea.runner.AEAInstanceTask.create_async_task"></a>
 #### create`_`async`_`task
 
 ```python
@@ -60,7 +60,7 @@ Return asyncio Task for task run in asyncio loop.
 
 task to run runtime
 
-<a name=".aea.runner.AEAInstanceTask.id"></a>
+<a name="aea.runner.AEAInstanceTask.id"></a>
 #### id
 
 ```python
@@ -70,7 +70,7 @@ task to run runtime
 
 Return agent name.
 
-<a name=".aea.runner.AEARunner"></a>
+<a name="aea.runner.AEARunner"></a>
 ## AEARunner Objects
 
 ```python
@@ -79,7 +79,7 @@ class AEARunner(AbstractMultipleRunner)
 
 Run multiple AEA instances.
 
-<a name=".aea.runner.AEARunner.__init__"></a>
+<a name="aea.runner.AEARunner.__init__"></a>
 #### `__`init`__`
 
 ```python

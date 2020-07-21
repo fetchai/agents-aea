@@ -19,18 +19,27 @@
 
 """This module contains the crypto modules."""
 
+from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries import register_crypto, register_ledger_api  # noqa
 
-register_crypto(id_="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
-register_crypto(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
-register_crypto(id_="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
-
-register_ledger_api(
-    id_="fetchai", entry_point="aea.crypto.fetchai:FetchAIApi",
+register_crypto(
+    id_=FetchAICrypto.identifier, entry_point="aea.crypto.fetchai:FetchAICrypto"
+)
+register_crypto(
+    id_=EthereumCrypto.identifier, entry_point="aea.crypto.ethereum:EthereumCrypto"
+)
+register_crypto(
+    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosCrypto"
 )
 
-register_ledger_api(id_="ethereum", entry_point="aea.crypto.ethereum:EthereumApi")
-
 register_ledger_api(
-    id_="cosmos", entry_point="aea.crypto.cosmos:CosmosApi",
+    id_=FetchAICrypto.identifier, entry_point="aea.crypto.fetchai:FetchAIApi",
+)
+register_ledger_api(
+    id_=EthereumCrypto.identifier, entry_point="aea.crypto.ethereum:EthereumApi"
+)
+register_ledger_api(
+    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosApi",
 )

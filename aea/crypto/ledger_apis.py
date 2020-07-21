@@ -23,8 +23,10 @@ from typing import Any, Dict, Optional, Type, Union
 
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
-from aea.crypto.ethereum import EthereumApi
-from aea.crypto.fetchai import FetchAIApi
+from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
+from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
+from aea.crypto.ethereum import DEFAULT_CHAIN_ID, EthereumApi
+from aea.crypto.fetchai import DEFAULT_NETWORK, FetchAIApi
 from aea.crypto.registries import make_ledger_api
 from aea.mail.base import Address
 
@@ -33,6 +35,14 @@ SUPPORTED_LEDGER_APIS = {
     EthereumApi.identifier: EthereumApi,
     FetchAIApi.identifier: FetchAIApi,
 }  # type: Dict[str, Type[LedgerApi]]
+DEFAULT_LEDGER_CONFIGS = {
+    CosmosApi.identifier: {"address": COSMOS_DEFAULT_ADDRESS},
+    EthereumApi.identifier: {
+        "address": ETHEREUM_DEFAULT_ADDRESS,
+        "chain_id": DEFAULT_CHAIN_ID,
+    },
+    FetchAIApi.identifier: {"network": DEFAULT_NETWORK},
+}  # type: Dict[str, Dict[str, Union[str, int]]]
 
 logger = logging.getLogger(__name__)
 

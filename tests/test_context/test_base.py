@@ -23,12 +23,14 @@
 from aea.context.base import AgentContext
 from aea.identity.base import Identity
 
+from tests.conftest import FETCHAI
+
 
 def test_agent_context():
     """Test the agent context."""
     agent_name = "name"
     address = "address"
-    addresses = {"fetchai": address}
+    addresses = {FETCHAI: address}
     identity = Identity(agent_name, addresses)
     connection_status = "connection_status_stub"
     outbox = "outbox_stub"

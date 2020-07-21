@@ -25,6 +25,8 @@ from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
 from aea.helpers.transaction.base import Terms
 
+from tests.conftest import ETHEREUM
+
 
 def test_non_initialized_ownership_state_raises_exception():
     """Test that non-initialized ownership state raises exception."""
@@ -54,7 +56,7 @@ def test_is_affordable_for_uninitialized():
     """Test the initialisation of the ownership_state."""
     ownership_state = OwnershipState()
     buyer_terms = Terms(
-        ledger_id="ethereum",
+        ledger_id=ETHEREUM,
         sender_address="pk1",
         counterparty_address="pk2",
         amount_by_currency_id={"FET": -1},
@@ -74,7 +76,7 @@ class TestOwnershipState:
     def setup_class(cls):
         """Setup class for test case."""
         cls.buyer_terms = Terms(
-            ledger_id="ethereum",
+            ledger_id=ETHEREUM,
             sender_address="pk1",
             counterparty_address="pk2",
             amount_by_currency_id={"FET": -1},
@@ -83,7 +85,7 @@ class TestOwnershipState:
             nonce="transaction nonce",
         )
         cls.neutral_terms = Terms(
-            ledger_id="ethereum",
+            ledger_id=ETHEREUM,
             sender_address="pk1",
             counterparty_address="pk2",
             amount_by_currency_id={"FET": 0},
@@ -92,7 +94,7 @@ class TestOwnershipState:
             nonce="transaction nonce",
         )
         cls.malformed_terms = Terms(
-            ledger_id="ethereum",
+            ledger_id=ETHEREUM,
             sender_address="pk1",
             counterparty_address="pk2",
             amount_by_currency_id={"FET": -10},
@@ -102,7 +104,7 @@ class TestOwnershipState:
         )
         cls.malformed_terms._amount_by_currency_id = {"FET": 10}
         cls.seller_terms = Terms(
-            ledger_id="ethereum",
+            ledger_id=ETHEREUM,
             sender_address="pk1",
             counterparty_address="pk2",
             amount_by_currency_id={"FET": 1},

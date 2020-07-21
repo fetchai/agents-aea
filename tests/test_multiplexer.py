@@ -16,10 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the Multiplexer."""
 
 import asyncio
+import logging
 import shutil
 import tempfile
 import time
@@ -27,6 +27,7 @@ import unittest.mock
 from pathlib import Path
 from threading import Thread
 from unittest import mock
+from unittest.mock import patch
 
 import pytest
 
@@ -34,7 +35,7 @@ import aea
 from aea.configurations.base import PublicId
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
-from aea.multiplexer import Multiplexer
+from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
@@ -439,3 +440,106 @@ def test_send_message_no_supported_protocol():
             )
 
         multiplexer.disconnect()
+
+
+def test_autoset_default_connection():
+    """Set default connection automatically."""
+    connection_1 = _make_dummy_connection()
+    connection_2 = _make_dummy_connection()
+    connections = [connection_1, connection_2]
+    multiplexer = Multiplexer(connections)
+
+    multiplexer._default_connection = None
+    multiplexer._set_default_connection_if_none()
+    assert multiplexer._default_connection == connections[0]
+
+
+@pytest.mark.asyncio
+async def test_disconnect_when_not_connected():
+    """Test disconnect when not connected."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = AsyncMultiplexer(connections)
+    with patch.object(multiplexer, "_disconnect_all") as disconnect_all_mocked:
+        await multiplexer.disconnect()
+
+    disconnect_all_mocked.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_exit_on_none_envelope():
+    """Test sending task exit on None envelope."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
+    try:
+        await multiplexer.connect()
+        assert multiplexer.is_connected
+        multiplexer.put(None)
+
+        await asyncio.sleep(0.5)
+        assert multiplexer._send_loop_task.done()
+    finally:
+        await multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_inbox_outbox():
+    """Test InBox OutBox objects."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_id=DefaultMessage.protocol_id,
+        message=b"",
+        context=EnvelopeContext(connection_id=connection_1.connection_id),
+    )
+    try:
+        await multiplexer.connect()
+        inbox = InBox(multiplexer)
+        outbox = InBox(multiplexer)
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        multiplexer.put(envelope)
+        await outbox.async_get()
+    finally:
+        await multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_default_route_applied(caplog):
+    """Test default route is selected automatically."""
+    logger = logging.getLogger("aea.multiplexer")
+    with caplog.at_level(logging.DEBUG, logger="aea.multiplexer"):
+        connection_1 = _make_dummy_connection()
+        connections = [connection_1]
+        multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
+        multiplexer.logger = logger
+        envelope = Envelope(
+            to="",
+            sender="",
+            protocol_id=DefaultMessage.protocol_id,
+            message=b"",
+            context=EnvelopeContext(),
+        )
+        multiplexer.default_routing = {
+            DefaultMessage.protocol_id: connection_1.connection_id
+        }
+        try:
+            await multiplexer.connect()
+            inbox = InBox(multiplexer)
+            outbox = InBox(multiplexer)
+
+            assert inbox.empty()
+            assert outbox.empty()
+
+            multiplexer.put(envelope)
+            await outbox.async_get()
+        finally:
+            await multiplexer.disconnect()
+
+            assert "Using default routing:" in caplog.text

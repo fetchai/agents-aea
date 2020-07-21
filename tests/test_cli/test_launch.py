@@ -28,8 +28,6 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator, List, Optional
 
-from click.testing import CliRunner
-
 from pexpect.exceptions import EOF  # type: ignore
 
 import pytest
@@ -40,7 +38,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, MAX_FLAKY_RERUNS
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, MAX_FLAKY_RERUNS
 
 logger = logging.getLogger(__name__)
 
@@ -124,8 +122,8 @@ class TestLaunch(BaseLaunchTestCase):
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
             process_launch.expect_all(
                 [
-                    f"[{self.agent_name_1}]: Start processing messages...",
-                    f"[{self.agent_name_2}]: Start processing messages...",
+                    f"[{self.agent_name_1}] Start processing messages...",
+                    f"[{self.agent_name_2}] Start processing messages...",
                 ],
                 timeout=20,
             )
@@ -160,7 +158,7 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
             process_launch.expect_all(
                 [
-                    f"[{self.agent_name_1}]: Start processing messages...",
+                    f"[{self.agent_name_1}] Start processing messages...",
                     "Expected exception!",
                     "Receiving loop terminated",  # cause race condition in close/interrupt agent 2, so wait it closed by exception before call ctrl+c
                 ],
@@ -213,8 +211,8 @@ class TestLaunchMultithreaded(BaseLaunchTestCase):
         ) as process_launch:
             process_launch.expect_all(
                 [
-                    f"[{self.agent_name_1}]: Start processing messages",
-                    f"[{self.agent_name_2}]: Start processing messages",
+                    f"[{self.agent_name_1}] Start processing messages",
+                    f"[{self.agent_name_2}] Start processing messages",
                 ],
                 timeout=20,
             )
@@ -231,7 +229,7 @@ class TestLaunchOneAgent(BaseLaunchTestCase):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch([self.agent_name_1]) as process_launch:
             process_launch.expect_all(
-                [f"[{self.agent_name_1}]: Start processing messages..."], timeout=20
+                [f"[{self.agent_name_1}] Start processing messages..."], timeout=20
             )
             process_launch.control_c()
             process_launch.expect_all(

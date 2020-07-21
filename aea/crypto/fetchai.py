@@ -45,7 +45,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _FETCHAI = "fetchai"
-FETCHAI_CURRENCY = "FET"
+DEFAULT_NETWORK = "testnet"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
 
@@ -63,6 +63,15 @@ class FetchAICrypto(Crypto[Entity]):
         """
         super().__init__(private_key_path=private_key_path)
         self._address = str(FetchaiAddress(Identity.from_hex(self.public_key)))
+
+    @property
+    def private_key(self) -> str:
+        """
+        Return a private key.
+
+        :return: a private key string
+        """
+        return self.entity.private_key_hex
 
     @property
     def public_key(self) -> str:
@@ -136,7 +145,7 @@ class FetchAICrypto(Crypto[Entity]):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self.entity.private_key_hex.encode("utf-8"))
+        fp.write(self.private_key.encode("utf-8"))
 
 
 class FetchAIHelper(Helper):
@@ -244,11 +253,9 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
 
         :param kwargs: key word arguments (expects either a pair of 'host' and 'port' or a 'network')
         """
-        assert (
-            "host" in kwargs and "port" in kwargs
-        ) or "network" in kwargs, (
-            "expects either a pair of 'host' and 'port' or a 'network'"
-        )
+        if not ("host" in kwargs and "port" in kwargs):
+            network = kwargs.pop("network", DEFAULT_NETWORK)
+            kwargs["network"] = network
         self._api = FetchaiLedgerApi(**kwargs)
 
     @property

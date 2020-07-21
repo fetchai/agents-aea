@@ -24,7 +24,7 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.multiple_executor import (
     ExecutorExceptionPolicies,
     logger as executor_logger,
@@ -33,7 +33,7 @@ from aea.runner import AEARunner
 from aea.skills.base import Skill, SkillContext
 
 from tests.common.utils import make_behaviour_cls_from_funcion, wait_for_condition
-from tests.conftest import FETCHAI_PRIVATE_KEY_PATH
+from tests.conftest import COSMOS_PRIVATE_KEY_PATH
 
 
 class TestThreadedRunner:
@@ -45,7 +45,7 @@ class TestThreadedRunner:
         """Build an aea instance."""
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH)
+        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
 
         skill_context = SkillContext()
         act_func = act_func or (lambda self: self)

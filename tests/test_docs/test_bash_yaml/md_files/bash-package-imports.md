@@ -1,7 +1,7 @@
 ``` bash
 aea_name/
   aea-config.yaml       YAML configuration of the AEA
-  fet_private_key.txt   The private key file
+  cosmos_private_key.txt   The private key file
   connections/          Directory containing all the connections developed as part of the given project.
     connection_1/       First connection
     ...                 ...

@@ -1,9 +1,9 @@
-<a name=".aea.mail.base"></a>
+<a name="aea.mail.base"></a>
 # aea.mail.base
 
 Mail module abstract base classes.
 
-<a name=".aea.mail.base.AEAConnectionError"></a>
+<a name="aea.mail.base.AEAConnectionError"></a>
 ## AEAConnectionError Objects
 
 ```python
@@ -12,7 +12,7 @@ class AEAConnectionError(Exception)
 
 Exception class for connection errors.
 
-<a name=".aea.mail.base.Empty"></a>
+<a name="aea.mail.base.Empty"></a>
 ## Empty Objects
 
 ```python
@@ -21,7 +21,7 @@ class Empty(Exception)
 
 Exception for when the inbox is empty.
 
-<a name=".aea.mail.base.URI"></a>
+<a name="aea.mail.base.URI"></a>
 ## URI Objects
 
 ```python
@@ -30,7 +30,7 @@ class URI()
 
 URI following RFC3986.
 
-<a name=".aea.mail.base.URI.__init__"></a>
+<a name="aea.mail.base.URI.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -49,7 +49,7 @@ Must follow: https://tools.ietf.org/html/rfc3986.html
 
 - `ValueError`: if uri_raw is not RFC3986 compliant
 
-<a name=".aea.mail.base.URI.scheme"></a>
+<a name="aea.mail.base.URI.scheme"></a>
 #### scheme
 
 ```python
@@ -59,7 +59,7 @@ Must follow: https://tools.ietf.org/html/rfc3986.html
 
 Get the scheme.
 
-<a name=".aea.mail.base.URI.netloc"></a>
+<a name="aea.mail.base.URI.netloc"></a>
 #### netloc
 
 ```python
@@ -69,7 +69,7 @@ Get the scheme.
 
 Get the netloc.
 
-<a name=".aea.mail.base.URI.path"></a>
+<a name="aea.mail.base.URI.path"></a>
 #### path
 
 ```python
@@ -79,7 +79,7 @@ Get the netloc.
 
 Get the path.
 
-<a name=".aea.mail.base.URI.params"></a>
+<a name="aea.mail.base.URI.params"></a>
 #### params
 
 ```python
@@ -89,7 +89,7 @@ Get the path.
 
 Get the params.
 
-<a name=".aea.mail.base.URI.query"></a>
+<a name="aea.mail.base.URI.query"></a>
 #### query
 
 ```python
@@ -99,7 +99,7 @@ Get the params.
 
 Get the query.
 
-<a name=".aea.mail.base.URI.fragment"></a>
+<a name="aea.mail.base.URI.fragment"></a>
 #### fragment
 
 ```python
@@ -109,7 +109,7 @@ Get the query.
 
 Get the fragment.
 
-<a name=".aea.mail.base.URI.username"></a>
+<a name="aea.mail.base.URI.username"></a>
 #### username
 
 ```python
@@ -119,7 +119,7 @@ Get the fragment.
 
 Get the username.
 
-<a name=".aea.mail.base.URI.password"></a>
+<a name="aea.mail.base.URI.password"></a>
 #### password
 
 ```python
@@ -129,7 +129,7 @@ Get the username.
 
 Get the password.
 
-<a name=".aea.mail.base.URI.host"></a>
+<a name="aea.mail.base.URI.host"></a>
 #### host
 
 ```python
@@ -139,7 +139,7 @@ Get the password.
 
 Get the host.
 
-<a name=".aea.mail.base.URI.port"></a>
+<a name="aea.mail.base.URI.port"></a>
 #### port
 
 ```python
@@ -149,7 +149,7 @@ Get the host.
 
 Get the port.
 
-<a name=".aea.mail.base.URI.__str__"></a>
+<a name="aea.mail.base.URI.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -158,7 +158,7 @@ Get the port.
 
 Get string representation.
 
-<a name=".aea.mail.base.URI.__eq__"></a>
+<a name="aea.mail.base.URI.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -167,7 +167,7 @@ Get string representation.
 
 Compare with another object.
 
-<a name=".aea.mail.base.EnvelopeContext"></a>
+<a name="aea.mail.base.EnvelopeContext"></a>
 ## EnvelopeContext Objects
 
 ```python
@@ -176,7 +176,7 @@ class EnvelopeContext()
 
 Extra information for the handling of an envelope.
 
-<a name=".aea.mail.base.EnvelopeContext.__init__"></a>
+<a name="aea.mail.base.EnvelopeContext.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -190,7 +190,7 @@ Initialize the envelope context.
 - `connection_id`: the connection id used for routing the outgoing envelope in the multiplexer.
 - `uri`: the URI sent with the envelope.
 
-<a name=".aea.mail.base.EnvelopeContext.uri_raw"></a>
+<a name="aea.mail.base.EnvelopeContext.uri_raw"></a>
 #### uri`_`raw
 
 ```python
@@ -200,7 +200,7 @@ Initialize the envelope context.
 
 Get uri in string format.
 
-<a name=".aea.mail.base.EnvelopeContext.__str__"></a>
+<a name="aea.mail.base.EnvelopeContext.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -209,7 +209,7 @@ Get uri in string format.
 
 Get the string representation.
 
-<a name=".aea.mail.base.EnvelopeContext.__eq__"></a>
+<a name="aea.mail.base.EnvelopeContext.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -218,7 +218,7 @@ Get the string representation.
 
 Compare with another object.
 
-<a name=".aea.mail.base.EnvelopeSerializer"></a>
+<a name="aea.mail.base.EnvelopeSerializer"></a>
 ## EnvelopeSerializer Objects
 
 ```python
@@ -227,7 +227,7 @@ class EnvelopeSerializer(ABC)
 
 Abstract class to specify the serialization layer for the envelope.
 
-<a name=".aea.mail.base.EnvelopeSerializer.encode"></a>
+<a name="aea.mail.base.EnvelopeSerializer.encode"></a>
 #### encode
 
 ```python
@@ -245,7 +245,7 @@ Encode the envelope.
 
 the encoded envelope
 
-<a name=".aea.mail.base.EnvelopeSerializer.decode"></a>
+<a name="aea.mail.base.EnvelopeSerializer.decode"></a>
 #### decode
 
 ```python
@@ -263,7 +263,7 @@ Decode the envelope.
 
 the envelope
 
-<a name=".aea.mail.base.ProtobufEnvelopeSerializer"></a>
+<a name="aea.mail.base.ProtobufEnvelopeSerializer"></a>
 ## ProtobufEnvelopeSerializer Objects
 
 ```python
@@ -272,7 +272,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer)
 
 Envelope serializer using Protobuf.
 
-<a name=".aea.mail.base.ProtobufEnvelopeSerializer.encode"></a>
+<a name="aea.mail.base.ProtobufEnvelopeSerializer.encode"></a>
 #### encode
 
 ```python
@@ -289,7 +289,7 @@ Encode the envelope.
 
 the encoded envelope
 
-<a name=".aea.mail.base.ProtobufEnvelopeSerializer.decode"></a>
+<a name="aea.mail.base.ProtobufEnvelopeSerializer.decode"></a>
 #### decode
 
 ```python
@@ -306,7 +306,7 @@ Decode the envelope.
 
 the envelope
 
-<a name=".aea.mail.base.Envelope"></a>
+<a name="aea.mail.base.Envelope"></a>
 ## Envelope Objects
 
 ```python
@@ -315,7 +315,7 @@ class Envelope()
 
 The top level message class for agent to agent communication.
 
-<a name=".aea.mail.base.Envelope.__init__"></a>
+<a name="aea.mail.base.Envelope.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -332,7 +332,17 @@ Initialize a Message object.
 - `message`: the protocol-specific message.
 - `context`: the optional envelope context.
 
-<a name=".aea.mail.base.Envelope.to"></a>
+<a name="aea.mail.base.Envelope.to"></a>
+#### to
+
+```python
+ | @property
+ | to() -> Address
+```
+
+Get address of receiver.
+
+<a name="aea.mail.base.Envelope.to"></a>
 #### to
 
 ```python
@@ -342,7 +352,17 @@ Initialize a Message object.
 
 Set address of receiver.
 
-<a name=".aea.mail.base.Envelope.sender"></a>
+<a name="aea.mail.base.Envelope.sender"></a>
+#### sender
+
+```python
+ | @property
+ | sender() -> Address
+```
+
+Get address of sender.
+
+<a name="aea.mail.base.Envelope.sender"></a>
 #### sender
 
 ```python
@@ -352,7 +372,17 @@ Set address of receiver.
 
 Set address of sender.
 
-<a name=".aea.mail.base.Envelope.protocol_id"></a>
+<a name="aea.mail.base.Envelope.protocol_id"></a>
+#### protocol`_`id
+
+```python
+ | @property
+ | protocol_id() -> ProtocolId
+```
+
+Get protocol id.
+
+<a name="aea.mail.base.Envelope.protocol_id"></a>
 #### protocol`_`id
 
 ```python
@@ -362,7 +392,17 @@ Set address of sender.
 
 Set the protocol id.
 
-<a name=".aea.mail.base.Envelope.message"></a>
+<a name="aea.mail.base.Envelope.message"></a>
+#### message
+
+```python
+ | @property
+ | message() -> Union[Message, bytes]
+```
+
+Get the protocol-specific message.
+
+<a name="aea.mail.base.Envelope.message"></a>
 #### message
 
 ```python
@@ -372,7 +412,7 @@ Set the protocol id.
 
 Set the protocol-specific message.
 
-<a name=".aea.mail.base.Envelope.message_bytes"></a>
+<a name="aea.mail.base.Envelope.message_bytes"></a>
 #### message`_`bytes
 
 ```python
@@ -382,7 +422,7 @@ Set the protocol-specific message.
 
 Get the protocol-specific message.
 
-<a name=".aea.mail.base.Envelope.context"></a>
+<a name="aea.mail.base.Envelope.context"></a>
 #### context
 
 ```python
@@ -392,7 +432,7 @@ Get the protocol-specific message.
 
 Get the envelope context.
 
-<a name=".aea.mail.base.Envelope.skill_id"></a>
+<a name="aea.mail.base.Envelope.skill_id"></a>
 #### skill`_`id
 
 ```python
@@ -406,7 +446,7 @@ Get the skill id from an envelope context, if set.
 
 skill id
 
-<a name=".aea.mail.base.Envelope.__eq__"></a>
+<a name="aea.mail.base.Envelope.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -415,7 +455,7 @@ skill id
 
 Compare with another object.
 
-<a name=".aea.mail.base.Envelope.encode"></a>
+<a name="aea.mail.base.Envelope.encode"></a>
 #### encode
 
 ```python
@@ -432,7 +472,7 @@ Encode the envelope.
 
 the encoded envelope.
 
-<a name=".aea.mail.base.Envelope.decode"></a>
+<a name="aea.mail.base.Envelope.decode"></a>
 #### decode
 
 ```python
@@ -451,7 +491,7 @@ Decode the envelope.
 
 the decoded envelope.
 
-<a name=".aea.mail.base.Envelope.__str__"></a>
+<a name="aea.mail.base.Envelope.__str__"></a>
 #### `__`str`__`
 
 ```python

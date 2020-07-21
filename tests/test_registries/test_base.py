@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/registries/base.py."""
-
 import os
 import random
 import shutil
@@ -25,6 +24,7 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 from typing import cast
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -32,16 +32,25 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import ComponentId, ComponentType, PublicId
-from aea.configurations.constants import DEFAULT_PROTOCOL, DEFAULT_SKILL
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    DEFAULT_PRIVATE_KEY_FILE,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+)
+from aea.connections.base import Connection
 from aea.contracts.base import Contract
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
-from aea.registries.base import AgentComponentRegistry
+from aea.registries.base import (
+    AgentComponentRegistry,
+    ComponentRegistry,
+    HandlerRegistry,
+)
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
@@ -223,29 +232,19 @@ class TestResources:
         # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
         cls.resources.add_component(
             Skill.from_dir(
-                Path(CUR_PATH, "data", "dummy_skill"),
-                agent_context=unittest.mock.MagicMock(),
+                Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
             )
         )
         cls.resources.add_component(
             Skill.from_dir(
-                Path(aea.AEA_DIR, "skills", "error"),
-                agent_context=unittest.mock.MagicMock(),
+                Path(aea.AEA_DIR, "skills", "error"), agent_context=MagicMock(),
             )
         )
 
         cls.error_skill_public_id = DEFAULT_SKILL
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
-        cls.expected_skills = {
-            PublicId.from_str("fetchai/dummy:0.1.0"),
-            DEFAULT_SKILL,
-        }
-
-        cls.expected_protocols = {
-            DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/oef_search:0.3.0"),
-        }
+        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.6.0")
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
@@ -291,34 +290,123 @@ class TestResources:
         )
         assert len(self.resources.get_all_handlers()) == 3
 
-    # def test_fake_skill_loading_failed(self):
-    #     """Test that when the skill is bad formatted, we print a log message."""
-    #     s = "A problem occurred while parsing the skill directory {}. Exception: {}".format(
-    #         os.path.join(self.agent_folder, "skills", "fake"),
-    #         "[Errno 2] No such file or directory: '"
-    #         + os.path.join(self.agent_folder, "skills", "fake", "skill.yaml")
-    #         + "'",
-    #     )
-    #     self.mocked_logger_warning.assert_called_once_with(s)
-
-    def test_remove_skill(self):
-        """Test that the 'remove skill' and 'add skill' method works correctly."""
-        error_skill = self.resources.get_skill(self.error_skill_public_id)
-        self.resources.remove_skill(self.error_skill_public_id)
-        assert self.resources.get_skill(self.error_skill_public_id) is None
-        self.resources.add_skill(error_skill)
-        assert self.resources.get_skill(self.error_skill_public_id) == error_skill
-
-    def test_add_protocol(self):
-        """Test that the 'add protocol' method works correctly."""
-        oef_protocol = Protocol.from_dir(
+    def test_add_and_remove_protocol(self):
+        """Test that the 'add protocol' and 'remove protocol' method work correctly."""
+        a_protocol = Protocol.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"),
         )
-        self.resources.add_protocol(cast(Protocol, oef_protocol))
-        for protocol_id in self.expected_protocols:
-            assert (
-                self.resources.get_protocol(protocol_id) is not None
-            ), "Protocol missing!"
+        self.resources.add_component(cast(Protocol, a_protocol))
+        assert self.resources.get_protocol(a_protocol.public_id) == a_protocol
+        # restore state
+        self.resources.remove_protocol(a_protocol.public_id)
+        assert self.resources.get_protocol(a_protocol.public_id) is None
+
+    def test_get_all_protocols(self):
+        """Test get all protocols."""
+        all_protocols = self.resources.get_all_protocols()
+        assert len(all_protocols) == 1
+
+        expected_pids = {DEFAULT_PROTOCOL}
+        actual_pids = {p.public_id for p in all_protocols}
+        assert expected_pids == actual_pids
+
+    def test_add_remove_contract(self):
+        """Test that the 'add contract' and 'remove contract' method work correctly."""
+        a_contract = Contract.from_dir(
+            Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"),
+        )
+        self.resources.add_component(a_contract)
+        assert self.resources.get_contract(a_contract.public_id) == a_contract
+        # restore state
+        self.resources.remove_contract(a_contract.public_id)
+        assert self.resources.get_contract(a_contract.public_id) is None
+
+    def test_get_all_contracts(self):
+        """Test get all contracts."""
+        a_contract = Contract.from_dir(
+            Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"),
+        )
+        self.resources.add_component(a_contract)
+        all_contracts = self.resources.get_all_contracts()
+        assert len(all_contracts) == 1
+        # restore state
+        self.resources.remove_contract(a_contract.public_id)
+
+    def test_add_remove_connection(self):
+        """Test that the 'add connection' and 'remove connection' methods work correctly."""
+        a_connection = Connection.from_dir(
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            identity=MagicMock(),
+            crypto_store=MagicMock(),
+        )
+        self.resources.add_component(a_connection)
+        assert self.resources.get_connection(a_connection.public_id) is not None
+        # restore state
+        self.resources.remove_connection(a_connection.public_id)
+
+    def test_get_all_connections(self):
+        """Test get all connections."""
+        a_connection = Connection.from_dir(
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            identity=MagicMock(),
+            crypto_store=MagicMock(),
+        )
+        self.resources.add_component(a_connection)
+        all_connections = self.resources.get_all_connections()
+        assert len(all_connections) == 1
+        assert all_connections[0] == a_connection
+        # restore state
+        self.resources.remove_connection(a_connection.public_id)
+
+    def test_add_remove_skill(self):
+        """Test that the 'remove skill' and 'add skill' method work correctly."""
+        a_skill = self.resources.get_skill(self.dummy_skill_public_id)
+        self.resources.remove_skill(self.dummy_skill_public_id)
+        assert self.resources.get_skill(self.dummy_skill_public_id) is None
+        self.resources.add_skill(a_skill)
+        assert self.resources.get_skill(self.dummy_skill_public_id) == a_skill
+
+    def test_get_handler(self):
+        """Test get handler."""
+        handler = self.resources.get_handler(
+            DEFAULT_PROTOCOL, self.dummy_skill_public_id
+        )
+        assert handler is not None
+
+    def test_get_handlers(self):
+        """Test get handlers."""
+        default_handlers = self.resources.get_handlers(DEFAULT_PROTOCOL)
+        assert len(default_handlers) == 2
+
+    def test_get_behaviours(self):
+        """Test get handlers."""
+        dummy_behaviours = self.resources.get_behaviours(self.dummy_skill_public_id)
+        assert len(dummy_behaviours) == 1
+
+    def test_add_component_raises_error(self):
+        """Test add component with unknown component type."""
+        a_component = MagicMock()
+        a_component.component_type = unittest.mock.PropertyMock(return_value=None)
+        with pytest.raises(ValueError):
+            self.resources.add_component(a_component)
+
+    def test_inject_contracts_unknown_contract(self):
+        """Test inject contracts when there is a missing contract."""
+        public_id = PublicId.from_str("author/name:0.1.0")
+        mock_skill = MagicMock(**{"config.contracts": {public_id}})
+        with pytest.raises(
+            ValueError, match=f"Missing contract for contract id {public_id}"
+        ):
+            self.resources.inject_contracts(mock_skill)
+
+    def test_inject_contracts(self):
+        """Test inject contracts."""
+        with unittest.mock.patch.object(
+            self.resources._component_registry, "fetch", return_value=object()
+        ):
+            public_id = PublicId.from_str("author/name:0.1.0")
+            mock_skill = MagicMock(**{"config.contracts": {public_id}})
+            self.resources.inject_contracts(mock_skill)
 
     def test_register_behaviour_with_already_existing_skill_id(self):
         """Test that registering a behaviour with an already existing skill id behaves as expected."""
@@ -427,17 +515,14 @@ class TestFilter:
         os.chdir(cls.agent_folder)
 
         connection = _make_dummy_connection()
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FetchAICrypto.identifier: private_key_path})
-        identity = Identity(
-            cls.agent_name, address=wallet.addresses[FetchAICrypto.identifier]
-        )
+        private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+        wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+        identity = Identity(cls.agent_name, address=wallet.addresses[DEFAULT_LEDGER])
         resources = Resources()
 
         resources.add_component(
             Skill.from_dir(
-                Path(CUR_PATH, "data", "dummy_skill"),
-                agent_context=unittest.mock.MagicMock(),
+                Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
             )
         )
 
@@ -472,3 +557,152 @@ class TestFilter:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestAgentComponentRegistry:
+    def setup_class(self):
+        """Set up the test."""
+        self.registry = AgentComponentRegistry()
+
+    def test_register_when_component_is_already_registered(self):
+        """Test AgentComponentRegistry.register when the component is already registered."""
+        component_id = ComponentId(
+            ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0")
+        )
+        component_mock = MagicMock(component_id=component_id)
+        self.registry._registered_keys.add(component_id)
+        with pytest.raises(
+            ValueError, match=r"Component already registered with item id"
+        ):
+            self.registry.register(component_id, component_mock)
+        self.registry._registered_keys = set()
+
+    def test_register_when_component_id_mismatch(self):
+        """Test AgentComponentRegistry.register when the component ids mismatch."""
+        component_id_1 = ComponentId(
+            ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0")
+        )
+        component_id_2 = ComponentId(
+            ComponentType.PROTOCOL, PublicId("author", "name", "0.2.0")
+        )
+        component_mock = MagicMock(component_id=component_id_1)
+        with pytest.raises(
+            ValueError, match="Component id '.*' is different to the id '.*' specified."
+        ):
+            self.registry.register(component_id_2, component_mock)
+        self.registry._registered_keys = set()
+
+    def test_unregister_when_no_item_registered(self):
+        """Test AgentComponentRegistry.register when the item was not registered."""
+        component_id = ComponentId(
+            ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0")
+        )
+        component_mock = MagicMock(component_id=component_id)
+        self.registry.register(component_id, component_mock)
+        self.registry._registered_keys.remove(component_id)
+        with pytest.raises(ValueError, match="No item registered with item id '.*'"):
+            self.registry.unregister(component_id)
+        self.registry._registered_keys.add(component_id)
+        self.registry.unregister(component_id)
+
+    def test_fetch_all(self):
+        """Test fetch all."""
+        all_components = self.registry.fetch_all()
+        assert len(all_components) == 0
+        component_id = ComponentId(
+            ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0")
+        )
+        component_mock = MagicMock(component_id=component_id)
+        self.registry.register(component_id, component_mock)
+        all_components = self.registry.fetch_all()
+        assert len(all_components) == 1
+
+        # restore state
+        self.registry.unregister(component_id)
+
+
+class TestComponentRegistry:
+    """Tests for the component registry."""
+
+    def setup_class(self):
+        """Set up the tests."""
+        self.registry = ComponentRegistry()
+
+    def test_unregister_when_item_not_registered(self):
+        """Test 'unregister' in case the item is not registered."""
+        with pytest.raises(ValueError):
+            self.registry.unregister(
+                (PublicId.from_str("author/name:0.1.0"), "component_name")
+            )
+
+    def test_unregister_by_skill_when_item_not_registered(self):
+        """Test 'unregister_by_skill' in case the item is not registered."""
+        with pytest.raises(
+            ValueError, match="No component of skill .* present in the registry."
+        ):
+            self.registry.unregister_by_skill(PublicId.from_str("author/skill:0.1.0"))
+
+    def test_setup_with_inactive_skill(self):
+        """Test setup with inactive skill."""
+        mock_item = MagicMock(
+            name="name", skill_id="skill", context=MagicMock(is_active=False)
+        )
+        with unittest.mock.patch.object(
+            self.registry, "fetch_all", return_value=[mock_item]
+        ):
+            with unittest.mock.patch.object(
+                aea.registries.base.logger, "debug"
+            ) as mock_debug:
+                self.registry.setup()
+                mock_debug.assert_called_with(
+                    f"Ignoring setup() of component {mock_item.name} of skill {mock_item.skill_id}, because the skill is not active."
+                )
+
+
+class TestHandlerRegistry:
+    """Test handler registry."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the tests."""
+        cls.registry = HandlerRegistry()
+
+    def test_register_when_protocol_id_is_none(self):
+        """Test register when protocol id is None."""
+        with pytest.raises(
+            ValueError, match="Please specify a supported protocol for handler class"
+        ):
+            self.registry.register(
+                (PublicId.from_str("author/name:0.1.0"), "name"),
+                MagicMock(SUPPORTED_PROTOCOL=None),
+            )
+
+    def test_register_when_skill_protocol_id_exist(self):
+        """Test register when protocol id is None."""
+        skill_id = PublicId.from_str("author/name:0.1.0")
+        protocol_id = PublicId.from_str("author/name:0.1.0")
+        self.registry._items_by_protocol_and_skill[protocol_id] = {skill_id: object()}
+        with pytest.raises(
+            ValueError,
+            match="A handler already registered with pair of protocol id .* and skill id .*",
+        ):
+            self.registry.register(
+                (skill_id, "name"), MagicMock(SUPPORTED_PROTOCOL=protocol_id)
+            )
+        self.registry._items_by_protocol_and_skill = {}
+
+    def test_unregister_when_no_item_is_registered(self):
+        """Test unregister when there is no item with that item id."""
+        item_id = (PublicId.from_str("author/name:0.1.0"), "name")
+        with pytest.raises(
+            ValueError, match="No item registered with component id '.*'"
+        ):
+            self.registry.unregister(item_id)
+
+    def test_unregister_by_skill(self):
+        """Test unregister by skill."""
+        skill_id = PublicId.from_str("author/name:0.1.0")
+        with pytest.raises(
+            ValueError, match="No component of skill .* present in the registry."
+        ):
+            self.registry.unregister_by_skill(skill_id)

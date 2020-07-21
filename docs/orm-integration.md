@@ -50,15 +50,6 @@ This diagram shows the communication between the various entities as data is suc
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-   
-### Launch an OEF search and communication node
-
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for all the following demos.
 
 ## Demo instructions
 
@@ -68,7 +59,7 @@ A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` ne
 
 First, fetch the seller AEA, which will provide data:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.5.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.6.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 ```
@@ -80,23 +71,19 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/thermometer:0.6.0
+aea add skill fetchai/thermometer:0.7.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
-In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
@@ -107,7 +94,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/thermometer_client:0.5.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.6.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -119,99 +106,49 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/thermometer_client:0.5.0
+aea add skill fetchai/thermometer_client:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
-In `my_buyer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_buyer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
 </details>
 
 
-### Generate wealth for the buyer AEA
+### Add keys for the thermometer AEA
 
-Additionally, create the private key for the buyer AEA based on the network you want to transact.
-
-To generate and add a key for Fetch.ai use:
-``` bash
-aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
-```
-
-To create some wealth for your buyer AEA based on the network you want to transact with:
-
-On the Fetch.ai `testnet` network.
-``` bash
-aea generate-wealth fetchai
-```
-
-<details><summary>Alternatively, create wealth for other test networks.</summary>
-<p>
-
-<strong>Ledger Config:</strong>
-<br>
-
-In `my_buyer_aea/aea-config.yaml` and `my_seller_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Ethereum:
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-
-Alternatively, to connect to Cosmos:
-``` yaml
-ledger_apis:
-  cosmos:
-    address: https://rest-agent-land.prod.fetch-ai.com:443
-```
-
-<strong>Wealth:</strong>
-<br>
-
-To generate and add a private-public key pair for Ethereum use:
-``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-
-On the Ethereum `ropsten` network.
-``` bash
-aea generate-wealth ethereum
-```
-
-Alternatively, to generate and add a private-public key pair for Cosmos use:
+First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
 aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
-On the Cosmos `testnet` network.
+### Add keys and generate wealth for the thermometer client AEA
+
+The thermometer client needs to have some wealth to purchase the thermometer information.
+
+First, create the private key for the thermometer client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
 ``` bash
-aea generate-wealth cosmos
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
-</p>
-</details>
+Then, create some wealth for your thermometer client based on the network you want to transact with. On the Fetch.ai `testnet` network:
+``` bash
+aea generate-key cosmos
+```
 
 
 ### Update the seller and buyer AEA skill configs
@@ -225,23 +162,16 @@ models:
       currency_id: FET
       data_for_sale:
         temperature: 26
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
-      service_id: generic_service
+        key: seller_service
+        value: thermometer_data
+      service_id: thermometer_data
       unit_price: 10
     class_name: Strategy
 dependencies:
@@ -257,106 +187,22 @@ models:
   strategy:
     args:
       currency_id: FET
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
       search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
-      service_id: generic_service
+        constraint_type: ==
+        search_key: seller_service
+        search_value: thermometer_data
+      search_radius: 5.0
+      service_id: thermometer_data
     class_name: Strategy
 ```
-
-<details><summary>Alternatively, configure skills for other test networks.</summary>
-<p>
-
-<strong>Ethereum:</strong>
-<br>
-``` yaml
-models:
-  ...
-  strategy:
-    args:
-      currency_id: ETH
-      data_for_sale:
-        temperature: 26
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
-      has_data_source: false
-      is_ledger_tx: true
-      ledger_id: ethereum
-      service_data:
-        city: Cambridge
-        country: UK
-      service_id: generic_service
-      unit_price: 10
-    class_name: Strategy
-dependencies:
-  SQLAlchemy: {}
-```
-
-``` yaml
-models:
-  ...
-  strategy:
-    args:
-      currency_id: ETH
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
-      is_ledger_tx: true
-      ledger_id: ethereum
-      max_negotiations: 1
-      max_tx_fee: 1
-      max_unit_price: 20
-      search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
-      service_id: generic_service
-    class_name: Strategy
-```
-
-</p>
-</details>
 
 After changing the skill config files you should run the following command for both agents to install each dependency:
 ``` bash
@@ -368,7 +214,7 @@ aea install
 Before being able to modify a package we need to eject it from vendor:
 
 ``` bash
-aea eject skill fetchai/thermometer:0.6.0
+aea eject skill fetchai/thermometer:0.7.0
 ```
 
 This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.
@@ -441,13 +287,36 @@ After modifying the skill we need to fingerprint it:
 aea fingerprint skill {YOUR_AUTHOR_HANDLE}/thermometer:0.1.0
 ```
 
-## Run the AEAs
+### Run both AEAs
 
-Run both AEAs from their respective terminals
+Run both AEAs from their respective terminals.
+
+First, run the thermometer AEA:
 
 ``` bash
 aea run
 ```
+
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
+Then, update the configuration of the thermometer client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
+
+Then run the thermometer client AEA:
+``` bash
+aea run
+```
+
 You will see that the AEAs negotiate and then transact using the configured testnet.
 
 ## Delete the AEAs

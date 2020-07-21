@@ -19,15 +19,20 @@
 
 """This module contains the strategy class."""
 
-from typing import Any, Dict, Optional
-
-from aea.helpers.search.generic import GenericDataModel
-from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
+from aea.helpers.search.models import (
+    Constraint,
+    ConstraintType,
+    Description,
+    Location,
+    Query,
+)
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
@@ -35,23 +40,13 @@ DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
 
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SEARCH_QUERY = {
-    "constraint_one": {
-        "search_term": "country",
-        "search_value": "UK",
-        "constraint_type": "==",
-    },
-    "constraint_two": {
-        "search_term": "city",
-        "search_value": "Cambridge",
-        "constraint_type": "==",
-    },
+    "search_key": "seller_service",
+    "search_value": "generic_service",
+    "constraint_type": "==",
 }
-DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": True},
-    "attribute_two": {"name": "city", "type": "str", "is_required": True},
-}  # type: Optional[Dict[str, Any]]
-DEFAULT_DATA_MODEL_NAME = "location"
+DEFAULT_SEARCH_RADIUS = 5.0
 
 DEFAULT_MAX_NEGOTIATIONS = 2
 
@@ -74,8 +69,9 @@ class GenericStrategy(Model):
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
@@ -121,24 +117,39 @@ class GenericStrategy(Model):
         """Get the maximum number of negotiations the agent can start."""
         return self._max_negotiations
 
+    def get_location_and_service_query(self) -> Query:
+        """
+        Get the location and service query of the agent.
+
+        :return: the query
+        """
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (self._agent_location, self._radius))
+        )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
+        return query
+
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.
 
         :return: the query
         """
-        query = Query(
-            [
-                Constraint(
-                    constraint["search_term"],
-                    ConstraintType(
-                        constraint["constraint_type"], constraint["search_value"],
-                    ),
-                )
-                for constraint in self._search_query.values()
-            ],
-            model=GenericDataModel(self._data_model_name, self._data_model),
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
         )
+        query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query
 
     def is_acceptable_proposal(self, proposal: Description) -> bool:

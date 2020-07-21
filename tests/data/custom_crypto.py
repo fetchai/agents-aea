@@ -43,6 +43,10 @@ class CustomCrypto(Crypto):
     def address(self) -> str:
         pass
 
+    @property
+    def private_key(self) -> str:
+        pass
+
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> str:
         pass

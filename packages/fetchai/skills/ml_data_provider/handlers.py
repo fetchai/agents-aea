@@ -29,12 +29,15 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.ml_data_provider.dialogues import (
     DefaultDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
     MlTradeDialogue,
     MlTradeDialogues,
+    OefSearchDialogue,
+    OefSearchDialogues,
 )
 from packages.fetchai.skills.ml_data_provider.strategy import Strategy
 
@@ -89,8 +92,8 @@ class MlTradeHandler(Handler):
         :param fipa_msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ml_trade message={}, unidentified dialogue.".format(
-                self.context.agent_name, ml_trade_msg
+            "received invalid ml_trade message={}, unidentified dialogue.".format(
+                ml_trade_msg
             )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
@@ -117,18 +120,16 @@ class MlTradeHandler(Handler):
         """
         query = ml_trade_msg.query
         self.context.logger.info(
-            "Got a Call for Terms from {}.".format(ml_trade_msg.counterparty[-5:])
+            "got a Call for Terms from {}.".format(ml_trade_msg.counterparty[-5:])
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_matching_supply(query):
-            self.context.logger.info(
-                "[{}]: query does not match supply.".format(self.context.agent_name)
-            )
+            self.context.logger.info("query does not match supply.")
             return
         terms = strategy.generate_terms()
         self.context.logger.info(
-            "[{}]: sending to the address={} a Terms message: {}".format(
-                self.context.agent_name, ml_trade_msg.counterparty[-5:], terms.values
+            "sending to the address={} a Terms message: {}".format(
+                ml_trade_msg.counterparty[-5:], terms.values
             )
         )
         terms_msg = MlTradeMessage(
@@ -154,20 +155,18 @@ class MlTradeHandler(Handler):
         """
         terms = ml_trade_msg.terms
         self.context.logger.info(
-            "Got an Accept from {}: {}".format(
+            "got an Accept from {}: {}".format(
                 ml_trade_msg.counterparty[-5:], terms.values
             )
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_valid_terms(terms):
-            self.context.logger.info(
-                "[{}]: terms are not valid.".format(self.context.agent_name)
-            )
+            self.context.logger.info("terms are not valid.")
             return
         data = strategy.sample_data(terms.values["batch_size"])
         self.context.logger.info(
-            "[{}]: sending to address={} a Data message: shape={}".format(
-                self.context.agent_name, ml_trade_msg.counterparty[-5:], data[0].shape
+            "sending to address={} a Data message: shape={}".format(
+                ml_trade_msg.counterparty[-5:], data[0].shape
             )
         )
         payload = pickle.dumps(data)  # nosec
@@ -194,8 +193,8 @@ class MlTradeHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle ml_trade message of performative={} in dialogue={}.".format(
-                self.context.agent_name, ml_trade_msg.performative, ml_trade_dialogue
+            "cannot handle ml_trade message of performative={} in dialogue={}.".format(
+                ml_trade_msg.performative, ml_trade_dialogue
             )
         )
 
@@ -252,8 +251,8 @@ class LedgerApiHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
-                self.context.agent_name, ledger_api_msg
+            "received invalid ledger_api message={}, unidentified dialogue.".format(
+                ledger_api_msg
             )
         )
 
@@ -267,10 +266,8 @@ class LedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "[{}]: starting balance on {} ledger={}.".format(
-                self.context.agent_name,
-                ledger_api_msg.ledger_id,
-                ledger_api_msg.balance,
+            "starting balance on {} ledger={}.".format(
+                ledger_api_msg.ledger_id, ledger_api_msg.balance,
             )
         )
 
@@ -284,8 +281,8 @@ class LedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "[{}]: received ledger_api error message={} in dialogue={}.".format(
-                self.context.agent_name, ledger_api_msg, ledger_api_dialogue
+            "received ledger_api error message={} in dialogue={}.".format(
+                ledger_api_msg, ledger_api_dialogue
             )
         )
 
@@ -299,9 +296,95 @@ class LedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
-            "[{}]: cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                ledger_api_msg.performative,
-                ledger_api_dialogue,
+            "cannot handle ledger_api message of performative={} in dialogue={}.".format(
+                ledger_api_msg.performative, ledger_api_dialogue,
+            )
+        )
+
+
+class OefSearchHandler(Handler):
+    """This class implements an OEF search handler."""
+
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Call to setup the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        oef_search_msg = cast(OefSearchMessage, message)
+
+        # recover dialogue
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_dialogue = cast(
+            Optional[OefSearchDialogue], oef_search_dialogues.update(oef_search_msg)
+        )
+        if oef_search_dialogue is None:
+            self._handle_unidentified_dialogue(oef_search_msg)
+            return
+
+        # handle message
+        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+            self._handle_error(oef_search_msg, oef_search_dialogue)
+        else:
+            self._handle_invalid(oef_search_msg, oef_search_dialogue)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the message
+        """
+        self.context.logger.info(
+            "received invalid oef_search message={}, unidentified dialogue.".format(
+                oef_search_msg
+            )
+        )
+
+    def _handle_error(
+        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search error message={} in dialogue={}.".format(
+                oef_search_msg, oef_search_dialogue
+            )
+        )
+
+    def _handle_invalid(
+        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.warning(
+            "cannot handle oef_search message of performative={} in dialogue={}.".format(
+                oef_search_msg.performative, oef_search_dialogue,
             )
         )

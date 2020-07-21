@@ -1,6 +1,6 @@
 name: tac_negotiation
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
 license: Apache-2.0
@@ -14,7 +14,7 @@ fingerprint:
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
   strategy.py: QmQMSPqS3TZxhQoh6SUA8u2c5BNTxYGV95DSQc4neen6Ja
-  transactions.py: QmZQYmZoknmJ4kfFx4Z5D5uv36ZmC97q4CMnscgLNB3fSq
+  transactions.py: QmTCErZmswHAx6UXfPkrredRDKVnLYhyVEBtm5ppSJpZBf
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -55,7 +55,7 @@ models:
   strategy:
     args:
       is_contract_tx: false
-      ledger_id: ethereum
+      ledger_id: cosmos
       register_as: both
       search_for: both
     class_name: Strategy

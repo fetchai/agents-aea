@@ -1,9 +1,9 @@
-<a name=".aea.agent_loop"></a>
+<a name="aea.agent_loop"></a>
 # aea.agent`_`loop
 
 This module contains the implementation of an agent loop using asyncio.
 
-<a name=".aea.agent_loop.BaseAgentLoop"></a>
+<a name="aea.agent_loop.BaseAgentLoop"></a>
 ## BaseAgentLoop Objects
 
 ```python
@@ -12,7 +12,7 @@ class BaseAgentLoop(WithLogger,  ABC)
 
 Base abstract  agent loop class.
 
-<a name=".aea.agent_loop.BaseAgentLoop.__init__"></a>
+<a name="aea.agent_loop.BaseAgentLoop.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -24,7 +24,7 @@ Init loop.
 :params agent: Agent or AEA to run.
 :params loop: optional asyncio event loop. if not specified a new loop will be created.
 
-<a name=".aea.agent_loop.BaseAgentLoop.set_loop"></a>
+<a name="aea.agent_loop.BaseAgentLoop.set_loop"></a>
 #### set`_`loop
 
 ```python
@@ -33,7 +33,7 @@ Init loop.
 
 Set event loop and all event loopp related objects.
 
-<a name=".aea.agent_loop.BaseAgentLoop.start"></a>
+<a name="aea.agent_loop.BaseAgentLoop.start"></a>
 #### start
 
 ```python
@@ -42,7 +42,7 @@ Set event loop and all event loopp related objects.
 
 Start agent loop synchronously in own asyncio loop.
 
-<a name=".aea.agent_loop.BaseAgentLoop.run_loop"></a>
+<a name="aea.agent_loop.BaseAgentLoop.run_loop"></a>
 #### run`_`loop
 
 ```python
@@ -51,7 +51,7 @@ Start agent loop synchronously in own asyncio loop.
 
 Run agent loop.
 
-<a name=".aea.agent_loop.BaseAgentLoop.wait_run_loop_stopped"></a>
+<a name="aea.agent_loop.BaseAgentLoop.wait_run_loop_stopped"></a>
 #### wait`_`run`_`loop`_`stopped
 
 ```python
@@ -60,7 +60,7 @@ Run agent loop.
 
 Wait all tasks stopped.
 
-<a name=".aea.agent_loop.BaseAgentLoop.stop"></a>
+<a name="aea.agent_loop.BaseAgentLoop.stop"></a>
 #### stop
 
 ```python
@@ -69,7 +69,7 @@ Wait all tasks stopped.
 
 Stop agent loop.
 
-<a name=".aea.agent_loop.BaseAgentLoop.is_running"></a>
+<a name="aea.agent_loop.BaseAgentLoop.is_running"></a>
 #### is`_`running
 
 ```python
@@ -79,7 +79,7 @@ Stop agent loop.
 
 Get running state of the loop.
 
-<a name=".aea.agent_loop.AgentLoopException"></a>
+<a name="aea.agent_loop.AgentLoopException"></a>
 ## AgentLoopException Objects
 
 ```python
@@ -88,7 +88,7 @@ class AgentLoopException(AEAException)
 
 Exception for agent loop runtime errors.
 
-<a name=".aea.agent_loop.AgentLoopStates"></a>
+<a name="aea.agent_loop.AgentLoopStates"></a>
 ## AgentLoopStates Objects
 
 ```python
@@ -97,7 +97,7 @@ class AgentLoopStates(Enum)
 
 Internal agent loop states.
 
-<a name=".aea.agent_loop.AsyncAgentLoop"></a>
+<a name="aea.agent_loop.AsyncAgentLoop"></a>
 ## AsyncAgentLoop Objects
 
 ```python
@@ -106,7 +106,7 @@ class AsyncAgentLoop(BaseAgentLoop)
 
 Asyncio based agent loop suitable only for AEA.
 
-<a name=".aea.agent_loop.AsyncAgentLoop.__init__"></a>
+<a name="aea.agent_loop.AsyncAgentLoop.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -120,7 +120,7 @@ Init agent loop.
 - `agent`: AEA instance
 - `loop`: asyncio loop to use. optional
 
-<a name=".aea.agent_loop.SyncAgentLoop"></a>
+<a name="aea.agent_loop.SyncAgentLoop"></a>
 ## SyncAgentLoop Objects
 
 ```python
@@ -129,7 +129,7 @@ class SyncAgentLoop(BaseAgentLoop)
 
 Synchronous agent loop.
 
-<a name=".aea.agent_loop.SyncAgentLoop.__init__"></a>
+<a name="aea.agent_loop.SyncAgentLoop.__init__"></a>
 #### `__`init`__`
 
 ```python

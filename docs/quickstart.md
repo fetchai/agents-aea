@@ -104,7 +104,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.1
+v0.5.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -121,7 +121,7 @@ The echo skill is a simple demo that introduces you to the main business logic c
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.6.0
+aea fetch fetchai/my_first_aea:0.7.0
 cd my_first_aea
 ```
 
@@ -191,7 +191,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.1
+v0.5.2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

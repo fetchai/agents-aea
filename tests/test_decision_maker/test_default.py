@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for decision_maker."""
-import os
+
 from queue import Queue
 from typing import Optional, cast
 from unittest import mock
@@ -34,8 +34,6 @@ import pytest
 import aea
 import aea.decision_maker.default
 from aea.configurations.base import PublicId
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
@@ -58,7 +56,14 @@ from aea.protocols.state_update.dialogues import (
 )
 from aea.protocols.state_update.message import StateUpdateMessage
 
-from tests.conftest import CUR_PATH
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_PATH,
+    ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_PATH,
+)
 
 
 class SigningDialogues(BaseSigningDialogues):
@@ -155,19 +160,16 @@ class TestDecisionMaker:
     def setup_class(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
             {
-                FetchAICrypto.identifier: private_key_pem_path,
-                EthereumCrypto.identifier: eth_private_key_pem_path,
+                COSMOS: COSMOS_PRIVATE_KEY_PATH,
+                ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
+                FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
             }
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name,
-            addresses=cls.wallet.addresses,
-            default_address_key=FetchAICrypto.identifier,
+            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=COSMOS,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet
@@ -177,7 +179,7 @@ class TestDecisionMaker:
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
-        cls.ledger_id = "fetchai"
+        cls.ledger_id = FETCHAI
 
         cls.decision_maker.start()
 
@@ -281,19 +283,16 @@ class TestDecisionMaker2:
     def setup_class(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
             {
-                FetchAICrypto.identifier: private_key_pem_path,
-                EthereumCrypto.identifier: eth_private_key_pem_path,
+                COSMOS: COSMOS_PRIVATE_KEY_PATH,
+                ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
+                FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
             }
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name,
-            addresses=cls.wallet.addresses,
-            default_address_key=FetchAICrypto.identifier,
+            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=COSMOS,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet
@@ -303,7 +302,7 @@ class TestDecisionMaker2:
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
-        cls.ledger_id = "fetchai"
+        cls.ledger_id = FETCHAI
 
         cls.decision_maker.start()
 
@@ -341,7 +340,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="fetchai",
+                ledger_id=FETCHAI,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -349,7 +348,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_transaction=RawTransaction("fetchai", tx),
+            raw_transaction=RawTransaction(FETCHAI, tx),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -371,7 +370,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="ethereum",
+                ledger_id=ETHEREUM,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -379,7 +378,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_transaction=RawTransaction("ethereum", tx),
+            raw_transaction=RawTransaction(ETHEREUM, tx),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -434,7 +433,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="fetchai",
+                ledger_id=FETCHAI,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -442,7 +441,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage("fetchai", message),
+            raw_message=RawMessage(FETCHAI, message),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -464,7 +463,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="ethereum",
+                ledger_id=ETHEREUM,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -472,7 +471,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage("ethereum", message),
+            raw_message=RawMessage(ETHEREUM, message),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -494,7 +493,7 @@ class TestDecisionMaker2:
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
-                ledger_id="ethereum",
+                ledger_id=ETHEREUM,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -502,7 +501,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage("ethereum", message, is_deprecated_mode=True),
+            raw_message=RawMessage(ETHEREUM, message, is_deprecated_mode=True),
         )
         signing_msg.counterparty = "decision_maker"
         self.decision_maker.message_in_queue.put_nowait(signing_msg)

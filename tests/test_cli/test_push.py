@@ -21,12 +21,11 @@
 from unittest import TestCase, mock
 
 from click import ClickException
-from click.testing import CliRunner
 
 from aea.cli import cli
 from aea.cli.push import _check_package_public_id, _save_item_locally
 
-from tests.conftest import AUTHOR, CLI_LOG_OPTION
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 

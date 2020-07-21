@@ -75,7 +75,7 @@ class AEA(Agent):
         default_connection: Optional[PublicId] = None,
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
-        search_service_address: str = "oef",
+        search_service_address: str = "fetchai/soef:*",
         **kwargs,
     ) -> None:
         """
@@ -164,7 +164,7 @@ class AEA(Agent):
         return self._task_manager
 
     def setup_multiplexer(self) -> None:
-        """Set up the multiplexer"""
+        """Set up the multiplexer."""
         connections = self.resources.get_all_connections()
         if self._connection_ids is not None:
             connections = [
@@ -245,6 +245,10 @@ class AEA(Agent):
         if envelope is not None:
             self._handle(envelope)
 
+    def _get_error_handler(self) -> Optional[Handler]:
+        """Get error hadnler."""
+        return self.resources.get_handler(DefaultMessage.protocol_id, DEFAULT_SKILL)
+
     def _handle(self, envelope: Envelope) -> None:
         """
         Handle an envelope.
@@ -256,9 +260,7 @@ class AEA(Agent):
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
         # TODO specify error handler in config and make this work for different skill/protocol versions.
-        error_handler = self.resources.get_handler(
-            DefaultMessage.protocol_id, DEFAULT_SKILL
-        )
+        error_handler = self._get_error_handler()
 
         if error_handler is None:
             logger.warning("ErrorHandler not initialized. Stopping AEA!")
@@ -285,6 +287,7 @@ class AEA(Agent):
         handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.skill_id
         )
+
         if len(handlers) == 0:
             error_handler.send_unsupported_skill(envelope)
             return
@@ -366,7 +369,7 @@ class AEA(Agent):
 
         :return None
         """
-        self.filter.handle_internal_messages()
+        self.filter.handle_internal_messages()  # pragma: nocover
 
     def teardown(self) -> None:
         """
@@ -388,7 +391,7 @@ class AEA(Agent):
         ExecTimeoutThreadGuard.stop()
 
     def _setup_loggers(self):
-        """Setup logger with agent name. """
+        """Set up logger with agent name."""
         for element in [
             self.main_loop,
             self.multiplexer,

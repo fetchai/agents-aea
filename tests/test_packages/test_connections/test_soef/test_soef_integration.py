@@ -19,6 +19,7 @@
 
 """This module contains the tests of the soef connection module."""
 
+import copy
 import logging
 import time
 from threading import Thread
@@ -26,7 +27,8 @@ from threading import Thread
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.registries import make_crypto
 from aea.helpers.search.models import (
     Constraint,
     ConstraintType,
@@ -44,6 +46,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from tests.common.utils import wait_for_condition
 
 from . import models
+from .test_soef import OefSearchDialogues
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -54,8 +57,9 @@ logger = logging.getLogger(__name__)
 def test_soef():
     """Perform tests over real network."""
     # First run OEF in a separate terminal: python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-    crypto = FetchAICrypto()
+    crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("", address=crypto.address)
+    oef_search_dialogues = OefSearchDialogues(crypto.address)
 
     # create the connection and multiplexer objects
     configuration = ConnectionConfig(
@@ -83,10 +87,14 @@ def test_soef():
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -105,10 +113,14 @@ def test_soef():
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -123,10 +135,14 @@ def test_soef():
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -144,10 +160,14 @@ def test_soef():
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -163,7 +183,13 @@ def test_soef():
         # check for search results
         envelope = multiplexer.get()
         message = envelope.message
+        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
         assert len(message.agents) >= 0
+        message = copy.deepcopy(message)
+        message.is_incoming = True  # TODO: fix
+        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        receiving_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
         # find agents near me with filter
         radius = 0.1
@@ -178,19 +204,23 @@ def test_soef():
         ]
 
         service_key_filters = [
-            Constraint("test", ConstraintType("==", "test")),
+            Constraint("test_key", ConstraintType("==", "test_value")),
         ]
+        constraints = [close_to_my_service] + personality_filters + service_key_filters
+        assert len(constraints) == 4
 
-        closeness_query = Query(
-            [close_to_my_service] + personality_filters + service_key_filters
-        )
+        closeness_query = Query(constraints)
 
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -206,21 +236,31 @@ def test_soef():
 
         envelope = multiplexer.get()
         message = envelope.message
+        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
         assert len(message.agents) >= 0
+        message = copy.deepcopy(message)
+        message.is_incoming = True  # TODO: fix
+        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        receiving_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
         # test ping command
         service_description = Description({}, data_model=models.PING_MODEL)
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=crypto.address,
             protocol_id=message.protocol_id,
             message=message,
         )
-        logger.info("Registering agent service key")
+        logger.info("Pinging")
         multiplexer.put(envelope)
         time.sleep(3)
         assert multiplexer.in_queue.empty()

@@ -1,9 +1,9 @@
-<a name=".aea.crypto.ledger_apis"></a>
+<a name="aea.crypto.ledger_apis"></a>
 # aea.crypto.ledger`_`apis
 
 Module wrapping all the public and private keys cryptography.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis"></a>
 ## LedgerApis Objects
 
 ```python
@@ -12,7 +12,7 @@ class LedgerApis()
 
 Store all the ledger apis we initialise.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.__init__"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -26,7 +26,7 @@ Instantiate a wallet object.
 - `ledger_api_configs`: the ledger api configs.
 - `default_ledger_id`: the default ledger id.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.configs"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.configs"></a>
 #### configs
 
 ```python
@@ -36,7 +36,7 @@ Instantiate a wallet object.
 
 Get the configs.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.apis"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.apis"></a>
 #### apis
 
 ```python
@@ -46,7 +46,7 @@ Get the configs.
 
 Get the apis.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.has_ledger"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.has_ledger"></a>
 #### has`_`ledger
 
 ```python
@@ -55,7 +55,7 @@ Get the apis.
 
 Check if it has a .
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.get_api"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.get_api"></a>
 #### get`_`api
 
 ```python
@@ -64,7 +64,7 @@ Check if it has a .
 
 Get the ledger API.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.has_default_ledger"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.has_default_ledger"></a>
 #### has`_`default`_`ledger
 
 ```python
@@ -74,7 +74,7 @@ Get the ledger API.
 
 Check if it has the default ledger API.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.default_ledger_id"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.default_ledger_id"></a>
 #### default`_`ledger`_`id
 
 ```python
@@ -84,7 +84,7 @@ Check if it has the default ledger API.
 
 Get the default ledger id.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.get_balance"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.get_balance"></a>
 #### get`_`balance
 
 ```python
@@ -102,7 +102,7 @@ Get the token balance.
 
 the token balance
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.get_transfer_transaction"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
@@ -124,7 +124,7 @@ Get a transaction to transfer from self to destination.
 
 tx
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.send_signed_transaction"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
@@ -142,7 +142,7 @@ Send a signed transaction and wait for confirmation.
 
 the tx_digest, if present
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.get_transaction_receipt"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
@@ -160,7 +160,7 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.get_transaction"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.get_transaction"></a>
 #### get`_`transaction
 
 ```python
@@ -178,7 +178,7 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.is_transaction_settled"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
@@ -197,7 +197,7 @@ Check whether the transaction is settled and correct.
 
 True if correctly settled, False otherwise
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.is_transaction_valid"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
@@ -220,7 +220,7 @@ Check whether the transaction is valid.
 
 True if is valid , False otherwise
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.generate_tx_nonce"></a>
+<a name="aea.crypto.ledger_apis.LedgerApis.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
 
 ```python

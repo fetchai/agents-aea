@@ -31,7 +31,7 @@ from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from threading import Timer
 from types import FunctionType, MethodType
-from typing import Callable, Optional, Sequence, cast
+from typing import Callable, List, Optional, Sequence, cast
 from unittest.mock import patch
 
 import docker as docker
@@ -62,9 +62,18 @@ from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.contracts import Contract, contract_registry
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.cosmos import _COSMOS
+from aea.crypto.ethereum import _ETHEREUM
+from aea.crypto.fetchai import _FETCHAI
+from aea.crypto.helpers import (
+    COSMOS_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+)
+from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.mail.base import Address
+from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
@@ -85,6 +94,7 @@ from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
+CliRunner = ImportedCliRunner
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
@@ -113,15 +123,20 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 
 DUMMY_ENV = gym.GoalEnv
 
+# Ledger identifiers
+COSMOS = _COSMOS
+ETHEREUM = _ETHEREUM
+FETCHAI = _FETCHAI
+
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
+    ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE
 )
 ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", "eth_private_key.txt"
+    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
 )
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", "fet_private_key.txt"
+    ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
 )
 FUNDED_ETH_PRIVATE_KEY_1 = (
     "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
@@ -135,6 +150,12 @@ FUNDED_ETH_PRIVATE_KEY_3 = (
 FUNDED_FET_PRIVATE_KEY_1 = (
     "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
 )
+FUNDED_COSMOS_PRIVATE_KEY_1 = (
+    "0aea4a45c40776f138a22655819519fe213030f6df7c14bf628fdc41de33a7c8"
+)
+NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
+    "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
+)
 
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
@@ -143,6 +164,16 @@ ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 FETCHAI_ADDRESS_ONE = "Vu6aENcVSYYH9GhY1k3CsL7shWH9gKKBAWcc4ckLk5w4Ltynx"
 FETCHAI_ADDRESS_TWO = "2LnTTHvGxWvKK1WfEAXnZvu81RPcMRDVQW8CJF3Gsh7Z3axDfP"
+
+# P2P addresses
+COSMOS_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"  # relates to NON_FUNDED_COSMOS_PRIVATE_KEY_1
+NON_GENESIS_CONFIG = {
+    "delegate_uri": "127.0.0.1:11001",
+    "entry_peers": [COSMOS_P2P_ADDRESS],
+    "local_uri": "127.0.0.1:9001",
+    "log_file": "libp2p_node.log",
+    "public_uri": "127.0.0.1:9001",
+}
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
@@ -168,6 +199,7 @@ DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
 MAX_FLAKY_RERUNS = 3
 MAX_FLAKY_RERUNS_ETH = 1
+MAX_FLAKY_RERUNS_INTEGRATION = 2
 
 FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
 PROTOCOL_SPECS_PREF = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
@@ -370,7 +402,7 @@ def oef_port() -> int:
     return 10000
 
 
-def tcpping(ip, port) -> bool:
+def tcpping(ip, port, log_exception: bool = True) -> bool:
     """Ping TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -378,8 +410,28 @@ def tcpping(ip, port) -> bool:
         s.shutdown(2)
         return True
     except Exception as e:
-        logger.exception(e)
+        if log_exception:
+            logger.exception(e)
         return False
+
+
+def wait_for_localhost_ports_to_close(
+    ports: List[int], timeout: int = 120, sleep_time: int = 2
+) -> None:
+    """Wait for ports to close with timeout."""
+    open_ports = ports
+    elapsed = 0
+    while len(open_ports) > 0 and elapsed < timeout:
+        closed = []
+        for port in open_ports:
+            if not tcpping("127.0.0.1", port, log_exception=False):
+                closed.append(port)
+        open_ports = [port for port in open_ports if port not in closed]
+        if len(open_ports) > 0:
+            time.sleep(sleep_time)
+            elapsed += sleep_time
+    if open_ports != []:
+        raise ValueError("Some ports are open: {}!".format(open_ports))
 
 
 class OEFHealthCheck(object):
@@ -736,7 +788,8 @@ def _make_libp2p_connection(
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
         os.remove(log_file)
-    identity = Identity("", address=FetchAICrypto().address)
+    crypto = make_crypto(FETCHAI)
+    identity = Identity("", address=crypto.address)
     if relay and delegate:
         configuration = ConnectionConfig(
             node_key_file=None,
@@ -770,7 +823,8 @@ def _make_libp2p_connection(
 def _make_libp2p_client_connection(
     node_port: int = 11234, node_host: str = "127.0.0.1"
 ) -> P2PLibp2pClientConnection:
-    identity = Identity("", address=FetchAICrypto().address)
+    crypto = make_crypto(FETCHAI)
+    identity = Identity("", address=crypto.address)
     configuration = ConnectionConfig(
         client_key_file=None,
         nodes=[{"uri": "{}:{}".format(node_host, node_port)}],
@@ -921,3 +975,15 @@ def erc1155_contract():
 
     contract = contract_registry.make(str(configuration.public_id))
     yield contract
+
+
+def env_path_separator() -> str:
+    """
+    Get the separator between path items in PATH variables, cross platform.
+
+    E.g. on Linux and MacOS, it returns ':', whereas on Windows ';'.
+    """
+    if sys.platform == "win32":
+        return ";"
+    else:
+        return ":"

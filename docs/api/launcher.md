@@ -1,9 +1,9 @@
-<a name=".aea.launcher"></a>
+<a name="aea.launcher"></a>
 # aea.launcher
 
 This module contains the implementation of multiple AEA configs launcher.
 
-<a name=".aea.launcher.load_agent"></a>
+<a name="aea.launcher.load_agent"></a>
 #### load`_`agent
 
 ```python
@@ -20,7 +20,7 @@ Load AEA from directory.
 
 AEA instance
 
-<a name=".aea.launcher.AEADirTask"></a>
+<a name="aea.launcher.AEADirTask"></a>
 ## AEADirTask Objects
 
 ```python
@@ -29,7 +29,7 @@ class AEADirTask(AbstractExecutorTask)
 
 Task to run agent from agent configuration directory.
 
-<a name=".aea.launcher.AEADirTask.__init__"></a>
+<a name="aea.launcher.AEADirTask.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -42,7 +42,7 @@ Init aea config dir task.
 
 - `agent_dir`: direcory with aea config.
 
-<a name=".aea.launcher.AEADirTask.start"></a>
+<a name="aea.launcher.AEADirTask.start"></a>
 #### start
 
 ```python
@@ -51,7 +51,7 @@ Init aea config dir task.
 
 Start task.
 
-<a name=".aea.launcher.AEADirTask.stop"></a>
+<a name="aea.launcher.AEADirTask.stop"></a>
 #### stop
 
 ```python
@@ -60,7 +60,7 @@ Start task.
 
 Stop task.
 
-<a name=".aea.launcher.AEADirTask.create_async_task"></a>
+<a name="aea.launcher.AEADirTask.create_async_task"></a>
 #### create`_`async`_`task
 
 ```python
@@ -69,7 +69,7 @@ Stop task.
 
 Return asyncio Task for task run in asyncio loop.
 
-<a name=".aea.launcher.AEADirTask.id"></a>
+<a name="aea.launcher.AEADirTask.id"></a>
 #### id
 
 ```python
@@ -79,7 +79,7 @@ Return asyncio Task for task run in asyncio loop.
 
 Return agent_dir.
 
-<a name=".aea.launcher.AEADirMultiprocessTask"></a>
+<a name="aea.launcher.AEADirMultiprocessTask"></a>
 ## AEADirMultiprocessTask Objects
 
 ```python
@@ -90,7 +90,7 @@ Task to run agent from agent configuration directory.
 
 Version for multiprocess executor mode.
 
-<a name=".aea.launcher.AEADirMultiprocessTask.__init__"></a>
+<a name="aea.launcher.AEADirMultiprocessTask.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -104,7 +104,7 @@ Init aea config dir task.
 - `agent_dir`: direcory with aea config.
 - `log_level`: debug level applied for AEA in subprocess
 
-<a name=".aea.launcher.AEADirMultiprocessTask.start"></a>
+<a name="aea.launcher.AEADirMultiprocessTask.start"></a>
 #### start
 
 ```python
@@ -113,7 +113,7 @@ Init aea config dir task.
 
 Return function and arguments to call within subprocess.
 
-<a name=".aea.launcher.AEADirMultiprocessTask.stop"></a>
+<a name="aea.launcher.AEADirMultiprocessTask.stop"></a>
 #### stop
 
 ```python
@@ -122,7 +122,7 @@ Return function and arguments to call within subprocess.
 
 Stop task.
 
-<a name=".aea.launcher.AEADirMultiprocessTask.id"></a>
+<a name="aea.launcher.AEADirMultiprocessTask.id"></a>
 #### id
 
 ```python
@@ -132,7 +132,7 @@ Stop task.
 
 Return agent_dir.
 
-<a name=".aea.launcher.AEADirMultiprocessTask.failed"></a>
+<a name="aea.launcher.AEADirMultiprocessTask.failed"></a>
 #### failed
 
 ```python
@@ -146,7 +146,7 @@ If it's running it's not failed.
 
 :rerurn: bool
 
-<a name=".aea.launcher.AEALauncher"></a>
+<a name="aea.launcher.AEALauncher"></a>
 ## AEALauncher Objects
 
 ```python
@@ -155,7 +155,7 @@ class AEALauncher(AbstractMultipleRunner)
 
 Run multiple AEA instances.
 
-<a name=".aea.launcher.AEALauncher.__init__"></a>
+<a name="aea.launcher.AEALauncher.__init__"></a>
 #### `__`init`__`
 
 ```python

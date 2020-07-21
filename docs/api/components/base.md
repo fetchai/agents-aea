@@ -1,9 +1,9 @@
-<a name=".aea.components.base"></a>
+<a name="aea.components.base"></a>
 # aea.components.base
 
 This module contains definitions of agent components.
 
-<a name=".aea.components.base.Component"></a>
+<a name="aea.components.base.Component"></a>
 ## Component Objects
 
 ```python
@@ -12,7 +12,7 @@ class Component(ABC,  WithLogger)
 
 Abstract class for an agent component.
 
-<a name=".aea.components.base.Component.__init__"></a>
+<a name="aea.components.base.Component.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -26,7 +26,7 @@ Initialize a package.
 - `configuration`: the package configuration.
 - `is_vendor`: whether the package is vendorized.
 
-<a name=".aea.components.base.Component.component_type"></a>
+<a name="aea.components.base.Component.component_type"></a>
 #### component`_`type
 
 ```python
@@ -36,7 +36,7 @@ Initialize a package.
 
 Get the component type.
 
-<a name=".aea.components.base.Component.is_vendor"></a>
+<a name="aea.components.base.Component.is_vendor"></a>
 #### is`_`vendor
 
 ```python
@@ -46,7 +46,7 @@ Get the component type.
 
 Get whether the component is vendorized or not.
 
-<a name=".aea.components.base.Component.prefix_import_path"></a>
+<a name="aea.components.base.Component.prefix_import_path"></a>
 #### prefix`_`import`_`path
 
 ```python
@@ -56,7 +56,7 @@ Get whether the component is vendorized or not.
 
 Get the prefix import path for this component.
 
-<a name=".aea.components.base.Component.component_id"></a>
+<a name="aea.components.base.Component.component_id"></a>
 #### component`_`id
 
 ```python
@@ -66,7 +66,7 @@ Get the prefix import path for this component.
 
 Ge the package id.
 
-<a name=".aea.components.base.Component.public_id"></a>
+<a name="aea.components.base.Component.public_id"></a>
 #### public`_`id
 
 ```python
@@ -76,7 +76,7 @@ Ge the package id.
 
 Get the public id.
 
-<a name=".aea.components.base.Component.configuration"></a>
+<a name="aea.components.base.Component.configuration"></a>
 #### configuration
 
 ```python
@@ -86,7 +86,17 @@ Get the public id.
 
 Get the component configuration.
 
-<a name=".aea.components.base.Component.directory"></a>
+<a name="aea.components.base.Component.directory"></a>
+#### directory
+
+```python
+ | @property
+ | directory() -> Path
+```
+
+Get the directory. Raise error if it has not been set yet.
+
+<a name="aea.components.base.Component.directory"></a>
 #### directory
 
 ```python

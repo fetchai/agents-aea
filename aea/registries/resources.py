@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the resources class."""
-
+from contextlib import suppress
 from typing import Dict, List, Optional, cast
 
 from aea.components.base import Component
@@ -296,15 +296,12 @@ class Resources:
         :return: None
         """
         self._component_registry.unregister(ComponentId(ComponentType.SKILL, skill_id))
-        try:
+        with suppress(ValueError):
             self._handler_registry.unregister_by_skill(skill_id)
-        except ValueError:
-            pass
-
-        try:
+        with suppress(ValueError):
             self._behaviour_registry.unregister_by_skill(skill_id)
-        except ValueError:
-            pass
+        with suppress(ValueError):
+            self._model_registry.unregister_by_skill(skill_id)
 
     def get_handler(
         self, protocol_id: ProtocolId, skill_id: SkillId

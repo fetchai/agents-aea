@@ -23,7 +23,7 @@
 import os
 
 # needs win32all to work on Windows
-if os.name == "nt":
+if os.name == "nt":  # pragma: nocover  # cause platform dependent!
     import win32con  # pylint: disable=import-error
     import win32file  # pylint: disable=import-error
     import pywintypes  # pylint: disable=import-error
@@ -48,7 +48,7 @@ if os.name == "nt":
         win32file.UnlockFileEx(hfile, 0, 0xFFFF0000, __overlapped)
 
 
-elif os.name == "posix":
+elif os.name == "posix":  # pragma: nocover  # cause platform dependent!
     from fcntl import LOCK_EX, LOCK_SH, LOCK_NB  # noqa # pylint: disable=unused-import
     import fcntl
 
@@ -61,5 +61,5 @@ elif os.name == "posix":
         fcntl.flock(file.fileno(), fcntl.LOCK_UN)
 
 
-else:
+else:  # pragma: nocover
     raise RuntimeError("This module only works for nt and posix platforms")

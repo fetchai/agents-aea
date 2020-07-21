@@ -1,4 +1,4 @@
-The `fetchai/p2p_libp2p:0.4.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
+The `fetchai/p2p_libp2p:0.5.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
 ## Local demo
 
@@ -9,9 +9,9 @@ Create one AEA as follows:
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.4.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.4.0
-aea run --connections fetchai/p2p_libp2p:0.4.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
+aea run --connections fetchai/p2p_libp2p:0.5.0
 ```
 
 ### Create and run another AEA
@@ -21,8 +21,8 @@ Create a second AEA:
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.4.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.4.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
 Provide the AEA with the information it needs to find the genesis by replacing the following block in `vendor/fetchai/connnections/p2p_libp2p/connection.yaml`:
@@ -40,7 +40,7 @@ Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses dis
 Run the AEA:
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.4.0
+aea run --connections fetchai/p2p_libp2p:0.5.0
 ```
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
@@ -53,14 +53,14 @@ You can inspect the `libp2p_node.log` log files of the AEA to see how they disco
 Create one AEA as follows:
 
 ``` bash
-aea fetch fetchai/weather_station:0.7.0
-aea fetch fetchai/weather_client:0.7.0
+aea fetch fetchai/weather_station:0.8.0
+aea fetch fetchai/weather_client:0.8.0
 ```
 
 Then enter each project individually and execute the following to add the `p2p_libp2p` connection:
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.4.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.4.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
 Then extend the `aea-config.yaml` of each project as follows:
@@ -80,7 +80,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Run the weather station first:
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.4.0,fetchai/oef:0.6.0"
+aea run --connections "fetchai/p2p_libp2p:0.5.0,fetchai/oef:0.6.0"
 ```
 The weather station will form the genesis node. Wait until you see the lines:
 ``` bash
@@ -118,7 +118,7 @@ Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses dis
 
 Now run the weather client:
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.4.0,fetchai/oef:0.6.0"
+aea run --connections "fetchai/p2p_libp2p:0.5.0,fetchai/oef:0.6.0"
 ```
 
 ## Deployed agent communication network

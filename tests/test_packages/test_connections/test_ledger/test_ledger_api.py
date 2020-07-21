@@ -26,10 +26,9 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import ProtocolId
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStatus
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumApi, EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.crypto.wallet import CryptoStore
 from aea.helpers.transaction.base import (
     RawTransaction,
@@ -51,11 +50,14 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 
 from tests.conftest import (
+    COSMOS,
     COSMOS_ADDRESS_ONE,
     COSMOS_TESTNET_CONFIG,
+    ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_PRIVATE_KEY_PATH,
     ETHEREUM_TESTNET_CONFIG,
+    FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
     ROOT_DIR,
@@ -67,9 +69,9 @@ logger = logging.getLogger(__name__)
 ledger_ids = pytest.mark.parametrize(
     "ledger_id,address,config",
     [
-        (FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
-        (EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
-        (CosmosCrypto.identifier, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
+        (FETCHAI, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
+        (ETHEREUM, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
+        (COSMOS, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
 
@@ -77,7 +79,8 @@ ledger_ids = pytest.mark.parametrize(
 @pytest.fixture()
 async def ledger_apis_connection(request):
     """Make a connection."""
-    identity = Identity("name", FetchAICrypto().address)
+    crypto = make_crypto(DEFAULT_LEDGER)
+    identity = Identity("name", crypto.address)
     crypto_store = CryptoStore()
     directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
@@ -128,9 +131,7 @@ async def test_get_balance(
     assert response_dialogue == ledger_api_dialogue
     assert response_msg.performative == LedgerApiMessage.Performative.BALANCE
     actual_balance_amount = response_msg.balance
-    expected_balance_amount = aea.crypto.registries.make_ledger_api(
-        ledger_id, **config
-    ).get_balance(address)
+    expected_balance_amount = make_ledger_api(ledger_id, **config).get_balance(address)
     assert actual_balance_amount == expected_balance_amount
 
 
@@ -141,12 +142,8 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     """Test send signed transaction with Ethereum APIs."""
     import aea  # noqa # to load registries
 
-    crypto1 = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
-    crypto2 = EthereumCrypto()
-    api = aea.crypto.registries.make_ledger_api(
-        EthereumCrypto.identifier, **ETHEREUM_TESTNET_CONFIG
-    )
-    api = cast(EthereumApi, api)
+    crypto1 = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
+    crypto2 = make_crypto(ETHEREUM)
     ledger_api_dialogues = LedgerApiDialogues()
 
     amount = 40000
@@ -156,7 +153,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
-            ledger_id=EthereumCrypto.identifier,
+            ledger_id=ETHEREUM,
             sender_address=crypto1.address,
             counterparty_address=crypto2.address,
             amount_by_currency_id={"ETH": -amount},
@@ -204,9 +201,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-        signed_transaction=SignedTransaction(
-            EthereumCrypto.identifier, signed_transaction
-        ),
+        signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
     )
     request.counterparty = str(ledger_apis_connection.connection_id)
     ledger_api_dialogue.update(request)
@@ -318,7 +313,7 @@ async def test_no_balance():
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=EthereumCrypto.identifier,
+        ledger_id=ETHEREUM,
         address="test",
     )
     message.counterparty = "test"
@@ -339,7 +334,7 @@ async def test_no_raw_tx():
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
-            ledger_id=EthereumCrypto.identifier,
+            ledger_id=ETHEREUM,
             sender_address="1111",
             counterparty_address="22222",
             amount_by_currency_id={"ETH": -1},

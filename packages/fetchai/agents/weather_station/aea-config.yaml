@@ -1,6 +1,6 @@
 agent_name: weather_station
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: This AEA represents a weather station selling weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -8,7 +8,8 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.2.0
-- fetchai/oef:0.6.0
+- fetchai/p2p_libp2p:0.5.0
+- fetchai/soef:0.5.0
 - fetchai/stub:0.6.0
 contracts: []
 protocols:
@@ -18,13 +19,10 @@ protocols:
 - fetchai/oef_search:0.3.0
 skills:
 - fetchai/error:0.3.0
-- fetchai/generic_seller:0.7.0
-- fetchai/weather_station:0.6.0
-default_connection: fetchai/oef:0.6.0
-default_ledger: fetchai
-ledger_apis:
-  fetchai:
-    network: testnet
+- fetchai/generic_seller:0.8.0
+- fetchai/weather_station:0.7.0
+default_connection: fetchai/p2p_libp2p:0.5.0
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -32,3 +30,4 @@ private_key_paths: {}
 registry_path: ../packages
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0

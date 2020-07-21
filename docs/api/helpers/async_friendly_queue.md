@@ -1,9 +1,9 @@
-<a name=".aea.helpers.async_friendly_queue"></a>
+<a name="aea.helpers.async_friendly_queue"></a>
 # aea.helpers.async`_`friendly`_`queue
 
 This module contains the implementation of AsyncFriendlyQueue.
 
-<a name=".aea.helpers.async_friendly_queue.AsyncFriendlyQueue"></a>
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue"></a>
 ## AsyncFriendlyQueue Objects
 
 ```python
@@ -12,7 +12,7 @@ class AsyncFriendlyQueue(queue.Queue)
 
 queue.Queue with async_get method.
 
-<a name=".aea.helpers.async_friendly_queue.AsyncFriendlyQueue.__init__"></a>
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -21,7 +21,7 @@ queue.Queue with async_get method.
 
 Init queue.
 
-<a name=".aea.helpers.async_friendly_queue.AsyncFriendlyQueue.put"></a>
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.put"></a>
 #### put
 
 ```python
@@ -35,7 +35,7 @@ Put an item into the queue.
 - `item`: item to put in the queue
 :param args, kwargs: similar to queue.Queue.put
 
-<a name=".aea.helpers.async_friendly_queue.AsyncFriendlyQueue.get"></a>
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.get"></a>
 #### get
 
 ```python
@@ -46,7 +46,7 @@ Get an item into the queue.
 
 :param args, kwargs: similar to queue.Queue.get
 
-<a name=".aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_wait"></a>
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_wait"></a>
 #### async`_`wait
 
 ```python
@@ -59,7 +59,7 @@ Wait an item appears in the queue.
 
 None
 
-<a name=".aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_get"></a>
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_get"></a>
 #### async`_`get
 
 ```python

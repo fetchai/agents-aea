@@ -1,9 +1,9 @@
-<a name=".aea.helpers.base"></a>
+<a name="aea.helpers.base"></a>
 # aea.helpers.base
 
 Miscellaneous helpers.
 
-<a name=".aea.helpers.base.yaml_load"></a>
+<a name="aea.helpers.base.yaml_load"></a>
 #### yaml`_`load
 
 ```python
@@ -20,7 +20,7 @@ Load a yaml from a file pointer in an ordered way.
 
 the yaml
 
-<a name=".aea.helpers.base.yaml_dump"></a>
+<a name="aea.helpers.base.yaml_dump"></a>
 #### yaml`_`dump
 
 ```python
@@ -34,7 +34,7 @@ Dump data to a yaml file in an ordered way.
 - `data`: the data to be dumped
 - `stream`: the file pointer
 
-<a name=".aea.helpers.base.locate"></a>
+<a name="aea.helpers.base.locate"></a>
 #### locate
 
 ```python
@@ -43,7 +43,7 @@ locate(path: str) -> Any
 
 Locate an object by name or dotted path, importing as necessary.
 
-<a name=".aea.helpers.base.load_aea_package"></a>
+<a name="aea.helpers.base.load_aea_package"></a>
 #### load`_`aea`_`package
 
 ```python
@@ -62,7 +62,7 @@ It adds all the __init__.py modules into `sys.modules`.
 
 None
 
-<a name=".aea.helpers.base.load_module"></a>
+<a name="aea.helpers.base.load_module"></a>
 #### load`_`module
 
 ```python
@@ -85,7 +85,7 @@ None
 - `ValueError`: if the filepath provided is not a module.
 - `Exception`: if the execution of the module raises exception.
 
-<a name=".aea.helpers.base.load_env_file"></a>
+<a name="aea.helpers.base.load_env_file"></a>
 #### load`_`env`_`file
 
 ```python
@@ -102,7 +102,7 @@ Load the content of the environment file into the process environment.
 
 None.
 
-<a name=".aea.helpers.base.sigint_crossplatform"></a>
+<a name="aea.helpers.base.sigint_crossplatform"></a>
 #### sigint`_`crossplatform
 
 ```python
@@ -126,7 +126,7 @@ However, a subprocess.Popen class has the method
 
 None
 
-<a name=".aea.helpers.base.RegexConstrainedString"></a>
+<a name="aea.helpers.base.RegexConstrainedString"></a>
 ## RegexConstrainedString Objects
 
 ```python
@@ -139,7 +139,7 @@ The default behaviour is to match anything.
 Subclass this class and change the 'REGEX' class
 attribute to implement a different behaviour.
 
-<a name=".aea.helpers.base.RegexConstrainedString.__init__"></a>
+<a name="aea.helpers.base.RegexConstrainedString.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -148,7 +148,7 @@ attribute to implement a different behaviour.
 
 Initialize a regex constrained string.
 
-<a name=".aea.helpers.base.cd"></a>
+<a name="aea.helpers.base.cd"></a>
 #### cd
 
 ```python
@@ -158,7 +158,7 @@ cd(path)
 
 Change working directory temporarily.
 
-<a name=".aea.helpers.base.get_logger_method"></a>
+<a name="aea.helpers.base.get_logger_method"></a>
 #### get`_`logger`_`method
 
 ```python
@@ -179,7 +179,7 @@ Or return logger_method if it's callable.
 
 callable to write log with
 
-<a name=".aea.helpers.base.try_decorator"></a>
+<a name="aea.helpers.base.try_decorator"></a>
 #### try`_`decorator
 
 ```python
@@ -196,7 +196,7 @@ Does not support async or coroutines!
 - `default_return`: value to return on exception, by default None
 - `logger_method`: name of the logger method or callable to print logs
 
-<a name=".aea.helpers.base.MaxRetriesError"></a>
+<a name="aea.helpers.base.MaxRetriesError"></a>
 ## MaxRetriesError Objects
 
 ```python
@@ -205,7 +205,7 @@ class MaxRetriesError(Exception)
 
 Exception for retry decorator.
 
-<a name=".aea.helpers.base.retry_decorator"></a>
+<a name="aea.helpers.base.retry_decorator"></a>
 #### retry`_`decorator
 
 ```python
@@ -223,7 +223,7 @@ Does not support async or coroutines!
 - `delay`: num of seconds to sleep between retries. default 0
 - `logger_method`: name of the logger method or callable to print logs
 
-<a name=".aea.helpers.base.exception_log_and_reraise"></a>
+<a name="aea.helpers.base.exception_log_and_reraise"></a>
 #### exception`_`log`_`and`_`reraise
 
 ```python

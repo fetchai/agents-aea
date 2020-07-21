@@ -1,9 +1,9 @@
-<a name=".aea.crypto.wallet"></a>
+<a name="aea.crypto.wallet"></a>
 # aea.crypto.wallet
 
 Module wrapping all the public and private keys cryptography.
 
-<a name=".aea.crypto.wallet.CryptoStore"></a>
+<a name="aea.crypto.wallet.CryptoStore"></a>
 ## CryptoStore Objects
 
 ```python
@@ -12,7 +12,7 @@ class CryptoStore()
 
 Utility class to store and retrieve crypto objects.
 
-<a name=".aea.crypto.wallet.CryptoStore.__init__"></a>
+<a name="aea.crypto.wallet.CryptoStore.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -26,7 +26,7 @@ Initialize the crypto store.
 - `crypto_id_to_path`: dictionary from crypto id to an (optional) path
 to the private key.
 
-<a name=".aea.crypto.wallet.CryptoStore.public_keys"></a>
+<a name="aea.crypto.wallet.CryptoStore.public_keys"></a>
 #### public`_`keys
 
 ```python
@@ -36,7 +36,7 @@ to the private key.
 
 Get the public_key dictionary.
 
-<a name=".aea.crypto.wallet.CryptoStore.crypto_objects"></a>
+<a name="aea.crypto.wallet.CryptoStore.crypto_objects"></a>
 #### crypto`_`objects
 
 ```python
@@ -46,7 +46,7 @@ Get the public_key dictionary.
 
 Get the crypto objects (key pair).
 
-<a name=".aea.crypto.wallet.CryptoStore.addresses"></a>
+<a name="aea.crypto.wallet.CryptoStore.addresses"></a>
 #### addresses
 
 ```python
@@ -56,7 +56,7 @@ Get the crypto objects (key pair).
 
 Get the crypto addresses.
 
-<a name=".aea.crypto.wallet.Wallet"></a>
+<a name="aea.crypto.wallet.Wallet"></a>
 ## Wallet Objects
 
 ```python
@@ -70,7 +70,7 @@ The cryptos are separated into two categories:
 - main cryptos: used by the AEA for the economic side (i.e. signing transaction)
 - connection cryptos: exposed to the connection objects for encrypted communication.
 
-<a name=".aea.crypto.wallet.Wallet.__init__"></a>
+<a name="aea.crypto.wallet.Wallet.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -84,7 +84,7 @@ Instantiate a wallet object.
 - `private_key_paths`: the private key paths
 - `connection_private_key_paths`: the private key paths for the connections.
 
-<a name=".aea.crypto.wallet.Wallet.public_keys"></a>
+<a name="aea.crypto.wallet.Wallet.public_keys"></a>
 #### public`_`keys
 
 ```python
@@ -94,7 +94,7 @@ Instantiate a wallet object.
 
 Get the public_key dictionary.
 
-<a name=".aea.crypto.wallet.Wallet.crypto_objects"></a>
+<a name="aea.crypto.wallet.Wallet.crypto_objects"></a>
 #### crypto`_`objects
 
 ```python
@@ -104,7 +104,7 @@ Get the public_key dictionary.
 
 Get the crypto objects (key pair).
 
-<a name=".aea.crypto.wallet.Wallet.addresses"></a>
+<a name="aea.crypto.wallet.Wallet.addresses"></a>
 #### addresses
 
 ```python
@@ -114,7 +114,7 @@ Get the crypto objects (key pair).
 
 Get the crypto addresses.
 
-<a name=".aea.crypto.wallet.Wallet.main_cryptos"></a>
+<a name="aea.crypto.wallet.Wallet.main_cryptos"></a>
 #### main`_`cryptos
 
 ```python
@@ -124,7 +124,7 @@ Get the crypto addresses.
 
 Get the main crypto store.
 
-<a name=".aea.crypto.wallet.Wallet.connection_cryptos"></a>
+<a name="aea.crypto.wallet.Wallet.connection_cryptos"></a>
 #### connection`_`cryptos
 
 ```python
@@ -134,7 +134,7 @@ Get the main crypto store.
 
 Get the connection crypto store.
 
-<a name=".aea.crypto.wallet.Wallet.sign_message"></a>
+<a name="aea.crypto.wallet.Wallet.sign_message"></a>
 #### sign`_`message
 
 ```python
@@ -153,7 +153,7 @@ Sign a message.
 
 the signature of the message
 
-<a name=".aea.crypto.wallet.Wallet.sign_transaction"></a>
+<a name="aea.crypto.wallet.Wallet.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python

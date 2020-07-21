@@ -21,12 +21,11 @@
 from unittest import TestCase, mock
 
 from click import ClickException
-from click.testing import CliRunner
 
 from aea.cli import cli
 from aea.cli.fingerprint import _fingerprint_item
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock
 
 

@@ -198,7 +198,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         with cls._lock:
             cls._start_count += 1
 
-            if cls._supervisor_thread:
+            if cls._supervisor_thread:  # pragma: nocover
                 return
 
             cls._loop = asyncio.new_event_loop()
@@ -217,7 +217,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         :return: None
         """
         with cls._lock:
-            if not cls._supervisor_thread:
+            if not cls._supervisor_thread:  # pragma: nocover
                 return
 
             cls._start_count -= 1
