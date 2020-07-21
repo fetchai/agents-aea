@@ -25,7 +25,7 @@ from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
     FUNDED_COSMOS_PRIVATE_KEY_1,
-    MAX_FLAKY_RERUNS,
+    MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
@@ -36,7 +36,9 @@ from tests.conftest import (
 class TestGenericSkills(AEATestCaseMany):
     """Test that generic skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"
@@ -186,7 +188,9 @@ class TestGenericSkills(AEATestCaseMany):
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
     """Test that generic skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"

@@ -18,9 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains registries."""
-import itertools
 import logging
-import operator
 from abc import ABC, abstractmethod
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
@@ -177,7 +175,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         """
         if component_id not in self._registered_keys:
             raise ValueError(
-                "No item registered with contract id '{}'".format(ComponentId)
+                "No item registered with item id '{}'".format(component_id)
             )
         self._unregister(component_id)
 
@@ -200,11 +198,11 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :return the list of registered components.
         """
-        return list(
-            itertools.chain(
-                map(operator.methodcaller("values"), self._components_by_type.values())
-            )
-        )
+        return [
+            component
+            for components_by_public_id in self._components_by_type.values()
+            for component in components_by_public_id.values()
+        ]
 
     def fetch_by_type(self, component_type: ComponentType) -> List[Component]:
         """
@@ -384,6 +382,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
         protocol_id = item.SUPPORTED_PROTOCOL
         if protocol_id is None:
+            super().unregister(item_id)
             raise ValueError(
                 "Please specify a supported protocol for handler class '{}'".format(
                     item.__class__.__name__

@@ -32,7 +32,7 @@ from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
     FUNDED_COSMOS_PRIVATE_KEY_1,
-    MAX_FLAKY_RERUNS,
+    MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     ROOT_DIR,
@@ -117,7 +117,7 @@ ORM_SELLER_STRATEGY_PATH = Path(
 class TestOrmIntegrationDocs(AEATestCaseMany):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""
         seller_aea_name = "my_thermometer_aea"

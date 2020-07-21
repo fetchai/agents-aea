@@ -55,7 +55,7 @@ class Location:
     def __eq__(self, other):
         """Compare equality of two locations."""
         if not isinstance(other, Location):
-            return False
+            return False  # pragma: nocover
         else:
             return self.latitude == other.latitude and self.longitude == other.longitude
 

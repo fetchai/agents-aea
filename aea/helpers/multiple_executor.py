@@ -141,7 +141,7 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
         )
 
 
-class AbstractMultipleExecutor(ABC):
+class AbstractMultipleExecutor(ABC):  # pragma: nocover
     """Abstract class to create multiple executors classes."""
 
     def __init__(
@@ -290,7 +290,7 @@ class AbstractMultipleExecutor(ABC):
         return [task for task in self._tasks if not task.failed]
 
 
-class ThreadExecutor(AbstractMultipleExecutor):
+class ThreadExecutor(AbstractMultipleExecutor):  # pragma: nocover
     """Thread based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
@@ -309,7 +309,7 @@ class ThreadExecutor(AbstractMultipleExecutor):
         )
 
 
-class ProcessExecutor(ThreadExecutor):
+class ProcessExecutor(ThreadExecutor):  # pragma: nocover
     """Subprocess based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
@@ -329,7 +329,7 @@ class ProcessExecutor(ThreadExecutor):
         )
 
 
-class AsyncExecutor(AbstractMultipleExecutor):
+class AsyncExecutor(AbstractMultipleExecutor):  # pragma: nocover
     """Thread based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
@@ -345,7 +345,7 @@ class AsyncExecutor(AbstractMultipleExecutor):
         return task.create_async_task(self._loop)
 
 
-class AbstractMultipleRunner:
+class AbstractMultipleRunner:  # pragma: nocover
     """Abstract multiple runner to create classes to launch tasks with selected mode."""
 
     SUPPORTED_MODES: Dict[str, Type[AbstractMultipleExecutor]] = {}

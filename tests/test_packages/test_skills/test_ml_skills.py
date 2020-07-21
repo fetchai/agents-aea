@@ -29,7 +29,7 @@ from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
     FUNDED_COSMOS_PRIVATE_KEY_1,
-    MAX_FLAKY_RERUNS,
+    MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
@@ -40,7 +40,9 @@ from tests.conftest import (
 class TestMLSkills(AEATestCaseMany):
     """Test that ml skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     @pytest.mark.skipif(
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
@@ -189,7 +191,9 @@ class TestMLSkills(AEATestCaseMany):
 class TestMLSkillsFetchaiLedger(AEATestCaseMany):
     """Test that ml skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     @pytest.mark.skipif(
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
