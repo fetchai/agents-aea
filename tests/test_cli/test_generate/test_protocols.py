@@ -26,8 +26,6 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from click.testing import CliRunner
-
 import jsonschema
 from jsonschema import Draft4Validator, ValidationError
 
@@ -42,6 +40,7 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
+    CliRunner,
     PROTOCOL_CONFIGURATION_SCHEMA,
 )
 

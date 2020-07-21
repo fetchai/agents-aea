@@ -17,16 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
-
+import logging
 import os
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -51,14 +52,11 @@ from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
-FETCHAI = FetchAICrypto.identifier
-
-
 def test_initialise_aea():
     """Tests the initialisation of the AEA."""
-    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
-    builder.set_name("my_name").add_private_key(FETCHAI, private_key_path)
+    builder.set_name("my_name").add_private_key(DEFAULT_LEDGER, private_key_path)
     my_AEA = builder.build()
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     assert (
@@ -79,10 +77,10 @@ def test_initialise_aea():
 def test_act():
     """Tests the act function of the AEA."""
     agent_name = "MyAgent"
-    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
@@ -101,10 +99,10 @@ def test_act():
 def test_start_stop():
     """Tests the act function of the AEA."""
     agent_name = "MyAgent"
-    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
@@ -119,10 +117,10 @@ def test_react():
     """Tests income messages."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_private_key(DEFAULT_LEDGER, private_key_path)
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
@@ -176,10 +174,10 @@ def test_handle():
     """Tests handle method of an agent."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_private_key(DEFAULT_LEDGER, private_key_path)
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
@@ -262,10 +260,10 @@ def test_initialize_aea_programmatically():
     """Test that we can initialize an AEA programmatically."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_private_key(DEFAULT_LEDGER, private_key_path)
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
@@ -341,9 +339,9 @@ def test_initialize_aea_programmatically_build_resources():
         temp = tempfile.mkdtemp(prefix="test_aea_resources")
         with LocalNode() as node:
             agent_name = "MyAgent"
-            private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-            wallet = Wallet({FETCHAI: private_key_path})
-            identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+            private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+            wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+            identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
             connection = _make_local_connection(agent_name, node)
 
             resources = Resources()
@@ -434,12 +432,11 @@ def test_initialize_aea_programmatically_build_resources():
 
 def test_add_behaviour_dynamically():
     """Test that we can add a behaviour dynamically."""
-
     agent_name = "MyAgent"
-    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-    wallet = Wallet({FETCHAI: private_key_path})
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+    wallet = Wallet({DEFAULT_LEDGER: private_key_path})
     resources = Resources()
-    identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+    identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
     connection = _make_local_connection(identity.address, LocalNode())
     agent = AEA(identity, wallet, resources, default_connection=connection.public_id,)
     resources.add_connection(connection)
@@ -472,19 +469,81 @@ def test_add_behaviour_dynamically():
         )
 
 
+def test_error_handler_is_not_set():
+    """Test stop on no error handler presents."""
+    agent_name = "my_agent"
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+    wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+    identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
+    resources = Resources()
+    context_namespace = {"key1": 1, "key2": 2}
+    agent = AEA(identity, wallet, resources, **context_namespace)
+
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
+    msg.counterparty = agent.identity.address
+    envelope = Envelope(
+        to=agent.identity.address,
+        sender=agent.identity.address,
+        protocol_id=DefaultMessage.protocol_id,
+        message=msg,
+    )
+
+    with patch.object(agent, "stop") as mocked_stop:
+        agent._handle(envelope)
+
+    mocked_stop.assert_called()
+
+
+def test_no_handlers_registered(caplog):
+    """Test no handlers are registered for message processing."""
+    agent_name = "MyAgent"
+    builder = AEABuilder()
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+    builder.set_name(agent_name)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    # local_connection_id = PublicId.from_str("fetchai/stub:0.4.0")
+    # builder.set_default_connection(local_connection_id)
+    aea = builder.build()
+
+    with caplog.at_level(
+        logging.WARNING, logger=aea._get_error_handler().context.logger.name
+    ):
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        msg.counterparty = aea.identity.address
+        envelope = Envelope(
+            to=aea.identity.address,
+            sender=aea.identity.address,
+            protocol_id=DefaultMessage.protocol_id,
+            message=msg,
+        )
+        with patch.object(aea.filter, "get_active_handlers", return_value=[]):
+            aea._handle(envelope)
+
+        assert "Cannot handle envelope: no active handler registered" in caplog.text
+
+
 class TestContextNamespace:
-    """
-    Test that the keyword arguments to AEA constructor
-    can be accessible from the skill context.
-    """
+    """Test that the keyword arguments to AEA constructor can be accessible from the skill context."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
         agent_name = "my_agent"
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_path})
-        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+        wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+        identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
         connection = _make_local_connection(identity.address, LocalNode())
         resources = Resources()
         cls.context_namespace = {"key1": 1, "key2": 2}

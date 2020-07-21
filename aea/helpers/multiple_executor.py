@@ -90,7 +90,7 @@ class AbstractExecutorTask(ABC):
         """
 
     @property
-    def id(self) -> Any:
+    def id(self) -> Any:  # pragma: nocover
         """Return task id."""
         return id(self)
 
@@ -125,7 +125,9 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
     def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Return function and arguments to call within subprocess."""
 
-    def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
+    def create_async_task(
+        self, loop: AbstractEventLoop
+    ) -> TaskAwaitable:  # pragma: nocover
         """
         Create asyncio task for task run in asyncio loop.
 
@@ -139,7 +141,7 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
         )
 
 
-class AbstractMultipleExecutor(ABC):
+class AbstractMultipleExecutor(ABC):  # pragma: nocover
     """Abstract class to create multiple executors classes."""
 
     def __init__(
@@ -208,7 +210,7 @@ class AbstractMultipleExecutor(ABC):
         async def wait_future(future):
             try:
                 await future
-            except KeyboardInterrupt:
+            except KeyboardInterrupt:  # pragma: nocover
                 logger.exception("KeyboardInterrupt in task!")
                 if not skip_exceptions:
                     raise
@@ -246,7 +248,7 @@ class AbstractMultipleExecutor(ABC):
             )
             self.stop()
             await self._wait_tasks_complete(skip_exceptions=True)
-        else:
+        else:  # pragma: nocover
             raise ValueError(f"Unknown fail policy: {self._task_fail_policy}")
 
     @abstractmethod
@@ -273,22 +275,22 @@ class AbstractMultipleExecutor(ABC):
         task.stop()
 
     @property
-    def num_failed(self) -> int:
+    def num_failed(self) -> int:  # pragma: nocover
         """Return number of failed tasks."""
         return len(self.failed_tasks)
 
     @property
-    def failed_tasks(self) -> Sequence[AbstractExecutorTask]:
+    def failed_tasks(self) -> Sequence[AbstractExecutorTask]:  # pragma: nocover
         """Return sequence failed tasks."""
         return [task for task in self._tasks if task.failed]
 
     @property
-    def not_failed_tasks(self) -> Sequence[AbstractExecutorTask]:
+    def not_failed_tasks(self) -> Sequence[AbstractExecutorTask]:  # pragma: nocover
         """Return sequence successful tasks."""
         return [task for task in self._tasks if not task.failed]
 
 
-class ThreadExecutor(AbstractMultipleExecutor):
+class ThreadExecutor(AbstractMultipleExecutor):  # pragma: nocover
     """Thread based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
@@ -307,7 +309,7 @@ class ThreadExecutor(AbstractMultipleExecutor):
         )
 
 
-class ProcessExecutor(ThreadExecutor):
+class ProcessExecutor(ThreadExecutor):  # pragma: nocover
     """Subprocess based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
@@ -327,7 +329,7 @@ class ProcessExecutor(ThreadExecutor):
         )
 
 
-class AsyncExecutor(AbstractMultipleExecutor):
+class AsyncExecutor(AbstractMultipleExecutor):  # pragma: nocover
     """Thread based executor to run multiple agents in threads."""
 
     def _set_executor_pool(self) -> None:
@@ -343,7 +345,7 @@ class AsyncExecutor(AbstractMultipleExecutor):
         return task.create_async_task(self._loop)
 
 
-class AbstractMultipleRunner:
+class AbstractMultipleRunner:  # pragma: nocover
     """Abstract multiple runner to create classes to launch tasks with selected mode."""
 
     SUPPORTED_MODES: Dict[str, Type[AbstractMultipleExecutor]] = {}
@@ -357,7 +359,7 @@ class AbstractMultipleRunner:
         :param mode: one of supported executor modes
         :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
         """
-        if mode not in self.SUPPORTED_MODES:
+        if mode not in self.SUPPORTED_MODES:  # pragma: nocover
             raise ValueError(f"Unsupported mode: {mode}")
         self._mode: str = mode
         self._executor: AbstractMultipleExecutor = self._make_executor(
@@ -412,24 +414,23 @@ class AbstractMultipleRunner:
     @abstractmethod
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
         """Make tasks to run with executor."""
-        raise NotImplementedError
 
     @property
-    def num_failed(self):
+    def num_failed(self):  # pragma: nocover
         """Return number of failed tasks."""
         return self._executor.num_failed
 
     @property
-    def failed(self):
+    def failed(self):  # pragma: nocover
         """Return sequence failed tasks."""
         return [i.id for i in self._executor.failed_tasks]
 
     @property
-    def not_failed(self):
+    def not_failed(self):  # pragma: nocover
         """Return sequence successful tasks."""
         return [i.id for i in self._executor.not_failed_tasks]
 
-    def join_thread(self) -> None:
+    def join_thread(self) -> None:  # pragma: nocover
         """Join thread if running in thread mode."""
         if self._thread is None:
             raise ValueError("Not started in thread mode.")

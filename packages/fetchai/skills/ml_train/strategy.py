@@ -19,22 +19,29 @@
 
 """This module contains the strategy class."""
 
+from aea.helpers.search.generic import SIMPLE_DATA_MODEL
 from aea.helpers.search.models import (
-    Attribute,
     Constraint,
     ConstraintType,
-    DataModel,
     Description,
+    Location,
     Query,
 )
 from aea.skills.base import Model
 
-DEFAULT_DATASET_ID = "UK"
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_LEDGER_ID = "None"
 DEFAULT_MAX_NEGOTIATIONS = 1
+
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SEARCH_QUERY = {
+    "search_key": "dataset_id",
+    "search_value": "fmnist",
+    "constraint_type": "==",
+}
+DEFAULT_SEARCH_RADIUS = 5.0
 
 
 class Strategy(Model):
@@ -42,7 +49,6 @@ class Strategy(Model):
 
     def __init__(self, **kwargs) -> None:
         """Initialize the strategy of the agent."""
-        self._dataset_id = kwargs.pop("dataset_id", DEFAULT_DATASET_ID)
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_ROW_PRICE)
         self._max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_TX_FEE)
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
@@ -51,6 +57,12 @@ class Strategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+
+        self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+
         super().__init__(**kwargs)
         self._is_searching = False
         self._tx_id = 0
@@ -101,16 +113,39 @@ class Strategy(Model):
         self._tx_id += 1
         return "transaction_{}".format(self._tx_id)
 
+    def get_location_and_service_query(self) -> Query:
+        """
+        Get the location and service query of the agent.
+
+        :return: the query
+        """
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (self._agent_location, self._radius))
+        )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
+        return query
+
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.
 
         :return: the query
         """
-        dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
-        query = Query(
-            [Constraint("dataset_id", ConstraintType("==", self._dataset_id))], model=dm
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
         )
+        query = Query([service_key_filter], model=SIMPLE_DATA_MODEL)
         return query
 
     def is_acceptable_terms(self, terms: Description) -> bool:

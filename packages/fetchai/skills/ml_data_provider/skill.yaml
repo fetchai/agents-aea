@@ -1,6 +1,6 @@
 name: ml_data_provider
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
 license: Apache-2.0
@@ -9,8 +9,8 @@ fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: Qmct8ZJie2AtvN3jEJCsJM1LCbcUhaVgD4swKw1FvAFgvt
-  handlers.py: QmPmTwojRvD11rpf1twKezvzv5cVSpdwYj81qqTMF89VLm
-  strategy.py: Qma9H4dramyaXa6Y6R5cGTgf8qhq6J7PFYXN1k8qyE61Ji
+  handlers.py: Qmbpx7Vn1GfuNvMBzwtMJzBf69qtSyoB6aBFn62pgghJLA
+  strategy.py: QmUR4zKYaeYxXRKqhY2BU6KWzuJmkbjsSfBYR9k3S6FDDM
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -19,7 +19,7 @@ protocols:
 - fetchai/ml_trade:0.3.0
 - fetchai/oef_search:0.3.0
 skills:
-- fetchai/generic_seller:0.7.0
+- fetchai/generic_seller:0.8.0
 behaviours:
   service_registration:
     args:
@@ -32,6 +32,9 @@ handlers:
   ml_trade:
     args: {}
     class_name: MlTradeHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
 models:
   default_dialogues:
     args: {}
@@ -50,11 +53,16 @@ models:
       batch_size: 2
       buyer_tx_fee: 10
       currency_id: FET
-      dataset_id: fmnist
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       price_per_data_batch: 100
       seller_tx_fee: 0
+      service_data:
+        key: dataset_id
+        value: fmnist
     class_name: Strategy
 dependencies:
   numpy: {}

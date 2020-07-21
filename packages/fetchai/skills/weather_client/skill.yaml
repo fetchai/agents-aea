@@ -1,6 +1,6 @@
 name: weather_client
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -18,7 +18,7 @@ protocols:
 - fetchai/ledger_api:0.1.0
 - fetchai/oef_search:0.3.0
 skills:
-- fetchai/generic_buyer:0.6.0
+- fetchai/generic_buyer:0.7.0
 behaviours:
   search:
     args:
@@ -56,30 +56,19 @@ models:
   strategy:
     args:
       currency_id: FET
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
       search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
-      service_id: generic_service
+        constraint_type: ==
+        search_key: seller_service
+        search_value: weather_data
+      search_radius: 5.0
+      service_id: weather_data
     class_name: Strategy
 dependencies: {}

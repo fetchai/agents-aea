@@ -22,26 +22,28 @@
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
-from aea.helpers.search.generic import GenericDataModel
-from aea.helpers.search.models import Description, Query
+from aea.helpers.search.generic import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
+    SIMPLE_SERVICE_MODEL,
+)
+from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_UNIT_PRICE = 4
 DEFAULT_SERVICE_ID = "generic_service"
 
-DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
-DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": True},
-    "attribute_two": {"name": "city", "type": "str", "is_required": True},
-}  # type: Optional[Dict[str, Any]]
-DEFAULT_DATA_MODEL_NAME = "location"
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
 
 DEFAULT_HAS_DATA_SOURCE = False
 DEFAULT_DATA_FOR_SALE = {
@@ -68,9 +70,20 @@ class GenericStrategy(Model):
         self._unit_price = kwargs.pop("unit_price", DEFAULT_UNIT_PRICE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = {
+            "location": Location(location["longitude"], location["latitude"])
+        }
+        self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        assert (
+            len(self._set_service_data) == 2
+            and "key" in self._set_service_data
+            and "value" in self._set_service_data
+        ), "service_data must contain keys `key` and `value`"
+        self._remove_service_data = {"key": self._set_service_data["key"]}
+        self._simple_service_data = {
+            self._set_service_data["key"]: self._set_service_data["value"]
+        }
 
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
         data_for_sale_ordered = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
@@ -99,15 +112,47 @@ class GenericStrategy(Model):
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
 
-    def get_service_description(self) -> Description:
+    def get_location_description(self) -> Description:
         """
-        Get the service description.
+        Get the location description.
+
+        :return: a description of the agent's location
+        """
+        description = Description(
+            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+        )
+        return description
+
+    def get_register_service_description(self) -> Description:
+        """
+        Get the register service description.
 
         :return: a description of the offered services
         """
         description = Description(
-            self._service_data,
-            data_model=GenericDataModel(self._data_model_name, self._data_model),
+            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_service_description(self) -> Description:
+        """
+        Get the simple service description.
+
+        :return: a description of the offered services
+        """
+        description = Description(
+            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
+        )
+        return description
+
+    def get_unregister_service_description(self) -> Description:
+        """
+        Get the unregister service description.
+
+        :return: a description of the to be removed service
+        """
+        description = Description(
+            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description
 

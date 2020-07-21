@@ -41,7 +41,6 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
-COSMOS_CURRENCY = "ATOM"
 COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
@@ -62,6 +61,15 @@ class CosmosCrypto(Crypto[SigningKey]):
         super().__init__(private_key_path=private_key_path)
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = CosmosHelper.get_address_from_public_key(self.public_key)
+
+    @property
+    def private_key(self) -> str:
+        """
+        Return a private key.
+
+        :return: a private key string
+        """
+        return self.entity.to_string().hex()
 
     @property
     def public_key(self) -> str:
@@ -154,7 +162,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self.entity.to_string().hex().encode("utf-8"))
+        fp.write(self.private_key.encode("utf-8"))
 
 
 class CosmosHelper(Helper):
@@ -231,7 +239,7 @@ class CosmosHelper(Helper):
         r = hashlib.new("ripemd160", s).digest()
         five_bit_r = convertbits(r, 8, 5)
         assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
-        address = bech32_encode("cosmos", five_bit_r)
+        address = bech32_encode(_COSMOS, five_bit_r)
         return address
 
     @staticmethod

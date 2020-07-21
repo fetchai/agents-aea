@@ -21,38 +21,48 @@
 
 import pytest
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.identity.base import Identity
+
+from tests.conftest import FETCHAI
 
 
 def test_init_identity_positive():
     """Test initialization of the identity object."""
     assert Identity("some_name", address="some_address")
-    assert Identity("some_name", address="some_address", default_address_key="cosmos")
     assert Identity(
-        "some_name", addresses={"cosmos": "some_address", "fetchai": "some_address"}
+        "some_name", address="some_address", default_address_key=DEFAULT_LEDGER
     )
     assert Identity(
         "some_name",
-        addresses={"cosmos": "some_address", "fetchai": "some_address"},
-        default_address_key="cosmos",
+        addresses={DEFAULT_LEDGER: "some_address", FETCHAI: "some_address"},
+    )
+    assert Identity(
+        "some_name",
+        addresses={DEFAULT_LEDGER: "some_address", FETCHAI: "some_address"},
+        default_address_key=DEFAULT_LEDGER,
     )
 
 
 def test_init_identity_negative():
     """Test initialization of the identity object."""
+    name = "some_name"
+    address_1 = "some_address"
     with pytest.raises(KeyError):
         Identity(
-            "some_name",
-            addresses={"cosmos": "some_address", "fetchai": "some_address"},
-            default_address_key="ethereum",
+            name,
+            addresses={DEFAULT_LEDGER: address_1, FETCHAI: address_1},
+            default_address_key="wrong_key",
         )
     with pytest.raises(AssertionError):
-        Identity("some_name")
+        Identity(name)
 
 
 def test_accessors():
     """Test the properties of the identity object."""
-    identity = Identity("some_name", address="some_address")
-    assert identity.name == "some_name"
-    assert identity.address == "some_address"
-    assert identity.addresses == {"fetchai": "some_address"}
+    name = "some_name"
+    address = "some_address"
+    identity = Identity(name, address=address)
+    assert identity.name == name
+    assert identity.address == address
+    assert identity.addresses == {DEFAULT_LEDGER: address}

@@ -1,9 +1,9 @@
-<a name=".aea.test_tools.test_cases"></a>
+<a name="aea.test_tools.test_cases"></a>
 # aea.test`_`tools.test`_`cases
 
 This module contains test case classes based on pytest for AEA end-to-end testing.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase"></a>
 ## BaseAEATestCase Objects
 
 ```python
@@ -12,7 +12,7 @@ class BaseAEATestCase(ABC)
 
 Base class for AEA test cases.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.set_agent_context"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.set_agent_context"></a>
 #### set`_`agent`_`context
 
 ```python
@@ -22,7 +22,7 @@ Base class for AEA test cases.
 
 Set the current agent context.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.unset_agent_context"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.unset_agent_context"></a>
 #### unset`_`agent`_`context
 
 ```python
@@ -32,7 +32,7 @@ Set the current agent context.
 
 Unset the current agent context.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.set_config"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.set_config"></a>
 #### set`_`config
 
 ```python
@@ -53,7 +53,7 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.force_set_config"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.force_set_config"></a>
 #### force`_`set`_`config
 
 ```python
@@ -63,7 +63,7 @@ None
 
 Force set config.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.disable_aea_logging"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.disable_aea_logging"></a>
 #### disable`_`aea`_`logging
 
 ```python
@@ -78,12 +78,12 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.run_cli_command"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.run_cli_command"></a>
 #### run`_`cli`_`command
 
 ```python
  | @classmethod
- | run_cli_command(cls, *args: str, cwd: str = ".") -> None
+ | run_cli_command(cls, *args: str, *, cwd: str = ".") -> None
 ```
 
 Run AEA CLI command.
@@ -101,12 +101,12 @@ Run AEA CLI command.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.start_subprocess"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.start_subprocess"></a>
 #### start`_`subprocess
 
 ```python
  | @classmethod
- | start_subprocess(cls, *args: str, cwd: str = ".") -> subprocess.Popen
+ | start_subprocess(cls, *args: str, *, cwd: str = ".") -> subprocess.Popen
 ```
 
 Run python with args as subprocess.
@@ -119,7 +119,7 @@ Run python with args as subprocess.
 
 subprocess object.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.start_thread"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.start_thread"></a>
 #### start`_`thread
 
 ```python
@@ -138,7 +138,7 @@ Start python Thread.
 
 None.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.create_agents"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.create_agents"></a>
 #### create`_`agents
 
 ```python
@@ -156,7 +156,7 @@ Create agents in current working directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.fetch_agent"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.fetch_agent"></a>
 #### fetch`_`agent
 
 ```python
@@ -175,7 +175,7 @@ Create agents in current working directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.difference_to_fetched_agent"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.difference_to_fetched_agent"></a>
 #### difference`_`to`_`fetched`_`agent
 
 ```python
@@ -194,7 +194,7 @@ Compare agent against the one fetched from public id.
 
 list of files differing in the projects
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.delete_agents"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.delete_agents"></a>
 #### delete`_`agents
 
 ```python
@@ -212,7 +212,7 @@ Delete agents in current working directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.run_agent"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.run_agent"></a>
 #### run`_`agent
 
 ```python
@@ -231,7 +231,7 @@ Run from agent's directory.
 
 subprocess object.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.run_interaction"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.run_interaction"></a>
 #### run`_`interaction
 
 ```python
@@ -250,12 +250,12 @@ Run from agent's directory.
 
 subprocess object.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.terminate_agents"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.terminate_agents"></a>
 #### terminate`_`agents
 
 ```python
  | @classmethod
- | terminate_agents(cls, *subprocesses: subprocess.Popen, signal: signal.Signals = signal.SIGINT, timeout: int = 10) -> None
+ | terminate_agents(cls, *subprocesses: subprocess.Popen, *, signal: signal.Signals = signal.SIGINT, timeout: int = 10) -> None
 ```
 
 Terminate agent subprocesses.
@@ -267,7 +267,7 @@ Run from agent's directory.
 - `signal`: the signal for interuption
 - `timeout`: the timeout for interuption
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.is_successfully_terminated"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.is_successfully_terminated"></a>
 #### is`_`successfully`_`terminated
 
 ```python
@@ -277,7 +277,7 @@ Run from agent's directory.
 
 Check if all subprocesses terminated successfully
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.initialize_aea"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.initialize_aea"></a>
 #### initialize`_`aea
 
 ```python
@@ -291,7 +291,7 @@ Initialize AEA locally with author name.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.add_item"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.add_item"></a>
 #### add`_`item
 
 ```python
@@ -312,7 +312,7 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.scaffold_item"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.scaffold_item"></a>
 #### scaffold`_`item
 
 ```python
@@ -332,7 +332,7 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.fingerprint_item"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.fingerprint_item"></a>
 #### fingerprint`_`item
 
 ```python
@@ -352,7 +352,7 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.eject_item"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.eject_item"></a>
 #### eject`_`item
 
 ```python
@@ -372,7 +372,7 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.run_install"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.run_install"></a>
 #### run`_`install
 
 ```python
@@ -387,12 +387,12 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.generate_private_key"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.generate_private_key"></a>
 #### generate`_`private`_`key
 
 ```python
  | @classmethod
- | generate_private_key(cls, ledger_api_id: str = FETCHAI_NAME) -> None
+ | generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None
 ```
 
 Generate AEA private key with CLI command.
@@ -406,12 +406,12 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.add_private_key"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.add_private_key"></a>
 #### add`_`private`_`key
 
 ```python
  | @classmethod
- | add_private_key(cls, ledger_api_id: str = FETCHAI_NAME, private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE) -> None
+ | add_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE, connection: bool = False) -> None
 ```
 
 Add private key with CLI command.
@@ -421,17 +421,18 @@ Run from agent's directory.
 
 - `ledger_api_id`: ledger API ID.
 - `private_key_filepath`: private key filepath.
+- `connection`: whether or not the private key filepath is for a connection.
 
 **Returns**:
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.replace_private_key_in_file"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.replace_private_key_in_file"></a>
 #### replace`_`private`_`key`_`in`_`file
 
 ```python
  | @classmethod
- | replace_private_key_in_file(cls, private_key: str, private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE) -> None
+ | replace_private_key_in_file(cls, private_key: str, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE) -> None
 ```
 
 Replace the private key in the provided file with the provided key.
@@ -446,12 +447,12 @@ Replace the private key in the provided file with the provided key.
 None
 :raises: exception if file does not exist
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.generate_wealth"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.generate_wealth"></a>
 #### generate`_`wealth
 
 ```python
  | @classmethod
- | generate_wealth(cls, ledger_api_id: str = FETCHAI_NAME) -> None
+ | generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None
 ```
 
 Generate wealth with CLI command.
@@ -465,12 +466,12 @@ Run from agent's directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.get_wealth"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.get_wealth"></a>
 #### get`_`wealth
 
 ```python
  | @classmethod
- | get_wealth(cls, ledger_api_id: str = FETCHAI_NAME) -> str
+ | get_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> str
 ```
 
 Get wealth with CLI command.
@@ -484,7 +485,7 @@ Run from agent's directory.
 
 command line output
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.replace_file_content"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.replace_file_content"></a>
 #### replace`_`file`_`content
 
 ```python
@@ -503,7 +504,7 @@ Replace the content of the source file to the dest file.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.change_directory"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.change_directory"></a>
 #### change`_`directory
 
 ```python
@@ -521,7 +522,7 @@ Change current working directory.
 
 None
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.send_envelope_to_agent"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.send_envelope_to_agent"></a>
 #### send`_`envelope`_`to`_`agent
 
 ```python
@@ -531,7 +532,7 @@ None
 
 Send an envelope to an agent, using the stub connection.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.read_envelope_from_agent"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.read_envelope_from_agent"></a>
 #### read`_`envelope`_`from`_`agent
 
 ```python
@@ -541,7 +542,7 @@ Send an envelope to an agent, using the stub connection.
 
 Read an envelope from an agent, using the stub connection.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.missing_from_output"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.missing_from_output"></a>
 #### missing`_`from`_`output
 
 ```python
@@ -565,7 +566,7 @@ or timeout expired.
 
 list of missed strings.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.is_running"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.is_running"></a>
 #### is`_`running
 
 ```python
@@ -580,7 +581,7 @@ Check if the AEA is launched and running (ready to process messages).
 - `process`: agent subprocess.
 - `timeout`: the timeout to wait for launch to complete
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.setup_class"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.setup_class"></a>
 #### setup`_`class
 
 ```python
@@ -590,7 +591,7 @@ Check if the AEA is launched and running (ready to process messages).
 
 Set up the test class.
 
-<a name=".aea.test_tools.test_cases.BaseAEATestCase.teardown_class"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.teardown_class"></a>
 #### teardown`_`class
 
 ```python
@@ -600,16 +601,17 @@ Set up the test class.
 
 Teardown the test.
 
-<a name=".aea.test_tools.test_cases.UseOef"></a>
+<a name="aea.test_tools.test_cases.UseOef"></a>
 ## UseOef Objects
 
 ```python
+@pytest.mark.integration
 class UseOef()
 ```
 
 Inherit from this class to launch an OEF node.
 
-<a name=".aea.test_tools.test_cases.AEATestCaseEmpty"></a>
+<a name="aea.test_tools.test_cases.AEATestCaseEmpty"></a>
 ## AEATestCaseEmpty Objects
 
 ```python
@@ -620,7 +622,7 @@ Test case for a default AEA project.
 
 This test case will create a default AEA project.
 
-<a name=".aea.test_tools.test_cases.AEATestCaseEmpty.setup_class"></a>
+<a name="aea.test_tools.test_cases.AEATestCaseEmpty.setup_class"></a>
 #### setup`_`class
 
 ```python
@@ -630,7 +632,7 @@ This test case will create a default AEA project.
 
 Set up the test class.
 
-<a name=".aea.test_tools.test_cases.AEATestCaseMany"></a>
+<a name="aea.test_tools.test_cases.AEATestCaseMany"></a>
 ## AEATestCaseMany Objects
 
 ```python
@@ -639,7 +641,7 @@ class AEATestCaseMany(BaseAEATestCase)
 
 Test case for many AEA projects.
 
-<a name=".aea.test_tools.test_cases.AEATestCaseMany.setup_class"></a>
+<a name="aea.test_tools.test_cases.AEATestCaseMany.setup_class"></a>
 #### setup`_`class
 
 ```python
@@ -649,7 +651,7 @@ Test case for many AEA projects.
 
 Set up the test class.
 
-<a name=".aea.test_tools.test_cases.AEATestCaseMany.teardown_class"></a>
+<a name="aea.test_tools.test_cases.AEATestCaseMany.teardown_class"></a>
 #### teardown`_`class
 
 ```python
@@ -659,7 +661,7 @@ Set up the test class.
 
 Teardown the test class.
 
-<a name=".aea.test_tools.test_cases.AEATestCase"></a>
+<a name="aea.test_tools.test_cases.AEATestCase"></a>
 ## AEATestCase Objects
 
 ```python
@@ -671,7 +673,7 @@ Test case from an existing AEA project.
 Subclass this class and set `path_to_aea` properly. By default,
 it is assumed the project is inside the current working directory.
 
-<a name=".aea.test_tools.test_cases.AEATestCase.setup_class"></a>
+<a name="aea.test_tools.test_cases.AEATestCase.setup_class"></a>
 #### setup`_`class
 
 ```python
@@ -681,7 +683,7 @@ it is assumed the project is inside the current working directory.
 
 Set up the test class.
 
-<a name=".aea.test_tools.test_cases.AEATestCase.teardown_class"></a>
+<a name="aea.test_tools.test_cases.AEATestCase.teardown_class"></a>
 #### teardown`_`class
 
 ```python

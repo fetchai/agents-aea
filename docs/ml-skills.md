@@ -56,22 +56,13 @@ This diagram shows the communication between the two AEAs.
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF search and communication node
-
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for the following demo.
-
 ## Demo instructions
 
 ### Create data provider AEA
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.7.0
+aea fetch fetchai/ml_data_provider:0.8.0
 cd ml_data_provider
 aea install
 ```
@@ -83,23 +74,19 @@ The following steps create the data provider from scratch:
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/ml_data_provider:0.6.0
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea add skill fetchai/ml_data_provider:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 aea install
 ```
 
-In `ml_data_provider/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `ml_data_provider/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
@@ -109,7 +96,7 @@ default_routing:
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.7.0
+aea fetch fetchai/ml_model_trainer:0.8.0
 cd ml_model_trainer
 aea install
 ```
@@ -121,147 +108,75 @@ The following steps create the model trainer from scratch:
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/ml_train:0.6.0
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea add skill fetchai/ml_train:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 aea install
 ```
 
-In `ml_model_trainer/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `ml_model_trainer/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
 </details>
 
-### Generate wealth for the model trainer AEA
+### Add keys for the data provider AEA
 
-The model trainer needs to have some wealth to purchase the training data.
-
-First, create the private key for the model trainer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
-``` bash
-aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
-```
-
-Then, create some wealth for your model trainer based on the network you want to transact with. On the Fetch.ai `testnet` network:
-``` bash
-aea generate-wealth fetchai
-```
-
-<details><summary>Alternatively, create wealth for other test networks.</summary>
-<p>
-
-<strong>Ledger Config:</strong>
-<br>
-
-In `ml_model_trainer/aea-config.yaml` and `ml_data_provider/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Ethereum:
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-
-Alternatively, to connect to Cosmos:
-``` yaml
-ledger_apis:
-  cosmos:
-    address: https://rest-agent-land.prod.fetch-ai.com:443
-```
-
-<strong>Wealth:</strong>
-<br>
-
-To generate and add a private-public key pair for Ethereum use:
-``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-
-On the Ethereum `ropsten` network.
-``` bash
-aea generate-wealth ethereum
-```
-
-Alternatively, to generate and add a private-public key pair for Cosmos use:
+First, create the private key for the data provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
 aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
-On the Cosmos `testnet` network.
+### Add keys and generate wealth for the model trainer AEA
+
+The model trainer needs to have some wealth to purchase the data from the data provider.
+
+First, create the private key for the model trainer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
+```
+
+Then, create some wealth for your model trainer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
 aea generate-wealth cosmos
 ```
 
-</p>
-</details>
-
-### Update the skill configs
-
-The default skill configs assume that the transaction is settled against the fetchai ledger.
-
-<details><summary>Alternatively, configure skills for other test networks.</summary>
-<p>
-
-<strong>Data provider:</strong>
-<br>
-Ensure you are in the ml_data_provider project directory.
-
-For ethereum, update the skill config of the data provider via the `aea config get/set` command like so:
-``` bash
-aea config set vendor.fetchai.skills. ml_data_provider.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledger_id ethereum
-```
-
-Or for cosmos, like so:
-``` bash
-aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledger_id cosmos
-```
-
-This updates the ml_data_provider skill config (`ml_data_provider/vendor/fetchai/skills/ml_data_provider/skill.yaml`).
-
-
-<strong>Model trainer:</strong>
-<br>
-Ensure you are in the ml_model_trainer project directory.
-
-For ethereum, update the skill config of the ml_model_trainer via the `aea config get/set` command like so:
-``` bash
-aea config set vendor.fetchai.skills.ml_trainer.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.ml_trainer.models.strategy.args.ledger_id ethereum
-```
-
-Or for cosmos, like so:
-``` bash
-aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id cosmos
-```
-
-This updates the ml_nodel_trainer skill config (`ml_model_trainer/vendor/fetchai/skills/ml_train/skill.yaml`).
-
-</p>
-</details>
-
 ### Run both AEAs
 
-Finally, run both AEAs from their respective directories:
+Run both AEAs from their respective terminals.
+
+First, run the data provider AEA:
+
+``` bash
+aea run
+```
+
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
+Then, update the configuration of the model trainer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
+
+Then run the model trainer AEA:
 ``` bash
 aea run
 ```

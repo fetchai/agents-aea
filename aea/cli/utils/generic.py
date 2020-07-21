@@ -19,6 +19,7 @@
 
 """Module with generic utils of the aea cli."""
 
+import os
 from typing import Dict, List
 
 from click import ClickException
@@ -68,3 +69,15 @@ def load_yaml(filepath: str) -> Dict:
             raise ClickException(
                 "Loading yaml config from {} failed: {}".format(filepath, e)
             )
+
+
+def is_readme_present(readme_path: str) -> bool:
+    """
+    Check is readme file present.
+    This method is needed for proper testing.
+
+    :param readme_path: path to readme file.
+
+    :return: bool is readme file present.
+    """
+    return os.path.exists(readme_path)

@@ -26,8 +26,6 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
 
-from click.testing import CliRunner
-
 import jsonschema
 from jsonschema import Draft4Validator
 
@@ -38,6 +36,7 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
+    CliRunner,
 )
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 

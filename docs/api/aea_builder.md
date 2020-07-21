@@ -1,10 +1,10 @@
-<a name=".aea.aea_builder"></a>
+<a name="aea.aea_builder"></a>
 # aea.aea`_`builder
 
 This module contains utilities for building an AEA.
 
 
-<a name=".aea.aea_builder.AEABuilder"></a>
+<a name="aea.aea_builder.AEABuilder"></a>
 ## AEABuilder Objects
 
 ```python
@@ -55,7 +55,7 @@ builder.add_component_instance(...)
 # second call
 my_aea_2 = builder.builder()
 
-<a name=".aea.aea_builder.AEABuilder.__init__"></a>
+<a name="aea.aea_builder.AEABuilder.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -68,7 +68,7 @@ Initialize the builder.
 
 - `with_default_packages`: add the default packages.
 
-<a name=".aea.aea_builder.AEABuilder.reset"></a>
+<a name="aea.aea_builder.AEABuilder.reset"></a>
 #### reset
 
 ```python
@@ -91,7 +91,7 @@ only resets:
 
 None
 
-<a name=".aea.aea_builder.AEABuilder.set_timeout"></a>
+<a name="aea.aea_builder.AEABuilder.set_timeout"></a>
 #### set`_`timeout
 
 ```python
@@ -108,7 +108,7 @@ Set agent loop idle timeout in seconds.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_execution_timeout"></a>
+<a name="aea.aea_builder.AEABuilder.set_execution_timeout"></a>
 #### set`_`execution`_`timeout
 
 ```python
@@ -125,7 +125,7 @@ Set agent execution timeout in seconds.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_max_reactions"></a>
+<a name="aea.aea_builder.AEABuilder.set_max_reactions"></a>
 #### set`_`max`_`reactions
 
 ```python
@@ -142,7 +142,7 @@ Set agent max reaction in one react.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_decision_maker_handler"></a>
+<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler"></a>
 #### set`_`decision`_`maker`_`handler
 
 ```python
@@ -160,7 +160,7 @@ Set decision maker handler class.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_skill_exception_policy"></a>
+<a name="aea.aea_builder.AEABuilder.set_skill_exception_policy"></a>
 #### set`_`skill`_`exception`_`policy
 
 ```python
@@ -177,7 +177,7 @@ Set skill exception policy.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_default_routing"></a>
+<a name="aea.aea_builder.AEABuilder.set_default_routing"></a>
 #### set`_`default`_`routing
 
 ```python
@@ -196,7 +196,7 @@ This is a map from public ids (protocols) to public ids (connections).
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_loop_mode"></a>
+<a name="aea.aea_builder.AEABuilder.set_loop_mode"></a>
 #### set`_`loop`_`mode
 
 ```python
@@ -213,7 +213,7 @@ Set the loop mode.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_runtime_mode"></a>
+<a name="aea.aea_builder.AEABuilder.set_runtime_mode"></a>
 #### set`_`runtime`_`mode
 
 ```python
@@ -230,7 +230,7 @@ Set the runtime mode.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_search_service_address"></a>
+<a name="aea.aea_builder.AEABuilder.set_search_service_address"></a>
 #### set`_`search`_`service`_`address
 
 ```python
@@ -247,7 +247,7 @@ Set the search service address.
 
 self
 
-<a name=".aea.aea_builder.AEABuilder.set_name"></a>
+<a name="aea.aea_builder.AEABuilder.set_name"></a>
 #### set`_`name
 
 ```python
@@ -264,7 +264,7 @@ Set the name of the agent.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.set_default_connection"></a>
+<a name="aea.aea_builder.AEABuilder.set_default_connection"></a>
 #### set`_`default`_`connection
 
 ```python
@@ -281,7 +281,7 @@ Set the default connection.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.add_private_key"></a>
+<a name="aea.aea_builder.AEABuilder.add_private_key"></a>
 #### add`_`private`_`key
 
 ```python
@@ -301,7 +301,7 @@ If None, the key will be created at build time.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.remove_private_key"></a>
+<a name="aea.aea_builder.AEABuilder.remove_private_key"></a>
 #### remove`_`private`_`key
 
 ```python
@@ -319,7 +319,7 @@ Remove a private key path by identifier, if present.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.private_key_paths"></a>
+<a name="aea.aea_builder.AEABuilder.private_key_paths"></a>
 #### private`_`key`_`paths
 
 ```python
@@ -329,7 +329,7 @@ the AEABuilder
 
 Get the private key paths.
 
-<a name=".aea.aea_builder.AEABuilder.connection_private_key_paths"></a>
+<a name="aea.aea_builder.AEABuilder.connection_private_key_paths"></a>
 #### connection`_`private`_`key`_`paths
 
 ```python
@@ -339,52 +339,7 @@ Get the private key paths.
 
 Get the connection private key paths.
 
-<a name=".aea.aea_builder.AEABuilder.add_ledger_api_config"></a>
-#### add`_`ledger`_`api`_`config
-
-```python
- | add_ledger_api_config(identifier: str, config: Dict) -> "AEABuilder"
-```
-
-Add a configuration for a ledger API to be supported by the agent.
-
-**Arguments**:
-
-- `identifier`: the identifier of the ledger api
-- `config`: the configuration of the ledger api
-
-**Returns**:
-
-the AEABuilder
-
-<a name=".aea.aea_builder.AEABuilder.remove_ledger_api_config"></a>
-#### remove`_`ledger`_`api`_`config
-
-```python
- | remove_ledger_api_config(identifier: str) -> "AEABuilder"
-```
-
-Remove a ledger API configuration.
-
-**Arguments**:
-
-- `identifier`: the identifier of the ledger api
-
-**Returns**:
-
-the AEABuilder
-
-<a name=".aea.aea_builder.AEABuilder.ledger_apis_config"></a>
-#### ledger`_`apis`_`config
-
-```python
- | @property
- | ledger_apis_config() -> Dict[str, Dict[str, Union[str, int]]]
-```
-
-Get the ledger api configurations.
-
-<a name=".aea.aea_builder.AEABuilder.set_default_ledger"></a>
+<a name="aea.aea_builder.AEABuilder.set_default_ledger"></a>
 #### set`_`default`_`ledger
 
 ```python
@@ -401,7 +356,7 @@ Set a default ledger API to use.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.add_component"></a>
+<a name="aea.aea_builder.AEABuilder.add_component"></a>
 #### add`_`component
 
 ```python
@@ -425,7 +380,7 @@ Add a component, given its type and the directory.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.add_component_instance"></a>
+<a name="aea.aea_builder.AEABuilder.add_component_instance"></a>
 #### add`_`component`_`instance
 
 ```python
@@ -441,7 +396,7 @@ You will have to `reset()` the builder before calling `build()` again.
 
 :params component: Component instance already initialized.
 
-<a name=".aea.aea_builder.AEABuilder.set_context_namespace"></a>
+<a name="aea.aea_builder.AEABuilder.set_context_namespace"></a>
 #### set`_`context`_`namespace
 
 ```python
@@ -450,7 +405,7 @@ You will have to `reset()` the builder before calling `build()` again.
 
 Set the context namespace.
 
-<a name=".aea.aea_builder.AEABuilder.remove_component"></a>
+<a name="aea.aea_builder.AEABuilder.remove_component"></a>
 #### remove`_`component
 
 ```python
@@ -467,7 +422,7 @@ Remove a component.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.add_protocol"></a>
+<a name="aea.aea_builder.AEABuilder.add_protocol"></a>
 #### add`_`protocol
 
 ```python
@@ -484,7 +439,7 @@ Add a protocol to the agent.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.remove_protocol"></a>
+<a name="aea.aea_builder.AEABuilder.remove_protocol"></a>
 #### remove`_`protocol
 
 ```python
@@ -501,7 +456,7 @@ Remove protocol.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.add_connection"></a>
+<a name="aea.aea_builder.AEABuilder.add_connection"></a>
 #### add`_`connection
 
 ```python
@@ -518,7 +473,7 @@ Add a connection to the agent.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.remove_connection"></a>
+<a name="aea.aea_builder.AEABuilder.remove_connection"></a>
 #### remove`_`connection
 
 ```python
@@ -535,7 +490,7 @@ Remove a connection.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.add_skill"></a>
+<a name="aea.aea_builder.AEABuilder.add_skill"></a>
 #### add`_`skill
 
 ```python
@@ -552,7 +507,7 @@ Add a skill to the agent.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.remove_skill"></a>
+<a name="aea.aea_builder.AEABuilder.remove_skill"></a>
 #### remove`_`skill
 
 ```python
@@ -569,7 +524,7 @@ Remove protocol.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.add_contract"></a>
+<a name="aea.aea_builder.AEABuilder.add_contract"></a>
 #### add`_`contract
 
 ```python
@@ -586,7 +541,7 @@ Add a contract to the agent.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.remove_contract"></a>
+<a name="aea.aea_builder.AEABuilder.remove_contract"></a>
 #### remove`_`contract
 
 ```python
@@ -603,7 +558,7 @@ Remove protocol.
 
 the AEABuilder
 
-<a name=".aea.aea_builder.AEABuilder.build"></a>
+<a name="aea.aea_builder.AEABuilder.build"></a>
 #### build
 
 ```python
@@ -631,7 +586,7 @@ the AEA object.
 
 - `ValueError`: if we cannot
 
-<a name=".aea.aea_builder.AEABuilder.set_from_configuration"></a>
+<a name="aea.aea_builder.AEABuilder.set_from_configuration"></a>
 #### set`_`from`_`configuration
 
 ```python
@@ -651,7 +606,7 @@ Set builder variables from AgentConfig.
 
 None
 
-<a name=".aea.aea_builder.AEABuilder.from_aea_project"></a>
+<a name="aea.aea_builder.AEABuilder.from_aea_project"></a>
 #### from`_`aea`_`project
 
 ```python

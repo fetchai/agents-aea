@@ -25,8 +25,6 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
-from click.testing import CliRunner
-
 from jsonschema import ValidationError
 
 import pytest
@@ -47,6 +45,7 @@ from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CUR_PATH,
+    CliRunner,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
     double_escape_windows_path_separator,
@@ -489,7 +488,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.7.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.8.0")
 
         contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)

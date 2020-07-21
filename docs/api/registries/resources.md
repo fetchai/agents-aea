@@ -1,9 +1,9 @@
-<a name=".aea.registries.resources"></a>
+<a name="aea.registries.resources"></a>
 # aea.registries.resources
 
 This module contains the resources class.
 
-<a name=".aea.registries.resources.Resources"></a>
+<a name="aea.registries.resources.Resources"></a>
 ## Resources Objects
 
 ```python
@@ -12,7 +12,7 @@ class Resources()
 
 This class implements the object that holds the resources of an AEA.
 
-<a name=".aea.registries.resources.Resources.__init__"></a>
+<a name="aea.registries.resources.Resources.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -23,7 +23,7 @@ Instantiate the resources.
 
 :return None
 
-<a name=".aea.registries.resources.Resources.component_registry"></a>
+<a name="aea.registries.resources.Resources.component_registry"></a>
 #### component`_`registry
 
 ```python
@@ -33,7 +33,7 @@ Instantiate the resources.
 
 Get the agent component registry.
 
-<a name=".aea.registries.resources.Resources.behaviour_registry"></a>
+<a name="aea.registries.resources.Resources.behaviour_registry"></a>
 #### behaviour`_`registry
 
 ```python
@@ -43,7 +43,7 @@ Get the agent component registry.
 
 Get the behaviour registry.
 
-<a name=".aea.registries.resources.Resources.handler_registry"></a>
+<a name="aea.registries.resources.Resources.handler_registry"></a>
 #### handler`_`registry
 
 ```python
@@ -53,7 +53,7 @@ Get the behaviour registry.
 
 Get the handler registry.
 
-<a name=".aea.registries.resources.Resources.model_registry"></a>
+<a name="aea.registries.resources.Resources.model_registry"></a>
 #### model`_`registry
 
 ```python
@@ -63,7 +63,7 @@ Get the handler registry.
 
 Get the model registry.
 
-<a name=".aea.registries.resources.Resources.add_component"></a>
+<a name="aea.registries.resources.Resources.add_component"></a>
 #### add`_`component
 
 ```python
@@ -72,7 +72,7 @@ Get the model registry.
 
 Add a component to resources.
 
-<a name=".aea.registries.resources.Resources.add_protocol"></a>
+<a name="aea.registries.resources.Resources.add_protocol"></a>
 #### add`_`protocol
 
 ```python
@@ -89,7 +89,7 @@ Add a protocol to the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.get_protocol"></a>
+<a name="aea.registries.resources.Resources.get_protocol"></a>
 #### get`_`protocol
 
 ```python
@@ -106,7 +106,7 @@ Get protocol for given protocol id.
 
 a matching protocol, if present, else None
 
-<a name=".aea.registries.resources.Resources.get_all_protocols"></a>
+<a name="aea.registries.resources.Resources.get_all_protocols"></a>
 #### get`_`all`_`protocols
 
 ```python
@@ -119,7 +119,7 @@ Get the list of all the protocols.
 
 the list of protocols.
 
-<a name=".aea.registries.resources.Resources.remove_protocol"></a>
+<a name="aea.registries.resources.Resources.remove_protocol"></a>
 #### remove`_`protocol
 
 ```python
@@ -136,7 +136,7 @@ Remove a protocol from the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.add_contract"></a>
+<a name="aea.registries.resources.Resources.add_contract"></a>
 #### add`_`contract
 
 ```python
@@ -153,7 +153,7 @@ Add a contract to the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.get_contract"></a>
+<a name="aea.registries.resources.Resources.get_contract"></a>
 #### get`_`contract
 
 ```python
@@ -170,7 +170,7 @@ Get contract for given contract id.
 
 a matching contract, if present, else None
 
-<a name=".aea.registries.resources.Resources.get_all_contracts"></a>
+<a name="aea.registries.resources.Resources.get_all_contracts"></a>
 #### get`_`all`_`contracts
 
 ```python
@@ -183,7 +183,7 @@ Get the list of all the contracts.
 
 the list of contracts.
 
-<a name=".aea.registries.resources.Resources.remove_contract"></a>
+<a name="aea.registries.resources.Resources.remove_contract"></a>
 #### remove`_`contract
 
 ```python
@@ -200,7 +200,7 @@ Remove a contract from the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.add_connection"></a>
+<a name="aea.registries.resources.Resources.add_connection"></a>
 #### add`_`connection
 
 ```python
@@ -217,7 +217,7 @@ Add a connection to the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.get_connection"></a>
+<a name="aea.registries.resources.Resources.get_connection"></a>
 #### get`_`connection
 
 ```python
@@ -234,7 +234,7 @@ Get connection for given connection id.
 
 a matching connection, if present, else None
 
-<a name=".aea.registries.resources.Resources.get_all_connections"></a>
+<a name="aea.registries.resources.Resources.get_all_connections"></a>
 #### get`_`all`_`connections
 
 ```python
@@ -247,7 +247,7 @@ Get the list of all the connections.
 
 the list of connections.
 
-<a name=".aea.registries.resources.Resources.remove_connection"></a>
+<a name="aea.registries.resources.Resources.remove_connection"></a>
 #### remove`_`connection
 
 ```python
@@ -264,7 +264,7 @@ Remove a connection from the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.add_skill"></a>
+<a name="aea.registries.resources.Resources.add_skill"></a>
 #### add`_`skill
 
 ```python
@@ -281,7 +281,7 @@ Add a skill to the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.inject_contracts"></a>
+<a name="aea.registries.resources.Resources.inject_contracts"></a>
 #### inject`_`contracts
 
 ```python
@@ -298,7 +298,7 @@ Inject contracts into a skill context.
 
 None
 
-<a name=".aea.registries.resources.Resources.get_skill"></a>
+<a name="aea.registries.resources.Resources.get_skill"></a>
 #### get`_`skill
 
 ```python
@@ -315,7 +315,7 @@ Get the skill for a given skill id.
 
 a matching skill, if present, else None
 
-<a name=".aea.registries.resources.Resources.get_all_skills"></a>
+<a name="aea.registries.resources.Resources.get_all_skills"></a>
 #### get`_`all`_`skills
 
 ```python
@@ -328,7 +328,7 @@ Get the list of all the skills.
 
 the list of skills.
 
-<a name=".aea.registries.resources.Resources.remove_skill"></a>
+<a name="aea.registries.resources.Resources.remove_skill"></a>
 #### remove`_`skill
 
 ```python
@@ -345,7 +345,7 @@ Remove a skill from the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.get_handler"></a>
+<a name="aea.registries.resources.Resources.get_handler"></a>
 #### get`_`handler
 
 ```python
@@ -363,7 +363,7 @@ Get a specific handler.
 
 the handler
 
-<a name=".aea.registries.resources.Resources.get_handlers"></a>
+<a name="aea.registries.resources.Resources.get_handlers"></a>
 #### get`_`handlers
 
 ```python
@@ -380,7 +380,7 @@ Get all handlers for a given protocol.
 
 the list of handlers matching the protocol
 
-<a name=".aea.registries.resources.Resources.get_all_handlers"></a>
+<a name="aea.registries.resources.Resources.get_all_handlers"></a>
 #### get`_`all`_`handlers
 
 ```python
@@ -393,7 +393,7 @@ Get all handlers from all skills.
 
 the list of handlers
 
-<a name=".aea.registries.resources.Resources.get_behaviour"></a>
+<a name="aea.registries.resources.Resources.get_behaviour"></a>
 #### get`_`behaviour
 
 ```python
@@ -411,7 +411,7 @@ Get a specific behaviours for a given skill.
 
 the behaviour, if it is present, else None
 
-<a name=".aea.registries.resources.Resources.get_behaviours"></a>
+<a name="aea.registries.resources.Resources.get_behaviours"></a>
 #### get`_`behaviours
 
 ```python
@@ -428,7 +428,7 @@ Get all behaviours for a given skill.
 
 the list of behaviours of the skill
 
-<a name=".aea.registries.resources.Resources.get_all_behaviours"></a>
+<a name="aea.registries.resources.Resources.get_all_behaviours"></a>
 #### get`_`all`_`behaviours
 
 ```python
@@ -441,7 +441,7 @@ Get all behaviours from all skills.
 
 the list of all behaviours
 
-<a name=".aea.registries.resources.Resources.setup"></a>
+<a name="aea.registries.resources.Resources.setup"></a>
 #### setup
 
 ```python
@@ -456,7 +456,7 @@ Calls setup on all resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.teardown"></a>
+<a name="aea.registries.resources.Resources.teardown"></a>
 #### teardown
 
 ```python

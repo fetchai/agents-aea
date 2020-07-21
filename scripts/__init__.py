@@ -17,21 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the dataModel for the weather agent."""
-
-from aea.helpers.search.models import Attribute, DataModel
-
-SCHEME = {"country": "UK", "city": "Cambridge"}
-
-
-class WEATHER_STATION_DATAMODEL(DataModel):
-    """Data model for the weather Agent."""
-
-    def __init__(self):
-        """Initialise the dataModel."""
-        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
-        self.ATTRIBUTE_CITY = Attribute("city", str, True)
-
-        super().__init__(
-            "weather_station_datamodel", [self.ATTRIBUTE_COUNTRY, self.ATTRIBUTE_CITY]
-        )
+"""Scripts for the AEA framework development and deployment."""

@@ -1,9 +1,9 @@
-<a name=".aea.runtime"></a>
+<a name="aea.runtime"></a>
 # aea.runtime
 
 This module contains the implementation of runtime for economic agent (AEA).
 
-<a name=".aea.runtime.RuntimeStates"></a>
+<a name="aea.runtime.RuntimeStates"></a>
 ## RuntimeStates Objects
 
 ```python
@@ -12,7 +12,7 @@ class RuntimeStates(Enum)
 
 Runtime states.
 
-<a name=".aea.runtime.BaseRuntime"></a>
+<a name="aea.runtime.BaseRuntime"></a>
 ## BaseRuntime Objects
 
 ```python
@@ -21,7 +21,7 @@ class BaseRuntime(ABC)
 
 Abstract runtime class to create implementations.
 
-<a name=".aea.runtime.BaseRuntime.__init__"></a>
+<a name="aea.runtime.BaseRuntime.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -39,7 +39,7 @@ Init runtime.
 
 None
 
-<a name=".aea.runtime.BaseRuntime.start"></a>
+<a name="aea.runtime.BaseRuntime.start"></a>
 #### start
 
 ```python
@@ -48,7 +48,7 @@ None
 
 Start agent using runtime.
 
-<a name=".aea.runtime.BaseRuntime.stop"></a>
+<a name="aea.runtime.BaseRuntime.stop"></a>
 #### stop
 
 ```python
@@ -57,7 +57,7 @@ Start agent using runtime.
 
 Stop agent and runtime.
 
-<a name=".aea.runtime.BaseRuntime.is_running"></a>
+<a name="aea.runtime.BaseRuntime.is_running"></a>
 #### is`_`running
 
 ```python
@@ -67,7 +67,7 @@ Stop agent and runtime.
 
 Get running state of the runtime.
 
-<a name=".aea.runtime.BaseRuntime.is_stopped"></a>
+<a name="aea.runtime.BaseRuntime.is_stopped"></a>
 #### is`_`stopped
 
 ```python
@@ -77,7 +77,7 @@ Get running state of the runtime.
 
 Get stopped state of the runtime.
 
-<a name=".aea.runtime.BaseRuntime.set_loop"></a>
+<a name="aea.runtime.BaseRuntime.set_loop"></a>
 #### set`_`loop
 
 ```python
@@ -90,7 +90,7 @@ Set event loop to be used.
 
 - `loop`: event loop to use.
 
-<a name=".aea.runtime.AsyncRuntime"></a>
+<a name="aea.runtime.AsyncRuntime"></a>
 ## AsyncRuntime Objects
 
 ```python
@@ -99,7 +99,7 @@ class AsyncRuntime(BaseRuntime)
 
 Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loop.
 
-<a name=".aea.runtime.AsyncRuntime.__init__"></a>
+<a name="aea.runtime.AsyncRuntime.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -117,7 +117,7 @@ Init runtime.
 
 None
 
-<a name=".aea.runtime.AsyncRuntime.set_loop"></a>
+<a name="aea.runtime.AsyncRuntime.set_loop"></a>
 #### set`_`loop
 
 ```python
@@ -130,7 +130,7 @@ Set event loop to be used.
 
 - `loop`: event loop to use.
 
-<a name=".aea.runtime.AsyncRuntime.run_runtime"></a>
+<a name="aea.runtime.AsyncRuntime.run_runtime"></a>
 #### run`_`runtime
 
 ```python
@@ -139,7 +139,7 @@ Set event loop to be used.
 
 Run agent and starts multiplexer.
 
-<a name=".aea.runtime.ThreadedRuntime"></a>
+<a name="aea.runtime.ThreadedRuntime"></a>
 ## ThreadedRuntime Objects
 
 ```python

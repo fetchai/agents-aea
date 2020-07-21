@@ -109,7 +109,7 @@ class AsyncMultiplexer(WithLogger):
         :param is_default: whether the connection added should be the default one.
         :return: None
         """
-        if connection.connection_id in self._id_to_connection:
+        if connection.connection_id in self._id_to_connection:  # pragma: nocover
             self.logger.warning(
                 f"A connection with id {connection.connection_id} was already added. Replacing it..."
             )
@@ -327,7 +327,7 @@ class AsyncMultiplexer(WithLogger):
             try:
                 self.logger.debug("Waiting for outgoing envelopes...")
                 envelope = await self.out_queue.get()
-                if envelope is None:
+                if envelope is None:  # pragma: nocover
                     self.logger.debug(
                         "Received empty envelope. Quitting the sending loop..."
                     )
@@ -339,7 +339,7 @@ class AsyncMultiplexer(WithLogger):
                 return
             except AEAConnectionError as e:
                 self.logger.error(str(e))
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.error("Error in the sending loop: {}".format(str(e)))
                 return
 
@@ -455,7 +455,7 @@ class AsyncMultiplexer(WithLogger):
         """
         try:
             return await self.in_queue.async_get()
-        except queue.Empty:
+        except queue.Empty:  # pragma: nocover
             raise Empty
 
     async def async_wait(self) -> None:
@@ -618,8 +618,10 @@ class InBox:
         """
         self._multiplexer.logger.debug("Checks for envelope from the in queue...")
         envelope = self._multiplexer.get(block=block, timeout=timeout)
-        if envelope is None:
+
+        if envelope is None:  # pragma: nocover
             raise Empty()
+
         self._multiplexer.logger.debug(
             "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
                 envelope.to, envelope.sender, envelope.protocol_id, envelope.message
@@ -634,10 +636,9 @@ class InBox:
         :return: the envelope object
         """
         try:
-            envelope = self.get()
-        except Empty:
+            return self.get()
+        except Empty:  # pragma: nocover
             return None
-        return envelope
 
     async def async_get(self) -> Envelope:
         """
@@ -649,8 +650,10 @@ class InBox:
             "Checks for envelope from the in queue async way..."
         )
         envelope = await self._multiplexer.async_get()
-        if envelope is None:
+
+        if envelope is None:  # pragma: nocover
             raise Empty()
+
         self._multiplexer.logger.debug(
             "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
                 envelope.to, envelope.sender, envelope.protocol_id, envelope.message
@@ -690,7 +693,7 @@ class OutBox:
 
         :return: boolean indicating whether there is an envelope or not
         """
-        return self._multiplexer.out_queue.empty()
+        return self._multiplexer.out_queue.empty()  # pragma: nocover
 
     def put(self, envelope: Envelope) -> None:
         """

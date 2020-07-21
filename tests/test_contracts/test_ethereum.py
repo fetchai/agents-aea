@@ -36,7 +36,7 @@ from aea.contracts import contract_registry
 from aea.contracts.base import Contract
 from aea.crypto.registries import ledger_apis_registry
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import ETHEREUM, ROOT_DIR
 
 
 @pytest.fixture()
@@ -71,7 +71,7 @@ def dummy_contract(request):
 def test_get_instance_no_address(dummy_contract):
     """Tests the from config method and contract registry registration."""
     ledger_api = ledger_apis_registry.make(
-        "ethereum",
+        ETHEREUM,
         address="https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
     )
     instance = dummy_contract.get_instance(ledger_api)

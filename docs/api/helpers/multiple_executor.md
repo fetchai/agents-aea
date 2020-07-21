@@ -1,9 +1,9 @@
-<a name=".aea.helpers.multiple_executor"></a>
+<a name="aea.helpers.multiple_executor"></a>
 # aea.helpers.multiple`_`executor
 
 This module contains the helpers to run multiple stoppable tasks in different modes: async, threaded, multiprocess .
 
-<a name=".aea.helpers.multiple_executor.ExecutorExceptionPolicies"></a>
+<a name="aea.helpers.multiple_executor.ExecutorExceptionPolicies"></a>
 ## ExecutorExceptionPolicies Objects
 
 ```python
@@ -12,7 +12,7 @@ class ExecutorExceptionPolicies(Enum)
 
 Runner exception policy modes.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask"></a>
 ## AbstractExecutorTask Objects
 
 ```python
@@ -21,7 +21,7 @@ class AbstractExecutorTask(ABC)
 
 Abstract task class to create Task classes.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask.__init__"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -30,7 +30,17 @@ Abstract task class to create Task classes.
 
 Init task.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask.future"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.future"></a>
+#### future
+
+```python
+ | @property
+ | future() -> Optional[TaskAwaitable]
+```
+
+Return awaitable to get result of task execution.
+
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.future"></a>
 #### future
 
 ```python
@@ -40,7 +50,7 @@ Init task.
 
 Set awaitable to get result of task execution.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask.start"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.start"></a>
 #### start
 
 ```python
@@ -50,7 +60,7 @@ Set awaitable to get result of task execution.
 
 Implement start task function here.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask.stop"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.stop"></a>
 #### stop
 
 ```python
@@ -60,7 +70,7 @@ Implement start task function here.
 
 Implement stop task function here.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask.create_async_task"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.create_async_task"></a>
 #### create`_`async`_`task
 
 ```python
@@ -78,7 +88,7 @@ Create asyncio task for task run in asyncio loop.
 
 task to run in asyncio loop.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask.id"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.id"></a>
 #### id
 
 ```python
@@ -88,7 +98,7 @@ task to run in asyncio loop.
 
 Return task id.
 
-<a name=".aea.helpers.multiple_executor.AbstractExecutorTask.failed"></a>
+<a name="aea.helpers.multiple_executor.AbstractExecutorTask.failed"></a>
 #### failed
 
 ```python
@@ -102,7 +112,7 @@ If it's running it's not failed.
 
 :rerurn: bool
 
-<a name=".aea.helpers.multiple_executor.AbstractMultiprocessExecutorTask"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultiprocessExecutorTask"></a>
 ## AbstractMultiprocessExecutorTask Objects
 
 ```python
@@ -111,7 +121,7 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask)
 
 Task for multiprocess executor.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultiprocessExecutorTask.start"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultiprocessExecutorTask.start"></a>
 #### start
 
 ```python
@@ -121,7 +131,7 @@ Task for multiprocess executor.
 
 Return function and arguments to call within subprocess.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultiprocessExecutorTask.create_async_task"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultiprocessExecutorTask.create_async_task"></a>
 #### create`_`async`_`task
 
 ```python
@@ -140,7 +150,7 @@ Raise error, cause async mode is not supported, cause this task for multiprocess
 
 task to run in asyncio loop.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor"></a>
 ## AbstractMultipleExecutor Objects
 
 ```python
@@ -149,7 +159,7 @@ class AbstractMultipleExecutor(ABC)
 
 Abstract class to create multiple executors classes.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor.__init__"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -163,7 +173,7 @@ Init executor.
 - `tasks`: sequence of AbstractExecutorTask instances to run.
 - `task_fail_policy`: the exception policy of all the tasks
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor.is_running"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor.is_running"></a>
 #### is`_`running
 
 ```python
@@ -173,7 +183,7 @@ Init executor.
 
 Return running state of the executor.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor.start"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor.start"></a>
 #### start
 
 ```python
@@ -182,7 +192,7 @@ Return running state of the executor.
 
 Start tasks.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor.stop"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor.stop"></a>
 #### stop
 
 ```python
@@ -191,7 +201,7 @@ Start tasks.
 
 Stop tasks.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor.num_failed"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor.num_failed"></a>
 #### num`_`failed
 
 ```python
@@ -201,7 +211,7 @@ Stop tasks.
 
 Return number of failed tasks.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor.failed_tasks"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor.failed_tasks"></a>
 #### failed`_`tasks
 
 ```python
@@ -211,7 +221,7 @@ Return number of failed tasks.
 
 Return sequence failed tasks.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleExecutor.not_failed_tasks"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleExecutor.not_failed_tasks"></a>
 #### not`_`failed`_`tasks
 
 ```python
@@ -221,7 +231,7 @@ Return sequence failed tasks.
 
 Return sequence successful tasks.
 
-<a name=".aea.helpers.multiple_executor.ThreadExecutor"></a>
+<a name="aea.helpers.multiple_executor.ThreadExecutor"></a>
 ## ThreadExecutor Objects
 
 ```python
@@ -230,7 +240,7 @@ class ThreadExecutor(AbstractMultipleExecutor)
 
 Thread based executor to run multiple agents in threads.
 
-<a name=".aea.helpers.multiple_executor.ProcessExecutor"></a>
+<a name="aea.helpers.multiple_executor.ProcessExecutor"></a>
 ## ProcessExecutor Objects
 
 ```python
@@ -239,7 +249,7 @@ class ProcessExecutor(ThreadExecutor)
 
 Subprocess based executor to run multiple agents in threads.
 
-<a name=".aea.helpers.multiple_executor.AsyncExecutor"></a>
+<a name="aea.helpers.multiple_executor.AsyncExecutor"></a>
 ## AsyncExecutor Objects
 
 ```python
@@ -248,7 +258,7 @@ class AsyncExecutor(AbstractMultipleExecutor)
 
 Thread based executor to run multiple agents in threads.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner"></a>
 ## AbstractMultipleRunner Objects
 
 ```python
@@ -257,7 +267,7 @@ class AbstractMultipleRunner()
 
 Abstract multiple runner to create classes to launch tasks with selected mode.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.__init__"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -271,7 +281,7 @@ Init with selected executor mode.
 - `mode`: one of supported executor modes
 - `fail_policy`: one of ExecutorExceptionPolicies to be used with Executor
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.is_running"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.is_running"></a>
 #### is`_`running
 
 ```python
@@ -281,7 +291,7 @@ Init with selected executor mode.
 
 Return state of the executor.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.start"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.start"></a>
 #### start
 
 ```python
@@ -298,7 +308,7 @@ Run agents.
 
 None
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.stop"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.stop"></a>
 #### stop
 
 ```python
@@ -315,7 +325,7 @@ Stop agents.
 
 None
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.num_failed"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.num_failed"></a>
 #### num`_`failed
 
 ```python
@@ -325,7 +335,7 @@ None
 
 Return number of failed tasks.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.failed"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.failed"></a>
 #### failed
 
 ```python
@@ -335,7 +345,7 @@ Return number of failed tasks.
 
 Return sequence failed tasks.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.not_failed"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.not_failed"></a>
 #### not`_`failed
 
 ```python
@@ -345,7 +355,7 @@ Return sequence failed tasks.
 
 Return sequence successful tasks.
 
-<a name=".aea.helpers.multiple_executor.AbstractMultipleRunner.join_thread"></a>
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.join_thread"></a>
 #### join`_`thread
 
 ```python

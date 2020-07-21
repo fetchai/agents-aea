@@ -18,7 +18,7 @@ author: fetchai
 version: 0.1.0
 description: ''
 license: Apache-2.0
-aea_version: 0.5.1
+aea_version: 0.5.2
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -29,8 +29,7 @@ protocols:
 skills:
 - fetchai/error:0.3.0
 default_connection: fetchai/stub:0.6.0
-default_ledger: fetchai
-ledger_apis: {}
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

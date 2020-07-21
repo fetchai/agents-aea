@@ -42,13 +42,12 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.helpers.base import cd, sigint_crossplatform
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
@@ -63,8 +62,6 @@ from aea.test_tools.generic import (
 from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)
-
-FETCHAI_NAME = FetchAICrypto.identifier
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
@@ -463,7 +460,7 @@ class BaseAEATestCase(ABC):
         cls.run_cli_command("install", cwd=cls._get_cwd())
 
     @classmethod
-    def generate_private_key(cls, ledger_api_id: str = FETCHAI_NAME) -> None:
+    def generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None:
         """
         Generate AEA private key with CLI command.
         Run from agent's directory.
@@ -477,8 +474,9 @@ class BaseAEATestCase(ABC):
     @classmethod
     def add_private_key(
         cls,
-        ledger_api_id: str = FETCHAI_NAME,
-        private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE,
+        ledger_api_id: str = DEFAULT_LEDGER,
+        private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE,
+        connection: bool = False,
     ) -> None:
         """
         Add private key with CLI command.
@@ -486,16 +484,26 @@ class BaseAEATestCase(ABC):
 
         :param ledger_api_id: ledger API ID.
         :param private_key_filepath: private key filepath.
+        :param connection: whether or not the private key filepath is for a connection.
 
         :return: None
         """
-        cls.run_cli_command(
-            "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
-        )
+        if connection:
+            cls.run_cli_command(
+                "add-key",
+                ledger_api_id,
+                private_key_filepath,
+                "--connection",
+                cwd=cls._get_cwd(),
+            )
+        else:
+            cls.run_cli_command(
+                "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
+            )
 
     @classmethod
     def replace_private_key_in_file(
-        cls, private_key: str, private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE
+        cls, private_key: str, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE
     ) -> None:
         """
         Replace the private key in the provided file with the provided key.
@@ -511,7 +519,7 @@ class BaseAEATestCase(ABC):
                 f.write(private_key)
 
     @classmethod
-    def generate_wealth(cls, ledger_api_id: str = FETCHAI_NAME) -> None:
+    def generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None:
         """
         Generate wealth with CLI command.
         Run from agent's directory.
@@ -525,7 +533,7 @@ class BaseAEATestCase(ABC):
         )
 
     @classmethod
-    def get_wealth(cls, ledger_api_id: str = FETCHAI_NAME) -> str:
+    def get_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> str:
         """
         Get wealth with CLI command.
         Run from agent's directory.
@@ -711,6 +719,7 @@ class BaseAEATestCase(ABC):
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
+        cls.terminate_agents(*cls.subprocesses)
         cls._terminate_subprocesses()
         cls._join_threads()
         cls.unset_agent_context()

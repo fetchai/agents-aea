@@ -29,8 +29,6 @@ from typing import Dict
 from unittest import TestCase
 from unittest.mock import patch
 
-from click.testing import CliRunner
-
 import jsonschema
 from jsonschema import Draft4Validator
 
@@ -53,6 +51,7 @@ from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
+    CliRunner,
     ROOT_DIR,
     skip_test_windows,
 )

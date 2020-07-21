@@ -56,6 +56,7 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
+DEFAULT_README_FILE = "README.md"
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
 
@@ -362,6 +363,11 @@ class PublicId(JSONSerializable):
     def version_info(self) -> PackageVersion:
         """Get the package version."""
         return self._version_info
+
+    @property
+    def latest(self) -> str:
+        """Get the public id in `latest` form."""
+        return "{author}/{name}:*".format(author=self.author, name=self.name)
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
@@ -1272,7 +1278,6 @@ class AgentConfig(PackageConfiguration):
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
         self.connection_private_key_paths = CRUDCollection[str]()
-        self.ledger_apis = CRUDCollection[Dict]()
 
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_ledger = None  # type: Optional[str]
@@ -1333,14 +1338,6 @@ class AgentConfig(PackageConfiguration):
         """Get dictionary version of private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
             key: path for key, path in self.private_key_paths.read_all()
-        }
-
-    @property
-    def ledger_apis_dict(self) -> Dict[str, Dict[str, Union[str, int]]]:
-        """Get dictionary version of ledger apis."""
-        return {
-            cast(str, key): cast(Dict[str, Union[str, int]], config)
-            for key, config in self.ledger_apis.read_all()
         }
 
     @property
@@ -1406,7 +1403,6 @@ class AgentConfig(PackageConfiguration):
                 "skills": sorted(map(str, self.skills)),
                 "default_connection": self.default_connection,
                 "default_ledger": self.default_ledger,
-                "ledger_apis": self.ledger_apis_dict,
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
@@ -1468,9 +1464,6 @@ class AgentConfig(PackageConfiguration):
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)
-
-        for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():
-            agent_config.ledger_apis.create(ledger_id, ledger_data)
 
         for crypto_id, path in obj.get("connection_private_key_paths", {}).items():
             agent_config.connection_private_key_paths.create(crypto_id, path)

@@ -23,10 +23,7 @@ from unittest.mock import Mock
 
 from click import ClickException
 
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
-
-from tests.conftest import AUTHOR
+from tests.conftest import AUTHOR, COSMOS, ETHEREUM
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
 
@@ -51,6 +48,11 @@ class AgentConfigMock:
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
         self.private_key_paths.read_all = Mock(return_value=private_key_paths)
+        connection_private_key_paths = kwargs.get("connection_private_key_paths", [])
+        self.connection_private_key_paths = Mock()
+        self.connection_private_key_paths.read_all = Mock(
+            return_value=connection_private_key_paths
+        )
         self.get = lambda x: getattr(self, x, None)
 
     registry_path = "registry"
@@ -103,8 +105,8 @@ class AEAConfMock:
         self.version = DEFAULT_TESTING_VERSION
         self.ledger_apis = Mock()
         ledger_apis = (
-            (EthereumCrypto.identifier, "value"),
-            (FetchAICrypto.identifier, "value"),
+            (COSMOS, "value"),
+            (ETHEREUM, "value"),
         )
         self.ledger_apis.read_all = Mock(return_value=ledger_apis)
         ledger_api_config = {"host": "host", "port": "port", "address": "address"}

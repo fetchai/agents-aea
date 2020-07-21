@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.4.0
+aea fetch fetchai/generic_seller:0.5.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.7.0
+aea eject skill fetchai/generic_seller:0.8.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.4.0
+aea fetch fetchai/generic_buyer:0.5.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.6.0
+aea eject skill fetchai/generic_buyer:0.7.0
 cd ..
 ```
 
@@ -83,9 +83,8 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and add the following code:
 
 ``` python
-from typing import Optional, cast
+from typing import cast
 
-from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -97,7 +96,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
-DEFAULT_SERVICES_INTERVAL = 30.0
+DEFAULT_SERVICES_INTERVAL = 60.0
 LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
 
 
@@ -110,7 +109,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
-        self._registered_service_description = None  # type: Optional[Description]
 
     def setup(self) -> None:
         """
@@ -132,6 +130,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             ledger_api_msg.counterparty = LEDGER_API_ADDRESS
             ledger_api_dialogues.update(ledger_api_msg)
             self.context.outbox.put_message(message=ledger_api_msg)
+        self._register_agent()
         self._register_service()
 
     def act(self) -> None:
@@ -140,8 +139,8 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        self._unregister_service()
-        self._register_service()
+        # self._unregister_service()
+        # self._register_service()
 
     def teardown(self) -> None:
         """
@@ -150,16 +149,16 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         self._unregister_service()
+        self._unregister_agent()
 
-    def _register_service(self) -> None:
+    def _register_agent(self) -> None:
         """
-        Register to the OEF Service Directory.
+        Register the agent's location.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_service_description()
-        self._registered_service_description = description
+        description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
@@ -171,37 +170,70 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(
-            "[{}]: updating services on OEF service directory.".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("registering agent on SOEF.")
 
-    def _unregister_service(self) -> None:
+    def _register_service(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Register the agent's service.
 
         :return: None
         """
-        if self._registered_service_description is None:
-            return
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_service_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering service on SOEF.")
+
+    def _unregister_service(self) -> None:
+        """
+        Unregister service from the SOEF.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            service_description=self._registered_service_description,
+            service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(
-            "[{}]: unregistering services from OEF service directory.".format(
-                self.context.agent_name
-            )
+        self.context.logger.info("unregistering service from SOEF.")
+
+    def _unregister_agent(self) -> None:
+        """
+        Unregister agent from the SOEF.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
-        self._registered_service_description = None
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("unregistering agent from SOEF.")
 ```
 
 This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the [OEF search node](../oef-ledger) at regular tick intervals (here 30 seconds). By registering, the AEA becomes discoverable to possible clients.
@@ -346,9 +378,7 @@ Below the unused `teardown` function, we continue by adding the following code:
         :param fipa_msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid fipa message={}, unidentified dialogue.".format(
-                self.context.agent_name, fipa_msg
-            )
+            "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg = DefaultMessage(
@@ -379,9 +409,7 @@ The next code block handles the CFP message, paste the code below the `_handle_u
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received CFP from sender={}".format(
-                self.context.agent_name, fipa_msg.counterparty[-5:]
-            )
+            "received CFP from sender={}".format(fipa_msg.counterparty[-5:])
         )
         strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_matching_supply(fipa_msg.query):
@@ -391,8 +419,8 @@ The next code block handles the CFP message, paste the code below the `_handle_u
             fipa_dialogue.data_for_sale = data_for_sale
             fipa_dialogue.terms = terms
             self.context.logger.info(
-                "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
-                    self.context.agent_name, proposal.values, fipa_msg.counterparty[-5:]
+                "sending a PROPOSE with proposal={} to sender={}".format(
+                    proposal.values, fipa_msg.counterparty[-5:]
                 )
             )
             proposal_msg = FipaMessage(
@@ -407,9 +435,7 @@ The next code block handles the CFP message, paste the code below the `_handle_u
             self.context.outbox.put_message(message=proposal_msg)
         else:
             self.context.logger.info(
-                "[{}]: declined the CFP from sender={}".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:]
-                )
+                "declined the CFP from sender={}".format(fipa_msg.counterparty[-5:])
             )
             decline_msg = FipaMessage(
                 message_id=fipa_msg.message_id + 1,
@@ -443,9 +469,7 @@ The next code-block  handles the decline message we receive from the buyer. Add 
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received DECLINE from sender={}".format(
-                self.context.agent_name, fipa_msg.counterparty[-5:]
-            )
+            "received DECLINE from sender={}".format(fipa_msg.counterparty[-5:])
         )
         fipa_dialogues.dialogue_stats.add_dialogue_endstate(
             FipaDialogue.EndState.DECLINED_PROPOSE, fipa_dialogue.is_self_initiated
@@ -469,9 +493,7 @@ Alternatively, we might receive an `Accept` message. In order to handle this opt
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received ACCEPT from sender={}".format(
-                self.context.agent_name, fipa_msg.counterparty[-5:]
-            )
+            "received ACCEPT from sender={}".format(fipa_msg.counterparty[-5:])
         )
         match_accept_msg = FipaMessage(
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
@@ -481,10 +503,8 @@ Alternatively, we might receive an `Accept` message. In order to handle this opt
             info={"address": fipa_dialogue.terms.sender_address},
         )
         self.context.logger.info(
-            "[{}]: sending MATCH_ACCEPT_W_INFORM to sender={} with info={}".format(
-                self.context.agent_name,
-                fipa_msg.counterparty[-5:],
-                match_accept_msg.info,
+            "sending MATCH_ACCEPT_W_INFORM to sender={} with info={}".format(
+                fipa_msg.counterparty[-5:], match_accept_msg.info,
             )
         )
         match_accept_msg.counterparty = fipa_msg.counterparty
@@ -512,16 +532,14 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
         new_message_id = fipa_msg.message_id + 1
         new_target = fipa_msg.message_id
         self.context.logger.info(
-            "[{}]: received INFORM from sender={}".format(
-                self.context.agent_name, fipa_msg.counterparty[-5:]
-            )
+            "received INFORM from sender={}".format(fipa_msg.counterparty[-5:])
         )
 
         strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_ledger_tx and "transaction_digest" in fipa_msg.info.keys():
             self.context.logger.info(
-                "[{}]: checking whether transaction={} has been received ...".format(
-                    self.context.agent_name, fipa_msg.info["transaction_digest"]
+                "checking whether transaction={} has been received ...".format(
+                    fipa_msg.info["transaction_digest"]
                 )
             )
             ledger_api_dialogues = cast(
@@ -545,8 +563,8 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
             self.context.outbox.put_message(message=ledger_api_msg)
         elif strategy.is_ledger_tx:
             self.context.logger.warning(
-                "[{}]: did not receive transaction digest from sender={}.".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:]
+                "did not receive transaction digest from sender={}.".format(
+                    fipa_msg.counterparty[-5:]
                 )
             )
         elif not strategy.is_ledger_tx and "Done" in fipa_msg.info.keys():
@@ -565,16 +583,14 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
             self.context.logger.info(
-                "[{}]: transaction confirmed, sending data={} to buyer={}.".format(
-                    self.context.agent_name,
-                    fipa_dialogue.data_for_sale,
-                    fipa_msg.counterparty[-5:],
+                "transaction confirmed, sending data={} to buyer={}.".format(
+                    fipa_dialogue.data_for_sale, fipa_msg.counterparty[-5:],
                 )
             )
         else:
             self.context.logger.warning(
-                "[{}]: did not receive transaction confirmation from sender={}.".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:]
+                "did not receive transaction confirmation from sender={}.".format(
+                    fipa_msg.counterparty[-5:]
                 )
             )
 ```
@@ -593,8 +609,8 @@ The remaining handlers are as follows:
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle fipa message of performative={} in dialogue={}.".format(
-                self.context.agent_name, fipa_msg.performative, fipa_dialogue
+            "cannot handle fipa message of performative={} in dialogue={}.".format(
+                fipa_msg.performative, fipa_dialogue
             )
         )
 
@@ -656,8 +672,8 @@ class GenericLedgerApiHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
-                self.context.agent_name, ledger_api_msg
+            "received invalid ledger_api message={}, unidentified dialogue.".format(
+                ledger_api_msg
             )
         )
 
@@ -671,10 +687,8 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "[{}]: starting balance on {} ledger={}.".format(
-                self.context.agent_name,
-                ledger_api_msg.ledger_id,
-                ledger_api_msg.balance,
+            "starting balance on {} ledger={}.".format(
+                ledger_api_msg.ledger_id, ledger_api_msg.balance,
             )
         )
 
@@ -719,16 +733,14 @@ class GenericLedgerApiHandler(Handler):
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
             self.context.logger.info(
-                "[{}]: transaction confirmed, sending data={} to buyer={}.".format(
-                    self.context.agent_name,
-                    fipa_dialogue.data_for_sale,
-                    last_message.counterparty[-5:],
+                "transaction confirmed, sending data={} to buyer={}.".format(
+                    fipa_dialogue.data_for_sale, last_message.counterparty[-5:],
                 )
             )
         else:
             self.context.logger.info(
-                "[{}]: transaction_receipt={} not settled or not valid, aborting".format(
-                    self.context.agent_name, ledger_api_msg.transaction_receipt
+                "transaction_receipt={} not settled or not valid, aborting".format(
+                    ledger_api_msg.transaction_receipt
                 )
             )
 
@@ -742,8 +754,8 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "[{}]: received ledger_api error message={} in dialogue={}.".format(
-                self.context.agent_name, ledger_api_msg, ledger_api_dialogue
+            "received ledger_api error message={} in dialogue={}.".format(
+                ledger_api_msg, ledger_api_dialogue
             )
         )
 
@@ -757,10 +769,8 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
-            "[{}]: cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                ledger_api_msg.performative,
-                ledger_api_dialogue,
+            "cannot handle ledger_api message of performative={} in dialogue={}.".format(
+                ledger_api_msg.performative, ledger_api_dialogue,
             )
         )
 
@@ -815,8 +825,8 @@ class GenericOefSearchHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid oef_search message={}, unidentified dialogue.".format(
-                self.context.agent_name, oef_search_msg
+            "received invalid oef_search message={}, unidentified dialogue.".format(
+                oef_search_msg
             )
         )
 
@@ -831,8 +841,8 @@ class GenericOefSearchHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received oef_search error message={} in dialogue={}.".format(
-                self.context.agent_name, oef_search_msg, oef_search_dialogue
+            "received oef_search error message={} in dialogue={}.".format(
+                oef_search_msg, oef_search_dialogue
             )
         )
 
@@ -847,10 +857,8 @@ class GenericOefSearchHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle oef_search message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                oef_search_msg.performative,
-                oef_search_dialogue,
+            "cannot handle oef_search message of performative={} in dialogue={}.".format(
+                oef_search_msg.performative, oef_search_dialogue,
             )
         )
 ```
@@ -864,26 +872,28 @@ Next, we are going to create the strategy that we want our `my_generic_seller` A
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
-from aea.helpers.search.generic import GenericDataModel
-from aea.helpers.search.models import Description, Query
+from aea.helpers.search.generic import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
+    SIMPLE_SERVICE_MODEL,
+)
+from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_UNIT_PRICE = 4
 DEFAULT_SERVICE_ID = "generic_service"
 
-DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
-DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": True},
-    "attribute_two": {"name": "city", "type": "str", "is_required": True},
-}  # type: Optional[Dict[str, Any]]
-DEFAULT_DATA_MODEL_NAME = "location"
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
 
 DEFAULT_HAS_DATA_SOURCE = False
 DEFAULT_DATA_FOR_SALE = {
@@ -910,9 +920,20 @@ class GenericStrategy(Model):
         self._unit_price = kwargs.pop("unit_price", DEFAULT_UNIT_PRICE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = {
+            "location": Location(location["longitude"], location["latitude"])
+        }
+        self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        assert (
+            len(self._set_service_data) == 2
+            and "key" in self._set_service_data
+            and "value" in self._set_service_data
+        ), "service_data must contain keys `key` and `value`"
+        self._remove_service_data = {"key": self._set_service_data["key"]}
+        self._simple_service_data = {
+            self._set_service_data["key"]: self._set_service_data["value"]
+        }
 
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
         data_for_sale_ordered = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
@@ -949,15 +970,47 @@ the [OEF search node](../oef-ledger) registration and we assume that the query m
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
 
-    def get_service_description(self) -> Description:
+    def get_location_description(self) -> Description:
         """
-        Get the service description.
+        Get the location description.
+
+        :return: a description of the agent's location
+        """
+        description = Description(
+            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+        )
+        return description
+
+    def get_register_service_description(self) -> Description:
+        """
+        Get the register service description.
 
         :return: a description of the offered services
         """
         description = Description(
-            self._service_data,
-            data_model=GenericDataModel(self._data_model_name, self._data_model),
+            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_service_description(self) -> Description:
+        """
+        Get the simple service description.
+
+        :return: a description of the offered services
+        """
+        description = Description(
+            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
+        )
+        return description
+
+    def get_unregister_service_description(self) -> Description:
+        """
+        Get the unregister service description.
+
+        :return: a description of the to be removed service
+        """
+        description = Description(
+            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description
 
@@ -1294,17 +1347,17 @@ Since we made so many changes to our AEA we have to update the `skill.yaml` (at 
 ``` yaml
 name: generic_seller
 author: fetchai
-version: 0.6.0
+version: 0.8.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmTwUHrRrBvadNp4RBBEKcMBUvgv2MuGojz7gDsuYDrauE
-  dialogues.py: QmY44eSrEzaZxtAG1dqbddwouj5iVMEitzpmt2xFC6MDUm
-  handlers.py: QmSiquvAA4ULXPEJfmT3Z85Lqm9Td2H2uXXKuXrZjcZcPK
-  strategy.py: QmYt74ucz8GfddfwP5dFgQBbD1dkcWvydUyEZ8jn9uxEDK
+  behaviours.py: QmZuzEpqCZjW1rAYT1PZXoYRPjCXxKNQ2ZEkL32WQhxtwf
+  dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
+  handlers.py: QmfFY8HGULapXzCHHLuwWhgADXvBw8NJvfX155pY3qWS1h
+  strategy.py: QmRVkBtcCUKXf68RAqnHAi6UWqcygesppUNzSm9oceYNHH
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -1346,22 +1399,15 @@ models:
       currency_id: FET
       data_for_sale:
         generic: data
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
+        key: seller_service
+        value: generic_service
       service_id: generic_service
       unit_price: 10
     class_name: GenericStrategy
@@ -1464,7 +1510,7 @@ class GenericSearchBehaviour(TickerBehaviour):
         """
         strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_searching:
-            query = strategy.get_service_query()
+            query = strategy.get_location_and_service_query()
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )
@@ -1582,9 +1628,7 @@ You will see that we are following similar logic to the `generic_seller` when we
         :param fipa_msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid fipa message={}, unidentified dialogue.".format(
-                self.context.agent_name, fipa_msg
-            )
+            "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg = DefaultMessage(
@@ -1612,10 +1656,8 @@ The above code handles the unidentified dialogues. And responds with an error me
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received proposal={} from sender={}".format(
-                self.context.agent_name,
-                fipa_msg.proposal.values,
-                fipa_msg.counterparty[-5:],
+            "received proposal={} from sender={}".format(
+                fipa_msg.proposal.values, fipa_msg.counterparty[-5:],
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -1623,8 +1665,8 @@ The above code handles the unidentified dialogues. And responds with an error me
         affordable = strategy.is_affordable_proposal(fipa_msg.proposal)
         if acceptable and affordable:
             self.context.logger.info(
-                "[{}]: accepting the proposal from sender={}".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:]
+                "accepting the proposal from sender={}".format(
+                    fipa_msg.counterparty[-5:]
                 )
             )
             terms = strategy.terms_from_proposal(
@@ -1642,8 +1684,8 @@ The above code handles the unidentified dialogues. And responds with an error me
             self.context.outbox.put_message(message=accept_msg)
         else:
             self.context.logger.info(
-                "[{}]: declining the proposal from sender={}".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:]
+                "declining the proposal from sender={}".format(
+                    fipa_msg.counterparty[-5:]
                 )
             )
             decline_msg = FipaMessage(
@@ -1676,9 +1718,7 @@ The next code-block handles the `DECLINE` message that we may receive from the b
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received DECLINE from sender={}".format(
-                self.context.agent_name, fipa_msg.counterparty[-5:]
-            )
+            "received DECLINE from sender={}".format(fipa_msg.counterparty[-5:])
         )
         if fipa_msg.target == 1:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -1705,8 +1745,8 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received MATCH_ACCEPT_W_INFORM from sender={} with info={}".format(
-                self.context.agent_name, fipa_msg.counterparty[-5:], fipa_msg.info
+            "received MATCH_ACCEPT_W_INFORM from sender={} with info={}".format(
+                fipa_msg.counterparty[-5:], fipa_msg.info
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -1733,9 +1773,7 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
             fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
             self.context.logger.info(
-                "[{}]: requesting transfer transaction from ledger api...".format(
-                    self.context.agent_name
-                )
+                "requesting transfer transaction from ledger api..."
             )
         else:
             inform_msg = FipaMessage(
@@ -1749,8 +1787,8 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
             fipa_dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
-                "[{}]: informing counterparty={} of payment.".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:]
+                "informing counterparty={} of payment.".format(
+                    fipa_msg.counterparty[-5:]
                 )
             )
 ```
@@ -1774,25 +1812,19 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received INFORM from sender={}".format(
-                self.context.agent_name, fipa_msg.counterparty[-5:]
-            )
+            "received INFORM from sender={}".format(fipa_msg.counterparty[-5:])
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
             self.context.logger.info(
-                "[{}]: received the following data={}".format(
-                    self.context.agent_name, pprint.pformat(data)
-                )
+                "received the following data={}".format(pprint.pformat(data))
             )
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
         else:
             self.context.logger.info(
-                "[{}]: received no data from sender={}".format(
-                    self.context.agent_name, fipa_msg.counterparty[-5:]
-                )
+                "received no data from sender={}".format(fipa_msg.counterparty[-5:])
             )
 
     def _handle_invalid(
@@ -1806,8 +1838,8 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle fipa message of performative={} in dialogue={}.".format(
-                self.context.agent_name, fipa_msg.performative, fipa_dialogue
+            "cannot handle fipa message of performative={} in dialogue={}.".format(
+                fipa_msg.performative, fipa_dialogue
             )
         )
 ```
@@ -1870,8 +1902,8 @@ class GenericOefSearchHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid oef_search message={}, unidentified dialogue.".format(
-                self.context.agent_name, oef_search_msg
+            "received invalid oef_search message={}, unidentified dialogue.".format(
+                oef_search_msg
             )
         )
 
@@ -1886,8 +1918,8 @@ class GenericOefSearchHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received oef_search error message={} in dialogue={}.".format(
-                self.context.agent_name, oef_search_msg, oef_search_dialogue
+            "received oef_search error message={} in dialogue={}.".format(
+                oef_search_msg, oef_search_dialogue
             )
         )
 
@@ -1901,16 +1933,11 @@ class GenericOefSearchHandler(Handler):
         :return: None
         """
         if len(oef_search_msg.agents) == 0:
-            self.context.logger.info(
-                "[{}]: found no agents, continue searching.".format(
-                    self.context.agent_name
-                )
-            )
+            self.context.logger.info("found no agents, continue searching.")
             return
 
         self.context.logger.info(
-            "[{}]: found agents={}, stopping search.".format(
-                self.context.agent_name,
+            "found agents={}, stopping search.".format(
                 list(map(lambda x: x[-5:], oef_search_msg.agents)),
             )
         )
@@ -1930,9 +1957,7 @@ class GenericOefSearchHandler(Handler):
             fipa_dialogues.update(cfp_msg)
             self.context.outbox.put_message(message=cfp_msg)
             self.context.logger.info(
-                "[{}]: sending CFP to agent={}".format(
-                    self.context.agent_name, counterparty[-5:]
-                )
+                "sending CFP to agent={}".format(counterparty[-5:])
             )
 
     def _handle_invalid(
@@ -1946,10 +1971,8 @@ class GenericOefSearchHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle oef_search message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                oef_search_msg.performative,
-                oef_search_dialogue,
+            "cannot handle oef_search message of performative={} in dialogue={}.".format(
+                oef_search_msg.performative, oef_search_dialogue,
             )
         )
 ```
@@ -2008,8 +2031,8 @@ class GenericSigningHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid signing message={}, unidentified dialogue.".format(
-                self.context.agent_name, signing_msg
+            "received invalid signing message={}, unidentified dialogue.".format(
+                signing_msg
             )
         )
 
@@ -2023,9 +2046,7 @@ class GenericSigningHandler(Handler):
         :param signing_dialogue: the dialogue
         :return: None
         """
-        self.context.logger.info(
-            "[{}]: transaction signing was successful.".format(self.context.agent_name)
-        )
+        self.context.logger.info("transaction signing was successful.")
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
@@ -2042,9 +2063,7 @@ class GenericSigningHandler(Handler):
         ledger_api_msg.counterparty = LEDGER_API_ADDRESS
         ledger_api_dialogue.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
-        self.context.logger.info(
-            "[{}]: sending transaction to ledger.".format(self.context.agent_name)
-        )
+        self.context.logger.info("sending transaction to ledger.")
 
     def _handle_error(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -2057,8 +2076,8 @@ class GenericSigningHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: transaction signing was not successful. Error_code={} in dialogue={}".format(
-                self.context.agent_name, signing_msg.error_code, signing_dialogue
+            "transaction signing was not successful. Error_code={} in dialogue={}".format(
+                signing_msg.error_code, signing_dialogue
             )
         )
 
@@ -2073,8 +2092,8 @@ class GenericSigningHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle signing message of performative={} in dialogue={}.".format(
-                self.context.agent_name, signing_msg.performative, signing_dialogue
+            "cannot handle signing message of performative={} in dialogue={}.".format(
+                signing_msg.performative, signing_dialogue
             )
         )
 
@@ -2140,8 +2159,8 @@ class GenericLedgerApiHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid ledger_api message={}, unidentified dialogue.".format(
-                self.context.agent_name, ledger_api_msg
+            "received invalid ledger_api message={}, unidentified dialogue.".format(
+                ledger_api_msg
             )
         )
 
@@ -2157,17 +2176,15 @@ class GenericLedgerApiHandler(Handler):
         strategy = cast(GenericStrategy, self.context.strategy)
         if ledger_api_msg.balance > 0:
             self.context.logger.info(
-                "[{}]: starting balance on {} ledger={}.".format(
-                    self.context.agent_name, strategy.ledger_id, ledger_api_msg.balance,
+                "starting balance on {} ledger={}.".format(
+                    strategy.ledger_id, ledger_api_msg.balance,
                 )
             )
             strategy.balance = ledger_api_msg.balance
             strategy.is_searching = True
         else:
             self.context.logger.warning(
-                "[{}]: you have no starting balance on {} ledger!".format(
-                    self.context.agent_name, strategy.ledger_id
-                )
+                "you have no starting balance on {} ledger!".format(strategy.ledger_id)
             )
             self.context.is_active = False
 
@@ -2180,11 +2197,7 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        self.context.logger.info(
-            "[{}]: received raw transaction={}".format(
-                self.context.agent_name, ledger_api_msg
-            )
-        )
+        self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
@@ -2204,9 +2217,7 @@ class GenericLedgerApiHandler(Handler):
         )
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
-            "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
-                self.context.agent_name
-            )
+            "proposing the transaction to the decision maker. Waiting for confirmation ..."
         )
 
     def _handle_transaction_digest(
@@ -2220,8 +2231,8 @@ class GenericLedgerApiHandler(Handler):
         """
         fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
         self.context.logger.info(
-            "[{}]: transaction was successfully submitted. Transaction digest={}".format(
-                self.context.agent_name, ledger_api_msg.transaction_digest
+            "transaction was successfully submitted. Transaction digest={}".format(
+                ledger_api_msg.transaction_digest
             )
         )
         fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
@@ -2237,8 +2248,7 @@ class GenericLedgerApiHandler(Handler):
         fipa_dialogue.update(inform_msg)
         self.context.outbox.put_message(message=inform_msg)
         self.context.logger.info(
-            "[{}]: informing counterparty={} of transaction digest.".format(
-                self.context.agent_name,
+            "informing counterparty={} of transaction digest.".format(
                 fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
             )
         )
@@ -2253,8 +2263,8 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "[{}]: received ledger_api error message={} in dialogue={}.".format(
-                self.context.agent_name, ledger_api_msg, ledger_api_dialogue
+            "received ledger_api error message={} in dialogue={}.".format(
+                ledger_api_msg, ledger_api_dialogue
             )
         )
 
@@ -2268,10 +2278,8 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
-            "[{}]: cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                ledger_api_msg.performative,
-                ledger_api_dialogue,
+            "cannot handle ledger_api message of performative={} in dialogue={}.".format(
+                ledger_api_msg.performative, ledger_api_dialogue,
             )
         )
 ```
@@ -2286,15 +2294,20 @@ If the transaction was unsuccessful, the `DecisionMaker` will inform us that som
 We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_generic_buyer/skills/generic_buyer/`) to `strategy.py` and paste the following code: 
 
 ``` python
-from typing import Any, Dict, Optional
-
-from aea.helpers.search.generic import GenericDataModel
-from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
+from aea.helpers.search.models import (
+    Constraint,
+    ConstraintType,
+    Description,
+    Location,
+    Query,
+)
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
 DEFAULT_CURRENCY_ID = "FET"
@@ -2302,23 +2315,13 @@ DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
 
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SEARCH_QUERY = {
-    "constraint_one": {
-        "search_term": "country",
-        "search_value": "UK",
-        "constraint_type": "==",
-    },
-    "constraint_two": {
-        "search_term": "city",
-        "search_value": "Cambridge",
-        "constraint_type": "==",
-    },
+    "search_key": "seller_service",
+    "search_value": "generic_service",
+    "constraint_type": "==",
 }
-DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": True},
-    "attribute_two": {"name": "city", "type": "str", "is_required": True},
-}  # type: Optional[Dict[str, Any]]
-DEFAULT_DATA_MODEL_NAME = "location"
+DEFAULT_SEARCH_RADIUS = 5.0
 
 DEFAULT_MAX_NEGOTIATIONS = 2
 
@@ -2341,8 +2344,9 @@ class GenericStrategy(Model):
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
@@ -2392,30 +2396,45 @@ We initialize the strategy class by trying to read the strategy variables from t
         """Get the maximum number of negotiations the agent can start."""
         return self._max_negotiations
 
+    def get_location_and_service_query(self) -> Query:
+        """
+        Get the location and service query of the agent.
+
+        :return: the query
+        """
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (self._agent_location, self._radius))
+        )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
+        return query
+
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.
 
         :return: the query
         """
-        query = Query(
-            [
-                Constraint(
-                    constraint["search_term"],
-                    ConstraintType(
-                        constraint["constraint_type"], constraint["search_value"],
-                    ),
-                )
-                for constraint in self._search_query.values()
-            ],
-            model=GenericDataModel(self._data_model_name, self._data_model),
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
         )
+        query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query
 ```
 
 The following code block checks if the proposal that we received is acceptable based on the strategy:
 
-``` python 
+``` python
     def is_acceptable_proposal(self, proposal: Description) -> bool:
         """
         Check whether it is an acceptable proposal.
@@ -2860,16 +2879,16 @@ First, we update the `skill.yaml`. Make sure that your `skill.yaml` matches with
 ``` yaml
 name: generic_buyer
 author: fetchai
-version: 0.5.0
-description: The generic buyer skill implements the skill to purchase data.
+version: 0.7.0
+description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmYfAMPG5Rnm9fGp7frZLky6cV6Z7qAhtsPNhfwtVYRuEx
-  dialogues.py: QmXe9VAuinv6jgi5So7e25qgWXN16pB6tVG1iD7oAxUZ56
-  handlers.py: QmX9Pphv5VkfKgYriUkzqnVBELLkpdfZd6KzEQKkCG6Da3
-  strategy.py: QmP3fLkBnLyQhHngZELHeLfK59WY6Xz76bxCVm6pfE6tLh
+  behaviours.py: QmUHgMCuvWYyAU382c7hUikNi6R6rfmH1toKUB1K2rcbXQ
+  dialogues.py: QmYMR28TDqE56GdUxP9LwerktaJrD9SBkGoeJsoLSMHpx6
+  handlers.py: QmYevHGuYJ8bsQUT22ZJcSx2aotUveNTLbdyEMMzCEMw7U
+  strategy.py: QmU2gH921MoxvVCCQhnEvcFNbDsgBojeHeTXDEY3ZBMC2A
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -2915,30 +2934,19 @@ models:
   strategy:
     args:
       currency_id: FET
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
       search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
+        constraint_type: ==
+        search_key: seller_service
+        search_value: generic_service
+      search_radius: 5.0
       service_id: generic_service
     class_name: GenericStrategy
 dependencies: {}
@@ -2992,13 +3000,7 @@ aea add-key fetchai fet_private_key.txt
 
 #### Update the AEA configs
 
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, replace ```ledger_apis```: {} with the following.
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and
+Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
@@ -3035,18 +3037,6 @@ Create the private key for the `my_generic_buyer` AEA.
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-```
-
-#### Update the AEA configs
-
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, replace `ledger_apis: {}` with the following.
-
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
 ```
 
 #### Update the skill configs

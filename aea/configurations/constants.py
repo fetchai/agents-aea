@@ -22,12 +22,14 @@
 from aea.configurations.base import DEFAULT_LICENSE as DL
 from aea.configurations.base import DEFAULT_REGISTRY_PATH as DRP
 from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.helpers import COSMOS_PRIVATE_KEY_FILE
 
 DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.6.0")
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.3.0")
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.3.0")
-DEFAULT_LEDGER = FetchAICrypto.identifier
+DEFAULT_LEDGER = CosmosCrypto.identifier
+DEFAULT_PRIVATE_KEY_FILE = COSMOS_PRIVATE_KEY_FILE
 DEFAULT_REGISTRY_PATH = DRP
 DEFAULT_LICENSE = DL
 SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.1.0")

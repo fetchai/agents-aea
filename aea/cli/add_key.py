@@ -44,31 +44,40 @@ from aea.crypto.registries import crypto_registry
     type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
     required=True,
 )
+@click.option(
+    "--connection", is_flag=True, help="For adding a private key for connections."
+)
 @click.pass_context
 @check_aea_project
-def add_key(click_context, type_, file):
+def add_key(click_context, type_, file, connection):
     """Add a private key to the wallet."""
-    _add_private_key(click_context, type_, file)
+    _add_private_key(click_context, type_, file, connection)
 
 
-def _add_private_key(click_context: click.core.Context, type_: str, file: str) -> None:
+def _add_private_key(
+    click_context: click.core.Context, type_: str, file: str, connection: bool = False
+) -> None:
     """
     Add private key to the wallet.
 
     :param click_context: click context object.
     :param type_: type.
     :param file: path to file.
+    :param connection: whether or not it is a private key for a connection
 
     :return: None
     """
     ctx = cast(Context, click_context.obj)
     try_validate_private_key_path(type_, file)
-    _try_add_key(ctx, type_, file)
+    _try_add_key(ctx, type_, file, connection)
 
 
-def _try_add_key(ctx, type_, filepath):
+def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = False):
     try:
-        ctx.agent_config.private_key_paths.create(type_, filepath)
+        if connection:
+            ctx.agent_config.connection_private_key_paths.create(type_, filepath)
+        else:
+            ctx.agent_config.private_key_paths.create(type_, filepath)
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
     ctx.agent_loader.dump(

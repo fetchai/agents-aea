@@ -1,9 +1,9 @@
-<a name=".aea.registries.filter"></a>
+<a name="aea.registries.filter"></a>
 # aea.registries.filter
 
 This module contains registries.
 
-<a name=".aea.registries.filter.Filter"></a>
+<a name="aea.registries.filter.Filter"></a>
 ## Filter Objects
 
 ```python
@@ -12,7 +12,7 @@ class Filter()
 
 This class implements the filter of an AEA.
 
-<a name=".aea.registries.filter.Filter.__init__"></a>
+<a name="aea.registries.filter.Filter.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -26,7 +26,7 @@ Instantiate the filter.
 - `resources`: the resources
 - `decision_maker_out_queue`: the decision maker queue
 
-<a name=".aea.registries.filter.Filter.resources"></a>
+<a name="aea.registries.filter.Filter.resources"></a>
 #### resources
 
 ```python
@@ -36,7 +36,7 @@ Instantiate the filter.
 
 Get resources.
 
-<a name=".aea.registries.filter.Filter.decision_maker_out_queue"></a>
+<a name="aea.registries.filter.Filter.decision_maker_out_queue"></a>
 #### decision`_`maker`_`out`_`queue
 
 ```python
@@ -46,7 +46,7 @@ Get resources.
 
 Get decision maker (out) queue.
 
-<a name=".aea.registries.filter.Filter.get_active_handlers"></a>
+<a name="aea.registries.filter.Filter.get_active_handlers"></a>
 #### get`_`active`_`handlers
 
 ```python
@@ -64,7 +64,7 @@ Get active handlers based on protocol id and optional skill id.
 
 the list of handlers currently active
 
-<a name=".aea.registries.filter.Filter.get_active_behaviours"></a>
+<a name="aea.registries.filter.Filter.get_active_behaviours"></a>
 #### get`_`active`_`behaviours
 
 ```python
@@ -77,7 +77,7 @@ Get the active behaviours.
 
 the list of behaviours currently active
 
-<a name=".aea.registries.filter.Filter.handle_internal_messages"></a>
+<a name="aea.registries.filter.Filter.handle_internal_messages"></a>
 #### handle`_`internal`_`messages
 
 ```python

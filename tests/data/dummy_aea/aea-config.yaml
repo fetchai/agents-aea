@@ -17,21 +17,11 @@ skills:
 - dummy_author/dummy:0.1.0
 - fetchai/error:0.3.0
 default_connection: fetchai/local:0.4.0
-default_ledger: fetchai
-ledger_apis:
-  ethereum:
-    args:
-      address: example.ethereum.com
-      chain_id: 8080
-      gas_price: 20
-  fetchai:
-    args:
-      address: example.fetch-ai.com
-      port: 8080
+default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths:
+  cosmos: cosmos_private_key.txt
   ethereum: eth_private_key.txt
-  fetchai: fet_private_key.txt
 registry_path: ../../packages

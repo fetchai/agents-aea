@@ -1,9 +1,9 @@
-<a name=".aea.configurations.base"></a>
+<a name="aea.configurations.base"></a>
 # aea.configurations.base
 
 Classes to handle AEA configurations.
 
-<a name=".aea.configurations.base.Dependency"></a>
+<a name="aea.configurations.base.Dependency"></a>
 #### Dependency
 
 A dependency is a dictionary with the following (optional) keys:
@@ -14,7 +14,7 @@ A dependency is a dictionary with the following (optional) keys:
 If the 'git' field is set, the 'version' field will be ignored.
 These fields will be forwarded to the 'pip' command.
 
-<a name=".aea.configurations.base.Dependencies"></a>
+<a name="aea.configurations.base.Dependencies"></a>
 #### Dependencies
 
 A dictionary from package name to dependency data structure (see above).
@@ -23,7 +23,7 @@ The package name must satisfy [the constraints on Python packages names](https:/
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 
-<a name=".aea.configurations.base.PackageType"></a>
+<a name="aea.configurations.base.PackageType"></a>
 ## PackageType Objects
 
 ```python
@@ -32,7 +32,7 @@ class PackageType(Enum)
 
 Package types.
 
-<a name=".aea.configurations.base.PackageType.to_plural"></a>
+<a name="aea.configurations.base.PackageType.to_plural"></a>
 #### to`_`plural
 
 ```python
@@ -52,7 +52,7 @@ Get the plural name.
 >>> PackageType.CONTRACT.to_plural()
 'contracts'
 
-<a name=".aea.configurations.base.PackageType.__str__"></a>
+<a name="aea.configurations.base.PackageType.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -61,7 +61,7 @@ Get the plural name.
 
 Convert to string.
 
-<a name=".aea.configurations.base.ComponentType"></a>
+<a name="aea.configurations.base.ComponentType"></a>
 ## ComponentType Objects
 
 ```python
@@ -70,7 +70,7 @@ class ComponentType(Enum)
 
 Enum of component types supported.
 
-<a name=".aea.configurations.base.ComponentType.to_configuration_type"></a>
+<a name="aea.configurations.base.ComponentType.to_configuration_type"></a>
 #### to`_`configuration`_`type
 
 ```python
@@ -79,7 +79,7 @@ Enum of component types supported.
 
 Get package type for component type.
 
-<a name=".aea.configurations.base.ComponentType.to_plural"></a>
+<a name="aea.configurations.base.ComponentType.to_plural"></a>
 #### to`_`plural
 
 ```python
@@ -97,7 +97,7 @@ Get the plural version of the component type.
 >>> ComponentType.CONTRACT.to_plural()
 'contracts'
 
-<a name=".aea.configurations.base.ComponentType.__str__"></a>
+<a name="aea.configurations.base.ComponentType.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -106,7 +106,7 @@ Get the plural version of the component type.
 
 Get the string representation.
 
-<a name=".aea.configurations.base.ProtocolSpecificationParseError"></a>
+<a name="aea.configurations.base.ProtocolSpecificationParseError"></a>
 ## ProtocolSpecificationParseError Objects
 
 ```python
@@ -115,7 +115,7 @@ class ProtocolSpecificationParseError(Exception)
 
 Exception for parsing a protocol specification file.
 
-<a name=".aea.configurations.base.JSONSerializable"></a>
+<a name="aea.configurations.base.JSONSerializable"></a>
 ## JSONSerializable Objects
 
 ```python
@@ -124,7 +124,7 @@ class JSONSerializable(ABC)
 
 Interface for JSON-serializable objects.
 
-<a name=".aea.configurations.base.JSONSerializable.json"></a>
+<a name="aea.configurations.base.JSONSerializable.json"></a>
 #### json
 
 ```python
@@ -135,7 +135,7 @@ Interface for JSON-serializable objects.
 
 Compute the JSON representation.
 
-<a name=".aea.configurations.base.JSONSerializable.from_json"></a>
+<a name="aea.configurations.base.JSONSerializable.from_json"></a>
 #### from`_`json
 
 ```python
@@ -145,7 +145,7 @@ Compute the JSON representation.
 
 Build from a JSON object.
 
-<a name=".aea.configurations.base.Configuration"></a>
+<a name="aea.configurations.base.Configuration"></a>
 ## Configuration Objects
 
 ```python
@@ -154,7 +154,7 @@ class Configuration(JSONSerializable,  ABC)
 
 Configuration class.
 
-<a name=".aea.configurations.base.Configuration.__init__"></a>
+<a name="aea.configurations.base.Configuration.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -163,7 +163,7 @@ Configuration class.
 
 Initialize a configuration object.
 
-<a name=".aea.configurations.base.Configuration.from_json"></a>
+<a name="aea.configurations.base.Configuration.from_json"></a>
 #### from`_`json
 
 ```python
@@ -173,7 +173,7 @@ Initialize a configuration object.
 
 Build from a JSON object.
 
-<a name=".aea.configurations.base.Configuration.ordered_json"></a>
+<a name="aea.configurations.base.Configuration.ordered_json"></a>
 #### ordered`_`json
 
 ```python
@@ -197,7 +197,7 @@ It does not do side-effect.
 
 the ordered dictionary.
 
-<a name=".aea.configurations.base.CRUDCollection"></a>
+<a name="aea.configurations.base.CRUDCollection"></a>
 ## CRUDCollection Objects
 
 ```python
@@ -206,7 +206,7 @@ class CRUDCollection(Generic[T])
 
 Interface of a CRUD collection.
 
-<a name=".aea.configurations.base.CRUDCollection.__init__"></a>
+<a name="aea.configurations.base.CRUDCollection.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -215,7 +215,7 @@ Interface of a CRUD collection.
 
 Instantiate a CRUD collection.
 
-<a name=".aea.configurations.base.CRUDCollection.create"></a>
+<a name="aea.configurations.base.CRUDCollection.create"></a>
 #### create
 
 ```python
@@ -237,7 +237,7 @@ None
 
 - `ValueError`: if the item with the same id is already in the collection.
 
-<a name=".aea.configurations.base.CRUDCollection.read"></a>
+<a name="aea.configurations.base.CRUDCollection.read"></a>
 #### read
 
 ```python
@@ -254,7 +254,7 @@ Get an item by its name.
 
 the associated item, or None if the item id is not present.
 
-<a name=".aea.configurations.base.CRUDCollection.update"></a>
+<a name="aea.configurations.base.CRUDCollection.update"></a>
 #### update
 
 ```python
@@ -272,7 +272,7 @@ Update an existing item.
 
 None
 
-<a name=".aea.configurations.base.CRUDCollection.delete"></a>
+<a name="aea.configurations.base.CRUDCollection.delete"></a>
 #### delete
 
 ```python
@@ -281,7 +281,7 @@ None
 
 Delete an item.
 
-<a name=".aea.configurations.base.CRUDCollection.read_all"></a>
+<a name="aea.configurations.base.CRUDCollection.read_all"></a>
 #### read`_`all
 
 ```python
@@ -290,7 +290,7 @@ Delete an item.
 
 Read all the items.
 
-<a name=".aea.configurations.base.PublicId"></a>
+<a name="aea.configurations.base.PublicId"></a>
 ## PublicId Objects
 
 ```python
@@ -316,7 +316,7 @@ The concatenation of those three elements gives the public identifier:
 >>> assert hash(public_id) == hash(another_public_id)
 >>> assert public_id == another_public_id
 
-<a name=".aea.configurations.base.PublicId.__init__"></a>
+<a name="aea.configurations.base.PublicId.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -325,7 +325,7 @@ The concatenation of those three elements gives the public identifier:
 
 Initialize the public identifier.
 
-<a name=".aea.configurations.base.PublicId.author"></a>
+<a name="aea.configurations.base.PublicId.author"></a>
 #### author
 
 ```python
@@ -335,7 +335,7 @@ Initialize the public identifier.
 
 Get the author.
 
-<a name=".aea.configurations.base.PublicId.name"></a>
+<a name="aea.configurations.base.PublicId.name"></a>
 #### name
 
 ```python
@@ -345,7 +345,7 @@ Get the author.
 
 Get the name.
 
-<a name=".aea.configurations.base.PublicId.version"></a>
+<a name="aea.configurations.base.PublicId.version"></a>
 #### version
 
 ```python
@@ -355,7 +355,7 @@ Get the name.
 
 Get the version.
 
-<a name=".aea.configurations.base.PublicId.version_info"></a>
+<a name="aea.configurations.base.PublicId.version_info"></a>
 #### version`_`info
 
 ```python
@@ -365,7 +365,17 @@ Get the version.
 
 Get the package version.
 
-<a name=".aea.configurations.base.PublicId.from_str"></a>
+<a name="aea.configurations.base.PublicId.latest"></a>
+#### latest
+
+```python
+ | @property
+ | latest() -> str
+```
+
+Get the public id in `latest` form.
+
+<a name="aea.configurations.base.PublicId.from_str"></a>
 #### from`_`str
 
 ```python
@@ -396,7 +406,7 @@ the public id object.
 
 - `ValueError`: if the string in input is not well formatted.
 
-<a name=".aea.configurations.base.PublicId.from_uri_path"></a>
+<a name="aea.configurations.base.PublicId.from_uri_path"></a>
 #### from`_`uri`_`path
 
 ```python
@@ -427,7 +437,7 @@ the public id object.
 
 - `ValueError`: if the string in input is not well formatted.
 
-<a name=".aea.configurations.base.PublicId.to_uri_path"></a>
+<a name="aea.configurations.base.PublicId.to_uri_path"></a>
 #### to`_`uri`_`path
 
 ```python
@@ -441,7 +451,7 @@ Turn the public id into a uri path string.
 
 uri path string
 
-<a name=".aea.configurations.base.PublicId.json"></a>
+<a name="aea.configurations.base.PublicId.json"></a>
 #### json
 
 ```python
@@ -451,7 +461,7 @@ uri path string
 
 Compute the JSON representation.
 
-<a name=".aea.configurations.base.PublicId.from_json"></a>
+<a name="aea.configurations.base.PublicId.from_json"></a>
 #### from`_`json
 
 ```python
@@ -461,7 +471,7 @@ Compute the JSON representation.
 
 Build from a JSON object.
 
-<a name=".aea.configurations.base.PublicId.__hash__"></a>
+<a name="aea.configurations.base.PublicId.__hash__"></a>
 #### `__`hash`__`
 
 ```python
@@ -470,7 +480,7 @@ Build from a JSON object.
 
 Get the hash.
 
-<a name=".aea.configurations.base.PublicId.__str__"></a>
+<a name="aea.configurations.base.PublicId.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -479,7 +489,7 @@ Get the hash.
 
 Get the string representation.
 
-<a name=".aea.configurations.base.PublicId.__repr__"></a>
+<a name="aea.configurations.base.PublicId.__repr__"></a>
 #### `__`repr`__`
 
 ```python
@@ -488,7 +498,7 @@ Get the string representation.
 
 Get the representation.
 
-<a name=".aea.configurations.base.PublicId.__eq__"></a>
+<a name="aea.configurations.base.PublicId.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -497,7 +507,7 @@ Get the representation.
 
 Compare with another object.
 
-<a name=".aea.configurations.base.PublicId.__lt__"></a>
+<a name="aea.configurations.base.PublicId.__lt__"></a>
 #### `__`lt`__`
 
 ```python
@@ -519,7 +529,7 @@ Traceback (most recent call last):
 ...
 ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author or name attributes are different.
 
-<a name=".aea.configurations.base.PackageId"></a>
+<a name="aea.configurations.base.PackageId"></a>
 ## PackageId Objects
 
 ```python
@@ -528,7 +538,7 @@ class PackageId()
 
 A package identifier.
 
-<a name=".aea.configurations.base.PackageId.__init__"></a>
+<a name="aea.configurations.base.PackageId.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -542,7 +552,7 @@ Initialize the package id.
 - `package_type`: the package type.
 - `public_id`: the public id.
 
-<a name=".aea.configurations.base.PackageId.package_type"></a>
+<a name="aea.configurations.base.PackageId.package_type"></a>
 #### package`_`type
 
 ```python
@@ -552,7 +562,7 @@ Initialize the package id.
 
 Get the package type.
 
-<a name=".aea.configurations.base.PackageId.public_id"></a>
+<a name="aea.configurations.base.PackageId.public_id"></a>
 #### public`_`id
 
 ```python
@@ -562,7 +572,7 @@ Get the package type.
 
 Get the public id.
 
-<a name=".aea.configurations.base.PackageId.author"></a>
+<a name="aea.configurations.base.PackageId.author"></a>
 #### author
 
 ```python
@@ -572,7 +582,7 @@ Get the public id.
 
 Get the author of the package.
 
-<a name=".aea.configurations.base.PackageId.name"></a>
+<a name="aea.configurations.base.PackageId.name"></a>
 #### name
 
 ```python
@@ -582,7 +592,7 @@ Get the author of the package.
 
 Get the name of the package.
 
-<a name=".aea.configurations.base.PackageId.version"></a>
+<a name="aea.configurations.base.PackageId.version"></a>
 #### version
 
 ```python
@@ -592,7 +602,7 @@ Get the name of the package.
 
 Get the version of the package.
 
-<a name=".aea.configurations.base.PackageId.package_prefix"></a>
+<a name="aea.configurations.base.PackageId.package_prefix"></a>
 #### package`_`prefix
 
 ```python
@@ -602,7 +612,7 @@ Get the version of the package.
 
 Get the package identifier without the version.
 
-<a name=".aea.configurations.base.PackageId.__hash__"></a>
+<a name="aea.configurations.base.PackageId.__hash__"></a>
 #### `__`hash`__`
 
 ```python
@@ -611,7 +621,7 @@ Get the package identifier without the version.
 
 Get the hash.
 
-<a name=".aea.configurations.base.PackageId.__str__"></a>
+<a name="aea.configurations.base.PackageId.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -620,7 +630,7 @@ Get the hash.
 
 Get the string representation.
 
-<a name=".aea.configurations.base.PackageId.__eq__"></a>
+<a name="aea.configurations.base.PackageId.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -629,7 +639,7 @@ Get the string representation.
 
 Compare with another object.
 
-<a name=".aea.configurations.base.PackageId.__lt__"></a>
+<a name="aea.configurations.base.PackageId.__lt__"></a>
 #### `__`lt`__`
 
 ```python
@@ -638,7 +648,7 @@ Compare with another object.
 
 Compare two public ids.
 
-<a name=".aea.configurations.base.ComponentId"></a>
+<a name="aea.configurations.base.ComponentId"></a>
 ## ComponentId Objects
 
 ```python
@@ -657,7 +667,7 @@ True
 >>> pacakge_id == component_id2
 False
 
-<a name=".aea.configurations.base.ComponentId.__init__"></a>
+<a name="aea.configurations.base.ComponentId.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -671,7 +681,7 @@ Initialize the component id.
 - `component_type`: the component type.
 - `public_id`: the public id.
 
-<a name=".aea.configurations.base.ComponentId.component_type"></a>
+<a name="aea.configurations.base.ComponentId.component_type"></a>
 #### component`_`type
 
 ```python
@@ -681,7 +691,7 @@ Initialize the component id.
 
 Get the component type.
 
-<a name=".aea.configurations.base.ComponentId.component_prefix"></a>
+<a name="aea.configurations.base.ComponentId.component_prefix"></a>
 #### component`_`prefix
 
 ```python
@@ -691,7 +701,7 @@ Get the component type.
 
 Get the component identifier without the version.
 
-<a name=".aea.configurations.base.ComponentId.prefix_import_path"></a>
+<a name="aea.configurations.base.ComponentId.prefix_import_path"></a>
 #### prefix`_`import`_`path
 
 ```python
@@ -701,7 +711,7 @@ Get the component identifier without the version.
 
 Get the prefix import path for this component.
 
-<a name=".aea.configurations.base.PackageConfiguration"></a>
+<a name="aea.configurations.base.PackageConfiguration"></a>
 ## PackageConfiguration Objects
 
 ```python
@@ -717,7 +727,7 @@ A package can be one of:
 - skills
 - contracts
 
-<a name=".aea.configurations.base.PackageConfiguration.__init__"></a>
+<a name="aea.configurations.base.PackageConfiguration.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -739,7 +749,17 @@ The fixed version is interpreted with the specifier '=='.
 - `fingerprint`: the fingerprint.
 - `fingerprint_ignore_patterns`: a list of file patterns to ignore files to fingerprint.
 
-<a name=".aea.configurations.base.PackageConfiguration.directory"></a>
+<a name="aea.configurations.base.PackageConfiguration.directory"></a>
+#### directory
+
+```python
+ | @property
+ | directory() -> Optional[Path]
+```
+
+Get the path to the configuration file associated to this file, if any.
+
+<a name="aea.configurations.base.PackageConfiguration.directory"></a>
 #### directory
 
 ```python
@@ -749,7 +769,7 @@ The fixed version is interpreted with the specifier '=='.
 
 Set directory if not already set.
 
-<a name=".aea.configurations.base.PackageConfiguration.aea_version_specifiers"></a>
+<a name="aea.configurations.base.PackageConfiguration.aea_version_specifiers"></a>
 #### aea`_`version`_`specifiers
 
 ```python
@@ -759,7 +779,7 @@ Set directory if not already set.
 
 Get the AEA version set specifier.
 
-<a name=".aea.configurations.base.PackageConfiguration.public_id"></a>
+<a name="aea.configurations.base.PackageConfiguration.public_id"></a>
 #### public`_`id
 
 ```python
@@ -769,7 +789,7 @@ Get the AEA version set specifier.
 
 Get the public id.
 
-<a name=".aea.configurations.base.PackageConfiguration.package_dependencies"></a>
+<a name="aea.configurations.base.PackageConfiguration.package_dependencies"></a>
 #### package`_`dependencies
 
 ```python
@@ -779,7 +799,7 @@ Get the public id.
 
 Get the package dependencies.
 
-<a name=".aea.configurations.base.ComponentConfiguration"></a>
+<a name="aea.configurations.base.ComponentConfiguration"></a>
 ## ComponentConfiguration Objects
 
 ```python
@@ -788,7 +808,7 @@ class ComponentConfiguration(PackageConfiguration,  ABC)
 
 Class to represent an agent component configuration.
 
-<a name=".aea.configurations.base.ComponentConfiguration.__init__"></a>
+<a name="aea.configurations.base.ComponentConfiguration.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -797,7 +817,7 @@ Class to represent an agent component configuration.
 
 Set component configuration.
 
-<a name=".aea.configurations.base.ComponentConfiguration.pypi_dependencies"></a>
+<a name="aea.configurations.base.ComponentConfiguration.pypi_dependencies"></a>
 #### pypi`_`dependencies
 
 ```python
@@ -807,7 +827,7 @@ Set component configuration.
 
 Get PyPI dependencies.
 
-<a name=".aea.configurations.base.ComponentConfiguration.component_type"></a>
+<a name="aea.configurations.base.ComponentConfiguration.component_type"></a>
 #### component`_`type
 
 ```python
@@ -818,7 +838,7 @@ Get PyPI dependencies.
 
 Get the component type.
 
-<a name=".aea.configurations.base.ComponentConfiguration.component_id"></a>
+<a name="aea.configurations.base.ComponentConfiguration.component_id"></a>
 #### component`_`id
 
 ```python
@@ -828,7 +848,7 @@ Get the component type.
 
 Get the component id.
 
-<a name=".aea.configurations.base.ComponentConfiguration.prefix_import_path"></a>
+<a name="aea.configurations.base.ComponentConfiguration.prefix_import_path"></a>
 #### prefix`_`import`_`path
 
 ```python
@@ -838,7 +858,7 @@ Get the component id.
 
 Get the prefix import path for this component.
 
-<a name=".aea.configurations.base.ComponentConfiguration.is_abstract_component"></a>
+<a name="aea.configurations.base.ComponentConfiguration.is_abstract_component"></a>
 #### is`_`abstract`_`component
 
 ```python
@@ -848,7 +868,7 @@ Get the prefix import path for this component.
 
 Check whether the component is abstract.
 
-<a name=".aea.configurations.base.ComponentConfiguration.load"></a>
+<a name="aea.configurations.base.ComponentConfiguration.load"></a>
 #### load
 
 ```python
@@ -868,7 +888,7 @@ Load configuration and check that it is consistent against the directory.
 
 the configuration object.
 
-<a name=".aea.configurations.base.ComponentConfiguration.check_fingerprint"></a>
+<a name="aea.configurations.base.ComponentConfiguration.check_fingerprint"></a>
 #### check`_`fingerprint
 
 ```python
@@ -881,7 +901,7 @@ Check that the fingerprint are correct against a directory path.
 - the argument is not a valid package directory
 - the fingerprints do not match.
 
-<a name=".aea.configurations.base.ComponentConfiguration.check_aea_version"></a>
+<a name="aea.configurations.base.ComponentConfiguration.check_aea_version"></a>
 #### check`_`aea`_`version
 
 ```python
@@ -892,7 +912,7 @@ Check that the AEA version matches the specifier set.
 
 :raises ValueError if the version of the aea framework falls within a specifier.
 
-<a name=".aea.configurations.base.ConnectionConfig"></a>
+<a name="aea.configurations.base.ConnectionConfig"></a>
 ## ConnectionConfig Objects
 
 ```python
@@ -901,7 +921,7 @@ class ConnectionConfig(ComponentConfiguration)
 
 Handle connection configuration.
 
-<a name=".aea.configurations.base.ConnectionConfig.__init__"></a>
+<a name="aea.configurations.base.ConnectionConfig.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -910,7 +930,7 @@ Handle connection configuration.
 
 Initialize a connection configuration object.
 
-<a name=".aea.configurations.base.ConnectionConfig.component_type"></a>
+<a name="aea.configurations.base.ConnectionConfig.component_type"></a>
 #### component`_`type
 
 ```python
@@ -920,7 +940,7 @@ Initialize a connection configuration object.
 
 Get the component type.
 
-<a name=".aea.configurations.base.ConnectionConfig.package_dependencies"></a>
+<a name="aea.configurations.base.ConnectionConfig.package_dependencies"></a>
 #### package`_`dependencies
 
 ```python
@@ -930,7 +950,7 @@ Get the component type.
 
 Get the connection dependencies.
 
-<a name=".aea.configurations.base.ConnectionConfig.json"></a>
+<a name="aea.configurations.base.ConnectionConfig.json"></a>
 #### json
 
 ```python
@@ -940,7 +960,7 @@ Get the connection dependencies.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.ConnectionConfig.from_json"></a>
+<a name="aea.configurations.base.ConnectionConfig.from_json"></a>
 #### from`_`json
 
 ```python
@@ -950,7 +970,7 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.ProtocolConfig"></a>
+<a name="aea.configurations.base.ProtocolConfig"></a>
 ## ProtocolConfig Objects
 
 ```python
@@ -959,7 +979,7 @@ class ProtocolConfig(ComponentConfiguration)
 
 Handle protocol configuration.
 
-<a name=".aea.configurations.base.ProtocolConfig.__init__"></a>
+<a name="aea.configurations.base.ProtocolConfig.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -968,7 +988,7 @@ Handle protocol configuration.
 
 Initialize a connection configuration object.
 
-<a name=".aea.configurations.base.ProtocolConfig.component_type"></a>
+<a name="aea.configurations.base.ProtocolConfig.component_type"></a>
 #### component`_`type
 
 ```python
@@ -978,7 +998,7 @@ Initialize a connection configuration object.
 
 Get the component type.
 
-<a name=".aea.configurations.base.ProtocolConfig.json"></a>
+<a name="aea.configurations.base.ProtocolConfig.json"></a>
 #### json
 
 ```python
@@ -988,7 +1008,7 @@ Get the component type.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.ProtocolConfig.from_json"></a>
+<a name="aea.configurations.base.ProtocolConfig.from_json"></a>
 #### from`_`json
 
 ```python
@@ -998,7 +1018,7 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.SkillComponentConfiguration"></a>
+<a name="aea.configurations.base.SkillComponentConfiguration"></a>
 ## SkillComponentConfiguration Objects
 
 ```python
@@ -1007,7 +1027,7 @@ class SkillComponentConfiguration()
 
 This class represent a skill component configuration.
 
-<a name=".aea.configurations.base.SkillComponentConfiguration.__init__"></a>
+<a name="aea.configurations.base.SkillComponentConfiguration.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -1022,7 +1042,7 @@ Initialize a skill component configuration.
 - `class_name`: the class name of the component.
 - `args`: keyword arguments.
 
-<a name=".aea.configurations.base.SkillComponentConfiguration.json"></a>
+<a name="aea.configurations.base.SkillComponentConfiguration.json"></a>
 #### json
 
 ```python
@@ -1032,7 +1052,7 @@ Initialize a skill component configuration.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.SkillComponentConfiguration.from_json"></a>
+<a name="aea.configurations.base.SkillComponentConfiguration.from_json"></a>
 #### from`_`json
 
 ```python
@@ -1042,7 +1062,7 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.SkillConfig"></a>
+<a name="aea.configurations.base.SkillConfig"></a>
 ## SkillConfig Objects
 
 ```python
@@ -1051,7 +1071,7 @@ class SkillConfig(ComponentConfiguration)
 
 Class to represent a skill configuration file.
 
-<a name=".aea.configurations.base.SkillConfig.__init__"></a>
+<a name="aea.configurations.base.SkillConfig.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -1060,7 +1080,7 @@ Class to represent a skill configuration file.
 
 Initialize a skill configuration.
 
-<a name=".aea.configurations.base.SkillConfig.component_type"></a>
+<a name="aea.configurations.base.SkillConfig.component_type"></a>
 #### component`_`type
 
 ```python
@@ -1070,7 +1090,7 @@ Initialize a skill configuration.
 
 Get the component type.
 
-<a name=".aea.configurations.base.SkillConfig.package_dependencies"></a>
+<a name="aea.configurations.base.SkillConfig.package_dependencies"></a>
 #### package`_`dependencies
 
 ```python
@@ -1080,7 +1100,7 @@ Get the component type.
 
 Get the skill dependencies.
 
-<a name=".aea.configurations.base.SkillConfig.is_abstract_component"></a>
+<a name="aea.configurations.base.SkillConfig.is_abstract_component"></a>
 #### is`_`abstract`_`component
 
 ```python
@@ -1090,7 +1110,7 @@ Get the skill dependencies.
 
 Check whether the component is abstract.
 
-<a name=".aea.configurations.base.SkillConfig.json"></a>
+<a name="aea.configurations.base.SkillConfig.json"></a>
 #### json
 
 ```python
@@ -1100,7 +1120,7 @@ Check whether the component is abstract.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.SkillConfig.from_json"></a>
+<a name="aea.configurations.base.SkillConfig.from_json"></a>
 #### from`_`json
 
 ```python
@@ -1110,7 +1130,7 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.AgentConfig"></a>
+<a name="aea.configurations.base.AgentConfig"></a>
 ## AgentConfig Objects
 
 ```python
@@ -1119,7 +1139,7 @@ class AgentConfig(PackageConfiguration)
 
 Class to represent the agent configuration file.
 
-<a name=".aea.configurations.base.AgentConfig.__init__"></a>
+<a name="aea.configurations.base.AgentConfig.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -1128,7 +1148,7 @@ Class to represent the agent configuration file.
 
 Instantiate the agent configuration object.
 
-<a name=".aea.configurations.base.AgentConfig.package_dependencies"></a>
+<a name="aea.configurations.base.AgentConfig.package_dependencies"></a>
 #### package`_`dependencies
 
 ```python
@@ -1138,7 +1158,7 @@ Instantiate the agent configuration object.
 
 Get the package dependencies.
 
-<a name=".aea.configurations.base.AgentConfig.private_key_paths_dict"></a>
+<a name="aea.configurations.base.AgentConfig.private_key_paths_dict"></a>
 #### private`_`key`_`paths`_`dict
 
 ```python
@@ -1148,17 +1168,7 @@ Get the package dependencies.
 
 Get dictionary version of private key paths.
 
-<a name=".aea.configurations.base.AgentConfig.ledger_apis_dict"></a>
-#### ledger`_`apis`_`dict
-
-```python
- | @property
- | ledger_apis_dict() -> Dict[str, Dict[str, Union[str, int]]]
-```
-
-Get dictionary version of ledger apis.
-
-<a name=".aea.configurations.base.AgentConfig.connection_private_key_paths_dict"></a>
+<a name="aea.configurations.base.AgentConfig.connection_private_key_paths_dict"></a>
 #### connection`_`private`_`key`_`paths`_`dict
 
 ```python
@@ -1168,7 +1178,17 @@ Get dictionary version of ledger apis.
 
 Get dictionary version of connection private key paths.
 
-<a name=".aea.configurations.base.AgentConfig.default_connection"></a>
+<a name="aea.configurations.base.AgentConfig.default_connection"></a>
+#### default`_`connection
+
+```python
+ | @property
+ | default_connection() -> str
+```
+
+Get the default connection.
+
+<a name="aea.configurations.base.AgentConfig.default_connection"></a>
 #### default`_`connection
 
 ```python
@@ -1186,7 +1206,17 @@ Set the default connection.
 
 None
 
-<a name=".aea.configurations.base.AgentConfig.default_ledger"></a>
+<a name="aea.configurations.base.AgentConfig.default_ledger"></a>
+#### default`_`ledger
+
+```python
+ | @property
+ | default_ledger() -> str
+```
+
+Get the default ledger.
+
+<a name="aea.configurations.base.AgentConfig.default_ledger"></a>
 #### default`_`ledger
 
 ```python
@@ -1204,7 +1234,7 @@ Set the default ledger.
 
 None
 
-<a name=".aea.configurations.base.AgentConfig.json"></a>
+<a name="aea.configurations.base.AgentConfig.json"></a>
 #### json
 
 ```python
@@ -1214,7 +1244,7 @@ None
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.AgentConfig.from_json"></a>
+<a name="aea.configurations.base.AgentConfig.from_json"></a>
 #### from`_`json
 
 ```python
@@ -1224,7 +1254,7 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.SpeechActContentConfig"></a>
+<a name="aea.configurations.base.SpeechActContentConfig"></a>
 ## SpeechActContentConfig Objects
 
 ```python
@@ -1233,7 +1263,7 @@ class SpeechActContentConfig(Configuration)
 
 Handle a speech_act content configuration.
 
-<a name=".aea.configurations.base.SpeechActContentConfig.__init__"></a>
+<a name="aea.configurations.base.SpeechActContentConfig.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -1242,7 +1272,7 @@ Handle a speech_act content configuration.
 
 Initialize a speech_act content configuration.
 
-<a name=".aea.configurations.base.SpeechActContentConfig.json"></a>
+<a name="aea.configurations.base.SpeechActContentConfig.json"></a>
 #### json
 
 ```python
@@ -1252,7 +1282,7 @@ Initialize a speech_act content configuration.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.SpeechActContentConfig.from_json"></a>
+<a name="aea.configurations.base.SpeechActContentConfig.from_json"></a>
 #### from`_`json
 
 ```python
@@ -1262,7 +1292,7 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.ProtocolSpecification"></a>
+<a name="aea.configurations.base.ProtocolSpecification"></a>
 ## ProtocolSpecification Objects
 
 ```python
@@ -1271,7 +1301,7 @@ class ProtocolSpecification(ProtocolConfig)
 
 Handle protocol specification.
 
-<a name=".aea.configurations.base.ProtocolSpecification.__init__"></a>
+<a name="aea.configurations.base.ProtocolSpecification.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -1280,7 +1310,17 @@ Handle protocol specification.
 
 Initialize a protocol specification configuration object.
 
-<a name=".aea.configurations.base.ProtocolSpecification.protobuf_snippets"></a>
+<a name="aea.configurations.base.ProtocolSpecification.protobuf_snippets"></a>
+#### protobuf`_`snippets
+
+```python
+ | @property
+ | protobuf_snippets() -> Dict
+```
+
+Get the protobuf snippets.
+
+<a name="aea.configurations.base.ProtocolSpecification.protobuf_snippets"></a>
 #### protobuf`_`snippets
 
 ```python
@@ -1290,7 +1330,17 @@ Initialize a protocol specification configuration object.
 
 Set the protobuf snippets.
 
-<a name=".aea.configurations.base.ProtocolSpecification.dialogue_config"></a>
+<a name="aea.configurations.base.ProtocolSpecification.dialogue_config"></a>
+#### dialogue`_`config
+
+```python
+ | @property
+ | dialogue_config() -> Dict
+```
+
+Get the dialogue config.
+
+<a name="aea.configurations.base.ProtocolSpecification.dialogue_config"></a>
 #### dialogue`_`config
 
 ```python
@@ -1300,7 +1350,7 @@ Set the protobuf snippets.
 
 Set the dialogue config.
 
-<a name=".aea.configurations.base.ProtocolSpecification.json"></a>
+<a name="aea.configurations.base.ProtocolSpecification.json"></a>
 #### json
 
 ```python
@@ -1310,7 +1360,7 @@ Set the dialogue config.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.ProtocolSpecification.from_json"></a>
+<a name="aea.configurations.base.ProtocolSpecification.from_json"></a>
 #### from`_`json
 
 ```python
@@ -1320,7 +1370,7 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.ContractConfig"></a>
+<a name="aea.configurations.base.ContractConfig"></a>
 ## ContractConfig Objects
 
 ```python
@@ -1329,7 +1379,7 @@ class ContractConfig(ComponentConfiguration)
 
 Handle contract configuration.
 
-<a name=".aea.configurations.base.ContractConfig.__init__"></a>
+<a name="aea.configurations.base.ContractConfig.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -1338,7 +1388,7 @@ Handle contract configuration.
 
 Initialize a protocol configuration object.
 
-<a name=".aea.configurations.base.ContractConfig.component_type"></a>
+<a name="aea.configurations.base.ContractConfig.component_type"></a>
 #### component`_`type
 
 ```python
@@ -1348,7 +1398,7 @@ Initialize a protocol configuration object.
 
 Get the component type.
 
-<a name=".aea.configurations.base.ContractConfig.json"></a>
+<a name="aea.configurations.base.ContractConfig.json"></a>
 #### json
 
 ```python
@@ -1358,7 +1408,7 @@ Get the component type.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.ContractConfig.from_json"></a>
+<a name="aea.configurations.base.ContractConfig.from_json"></a>
 #### from`_`json
 
 ```python

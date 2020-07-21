@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.base import Model
 
@@ -27,7 +28,7 @@ DEFAULT_SEARCH_QUERY = {
     "search_value": True,
     "constraint_type": "==",
 }
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 
 class Strategy(Model):

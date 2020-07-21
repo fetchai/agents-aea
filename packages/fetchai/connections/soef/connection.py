@@ -19,11 +19,12 @@
 """Extension to the Simple OEF and OEF Python SDK."""
 
 import asyncio
+import copy
 import logging
 from asyncio import CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
-from typing import Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Callable, Dict, List, Optional, Set, Union, cast
 from urllib import parse
 from uuid import uuid4
 
@@ -33,6 +34,8 @@ import requests
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
@@ -41,21 +44,18 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.mail.base import Address, Envelope
+from aea.protocols.base import Message
 
 from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
+from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogues as BaseOefSearchDialogues,
+)
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-TARGET = 0
-MESSAGE_ID = 1
-RESPONSE_TARGET = MESSAGE_ID
-RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
-STUB_MESSAGE_ID = 0
-STUB_DIALOGUE_ID = 0
-DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.4.0")
-
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.5.0")
 
 NOT_SPECIFIED = object()
 
@@ -110,12 +110,54 @@ class SOEFException(Exception):
         return cls(msg)
 
 
+class OefSearchDialogues(BaseOefSearchDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        BaseOefSearchDialogues.__init__(self, SOEFConnection.connection_id.latest)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming/outgoing first message.
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return OefSearchDialogue.Role.OEF_NODE
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> OefSearchDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = OefSearchDialogue(
+            dialogue_label=dialogue_label,
+            agent_address=SOEFConnection.connection_id.latest,
+            role=role,
+        )
+        return dialogue
+
+
 class SOEFChannel:
     """The OEFChannel connects the OEF Agent with the connection."""
 
+    DEFAULT_CHAIN_IDENTIFIER = "fetchai_cosmos"
+
     SUPPORTED_CHAIN_IDENTIFIERS = [
         "fetchai",
-        "cosmos",
+        "fetchai_cosmos",
         "ethereum",
     ]
 
@@ -159,14 +201,16 @@ class SOEFChannel:
         self.base_url = "http://{}:{}".format(soef_addr, soef_port)
         self.excluded_protocols = excluded_protocols
         self.restricted_to_protocols = restricted_to_protocols
-        self.search_id = 0
-        self.search_id_to_dialogue_reference = {}  # type: Dict[int, Tuple[str, str]]
+        self.oef_search_dialogues = OefSearchDialogues()
+        self.oef_msg_id = 0
+        self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
+
         self.declared_name = uuid4().hex
         self.unique_page_address = None  # type: Optional[str]
         self.agent_location = None  # type: Optional[Location]
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self._executor_pool: Optional[ThreadPoolExecutor] = None
-        self.chain_identifier: str = chain_identifier or "fetchai"
+        self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
 
@@ -206,7 +250,7 @@ class SOEFChannel:
         :param equality_constraints: list of equality constraints
         :return: bool
         """
-        filters = self.DEFAULT_PERSONALITY_PIECES
+        filters = copy.copy(self.DEFAULT_PERSONALITY_PIECES)
 
         for constraint in equality_constraints:
             if constraint.attribute_name not in PERSONALITY_PIECES_KEYS:
@@ -294,6 +338,21 @@ class SOEFChannel:
             "Message not of type OefSearchMessage"
         )
         oef_message = cast(OefSearchMessage, envelope.message)
+        oef_message = copy.deepcopy(
+            oef_message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        oef_message.is_incoming = True  # TODO: fix; should be done by framework
+        oef_message.counterparty = (
+            envelope.sender
+        )  # TODO: fix; should be done by framework
+        oef_search_dialogue = cast(
+            OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
+        )
+        if oef_search_dialogue is None:  # pragma: nocover
+            raise ValueError(
+                "Could not create dialogue for message={}".format(oef_message)
+            )
+
         err_ops = OefSearchMessage.OefErrorOperation
         oef_error_operation = err_ops.OTHER
 
@@ -317,23 +376,35 @@ class SOEFChannel:
             }
 
             if oef_message.performative not in handlers_and_errors:
-                raise ValueError("OEF request not recognized.")
+                raise ValueError("OEF request not recognized.")  # pragma: nocover
 
             handler, oef_error_operation = handlers_and_errors[oef_message.performative]
-            await handler(oef_message)
+            await handler(oef_message, oef_search_dialogue)
 
         except SOEFException:
-            await self._send_error_response(oef_error_operation=oef_error_operation)
-        except Exception:  # pylint: disable=broad-except
+            await self._send_error_response(
+                oef_message,
+                oef_search_dialogue,
+                oef_error_operation=oef_error_operation,
+            )
+        except Exception:  # pylint: disable=broad-except # pragma: nocover
             logger.exception("Exception during envelope processing")
-            await self._send_error_response(oef_error_operation=oef_error_operation)
+            await self._send_error_response(
+                oef_message,
+                oef_search_dialogue,
+                oef_error_operation=oef_error_operation,
+            )
             raise
 
-    async def register_service(self, oef_message: OefSearchMessage) -> None:
+    async def register_service(
+        self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    ) -> None:
         """
         Register a service on the SOEF.
 
         :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
+        :return: None
         """
         service_description = oef_message.service_description
 
@@ -341,9 +412,8 @@ class SOEFChannel:
             "location_agent": self._register_location_handler,
             "personality_agent": self._set_personality_piece_handler,
             "set_service_key": self._set_service_key_handler,
-            "remove_service_key": self._remove_service_key_handler,
             "ping": self._ping_handler,
-        }
+        }  # type: Dict[str, Callable]
         data_model_name = service_description.data_model.name
 
         if data_model_name not in data_model_handlers:
@@ -406,12 +476,12 @@ class SOEFChannel:
 
     async def _generic_oef_command(
         self, command, params=None, unique_page_address=None, check_success=True
-    ):
+    ) -> str:
         """
         Set service key from service description.
 
         :param service_description: Service description
-        :return None
+        :return: response text
         """
         params = params or {}
         logger.debug(f"Perform `{command}` with {params}")
@@ -555,6 +625,12 @@ class SOEFChannel:
         """
         Register an agent on the SOEF.
 
+        Includes the following steps:
+        - apply to lobby to receive unique page address and token
+        - acknowledge registration
+        - set default personality piece for agent framework
+        - initiate ping task
+
         :return: None
         """
         logger.debug("Applying to SOEF lobby with address={}".format(self.address))
@@ -591,6 +667,8 @@ class SOEFChannel:
         )
         self.unique_page_address = unique_page_address
 
+        await self._set_personality_piece("architecture", "agentframework")
+
         if self._loop and not self._ping_periodic_task:
             self._ping_periodic_task = self._loop.create_task(
                 self._ping_periodic(self.PING_PERIOD)
@@ -598,11 +676,15 @@ class SOEFChannel:
 
     async def _send_error_response(
         self,
+        oef_search_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
         oef_error_operation: OefErrorOperation = OefSearchMessage.OefErrorOperation.OTHER,
     ) -> None:
         """
         Send an error response back.
 
+        :param oef_search_message: the oef search message
+        :param oef_search_dialogue: the oef search dialogue
         :param oef_error_operation: the error code to send back
         :return: None
         """
@@ -610,23 +692,51 @@ class SOEFChannel:
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.OEF_ERROR,
             oef_error_operation=oef_error_operation,
+            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
+            target=oef_search_message.message_id,
+            message_id=oef_search_message.message_id + 1,
         )
+        message.counterparty = oef_search_message.counterparty
+        oef_search_dialogue.update(message)
+        message = copy.deepcopy(
+            message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
         envelope = Envelope(
-            to=self.address,
-            sender="simple_oef",
-            protocol_id=OefSearchMessage.protocol_id,
+            to=message.counterparty,
+            sender=SOEFConnection.connection_id.latest,
+            protocol_id=message.protocol_id,
             message=message,
         )
         await self.in_queue.put(envelope)
 
-    async def unregister_service(self, oef_message: OefSearchMessage) -> None:
+    async def unregister_service(
+        self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    ) -> None:
         """
         Unregister a service on the SOEF.
 
         :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
         :return: None
         """
-        raise NotImplementedError
+        service_description = oef_message.service_description
+
+        data_model_handlers = {
+            "location_agent": self._unregister_agent,
+            "remove_service_key": self._remove_service_key_handler,
+        }  # type: Dict[str, Callable]
+        data_model_name = service_description.data_model.name
+
+        if data_model_name not in data_model_handlers:
+            raise SOEFException.error(
+                f'Data model name: {data_model_name} is not supported. Valid models are: {", ".join(data_model_handlers.keys())}'
+            )
+
+        handler = data_model_handlers[data_model_name]
+        if data_model_name == "location_agent":
+            await handler()
+        else:
+            await handler(service_description)
 
     async def _unregister_agent(self) -> None:
         """
@@ -636,9 +746,10 @@ class SOEFChannel:
         """
         await self._stop_periodic_ping_task()
         if self.unique_page_address is None:  # pragma: nocover
-            raise SOEFException.error(
+            logger.debug(
                 "The service is not registered to the simple OEF. Cannot unregister."
             )
+            return
 
         response = await self._generic_oef_command("unregister", check_success=False)
         assert "<response><message>Goodbye!</message></response>" in response
@@ -671,11 +782,15 @@ class SOEFChannel:
         await self._unregister_agent()
         await self.in_queue.put(None)
 
-    async def search_services(self, oef_message: OefSearchMessage) -> None:
+    async def search_services(
+        self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    ) -> None:
         """
         Search services on the SOEF.
 
         :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
+        :return: None
         """
         query = oef_message.query
 
@@ -685,13 +800,6 @@ class SOEFChannel:
                     query.constraints
                 )
             )
-
-        dialogue_reference = oef_message.dialogue_reference[0]
-        self.search_id += 1
-        self.search_id_to_dialogue_reference[self.search_id] = (
-            dialogue_reference,
-            str(self.search_id),
-        )
 
         constraints = [cast(Constraint, c) for c in query.constraints]
         constraint_distance = [
@@ -712,15 +820,22 @@ class SOEFChannel:
         if self.agent_location is None or self.agent_location != service_location:
             # we update the location to match the query.
             await self._set_location(service_location)  # pragma: nocover
-        await self._find_around_me(radius, params)
+        await self._find_around_me(oef_message, oef_search_dialogue, radius, params)
 
     async def _find_around_me(
-        self, radius: float, params: Dict[str, List[str]]
+        self,
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+        radius: float,
+        params: Dict[str, List[str]],
     ) -> None:
         """
         Find agents around me.
 
+        :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
         :param radius: the radius in which to search
+        :param params: the parameters for the query
         :return: None
         """
         assert self.in_queue is not None, "Inqueue not set!"
@@ -731,9 +846,7 @@ class SOEFChannel:
         )
         root = ET.fromstring(response_text)
         agents = {
-            "fetchai": {},
-            "cosmos": {},
-            "ethereum": {},
+            key: {} for key in self.SUPPORTED_CHAIN_IDENTIFIERS
         }  # type: Dict[str, Dict[str, str]]
         agents_l = []  # type: List[str]
         for agent in root.findall(path=".//agent"):
@@ -754,12 +867,20 @@ class SOEFChannel:
 
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
             agents=tuple(agents_l),
+            target=oef_message.message_id,
+            message_id=oef_message.message_id + 1,
         )
+        message.counterparty = oef_message.counterparty
+        oef_search_dialogue.update(message)
+        message = copy.deepcopy(
+            message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
         envelope = Envelope(
-            to=self.address,
-            sender="simple_oef",
-            protocol_id=OefSearchMessage.protocol_id,
+            to=message.counterparty,
+            sender=SOEFConnection.connection_id.latest,
+            protocol_id=message.protocol_id,
             message=message,
         )
         await self.in_queue.put(envelope)

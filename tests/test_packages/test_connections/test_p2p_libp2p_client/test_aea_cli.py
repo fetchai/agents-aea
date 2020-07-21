@@ -62,7 +62,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         assert self.node_connection.connection_status.is_connected is True
 
     def test_connection(self):
-        self.add_item("connection", "fetchai/p2p_libp2p_client:0.3.0")
+        self.add_item("connection", "fetchai/p2p_libp2p_client:0.4.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.force_set_config(
             "{}.nodes".format(config_path),

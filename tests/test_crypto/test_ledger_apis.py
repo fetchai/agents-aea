@@ -34,6 +34,7 @@ from tests.conftest import (
     COSMOS_TESTNET_CONFIG,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_TESTNET_CONFIG,
+    FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
 )
@@ -106,7 +107,7 @@ class TestLedgerApis:
             return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transfer_transaction(
-                identifier="fetchai",
+                identifier=FETCHAI,
                 sender_address="sender_address",
                 destination_address=FETCHAI_ADDRESS_ONE,
                 amount=10,
@@ -123,7 +124,7 @@ class TestLedgerApis:
             return_value="mock_transaction_digest",
         ):
             tx_digest = self.ledger_apis.send_signed_transaction(
-                identifier="fetchai", tx_signed="signed_transaction",
+                identifier=FETCHAI, tx_signed="signed_transaction",
             )
             assert tx_digest == "mock_transaction_digest"
 
@@ -135,7 +136,7 @@ class TestLedgerApis:
             return_value="mock_transaction_receipt",
         ):
             tx_receipt = self.ledger_apis.get_transaction_receipt(
-                identifier="fetchai", tx_digest="tx_digest",
+                identifier=FETCHAI, tx_digest="tx_digest",
             )
             assert tx_receipt == "mock_transaction_receipt"
 
@@ -147,7 +148,7 @@ class TestLedgerApis:
             return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transaction(
-                identifier="fetchai", tx_digest="tx_digest",
+                identifier=FETCHAI, tx_digest="tx_digest",
             )
             assert tx == "mock_transaction"
 
@@ -157,7 +158,7 @@ class TestLedgerApis:
             FetchAIApi, "is_transaction_settled", return_value=True,
         ):
             is_settled = self.ledger_apis.is_transaction_settled(
-                identifier="fetchai", tx_receipt="tx_receipt",
+                identifier=FETCHAI, tx_receipt="tx_receipt",
             )
             assert is_settled
 
@@ -167,7 +168,7 @@ class TestLedgerApis:
             FetchAIApi, "is_transaction_valid", return_value=True,
         ):
             is_valid = self.ledger_apis.is_transaction_valid(
-                identifier="fetchai",
+                identifier=FETCHAI,
                 tx="tx",
                 seller="seller",
                 client="client",

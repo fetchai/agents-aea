@@ -1,9 +1,9 @@
-<a name=".aea.decision_maker.default"></a>
+<a name="aea.decision_maker.default"></a>
 # aea.decision`_`maker.default
 
 This module contains the decision maker class.
 
-<a name=".aea.decision_maker.default.SigningDialogues"></a>
+<a name="aea.decision_maker.default.SigningDialogues"></a>
 ## SigningDialogues Objects
 
 ```python
@@ -12,7 +12,7 @@ class SigningDialogues(BaseSigningDialogues)
 
 This class keeps track of all oef_search dialogues.
 
-<a name=".aea.decision_maker.default.SigningDialogues.__init__"></a>
+<a name="aea.decision_maker.default.SigningDialogues.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -29,7 +29,7 @@ Initialize dialogues.
 
 None
 
-<a name=".aea.decision_maker.default.SigningDialogues.role_from_first_message"></a>
+<a name="aea.decision_maker.default.SigningDialogues.role_from_first_message"></a>
 #### role`_`from`_`first`_`message
 
 ```python
@@ -47,7 +47,7 @@ Infer the role of the agent from an incoming/outgoing first message
 
 The role of the agent
 
-<a name=".aea.decision_maker.default.SigningDialogues.create_dialogue"></a>
+<a name="aea.decision_maker.default.SigningDialogues.create_dialogue"></a>
 #### create`_`dialogue
 
 ```python
@@ -65,7 +65,7 @@ Create an instance of fipa dialogue.
 
 the created dialogue
 
-<a name=".aea.decision_maker.default.StateUpdateDialogues"></a>
+<a name="aea.decision_maker.default.StateUpdateDialogues"></a>
 ## StateUpdateDialogues Objects
 
 ```python
@@ -74,7 +74,7 @@ class StateUpdateDialogues(BaseStateUpdateDialogues)
 
 This class keeps track of all oef_search dialogues.
 
-<a name=".aea.decision_maker.default.StateUpdateDialogues.__init__"></a>
+<a name="aea.decision_maker.default.StateUpdateDialogues.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -91,7 +91,7 @@ Initialize dialogues.
 
 None
 
-<a name=".aea.decision_maker.default.StateUpdateDialogues.role_from_first_message"></a>
+<a name="aea.decision_maker.default.StateUpdateDialogues.role_from_first_message"></a>
 #### role`_`from`_`first`_`message
 
 ```python
@@ -109,7 +109,7 @@ Infer the role of the agent from an incoming/outgoing first message
 
 The role of the agent
 
-<a name=".aea.decision_maker.default.StateUpdateDialogues.create_dialogue"></a>
+<a name="aea.decision_maker.default.StateUpdateDialogues.create_dialogue"></a>
 #### create`_`dialogue
 
 ```python
@@ -127,7 +127,7 @@ Create an instance of fipa dialogue.
 
 the created dialogue
 
-<a name=".aea.decision_maker.default.GoalPursuitReadiness"></a>
+<a name="aea.decision_maker.default.GoalPursuitReadiness"></a>
 ## GoalPursuitReadiness Objects
 
 ```python
@@ -136,7 +136,7 @@ class GoalPursuitReadiness()
 
 The goal pursuit readiness.
 
-<a name=".aea.decision_maker.default.GoalPursuitReadiness.Status"></a>
+<a name="aea.decision_maker.default.GoalPursuitReadiness.Status"></a>
 ## Status Objects
 
 ```python
@@ -150,7 +150,7 @@ In particular, it can be one of the following:
 - Status.READY: when the agent is ready to pursuit its goal
 - Status.NOT_READY: when the agent is not ready to pursuit its goal
 
-<a name=".aea.decision_maker.default.GoalPursuitReadiness.__init__"></a>
+<a name="aea.decision_maker.default.GoalPursuitReadiness.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -159,7 +159,7 @@ In particular, it can be one of the following:
 
 Instantiate the goal pursuit readiness.
 
-<a name=".aea.decision_maker.default.GoalPursuitReadiness.is_ready"></a>
+<a name="aea.decision_maker.default.GoalPursuitReadiness.is_ready"></a>
 #### is`_`ready
 
 ```python
@@ -169,7 +169,7 @@ Instantiate the goal pursuit readiness.
 
 Get the readiness.
 
-<a name=".aea.decision_maker.default.GoalPursuitReadiness.update"></a>
+<a name="aea.decision_maker.default.GoalPursuitReadiness.update"></a>
 #### update
 
 ```python
@@ -186,7 +186,7 @@ Update the goal pursuit readiness.
 
 None
 
-<a name=".aea.decision_maker.default.OwnershipState"></a>
+<a name="aea.decision_maker.default.OwnershipState"></a>
 ## OwnershipState Objects
 
 ```python
@@ -195,7 +195,7 @@ class OwnershipState(BaseOwnershipState)
 
 Represent the ownership state of an agent (can proxy a ledger).
 
-<a name=".aea.decision_maker.default.OwnershipState.__init__"></a>
+<a name="aea.decision_maker.default.OwnershipState.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -208,7 +208,7 @@ Instantiate an ownership state object.
 
 - `decision_maker`: the decision maker
 
-<a name=".aea.decision_maker.default.OwnershipState.set"></a>
+<a name="aea.decision_maker.default.OwnershipState.set"></a>
 #### set
 
 ```python
@@ -222,7 +222,7 @@ Set values on the ownership state.
 - `amount_by_currency_id`: the currency endowment of the agent in this state.
 - `quantities_by_good_id`: the good endowment of the agent in this state.
 
-<a name=".aea.decision_maker.default.OwnershipState.apply_delta"></a>
+<a name="aea.decision_maker.default.OwnershipState.apply_delta"></a>
 #### apply`_`delta
 
 ```python
@@ -242,7 +242,7 @@ This method is used to apply a raw state update without a transaction.
 
 None
 
-<a name=".aea.decision_maker.default.OwnershipState.is_initialized"></a>
+<a name="aea.decision_maker.default.OwnershipState.is_initialized"></a>
 #### is`_`initialized
 
 ```python
@@ -252,7 +252,7 @@ None
 
 Get the initialization status.
 
-<a name=".aea.decision_maker.default.OwnershipState.amount_by_currency_id"></a>
+<a name="aea.decision_maker.default.OwnershipState.amount_by_currency_id"></a>
 #### amount`_`by`_`currency`_`id
 
 ```python
@@ -262,7 +262,7 @@ Get the initialization status.
 
 Get currency holdings in this state.
 
-<a name=".aea.decision_maker.default.OwnershipState.quantities_by_good_id"></a>
+<a name="aea.decision_maker.default.OwnershipState.quantities_by_good_id"></a>
 #### quantities`_`by`_`good`_`id
 
 ```python
@@ -272,7 +272,7 @@ Get currency holdings in this state.
 
 Get good holdings in this state.
 
-<a name=".aea.decision_maker.default.OwnershipState.is_affordable_transaction"></a>
+<a name="aea.decision_maker.default.OwnershipState.is_affordable_transaction"></a>
 #### is`_`affordable`_`transaction
 
 ```python
@@ -292,7 +292,7 @@ Note, the agent is the sender of the transaction message by design.
 
 True if the transaction is legal wrt the current state, false otherwise.
 
-<a name=".aea.decision_maker.default.OwnershipState.is_affordable"></a>
+<a name="aea.decision_maker.default.OwnershipState.is_affordable"></a>
 #### is`_`affordable
 
 ```python
@@ -309,7 +309,7 @@ Check if the tx is affordable.
 
 whether the transaction is affordable or not
 
-<a name=".aea.decision_maker.default.OwnershipState.update"></a>
+<a name="aea.decision_maker.default.OwnershipState.update"></a>
 #### update
 
 ```python
@@ -326,7 +326,7 @@ Update the agent state from a transaction.
 
 None
 
-<a name=".aea.decision_maker.default.OwnershipState.apply_transactions"></a>
+<a name="aea.decision_maker.default.OwnershipState.apply_transactions"></a>
 #### apply`_`transactions
 
 ```python
@@ -343,7 +343,7 @@ Apply a list of transactions to (a copy of) the current state.
 
 the final state.
 
-<a name=".aea.decision_maker.default.OwnershipState.__copy__"></a>
+<a name="aea.decision_maker.default.OwnershipState.__copy__"></a>
 #### `__`copy`__`
 
 ```python
@@ -352,7 +352,7 @@ the final state.
 
 Copy the object.
 
-<a name=".aea.decision_maker.default.Preferences"></a>
+<a name="aea.decision_maker.default.Preferences"></a>
 ## Preferences Objects
 
 ```python
@@ -361,7 +361,7 @@ class Preferences(BasePreferences)
 
 Class to represent the preferences.
 
-<a name=".aea.decision_maker.default.Preferences.__init__"></a>
+<a name="aea.decision_maker.default.Preferences.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -370,7 +370,7 @@ Class to represent the preferences.
 
 Instantiate an agent preference object.
 
-<a name=".aea.decision_maker.default.Preferences.set"></a>
+<a name="aea.decision_maker.default.Preferences.set"></a>
 #### set
 
 ```python
@@ -384,7 +384,7 @@ Set values on the preferences.
 - `exchange_params_by_currency_id`: the exchange params.
 - `utility_params_by_good_id`: the utility params for every asset.
 
-<a name=".aea.decision_maker.default.Preferences.is_initialized"></a>
+<a name="aea.decision_maker.default.Preferences.is_initialized"></a>
 #### is`_`initialized
 
 ```python
@@ -396,7 +396,7 @@ Get the initialization status.
 
 Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
 
-<a name=".aea.decision_maker.default.Preferences.exchange_params_by_currency_id"></a>
+<a name="aea.decision_maker.default.Preferences.exchange_params_by_currency_id"></a>
 #### exchange`_`params`_`by`_`currency`_`id
 
 ```python
@@ -406,7 +406,7 @@ Returns True if exchange_params_by_currency_id and utility_params_by_good_id are
 
 Get exchange parameter for each currency.
 
-<a name=".aea.decision_maker.default.Preferences.utility_params_by_good_id"></a>
+<a name="aea.decision_maker.default.Preferences.utility_params_by_good_id"></a>
 #### utility`_`params`_`by`_`good`_`id
 
 ```python
@@ -416,7 +416,7 @@ Get exchange parameter for each currency.
 
 Get utility parameter for each good.
 
-<a name=".aea.decision_maker.default.Preferences.logarithmic_utility"></a>
+<a name="aea.decision_maker.default.Preferences.logarithmic_utility"></a>
 #### logarithmic`_`utility
 
 ```python
@@ -433,7 +433,7 @@ Compute agent's utility given her utility function params and a good bundle.
 
 utility value
 
-<a name=".aea.decision_maker.default.Preferences.linear_utility"></a>
+<a name="aea.decision_maker.default.Preferences.linear_utility"></a>
 #### linear`_`utility
 
 ```python
@@ -450,7 +450,7 @@ Compute agent's utility given her utility function params and a currency bundle.
 
 utility value
 
-<a name=".aea.decision_maker.default.Preferences.utility"></a>
+<a name="aea.decision_maker.default.Preferences.utility"></a>
 #### utility
 
 ```python
@@ -468,7 +468,7 @@ Compute the utility given the good and currency holdings.
 
 the utility value.
 
-<a name=".aea.decision_maker.default.Preferences.marginal_utility"></a>
+<a name="aea.decision_maker.default.Preferences.marginal_utility"></a>
 #### marginal`_`utility
 
 ```python
@@ -487,7 +487,7 @@ Compute the marginal utility.
 
 the marginal utility score
 
-<a name=".aea.decision_maker.default.Preferences.utility_diff_from_transaction"></a>
+<a name="aea.decision_maker.default.Preferences.utility_diff_from_transaction"></a>
 #### utility`_`diff`_`from`_`transaction
 
 ```python
@@ -505,7 +505,7 @@ Simulate a transaction and get the resulting utility difference (taking into acc
 
 the score.
 
-<a name=".aea.decision_maker.default.Preferences.is_utility_enhancing"></a>
+<a name="aea.decision_maker.default.Preferences.is_utility_enhancing"></a>
 #### is`_`utility`_`enhancing
 
 ```python
@@ -523,7 +523,7 @@ Check if the tx is utility enhancing.
 
 whether the transaction is utility enhancing or not
 
-<a name=".aea.decision_maker.default.Preferences.__copy__"></a>
+<a name="aea.decision_maker.default.Preferences.__copy__"></a>
 #### `__`copy`__`
 
 ```python
@@ -532,7 +532,7 @@ whether the transaction is utility enhancing or not
 
 Copy the object.
 
-<a name=".aea.decision_maker.default.DecisionMakerHandler"></a>
+<a name="aea.decision_maker.default.DecisionMakerHandler"></a>
 ## DecisionMakerHandler Objects
 
 ```python
@@ -541,7 +541,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler)
 
 This class implements the decision maker.
 
-<a name=".aea.decision_maker.default.DecisionMakerHandler.__init__"></a>
+<a name="aea.decision_maker.default.DecisionMakerHandler.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -555,7 +555,7 @@ Initialize the decision maker.
 - `identity`: the identity
 - `wallet`: the wallet
 
-<a name=".aea.decision_maker.default.DecisionMakerHandler.handle"></a>
+<a name="aea.decision_maker.default.DecisionMakerHandler.handle"></a>
 #### handle
 
 ```python

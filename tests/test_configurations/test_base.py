@@ -48,6 +48,7 @@ from aea.configurations.base import (
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import DEFAULT_LEDGER
 
 from tests.conftest import (
     AUTHOR,
@@ -226,6 +227,12 @@ class PublicIdTestCase(TestCase):
         """Test case for from_json method positive result."""
         obj = {"author": AUTHOR, "name": "name", "version": "0.1.0"}
         PublicId.from_json(obj)
+
+    def test_public_id_latest_positive(self):
+        """Test case for latest property positive result."""
+        name = "name"
+        obj = PublicId(AUTHOR, name, "0.1.0")
+        assert obj.latest == "{}/{}:*".format(AUTHOR, name)
 
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
@@ -560,7 +567,7 @@ def test_agent_config_to_json_with_optional_configurations():
         runtime_mode="async",
     )
     agent_config.default_connection = "author/name:0.1.0"
-    agent_config.default_ledger = "fetchai"
+    agent_config.default_ledger = DEFAULT_LEDGER
     agent_config.json
 
 

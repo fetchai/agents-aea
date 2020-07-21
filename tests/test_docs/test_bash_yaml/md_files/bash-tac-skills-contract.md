@@ -2,7 +2,7 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.5.0
+aea fetch fetchai/tac_controller_contract:0.6.0
 cd tac_controller_contract
 aea install
 ```
@@ -26,12 +26,12 @@ aea generate-wealth ethereum
 aea get-wealth ethereum
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.5.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.6.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 cd ..
-aea fetch fetchai/tac_participant:0.5.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.6.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
@@ -45,7 +45,7 @@ aea create tac_participant_two
 cd tac_participant_one
 aea add connection fetchai/oef:0.6.0
 aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.4.0
+aea add skill fetchai/tac_negotiation:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 aea config set agent.default_ledger ethereum
@@ -56,7 +56,7 @@ aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_con
 cd tac_participant_two
 aea add connection fetchai/oef:0.6.0
 aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.4.0
+aea add skill fetchai/tac_negotiation:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.6.0
 aea config set agent.default_ledger ethereum
@@ -74,13 +74,6 @@ aea launch tac_controller_contract tac_participant_one tac_participant_two
 aea delete tac_controller_contract
 aea delete tac_participant_one
 aea delete tac_participant_two
-```
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 20
 ```
 ``` yaml
 name: tac_negotiation

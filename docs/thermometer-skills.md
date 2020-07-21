@@ -54,14 +54,6 @@ This diagram shows the communication between the various entities as data is suc
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF search and communication node
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for all the following demos.
-
 ## Demo instructions
 
 A demo to run the thermometer scenario with a true ledger transaction This demo assumes the buyer trusts the seller AEA to send the data upon successful payment.
@@ -70,7 +62,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.5.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.6.0 --alias my_thermometer_aea
 cd thermometer_aea
 aea install
 ```
@@ -82,23 +74,19 @@ The following steps create the thermometer AEA from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/thermometer:0.6.0
+aea add skill fetchai/thermometer:0.7.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
-In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
@@ -108,7 +96,7 @@ default_routing:
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.5.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.6.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -120,147 +108,75 @@ The following steps create the thermometer client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/thermometer_client:0.5.0
+aea add skill fetchai/thermometer_client:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 
-In `my_thermometer_aea/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Fetchai:
-``` yaml
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-and add 
+In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 
 </p>
 </details>
 
-### Generate wealth for the thermometer client AEA
+### Add keys for the thermometer AEA
+
+First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
+```
+
+### Add keys and generate wealth for the thermometer client AEA
 
 The thermometer client needs to have some wealth to purchase the thermometer information.
 
 First, create the private key for the thermometer client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
 Then, create some wealth for your thermometer client based on the network you want to transact with. On the Fetch.ai `testnet` network:
 ``` bash
-aea generate-wealth fetchai
-```
-
-<details><summary>Alternatively, create wealth for other test networks.</summary>
-<p>
-
-<strong>Ledger Config:</strong>
-<br>
-
-In `my_thermometer_aea/aea-config.yaml` and `my_thermometer_client/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
-
-To connect to Ethereum:
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-
-Alternatively, to connect to Cosmos:
-``` yaml
-ledger_apis:
-  cosmos:
-    address: https://rest-agent-land.prod.fetch-ai.com:443
-```
-
-<strong>Wealth:</strong>
-<br>
-
-To generate and add a private-public key pair for Ethereum use:
-``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-
-On the Ethereum `ropsten` network.
-``` bash
-aea generate-wealth ethereum
-```
-
-Alternatively, to generate and add a private-public key pair for Cosmos use:
-``` bash
 aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
 ```
-
-On the Cosmos `testnet` network.
-``` bash
-aea generate-wealth cosmos
-```
-
-</p>
-</details>
-
-### Update the skill configs
-
-The default skill configs assume that the transaction is settled against the fetchai ledger.
-
-<details><summary>Alternatively, configure skills for other test networks.</summary>
-<p>
-
-<strong>Thermometer:</strong>
-<br>
-Ensure you are in the thermometer project directory.
-
-For ethereum, update the skill config of the thermometer via the `aea config get/set` command like so:
-``` bash
-aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
-```
-
-Or for cosmos, like so:
-``` bash
-aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id cosmos
-```
-
-This updates the thermometer skill config (`my_thermometer_aea/vendor/fetchai/skills/thermometer/skill.yaml`).
-
-
-<strong>Thermometer client:</strong>
-<br>
-Ensure you are in the thermometer client project directory.
-
-For ethereum, update the skill config of the thermometer via the `aea config get/set` command like so:
-``` bash
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id ethereum
-```
-
-Or for cosmos, like so:
-``` bash
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id cosmos
-```
-
-This updates the thermometer client skill config (`my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`).
-
-</p>
-</details>
 
 ### Run both AEAs
 
-Finally, run both AEAs from their respective directories:
+Run both AEAs from their respective terminals.
+
+First, run the thermometer AEA:
+
+``` bash
+aea run
+```
+
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
+Then, update the configuration of the thermometer client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
+
+Then run the thermometer client AEA:
 ``` bash
 aea run
 ```

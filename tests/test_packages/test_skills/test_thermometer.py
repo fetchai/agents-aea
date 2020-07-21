@@ -19,15 +19,26 @@
 """This test module contains the integration test for the thermometer skills."""
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany, UseOef
+from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
+from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_FILE,
+    FUNDED_COSMOS_PRIVATE_KEY_1,
+    MAX_FLAKY_RERUNS_INTEGRATION,
+    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_GENESIS_CONFIG,
+    wait_for_localhost_ports_to_close,
+)
 
 
-class TestThermometerSkill(AEATestCaseMany, UseOef):
+@pytest.mark.integration
+class TestThermometerSkill(AEATestCaseMany):
     """Test that thermometer skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
@@ -35,14 +46,18 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         thermometer_client_aea_name = "my_thermometer_client"
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/thermometer:0.6.0")
+        self.add_item("skill", "fetchai/thermometer:0.7.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
         )
@@ -51,12 +66,21 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.5.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.6.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
         )
@@ -65,15 +89,61 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
+        # add funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
         thermometer_aea_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
 
         self.set_agent_context(thermometer_client_aea_name)
         thermometer_client_aea_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_client_aea_process,
+            check_strings,
+            timeout=240,
+            is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
+            missing_strings
+        )
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
@@ -110,12 +180,16 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])
 
 
-class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
+@pytest.mark.integration
+class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
     """Test that thermometer skills work."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
@@ -123,64 +197,110 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         thermometer_client_aea_name = "my_thermometer_client"
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
-
-        ledger_apis = {"fetchai": {"network": "testnet"}}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/thermometer:0.6.0")
-        setting_path = "agent.ledger_apis"
-        self.force_set_config(setting_path, ledger_apis)
+        self.add_item("skill", "fetchai/thermometer:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.5.0", thermometer_aea_name
+            "fetchai/thermometer_aea:0.6.0", thermometer_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
+
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.5.0")
-        setting_path = "agent.ledger_apis"
-        self.force_set_config(setting_path, ledger_apis)
+        self.add_item("skill", "fetchai/thermometer_client:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.5.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.6.0", thermometer_client_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key("fetchai")
-        self.add_private_key("fetchai", "fet_private_key.txt")
+        # add funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
-            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
         thermometer_aea_process = self.run_agent()
 
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
+
         self.set_agent_context(thermometer_client_aea_name)
         thermometer_client_aea_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
-            "unregistering services from OEF service directory.",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_client_aea_process,
+            check_strings,
+            timeout=240,
+            is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
+            missing_strings
+        )
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
@@ -225,3 +345,4 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])

@@ -1,5 +1,8 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.5.1 to 0.5.2
+
+No public APIs have been changed.
 
 ## v0.5.0 to 0.5.1
 

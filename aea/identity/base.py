@@ -21,9 +21,10 @@
 
 from typing import Dict, Optional
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.mail.base import Address
 
-DEFAULT_ADDRESS_KEY = "fetchai"
+DEFAULT_ADDRESS_KEY = DEFAULT_LEDGER
 
 
 class Identity:

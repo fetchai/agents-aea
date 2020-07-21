@@ -1,9 +1,9 @@
-<a name=".aea.helpers.preference_representations.base"></a>
+<a name="aea.helpers.preference_representations.base"></a>
 # aea.helpers.preference`_`representations.base
 
 Preference representation helpers.
 
-<a name=".aea.helpers.preference_representations.base.logarithmic_utility"></a>
+<a name="aea.helpers.preference_representations.base.logarithmic_utility"></a>
 #### logarithmic`_`utility
 
 ```python
@@ -22,7 +22,7 @@ Compute agent's utility given her utility function params and a good bundle.
 
 utility value
 
-<a name=".aea.helpers.preference_representations.base.linear_utility"></a>
+<a name="aea.helpers.preference_representations.base.linear_utility"></a>
 #### linear`_`utility
 
 ```python

@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for Envelope of mail.base.py."""
-import logging
 import time
 import unittest.mock
 
@@ -301,9 +300,12 @@ def test_envelope_skill_id():
     assert envelope.skill_id == PublicId("author", "skill_name", "0.1.0")
 
 
-def test_envelope_skill_id_raises_value_error(caplog):
+def test_envelope_skill_id_raises_value_error():
     """Test the property Envelope.skill_id raises ValueError if the URI is not a public id.."""
-    with caplog.at_level(logging.DEBUG, logger="aea.mail.base"):
+    with unittest.mock.patch.object(
+        aea.mail.base.logger, "debug"
+    ) as mock_logger_method:
+        # with caplog.at_level(logging.DEBUG, logger="aea.mail.base"):
         bad_uri = "author/skill_name/bad_version"
         envelope_context = EnvelopeContext(uri=URI(bad_uri))
         envelope = Envelope(
@@ -315,6 +317,9 @@ def test_envelope_skill_id_raises_value_error(caplog):
         )
 
         assert envelope.skill_id is None
-        assert (
-            f"URI - {bad_uri} - not a valid skill id." in caplog.text
-        ), f"Cannot find message in output: {caplog.text}"
+        # assert (
+        #     f"URI - {bad_uri} - not a valid skill id." in caplog.text
+        # ), f"Cannot find message in output: {caplog.text}"
+        mock_logger_method.assert_called_with(
+            f"URI - {bad_uri} - not a valid skill id."
+        )
