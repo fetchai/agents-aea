@@ -42,7 +42,7 @@ from tests.conftest import (
 )
 
 
-@pytest.mark.integration
+@pytest.mark.network
 class TestGui:
     """Test that the command 'aea gui' works as expected."""
 

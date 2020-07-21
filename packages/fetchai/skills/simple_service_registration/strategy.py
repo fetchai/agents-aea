@@ -19,18 +19,16 @@
 
 """This package contains a scaffold of a model."""
 
-from typing import Any, Dict, Optional
-
-from aea.helpers.search.generic import GenericDataModel
-from aea.helpers.search.models import Description
+from aea.helpers.search.generic import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
+)
+from aea.helpers.search.models import Description, Location
 from aea.skills.base import Model
 
-DEFAULT_DATA_MODEL_NAME = "location"
-DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": "True"},
-    "attribute_two": {"name": "city", "type": "str", "is_required": "True"},
-}  # type: Optional[Dict[str, Any]]
-DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
 
 
 class Strategy(Model):
@@ -42,29 +40,48 @@ class Strategy(Model):
 
         :return: None
         """
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = {
+            "location": Location(location["longitude"], location["latitude"])
+        }
+        self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        assert (
+            len(self._set_service_data) == 2
+            and "key" in self._set_service_data
+            and "value" in self._set_service_data
+        ), "service_data must contain keys `key` and `value`"
+        self._remove_service_data = {"key": self._set_service_data["key"]}
         super().__init__(**kwargs)
-        self._oef_msg_id = 0
 
-    def get_next_oef_msg_id(self) -> int:
+    def get_location_description(self) -> Description:
         """
-        Get the next oef msg id.
+        Get the location description.
 
-        :return: the next oef msg id
+        :return: a description of the agent's location
         """
-        self._oef_msg_id += 1
-        return self._oef_msg_id
+        description = Description(
+            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+        )
+        return description
 
-    def get_service_description(self) -> Description:
+    def get_register_service_description(self) -> Description:
         """
-        Get the service description.
+        Get the register service description.
 
         :return: a description of the offered services
         """
-        desc = Description(
-            self._service_data,
-            data_model=GenericDataModel(self._data_model_name, self._data_model),
+        description = Description(
+            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
         )
-        return desc
+        return description
+
+    def get_unregister_service_description(self) -> Description:
+        """
+        Get the unregister service description.
+
+        :return: a description of the to be removed service
+        """
+        description = Description(
+            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+        )
+        return description
