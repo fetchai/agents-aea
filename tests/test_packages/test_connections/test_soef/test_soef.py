@@ -19,6 +19,7 @@
 """This module contains the tests of the soef connection module."""
 
 import asyncio
+import copy
 from typing import Any, Callable
 from unittest.mock import MagicMock, patch
 
@@ -27,6 +28,8 @@ import pytest
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -38,8 +41,13 @@ from aea.helpers.search.models import (
 )
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+from aea.protocols.base import Message
 
 from packages.fetchai.connections.soef.connection import SOEFConnection, SOEFException
+from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogues as BaseOefSearchDialogues,
+)
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
@@ -63,6 +71,45 @@ def wrap_future(return_value: Any) -> asyncio.Future:
     return f
 
 
+class OefSearchDialogues(BaseOefSearchDialogues):
+    """This class keeps track of all oef_search dialogues."""
+
+    def __init__(self, agent_address: str) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        BaseOefSearchDialogues.__init__(self, agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming/outgoing first message.
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return OefSearchDialogue.Role.AGENT
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> OefSearchDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = OefSearchDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+
 class TestSoef:
     """Set of unit tests for soef connection."""
 
@@ -78,6 +125,7 @@ class TestSoef:
         self.crypto = make_crypto(DEFAULT_LEDGER)
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
         identity = Identity("", address=self.crypto.address)
+        self.oef_search_dialogues = OefSearchDialogues(self.crypto.address)
 
         # create the connection and multiplexer objects
         configuration = ConnectionConfig(
@@ -108,10 +156,14 @@ class TestSoef:
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -136,11 +188,15 @@ class TestSoef:
             service_instance, data_model=models.REMOVE_SERVICE_KEY_MODEL
         )
         message = OefSearchMessage(
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -182,10 +238,14 @@ class TestSoef:
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -222,10 +282,14 @@ class TestSoef:
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -238,6 +302,11 @@ class TestSoef:
             expected_envelope.message.performative
             == OefSearchMessage.Performative.OEF_ERROR
         )
+        message = copy.deepcopy(expected_envelope.message)
+        message.is_incoming = True  # TODO: fix
+        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        receiving_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
     @pytest.mark.asyncio
     async def test_unregister_service(self):
@@ -249,18 +318,26 @@ class TestSoef:
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
         )
-        with pytest.raises(NotImplementedError):
+        with patch.object(
+            self.connection.channel,
+            "_request_text",
+            make_async("<response><message>Goodbye!</message></response>"),
+        ):
             await self.connection.send(envelope)
 
-        assert await asyncio.wait_for(self.connection.receive(), timeout=1)
+        assert self.connection.channel.unique_page_address is None
 
     @pytest.mark.asyncio
     async def test_register_personailty_pieces(self):
@@ -271,10 +348,14 @@ class TestSoef:
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -343,10 +424,14 @@ class TestSoef:
         closeness_query = Query([], model=models.AGENT_LOCATION_MODEL)
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -363,6 +448,11 @@ class TestSoef:
         assert expected_envelope
         message = expected_envelope.message
         assert message.performative == OefSearchMessage.Performative.OEF_ERROR
+        message = copy.deepcopy(expected_envelope.message)
+        message.is_incoming = True  # TODO: fix
+        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        receiving_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
     @pytest.mark.asyncio
     async def test_search(self):
@@ -386,10 +476,14 @@ class TestSoef:
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -406,10 +500,40 @@ class TestSoef:
         assert expected_envelope
         message = expected_envelope.message
         assert len(message.agents) >= 1
+        message = copy.deepcopy(expected_envelope.message)
+        message.is_incoming = True  # TODO: fix
+        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        receiving_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
     @pytest.mark.asyncio
     async def test_find_around_me(self):
         """Test internal method find around me."""
+        agent_location = Location(52.2057092, 2.1183431)
+        radius = 0.1
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (agent_location, radius))
+        )
+        personality_filters = [
+            Constraint("genus", ConstraintType("==", "vehicle")),
+            Constraint(
+                "classification", ConstraintType("==", "mobility.railway.train")
+            ),
+        ]
+        service_key_filters = [
+            Constraint("custom_key", ConstraintType("==", "custom_value")),
+        ]
+        closeness_query = Query(
+            [close_to_my_service] + personality_filters + service_key_filters
+        )
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            query=closeness_query,
+        )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -420,10 +544,16 @@ class TestSoef:
                 wrap_future(self.search_fail_response),
             ],
         ):
-            await self.connection.channel._find_around_me(1, {})
-            await self.connection.channel._find_around_me(1, {})
+            await self.connection.channel._find_around_me(
+                message, sending_dialogue, 1, {}
+            )
+            await self.connection.channel._find_around_me(
+                message, sending_dialogue, 1, {}
+            )
             with pytest.raises(SOEFException, match=r"`find_around_me` error: .*"):
-                await self.connection.channel._find_around_me(1, {})
+                await self.connection.channel._find_around_me(
+                    message, sending_dialogue, 1, {}
+                )
 
     @pytest.mark.asyncio
     async def test_register_agent(self):
@@ -449,11 +579,16 @@ class TestSoef:
 
         resp_text1 = '<?xml version="1.0" encoding="UTF-8"?><response><encrypted>0</encrypted><token>672DB3B67780F98984ABF1123BD11</token><page_address>oef_C95B21A4D5759C8FE7A6304B62B726AB8077BEE4BA191A7B92B388F9B1</page_address></response>'
         resp_text2 = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
+        resp_text3 = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
         with patch.object(
             self.connection.channel,
             "_request_text",
             new_callable=MagicMock,
-            side_effect=[wrap_future(resp_text1), wrap_future(resp_text2)],
+            side_effect=[
+                wrap_future(resp_text1),
+                wrap_future(resp_text2),
+                wrap_future(resp_text3),
+            ],
         ):
             await self.connection.channel._register_agent()
             assert self.connection.channel._ping_periodic_task is not None
@@ -568,10 +703,14 @@ class TestSoef:
         service_description = Description({}, data_model=models.PING_MODEL)
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
         envelope = Envelope(
-            to="soef",
+            to=message.counterparty,
             sender=self.crypto.address,
             protocol_id=message.protocol_id,
             message=message,
@@ -592,13 +731,18 @@ class TestSoef:
         """Test periodic ping task is set on agent register."""
         resp_text1 = '<?xml version="1.0" encoding="UTF-8"?><response><encrypted>0</encrypted><token>672DB3B67780F98984ABF1123BD11</token><page_address>oef_C95B21A4D5759C8FE7A6304B62B726AB8077BEE4BA191A7B92B388F9B1</page_address></response>'
         resp_text2 = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
+        resp_text3 = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
         self.connection.channel.PING_PERIOD = 0.1
 
         with patch.object(
             self.connection.channel,
             "_request_text",
             new_callable=MagicMock,
-            side_effect=[wrap_future(resp_text1), wrap_future(resp_text2)],
+            side_effect=[
+                wrap_future(resp_text1),
+                wrap_future(resp_text2),
+                wrap_future(resp_text3),
+            ],
         ):
             with patch.object(self.connection.channel, "_ping_command",) as mocked_ping:
                 await self.connection.channel._register_agent()

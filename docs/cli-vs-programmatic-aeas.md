@@ -11,15 +11,6 @@ The scope of the specific demo is to demonstrate how a CLI based AEA can interac
 to achieve this we are going to use the weather station skills. 
 This demo does not utilize a smart contract or a ledger interaction. 
 
-## Launch an OEF search and communication node
-
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for the entire demo.
-
 ## Get required packages
 
 Copy the packages directory into your local working directory:
@@ -49,10 +40,21 @@ aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_led
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
+### Add keys
+
+Add keys for the weather station.
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
+```
+
 ### Run the weather station AEA
 ``` bash
 aea run
 ```
+
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
 
 ### Create the weather client AEA
 
@@ -80,11 +82,16 @@ from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
-from packages.fetchai.connections.oef.connection import OEFConnection
+from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
+from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
-HOST = "127.0.0.1"
-PORT = 10000
+API_KEY = "TwiCIriSl0mLahw17pyqoA"
+SOEF_ADDR = "soef.fetch.ai"
+SOEF_PORT = 9002
+ENTRY_PEER_ADDRESS = (
+    "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"
+)
 ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
@@ -96,15 +103,19 @@ def run():
     create_private_key(CosmosCrypto.identifier)
 
     # Set up the wallet, identity and (empty) resources
-    wallet = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE})
+    wallet = Wallet(
+        private_key_paths={CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE},
+        connection_private_key_paths={CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE},
+    )
     identity = Identity("my_aea", address=wallet.addresses.get(CosmosCrypto.identifier))
     resources = Resources()
 
     # specify the default routing for some protocols
     default_routing = {
-        PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerConnection.connection_id
+        PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerConnection.connection_id,
+        PublicId.from_str("fetchai/oef_search:0.3.0"): SOEFConnection.connection_id,
     }
-    default_connection = OEFConnection.connection_id
+    default_connection = SOEFConnection.connection_id
 
     # create the AEA
     my_aea = AEA(
@@ -148,12 +159,37 @@ def run():
     )
     resources.add_connection(ledger_api_connection)
 
-    # Add the OEF connection
+    # Add the P2P connection
     configuration = ConnectionConfig(
-        addr=HOST, port=PORT, connection_id=OEFConnection.connection_id
+        connection_id=P2PLibp2pConnection.connection_id,
+        delegate_uri="127.0.0.1:11001",
+        entry_peers=[ENTRY_PEER_ADDRESS],
+        local_uri="127.0.0.1:9001",
+        log_file="libp2p_node.log",
+        public_uri="127.0.0.1:9001",
     )
-    oef_connection = OEFConnection(configuration=configuration, identity=identity)
-    resources.add_connection(oef_connection)
+    p2p_connection = P2PLibp2pConnection(
+        configuration=configuration,
+        identity=identity,
+        crypto_store=wallet.connection_cryptos,
+    )
+    resources.add_connection(p2p_connection)
+
+    # Add the SOEF connection
+    configuration = ConnectionConfig(
+        api_key=API_KEY,
+        soef_addr=SOEF_ADDR,
+        soef_port=SOEF_PORT,
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.3.0")},
+        connection_id=SOEFConnection.connection_id,
+        delegate_uri="127.0.0.1:11001",
+        entry_peers=[ENTRY_PEER_ADDRESS],
+        local_uri="127.0.0.1:9001",
+        log_file="libp2p_node.log",
+        public_uri="127.0.0.1:9001",
+    )
+    soef_connection = SOEFConnection(configuration=configuration, identity=identity)
+    resources.add_connection(soef_connection)
 
     # Add the error and weather_client skills
     error_skill = Skill.from_dir(
@@ -184,7 +220,9 @@ if __name__ == "__main__":
 ```
 </details>
 
-For more details on how to create an agent programmatically follow this guide <a href='/build-aea-programmatically/'>here</a>
+Now replace `ENTRY_PEER_ADDRESS` with the peer address (`SOME_ADDRESS`) noted above.
+
+For more details on how to create an agent programmatically follow this guide <a href='/build-aea-programmatically/'>here</a>.
 
 ### Run the weather station AEA
 

@@ -72,17 +72,17 @@ aea delete my_generic_buyer
 ``` yaml
 name: generic_seller
 author: fetchai
-version: 0.6.0
+version: 0.8.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmTwUHrRrBvadNp4RBBEKcMBUvgv2MuGojz7gDsuYDrauE
-  dialogues.py: QmY44eSrEzaZxtAG1dqbddwouj5iVMEitzpmt2xFC6MDUm
-  handlers.py: QmSiquvAA4ULXPEJfmT3Z85Lqm9Td2H2uXXKuXrZjcZcPK
-  strategy.py: QmYt74ucz8GfddfwP5dFgQBbD1dkcWvydUyEZ8jn9uxEDK
+  behaviours.py: QmZuzEpqCZjW1rAYT1PZXoYRPjCXxKNQ2ZEkL32WQhxtwf
+  dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
+  handlers.py: QmfFY8HGULapXzCHHLuwWhgADXvBw8NJvfX155pY3qWS1h
+  strategy.py: QmRVkBtcCUKXf68RAqnHAi6UWqcygesppUNzSm9oceYNHH
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -124,22 +124,15 @@ models:
       currency_id: FET
       data_for_sale:
         generic: data
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       has_data_source: false
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
+        key: seller_service
+        value: generic_service
       service_id: generic_service
       unit_price: 10
     class_name: GenericStrategy
@@ -148,16 +141,16 @@ dependencies: {}
 ``` yaml
 name: generic_buyer
 author: fetchai
-version: 0.5.0
-description: The generic buyer skill implements the skill to purchase data.
+version: 0.7.0
+description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmYfAMPG5Rnm9fGp7frZLky6cV6Z7qAhtsPNhfwtVYRuEx
-  dialogues.py: QmXe9VAuinv6jgi5So7e25qgWXN16pB6tVG1iD7oAxUZ56
-  handlers.py: QmX9Pphv5VkfKgYriUkzqnVBELLkpdfZd6KzEQKkCG6Da3
-  strategy.py: QmP3fLkBnLyQhHngZELHeLfK59WY6Xz76bxCVm6pfE6tLh
+  behaviours.py: QmUHgMCuvWYyAU382c7hUikNi6R6rfmH1toKUB1K2rcbXQ
+  dialogues.py: QmYMR28TDqE56GdUxP9LwerktaJrD9SBkGoeJsoLSMHpx6
+  handlers.py: QmYevHGuYJ8bsQUT22ZJcSx2aotUveNTLbdyEMMzCEMw7U
+  strategy.py: QmU2gH921MoxvVCCQhnEvcFNbDsgBojeHeTXDEY3ZBMC2A
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -203,30 +196,19 @@ models:
   strategy:
     args:
       currency_id: FET
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
       search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
+        constraint_type: ==
+        search_key: seller_service
+        search_value: generic_service
+      search_radius: 5.0
       service_id: generic_service
     class_name: GenericStrategy
 dependencies: {}

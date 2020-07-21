@@ -22,10 +22,15 @@
 import os
 import shutil
 
-from aea.test_tools.test_cases import AEATestCaseMany, UseOef
+import pytest
+
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_FILE,
     CUR_PATH,
+    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     ROOT_DIR,
 )
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
@@ -35,7 +40,7 @@ PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 DEST = "programmatic_aea.py"
 
 
-class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
+class TestCliVsProgrammaticAEA(AEATestCaseMany):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     def test_read_md_file(self):
@@ -46,6 +51,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
+    @pytest.mark.integration
     def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
 
@@ -58,7 +64,31 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
             "bool",
         )
         self.run_install()
+
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+
         weather_station_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            weather_station_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
         src_file_path = os.path.join(ROOT_DIR, "tests", PY_FILE)
         dst_file_path = os.path.join(ROOT_DIR, self.t, DEST)
@@ -66,7 +96,23 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         weather_client_process = self.start_subprocess(DEST, cwd=self.t)
 
         check_strings = (
-            "updating services on OEF service directory.",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, timeout=240, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",

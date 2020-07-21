@@ -1,7 +1,4 @@
 ``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-``` bash
 aea fetch fetchai/generic_seller:0.5.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
@@ -9,11 +6,12 @@ aea install
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/generic_seller:0.8.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 ``` bash
 aea fetch fetchai/generic_buyer:0.5.0 --alias my_buyer_aea
@@ -23,48 +21,25 @@ aea install
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.6.0
+aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/generic_buyer:0.7.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
-```
-``` bash
-aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
-```
-``` bash
-aea generate-wealth fetchai
-```
-``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-``` bash
-aea generate-wealth ethereum
+aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
 ```
 ``` bash
 aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
+```
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 ``` bash
 aea generate-wealth cosmos
-```
-``` bash
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.ledger_id ethereum
-```
-``` bash
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.generic_seller.models.strategy.args.ledger_id cosmos
-```
-``` bash
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.ledger_id ethereum
-```
-``` bash
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.currency_id ATOM
-aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
 cd my_seller_aea
@@ -78,6 +53,9 @@ aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
 aea run
 ```
 ``` bash
+aea run
+```
+``` bash
 cd ..
 aea delete my_seller_aea
 aea delete my_buyer_aea
@@ -85,10 +63,12 @@ aea delete my_buyer_aea
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
 ```
 ``` yaml
 models:
@@ -97,28 +77,19 @@ models:
     args:
       currency_id: FET
       data_for_sale:
-        pressure: 20
-        temperature: 26
-        wind: 10
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
+        generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
+        key: seller_service
+        value: generic_service
       service_id: generic_service
       unit_price: 10
-    class_name: GenericStrategy 
+    class_name: GenericStrategy
 ```
 ``` yaml
 models:
@@ -126,30 +97,27 @@ models:
   strategy:
     args:
       currency_id: FET
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       is_ledger_tx: true
-      ledger_id: fetchai
+      ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
       search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
+        constraint_type: ==
+        search_key: seller_service
+        search_value: generic_service
+      search_radius: 5.0
       service_id: generic_service
     class_name: GenericStrategy
+```
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
 ```

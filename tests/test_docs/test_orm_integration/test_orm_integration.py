@@ -26,14 +26,17 @@ import pytest
 
 import yaml
 
-from aea.test_tools.test_cases import AEATestCaseMany, UseOef
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
     FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS,
+    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_GENESIS_CONFIG,
     ROOT_DIR,
+    wait_for_localhost_ports_to_close,
 )
 
 seller_strategy_replacement = """models:
@@ -54,23 +57,16 @@ seller_strategy_replacement = """models:
       currency_id: FET
       data_for_sale:
         temperature: 26
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
-      has_data_source: true
+      has_data_source: false
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       service_data:
-        city: Cambridge
-        country: UK
-      service_id: generic_service
+        key: seller_service
+        value: thermometer_data
+      service_id: thermometer_data
       unit_price: 10
     class_name: Strategy
 dependencies:
@@ -95,31 +91,20 @@ buyer_strategy_replacement = """models:
   strategy:
     args:
       currency_id: FET
-      data_model:
-        attribute_one:
-          is_required: true
-          name: country
-          type: str
-        attribute_two:
-          is_required: true
-          name: city
-          type: str
-      data_model_name: location
       is_ledger_tx: true
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
       search_query:
-        constraint_one:
-          constraint_type: ==
-          search_term: country
-          search_value: UK
-        constraint_two:
-          constraint_type: ==
-          search_term: city
-          search_value: Cambridge
-      service_id: generic_service
+        constraint_type: ==
+        search_key: seller_service
+        search_value: thermometer_data
+      search_radius: 5.0
+      service_id: thermometer_data
     class_name: Strategy"""
 
 
@@ -128,7 +113,8 @@ ORM_SELLER_STRATEGY_PATH = Path(
 )
 
 
-class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
+@pytest.mark.integration
+class TestOrmIntegrationDocs(AEATestCaseMany):
     """This class contains the tests for the orm-integration.md guide."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -138,14 +124,18 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         buyer_aea_name = "my_thermometer_client"
         self.create_agents(seller_aea_name, buyer_aea_name)
 
-        default_routing = {"fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0"}
+        default_routing = {
+            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+        }
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/thermometer:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         # ejecting changes author and version!
@@ -168,12 +158,21 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         )
         self.run_install()
 
+        # add non-funded key
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        )
+
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/thermometer_client:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
@@ -186,20 +185,55 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         # add funded key
         self.generate_private_key(COSMOS)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(seller_aea_name)
         seller_aea_process = self.run_agent()
 
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            seller_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
+
         self.set_agent_context(buyer_aea_name)
         buyer_aea_process = self.run_agent()
 
         check_strings = (
-            "updating services on OEF service directory.",
-            "unregistering services from OEF service directory.",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            buyer_aea_process, check_strings, timeout=240, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
+            missing_strings
+        )
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
@@ -242,6 +276,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])
 
 
 def test_strategy_consistency():

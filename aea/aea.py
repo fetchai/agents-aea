@@ -75,7 +75,7 @@ class AEA(Agent):
         default_connection: Optional[PublicId] = None,
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
-        search_service_address: str = "oef",
+        search_service_address: str = "fetchai/soef:*",
         **kwargs,
     ) -> None:
         """

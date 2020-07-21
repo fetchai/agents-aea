@@ -26,7 +26,7 @@ import tempfile
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
@@ -35,6 +35,7 @@ from packages.fetchai.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
+    COSMOS,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     libp2p_log_on_failure,
@@ -64,14 +65,14 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-
+        crypto = make_crypto(COSMOS)
         cls.node_host = "localhost"
         cls.node_port = "11234"
-        cls.identity = Identity("", address=FetchAICrypto().address)
+        cls.identity = Identity("", address=crypto.address)
 
         cls.key_file = os.path.join(cls.t, "keyfile")
         key_file_desc = open(cls.key_file, "ab")
-        FetchAICrypto().dump(key_file_desc)
+        crypto.dump(key_file_desc)
         key_file_desc.close()
 
     def test_empty_nodes(self):

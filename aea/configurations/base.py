@@ -364,6 +364,11 @@ class PublicId(JSONSerializable):
         """Get the package version."""
         return self._version_info
 
+    @property
+    def latest(self) -> str:
+        """Get the public id in `latest` form."""
+        return "{author}/{name}:*".format(author=self.author, name=self.name)
+
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
         """

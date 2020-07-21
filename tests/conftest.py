@@ -31,7 +31,7 @@ from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from threading import Timer
 from types import FunctionType, MethodType
-from typing import Callable, Optional, Sequence, cast
+from typing import Callable, List, Optional, Sequence, cast
 from unittest.mock import patch
 
 import docker as docker
@@ -153,6 +153,9 @@ FUNDED_FET_PRIVATE_KEY_1 = (
 FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "0aea4a45c40776f138a22655819519fe213030f6df7c14bf628fdc41de33a7c8"
 )
+NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
+    "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
+)
 
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
@@ -161,6 +164,16 @@ ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 FETCHAI_ADDRESS_ONE = "Vu6aENcVSYYH9GhY1k3CsL7shWH9gKKBAWcc4ckLk5w4Ltynx"
 FETCHAI_ADDRESS_TWO = "2LnTTHvGxWvKK1WfEAXnZvu81RPcMRDVQW8CJF3Gsh7Z3axDfP"
+
+# P2P addresses
+COSMOS_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"  # relates to NON_FUNDED_COSMOS_PRIVATE_KEY_1
+NON_GENESIS_CONFIG = {
+    "delegate_uri": "127.0.0.1:11001",
+    "entry_peers": [COSMOS_P2P_ADDRESS],
+    "local_uri": "127.0.0.1:9001",
+    "log_file": "libp2p_node.log",
+    "public_uri": "127.0.0.1:9001",
+}
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
@@ -388,7 +401,7 @@ def oef_port() -> int:
     return 10000
 
 
-def tcpping(ip, port) -> bool:
+def tcpping(ip, port, log_exception: bool = True) -> bool:
     """Ping TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -396,8 +409,28 @@ def tcpping(ip, port) -> bool:
         s.shutdown(2)
         return True
     except Exception as e:
-        logger.exception(e)
+        if log_exception:
+            logger.exception(e)
         return False
+
+
+def wait_for_localhost_ports_to_close(
+    ports: List[int], timeout: int = 120, sleep_time: int = 2
+) -> None:
+    """Wait for ports to close with timeout."""
+    open_ports = ports
+    elapsed = 0
+    while len(open_ports) > 0 and elapsed < timeout:
+        closed = []
+        for port in open_ports:
+            if not tcpping("127.0.0.1", port, log_exception=False):
+                closed.append(port)
+        open_ports = [port for port in open_ports if port not in closed]
+        if len(open_ports) > 0:
+            time.sleep(sleep_time)
+            elapsed += sleep_time
+    if open_ports != []:
+        raise ValueError("Some ports are open: {}!".format(open_ports))
 
 
 class OEFHealthCheck(object):

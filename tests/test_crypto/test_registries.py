@@ -26,16 +26,18 @@ from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.crypto.registries.base import ItemId, Registry
 
+FETCHAI = FetchAICrypto.identifier
+
 
 def test_make_crypto_fetchai_positive():
     """Test make_crypto for fetchai."""
-    crypto = make_crypto("fetchai")
+    crypto = make_crypto(FETCHAI)
     assert isinstance(crypto, FetchAICrypto)
 
 
 def test_make_ledger_api_fetchai_positive():
     """Test make_crypto for fetchai."""
-    ledger_api = make_ledger_api("fetchai", **{"network": "testnet"})
+    ledger_api = make_ledger_api(FETCHAI, **{"network": "testnet"})
     assert isinstance(ledger_api, FetchAIApi)
 
 
@@ -71,12 +73,12 @@ def test_register_make_with_class_kwargs():
 
 def test_itemid():
     """Test the idemid object."""
-    item_id = ItemId("fetchai")
-    assert item_id.name == "fetchai"
+    item_id = ItemId(FETCHAI)
+    assert item_id.name == FETCHAI
 
 
 def test_registry():
     """Test the registry object."""
     registry = Registry[Crypto]()
-    item_id = ItemId("fetchai")
+    item_id = ItemId(FETCHAI)
     assert not registry.has_spec(item_id), "Registry should be empty"

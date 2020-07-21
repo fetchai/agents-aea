@@ -476,6 +476,7 @@ class BaseAEATestCase(ABC):
         cls,
         ledger_api_id: str = DEFAULT_LEDGER,
         private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE,
+        connection: bool = False,
     ) -> None:
         """
         Add private key with CLI command.
@@ -483,12 +484,22 @@ class BaseAEATestCase(ABC):
 
         :param ledger_api_id: ledger API ID.
         :param private_key_filepath: private key filepath.
+        :param connection: whether or not the private key filepath is for a connection.
 
         :return: None
         """
-        cls.run_cli_command(
-            "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
-        )
+        if connection:
+            cls.run_cli_command(
+                "add-key",
+                ledger_api_id,
+                private_key_filepath,
+                "--connection",
+                cwd=cls._get_cwd(),
+            )
+        else:
+            cls.run_cli_command(
+                "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
+            )
 
     @classmethod
     def replace_private_key_in_file(
@@ -708,6 +719,7 @@ class BaseAEATestCase(ABC):
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
+        cls.terminate_agents(*cls.subprocesses)
         cls._terminate_subprocesses()
         cls._join_threads()
         cls.unset_agent_context()

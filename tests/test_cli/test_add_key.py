@@ -304,6 +304,16 @@ class AddKeyTestCase(TestCase):
         _try_add_key(ctx, "type", "filepath")
 
 
+@mock.patch("builtins.open", mock.mock_open())
+class AddKeyConnectionTestCase(TestCase):
+    """Test case for _add_key method."""
+
+    def test__add_key_positive(self, *mocks):
+        """Test for _add_key method positive result."""
+        ctx = ContextMock()
+        _try_add_key(ctx, "type", "filepath", connection=True)
+
+
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
 @mock.patch("aea.cli.add_key.try_validate_private_key_path")
 @mock.patch("aea.cli.add_key._try_add_key")

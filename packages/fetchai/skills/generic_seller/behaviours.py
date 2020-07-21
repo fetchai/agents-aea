@@ -19,9 +19,8 @@
 
 """This package contains the behaviour of a generic seller AEA."""
 
-from typing import Optional, cast
+from typing import cast
 
-from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -33,7 +32,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
-DEFAULT_SERVICES_INTERVAL = 30.0
+DEFAULT_SERVICES_INTERVAL = 60.0
 LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
 
 
@@ -46,7 +45,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
-        self._registered_service_description = None  # type: Optional[Description]
 
     def setup(self) -> None:
         """
@@ -68,6 +66,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             ledger_api_msg.counterparty = LEDGER_API_ADDRESS
             ledger_api_dialogues.update(ledger_api_msg)
             self.context.outbox.put_message(message=ledger_api_msg)
+        self._register_agent()
         self._register_service()
 
     def act(self) -> None:
@@ -76,8 +75,8 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        self._unregister_service()
-        self._register_service()
+        # self._unregister_service()
+        # self._register_service()
 
     def teardown(self) -> None:
         """
@@ -86,16 +85,16 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         self._unregister_service()
+        self._unregister_agent()
 
-    def _register_service(self) -> None:
+    def _register_agent(self) -> None:
         """
-        Register to the OEF Service Directory.
+        Register the agent's location.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_service_description()
-        self._registered_service_description = description
+        description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
@@ -107,34 +106,67 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(
-            "[{}]: updating services on OEF service directory.".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("registering agent on SOEF.")
 
-    def _unregister_service(self) -> None:
+    def _register_service(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Register the agent's service.
 
         :return: None
         """
-        if self._registered_service_description is None:
-            return
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_service_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering service on SOEF.")
+
+    def _unregister_service(self) -> None:
+        """
+        Unregister service from the SOEF.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            service_description=self._registered_service_description,
+            service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(
-            "[{}]: unregistering services from OEF service directory.".format(
-                self.context.agent_name
-            )
+        self.context.logger.info("unregistering service from SOEF.")
+
+    def _unregister_agent(self) -> None:
+        """
+        Unregister agent from the SOEF.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
-        self._registered_service_description = None
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("unregistering agent from SOEF.")

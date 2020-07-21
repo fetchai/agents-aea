@@ -63,6 +63,15 @@ class CosmosCrypto(Crypto[SigningKey]):
         self._address = CosmosHelper.get_address_from_public_key(self.public_key)
 
     @property
+    def private_key(self) -> str:
+        """
+        Return a private key.
+
+        :return: a private key string
+        """
+        return self.entity.to_string().hex()
+
+    @property
     def public_key(self) -> str:
         """
         Return a public key in hex format.
@@ -153,7 +162,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self.entity.to_string().hex().encode("utf-8"))
+        fp.write(self.private_key.encode("utf-8"))
 
 
 class CosmosHelper(Helper):
