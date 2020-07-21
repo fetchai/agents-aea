@@ -307,7 +307,7 @@ class ConstraintTypes(Enum):
     NOT_IN = "not_in"
     DISTANCE = "distance"
 
-    def __str__(self):
+    def __str__(self):  # pragma: nocover
         """Get the string representation."""
         return str(self.value)
 
@@ -329,6 +329,7 @@ class ConstraintType:
         >>> within_range = ConstraintType("within", (-10.0, 10.0))
         >>> in_a_set = ConstraintType("in", [1, 2, 3])
         >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
+
     """
 
     def __init__(self, type_: Union[ConstraintTypes, str], value: Any):
@@ -385,7 +386,7 @@ class ConstraintType:
                 assert len(self.value) == 2
                 assert isinstance(self.value[0], Location)
                 assert isinstance(self.value[1], float)
-            else:
+            else:  # pragma: nocover
                 raise ValueError("Type not recognized.")
         except (AssertionError, ValueError):
             return False
@@ -472,7 +473,7 @@ class ConstraintType:
             location = cast(Location, self.value[0])
             distance = self.value[1]
             return location.distance(value) <= distance
-        else:
+        else:  # pragma: nocover
             raise ValueError("Constraint type not recognized.")
 
     def __eq__(self, other):
@@ -508,7 +509,7 @@ class ConstraintExpr(ABC):
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
         """
 
-    def check_validity(self) -> None:  # pylint: disable=no-self-use
+    def check_validity(self) -> None:  # pylint: disable=no-self-use  # pragma: nocover
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 
@@ -554,7 +555,7 @@ class And(ConstraintExpr):
         :return ``None``
         :raises ValueError: if the object does not satisfy some requirements.
         """
-        if len(self.constraints) < 2:
+        if len(self.constraints) < 2:  # pragma: nocover  # TODO: do we need this check?
             raise ValueError(
                 "Invalid input value for type '{}': number of "
                 "subexpression must be at least 2.".format(type(self).__name__)
@@ -562,7 +563,7 @@ class And(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, And) and self.constraints == other.constraints
 
@@ -603,7 +604,7 @@ class Or(ConstraintExpr):
         :return ``None``
         :raises ValueError: if the object does not satisfy some requirements.
         """
-        if len(self.constraints) < 2:
+        if len(self.constraints) < 2:  # pragma: nocover # TODO: do we need this check?
             raise ValueError(
                 "Invalid input value for type '{}': number of "
                 "subexpression must be at least 2.".format(type(self).__name__)
@@ -611,7 +612,7 @@ class Or(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
 
@@ -645,7 +646,7 @@ class Not(ConstraintExpr):
         """
         return self.constraint.is_valid(data_model)
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Not) and self.constraint == other.constraint
 

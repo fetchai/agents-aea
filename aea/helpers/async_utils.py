@@ -25,6 +25,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from asyncio.tasks import Task
+from collections.abc import Iterable
 from threading import Thread
 from typing import (
     Any,
@@ -50,9 +51,13 @@ logger = logging.getLogger(__file__)
 
 def ensure_list(value: Any) -> List:
     """Return [value] or list(value) if value is a sequence."""
-    if not isinstance(value, (list, tuple)):
-        value = [value]
-    return list(value)
+    if isinstance(value, list):
+        return value
+
+    if isinstance(value, Iterable):
+        return list(value)
+
+    return [value]
 
 
 class AsyncState:
@@ -90,7 +95,7 @@ class AsyncState:
     def _state_changed(self, state: Any) -> None:
         """Fulfill watchers for state."""
         for watcher in list(self._watchers):
-            if state not in watcher._states:  # type: ignore # pylint: disable=protected-access
+            if state not in watcher._states:  # type: ignore # pylint: disable=protected-access  # pragma: nocover
                 continue
             if not watcher.done():
                 watcher._loop.call_soon_threadsafe(  # pylint: disable=protected-access
@@ -110,7 +115,7 @@ class AsyncState:
         """Create callback for watcher result."""
         # docstyle.
         def _callback(result):
-            if watcher.done():
+            if watcher.done():  # pragma: nocover
                 return
             watcher.set_result(result)
 
@@ -173,7 +178,7 @@ class PeriodicCaller:
         try:
             self._periodic_callable()
         except Exception as exception:  # pylint: disable=broad-except
-            if not self._exception_callback:
+            if not self._exception_callback:  # pragma: nocover
                 raise
             self._exception_callback(self._periodic_callable, exception)
 
@@ -188,13 +193,14 @@ class PeriodicCaller:
 
     def start(self) -> None:
         """Activate period calls."""
-        if self._timerhandle:
+        if self._timerhandle:  # pragma: nocover
             return
+
         self._schedule_call()
 
     def stop(self) -> None:
         """Remove from schedule."""
-        if not self._timerhandle:
+        if not self._timerhandle:  # pragma: nocover
             return
 
         self._timerhandle.cancel()
@@ -216,6 +222,7 @@ def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
         assert not loop.is_running()
     except (RuntimeError, AssertionError):
         loop = asyncio.new_event_loop()
+
     return loop
 
 
@@ -262,14 +269,6 @@ class AnotherThreadTask:
         else:
             self._loop.call_soon_threadsafe(self._task.cancel)
 
-    def future_cancel(self) -> None:
-        """
-        Cancel task waiting future.
-
-        In this case future result will raise CanclledError not waiting for real task exit.
-        """
-        self._future.cancel()
-
     def done(self) -> bool:
         """Check task is done."""
         return self._future.done()
@@ -290,7 +289,7 @@ class ThreadedAsyncRunner(Thread):
 
     def start(self) -> None:
         """Start event loop in dedicated thread."""
-        if self.is_alive() or self._loop.is_running():
+        if self.is_alive() or self._loop.is_running():  # pragma: nocover
             return
         super().start()
         self.call(asyncio.sleep(0.001)).result(1)
@@ -313,11 +312,14 @@ class ThreadedAsyncRunner(Thread):
     def stop(self) -> None:
         """Stop event loop in thread."""
         logger.debug("Stopping...")
-        if not self.is_alive():
+
+        if not self.is_alive():  # pragma: nocover
             return
+
         if self._loop.is_running():
             logger.debug("Stopping loop...")
             self._loop.call_soon_threadsafe(self._loop.stop)
+
         logger.debug("Wait thread to join...")
         self.join(10)
         logger.debug("Stopped.")
@@ -325,11 +327,12 @@ class ThreadedAsyncRunner(Thread):
 
 async def cancel_and_wait(task: Optional[Task]) -> Any:
     """Wait cancelled task and skip CancelledError."""
-    if not task:
+    if not task:  # pragma: nocover
         return
     try:
         if task.done():
             return await task
+
         task.cancel()
         return await task
     except CancelledError as e:
