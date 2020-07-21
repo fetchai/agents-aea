@@ -92,10 +92,36 @@ class TProtocolSerializer(Serializer):
             t_protocol_msg.performative_pct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pmt_Performative()  # type: ignore
+            content_dict_int_bytes = msg.content_dict_int_bytes
+            performative.content_dict_int_bytes.update(content_dict_int_bytes)
+            content_dict_int_int = msg.content_dict_int_int
+            performative.content_dict_int_int.update(content_dict_int_int)
+            content_dict_int_float = msg.content_dict_int_float
+            performative.content_dict_int_float.update(content_dict_int_float)
+            content_dict_int_bool = msg.content_dict_int_bool
+            performative.content_dict_int_bool.update(content_dict_int_bool)
+            content_dict_int_str = msg.content_dict_int_str
+            performative.content_dict_int_str.update(content_dict_int_str)
             content_dict_bool_bytes = msg.content_dict_bool_bytes
             performative.content_dict_bool_bytes.update(content_dict_bool_bytes)
+            content_dict_bool_int = msg.content_dict_bool_int
+            performative.content_dict_bool_int.update(content_dict_bool_int)
+            content_dict_bool_float = msg.content_dict_bool_float
+            performative.content_dict_bool_float.update(content_dict_bool_float)
+            content_dict_bool_bool = msg.content_dict_bool_bool
+            performative.content_dict_bool_bool.update(content_dict_bool_bool)
+            content_dict_bool_str = msg.content_dict_bool_str
+            performative.content_dict_bool_str.update(content_dict_bool_str)
+            content_dict_str_bytes = msg.content_dict_str_bytes
+            performative.content_dict_str_bytes.update(content_dict_str_bytes)
+            content_dict_str_int = msg.content_dict_str_int
+            performative.content_dict_str_int.update(content_dict_str_int)
             content_dict_str_float = msg.content_dict_str_float
             performative.content_dict_str_float.update(content_dict_str_float)
+            content_dict_str_bool = msg.content_dict_str_bool
+            performative.content_dict_str_bool.update(content_dict_str_bool)
+            content_dict_str_str = msg.content_dict_str_str
+            performative.content_dict_str_str.update(content_dict_str_str)
             t_protocol_msg.performative_pmt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_MT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Mt_Performative()  # type: ignore
@@ -360,6 +386,25 @@ class TProtocolSerializer(Serializer):
             content_list_str_tuple = tuple(content_list_str)
             performative_content["content_list_str"] = content_list_str_tuple
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
+            content_dict_int_bytes = (
+                t_protocol_pb.performative_pmt.content_dict_int_bytes
+            )
+            content_dict_int_bytes_dict = dict(content_dict_int_bytes)
+            performative_content["content_dict_int_bytes"] = content_dict_int_bytes_dict
+            content_dict_int_int = t_protocol_pb.performative_pmt.content_dict_int_int
+            content_dict_int_int_dict = dict(content_dict_int_int)
+            performative_content["content_dict_int_int"] = content_dict_int_int_dict
+            content_dict_int_float = (
+                t_protocol_pb.performative_pmt.content_dict_int_float
+            )
+            content_dict_int_float_dict = dict(content_dict_int_float)
+            performative_content["content_dict_int_float"] = content_dict_int_float_dict
+            content_dict_int_bool = t_protocol_pb.performative_pmt.content_dict_int_bool
+            content_dict_int_bool_dict = dict(content_dict_int_bool)
+            performative_content["content_dict_int_bool"] = content_dict_int_bool_dict
+            content_dict_int_str = t_protocol_pb.performative_pmt.content_dict_int_str
+            content_dict_int_str_dict = dict(content_dict_int_str)
+            performative_content["content_dict_int_str"] = content_dict_int_str_dict
             content_dict_bool_bytes = (
                 t_protocol_pb.performative_pmt.content_dict_bool_bytes
             )
@@ -367,11 +412,43 @@ class TProtocolSerializer(Serializer):
             performative_content[
                 "content_dict_bool_bytes"
             ] = content_dict_bool_bytes_dict
+            content_dict_bool_int = t_protocol_pb.performative_pmt.content_dict_bool_int
+            content_dict_bool_int_dict = dict(content_dict_bool_int)
+            performative_content["content_dict_bool_int"] = content_dict_bool_int_dict
+            content_dict_bool_float = (
+                t_protocol_pb.performative_pmt.content_dict_bool_float
+            )
+            content_dict_bool_float_dict = dict(content_dict_bool_float)
+            performative_content[
+                "content_dict_bool_float"
+            ] = content_dict_bool_float_dict
+            content_dict_bool_bool = (
+                t_protocol_pb.performative_pmt.content_dict_bool_bool
+            )
+            content_dict_bool_bool_dict = dict(content_dict_bool_bool)
+            performative_content["content_dict_bool_bool"] = content_dict_bool_bool_dict
+            content_dict_bool_str = t_protocol_pb.performative_pmt.content_dict_bool_str
+            content_dict_bool_str_dict = dict(content_dict_bool_str)
+            performative_content["content_dict_bool_str"] = content_dict_bool_str_dict
+            content_dict_str_bytes = (
+                t_protocol_pb.performative_pmt.content_dict_str_bytes
+            )
+            content_dict_str_bytes_dict = dict(content_dict_str_bytes)
+            performative_content["content_dict_str_bytes"] = content_dict_str_bytes_dict
+            content_dict_str_int = t_protocol_pb.performative_pmt.content_dict_str_int
+            content_dict_str_int_dict = dict(content_dict_str_int)
+            performative_content["content_dict_str_int"] = content_dict_str_int_dict
             content_dict_str_float = (
                 t_protocol_pb.performative_pmt.content_dict_str_float
             )
             content_dict_str_float_dict = dict(content_dict_str_float)
             performative_content["content_dict_str_float"] = content_dict_str_float_dict
+            content_dict_str_bool = t_protocol_pb.performative_pmt.content_dict_str_bool
+            content_dict_str_bool_dict = dict(content_dict_str_bool)
+            performative_content["content_dict_str_bool"] = content_dict_str_bool_dict
+            content_dict_str_str = t_protocol_pb.performative_pmt.content_dict_str_str
+            content_dict_str_str_dict = dict(content_dict_str_str)
+            performative_content["content_dict_str_str"] = content_dict_str_str_dict
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_MT:
             if t_protocol_pb.performative_mt.content_union_1_type_DataModel_is_set:
                 pb2_content_union_1_type_DataModel = (

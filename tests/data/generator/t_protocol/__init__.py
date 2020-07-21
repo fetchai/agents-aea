@@ -19,7 +19,7 @@
 
 """This module contains the support resources for the t_protocol protocol."""
 
-from tests.data.generator.t_protocol.message import TProtocolMessage
-from tests.data.generator.t_protocol.serialization import TProtocolSerializer
+from .message import TProtocolMessage
+from .serialization import TProtocolSerializer
 
 TProtocolMessage.serializer = TProtocolSerializer

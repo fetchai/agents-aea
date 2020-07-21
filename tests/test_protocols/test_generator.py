@@ -26,7 +26,7 @@ import tempfile
 import time
 from pathlib import Path
 from threading import Thread
-from typing import Optional
+from typing import Optional, cast
 from unittest import TestCase, mock
 
 import pytest
@@ -68,8 +68,8 @@ HOST = "127.0.0.1"
 PORT = 10000
 
 
-class TestEndToEndGenerator(UseOef):
-    """Test that the generating a protocol works correctly in correct preconditions."""
+class TestCompareLatestGeneratorOutputWithTestProtocol:
+    """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
 
     @classmethod
     def setup_class(cls):
@@ -78,13 +78,9 @@ class TestEndToEndGenerator(UseOef):
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.private_key_path_1 = os.path.join(cls.t, DEFAULT_PRIVATE_KEY_FILE + "_1")
-        cls.private_key_path_2 = os.path.join(cls.t, DEFAULT_PRIVATE_KEY_FILE + "_2")
-        create_private_key(DEFAULT_LEDGER, cls.private_key_path_1)
-        create_private_key(DEFAULT_LEDGER, cls.private_key_path_2)
 
     def test_compare_latest_generator_output_with_test_protocol(self):
-        """Test that the "t_protocol" test protocol matches with what the latest generator generates based on the specification."""
+        """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
         # Skip if prerequisite applications are not installed
         try:
             check_prerequisites()
@@ -154,6 +150,304 @@ class TestEndToEndGenerator(UseOef):
         # )
         # assert filecmp.cmp(pb2_file_generated, pb2_file_original)
         assert True
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestSerialisations:
+    """
+    Test that the generating a protocol works correctly in correct preconditions.
+
+    Note: Types involving Floats seem to lose some precision when serialised then deserialised using protobuf.
+    So tests for these types are commented out throughout for now.
+    """
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+    def test_generated_protocol_serialisation_ct(self):
+        """Test serialisation and deserialisation of a message involving a ct type."""
+        some_dict = {1: True, 2: False, 3: True, 4: False}
+        data_model = TProtocolMessage.DataModel(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
+        message = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
+            content_ct=data_model,
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message.message_id
+        assert decoded_message.dialogue_reference == message.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+        assert decoded_message.target == message.target
+        assert decoded_message.performative == message.performative
+        assert decoded_message.content_ct == message.content_ct
+
+    def test_generated_protocol_serialisation_pt(self):
+        """Test serialisation and deserialisation of a message involving a pt type."""
+        message = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
+            content_bytes=b"some bytes",
+            content_int=42,
+            content_float=42.7,
+            content_bool=True,
+            content_str="some string",
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message.message_id
+        assert decoded_message.dialogue_reference == message.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+        assert decoded_message.target == message.target
+        assert decoded_message.performative == message.performative
+        assert decoded_message.content_bytes == message.content_bytes
+        assert decoded_message.content_int == message.content_int
+        # assert decoded_message.content_float == message.content_float
+        assert decoded_message.content_bool == message.content_bool
+        assert decoded_message.content_str == message.content_str
+
+    def test_generated_protocol_serialisation_pct(self):
+        """Test serialisation and deserialisation of a message involving a pct type."""
+        message = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_PCT,
+            content_set_bytes=frozenset([b"byte 1", b"byte 2", b"byte 3"]),
+            content_set_int=frozenset([1, 2, 3]),
+            content_set_float=frozenset([1.2, 2.3, 3.4]),
+            content_set_bool=frozenset([True, False, False, True]),
+            content_set_str=frozenset(["string1", "string2", "string3"]),
+            content_list_bytes=(b"byte 4", b"byte 5", b"byte 6"),
+            content_list_int=(4, 5, 6),
+            content_list_float=(4.5, 5.6, 6.7),
+            content_list_bool=(False, True, False, False),
+            content_list_str=("string4", "string5", "string6"),
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message.message_id
+        assert decoded_message.dialogue_reference == message.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+        assert decoded_message.target == message.target
+        assert decoded_message.performative == message.performative
+        assert decoded_message.content_set_bytes == message.content_set_bytes
+        assert decoded_message.content_set_int == message.content_set_int
+        # assert decoded_message.content_set_float == message.content_set_float
+        assert decoded_message.content_set_bool == message.content_set_bool
+        assert decoded_message.content_set_str == message.content_set_str
+        assert decoded_message.content_list_bytes == message.content_list_bytes
+        assert decoded_message.content_list_int == message.content_list_int
+        # assert decoded_message.content_list_float == message.content_list_float
+        assert decoded_message.content_list_bool == message.content_list_bool
+        assert decoded_message.content_list_str == message.content_list_str
+
+    def test_generated_protocol_serialisation_pmt(self):
+        """Test serialisation and deserialisation of a message involving a pmt type."""
+        message = TProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_PMT,
+            content_dict_int_bytes={1: b"bytes1", 2: b"bytes2", 3: b"bytes3"},
+            content_dict_int_int={1: 2, 2: 3, 3: 4},
+            content_dict_int_float={1: 3.4, 2: 4.7, 3: 4.6},
+            content_dict_int_bool={1: True, 2: True, 3: False},
+            content_dict_int_str={1: "string1", 2: "string2", 3: "string3"},
+            content_dict_bool_bytes={True: b"bytes1", False: b"bytes2"},
+            content_dict_bool_int={True: 5, False: 7},
+            content_dict_bool_float={True: 5.4, False: 4.6},
+            content_dict_bool_bool={True: False, False: False},
+            content_dict_bool_str={True: "string1", False: "string2"},
+            content_dict_str_bytes={"string1": b"bytes1", "string2": b"bytes2", "string3": b"bytes3"},
+            content_dict_str_int={"string1": 2, "string2": 3, "string3": 4},
+            content_dict_str_float={"string1": 3.4, "string2": 4.7, "string3": 4.6},
+            content_dict_str_bool={"string1": True, "string2": True, "string3": False},
+            content_dict_str_str={"string1": "string4", "string2": "string5", "string3": "string6"},
+        )
+
+        encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
+        decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+
+        assert decoded_message.message_id == message.message_id
+        assert decoded_message.dialogue_reference == message.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+        assert decoded_message.target == message.target
+        assert decoded_message.performative == message.performative
+        assert decoded_message.content_dict_int_bytes == message.content_dict_int_bytes
+        assert decoded_message.content_dict_int_int == message.content_dict_int_int
+        # assert decoded_message.content_dict_int_float == message.content_dict_int_float
+        assert decoded_message.content_dict_int_bool == message.content_dict_int_bool
+        assert decoded_message.content_dict_int_str == message.content_dict_int_str
+        assert decoded_message.content_dict_bool_bytes == message.content_dict_bool_bytes
+        assert decoded_message.content_dict_bool_int == message.content_dict_bool_int
+        # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float
+        assert decoded_message.content_dict_bool_bool == message.content_dict_bool_bool
+        assert decoded_message.content_dict_bool_str == message.content_dict_bool_str
+        assert decoded_message.content_dict_str_bytes == message.content_dict_str_bytes
+        assert decoded_message.content_dict_str_int == message.content_dict_str_int
+        # assert decoded_message.content_dict_str_float == message.content_dict_str_float
+        assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
+        assert decoded_message.content_dict_str_str == message.content_dict_str_str
+
+    # def test_generated_protocol_serialisation_mt(self):
+    #     """Test serialisation and deserialisation of a message involving an mt type."""
+    #     message = TProtocolMessage(
+    #         message_id=1,
+    #         dialogue_reference=(str(0), ""),
+    #         target=0,
+    #         performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
+    #         content_dict_int_bytes={1: b"bytes1", 2: b"bytes2", 3: b"bytes3"},
+    #         content_dict_int_int={1: 2, 2: 3, 3: 4},
+    #         content_dict_int_float={1: 3.4, 2: 4.7, 3: 4.6},
+    #         content_dict_int_bool={1: True, 2: True, 3: False},
+    #         content_dict_int_str={1: "string1", 2: "string2", 3: "string3"},
+    #         content_dict_bool_bytes={True: b"bytes1", False: b"bytes2"},
+    #         content_dict_bool_int={True: 5, False: 7},
+    #         content_dict_bool_float={True: 5.4, False: 4.6},
+    #         content_dict_bool_bool={True: False, False: False},
+    #         content_dict_bool_str={True: "string1", False: "string2"},
+    #         content_dict_str_bytes={"string1": b"bytes1", "string2": b"bytes2", "string3": b"bytes3"},
+    #         content_dict_str_int={"string1": 2, "string2": 3, "string3": 4},
+    #         content_dict_str_float={"string1": 3.4, "string2": 4.7, "string3": 4.6},
+    #         content_dict_str_bool={"string1": True, "string2": True, "string3": False},
+    #         content_dict_str_str={"string1": "string4", "string2": "string5", "string3": "string6"},
+    #     )
+    #
+    #     encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
+    #     decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+    #
+    #     assert decoded_message.message_id == message.message_id
+    #     assert decoded_message.dialogue_reference == message.dialogue_reference
+    #     assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+    #     assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+    #     assert decoded_message.target == message.target
+    #     assert decoded_message.performative == message.performative
+    #     assert decoded_message.content_dict_int_bytes == message.content_dict_int_bytes
+    #     assert decoded_message.content_dict_int_int == message.content_dict_int_int
+    #     # assert decoded_message.content_dict_int_float == message.content_dict_int_float
+    #     assert decoded_message.content_dict_int_bool == message.content_dict_int_bool
+    #     assert decoded_message.content_dict_int_str == message.content_dict_int_str
+    #     assert decoded_message.content_dict_bool_bytes == message.content_dict_bool_bytes
+    #     assert decoded_message.content_dict_bool_int == message.content_dict_bool_int
+    #     # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float
+    #     assert decoded_message.content_dict_bool_bool == message.content_dict_bool_bool
+    #     assert decoded_message.content_dict_bool_str == message.content_dict_bool_str
+    #     assert decoded_message.content_dict_str_bytes == message.content_dict_str_bytes
+    #     assert decoded_message.content_dict_str_int == message.content_dict_str_int
+    #     # assert decoded_message.content_dict_str_float == message.content_dict_str_float
+    #     assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
+    #     assert decoded_message.content_dict_str_str == message.content_dict_str_str
+    #
+    # def test_generated_protocol_serialisation_o(self):
+    #     """Test serialisation and deserialisation of a message involving an optional type."""
+    #     message = TProtocolMessage(
+    #         message_id=1,
+    #         dialogue_reference=(str(0), ""),
+    #         target=0,
+    #         performative=TProtocolMessage.Performative.PERFORMATIVE_PMT,
+    #         content_dict_int_bytes={1: b"bytes1", 2: b"bytes2", 3: b"bytes3"},
+    #         content_dict_int_int={1: 2, 2: 3, 3: 4},
+    #         content_dict_int_float={1: 3.4, 2: 4.7, 3: 4.6},
+    #         content_dict_int_bool={1: True, 2: True, 3: False},
+    #         content_dict_int_str={1: "string1", 2: "string2", 3: "string3"},
+    #         content_dict_bool_bytes={True: b"bytes1", False: b"bytes2"},
+    #         content_dict_bool_int={True: 5, False: 7},
+    #         content_dict_bool_float={True: 5.4, False: 4.6},
+    #         content_dict_bool_bool={True: False, False: False},
+    #         content_dict_bool_str={True: "string1", False: "string2"},
+    #         content_dict_str_bytes={"string1": b"bytes1", "string2": b"bytes2", "string3": b"bytes3"},
+    #         content_dict_str_int={"string1": 2, "string2": 3, "string3": 4},
+    #         content_dict_str_float={"string1": 3.4, "string2": 4.7, "string3": 4.6},
+    #         content_dict_str_bool={"string1": True, "string2": True, "string3": False},
+    #         content_dict_str_str={"string1": "string4", "string2": "string5", "string3": "string6"},
+    #     )
+    #
+    #     encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
+    #     decoded_message = cast(TProtocolMessage, TProtocolMessage.serializer.decode(encoded_message_in_bytes))
+    #
+    #     assert decoded_message.message_id == message.message_id
+    #     assert decoded_message.dialogue_reference == message.dialogue_reference
+    #     assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+    #     assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+    #     assert decoded_message.target == message.target
+    #     assert decoded_message.performative == message.performative
+    #     assert decoded_message.content_dict_int_bytes == message.content_dict_int_bytes
+    #     assert decoded_message.content_dict_int_int == message.content_dict_int_int
+    #     # assert decoded_message.content_dict_int_float == message.content_dict_int_float
+    #     assert decoded_message.content_dict_int_bool == message.content_dict_int_bool
+    #     assert decoded_message.content_dict_int_str == message.content_dict_int_str
+    #     assert decoded_message.content_dict_bool_bytes == message.content_dict_bool_bytes
+    #     assert decoded_message.content_dict_bool_int == message.content_dict_bool_int
+    #     # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float
+    #     assert decoded_message.content_dict_bool_bool == message.content_dict_bool_bool
+    #     assert decoded_message.content_dict_bool_str == message.content_dict_bool_str
+    #     assert decoded_message.content_dict_str_bytes == message.content_dict_str_bytes
+    #     assert decoded_message.content_dict_str_int == message.content_dict_str_int
+    #     # assert decoded_message.content_dict_str_float == message.content_dict_str_float
+    #     assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
+    #     assert decoded_message.content_dict_str_str == message.content_dict_str_str
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestEndToEndGenerator(UseOef):
+    """Test that the generating a protocol works correctly in correct preconditions."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+        cls.private_key_path_1 = os.path.join(cls.t, DEFAULT_PRIVATE_KEY_FILE + "_1")
+        cls.private_key_path_2 = os.path.join(cls.t, DEFAULT_PRIVATE_KEY_FILE + "_2")
+        create_private_key(DEFAULT_LEDGER, cls.private_key_path_1)
+        create_private_key(DEFAULT_LEDGER, cls.private_key_path_2)
 
     def test_generated_protocol_serialisation_ct(self):
         """Test that a generated protocol's serialisation + deserialisation work correctly."""

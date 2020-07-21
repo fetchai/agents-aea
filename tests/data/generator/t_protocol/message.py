@@ -106,7 +106,7 @@ class TProtocolMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
+    def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
         return cast(TProtocolMessage.Performative, self.get("performative"))
@@ -136,6 +136,14 @@ class TProtocolMessage(Message):
         return cast(CustomDataModel, self.get("content_ct"))
 
     @property
+    def content_dict_bool_bool(self) -> Dict[bool, bool]:
+        """Get the 'content_dict_bool_bool' content from the message."""
+        assert self.is_set(
+            "content_dict_bool_bool"
+        ), "'content_dict_bool_bool' content is not set."
+        return cast(Dict[bool, bool], self.get("content_dict_bool_bool"))
+
+    @property
     def content_dict_bool_bytes(self) -> Dict[bool, bytes]:
         """Get the 'content_dict_bool_bytes' content from the message."""
         assert self.is_set(
@@ -144,12 +152,108 @@ class TProtocolMessage(Message):
         return cast(Dict[bool, bytes], self.get("content_dict_bool_bytes"))
 
     @property
+    def content_dict_bool_float(self) -> Dict[bool, float]:
+        """Get the 'content_dict_bool_float' content from the message."""
+        assert self.is_set(
+            "content_dict_bool_float"
+        ), "'content_dict_bool_float' content is not set."
+        return cast(Dict[bool, float], self.get("content_dict_bool_float"))
+
+    @property
+    def content_dict_bool_int(self) -> Dict[bool, int]:
+        """Get the 'content_dict_bool_int' content from the message."""
+        assert self.is_set(
+            "content_dict_bool_int"
+        ), "'content_dict_bool_int' content is not set."
+        return cast(Dict[bool, int], self.get("content_dict_bool_int"))
+
+    @property
+    def content_dict_bool_str(self) -> Dict[bool, str]:
+        """Get the 'content_dict_bool_str' content from the message."""
+        assert self.is_set(
+            "content_dict_bool_str"
+        ), "'content_dict_bool_str' content is not set."
+        return cast(Dict[bool, str], self.get("content_dict_bool_str"))
+
+    @property
+    def content_dict_int_bool(self) -> Dict[int, bool]:
+        """Get the 'content_dict_int_bool' content from the message."""
+        assert self.is_set(
+            "content_dict_int_bool"
+        ), "'content_dict_int_bool' content is not set."
+        return cast(Dict[int, bool], self.get("content_dict_int_bool"))
+
+    @property
+    def content_dict_int_bytes(self) -> Dict[int, bytes]:
+        """Get the 'content_dict_int_bytes' content from the message."""
+        assert self.is_set(
+            "content_dict_int_bytes"
+        ), "'content_dict_int_bytes' content is not set."
+        return cast(Dict[int, bytes], self.get("content_dict_int_bytes"))
+
+    @property
+    def content_dict_int_float(self) -> Dict[int, float]:
+        """Get the 'content_dict_int_float' content from the message."""
+        assert self.is_set(
+            "content_dict_int_float"
+        ), "'content_dict_int_float' content is not set."
+        return cast(Dict[int, float], self.get("content_dict_int_float"))
+
+    @property
+    def content_dict_int_int(self) -> Dict[int, int]:
+        """Get the 'content_dict_int_int' content from the message."""
+        assert self.is_set(
+            "content_dict_int_int"
+        ), "'content_dict_int_int' content is not set."
+        return cast(Dict[int, int], self.get("content_dict_int_int"))
+
+    @property
+    def content_dict_int_str(self) -> Dict[int, str]:
+        """Get the 'content_dict_int_str' content from the message."""
+        assert self.is_set(
+            "content_dict_int_str"
+        ), "'content_dict_int_str' content is not set."
+        return cast(Dict[int, str], self.get("content_dict_int_str"))
+
+    @property
+    def content_dict_str_bool(self) -> Dict[str, bool]:
+        """Get the 'content_dict_str_bool' content from the message."""
+        assert self.is_set(
+            "content_dict_str_bool"
+        ), "'content_dict_str_bool' content is not set."
+        return cast(Dict[str, bool], self.get("content_dict_str_bool"))
+
+    @property
+    def content_dict_str_bytes(self) -> Dict[str, bytes]:
+        """Get the 'content_dict_str_bytes' content from the message."""
+        assert self.is_set(
+            "content_dict_str_bytes"
+        ), "'content_dict_str_bytes' content is not set."
+        return cast(Dict[str, bytes], self.get("content_dict_str_bytes"))
+
+    @property
     def content_dict_str_float(self) -> Dict[str, float]:
         """Get the 'content_dict_str_float' content from the message."""
         assert self.is_set(
             "content_dict_str_float"
         ), "'content_dict_str_float' content is not set."
         return cast(Dict[str, float], self.get("content_dict_str_float"))
+
+    @property
+    def content_dict_str_int(self) -> Dict[str, int]:
+        """Get the 'content_dict_str_int' content from the message."""
+        assert self.is_set(
+            "content_dict_str_int"
+        ), "'content_dict_str_int' content is not set."
+        return cast(Dict[str, int], self.get("content_dict_str_int"))
+
+    @property
+    def content_dict_str_str(self) -> Dict[str, str]:
+        """Get the 'content_dict_str_str' content from the message."""
+        assert self.is_set(
+            "content_dict_str_str"
+        ), "'content_dict_str_str' content is not set."
+        return cast(Dict[str, str], self.get("content_dict_str_str"))
 
     @property
     def content_float(self) -> float:
@@ -511,7 +615,102 @@ class TProtocolMessage(Message):
                     type(element) == str for element in self.content_list_str
                 ), "Invalid type for tuple elements in content 'content_list_str'. Expected 'str'."
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PMT:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 15
+                assert (
+                    type(self.content_dict_int_bytes) == dict
+                ), "Invalid type for content 'content_dict_int_bytes'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_int_bytes)
+                )
+                for (
+                    key_of_content_dict_int_bytes,
+                    value_of_content_dict_int_bytes,
+                ) in self.content_dict_int_bytes.items():
+                    assert (
+                        type(key_of_content_dict_int_bytes) == int
+                    ), "Invalid type for dictionary keys in content 'content_dict_int_bytes'. Expected 'int'. Found '{}'.".format(
+                        type(key_of_content_dict_int_bytes)
+                    )
+                    assert (
+                        type(value_of_content_dict_int_bytes) == bytes
+                    ), "Invalid type for dictionary values in content 'content_dict_int_bytes'. Expected 'bytes'. Found '{}'.".format(
+                        type(value_of_content_dict_int_bytes)
+                    )
+                assert (
+                    type(self.content_dict_int_int) == dict
+                ), "Invalid type for content 'content_dict_int_int'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_int_int)
+                )
+                for (
+                    key_of_content_dict_int_int,
+                    value_of_content_dict_int_int,
+                ) in self.content_dict_int_int.items():
+                    assert (
+                        type(key_of_content_dict_int_int) == int
+                    ), "Invalid type for dictionary keys in content 'content_dict_int_int'. Expected 'int'. Found '{}'.".format(
+                        type(key_of_content_dict_int_int)
+                    )
+                    assert (
+                        type(value_of_content_dict_int_int) == int
+                    ), "Invalid type for dictionary values in content 'content_dict_int_int'. Expected 'int'. Found '{}'.".format(
+                        type(value_of_content_dict_int_int)
+                    )
+                assert (
+                    type(self.content_dict_int_float) == dict
+                ), "Invalid type for content 'content_dict_int_float'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_int_float)
+                )
+                for (
+                    key_of_content_dict_int_float,
+                    value_of_content_dict_int_float,
+                ) in self.content_dict_int_float.items():
+                    assert (
+                        type(key_of_content_dict_int_float) == int
+                    ), "Invalid type for dictionary keys in content 'content_dict_int_float'. Expected 'int'. Found '{}'.".format(
+                        type(key_of_content_dict_int_float)
+                    )
+                    assert (
+                        type(value_of_content_dict_int_float) == float
+                    ), "Invalid type for dictionary values in content 'content_dict_int_float'. Expected 'float'. Found '{}'.".format(
+                        type(value_of_content_dict_int_float)
+                    )
+                assert (
+                    type(self.content_dict_int_bool) == dict
+                ), "Invalid type for content 'content_dict_int_bool'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_int_bool)
+                )
+                for (
+                    key_of_content_dict_int_bool,
+                    value_of_content_dict_int_bool,
+                ) in self.content_dict_int_bool.items():
+                    assert (
+                        type(key_of_content_dict_int_bool) == int
+                    ), "Invalid type for dictionary keys in content 'content_dict_int_bool'. Expected 'int'. Found '{}'.".format(
+                        type(key_of_content_dict_int_bool)
+                    )
+                    assert (
+                        type(value_of_content_dict_int_bool) == bool
+                    ), "Invalid type for dictionary values in content 'content_dict_int_bool'. Expected 'bool'. Found '{}'.".format(
+                        type(value_of_content_dict_int_bool)
+                    )
+                assert (
+                    type(self.content_dict_int_str) == dict
+                ), "Invalid type for content 'content_dict_int_str'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_int_str)
+                )
+                for (
+                    key_of_content_dict_int_str,
+                    value_of_content_dict_int_str,
+                ) in self.content_dict_int_str.items():
+                    assert (
+                        type(key_of_content_dict_int_str) == int
+                    ), "Invalid type for dictionary keys in content 'content_dict_int_str'. Expected 'int'. Found '{}'.".format(
+                        type(key_of_content_dict_int_str)
+                    )
+                    assert (
+                        type(value_of_content_dict_int_str) == str
+                    ), "Invalid type for dictionary values in content 'content_dict_int_str'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_content_dict_int_str)
+                    )
                 assert (
                     type(self.content_dict_bool_bytes) == dict
                 ), "Invalid type for content 'content_dict_bool_bytes'. Expected 'dict'. Found '{}'.".format(
@@ -532,6 +731,120 @@ class TProtocolMessage(Message):
                         type(value_of_content_dict_bool_bytes)
                     )
                 assert (
+                    type(self.content_dict_bool_int) == dict
+                ), "Invalid type for content 'content_dict_bool_int'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_bool_int)
+                )
+                for (
+                    key_of_content_dict_bool_int,
+                    value_of_content_dict_bool_int,
+                ) in self.content_dict_bool_int.items():
+                    assert (
+                        type(key_of_content_dict_bool_int) == bool
+                    ), "Invalid type for dictionary keys in content 'content_dict_bool_int'. Expected 'bool'. Found '{}'.".format(
+                        type(key_of_content_dict_bool_int)
+                    )
+                    assert (
+                        type(value_of_content_dict_bool_int) == int
+                    ), "Invalid type for dictionary values in content 'content_dict_bool_int'. Expected 'int'. Found '{}'.".format(
+                        type(value_of_content_dict_bool_int)
+                    )
+                assert (
+                    type(self.content_dict_bool_float) == dict
+                ), "Invalid type for content 'content_dict_bool_float'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_bool_float)
+                )
+                for (
+                    key_of_content_dict_bool_float,
+                    value_of_content_dict_bool_float,
+                ) in self.content_dict_bool_float.items():
+                    assert (
+                        type(key_of_content_dict_bool_float) == bool
+                    ), "Invalid type for dictionary keys in content 'content_dict_bool_float'. Expected 'bool'. Found '{}'.".format(
+                        type(key_of_content_dict_bool_float)
+                    )
+                    assert (
+                        type(value_of_content_dict_bool_float) == float
+                    ), "Invalid type for dictionary values in content 'content_dict_bool_float'. Expected 'float'. Found '{}'.".format(
+                        type(value_of_content_dict_bool_float)
+                    )
+                assert (
+                    type(self.content_dict_bool_bool) == dict
+                ), "Invalid type for content 'content_dict_bool_bool'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_bool_bool)
+                )
+                for (
+                    key_of_content_dict_bool_bool,
+                    value_of_content_dict_bool_bool,
+                ) in self.content_dict_bool_bool.items():
+                    assert (
+                        type(key_of_content_dict_bool_bool) == bool
+                    ), "Invalid type for dictionary keys in content 'content_dict_bool_bool'. Expected 'bool'. Found '{}'.".format(
+                        type(key_of_content_dict_bool_bool)
+                    )
+                    assert (
+                        type(value_of_content_dict_bool_bool) == bool
+                    ), "Invalid type for dictionary values in content 'content_dict_bool_bool'. Expected 'bool'. Found '{}'.".format(
+                        type(value_of_content_dict_bool_bool)
+                    )
+                assert (
+                    type(self.content_dict_bool_str) == dict
+                ), "Invalid type for content 'content_dict_bool_str'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_bool_str)
+                )
+                for (
+                    key_of_content_dict_bool_str,
+                    value_of_content_dict_bool_str,
+                ) in self.content_dict_bool_str.items():
+                    assert (
+                        type(key_of_content_dict_bool_str) == bool
+                    ), "Invalid type for dictionary keys in content 'content_dict_bool_str'. Expected 'bool'. Found '{}'.".format(
+                        type(key_of_content_dict_bool_str)
+                    )
+                    assert (
+                        type(value_of_content_dict_bool_str) == str
+                    ), "Invalid type for dictionary values in content 'content_dict_bool_str'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_content_dict_bool_str)
+                    )
+                assert (
+                    type(self.content_dict_str_bytes) == dict
+                ), "Invalid type for content 'content_dict_str_bytes'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_str_bytes)
+                )
+                for (
+                    key_of_content_dict_str_bytes,
+                    value_of_content_dict_str_bytes,
+                ) in self.content_dict_str_bytes.items():
+                    assert (
+                        type(key_of_content_dict_str_bytes) == str
+                    ), "Invalid type for dictionary keys in content 'content_dict_str_bytes'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_content_dict_str_bytes)
+                    )
+                    assert (
+                        type(value_of_content_dict_str_bytes) == bytes
+                    ), "Invalid type for dictionary values in content 'content_dict_str_bytes'. Expected 'bytes'. Found '{}'.".format(
+                        type(value_of_content_dict_str_bytes)
+                    )
+                assert (
+                    type(self.content_dict_str_int) == dict
+                ), "Invalid type for content 'content_dict_str_int'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_str_int)
+                )
+                for (
+                    key_of_content_dict_str_int,
+                    value_of_content_dict_str_int,
+                ) in self.content_dict_str_int.items():
+                    assert (
+                        type(key_of_content_dict_str_int) == str
+                    ), "Invalid type for dictionary keys in content 'content_dict_str_int'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_content_dict_str_int)
+                    )
+                    assert (
+                        type(value_of_content_dict_str_int) == int
+                    ), "Invalid type for dictionary values in content 'content_dict_str_int'. Expected 'int'. Found '{}'.".format(
+                        type(value_of_content_dict_str_int)
+                    )
+                assert (
                     type(self.content_dict_str_float) == dict
                 ), "Invalid type for content 'content_dict_str_float'. Expected 'dict'. Found '{}'.".format(
                     type(self.content_dict_str_float)
@@ -549,6 +862,44 @@ class TProtocolMessage(Message):
                         type(value_of_content_dict_str_float) == float
                     ), "Invalid type for dictionary values in content 'content_dict_str_float'. Expected 'float'. Found '{}'.".format(
                         type(value_of_content_dict_str_float)
+                    )
+                assert (
+                    type(self.content_dict_str_bool) == dict
+                ), "Invalid type for content 'content_dict_str_bool'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_str_bool)
+                )
+                for (
+                    key_of_content_dict_str_bool,
+                    value_of_content_dict_str_bool,
+                ) in self.content_dict_str_bool.items():
+                    assert (
+                        type(key_of_content_dict_str_bool) == str
+                    ), "Invalid type for dictionary keys in content 'content_dict_str_bool'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_content_dict_str_bool)
+                    )
+                    assert (
+                        type(value_of_content_dict_str_bool) == bool
+                    ), "Invalid type for dictionary values in content 'content_dict_str_bool'. Expected 'bool'. Found '{}'.".format(
+                        type(value_of_content_dict_str_bool)
+                    )
+                assert (
+                    type(self.content_dict_str_str) == dict
+                ), "Invalid type for content 'content_dict_str_str'. Expected 'dict'. Found '{}'.".format(
+                    type(self.content_dict_str_str)
+                )
+                for (
+                    key_of_content_dict_str_str,
+                    value_of_content_dict_str_str,
+                ) in self.content_dict_str_str.items():
+                    assert (
+                        type(key_of_content_dict_str_str) == str
+                    ), "Invalid type for dictionary keys in content 'content_dict_str_str'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_content_dict_str_str)
+                    )
+                    assert (
+                        type(value_of_content_dict_str_str) == str
+                    ), "Invalid type for dictionary values in content 'content_dict_str_str'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_content_dict_str_str)
                     )
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_MT:
                 expected_nb_of_contents = 2
