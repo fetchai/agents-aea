@@ -107,6 +107,17 @@ class TaskManagerTestCase(TestCase):
         obj._stopped = False
         obj.start()
         debug_mock.assert_called_once()
+        obj.stop()
+
+    @mock.patch("aea.skills.tasks.logger.debug")
+    def test_start_lazy_pool_start(self, debug_mock):
+        """Test start method with lazy pool start."""
+        obj = TaskManager(is_lazy_pool_start=False)
+        obj.start()
+        obj._stopped = True
+        obj.start()
+        debug_mock.assert_called_with("Pool was already started!")
+        obj.start()
 
     def test_enqueue_task_stopped(self):
         """Test enqueue_task method manager stopped."""
