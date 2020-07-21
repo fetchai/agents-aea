@@ -12,8 +12,8 @@ fingerprint_ignore_patterns: []
 protocols: []
 class_name: PeerToPeerConnection
 config:
-  addr: ${addr:127.0.0.1}
-  port: ${port:8000}
+  addr: 127.0.0.1
+  port: '8000'
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
