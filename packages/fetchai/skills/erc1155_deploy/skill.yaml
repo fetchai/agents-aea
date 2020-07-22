@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
-  behaviours.py: QmehgihC5x7BBigkozXdtTsKxGV89kCn4iJELz8V4sdaFu
+  behaviours.py: QmVujGtobQ5SeaVRc8n7PJaVsnnUdixUsmmQyjpMjyLe7Z
   dialogues.py: QmR6qb8PdmUozHANKMuLaKfLGKxgnx2zFzbkmcgqXq8wgg
-  handlers.py: QmQCRnBhH4zTGvny3Dsmki34siNNXgm8JMPtX2cBrtJxfX
-  strategy.py: QmQ9UNcEvgB6TQtujrCgW8L7KJbAMN33aeExyUZSHtqtjv
+  handlers.py: QmRM7w75L1EXohnnXU2y9wHKfSCn37yn4t9BHLYxU9dMUm
+  strategy.py: QmW5yoXYPf9HGsjhD2ybSHKfRvSBTYoBcuzv2UQdS6gr8t
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -37,6 +37,9 @@ handlers:
   ledger_api:
     args: {}
     class_name: LedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
   signing:
     args: {}
     class_name: SigningHandler
@@ -79,8 +82,8 @@ models:
       - 100
       nb_tokens: 10
       service_data:
-        key: has_erc1155_contract
-        value: true
+        key: contract
+        value: erc1155
       to_supply: 0
       token_type: 2
       value: 0

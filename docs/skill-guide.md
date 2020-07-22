@@ -70,7 +70,7 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: setting up MySearchBehaviour".format(self.context.agent_name)
+            "setting up MySearchBehaviour"
         )
 
     def act(self) -> None:
@@ -89,8 +89,8 @@ class MySearchBehaviour(TickerBehaviour):
             query=self.query,
         )
         self.context.logger.info(
-            "[{}]: sending search request to OEF search node, search_count={}".format(
-                self.context.agent_name, self.sent_search_count
+            "sending search request to OEF search node, search_count={}".format(
+                self.sent_search_count
             )
         )
         search_request.counterparty = self.context.search_service_address
@@ -104,7 +104,7 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: tearing down MySearchBehaviour".format(self.context.agent_name)
+            "tearing down MySearchBehaviour"
         )
 ```
 
@@ -144,7 +144,7 @@ class MySearchHandler(Handler):
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info(
-            "[{}]: setting up MySearchHandler".format(self.context.agent_name)
+            "setting up MySearchHandler"
         )
 
     def handle(self, message: Message) -> None:
@@ -215,13 +215,12 @@ class MySearchHandler(Handler):
         self.received_search_count += 1
         nb_agents_found = len(oef_search_msg.agents)
         self.context.logger.info(
-            "[{}]: found number of agents={}, received search count={}".format(
-                self.context.agent_name, nb_agents_found, self.received_search_count
+            "found number of agents={}, received search count={}".format(
+                nb_agents_found, self.received_search_count
             )
         )
         self.context.logger.info(
-            "[{}]: number of search requests sent={} vs. number of search responses received={}".format(
-                self.context.agent_name,
+            "number of search requests sent={} vs. number of search responses received={}".format(
                 self.context.behaviours.my_search_behaviour.sent_search_count,
                 self.received_search_count,
             )
@@ -250,7 +249,7 @@ class MySearchHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: tearing down MySearchHandler".format(self.context.agent_name)
+            "tearing down MySearchHandler"
         )
 ```
 

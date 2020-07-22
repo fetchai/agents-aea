@@ -47,6 +47,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
+        self.is_service_registered = False
 
     def setup(self) -> None:
         """
@@ -81,9 +82,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             strategy.is_contract_deployed
             and strategy.is_tokens_created
             and strategy.is_tokens_minted
+            and not self.is_service_registered
         ):
-            self._unregister_service()
+            self._register_agent()
             self._register_service()
+            self.is_service_registered = True
 
     def teardown(self) -> None:
         """
@@ -92,6 +95,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         self._unregister_service()
+        self._unregister_agent()
 
     def _request_balance(self) -> None:
         """

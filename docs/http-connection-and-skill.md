@@ -83,8 +83,7 @@ class HttpHandler(Handler):
         http_msg = cast(HttpMessage, message)
         if http_msg.performative == HttpMessage.Performative.REQUEST:
             self.context.logger.info(
-                "[{}] received http request with method={}, url={} and body={}".format(
-                    self.context.agent_name,
+                "received http request with method={}, url={} and body={}".format(
                     http_msg.method,
                     http_msg.url,
                     http_msg.bodyy,
@@ -96,9 +95,7 @@ class HttpHandler(Handler):
                 self._handle_post(http_msg)
         else:
             self.context.logger.info(
-                "[{}] received response ({}) unexpectedly!".format(
-                    self.context.agent_name, http_msg
-                )
+                "received response ({}) unexpectedly!".format(http_msg)
             )
 
     def _handle_get(self, http_msg: HttpMessage) -> None:
@@ -120,7 +117,7 @@ class HttpHandler(Handler):
             bodyy=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
         )
         self.context.logger.info(
-            "[{}] responding with: {}".format(self.context.agent_name, http_response)
+            "responding with: {}".format(http_response)
         )
         http_response.counterparty = http_msg.counterparty
         self.context.outbox.put_message(message=http_response)
@@ -144,7 +141,7 @@ class HttpHandler(Handler):
             bodyy=b"",
         )
         self.context.logger.info(
-            "[{}] responding with: {}".format(self.context.agent_name, http_response)
+            "responding with: {}".format(http_response)
         )
         http_response.counterparty = http_msg.counterparty
         self.context.outbox.put_message(message=http_response)
