@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the base classes for the skills."""
-
+from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
 from unittest import TestCase, mock
@@ -30,13 +30,14 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
-from aea.skills.base import SkillComponent, SkillContext
+from aea.skills.base import Behaviour, Skill, SkillComponent, SkillContext
 
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_PATH,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
+    ROOT_DIR,
     _make_dummy_connection,
 )
 
@@ -258,3 +259,43 @@ class SkillComponentTestCase(TestCase):
             configuration=Mock(args={}), skill_context="ctx", name="name"
         )
         component.config
+
+    @mock.patch("aea.skills.base.logger.warning")
+    def test_kwargs_not_empty(self, mock_logger_debug):
+        """Test the case when there are some kwargs not-empty"""
+        kwargs = dict(foo="bar")
+        component_name = "component_name"
+        self.TestComponent(component_name, MagicMock(), **kwargs)
+        mock_logger_debug.assert_called_with(
+            f"The kwargs={kwargs} passed to {component_name} have not been set!"
+        )
+
+
+def test_load_skill():
+    """Test the loading of a skill."""
+    agent_context = MagicMock()
+    skill = Skill.from_dir(
+        Path(ROOT_DIR, "tests", "data", "dummy_skill"), agent_context=agent_context
+    )
+    assert isinstance(skill, Skill)
+
+
+def test_behaviour():
+    """Test behaviour initialization."""
+
+    class CustomBehaviour(Behaviour):
+        def setup(self) -> None:
+            pass
+
+        def teardown(self) -> None:
+            pass
+
+        def act(self) -> None:
+            pass
+
+    behaviour = CustomBehaviour("behaviour", skill_context=MagicMock())
+
+    # test getters (default values)
+    assert behaviour.tick_interval == 0.001
+    assert behaviour.start_at is None
+    assert behaviour.is_done() is False
