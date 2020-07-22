@@ -406,6 +406,17 @@ class Dialogue(ABC):
         ):
             self._update_self_initiated_dialogue_label_on_second_message(message)
 
+        counterparty = None  # type: Optional[str]
+        try:
+            counterparty = message.counterparty
+        except AssertionError:
+            message.counterparty = self.dialogue_label.dialogue_opponent_addr
+
+        if counterparty is not None:
+            assert (
+                message.counterparty == self.dialogue_label.dialogue_opponent_addr
+            ), "The counterparty specified in the message is different from the opponent in this dialogue."
+
         is_extendable = self.is_valid_next_message(message)
         if is_extendable:
             if message.is_incoming:
@@ -704,7 +715,9 @@ class Dialogues(ABC):
         if role_from_first_message is not None:
             self._role_from_first_message = role_from_first_message
         else:
-            self._role_from_first_message = self.role_from_first_message
+            self._role_from_first_message = (
+                self.role_from_first_message
+            )  # pragma: no cover
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
@@ -815,14 +828,6 @@ class Dialogues(ABC):
             dialogue = self.get_dialogue(message)
 
         if dialogue is not None:
-            if message.counterparty is None:
-                message.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
-            else:
-                assert (
-                    message.counterparty
-                    == dialogue.dialogue_label.dialogue_opponent_addr
-                ), "The counterparty specified in the message is different from the opponent in this dialogue."
-
             dialogue.update(message)
             result = dialogue  # type: Optional[Dialogue]
         else:  # couldn't find the dialogue
@@ -931,7 +936,9 @@ class Dialogues(ABC):
                 role=role,
             )
         else:
-            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)
+            dialogue = self.create_dialogue(
+                dialogue_label=dialogue_label, role=role,
+            )  # pragma: no cover
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -971,7 +978,9 @@ class Dialogues(ABC):
                 role=role,
             )
         else:
-            dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role,)
+            dialogue = self.create_dialogue(
+                dialogue_label=dialogue_label, role=role,
+            )  # pragma: no cover
         self.dialogues.update({dialogue_label: dialogue})
 
         return dialogue
@@ -999,7 +1008,7 @@ class Dialogues(ABC):
         :param message: an incoming/outgoing first message
         :return: the agent's role
         """
-        pass
+        pass  # pragma: no cover
 
     def _next_dialogue_nonce(self) -> int:
         """

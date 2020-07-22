@@ -383,7 +383,7 @@ def parse_arguments() -> argparse.Namespace:
     return arguments
 
 
-def update_hashes(arguments: argparse.Namespace) -> int:
+def update_hashes(timeout: float = 10.0) -> int:
     """
     Process all AEA packages, update fingerprint, and update hashes.csv files.
 
@@ -393,7 +393,7 @@ def update_hashes(arguments: argparse.Namespace) -> int:
     package_hashes = {}  # type: Dict[str, str]
     test_package_hashes = {}  # type: Dict[str, str]
     # run the ipfs daemon
-    with IPFSDaemon(arguments.timeout):
+    with IPFSDaemon(timeout=timeout):
         try:
             # connect ipfs client
             client = ipfshttpclient.connect(
@@ -463,7 +463,7 @@ def check_same_ipfs_hash(
     return result
 
 
-def check_hashes(arguments: argparse.Namespace) -> int:
+def check_hashes(timeout: float = 10.0) -> int:
     """
     Check fingerprints and outer hash of all AEA packages.
 
@@ -477,7 +477,7 @@ def check_hashes(arguments: argparse.Namespace) -> int:
         TEST_PACKAGE_HASHES_PATH
     )  # type: Dict[str, str]
     all_expected_hashes = {**expected_package_hashes, **expected_test_package_hashes}
-    with IPFSDaemon(timeout=arguments.timeout):
+    with IPFSDaemon(timeout=timeout):
         try:
             # connect ipfs client
             client = ipfshttpclient.connect(
@@ -506,8 +506,8 @@ def check_hashes(arguments: argparse.Namespace) -> int:
 if __name__ == "__main__":
     arguments = parse_arguments()
     if arguments.check:
-        return_code = check_hashes(arguments)
+        return_code = check_hashes(arguments.timeout)
     else:
-        return_code = update_hashes(arguments)
+        return_code = update_hashes(arguments.timeout)
 
     sys.exit(return_code)

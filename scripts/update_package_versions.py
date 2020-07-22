@@ -43,6 +43,8 @@ from aea.cli import cli
 from aea.configurations.base import PublicId
 from aea.configurations.loader import ConfigLoader
 
+from scripts.generate_ipfs_hashes import update_hashes
+
 DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]
 CLI_LOG_OPTION = ["-v", "OFF"]
 TYPES = ["protocols", "contracts", "connections", "skills", "agents"]
@@ -67,6 +69,14 @@ def check_if_running_allowed() -> None:
     git_call.wait()
     if len(stdout) > 0:
         print("Cannot run script in unclean git state.")
+        sys.exit(1)
+
+
+def run_hashing() -> None:
+    """Run the hashing script."""
+    hashing_call = update_hashes()
+    if hashing_call == 1:
+        print("Problem when running IPFS script!")
         sys.exit(1)
 
 
@@ -171,8 +181,9 @@ def public_id_in_registry(type_: str, name: str) -> PublicId:
 
 def process_packages(
     last_by_type: Dict[str, Dict[str, str]], now_by_type: Dict[str, Dict[str, str]]
-) -> None:
+) -> bool:
     """Process the package versions."""
+    is_bumped = False
     for type_ in TYPES:
         for key, value in last_by_type[type_].items():
             if key not in now_by_type[type_]:
@@ -184,7 +195,13 @@ def process_packages(
                     )
                 )
             else:
-                process_package(type_, key)
+                is_bumped = process_package(type_, key)
+            if is_bumped:
+                break
+        else:
+            continue
+        break
+    return is_bumped
 
 
 def minor_version_difference(
@@ -232,13 +249,13 @@ def bump_version_in_yaml(
     configuration_file_path: Path, type_: str, version: str
 ) -> None:
     """Bump the package version in the package yaml."""
-    loader = ConfigLoader.from_configuration_type(type_)
+    loader = ConfigLoader.from_configuration_type(type_[:-1])
     config = loader.load(configuration_file_path.open())
     config.version = version
     loader.dump(config, open(configuration_file_path, "w"))
 
 
-def process_package(type_: str, name: str) -> None:
+def process_package(type_: str, name: str) -> bool:
     """
     Process a package.
 
@@ -246,14 +263,18 @@ def process_package(type_: str, name: str) -> None:
     - make sure, version is exactly one above the one in registry
     - change all occurences in packages/tests/aea/examples/benchmark/docs to new reference
     - change yaml version number
+
+    :return: whether a package was bumped or not
     """
     configuration_file_path = get_configuration_file_path(type_, name)
     current_public_id = get_public_id_from_yaml(configuration_file_path)
     deployed_public_id = public_id_in_registry(type_, name)
     difference = minor_version_difference(current_public_id, deployed_public_id)
+    is_bumped = False
     if difference == 0:
         print("Bumping package `{}` of type `{}`!".format(name, type_))
         bump_package_version(current_public_id, configuration_file_path, type_)
+        is_bumped = True
     elif difference == 1:
         print(
             "Package `{}` of type `{}` already at correct version!".format(name, type_)
@@ -265,13 +286,21 @@ def process_package(type_: str, name: str) -> None:
             )
         )
         sys.exit(1)
+    return is_bumped
 
 
-if __name__ == "__main__":
+def run_once() -> bool:
+    """Run the upgrade logic once."""
     check_if_running_allowed()
     last = get_hashes_from_last_release()
     now = get_hashes_from_current_release()
     last_by_type = split_hashes_by_type(last)
     now_by_type = split_hashes_by_type(now)
-    process_packages(last_by_type, now_by_type)
+    is_bumped = process_packages(last_by_type, now_by_type)
+    return is_bumped
+
+
+if __name__ == "__main__":
+    while run_once():
+        run_hashing()
     sys.exit(0)

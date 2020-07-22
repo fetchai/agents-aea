@@ -60,7 +60,7 @@ class Filter:
         return self._decision_maker_out_queue
 
     def get_active_handlers(
-        self, protocol_id: PublicId, skill_id: Optional[SkillId]
+        self, protocol_id: PublicId, skill_id: Optional[SkillId] = None
     ) -> List[Handler]:
         """
         Get active handlers based on protocol id and optional skill id.
