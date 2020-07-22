@@ -58,7 +58,7 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.6.0")
 
 MultiAddr = str
 

@@ -1,6 +1,6 @@
 name: erc1155_client
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 description: The erc1155 client interacts with the erc1155 deployer to conduct an
   atomic swap.
 license: Apache-2.0
