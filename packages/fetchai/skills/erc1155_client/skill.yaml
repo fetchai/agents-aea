@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmNkEycwsuyBQ2Ay7s3zzYJHCQTSGwmcSfS2YQ3km6mg2X
+  behaviours.py: QmYv7qZMgZRrK8UsWeAbFmGAbM9TPBennDuq2SoEa2VJCM
   dialogues.py: QmXd6KC9se6qZWaAsoqJpRYNF6BvVPBd5KJBxSKq9xhLLh
-  handlers.py: QmcDbeow6ebn5Q9JbxyanVb8MH5hs4imqLGb9b2hvEhuvF
-  strategy.py: QmPr8aXdXnAwJ2NKXcV9TULgu1UuxUH29W8YiMc8LMvLj3
+  handlers.py: QmXbjb2XESuXcR5Pu8RT2pDJLvFECSY7FbuataVVggZoUq
+  strategy.py: QmeFPYLYW4CjeXvD3HGQDHMyaySLaqBLJPVFqCG1tcBSr8
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -69,5 +69,6 @@ models:
         constraint_type: ==
         search_term: has_erc1155_contract
         search_value: true
+      search_radius: 5.0
     class_name: Strategy
 dependencies: {}

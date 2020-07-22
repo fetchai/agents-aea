@@ -136,11 +136,6 @@ def run():
         soef_port=SOEF_PORT,
         restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.3.0")},
         connection_id=SOEFConnection.connection_id,
-        delegate_uri="127.0.0.1:11001",
-        entry_peers=[ENTRY_PEER_ADDRESS],
-        local_uri="127.0.0.1:9001",
-        log_file="libp2p_node.log",
-        public_uri="127.0.0.1:9001",
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)
     resources.add_connection(soef_connection)

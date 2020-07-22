@@ -21,7 +21,6 @@
 
 from typing import Optional, cast
 
-from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -48,7 +47,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
-        self._registered_service_description = None  # type: Optional[Description]
 
     def setup(self) -> None:
         """
@@ -144,11 +142,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
         contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
-        self.context.logger.info(
-            "[{}]: Requesting contract deployment transaction...".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("requesting contract deployment transaction...")
 
     def _request_token_create_transaction(self) -> None:
         """
@@ -183,11 +177,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
         contract_api_dialogue.terms = strategy.get_create_token_terms()
         self.context.outbox.put_message(message=contract_api_msg)
-        self.context.logger.info(
-            "[{}]: Requesting create batch transaction...".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("requesting create batch transaction...")
 
     def _request_token_mint_transaction(self) -> None:
         """
@@ -224,19 +214,16 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
         contract_api_dialogue.terms = strategy.get_mint_token_terms()
         self.context.outbox.put_message(message=contract_api_msg)
-        self.context.logger.info(
-            "[{}]: Requesting mint batch transaction...".format(self.context.agent_name)
-        )
+        self.context.logger.info("requesting mint batch transaction...")
 
-    def _register_service(self) -> None:
+    def _register_agent(self) -> None:
         """
-        Register to the OEF Service Directory.
+        Register the agent's location.
 
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        description = strategy.get_service_description()
-        self._registered_service_description = description
+        description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
@@ -248,34 +235,67 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(
-            "[{}]: updating erc1155 service on OEF search node.".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("registering agent on SOEF.")
 
-    def _unregister_service(self) -> None:
+    def _register_service(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Register the agent's service.
 
         :return: None
         """
-        if self._registered_service_description is None:
-            return
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_register_service_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering service on SOEF.")
+
+    def _unregister_service(self) -> None:
+        """
+        Unregister service from the SOEF.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            service_description=self._registered_service_description,
+            service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(
-            "[{}]: unregistering erc1155 service from OEF search node.".format(
-                self.context.agent_name
-            )
+        self.context.logger.info("unregistering service from SOEF.")
+
+    def _unregister_agent(self) -> None:
+        """
+        Unregister agent from the SOEF.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
         )
-        self._registered_service_description = None
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("unregistering agent from SOEF.")

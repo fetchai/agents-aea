@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
-  behaviours.py: Qmejkpw5Ug9nW8Ju4y8Mg3wTgtJTDFGGcQLXYQKCDjbpVP
+  behaviours.py: QmehgihC5x7BBigkozXdtTsKxGV89kCn4iJELz8V4sdaFu
   dialogues.py: QmR6qb8PdmUozHANKMuLaKfLGKxgnx2zFzbkmcgqXq8wgg
-  handlers.py: Qmd6U3zTZqapH5EyaLp2rGCABWVRfkx2arHLVHQgdLWvCf
-  strategy.py: QmNLnx4zKMgwe18ou5unotaEJj5jMWTKoSL2UT7PtZZjg3
+  handlers.py: QmQCRnBhH4zTGvny3Dsmki34siNNXgm8JMPtX2cBrtJxfX
+  strategy.py: QmQ9UNcEvgB6TQtujrCgW8L7KJbAMN33aeExyUZSHtqtjv
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -61,14 +61,11 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      data_model:
-        attribute_one:
-          is_required: true
-          name: has_erc1155_contract
-          type: bool
-      data_model_name: erc1155_deploy
       from_supply: 10
       ledger_id: ethereum
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       mint_quantities:
       - 100
       - 100
@@ -82,7 +79,8 @@ models:
       - 100
       nb_tokens: 10
       service_data:
-        has_erc1155_contract: true
+        key: has_erc1155_contract
+        value: true
       to_supply: 0
       token_type: 2
       value: 0
