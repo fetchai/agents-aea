@@ -20,14 +20,18 @@
 """This module contains the strategy class."""
 
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.helpers.search.models import Constraint, ConstraintType, Query
+from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
+from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
 
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SEARCH_QUERY = {
-    "search_term": "has_erc1155_contract",
-    "search_value": True,
+    "search_term": "contract",
+    "search_value": "erc1155",
     "constraint_type": "==",
 }
+DEFAULT_SEARCH_RADIUS = 5.0
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 
@@ -41,12 +45,10 @@ class Strategy(Model):
         :return: None
         """
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
-        assert all(
-            [
-                key in self._search_query
-                for key in ["search_term", "constraint_type", "search_value"]
-            ]
-        ), "Invalid search query data."
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         super().__init__(**kwargs)
         self.is_searching = True
@@ -56,22 +58,37 @@ class Strategy(Model):
         """Get the ledger id."""
         return self._ledger_id
 
+    def get_location_and_service_query(self) -> Query:
+        """
+        Get the location and service query of the agent.
+
+        :return: the query
+        """
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (self._agent_location, self._radius))
+        )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
+        return query
+
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.
 
         :return: the query
         """
-        query = Query(
-            [
-                Constraint(
-                    self._search_query["search_term"],
-                    ConstraintType(
-                        self._search_query["constraint_type"],
-                        self._search_query["search_value"],
-                    ),
-                )
-            ],
-            model=None,
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
         )
+        query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query

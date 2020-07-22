@@ -788,7 +788,7 @@ def _make_libp2p_connection(
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
         os.remove(log_file)
-    crypto = make_crypto(FETCHAI)
+    crypto = make_crypto(COSMOS)
     identity = Identity("", address=crypto.address)
     if relay and delegate:
         configuration = ConnectionConfig(
@@ -823,7 +823,7 @@ def _make_libp2p_connection(
 def _make_libp2p_client_connection(
     node_port: int = 11234, node_host: str = "127.0.0.1"
 ) -> P2PLibp2pClientConnection:
-    crypto = make_crypto(FETCHAI)
+    crypto = make_crypto(COSMOS)
     identity = Identity("", address=crypto.address)
     configuration = ConnectionConfig(
         client_key_file=None,

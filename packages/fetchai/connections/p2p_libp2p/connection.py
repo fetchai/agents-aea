@@ -20,7 +20,6 @@
 """This module contains the p2p libp2p connection."""
 
 import asyncio
-import distutils
 import errno
 import logging
 import os
@@ -29,6 +28,7 @@ import struct
 import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
+from pathlib import Path
 from random import randint
 from threading import Thread
 from typing import IO, List, Optional, Sequence, cast
@@ -58,7 +58,7 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.6.0")
 
 MultiAddr = str
 
@@ -600,8 +600,9 @@ class P2PLibp2pConnection(Connection):
 
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
-        self.libp2p_workdir = tempfile.mkdtemp()
-        distutils.dir_util.copy_tree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
+        temp_dir = tempfile.mkdtemp()
+        self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
+        shutil.copytree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
 
         self.node = Libp2pNode(
             self.address,
@@ -670,7 +671,7 @@ class P2PLibp2pConnection(Connection):
             self._receive_from_node_task = None
         self.node.stop()
         if self.libp2p_workdir is not None:
-            distutils.dir_util.remove_tree(self.libp2p_workdir)
+            shutil.rmtree(Path(self.libp2p_workdir).parent)
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:

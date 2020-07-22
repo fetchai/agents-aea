@@ -20,11 +20,16 @@
 """This module contains the strategy class."""
 
 import random  # nosec
-from typing import Any, Dict, List, Optional
+from typing import List
 
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.helpers.search.generic import GenericDataModel
-from aea.helpers.search.models import Description
+from aea.helpers.search.generic import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
+    SIMPLE_SERVICE_MODEL,
+)
+from aea.helpers.search.models import Description, Location
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
@@ -39,15 +44,8 @@ DEFAULT_MINT_QUANTITIES = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
 DEFAULT_FROM_SUPPLY = 10
 DEFAULT_TO_SUPPLY = 0
 DEFAULT_VALUE = 0
-DEFAULT_DATA_MODEL_NAME = "erc1155_deploy"
-DEFAULT_DATA_MODEL = {
-    "attribute_one": {
-        "name": "has_erc1155_contract",
-        "type": "bool",
-        "is_required": "True",
-    },
-}  # type: Optional[Dict[str, Any]]
-DEFAULT_SERVICE_DATA = {"has_erc1155_contract": True}
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SERVICE_DATA = {"key": "contract", "value": "erc1155"}
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 
@@ -78,9 +76,20 @@ class Strategy(Model):
         self.to_supply = kwargs.pop("to_supply", DEFAULT_TO_SUPPLY)
         self.value = kwargs.pop("value", DEFAULT_VALUE)
 
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = {
+            "location": Location(location["longitude"], location["latitude"])
+        }
+        self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        assert (
+            len(self._set_service_data) == 2
+            and "key" in self._set_service_data
+            and "value" in self._set_service_data
+        ), "service_data must contain keys `key` and `value`"
+        self._remove_service_data = {"key": self._set_service_data["key"]}
+        self._simple_service_data = {
+            self._set_service_data["key"]: self._set_service_data["value"]
+        }
 
         super().__init__(**kwargs)
 
@@ -160,15 +169,47 @@ class Strategy(Model):
         ), "Only allowed to switch to true."
         self._is_tokens_minted = is_tokens_minted
 
-    def get_service_description(self) -> Description:
+    def get_location_description(self) -> Description:
         """
-        Get the service description.
+        Get the location description.
+
+        :return: a description of the agent's location
+        """
+        description = Description(
+            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+        )
+        return description
+
+    def get_register_service_description(self) -> Description:
+        """
+        Get the register service description.
 
         :return: a description of the offered services
         """
         description = Description(
-            self._service_data,
-            data_model=GenericDataModel(self._data_model_name, self._data_model),
+            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_service_description(self) -> Description:
+        """
+        Get the simple service description.
+
+        :return: a description of the offered services
+        """
+        description = Description(
+            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
+        )
+        return description
+
+    def get_unregister_service_description(self) -> Description:
+        """
+        Get the unregister service description.
+
+        :return: a description of the to be removed service
+        """
+        description = Description(
+            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description
 

@@ -59,7 +59,7 @@ A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` ne
 
 First, fetch the seller AEA, which will provide data:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.6.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.7.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 ```
@@ -71,12 +71,12 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/thermometer:0.7.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
 
 In `my_thermometer_aea/aea-config.yaml` add 
@@ -94,7 +94,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/thermometer_client:0.6.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.7.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -106,12 +106,12 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/thermometer_client:0.6.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` add 

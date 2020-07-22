@@ -53,8 +53,8 @@ class TestTacSkills(AEATestCaseMany, UseOef):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("skill", "fetchai/tac_control:0.3.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         self.run_install()
@@ -69,8 +69,8 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         # prepare agents for test
         for agent_name in (tac_aea_one, tac_aea_two):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.5.0")
             self.set_config("agent.default_ledger", ETHEREUM)
@@ -95,18 +95,18 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         )
         self.set_config(setting_path, start_time)
         tac_controller_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.5.0"
+            "--connections", "fetchai/p2p_libp2p:0.6.0"
         )
 
         # run two agents (participants)
         self.set_agent_context(tac_aea_one)
         tac_aea_one_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.5.0"
+            "--connections", "fetchai/p2p_libp2p:0.6.0"
         )
 
         self.set_agent_context(tac_aea_two)
         tac_aea_two_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.5.0"
+            "--connections", "fetchai/p2p_libp2p:0.6.0"
         )
 
         check_strings = (
@@ -179,8 +179,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.4.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         # stdout = self.get_wealth(ETHEREUM)
@@ -207,8 +207,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             (FUNDED_ETH_PRIVATE_KEY_2, FUNDED_ETH_PRIVATE_KEY_3),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.4.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.5.0")
             self.set_config("agent.default_ledger", ETHEREUM)
@@ -244,7 +244,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time"
         self.set_config(setting_path, start_time)
         tac_controller_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.5.0"
+            "--connections", "fetchai/p2p_libp2p:0.6.0"
         )
 
         check_strings = (
@@ -264,12 +264,12 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
         # run two participants as well
         self.set_agent_context(tac_aea_one)
         tac_aea_one_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.5.0"
+            "--connections", "fetchai/p2p_libp2p:0.6.0"
         )
 
         self.set_agent_context(tac_aea_two)
         tac_aea_two_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.5.0"
+            "--connections", "fetchai/p2p_libp2p:0.6.0"
         )
 
         check_strings = (
