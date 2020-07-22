@@ -54,18 +54,15 @@ from aea.protocols.generator.common import (
     load_protocol_specification,
 )
 from aea.protocols.generator.extract_specification import (
+    PythonicProtocolSpecification,
     _ct_specification_type_to_python_type,
     _mt_specification_type_to_python_type,
     _optional_specification_type_to_python_type,
-    _pt_specification_type_to_python_type,
     _pct_specification_type_to_python_type,
     _pmt_specification_type_to_python_type,
+    _pt_specification_type_to_python_type,
     _specification_type_to_python_type,
     extract,
-    PythonicProtocolSpecification,
-)
-from aea.protocols.generator.extract_specification import (
-    _specification_type_to_python_type,
 )
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
@@ -1399,24 +1396,24 @@ class TestCommon:
     def test_includes_custom_type(self,):
         """Test the '_includes_custom_type' method"""
         content_type_includes_1 = "Optional[DataModel]"
-        assert _includes_custom_type(content_type_includes_1) == True
+        assert _includes_custom_type(content_type_includes_1) is True
 
         content_type_includes_2 = "Union[int, DataModel]"
-        assert _includes_custom_type(content_type_includes_2) == True
+        assert _includes_custom_type(content_type_includes_2) is True
 
         content_type_includes_3 = "Optional[Union[int, float, DataModel, Query, float]]"
-        assert _includes_custom_type(content_type_includes_3) == True
+        assert _includes_custom_type(content_type_includes_3) is True
 
         content_type_not_includes_1 = "Optional[int]"
-        assert _includes_custom_type(content_type_not_includes_1) == False
+        assert _includes_custom_type(content_type_not_includes_1) is False
 
         content_type_not_includes_2 = "Union[int, float, str]"
-        assert _includes_custom_type(content_type_not_includes_2) == False
+        assert _includes_custom_type(content_type_not_includes_2) is False
 
         content_type_not_includes_3 = (
             "Optional[Union[int, float, FrozenSet[int], Tuple[bool, ...], float]]"
         )
-        assert _includes_custom_type(content_type_not_includes_3) == False
+        assert _includes_custom_type(content_type_not_includes_3) is False
 
     def test_is_installed(self,):
         """Test the 'is_installed' method"""
@@ -1438,7 +1435,7 @@ class TestCommon:
         assert spec.aea_version == ">=0.5.0, <0.6.0"
         assert spec.description == "A protocol for testing purposes."
         assert spec.speech_acts is not None
-        assert spec.protobuf_snippets is not None and spec.protobuf_snippets is not ""
+        assert spec.protobuf_snippets is not None and spec.protobuf_snippets != ""
 
     def test_create_protocol_file(self,):
         """Test the '_create_protocol_file' method"""
@@ -1756,17 +1753,23 @@ class TestExtractSpecification(TestCase):
         specification_type_8 = "wrong_type"
         with self.assertRaises(ProtocolSpecificationParseError) as cm:
             _specification_type_to_python_type(specification_type_8)
-        self.assertEqual(str(cm.exception), "Unsupported type: '{}'".format(specification_type_8))
+        self.assertEqual(
+            str(cm.exception), "Unsupported type: '{}'".format(specification_type_8)
+        )
 
         specification_type_9 = "pt:integer"
         with self.assertRaises(ProtocolSpecificationParseError) as cm:
             _specification_type_to_python_type(specification_type_9)
-        self.assertEqual(str(cm.exception), "Unsupported type: '{}'".format(specification_type_9))
+        self.assertEqual(
+            str(cm.exception), "Unsupported type: '{}'".format(specification_type_9)
+        )
 
         specification_type_10 = "pt: list"
         with self.assertRaises(ProtocolSpecificationParseError) as cm:
             _specification_type_to_python_type(specification_type_10)
-        self.assertEqual(str(cm.exception), "Unsupported type: '{}'".format(specification_type_10))
+        self.assertEqual(
+            str(cm.exception), "Unsupported type: '{}'".format(specification_type_10)
+        )
 
         specification_type_11 = "pt:list[wrong_sub_type]"
         with self.assertRaises(ProtocolSpecificationParseError) as cm:
@@ -1905,11 +1908,23 @@ class TestExtractSpecification(TestCase):
         }
         assert spec.all_custom_types == ["DataModel"]
         assert spec.custom_custom_types == {"DataModel": "CustomDataModel"}
-        assert spec.initial_performatives == ['PERFORMATIVE_CT', 'PERFORMATIVE_PT']
-        assert spec.reply == {'performative_ct': ['performative_pct'], 'performative_pt': ['performative_pmt'], 'performative_pct': ['performative_mt', 'performative_o'], 'performative_pmt': ['performative_mt', 'performative_o'], 'performative_mt': [], 'performative_o': [], 'performative_empty_contents': ['performative_empty_contents']}
-        assert spec.terminal_performatives == ['PERFORMATIVE_MT', 'PERFORMATIVE_O', 'PERFORMATIVE_EMPTY_CONTENTS']
-        assert spec.roles == ['role_1', 'role_2']
-        assert spec.end_states == ['end_state_1', 'end_state_2', 'end_state_3']
+        assert spec.initial_performatives == ["PERFORMATIVE_CT", "PERFORMATIVE_PT"]
+        assert spec.reply == {
+            "performative_ct": ["performative_pct"],
+            "performative_pt": ["performative_pmt"],
+            "performative_pct": ["performative_mt", "performative_o"],
+            "performative_pmt": ["performative_mt", "performative_o"],
+            "performative_mt": [],
+            "performative_o": [],
+            "performative_empty_contents": ["performative_empty_contents"],
+        }
+        assert spec.terminal_performatives == [
+            "PERFORMATIVE_MT",
+            "PERFORMATIVE_O",
+            "PERFORMATIVE_EMPTY_CONTENTS",
+        ]
+        assert spec.roles == ["role_1", "role_2"]
+        assert spec.end_states == ["end_state_1", "end_state_2", "end_state_3"]
         assert spec.typing_imports == {
             "Set": True,
             "Tuple": True,
