@@ -1,3 +1,4 @@
+---
 name: t_protocol
 author: fetchai
 version: 0.1.0
@@ -69,6 +70,7 @@ speech_acts:
 #    union does not work properly in the generator
 #    content_o_union: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:int], pt:set[pt:bytes], pt:list[pt:bool], pt:dict[pt:str, pt:float]]]
   performative_empty_contents: {}
+...
 ---
 ct:DataModel: |
   bytes bytes_field = 1;
@@ -79,3 +81,18 @@ ct:DataModel: |
   repeated int32 set_field = 6;
   repeated string list_field = 7;
   map<int32, bool> dict_field = 8;
+...
+---
+initiation: [performative_ct, performative_pt]
+reply:
+  performative_ct: [performative_pct]
+  performative_pt: [performative_pmt]
+  performative_pct: [performative_mt, performative_o]
+  performative_pmt: [performative_mt, performative_o]
+  performative_mt: []
+  performative_o: []
+  performative_empty_contents: [performative_empty_contents]
+termination: [performative_mt, performative_o, performative_empty_contents]
+roles: {role_1, role_2}
+end_states: [end_state_1, end_state_2, end_state_3]
+...

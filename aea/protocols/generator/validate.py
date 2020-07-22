@@ -147,7 +147,16 @@ def _is_valid_union(content_type: str) -> bool:
     if not _has_brackets(content_type):
         return False
 
+    # check there are at least two subtypes in the union
     sub_types = _get_sub_types_of_compositional_types(content_type)
+    if len(sub_types) < 2:
+        return False
+
+    # check there are no duplicate subtypes in the union
+    sub_types_set = set(sub_types)
+    if len(sub_types) != len(sub_types_set):
+        return False
+
     for sub_type in sub_types:
         if not (
             _is_valid_ct(sub_type)
