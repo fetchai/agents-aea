@@ -18,19 +18,34 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the base classes for the skills."""
+import unittest.mock
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
 from unittest import TestCase, mock
 from unittest.mock import MagicMock, Mock
 
+import pytest
+
+import aea
 from aea.aea import AEA
+from aea.configurations.base import PublicId, SkillComponentConfiguration
 from aea.connections.base import ConnectionStatus
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.exceptions import AEAException
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
-from aea.skills.base import Behaviour, Skill, SkillComponent, SkillContext
+from aea.skills.base import (
+    Behaviour,
+    Handler,
+    Model,
+    Skill,
+    SkillComponent,
+    SkillContext,
+    _check_duplicate_classes,
+    _print_warning_message_for_non_declared_skill_components,
+)
 
 from tests.conftest import (
     COSMOS,
@@ -299,3 +314,151 @@ def test_behaviour():
     assert behaviour.tick_interval == 0.001
     assert behaviour.start_at is None
     assert behaviour.is_done() is False
+
+
+def test_behaviour_parse_module_without_configs():
+    """call Behaviour.parse_module without configurations."""
+    assert Behaviour.parse_module(MagicMock(), {}, MagicMock()) == {}
+
+
+def test_behaviour_parse_module_missing_class():
+    """Test Behaviour.parse_module when a class is missing."""
+    skill_context = SkillContext(
+        skill=MagicMock(skill_id=PublicId.from_str("author/name:0.1.0"))
+    )
+    dummy_behaviours_path = Path(
+        ROOT_DIR, "tests", "data", "dummy_skill", "behaviours.py"
+    )
+    with unittest.mock.patch.object(
+        aea.skills.base.logger, "warning"
+    ) as mock_logger_warning:
+        behaviours_by_id = Behaviour.parse_module(
+            dummy_behaviours_path,
+            {
+                "dummy_behaviour": SkillComponentConfiguration("DummyBehaviour"),
+                "unknown_behaviour": SkillComponentConfiguration("UnknownBehaviour"),
+            },
+            skill_context,
+        )
+        mock_logger_warning.assert_called_with(
+            "Behaviour 'UnknownBehaviour' cannot be found."
+        )
+        assert "dummy_behaviour" in behaviours_by_id
+
+
+def test_handler_parse_module_without_configs():
+    """call Handler.parse_module without configurations."""
+    assert Handler.parse_module(MagicMock(), {}, MagicMock()) == {}
+
+
+def test_handler_parse_module_missing_class():
+    """Test Handler.parse_module when a class is missing."""
+    skill_context = SkillContext(
+        skill=MagicMock(skill_id=PublicId.from_str("author/name:0.1.0"))
+    )
+    dummy_handlers_path = Path(ROOT_DIR, "tests", "data", "dummy_skill", "handlers.py")
+    with unittest.mock.patch.object(
+        aea.skills.base.logger, "warning"
+    ) as mock_logger_warning:
+        behaviours_by_id = Handler.parse_module(
+            dummy_handlers_path,
+            {
+                "dummy_handler": SkillComponentConfiguration("DummyHandler"),
+                "unknown_handelr": SkillComponentConfiguration("UnknownHandler"),
+            },
+            skill_context,
+        )
+        mock_logger_warning.assert_called_with(
+            "Handler 'UnknownHandler' cannot be found."
+        )
+        assert "dummy_handler" in behaviours_by_id
+
+
+def test_model_parse_module_without_configs():
+    """call Model.parse_module without configurations."""
+    assert Model.parse_module(MagicMock(), {}, MagicMock()) == {}
+
+
+def test_model_parse_module_missing_class():
+    """Test Model.parse_module when a class is missing."""
+    skill_context = SkillContext(
+        skill=MagicMock(skill_id=PublicId.from_str("author/name:0.1.0"))
+    )
+    dummy_models_path = Path(ROOT_DIR, "tests", "data", "dummy_skill")
+    with unittest.mock.patch.object(
+        aea.skills.base.logger, "warning"
+    ) as mock_logger_warning:
+        models_by_id = Model.parse_module(
+            dummy_models_path,
+            {
+                "dummy_model": SkillComponentConfiguration("DummyModel"),
+                "unknown_model": SkillComponentConfiguration("UnknownModel"),
+            },
+            skill_context,
+        )
+        mock_logger_warning.assert_called_with("Model 'UnknownModel' cannot be found.")
+        assert "dummy_model" in models_by_id
+
+
+def test_check_duplicate_classes():
+    """Test check duplicate classes."""
+    with pytest.raises(
+        AEAException,
+        match=f"Model 'ModelClass' present both in path_1 and path_2. Remove one of them.",
+    ):
+        _check_duplicate_classes(
+            [
+                ("ModelClass", MagicMock(__module__="path_1")),
+                ("ModelClass", MagicMock(__module__="path_2")),
+            ]
+        )
+
+
+def test_print_warning_message_for_non_declared_skill_components():
+    """Test the helper function '_print_warning_message_for_non_declared_skill_components'."""
+    with unittest.mock.patch.object(
+        aea.skills.base.logger, "warning"
+    ) as mock_logger_warning:
+        _print_warning_message_for_non_declared_skill_components(
+            {"unknown_class_1", "unknown_class_2"}, set(), "type", "path"
+        )
+        mock_logger_warning.assert_any_call(
+            "Class unknown_class_1 of type type found but not declared in the configuration file path."
+        )
+        mock_logger_warning.assert_any_call(
+            "Class unknown_class_2 of type type found but not declared in the configuration file path."
+        )
+
+
+class TestSkill:
+    """Test skill attributes."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        cls.skill = Skill.from_dir(
+            Path(ROOT_DIR, "tests", "data", "dummy_skill"),
+            MagicMock(agent_name="agent_name"),
+        )
+
+    def test_logger(self):
+        """Test the logger getter."""
+        self.skill.logger
+
+    def test_logger_setter_raises_error(self):
+        """Test that the logger setter raises error."""
+        with pytest.raises(ValueError, match="Cannot set logger to a skill component."):
+            logger = self.skill.logger
+            self.skill.logger = logger
+
+    def test_skill_context(self):
+        """Test the skill context getter."""
+        context = self.skill.skill_context
+        assert isinstance(context, SkillContext)
+
+    def test_inject_contracts(self):
+        """Test inject contracts."""
+        assert self.skill.contracts == {}
+        d = {"foo": MagicMock()}
+        self.skill.inject_contracts(d)
+        assert self.skill.contracts == d
