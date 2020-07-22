@@ -37,7 +37,7 @@ class MyScaffoldHandler(Handler):
 
         :return: None
         """
-        raise NotImplementedError  # pragma: no cover
+        raise NotImplementedError
 
     def handle(self, message: Message) -> None:
         """
@@ -46,7 +46,7 @@ class MyScaffoldHandler(Handler):
         :param message: the message
         :return: None
         """
-        raise NotImplementedError  # pragma: no cover
+        raise NotImplementedError
 
     def teardown(self) -> None:
         """
@@ -54,4 +54,4 @@ class MyScaffoldHandler(Handler):
 
         :return: None
         """
-        raise NotImplementedError  # pragma: no cover
+        raise NotImplementedError
