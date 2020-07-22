@@ -17,8 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """HTTP server connection, channel, server, and handler."""
 import asyncio
+import copy
 import email
 import logging
 from abc import ABC, abstractmethod
@@ -26,7 +28,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from traceback import format_exc
-from typing import Dict, Optional, Set, cast
+from typing import Dict, Optional, Set, Tuple, cast
 from urllib.parse import parse_qs, urlencode, urlparse
 from uuid import uuid4
 
@@ -57,6 +59,7 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
+from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
@@ -163,6 +166,7 @@ class Request(OpenAPIRequest):
             bodyy=self.body if self.body is not None else b"",
             version="",
         )
+        http_message.counterparty = agent_address
         envelope = Envelope(
             to=agent_address,
             sender=self.id,
@@ -347,7 +351,7 @@ class HTTPChannel(BaseAsyncChannel):
         self.timeout_window = timeout_window
         self.http_server: Optional[web.TCPSite] = None
         self.pending_requests: Dict[RequestId, Future] = {}
-
+        self._dialogues = HttpDialogues(self.address)
         self.logger = logger
 
     @property
@@ -380,6 +384,27 @@ class HTTPChannel(BaseAsyncChannel):
                     "Failed to start server on {}:{}.".format(self.host, self.port)
                 )
 
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[HttpMessage, Optional[HttpDialogue]]:
+        """
+        Get a message copy and dialogue related to this message.
+
+        :param envelope: incoming envelope
+
+        :return: Tuple[MEssage, Optional[Dialogue]]
+        """
+        message = cast(HttpMessage, envelope.message)
+        message = copy.deepcopy(
+            message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+        dialogue = cast(HttpDialogue, self._dialogues.update(message))
+        if dialogue is None:  # pragma: nocover
+            logger.warning("Could not create dialogue for message={}".format(message))
+        return message, dialogue
+
     async def _http_handler(self, http_request: BaseRequest) -> Response:
         """
         Verify the request then send the request to Agent as an envelope.
@@ -401,6 +426,12 @@ class HTTPChannel(BaseAsyncChannel):
             self.pending_requests[request.id] = Future()
             # turn request into envelope
             envelope = request.to_envelope(self.connection_id, self.address)
+            message = cast(HttpMessage, envelope.message)
+            message.set(
+                "dialogue_reference",
+                self._dialogues.new_self_initiated_dialogue_reference(),
+            )
+            self._dialogues.update(message)
             # send the envelope to the agent's inbox (via self.in_queue)
             await self._in_queue.put(envelope)
             # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
@@ -408,11 +439,17 @@ class HTTPChannel(BaseAsyncChannel):
             response_envelope = await asyncio.wait_for(
                 self.pending_requests[request.id], timeout=self.RESPONSE_TIMEOUT
             )
+            _, dialogue = self._get_message_and_dialogue(response_envelope)
+
+            if not dialogue:
+                raise ValueError("Can not construct a dialogue!")
+
             return Response.from_envelope(response_envelope)
 
         except asyncio.TimeoutError:
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
         except BaseException:  # pragma: nocover # pylint: disable=broad-except
+            logger.exception("Error during handling incoming request")
             return Response(
                 status=SERVER_ERROR, reason="Server Error", text=format_exc()
             )

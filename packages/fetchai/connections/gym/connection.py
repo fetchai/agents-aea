@@ -20,11 +20,12 @@
 """Gym connector and gym channel."""
 
 import asyncio
+import copy
 import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Optional, Union, cast
+from typing import Optional, Tuple, Union, cast
 
 import gym
 
@@ -33,7 +34,9 @@ from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope
 
+from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
+
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
@@ -58,6 +61,55 @@ class GymChannel:
             self.THREAD_POOL_SIZE
         )
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = logger
+        self._dialogues = GymDialogues(self.address)
+
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[GymMessage, Optional[GymDialogue]]:
+        """
+        Get a message copy and dialogue related to this message.
+
+        :param envelope: incoming envelope
+
+        :return: Tuple[MEssage, Optional[Dialogue]]
+        """
+        message = cast(GymMessage, envelope.message)
+        message = copy.deepcopy(
+            message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+        dialogue = cast(GymDialogue, self._dialogues.update(message))
+        if dialogue is None:  # pragma: nocover
+            logger.warning("Could not create dialogue for message={}".format(message))
+        return message, dialogue
+
+    @staticmethod
+    def _set_response_dialogue_references(
+        response_message: GymMessage,
+        incoming_message: GymMessage,
+        dialogue: GymDialogue,
+    ) -> GymMessage:
+        response_message.set(
+            "dialogue_reference", dialogue.dialogue_label.dialogue_reference
+        )
+        """
+        Create a response message  with all dialog ue details.
+
+        :param response_message: message to be sent
+        :param incoming_message: message that response constructed for
+        :param dialogue: a dialog for messages
+
+        :return: new response message with all dialogue details.
+        """
+        response_message.set("target", incoming_message.message_id)
+        response_message.set("message_id", incoming_message.message_id + 1)
+        response_message.counterparty = incoming_message.counterparty
+        dialogue.update(response_message)
+        response_message = copy.deepcopy(
+            response_message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        return response_message
 
     @property
     def queue(self) -> asyncio.Queue:
@@ -102,7 +154,11 @@ class GymChannel:
         assert isinstance(
             envelope.message, GymMessage
         ), "Message not of type GymMessage"
-        gym_message = cast(GymMessage, envelope.message)
+        gym_message, dialogue = self._get_message_and_dialogue(envelope)
+
+        if not dialogue:
+            return
+
         if gym_message.performative == GymMessage.Performative.ACT:
             action = gym_message.action.any
             step_id = gym_message.step_id
@@ -119,6 +175,7 @@ class GymChannel:
                 info=GymMessage.AnyObject(info),
                 step_id=step_id,
             )
+            msg = self._set_response_dialogue_references(msg, gym_message, dialogue)
             envelope = Envelope(
                 to=envelope.sender,
                 sender=DEFAULT_GYM,

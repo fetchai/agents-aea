@@ -28,10 +28,13 @@ import aiohttp
 import pytest
 
 from aea.configurations.base import ConnectionConfig
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.conftest import (
@@ -77,6 +80,10 @@ class TestHTTPClientConnect:
             configuration=configuration, identity=self.agent_identity
         )
         self.http_client_connection.loop = asyncio.get_event_loop()
+        self.http_dialogs = HttpDialogues(make_crypto(DEFAULT_LEDGER).address)
+
+    def _make_dialog_reference(self):
+        return self.http_dialogs.new_self_initiated_dialogue_reference()
 
     @pytest.mark.asyncio
     async def test_initialization(self):
@@ -104,7 +111,7 @@ class TestHTTPClientConnect:
         await self.http_client_connection.connect()
 
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=self._make_dialog_reference(),
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
@@ -150,7 +157,7 @@ class TestHTTPClientConnect:
     async def test_send_envelope_excluded_protocol_fail(self):
         """Test send error if protocol not supported."""
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=self._make_dialog_reference(),
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
@@ -198,7 +205,7 @@ class TestHTTPClientConnect:
         await self.http_client_connection.connect()
 
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=self._make_dialog_reference(),
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
@@ -246,7 +253,7 @@ class TestHTTPClientConnect:
         await self.http_client_connection.connect()
 
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=self._make_dialog_reference(),
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
@@ -287,5 +294,5 @@ class TestHTTPClientConnect:
         assert (
             envelope.message.status_code == response_mock.status
         ), envelope.message.bodyy.decode("utf-8")
-
+        assert envelope.message.message_id == request_envelope.message.message_id + 1
         await self.http_client_connection.disconnect()

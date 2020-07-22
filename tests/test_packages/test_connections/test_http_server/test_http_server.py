@@ -16,12 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests of the HTTP Server connection module."""
 import asyncio
+import copy
 import logging
 import os
 from traceback import print_exc
-from typing import cast
+from typing import Optional, Tuple, cast
 from unittest.mock import Mock, patch
 
 import aiohttp
@@ -38,6 +40,7 @@ from packages.fetchai.connections.http_server.connection import (
     HTTPServerConnection,
     Response,
 )
+from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.conftest import (
@@ -97,6 +100,7 @@ class TestHTTPServer:
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.http_connection.connect())
+        self._dialogues = HttpDialogues("some_addr")
 
     @pytest.mark.asyncio
     async def test_http_connection_disconnect_channel(self):
@@ -104,23 +108,56 @@ class TestHTTPServer:
         await self.http_connection.channel.disconnect()
         assert self.http_connection.channel.is_stopped
 
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[HttpMessage, Optional[HttpDialogue]]:
+        message = cast(HttpMessage, envelope.message)
+        message = copy.deepcopy(
+            message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+        dialogue = cast(HttpDialogue, self._dialogues.update(message))
+        if dialogue is None:  # pragma: nocover
+            logger.warning("Could not create dialogue for message={}".format(message))
+        return message, dialogue
+
+    def _set_response_dialogue_references(
+        self,
+        response_message: HttpMessage,
+        incoming_message: HttpMessage,
+        dialogue: HttpDialogue,
+    ) -> HttpMessage:
+        response_message.set(
+            "dialogue_reference", dialogue.dialogue_label.dialogue_reference
+        )
+        response_message.set("target", incoming_message.message_id)
+        response_message.set("message_id", incoming_message.message_id + 1)
+        response_message.set("counterparty", incoming_message.counterparty)
+        dialogue.update(response_message)
+        response_message = copy.deepcopy(
+            response_message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        return response_message
+
     @pytest.mark.asyncio
     async def test_get_200(self):
         """Test send get request w/ 200 response."""
         request_task = self.loop.create_task(self.request("get", "/pets"))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
-        incoming_message = cast(HttpMessage, envelope.message)
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
+        assert dialogue
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("", ""),
-            target=incoming_message.message_id,
-            message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
             headers=incoming_message.headers,
             status_code=200,
             status_text="Success",
             bodyy=b"Response body",
+        )
+        message = self._set_response_dialogue_references(
+            message, incoming_message, dialogue
         )
         response_envelope = Envelope(
             to=envelope.sender,
@@ -145,7 +182,7 @@ class TestHTTPServer:
         request_task = self.loop.create_task(self.request("get", "/pets"))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
-        incoming_message = cast(HttpMessage, envelope.message)
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
         message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
             dialogue_reference=("", ""),
@@ -156,6 +193,9 @@ class TestHTTPServer:
             status_code=200,
             status_text="Success",
             bodyy=b"Response body",
+        )
+        message = self._set_response_dialogue_references(
+            message, incoming_message, dialogue
         )
         response_envelope = Envelope(
             to=envelope.sender,
@@ -176,7 +216,7 @@ class TestHTTPServer:
         request_task = self.loop.create_task(self.request("post", "/pets",))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
-        incoming_message = cast(HttpMessage, envelope.message)
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
             dialogue_reference=("", ""),
@@ -188,6 +228,9 @@ class TestHTTPServer:
             status_text="Created",
             bodyy=b"Response body",
         )
+        message = self._set_response_dialogue_references(
+            message, incoming_message, dialogue
+        )
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
@@ -195,6 +238,7 @@ class TestHTTPServer:
             context=envelope.context,
             message=message,
         )
+
         await self.http_connection.send(response_envelope)
 
         response = await asyncio.wait_for(request_task, timeout=20,)

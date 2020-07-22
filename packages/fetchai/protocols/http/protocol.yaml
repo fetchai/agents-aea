@@ -6,7 +6,7 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmRWie4QPiFJE8nK4fFJ6prqoG3u36cPo7st5JUZAGpVWv
-  dialogues.py: QmYXrUN76rptudYbvdZwzf4DRPN2HkuG67mkxvzznLBvao
+  dialogues.py: QmbhfvfdniejPAUT9dZD8AGv6vZNkVRRy9spi8aCU1kJb5
   http.proto: QmdTUTvvxGxMxSTB67AXjMUSDLdsxBYiSuJNVxHuLKB1jS
   http_pb2.py: QmYYKqdwiueq54EveL9WXn216FXLSQ6XGJJHoiJxwJjzHC
   message.py: QmX1rFsvggjpHcujLhB3AZRJpUWpEsf9gG6M2A2qdg6FVY

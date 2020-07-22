@@ -30,7 +30,9 @@ from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
+
 from packages.fetchai.connections.gym.connection import GymConnection
+from packages.fetchai.protocols.gym.dialogues import GymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 
 from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
@@ -51,6 +53,7 @@ class TestGymConnection:
             gym_env=self.env, identity=identity, configuration=configuration
         )
         self.loop = asyncio.get_event_loop()
+        self.dialogues = GymDialogues(self.my_address)
 
     def teardown(self):
         """Clean up after tests."""
@@ -84,6 +87,7 @@ class TestGymConnection:
             performative=GymMessage.Performative.ACT,
             action=GymMessage.AnyObject("any_action"),
             step_id=1,
+            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
         )
         msg.counterparty = "_to_key"
         envelope = Envelope(
@@ -103,6 +107,7 @@ class TestGymConnection:
             performative=GymMessage.Performative.ACT,
             action=GymMessage.AnyObject("any_action"),
             step_id=1,
+            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
         )
         msg.counterparty = "_to_key"
         envelope = Envelope(
@@ -124,7 +129,10 @@ class TestGymConnection:
     @pytest.mark.asyncio
     async def test_send_reset(self):
         """Test send reset message."""
-        msg = GymMessage(performative=GymMessage.Performative.RESET,)
+        msg = GymMessage(
+            performative=GymMessage.Performative.RESET,
+            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
+        )
         msg.counterparty = "_to_key"
         envelope = Envelope(
             to="_to_key",
@@ -143,7 +151,10 @@ class TestGymConnection:
     @pytest.mark.asyncio
     async def test_send_close(self):
         """Test send close message."""
-        msg = GymMessage(performative=GymMessage.Performative.CLOSE,)
+        msg = GymMessage(
+            performative=GymMessage.Performative.CLOSE,
+            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
+        )
         msg.counterparty = "_to_key"
         envelope = Envelope(
             to="_to_key",

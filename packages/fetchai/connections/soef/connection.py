@@ -202,8 +202,6 @@ class SOEFChannel:
         self.excluded_protocols = excluded_protocols
         self.restricted_to_protocols = restricted_to_protocols
         self.oef_search_dialogues = OefSearchDialogues()
-        self.oef_msg_id = 0
-        self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
 
         self.declared_name = uuid4().hex
         self.unique_page_address = None  # type: Optional[str]

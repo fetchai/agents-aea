@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This contains the proxy gym environment."""
 
 import sys
@@ -36,6 +37,8 @@ sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
 )
 sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
+
+from packages.fetchai.protocols.gym.dialogues import GymDialogues  # noqa: E402
 from packages.fetchai.protocols.gym.message import GymMessage  # noqa: E402
 
 from .agent import ProxyAgent  # noqa: E402
@@ -67,6 +70,7 @@ class ProxyEnv(gym.Env):
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
         self._agent_address = self._agent.identity.address
+        self._dialogues = GymDialogues(self._agent_address)
         self._agent_thread = Thread(target=self._agent.start)
 
     def step(self, action: Action) -> Feedback:
@@ -115,7 +119,10 @@ class ProxyEnv(gym.Env):
         """
         if not self._agent.multiplexer.is_connected:
             self._connect()
-        gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
+        gym_msg = GymMessage(
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
+            performative=GymMessage.Performative.RESET,
+        )
         gym_msg.counterparty = DEFAULT_GYM
         self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
@@ -125,7 +132,10 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
+        gym_msg = GymMessage(
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
+            performative=GymMessage.Performative.CLOSE,
+        )
         gym_msg.counterparty = DEFAULT_GYM
         self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
@@ -161,6 +171,7 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         gym_msg = GymMessage(
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
             performative=GymMessage.Performative.ACT,
             action=GymMessage.AnyObject(action),
             step_id=step_id,
