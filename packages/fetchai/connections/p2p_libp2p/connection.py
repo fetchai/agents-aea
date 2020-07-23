@@ -383,8 +383,8 @@ class Libp2pNode:
         """
         if self._connection_attempts == 1:
             with open(self.log_file, "r") as f:
-                self.logger.debug("Couldn't connect to libp2p p2p process, logs:")
-                self.logger.debug(f.read())
+                self.logger.error("Couldn't connect to libp2p p2p process, logs:")
+                self.logger.error(f.read())
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
@@ -588,7 +588,7 @@ class P2PLibp2pConnection(Connection):
                 )
             if delegate_uri is not None:  # pragma: no cover
                 logger.warning(
-                    "Ignoring Delegate Uri configuration as node can not be publically reachable"
+                    "Ignoring Delegate Uri configurCouldn't connectation as node can not be publically reachable"
                 )
         else:
             # node will be run as a full NodeDHT

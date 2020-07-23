@@ -53,7 +53,8 @@ func ignore(err error) {
 }
 
 const (
-	newStreamTimeout = 5 * time.Second
+	newStreamTimeout        = 5 * 60 * time.Second // includes peer restart
+	sleepTimeIncreaseFactor = 2                    // multiplicative increase
 )
 
 // DHTClient A restricted libp2p node for the Agents Communication Network
@@ -275,6 +276,21 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeout)
 	defer cancel()
 	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaAddressStream)
+	sleepTime := 200 * time.Millisecond
+	for err != nil {
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("couldn't open stream to relay, retrying in %s", sleepTime)
+		select {
+		default:
+			time.Sleep(sleepTime)
+			sleepTime = sleepTime * sleepTimeIncreaseFactor
+			stream, err = dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaAddressStream)
+		case <-ctx.Done():
+			break
+		}
+	}
 	if err != nil {
 		lerror(err).
 			Str("op", "route").
@@ -355,6 +371,21 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	ctx, cancel = context.WithTimeout(context.Background(), newStreamTimeout)
 	defer cancel()
 	stream, err = dhtClient.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
+	sleepTime = 200 * time.Millisecond
+	for err != nil {
+		lerror(err).
+			Str("op", "route").
+			Str("target", target).
+			Msgf("timeout, couldn't open stream to target %s, retrying in %s", peerID, sleepTime)
+		select {
+		default:
+			time.Sleep(sleepTime)
+			sleepTime = sleepTime * sleepTimeIncreaseFactor
+			stream, err = dhtClient.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
+		case <-ctx.Done():
+			break
+		}
+	}
 	if err != nil {
 		lerror(err).
 			Str("op", "route").
@@ -453,6 +484,21 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 	ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeout)
 	defer cancel()
 	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaRegisterRelayStream)
+	sleepTime := 200 * time.Millisecond
+	for err != nil {
+		lerror(err).
+			Str("op", "register").
+			Str("addr", dhtClient.myAgentAddress).
+			Msgf("timeout, couldn't open stream to relay peer, retrying in %s", sleepTime)
+		select {
+		default:
+			time.Sleep(sleepTime)
+			sleepTime = sleepTime * sleepTimeIncreaseFactor
+			stream, err = dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaRegisterRelayStream)
+		case <-ctx.Done():
+			break
+		}
+	}
 	if err != nil {
 		lerror(err).
 			Str("op", "register").
