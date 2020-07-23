@@ -16,29 +16,30 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This contains the proxy gym environment."""
 
+import copy
 import sys
 import time
 from queue import Queue
 from threading import Thread
-from typing import Any, Tuple, cast
+from typing import Any, Optional, Tuple, cast
 
 import gym
 
 from aea.configurations.base import PublicId
 from aea.helpers.base import locate
 from aea.mail.base import Envelope
-from aea.protocols.base import Message
 
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
 )
 sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
 
-from packages.fetchai.protocols.gym.dialogues import GymDialogues  # noqa: E402
+from packages.fetchai.protocols.gym.dialogues import (
+    GymDialogue,
+    GymDialogues,
+)  # noqa: E402
 from packages.fetchai.protocols.gym.message import GymMessage  # noqa: E402
 
 from .agent import ProxyAgent  # noqa: E402
@@ -64,14 +65,33 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         super().__init__()
-        self._queue = Queue()
-        self._action_counter = 0
+        self._queue: Queue = Queue()
+        self._action_counter: int = 0
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
         self._agent_address = self._agent.identity.address
         self._dialogues = GymDialogues(self._agent_address)
         self._agent_thread = Thread(target=self._agent.start)
+
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[GymMessage, Optional[GymDialogue]]:
+        """
+        Get a message copy and dialogue related to this message.
+
+        :param envelope: incoming envelope
+
+        :return: Tuple[MEssage, Optional[Dialogue]]
+        """
+        message = cast(GymMessage, envelope.message)
+        message = copy.deepcopy(
+            message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+        dialogue = cast(GymDialogue, self._dialogues.update(message))
+        return message, dialogue
 
     def step(self, action: Action) -> Feedback:
         """
@@ -96,8 +116,8 @@ class ProxyEnv(gym.Env):
         # Wait (blocking!) for the response envelope from the environment
         in_envelope = self._queue.get(block=True, timeout=None)  # type: Envelope
 
-        msg = self._decode_percept(in_envelope, step_id)
-
+        self._decode_percept(in_envelope, step_id)
+        msg, _ = self._get_message_and_dialogue(in_envelope)
         observation, reward, done, info = self._message_to_percept(msg)
 
         return observation, reward, done, info
@@ -124,6 +144,7 @@ class ProxyEnv(gym.Env):
             performative=GymMessage.Performative.RESET,
         )
         gym_msg.counterparty = DEFAULT_GYM
+        self._dialogues.update(gym_msg)
         self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
     def close(self) -> None:
@@ -137,6 +158,7 @@ class ProxyEnv(gym.Env):
             performative=GymMessage.Performative.CLOSE,
         )
         gym_msg.counterparty = DEFAULT_GYM
+        self._dialogues.update(gym_msg)
         self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
         self._disconnect()
@@ -177,10 +199,11 @@ class ProxyEnv(gym.Env):
             step_id=step_id,
         )
         gym_msg.counterparty = DEFAULT_GYM
+        self._dialogues.update(gym_msg)
         # Send the message via the proxy agent and to the environment
         self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
-    def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> Message:
+    def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> GymMessage:
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 
@@ -191,7 +214,7 @@ class ProxyEnv(gym.Env):
         """
         if envelope is not None:
             if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.3.0"):
-                gym_msg = envelope.message
+                gym_msg = cast(GymMessage, envelope.message)
                 if (
                     gym_msg.performative == GymMessage.Performative.PERCEPT
                     and gym_msg.step_id == expected_step_id
@@ -208,7 +231,7 @@ class ProxyEnv(gym.Env):
         else:
             raise ValueError("Missing envelope.")
 
-    def _message_to_percept(self, message: Message) -> Feedback:
+    def _message_to_percept(self, message: GymMessage) -> Feedback:
         """
         Transform the message received from the gym environment into observation, reward, done, info.
 

@@ -137,16 +137,20 @@ class Request(OpenAPIRequest):
         request.id = uuid4().hex
         return request
 
-    def to_envelope(self, connection_id: PublicId, agent_address: str) -> Envelope:
+    def to_envelope(
+        self,
+        connection_id: PublicId,
+        agent_address: str,
+        dialogue_reference: Tuple[str, str],
+    ) -> Envelope:
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
 
-        The Envelope's message body contains the "performative", "path", "params", and "payload".
+        :param connection_id: id of the connection
+        :param agent_address: agent's address
+        :param dialogue_reference: new dialog refernece for envelope
 
-        :param http_method: the http method
-        :param url: the url
-        :param param: the parameter
-        :param body: the body
+        :return: envelope
         """
         url = (
             self.full_url_pattern
@@ -156,7 +160,7 @@ class Request(OpenAPIRequest):
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
         http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=dialogue_reference,
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
@@ -425,12 +429,12 @@ class HTTPChannel(BaseAsyncChannel):
         try:
             self.pending_requests[request.id] = Future()
             # turn request into envelope
-            envelope = request.to_envelope(self.connection_id, self.address)
-            message = cast(HttpMessage, envelope.message)
-            message.set(
-                "dialogue_reference",
-                self._dialogues.new_self_initiated_dialogue_reference(),
+            envelope = request.to_envelope(
+                self.connection_id,
+                self.address,
+                dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
             )
+            message = cast(HttpMessage, envelope.message)
             self._dialogues.update(message)
             # send the envelope to the agent's inbox (via self.in_queue)
             await self._in_queue.put(envelope)

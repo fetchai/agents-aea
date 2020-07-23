@@ -240,8 +240,14 @@ class LocalNode:
                     target=RESPONSE_TARGET,
                     message_id=RESPONSE_MESSAGE_ID,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
+                    dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 )
-                msg = self._set_response_dialogue_references(msg, oef_message, dialogue)
+                msg.counterparty = oef_message.counterparty
+                dialogue.update(msg)
+                msg = copy.deepcopy(
+                    msg
+                )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+
                 envelope = Envelope(
                     to=address,
                     sender=DEFAULT_OEF,

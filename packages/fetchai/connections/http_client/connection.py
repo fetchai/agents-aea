@@ -128,33 +128,6 @@ class HTTPClientAsyncChannel:
             logger.warning("Could not create dialogue for message={}".format(message))
         return message, dialogue
 
-    @staticmethod
-    def _set_response_dialogue_references(
-        response_message: HttpMessage,
-        incoming_message: HttpMessage,
-        dialogue: HttpDialogue,
-    ) -> HttpMessage:
-        response_message.set(
-            "dialogue_reference", dialogue.dialogue_label.dialogue_reference
-        )
-        """
-        Create a response message  with all dialog ue details.
-
-        :param response_message: message to be sent
-        :param incoming_message: message that response constructed for
-        :param dialogue: a dialog for messages
-
-        :return: new response message with all dialogue details.
-        """
-        response_message.set("target", incoming_message.message_id)
-        response_message.set("message_id", incoming_message.message_id + 1)
-        response_message.counterparty = incoming_message.counterparty
-        dialogue.update(response_message)
-        response_message = copy.deepcopy(
-            response_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        return response_message
-
     async def _http_request_task(self, request_envelope: Envelope) -> None:
         """
         Perform http request and send back response.
@@ -332,10 +305,16 @@ class HTTPClientAsyncChannel:
             status_text=status_text,
             bodyy=bodyy,
             version="",
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            target=http_request_message.message_id,
+            message_id=http_request_message.message_id + 1,
         )
-        http_message = self._set_response_dialogue_references(
-            http_message, http_request_message, dialogue
-        )
+        http_message.counterparty = http_request_message.counterparty
+        dialogue.update(http_message)
+        http_message = copy.deepcopy(
+            http_message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",

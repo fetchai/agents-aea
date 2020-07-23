@@ -84,33 +84,6 @@ class GymChannel:
             logger.warning("Could not create dialogue for message={}".format(message))
         return message, dialogue
 
-    @staticmethod
-    def _set_response_dialogue_references(
-        response_message: GymMessage,
-        incoming_message: GymMessage,
-        dialogue: GymDialogue,
-    ) -> GymMessage:
-        response_message.set(
-            "dialogue_reference", dialogue.dialogue_label.dialogue_reference
-        )
-        """
-        Create a response message  with all dialog ue details.
-
-        :param response_message: message to be sent
-        :param incoming_message: message that response constructed for
-        :param dialogue: a dialog for messages
-
-        :return: new response message with all dialogue details.
-        """
-        response_message.set("target", incoming_message.message_id)
-        response_message.set("message_id", incoming_message.message_id + 1)
-        response_message.counterparty = incoming_message.counterparty
-        dialogue.update(response_message)
-        response_message = copy.deepcopy(
-            response_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        return response_message
-
     @property
     def queue(self) -> asyncio.Queue:
         """Check queue is set and return queue."""
@@ -174,8 +147,15 @@ class GymChannel:
                 done=done,
                 info=GymMessage.AnyObject(info),
                 step_id=step_id,
+                target=gym_message.message_id,
+                message_id=gym_message.message_id + 1,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             )
-            msg = self._set_response_dialogue_references(msg, gym_message, dialogue)
+            msg.counterparty = gym_message.counterparty
+            dialogue.update(msg)
+            msg = copy.deepcopy(
+                msg
+            )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
             envelope = Envelope(
                 to=envelope.sender,
                 sender=DEFAULT_GYM,
