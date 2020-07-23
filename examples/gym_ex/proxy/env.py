@@ -36,9 +36,11 @@ sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
 )
 sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
-from packages.fetchai.protocols.gym.message import GymMessage  # noqa: E402
+from packages.fetchai.protocols.gym.message import (  # noqa: E402  # pylint: disable=wrong-import-position
+    GymMessage,
+)
 
-from .agent import ProxyAgent  # noqa: E402
+from .agent import ProxyAgent  # noqa: E402  # pylint: disable=wrong-import-position
 
 Action = Any
 Observation = Any
@@ -105,7 +107,9 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         # TODO: adapt this line to the new APIs. We no longer have a mailbox.
-        self._agent.mailbox._connection.channel.gym_env.render(mode)
+        self._agent.mailbox._connection.channel.gym_env.render(  # pylint: disable=protected-access,no-member
+            mode
+        )
 
     def reset(self) -> None:
         """
@@ -169,7 +173,8 @@ class ProxyEnv(gym.Env):
         # Send the message via the proxy agent and to the environment
         self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
-    def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> Message:
+    @staticmethod
+    def _decode_percept(envelope: Envelope, expected_step_id: int) -> Message:
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 
@@ -197,7 +202,8 @@ class ProxyEnv(gym.Env):
         else:
             raise ValueError("Missing envelope.")
 
-    def _message_to_percept(self, message: Message) -> Feedback:
+    @staticmethod
+    def _message_to_percept(message: Message) -> Feedback:
         """
         Transform the message received from the gym environment into observation, reward, done, info.
 

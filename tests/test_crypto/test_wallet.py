@@ -104,6 +104,18 @@ class WalletTestCase(TestCase):
             tuple(addresses), (EthereumCrypto.identifier, FetchAICrypto.identifier)
         )
 
+    def test_wallet_private_keys_positive(self):
+        """Test Wallet.private_keys init positive result."""
+        private_key_paths = {
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+        }
+        wallet = Wallet(private_key_paths)
+        private_keys = wallet.private_keys
+        self.assertTupleEqual(
+            tuple(private_keys), (EthereumCrypto.identifier, FetchAICrypto.identifier)
+        )
+
     def test_wallet_cryptos_positive(self):
         """Test Wallet.main_cryptos and connection cryptos init positive result."""
         private_key_paths = {

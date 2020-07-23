@@ -70,7 +70,7 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: setting up MySearchBehaviour".format(self.context.agent_name)
+            "setting up MySearchBehaviour"
         )
 
     def act(self) -> None:
@@ -89,8 +89,8 @@ class MySearchBehaviour(TickerBehaviour):
             query=self.query,
         )
         self.context.logger.info(
-            "[{}]: sending search request to OEF search node, search_count={}".format(
-                self.context.agent_name, self.sent_search_count
+            "sending search request to OEF search node, search_count={}".format(
+                self.sent_search_count
             )
         )
         search_request.counterparty = self.context.search_service_address
@@ -104,7 +104,7 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: tearing down MySearchBehaviour".format(self.context.agent_name)
+            "tearing down MySearchBehaviour"
         )
 ```
 
@@ -144,7 +144,7 @@ class MySearchHandler(Handler):
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info(
-            "[{}]: setting up MySearchHandler".format(self.context.agent_name)
+            "setting up MySearchHandler"
         )
 
     def handle(self, message: Message) -> None:
@@ -215,13 +215,12 @@ class MySearchHandler(Handler):
         self.received_search_count += 1
         nb_agents_found = len(oef_search_msg.agents)
         self.context.logger.info(
-            "[{}]: found number of agents={}, received search count={}".format(
-                self.context.agent_name, nb_agents_found, self.received_search_count
+            "found number of agents={}, received search count={}".format(
+                nb_agents_found, self.received_search_count
             )
         )
         self.context.logger.info(
-            "[{}]: number of search requests sent={} vs. number of search responses received={}".format(
-                self.context.agent_name,
+            "number of search requests sent={} vs. number of search responses received={}".format(
                 self.context.behaviours.my_search_behaviour.sent_search_count,
                 self.received_search_count,
             )
@@ -250,7 +249,7 @@ class MySearchHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: tearing down MySearchHandler".format(self.context.agent_name)
+            "tearing down MySearchHandler"
         )
 ```
 
@@ -393,9 +392,9 @@ This adds the protocol to our AEA and makes it available on the path `packages.f
 We also need to add the soef and p2p connections and install the AEA's dependencies:
 ``` bash
 aea add connection fetchai/soef:0.5.0
-aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
 
 Finally, in the `aea-config.yaml` add the following lines:
@@ -410,7 +409,7 @@ This will ensure that search requests are processed by the correct connection.
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.8.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.9.0 && cd simple_service_registration
 ```
 
 This AEA will simply register a location service on the [SOEF search node](../simple-oef) so we can search for it.
