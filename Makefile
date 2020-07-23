@@ -45,7 +45,7 @@ lint:
 
 .PHONY: pylint
 pylint:
-	pylint aea benchmark examples packages scripts
+	pylint aea benchmark packages scripts examples/*
 
 .PHONY: security
 security:

@@ -698,7 +698,7 @@ class Skill(Component):
     @logger.setter
     def logger(self, *args) -> None:
         """Set the logger."""
-        raise ValueError("Cannot set logger to a skill component..")
+        raise ValueError("Cannot set logger to a skill component.")
 
     @classmethod
     def from_config(

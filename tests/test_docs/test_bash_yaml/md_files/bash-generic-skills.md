@@ -1,32 +1,32 @@
 ``` bash
-aea fetch fetchai/generic_seller:0.5.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.6.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/generic_seller:0.8.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.5.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.6.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/p2p_libp2p:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.5.0
 aea add connection fetchai/ledger:0.2.0
 aea add skill fetchai/generic_buyer:0.7.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.5.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
 ``` bash
 aea generate-key cosmos

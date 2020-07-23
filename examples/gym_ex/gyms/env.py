@@ -70,7 +70,8 @@ class BanditEnv(gym.Env):
 
         self.seed()  # seed environment randomness
 
-    def reset(self) -> Observation:
+    @staticmethod
+    def reset() -> Observation:
         """
         Reset the environment.
 

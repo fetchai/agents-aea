@@ -240,7 +240,7 @@ class TaskManager(WithLogger):
         :return: None
         """
         if self._pool:
-            self.logger.debug("Pool was already started!.")
+            self.logger.debug("Pool was already started!")
             return
         self._pool = Pool(self._nb_workers, initializer=init_worker)
 
