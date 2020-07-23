@@ -51,10 +51,10 @@ class CliRunner(ClickCliRunner):
     ):
         """Patch click.testing.CliRunner.invoke()."""
         exc_info = None
-        with self.isolation(input=input, env=env, color=color) as outstreams:
-            exception = None
-            exit_code = 0
+        exception = None
+        exit_code = 0
 
+        with self.isolation(input=input, env=env, color=color) as outstreams:
             if isinstance(args, string_types):
                 args = shlex.split(args)
 
@@ -67,14 +67,11 @@ class CliRunner(ClickCliRunner):
                 cli.main(args=args or (), prog_name=prog_name, **extra)
             except SystemExit as e:
                 exc_info = sys.exc_info()
-                exit_code = e.code
-                if exit_code is None:
+
+                if e.code is None:  # pragma: nocover
                     exit_code = 0
-
-                if exit_code != 0:
+                else:
                     exception = e
-
-                if not isinstance(exit_code, int):
                     sys.stdout.write(str(exit_code))
                     sys.stdout.write("\n")
                     exit_code = 1
