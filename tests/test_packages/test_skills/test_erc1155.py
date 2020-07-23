@@ -28,10 +28,11 @@ from tests.conftest import (
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FUNDED_COSMOS_PRIVATE_KEY_1,
-    FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
+    FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
 
@@ -78,13 +79,16 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.generate_private_key(ETHEREUM)
         self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_1, ETHEREUM_PRIVATE_KEY_FILE
+            FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
         self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
+        setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+        self.set_config(setting_path, "ethereum")
         # stdout = self.get_wealth(ETHEREUM)
         # if int(stdout) < 100000000000000000:
         #     pytest.skip("The agent needs more funds for the test to pass.")
@@ -114,10 +118,15 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
         self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
+        setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+        self.set_config(setting_path, "ethereum")
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
         # stdout = self.get_wealth(ETHEREUM)
         # if int(stdout) < 100000000000000000:
         #     pytest.skip("The agent needs more funds for the test to pass.")
@@ -151,8 +160,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
             "transaction was successfully settled. Transaction receipt=",
-            "Requesting create batch transaction...",
-            "Requesting mint batch transaction...",
+            "requesting create batch transaction...",
+            "requesting mint batch transaction...",
+            "registering agent on SOEF.",
+            "registering service on SOEF.",
         )
         missing_strings = self.missing_from_output(
             deploy_aea_process, check_strings, timeout=420, is_terminating=False
@@ -180,9 +191,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         ), "Strings {} didn't appear in client_aea output.".format(missing_strings)
 
         check_strings = (
-            "Sending PROPOSE to agent=",
+            "received CFP from sender=",
+            "sending PROPOSE to agent=",
             "received ACCEPT_W_INFORM from sender=",
-            "Requesting single atomic swap transaction...",
+            "requesting single atomic swap transaction...",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "transaction signing was successful.",
@@ -190,7 +202,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
             "transaction was successfully settled. Transaction receipt=",
-            "Demo finished!",
+            "demo finished!",
         )
         missing_strings = self.missing_from_output(
             deploy_aea_process, check_strings, timeout=360, is_terminating=False

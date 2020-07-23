@@ -45,7 +45,7 @@ DEFAULT_FROM_SUPPLY = 10
 DEFAULT_TO_SUPPLY = 0
 DEFAULT_VALUE = 0
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
-DEFAULT_SERVICE_DATA = {"key": "contract", "value": "erc1155"}
+DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "erc1155_contract"}
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 

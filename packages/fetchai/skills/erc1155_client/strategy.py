@@ -26,8 +26,8 @@ from aea.skills.base import Model
 
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SEARCH_QUERY = {
-    "search_term": "contract",
-    "search_value": "erc1155",
+    "search_key": "seller_service",
+    "search_value": "erc1155_contract",
     "constraint_type": "==",
 }
 DEFAULT_SEARCH_RADIUS = 5.0
