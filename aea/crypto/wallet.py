@@ -123,6 +123,11 @@ class Wallet:
         return self._main_cryptos.addresses
 
     @property
+    def private_keys(self) -> Dict[str, str]:
+        """Get the crypto addresses."""
+        return self._main_cryptos.private_keys
+
+    @property
     def main_cryptos(self) -> CryptoStore:
         """Get the main crypto store."""
         return self._main_cryptos
