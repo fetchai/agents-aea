@@ -69,7 +69,7 @@ def run():
         PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerConnection.connection_id,
         PublicId.from_str("fetchai/oef_search:0.3.0"): SOEFConnection.connection_id,
     }
-    default_connection = SOEFConnection.connection_id
+    default_connection = P2PLibp2pConnection.connection_id
 
     # create the AEA
     my_aea = AEA(

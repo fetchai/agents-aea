@@ -10,7 +10,7 @@ fingerprint:
   behaviours.py: QmVujGtobQ5SeaVRc8n7PJaVsnnUdixUsmmQyjpMjyLe7Z
   dialogues.py: QmR6qb8PdmUozHANKMuLaKfLGKxgnx2zFzbkmcgqXq8wgg
   handlers.py: QmRM7w75L1EXohnnXU2y9wHKfSCn37yn4t9BHLYxU9dMUm
-  strategy.py: QmW5yoXYPf9HGsjhD2ybSHKfRvSBTYoBcuzv2UQdS6gr8t
+  strategy.py: QmUFKGQKuctWQY72DRPuxWBtPtPj6pjBHFpD4QS1X5X3bM
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -82,8 +82,8 @@ models:
       - 100
       nb_tokens: 10
       service_data:
-        key: contract
-        value: erc1155
+        key: seller_service
+        value: erc1155_contract
       to_supply: 0
       token_type: 2
       value: 0

@@ -30,8 +30,10 @@ from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
     CUR_PATH,
+    MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     ROOT_DIR,
+    wait_for_localhost_ports_to_close,
 )
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
@@ -51,6 +53,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     @pytest.mark.integration
     def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
@@ -147,3 +150,4 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])

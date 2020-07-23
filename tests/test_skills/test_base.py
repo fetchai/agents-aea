@@ -404,7 +404,7 @@ def test_check_duplicate_classes():
     """Test check duplicate classes."""
     with pytest.raises(
         AEAException,
-        match=f"Model 'ModelClass' present both in path_1 and path_2. Remove one of them.",
+        match="Model 'ModelClass' present both in path_1 and path_2. Remove one of them.",
     ):
         _check_duplicate_classes(
             [

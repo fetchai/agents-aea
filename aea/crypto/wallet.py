@@ -45,16 +45,19 @@ class CryptoStore:
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
         addresses = {}  # type: Dict[str, str]
+        private_keys = {}  # type: Dict[str, str]
 
         for identifier, path in crypto_id_to_path.items():
             crypto = make_crypto(identifier, private_key_path=path)
             crypto_objects[identifier] = crypto
             public_keys[identifier] = cast(str, crypto.public_key)
             addresses[identifier] = cast(str, crypto.address)
+            private_keys[identifier] = cast(str, crypto.private_key)
 
         self._crypto_objects = crypto_objects
         self._public_keys = public_keys
         self._addresses = addresses
+        self._private_keys = private_keys
 
     @property
     def public_keys(self) -> Dict[str, str]:
@@ -70,6 +73,11 @@ class CryptoStore:
     def addresses(self) -> Dict[str, str]:
         """Get the crypto addresses."""
         return self._addresses
+
+    @property
+    def private_keys(self) -> Dict[str, str]:
+        """Get the crypto addresses."""
+        return self._private_keys
 
 
 class Wallet:

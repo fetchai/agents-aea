@@ -150,6 +150,14 @@ aea get-wealth ethereum
   <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
 </div>
 
+
+## Update SOEF configs for both AEAs
+
+To update the SOEF config, run in each AEA project:
+``` bash
+aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
+```
+
 ## Run the AEAs
 
 First, run the deployer AEA.

@@ -57,6 +57,9 @@ aea generate-wealth ethereum
 aea get-wealth ethereum
 ```
 ``` bash
+aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
+```
+``` bash
 aea run
 ```
 ``` bash

@@ -10,7 +10,7 @@ fingerprint:
   behaviours.py: QmYv7qZMgZRrK8UsWeAbFmGAbM9TPBennDuq2SoEa2VJCM
   dialogues.py: QmXd6KC9se6qZWaAsoqJpRYNF6BvVPBd5KJBxSKq9xhLLh
   handlers.py: QmXbjb2XESuXcR5Pu8RT2pDJLvFECSY7FbuataVVggZoUq
-  strategy.py: QmU1enAG5xrikcQiGQkKV5p7D2hJvZuALqh7stCbPF1cLo
+  strategy.py: QmNg87LgfLPoPyokFrmvrNghQD7JkWehRNAdRNyB3YogeN
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -65,10 +65,13 @@ models:
   strategy:
     args:
       ledger_id: ethereum
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       search_query:
         constraint_type: ==
-        search_term: contract
-        search_value: erc1155
+        search_key: seller_service
+        search_value: erc1155_contract
       search_radius: 5.0
     class_name: Strategy
 dependencies: {}
