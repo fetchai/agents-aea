@@ -93,15 +93,14 @@ class Parameters(Model):
         now = datetime.datetime.now()
         if now > self.registration_start_time:
             self.context.logger.warning(
-                "[{}]: TAC registration start time {} is in the past! Deregistering skill.".format(
-                    self.context.agent_name, self.registration_start_time
+                "TAC registration start time {} is in the past! Deregistering skill.".format(
+                    self.registration_start_time
                 )
             )
             self.context.is_active = False
         else:
             self.context.logger.info(
-                "[{}]: TAC registation start time: {}, and registration end time: {}, and start time: {}, and end time: {}".format(
-                    self.context.agent_name,
+                "TAC registation start time: {}, and registration end time: {}, and start time: {}, and end time: {}".format(
                     self.registration_start_time,
                     self.registration_end_time,
                     self.start_time,

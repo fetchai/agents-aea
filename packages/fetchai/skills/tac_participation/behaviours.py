@@ -80,7 +80,5 @@ class TacSearchBehaviour(TickerBehaviour):
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
-            "[{}]: Searching for TAC, search_id={}".format(
-                self.context.agent_name, oef_search_msg.dialogue_reference
-            )
+            "searching for TAC, search_id={}".format(oef_search_msg.dialogue_reference)
         )

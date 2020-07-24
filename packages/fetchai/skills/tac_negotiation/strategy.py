@@ -240,11 +240,7 @@ class Strategy(Model):
             is_supply=is_seller, is_search_description=False
         )
         if not query.check(own_service_description):
-            self.context.logger.debug(
-                "[{}]: Current holdings do not satisfy CFP query.".format(
-                    self.context.agent_name
-                )
-            )
+            self.context.logger.debug("current holdings do not satisfy CFP query.")
             return None
         else:
             proposal_description = self._get_proposal_for_query(
@@ -252,9 +248,7 @@ class Strategy(Model):
             )
             if proposal_description is None:
                 self.context.logger.debug(
-                    "[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(
-                        self.context.agent_name
-                    )
+                    "current strategy does not generate proposal that satisfies CFP query."
                 )
             return proposal_description
 

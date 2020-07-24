@@ -70,9 +70,7 @@ class TacHandler(Handler):
             return
 
         self.context.logger.debug(
-            "[{}]: Handling TAC message. performative={}".format(
-                self.context.agent_name, tac_msg.performative
-            )
+            "handling TAC message. performative={}".format(tac_msg.performative)
         )
         if tac_msg.performative == TacMessage.Performative.REGISTER:
             self._on_register(tac_msg, tac_dialogue)
@@ -84,9 +82,7 @@ class TacHandler(Handler):
             self._handle_invalid(tac_msg, tac_dialogue)
 
             self.context.logger.warning(
-                "[{}]: TAC Message performative not recognized or not permitted.".format(
-                    self.context.agent_name
-                )
+                "TAC Message performative not recognized or not permitted."
             )
 
     def teardown(self) -> None:
@@ -104,9 +100,7 @@ class TacHandler(Handler):
         :param tac_msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid tac message={}, unidentified dialogue.".format(
-                self.context.agent_name, tac_msg
-            )
+            "received invalid tac message={}, unidentified dialogue.".format(tac_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg = DefaultMessage(
@@ -133,8 +127,8 @@ class TacHandler(Handler):
         game = cast(Game, self.context.game)
         if not game.phase == Phase.GAME_REGISTRATION:
             self.context.logger.warning(
-                "[{}]: Received registration outside of game registration phase: '{}'".format(
-                    self.context.agent_name, tac_msg
+                "received registration outside of game registration phase: '{}'".format(
+                    tac_msg
                 )
             )
             return
@@ -143,9 +137,7 @@ class TacHandler(Handler):
         agent_name = tac_msg.agent_name
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
             self.context.logger.warning(
-                "[{}]: Agent name not in whitelist: '{}'".format(
-                    self.context.agent_name, agent_name
-                )
+                "agent name not in whitelist: '{}'".format(agent_name)
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
@@ -158,8 +150,7 @@ class TacHandler(Handler):
         game = cast(Game, self.context.game)
         if tac_msg.counterparty in game.registration.agent_addr_to_name:
             self.context.logger.warning(
-                "[{}]: Agent already registered: '{}'".format(
-                    self.context.agent_name,
+                "agent already registered: '{}'".format(
                     game.registration.agent_addr_to_name[tac_msg.counterparty],
                 )
             )
@@ -173,9 +164,7 @@ class TacHandler(Handler):
 
         if agent_name in game.registration.agent_addr_to_name.values():
             self.context.logger.warning(
-                "[{}]: Agent with this name already registered: '{}'".format(
-                    self.context.agent_name, agent_name
-                )
+                "agent with this name already registered: '{}'".format(agent_name)
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
@@ -186,9 +175,7 @@ class TacHandler(Handler):
             return
 
         game.registration.register_agent(tac_msg.counterparty, agent_name)
-        self.context.logger.info(
-            "[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name)
-        )
+        self.context.logger.info("agent registered: '{}'".format(agent_name))
 
     def _on_unregister(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
         """
@@ -203,17 +190,15 @@ class TacHandler(Handler):
         game = cast(Game, self.context.game)
         if not game.phase == Phase.GAME_REGISTRATION:
             self.context.logger.warning(
-                "[{}]: Received unregister outside of game registration phase: '{}'".format(
-                    self.context.agent_name, tac_msg
+                "received unregister outside of game registration phase: '{}'".format(
+                    tac_msg
                 )
             )
             return
 
         if tac_msg.counterparty not in game.registration.agent_addr_to_name:
             self.context.logger.warning(
-                "[{}]: Agent not registered: '{}'".format(
-                    self.context.agent_name, tac_msg.counterparty
-                )
+                "agent not registered: '{}'".format(tac_msg.counterparty)
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
@@ -223,8 +208,7 @@ class TacHandler(Handler):
             self.context.outbox.put_message(message=error_msg)
         else:
             self.context.logger.debug(
-                "[{}]: Agent unregistered: '{}'".format(
-                    self.context.agent_name,
+                "agent unregistered: '{}'".format(
                     game.conf.agent_addr_to_name[tac_msg.counterparty],
                 )
             )
@@ -243,18 +227,12 @@ class TacHandler(Handler):
         game = cast(Game, self.context.game)
         if not game.phase == Phase.GAME:
             self.context.logger.warning(
-                "[{}]: Received transaction outside of game phase: '{}'".format(
-                    self.context.agent_name, tac_msg
-                )
+                "received transaction outside of game phase: '{}'".format(tac_msg)
             )
             return
 
         transaction = Transaction.from_message(tac_msg)
-        self.context.logger.debug(
-            "[{}]: Handling transaction: {}".format(
-                self.context.agent_name, transaction
-            )
-        )
+        self.context.logger.debug("handling transaction: {}".format(transaction))
 
         game = cast(Game, self.context.game)
         if game.is_transaction_valid(transaction):
@@ -277,9 +255,7 @@ class TacHandler(Handler):
         """
         game = cast(Game, self.context.game)
         self.context.logger.info(
-            "[{}]: Handling valid transaction: {}".format(
-                self.context.agent_name, transaction.id[-10:]
-            )
+            "handling valid transaction: {}".format(transaction.id[-10:])
         )
         game.settle_transaction(transaction)
 
@@ -297,35 +273,26 @@ class TacHandler(Handler):
             amount_by_currency_id=transaction.amount_by_currency_id,
             quantities_by_good_id=transaction.quantities_by_good_id,
         )
-        sender_tac_msg.counterparty = transaction.sender_addr
+        sender_tac_msg.counterparty = transaction.sender_address
         self.context.outbox.put_message(message=sender_tac_msg)
-        counterparty_tac_msg.counterparty = transaction.counterparty_addr
+        counterparty_tac_msg.counterparty = transaction.counterparty_address
         self.context.outbox.put_message(message=counterparty_tac_msg)
 
         # log messages
         self.context.logger.info(
-            "[{}]: Transaction '{}' settled successfully.".format(
-                self.context.agent_name, transaction.id[-10:]
-            )
+            "transaction '{}' settled successfully.".format(transaction.id[-10:])
         )
-        self.context.logger.info(
-            "[{}]: Current state:\n{}".format(
-                self.context.agent_name, game.holdings_summary
-            )
-        )
+        self.context.logger.info("current state:\n{}".format(game.holdings_summary))
 
     def _handle_invalid_transaction(self, tac_msg: TacMessage) -> None:
         """Handle an invalid transaction."""
-        tx_id = tac_msg.tx_id[-10:]
         self.context.logger.info(
-            "[{}]: Handling invalid transaction: {}".format(
-                self.context.agent_name, tx_id
-            )
+            "handling invalid transaction: {}".format(tac_msg.transaction_id)
         )
         tac_msg = TacMessage(
             performative=TacMessage.Performative.TAC_ERROR,
             error_code=TacMessage.ErrorCode.TRANSACTION_NOT_VALID,
-            info={"transaction_id": tac_msg.tx_id},
+            info={"transaction_id": tac_msg.transaction_id},
         )
         tac_msg.counterparty = tac_msg.counterparty
         self.context.outbox.put_message(message=tac_msg)
@@ -339,8 +306,8 @@ class TacHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle tac message of performative={} in dialogue={}.".format(
-                self.context.agent_name, tac_msg.performative, tac_dialogue
+            "cannot handle tac message of performative={} in dialogue={}.".format(
+                tac_msg.performative, tac_dialogue
             )
         )
 
@@ -399,8 +366,8 @@ class OefSearchHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "[{}]: received invalid oef_search message={}, unidentified dialogue.".format(
-                self.context.agent_name, oef_search_msg
+            "received invalid oef_search message={}, unidentified dialogue.".format(
+                oef_search_msg
             )
         )
 
@@ -415,8 +382,8 @@ class OefSearchHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received oef_search error message={} in dialogue={}.".format(
-                self.context.agent_name, oef_search_msg, oef_search_dialogue
+            "received oef_search error message={} in dialogue={}.".format(
+                oef_search_msg, oef_search_dialogue
             )
         )
 
@@ -431,9 +398,7 @@ class OefSearchHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle oef_search message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                oef_search_msg.performative,
-                oef_search_dialogue,
+            "cannot handle oef_search message of performative={} in dialogue={}.".format(
+                oef_search_msg.performative, oef_search_dialogue,
             )
         )

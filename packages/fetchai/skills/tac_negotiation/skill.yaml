@@ -7,14 +7,14 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
-  behaviours.py: QmSgtvb4rD4RZ5H2zQQqPUwBzAeoR6ZBTJ1p33YqL5XjMe
+  behaviours.py: Qmembb4bL9BqWsHy4m97qSpuQpQ6FzG8DQPDzSUrqF9cir
   dialogues.py: QmZe9PJncaWzJ4yn9b76Mm5R93VLNxGVd5ogUWhfp8Q6km
-  handlers.py: QmSdEvCaP9JnfQVcEpLvnzy6c8Uva24ifbGMkr2hFy5qFZ
+  handlers.py: QmYcku7zAxxRwYiBH7bTgGnR4CpC89pRwY2JeNSt8igt6V
   helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmQMSPqS3TZxhQoh6SUA8u2c5BNTxYGV95DSQc4neen6Ja
-  transactions.py: QmTCErZmswHAx6UXfPkrredRDKVnLYhyVEBtm5ppSJpZBf
+  strategy.py: QmX6GbrW4sGWeSUFYXuE2Abuj2vXydX9G3tzTyRo1AtXGE
+  transactions.py: QmXn1ofR4PeqTDmDhU8JukggVUuNdPxGSk2Kqug89CNYdD
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0

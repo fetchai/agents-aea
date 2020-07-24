@@ -117,9 +117,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         if strategy.is_registering_as_seller:
             self.context.logger.debug(
-                "[{}]: Updating service directory as seller with goods supplied.".format(
-                    self.context.agent_name
-                )
+                "updating service directory as seller with goods supplied."
             )
             goods_supplied_description = strategy.get_own_service_description(
                 is_supply=True, is_search_description=False,
@@ -137,9 +135,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         if strategy.is_registering_as_buyer:
             self.context.logger.debug(
-                "[{}]: Updating service directory as buyer with goods demanded.".format(
-                    self.context.agent_name
-                )
+                "updating service directory as buyer with goods demanded."
             )
             goods_demanded_description = strategy.get_own_service_description(
                 is_supply=False, is_search_description=False,
@@ -175,16 +171,14 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             )
             if query is None:
                 self.context.logger.warning(
-                    "[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(
-                        self.context.agent_name
-                    )
+                    "not searching the OEF for sellers because the agent demands no goods."
                 )
                 return None
             else:
                 search_id = search.get_next_id(is_searching_for_sellers=True)
                 self.context.logger.info(
-                    "[{}]: Searching for sellers which match the demand of the agent, search_id={}.".format(
-                        self.context.agent_name, search_id
+                    "searching for sellers which match the demand of the agent, search_id={}.".format(
+                        search_id
                     )
                 )
                 oef_msg = OefSearchMessage(
@@ -201,16 +195,14 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             )
             if query is None:
                 self.context.logger.warning(
-                    "[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(
-                        self.context.agent_name
-                    )
+                    "not searching the OEF for buyers because the agent supplies no goods."
                 )
                 return None
             else:
                 search_id = search.get_next_id(is_searching_for_sellers=False)
                 self.context.logger.info(
-                    "[{}]: Searching for buyers which match the supply of the agent, search_id={}.".format(
-                        self.context.agent_name, search_id
+                    "searching for buyers which match the supply of the agent, search_id={}.".format(
+                        search_id
                     )
                 )
                 oef_msg = OefSearchMessage(

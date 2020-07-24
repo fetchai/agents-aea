@@ -30,7 +30,12 @@ from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
-from aea.helpers.search.models import Attribute, DataModel, Description
+from aea.helpers.search.generic import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
+)
+from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.skills.base import Model
@@ -60,12 +65,6 @@ GoodEndowment = Dict[GoodId, Quantity]
 UtilityParams = Dict[GoodId, Parameter]
 EquilibriumCurrencyHoldings = Dict[CurrencyId, EquilibriumQuantity]
 EquilibriumGoodHoldings = Dict[GoodId, EquilibriumQuantity]
-
-
-CONTROLLER_DATAMODEL = DataModel(
-    "tac",
-    [Attribute("version", str, True, "Version number of the TAC Controller Agent.")],
-)
 
 
 class Phase(Enum):
@@ -275,7 +274,7 @@ class Transaction(Terms):
         amount_by_currency_id: Dict[str, int],
         quantities_by_good_id: Dict[str, int],
         is_sender_payable_tx_fee: bool,
-        nonce: int,
+        nonce: str,
         fee_by_currency_id: Optional[Dict[str, int]],
         sender_signature: str,
         counterparty_signature: str,
@@ -296,13 +295,16 @@ class Transaction(Terms):
         :param sender_signature: the signature of the terms by the sender.
         :param counterparty_signature: the signature of the terms by the counterparty.
         """
-        super().__init__(ledger_id=ledger_id, sender_address=sender_address,
+        super().__init__(
+            ledger_id=ledger_id,
+            sender_address=sender_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id=amount_by_currency_id,
             quantities_by_good_id=quantities_by_good_id,
             is_sender_payable_tx_fee=is_sender_payable_tx_fee,
             nonce=nonce,
-            fee_by_currency_id=fee_by_currency_id)
+            fee_by_currency_id=fee_by_currency_id,
+        )
         self._sender_signature = sender_signature
         self._counterparty_signature = counterparty_signature
 
@@ -316,7 +318,6 @@ class Transaction(Terms):
         """Get the counterparty signature."""
         return self._counterparty_signature
 
-
     def has_matching_signatures(self) -> bool:
         """
         Check that the signatures match the terms of trade.
@@ -329,7 +330,7 @@ class Transaction(Terms):
             self.sender_address
             in LedgerApis.recover_message(  # pylint: disable=no-member
                 identifier=self.ledger_id,
-                message=self.sender_hash,
+                message=self.sender_hash.encode("utf-8"),
                 signature=self.sender_signature,
             )
         )
@@ -339,7 +340,7 @@ class Transaction(Terms):
             and self.counterparty_address
             in LedgerApis.recover_message(  # pylint: disable=no-member
                 identifier=self.ledger_id,
-                message=self.counterparty_hash,
+                message=self.counterparty_hash.encode("utf-8"),
                 signature=self.counterparty_signature,
             )
         )
@@ -353,7 +354,9 @@ class Transaction(Terms):
         :param message: the message
         :return: Transaction
         """
-        assert message.performative == TacMessage.Performative.TRANSACTION, "Wrong performative"
+        assert (
+            message.performative == TacMessage.Performative.TRANSACTION
+        ), "Wrong performative"
         transaction = Transaction(
             ledger_id=message.ledger_id,
             sender_address=message.sender_address,
@@ -362,13 +365,14 @@ class Transaction(Terms):
             fee_by_currency_id=message.fee_by_currency_id,
             quantities_by_good_id=message.quantities_by_good_id,
             is_sender_payable_tx_fee=True,  # TODO: check
-            nonce=message.nonce,
+            nonce=str(message.nonce),
             sender_signature=message.sender_signature,
             counterparty_signature=message.counterparty_signature,
         )
-        assert transaction.id == message.transaction_id, "Transaction content does not match hash."
+        assert (
+            transaction.id == message.transaction_id
+        ), "Transaction content does not match hash."
         return transaction
-
 
     def __eq__(self, other):
         """Compare to another object."""
@@ -463,19 +467,23 @@ class AgentState:
         :return: True if the transaction is legal wrt the current state, False otherwise.
         """
         result = self.agent_address in [tx.sender_address, tx.counterparty_address]
-        if tx.amount == 0 and all(
+        result = result and tx.is_single_currency
+        if not result:
+            return result
+        if all(amount == 0 for amount in tx.amount_by_currency_id.values()) and all(
             quantity == 0 for quantity in tx.quantities_by_good_id.values()
         ):
             # reject the transaction when there is no wealth exchange
             result = False
-        elif tx.amount <= 0 and all(
+        elif all(amount <= 0 for amount in tx.amount_by_currency_id.values()) and all(
             quantity >= 0 for quantity in tx.quantities_by_good_id.values()
         ):
             # sender is buyer, counterparty is seller
             if self.agent_address == tx.sender_address:
                 # check this sender state has enough money
                 result = result and (
-                    self.amount_by_currency_id[tx.currency_id] >= tx.sender_amount
+                    self.amount_by_currency_id[tx.currency_id]
+                    >= tx.sender_payable_amount
                 )
             elif self.agent_address == tx.counterparty_address:
                 # check this counterparty state has enough goods
@@ -483,7 +491,7 @@ class AgentState:
                     self.quantities_by_good_id[good_id] >= quantity
                     for good_id, quantity in tx.quantities_by_good_id.items()
                 )
-        elif tx.amount >= 0 and all(
+        elif all(amount >= 0 for amount in tx.amount_by_currency_id.values()) and all(
             quantity <= 0 for quantity in tx.quantities_by_good_id.values()
         ):
             # sender is seller, counterparty is buyer
@@ -497,7 +505,8 @@ class AgentState:
             elif self.agent_address == tx.counterparty_address:
                 # check this counterparty state has enough money
                 result = result and (
-                    self.amount_by_currency_id[tx.currency_id] >= tx.counterparty_amount
+                    self.amount_by_currency_id[tx.currency_id]
+                    >= tx.counterparty_payable_amount
                 )
         else:
             result = False
@@ -528,10 +537,12 @@ class AgentState:
         new_amount_by_currency_id = self.amount_by_currency_id
         if self.agent_address == tx.sender_address:
             # settling the transaction for the sender
-            new_amount_by_currency_id[tx.currency_id] += tx.sender_amount
+            for currency_id, amount in tx.amount_by_currency_id.items():
+                new_amount_by_currency_id[currency_id] += amount
         elif self.agent_address == tx.counterparty_address:
             # settling the transaction for the counterparty
-            new_amount_by_currency_id[tx.currency_id] += tx.counterparty_amount
+            for currency_id, amount in tx.amount_by_currency_id.items():
+                new_amount_by_currency_id[currency_id] += amount
 
         self._amount_by_currency_id = new_amount_by_currency_id
 
@@ -918,13 +929,32 @@ class Game(Model):
         self.transactions.add(tx)
         self._current_agent_states.update({tx.sender_address: new_sender_state})
         self._current_agent_states.update(
-            {tx.counterparty_addr: new_counterparty_state}
+            {tx.counterparty_address: new_counterparty_state}
         )
 
-    def get_tac_description(self) -> Description:
-        """Get the tac description."""
-        desc = Description(
-            {"version": self.context.parameters.version_id},
-            data_model=CONTROLLER_DATAMODEL,
+    def get_location_description(self) -> Description:
+        """
+        Get the location description.
+
+        :return: a description of the agent's location
+        """
+        description = Description(
+            self.context.parameters.agent_location, data_model=AGENT_LOCATION_MODEL,
         )
-        return desc
+        return description
+
+    def get_register_tac_description(self) -> Description:
+        """Get the tac description for registering."""
+        description = Description(
+            self.context.parameters.set_service_data,
+            data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_unregister_tac_description(self) -> Description:
+        """Get the tac description for unregistering."""
+        description = Description(
+            self.context.parameters.remove_service_data,
+            data_model=AGENT_REMOVE_SERVICE_MODEL,
+        )
+        return description

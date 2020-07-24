@@ -546,12 +546,12 @@ class Terms:
         return self.sender_hash
 
     @property
-    def sender_hash(self) -> bytes:
+    def sender_hash(self) -> str:
         """Get the sender hash."""
         return self._sender_hash
 
     @property
-    def counterparty_hash(self) -> bytes:
+    def counterparty_hash(self) -> str:
         """Get the sender hash."""
         return self._counterparty_hash
 
@@ -580,6 +580,18 @@ class Terms:
     def amount_by_currency_id(self) -> Dict[str, int]:
         """Get the amount by currency id."""
         return copy.copy(self._amount_by_currency_id)
+
+    @property
+    def is_single_currency(self) -> bool:
+        """Check whether a single currency is used for payment."""
+        return len(self._amount_by_currency_id) == 1
+
+    @property
+    def currency_id(self) -> str:
+        """Get the amount the sender must pay."""
+        assert self.is_single_currency, "More than one currency id, cannot get id."
+        value = next(iter(self._amount_by_currency_id.keys()))
+        return value
 
     @property
     def sender_payable_amount(self) -> int:

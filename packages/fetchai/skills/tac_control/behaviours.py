@@ -49,7 +49,7 @@ class TacBehaviour(Behaviour):
 
         :return: None
         """
-        pass
+        self._register_agent()
 
     def act(self) -> None:
         """
@@ -67,9 +67,7 @@ class TacBehaviour(Behaviour):
             game.phase = Phase.GAME_REGISTRATION
             self._register_tac()
             self.context.logger.info(
-                "[{}]: TAC open for registration until: {}".format(
-                    self.context.agent_name, parameters.start_time
-                )
+                "TAC open for registration until: {}".format(parameters.start_time)
             )
         elif (
             game.phase.value == Phase.GAME_REGISTRATION.value
@@ -94,8 +92,28 @@ class TacBehaviour(Behaviour):
 
         :return: None
         """
-        if self._registered_description is not None:
-            self._unregister_tac()
+        self._unregister_agent()
+
+    def _register_agent(self) -> None:
+        """
+        Register the agent's location.
+
+        :return: None
+        """
+        game = cast(Game, self.context.game)
+        description = game.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering agent on SOEF.")
 
     def _register_tac(self) -> None:
         """
@@ -104,21 +122,19 @@ class TacBehaviour(Behaviour):
         :return: None.
         """
         game = cast(Game, self.context.game)
-        self._registered_description = game.get_tac_description()
+        description = game.get_register_tac_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            service_description=self._registered_description,
+            service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(
-            "[{}]: Registering TAC data model".format(self.context.agent_name)
-        )
+        self.context.logger.info("registering TAC data model on SOEF.")
 
     def _unregister_tac(self) -> None:
         """
@@ -126,35 +142,51 @@ class TacBehaviour(Behaviour):
 
         :return: None.
         """
-        if self._registered_description is not None:
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
-            )
-            oef_search_msg = OefSearchMessage(
-                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-                service_description=self._registered_description,
-            )
-            oef_search_msg.counterparty = self.context.search_service_address
-            oef_search_dialogues.update(oef_search_msg)
-            self.context.outbox.put_message(message=oef_search_msg)
-            self._registered_description = None
-            self.context.logger.info(
-                "[{}]: Unregistering TAC data model".format(self.context.agent_name)
-            )
+        game = cast(Game, self.context.game)
+        description = game.get_unregister_tac_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self._registered_description = None
+        self.context.logger.info("unregistering TAC data model from SOEF.")
+
+    def _unregister_agent(self) -> None:
+        """
+        Unregister agent from the SOEF.
+
+        :return: None
+        """
+        game = cast(Game, self.context.game)
+        description = game.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("unregistering agent from SOEF.")
 
     def _start_tac(self, game: Game):
         """Create a game and send the game configuration to every registered agent."""
         game.create()
         self.context.logger.info(
-            "[{}]: Started competition:\n{}".format(
-                self.context.agent_name, game.holdings_summary
-            )
+            "started competition:\n{}".format(game.holdings_summary)
         )
         self.context.logger.info(
-            "[{}]: Computed equilibrium:\n{}".format(
-                self.context.agent_name, game.equilibrium_summary
-            )
+            "computed equilibrium:\n{}".format(game.equilibrium_summary)
         )
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.conf.agent_addr_to_name.keys():
@@ -176,18 +208,12 @@ class TacBehaviour(Behaviour):
             tac_dialogues.update(tac_msg)
             self.context.outbox.put_message(message=tac_msg)
             self.context.logger.debug(
-                "[{}]: sending game data to '{}': {}".format(
-                    self.context.agent_name, agent_address, str(tac_msg)
-                )
+                "sending game data to '{}': {}".format(agent_address, str(tac_msg))
             )
 
     def _cancel_tac(self, game: Game):
         """Notify agents that the TAC is cancelled."""
-        self.context.logger.info(
-            "[{}]: Notifying agents that TAC is cancelled.".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("notifying agents that TAC is cancelled.")
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TacMessage(
@@ -199,13 +225,9 @@ class TacBehaviour(Behaviour):
             self.context.outbox.put_message(message=tac_msg)
         if game.phase == Phase.GAME:
             self.context.logger.info(
-                "[{}]: Finished competition:\n{}".format(
-                    self.context.agent_name, game.holdings_summary
-                )
+                "finished competition:\n{}".format(game.holdings_summary)
             )
             self.context.logger.info(
-                "[{}]: Computed equilibrium:\n{}".format(
-                    self.context.agent_name, game.equilibrium_summary
-                )
+                "computed equilibrium:\n{}".format(game.equilibrium_summary)
             )
             self.context.is_active = False

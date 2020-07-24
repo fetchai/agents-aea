@@ -786,7 +786,7 @@ class Dialogues(ABC):
         successfully_updated = dialogue.update(initial_message)
 
         if not successfully_updated:
-            self._dialogues.pop(dialogue.dialogue_label)
+            self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
             self._dialogue_nonce -= 1
             raise Exception(
                 "Cannot create the a dialogue with the specified performative and contents."

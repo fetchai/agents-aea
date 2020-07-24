@@ -47,7 +47,7 @@ class Configuration:
     def __init__(
         self,
         version_id: str,
-        tx_fee: int,
+        fee_by_currency_id: Dict[str, int],
         agent_addr_to_name: Dict[Address, str],
         good_id_to_name: Dict[str, str],
         controller_addr: Address,
@@ -56,7 +56,7 @@ class Configuration:
         Instantiate a game configuration.
 
         :param version_id: the version of the game.
-        :param tx_fee: the fee for a transaction.
+        :param fee_by_currency_id: the fee for a transaction by currency id.
         :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
         :param good_id_to_name: a dictionary mapping good ids to good names (as strings).
         :param controller_addr: the address of the controller
@@ -64,7 +64,7 @@ class Configuration:
         self._version_id = version_id
         self._nb_agents = len(agent_addr_to_name)
         self._nb_goods = len(good_id_to_name)
-        self._tx_fee = tx_fee
+        self._fee_by_currency_id = fee_by_currency_id
         self._agent_addr_to_name = agent_addr_to_name
         self._good_id_to_name = good_id_to_name
         self._controller_addr = controller_addr
@@ -89,7 +89,14 @@ class Configuration:
     @property
     def tx_fee(self) -> int:
         """Transaction fee for the TAC instance."""
-        return self._tx_fee
+        assert len(self._fee_by_currency_id) == 1, "More than one currency id present!"
+        value = next(iter(self._fee_by_currency_id.values()))
+        return value
+
+    @property
+    def fee_by_currency_id(self) -> Dict[str, int]:
+        """Transaction fee for the TAC instance."""
+        return self._fee_by_currency_id
 
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
@@ -134,7 +141,9 @@ class Configuration:
         :raises: AssertionError: if some constraint is not satisfied.
         """
         assert self.version_id is not None, "A version id must be set."
-        assert self.tx_fee >= 0, "Tx fee must be non-negative."
+        assert (
+            len(self.fee_by_currency_id) == 1 and self.tx_fee >= 0
+        ), "Tx fee must be non-negative."
         assert self.nb_agents > 1, "Must have at least two agents."
         assert self.nb_goods > 1, "Must have at least two goods."
         assert (
@@ -246,7 +255,7 @@ class Game(Model):
         ), "TacMessage for unexpected game."
         self._conf = Configuration(
             tac_message.version_id,
-            tac_message.tx_fee,
+            tac_message.fee_by_currency_id,
             tac_message.agent_addr_to_name,
             tac_message.good_id_to_name,
             controller_addr,
@@ -261,9 +270,7 @@ class Game(Model):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.".format(
-                self.context.agent_name
-            )
+            "TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it."
         )
         self._expected_controller_addr = controller_addr
 

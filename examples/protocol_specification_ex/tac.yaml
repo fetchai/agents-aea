@@ -1,7 +1,7 @@
 ---
 name: tac
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
@@ -27,7 +27,7 @@ speech_acts:
     exchange_params_by_currency_id: pt:dict[pt:str, pt:float]
     quantities_by_good_id: pt:dict[pt:str, pt:int]
     utility_params_by_good_id: pt:dict[pt:str, pt:float]
-    fee_by_currency_id: pt:int
+    fee_by_currency_id: pt:dict[pt:str, pt:int]
     agent_addr_to_name: pt:dict[pt:str, pt:str]
     currency_id_to_name: pt:dict[pt:str, pt:str]
     good_id_to_name: pt:dict[pt:str, pt:str]

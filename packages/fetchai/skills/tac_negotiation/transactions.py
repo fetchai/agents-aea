@@ -195,9 +195,7 @@ class Transactions(Model):
             # extract dialogue label and message id
             transaction_id = next_item
             self.context.logger.debug(
-                "[{}]: Removing transaction from pending list: {}".format(
-                    self.context.agent_name, transaction_id
-                )
+                "removing transaction from pending list: {}".format(transaction_id)
             )
 
             # remove (safely) the associated pending proposal (if present)
