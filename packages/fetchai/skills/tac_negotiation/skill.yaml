@@ -1,6 +1,6 @@
 name: tac_negotiation
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
 license: Apache-2.0
@@ -9,12 +9,12 @@ fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: Qmembb4bL9BqWsHy4m97qSpuQpQ6FzG8DQPDzSUrqF9cir
   dialogues.py: QmZe9PJncaWzJ4yn9b76Mm5R93VLNxGVd5ogUWhfp8Q6km
-  handlers.py: QmYcku7zAxxRwYiBH7bTgGnR4CpC89pRwY2JeNSt8igt6V
+  handlers.py: Qme5JNPjEgDSMmXbDFdv6c3L9xdSYm41erk7eKLYcPddiH
   helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
   strategy.py: QmX6GbrW4sGWeSUFYXuE2Abuj2vXydX9G3tzTyRo1AtXGE
-  transactions.py: QmXn1ofR4PeqTDmDhU8JukggVUuNdPxGSk2Kqug89CNYdD
+  transactions.py: Qma4Nqp9p1t2woephydFUUBtJCz5wMZvP1CZapw48EGx2U
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0

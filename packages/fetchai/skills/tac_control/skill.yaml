@@ -1,6 +1,6 @@
 name: tac_control
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
 license: Apache-2.0
