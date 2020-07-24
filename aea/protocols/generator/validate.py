@@ -26,6 +26,7 @@ from aea.protocols.generator.common import (
     SPECIFICATION_COMPOSITIONAL_TYPES,
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
+    _has_matched_brackets,
 )
 
 # The following names are reserved for standard message fields and cannot be
@@ -36,7 +37,7 @@ RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "perform
 PERFORMATIVE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 CONTENT_NAME_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 
-CT_CONTENT_REGEX_PATTERN = "^ct:([A-Z]+[a-z]*)+$"  # or maybe "ct:(?:[A-Z][a-z]+)+" or # "^ct:[A-Z][a-zA-Z0-9]*$"
+CT_CONTENT_TYPE_REGEX_PATTERN = "^ct:([A-Z]+[a-z]*)+$"  # or maybe "ct:(?:[A-Z][a-z]+)+" or # "^ct:[A-Z][a-zA-Z0-9]*$"
 
 ROLE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 END_STATE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
@@ -69,33 +70,70 @@ def _is_valid_regex(regex_pattern: str, text: str) -> bool:
 
 
 def _has_brackets(content_type: str) -> bool:
+    """
+    Evaluate whether a compositional content type in a protocol specification is valid has corresponding brackets.
+
+    :param content_type: an 'set' content type.
+    :return: Boolean result
+    """
     for compositional_type in SPECIFICATION_COMPOSITIONAL_TYPES:
         if content_type.startswith(compositional_type):
             content_type = content_type[len(compositional_type) :]
-            return content_type[0] == "[" and content_type[len(content_type) - 1] == "]"
+            if len(content_type) < 2:
+                return False
+            else:
+                return (
+                    content_type[0] == "["
+                    and content_type[len(content_type) - 1] == "]"
+                )
     raise SyntaxError("Content type must be a compositional type!")
 
 
 def _is_valid_ct(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'ct' content type in a protocol specification is valid.
+
+    :param content_type: a 'ct' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
-    return _is_valid_regex(CT_CONTENT_REGEX_PATTERN, content_type)
+    return _is_valid_regex(CT_CONTENT_TYPE_REGEX_PATTERN, content_type)
 
 
 def _is_valid_pt(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'pt' content type in a protocol specification is valid.
+
+    :param content_type: a 'pt' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
     return content_type in SPECIFICATION_PRIMITIVE_TYPES
 
 
 def _is_valid_set(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'set' content type in a protocol specification is valid.
+
+    :param content_type: a 'set' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:set"):
         return False
 
+    if not _has_matched_brackets(content_type):
+        return False
+
     if not _has_brackets(content_type):
         return False
 
-    sub_types = _get_sub_types_of_compositional_types(content_type)
+    try:
+        sub_types = _get_sub_types_of_compositional_types(content_type)
+    except SyntaxError:
+        return False
+
     if len(sub_types) != 1:
         return False
 
@@ -104,15 +142,28 @@ def _is_valid_set(content_type: str) -> bool:
 
 
 def _is_valid_list(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'list' content type in a protocol specification is valid.
+
+    :param content_type: a 'list' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:list"):
         return False
 
+    if not _has_matched_brackets(content_type):
+        return False
+
     if not _has_brackets(content_type):
         return False
 
-    sub_types = _get_sub_types_of_compositional_types(content_type)
+    try:
+        sub_types = _get_sub_types_of_compositional_types(content_type)
+    except SyntaxError:
+        return False
+
     if len(sub_types) != 1:
         return False
 
@@ -121,15 +172,28 @@ def _is_valid_list(content_type: str) -> bool:
 
 
 def _is_valid_dict(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'dict' content type in a protocol specification is valid.
+
+    :param content_type: a 'dict' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:dict"):
         return False
 
+    if not _has_matched_brackets(content_type):
+        return False
+
     if not _has_brackets(content_type):
         return False
 
-    sub_types = _get_sub_types_of_compositional_types(content_type)
+    try:
+        sub_types = _get_sub_types_of_compositional_types(content_type)
+    except SyntaxError:
+        return False
+
     if len(sub_types) != 2:
         return False
 
@@ -139,16 +203,29 @@ def _is_valid_dict(content_type: str) -> bool:
 
 
 def _is_valid_union(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'union' content type in a protocol specification is valid.
+
+    :param content_type: an 'union' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:union"):
         return False
 
+    if not _has_matched_brackets(content_type):
+        return False
+
     if not _has_brackets(content_type):
         return False
 
+    try:
+        sub_types = _get_sub_types_of_compositional_types(content_type)
+    except SyntaxError:
+        return False
+
     # check there are at least two subtypes in the union
-    sub_types = _get_sub_types_of_compositional_types(content_type)
     if len(sub_types) < 2:
         return False
 
@@ -171,15 +248,28 @@ def _is_valid_union(content_type: str) -> bool:
 
 
 def _is_valid_optional(content_type: str) -> bool:
+    """
+    Evaluate whether the format of an 'optional' content type in a protocol specification is valid.
+
+    :param content_type: an 'optional' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:optional"):
         return False
 
+    if not _has_matched_brackets(content_type):
+        return False
+
     if not _has_brackets(content_type):
         return False
 
-    sub_types = _get_sub_types_of_compositional_types(content_type)
+    try:
+        sub_types = _get_sub_types_of_compositional_types(content_type)
+    except SyntaxError:
+        return False
+
     if len(sub_types) != 1:
         return False
 
@@ -195,6 +285,12 @@ def _is_valid_optional(content_type: str) -> bool:
 
 
 def _is_valid_content_type_format(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a content type in a protocol specification is valid.
+
+    :param content_type: a content type.
+    :return: Boolean result
+    """
     return (
         _is_valid_ct(content_type)
         or _is_valid_pt(content_type)

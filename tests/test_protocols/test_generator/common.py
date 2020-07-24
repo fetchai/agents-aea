@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,10 +16,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This module contains utility code for the test_generator modules."""
+import os
 
-"""This module contains the support resources for the t_protocol protocol."""
+from tests.conftest import ROOT_DIR
 
-from tests.data.generator.t_protocol.message import TProtocolMessage
-from tests.data.generator.t_protocol.serialization import TProtocolSerializer
-
-TProtocolMessage.serializer = TProtocolSerializer
+T_PROTOCOL_NAME = "t_protocol"
+PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
+    ROOT_DIR, "tests", "data", "sample_specification.yaml"
+)
+PATH_TO_T_PROTOCOL = os.path.join(
+    ROOT_DIR, "tests", "data", "generator", T_PROTOCOL_NAME
+)

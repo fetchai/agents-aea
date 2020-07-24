@@ -36,6 +36,13 @@ SPECIFICATION_COMPOSITIONAL_TYPES = [
     "pt:union",
     "pt:optional",
 ]
+PYTHON_COMPOSITIONAL_TYPES = [
+    "FrozenSet",
+    "Tuple",
+    "Dict",
+    "Union",
+    "Optional",
+]
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
@@ -77,6 +84,58 @@ def _camel_case_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
+def _match_brackets(text: str, index_of_open_bracket: int) -> int:
+    """
+    Give the index of the matching close bracket for the opening bracket at 'index_of_open_bracket' in the input 'text'.
+
+    :param text: the text containing the brackets.
+    :param index_of_open_bracket: the index of the opening bracket.
+
+    :return: the index of the matching closing bracket (if any).
+    :raises SyntaxError if there are no matching closing bracket.
+    """
+    if text[index_of_open_bracket] != "[":
+        raise SyntaxError(
+            "'index_of_open_bracket' in 'text' is not an open bracket '['. It is {}".format(
+                text[index_of_open_bracket]
+            )
+        )
+
+    open_bracket_stack = []
+    for index in range(index_of_open_bracket, len(text)):
+        if text[index] == "[":
+            open_bracket_stack.append(text[index])
+        elif text[index] == "]":
+            open_bracket_stack.pop()
+        if not open_bracket_stack:
+            return index
+    raise SyntaxError(
+        "No matching closing bracket ']' for the opening bracket '[' at {} "
+        + str(index_of_open_bracket)
+    )
+
+
+def _has_matched_brackets(text: str) -> bool:
+    """
+    Evaluate whether every opening bracket '[' in the 'text' has a matching closing bracket ']'.
+
+    :param text: the text.
+    :return: Boolean result, and associated message.
+    """
+    open_bracket_stack = []
+    for index, _ in enumerate(text):
+        if text[index] == "[":
+            open_bracket_stack.append(index)
+        elif text[index] == "]":
+            if len(open_bracket_stack) == 0:
+                return False
+            open_bracket_stack.pop()
+    if len(open_bracket_stack) > 0:
+        return False
+    else:
+        return True
+
+
 def _get_sub_types_of_compositional_types(compositional_type: str) -> Tuple[str, ...]:
     """
     Extract the sub-types of compositional types.
@@ -87,82 +146,66 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> Tuple[str,
     :return: tuple containing all extracted sub-types.
     """
     sub_types_list = list()
-    if compositional_type.startswith("Optional") or compositional_type.startswith(
-        "pt:optional"
+    for valid_compositional_type in (
+        SPECIFICATION_COMPOSITIONAL_TYPES + PYTHON_COMPOSITIONAL_TYPES
     ):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_types_list.append(sub_type1)
-    if (
-        compositional_type.startswith("FrozenSet")
-        or compositional_type.startswith("pt:set")
-        or compositional_type.startswith("pt:list")
-    ):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_types_list.append(sub_type1)
-    if compositional_type.startswith("Tuple"):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_type1 = sub_type1[:-5]
-        sub_types_list.append(sub_type1)
-    if compositional_type.startswith("Dict") or compositional_type.startswith(
-        "pt:dict"
-    ):
-        sub_type1 = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.index(",")
-        ].strip()
-        sub_type2 = compositional_type[
-            compositional_type.index(",") + 1 : compositional_type.rindex("]")
-        ].strip()
-        sub_types_list.extend([sub_type1, sub_type2])
-    if compositional_type.startswith("Union") or compositional_type.startswith(
-        "pt:union"
-    ):
-        inside_union = compositional_type[
-            compositional_type.index("[") + 1 : compositional_type.rindex("]")
-        ].strip()
-        while inside_union != "":
-            if inside_union.startswith("Dict") or inside_union.startswith("pt:dict"):
-                sub_type = inside_union[: inside_union.index("]") + 1].strip()
-                rest_of_inside_union = inside_union[
-                    inside_union.index("]") + 1 :
-                ].strip()
-                if rest_of_inside_union.find(",") == -1:
-                    # it is the last sub-type
-                    inside_union = rest_of_inside_union.strip()
-                else:
-                    # it is not the last sub-type
-                    inside_union = rest_of_inside_union[
-                        rest_of_inside_union.index(",") + 1 :
+        if compositional_type.startswith(valid_compositional_type):
+            inside_string = compositional_type[
+                compositional_type.index("[") + 1 : compositional_type.rindex("]")
+            ].strip()
+            while inside_string != "":
+                do_not_add = False
+                if inside_string.find(",") == -1:  # No comma; this is the last sub-type
+                    provisional_sub_type = inside_string.strip()
+                    if (
+                        provisional_sub_type == "..."
+                    ):  # The sub-string is ... used for Tuple, e.g. Tuple[int, ...]
+                        do_not_add = True
+                    else:
+                        sub_type = provisional_sub_type
+                    inside_string = ""
+                else:  # There is a comma; this MAY not be the last sub-type
+                    sub_string_until_comma = inside_string[
+                        : inside_string.index(",")
                     ].strip()
-            elif inside_union.startswith("Tuple"):
-                sub_type = inside_union[: inside_union.index("]") + 1].strip()
-                rest_of_inside_union = inside_union[
-                    inside_union.index("]") + 1 :
-                ].strip()
-                if rest_of_inside_union.find(",") == -1:
-                    # it is the last sub-type
-                    inside_union = rest_of_inside_union.strip()
-                else:
-                    # it is not the last sub-type
-                    inside_union = rest_of_inside_union[
-                        rest_of_inside_union.index(",") + 1 :
-                    ].strip()
-            else:
-                if inside_union.find(",") == -1:
-                    # it is the last sub-type
-                    sub_type = inside_union.strip()
-                    inside_union = ""
-                else:
-                    # it is not the last sub-type
-                    sub_type = inside_union[: inside_union.index(",")].strip()
-                    inside_union = inside_union[inside_union.index(",") + 1 :].strip()
-            sub_types_list.append(sub_type)
-    return tuple(sub_types_list)
+                    if (
+                        sub_string_until_comma.find("[") == -1
+                    ):  # No open brackets; this is a primitive type and NOT the last sub-type
+                        sub_type = sub_string_until_comma
+                        inside_string = inside_string[
+                            inside_string.index(",") + 1 :
+                        ].strip()
+                    else:  # There is an open bracket'['; this is a compositional type
+                        try:
+                            closing_bracket_index = _match_brackets(
+                                inside_string, inside_string.index("[")
+                            )
+                        except SyntaxError:
+                            raise SyntaxError(
+                                "Bad formatting. No matching close bracket ']' for the open bracket at {}".format(
+                                    inside_string[
+                                        : inside_string.index("[") + 1
+                                    ].strip()
+                                )
+                            )
+                        sub_type = inside_string[: closing_bracket_index + 1].strip()
+                        the_rest_of_inside_string = inside_string[
+                            closing_bracket_index + 1 :
+                        ].strip()
+                        if (
+                            the_rest_of_inside_string.find(",") == -1
+                        ):  # No comma; this is the last sub-type
+                            inside_string = the_rest_of_inside_string.strip()
+                        else:  # There is a comma; this is not the last sub-type
+                            inside_string = the_rest_of_inside_string[
+                                the_rest_of_inside_string.index(",") + 1 :
+                            ].strip()
+                if not do_not_add:
+                    sub_types_list.append(sub_type)
+            return tuple(sub_types_list)
+    raise SyntaxError(
+        "{} is not a valid compositional type.".format(compositional_type)
+    )
 
 
 def _union_sub_type_to_protobuf_variable_name(
