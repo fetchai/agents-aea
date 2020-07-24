@@ -130,10 +130,7 @@ def _has_matched_brackets(text: str) -> bool:
             if len(open_bracket_stack) == 0:
                 return False
             open_bracket_stack.pop()
-    if len(open_bracket_stack) > 0:
-        return False
-    else:
-        return True
+    return len(open_bracket_stack) == 0
 
 
 def _get_sub_types_of_compositional_types(compositional_type: str) -> Tuple[str, ...]:
