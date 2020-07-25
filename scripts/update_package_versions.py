@@ -186,8 +186,12 @@ def process_packages(
     is_bumped = False
     for type_ in TYPES:
         for key, value in last_by_type[type_].items():
+            if key == "scaffold":
+                print("Package `{}` of type `{}` is never bumped!".format(key, type_))
+                continue
             if key not in now_by_type[type_]:
                 print("Package `{}` of type `{}` no longer present!".format(key, type_))
+                continue
             if now_by_type[type_][key] == value:
                 print(
                     "Package `{}` of type `{}` has not changed since last release!".format(

@@ -265,11 +265,6 @@ class Dialogue(ABC):
         return self._dialogue_label
 
     @property
-    def dialogue_reference(self) -> Tuple[str, str]:
-        """Get the dialogue reference."""
-        return self._dialogue_label.dialogue_reference
-
-    @property
     def agent_address(self) -> Address:
         """
         Get the address of the agent for whom this dialogues is maintained.
@@ -704,7 +699,6 @@ class Dialogues(ABC):
         :param end_states: the list of dialogue endstates
         :return: None
         """
-        self._dialogue_labels_by_address = {}  # type: Dict[str, List[DialogueLabel]]
         self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
         self._agent_address = agent_address
         self._dialogue_nonce = 0
@@ -903,19 +897,6 @@ class Dialogues(ABC):
             result = None
 
         return result
-
-    def get_dialogues_from_address(self, counterparty_address: str) -> List[Dialogue]:
-        """
-        Retrieve all dialogues for an counterparty address.
-
-        :param counterparty_address: the counterparty address to retrieve dialogues for
-        """
-        dialogues = []
-        for dialogue_label in self._dialogue_labels_by_address.get(
-            counterparty_address, []
-        ):
-            dialogues.append(self._dialogues_by_dialogue_label[dialogue_label])
-        return dialogues
 
     def get_dialogue_from_label(
         self, dialogue_label: DialogueLabel

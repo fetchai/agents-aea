@@ -402,13 +402,14 @@ class Terms:
         counterparty_address: Address,
         amount_by_currency_id: Dict[str, int],
         quantities_by_good_id: Dict[str, int],
-        is_sender_payable_tx_fee: bool,
         nonce: str,
+        is_sender_payable_tx_fee: bool = True,
         fee_by_currency_id: Optional[Dict[str, int]] = None,
+        is_strict: bool = False,
         **kwargs,
     ):
         """
-        Instantiate terms.
+        Instantiate terms of a transaction.
 
         :param ledger_id: the ledger on which the terms are to be settled.
         :param sender_address: the sender address of the transaction.
@@ -418,6 +419,7 @@ class Terms:
         :param is_sender_payable_tx_fee: whether the sender or counterparty pays the tx fee.
         :param nonce: nonce to be included in transaction to discriminate otherwise identical transactions.
         :param fee_by_currency_id: the fee associated with the transaction.
+        :param is_strict: whether or not terms must have quantities and amounts of opposite signs.
         """
         self._ledger_id = ledger_id
         self._sender_address = sender_address
@@ -426,7 +428,10 @@ class Terms:
         self._quantities_by_good_id = quantities_by_good_id
         self._is_sender_payable_tx_fee = is_sender_payable_tx_fee
         self._nonce = nonce
-        self._fee_by_currency_id = fee_by_currency_id
+        self._fee_by_currency_id = (
+            fee_by_currency_id if fee_by_currency_id is not None else {}
+        )
+        self._is_strict = is_strict
         self._kwargs = kwargs if kwargs is not None else {}
         self._check_consistency()
         (
@@ -479,21 +484,6 @@ class Terms:
                 for key, value in self._quantities_by_good_id.items()
             ]
         ), "quantities_by_good_id must be a dictionary with str keys and int values."
-        pos_amounts = all(
-            [amount >= 0 for amount in self._amount_by_currency_id.values()]
-        )
-        neg_amounts = all(
-            [amount <= 0 for amount in self._amount_by_currency_id.values()]
-        )
-        pos_quantities = all(
-            [quantity >= 0 for quantity in self._quantities_by_good_id.values()]
-        )
-        neg_quantities = all(
-            [quantity <= 0 for quantity in self._quantities_by_good_id.values()]
-        )
-        assert (pos_amounts and neg_quantities) or (
-            neg_amounts and pos_quantities
-        ), "quantities and amounts do not constitute valid terms."
         assert isinstance(
             self._is_sender_payable_tx_fee, bool
         ), "is_sender_payable_tx_fee must be bool"
@@ -502,43 +492,33 @@ class Terms:
             isinstance(self._fee_by_currency_id, dict)
             and all(
                 [
-                    isinstance(key, str) and isinstance(value, int)
+                    isinstance(key, str) and isinstance(value, int) and value >= 0
                     for key, value in self._fee_by_currency_id.items()
                 ]
             )
-        ), "fee must be None or Dict[str, int]"
-
-    # def _check_consistency(self) -> None:
-    #     """
-    #     Check the consistency of the transaction parameters.
-
-    #     :return: None
-    #     :raises AssertionError if some constraint is not satisfied.
-    #     """
-    #     assert self.sender_addr != self.counterparty_addr
-    #     assert (
-    #         len(self.amount_by_currency_id.keys()) == 1
-    #     )  # For now we restrict to one currency per transaction.
-    #     assert self.sender_fee >= 0
-    #     assert self.counterparty_fee >= 0
-    #     assert (
-    #         self.amount >= 0
-    #         and all(quantity <= 0 for quantity in self.quantities_by_good_id.values())
-    #     ) or (
-    #         self.amount <= 0
-    #         and all(quantity >= 0 for quantity in self.quantities_by_good_id.values())
-    #     )
-    #     assert isinstance(self.sender_signature, str) and isinstance(
-    #         self.counterparty_signature, str
-    #     )
-    #     if self.amount >= 0:
-    #         assert (
-    #             self.sender_amount >= 0
-    #         ), "Sender_amount must be positive when the sender is the payment receiver."
-    #     else:
-    #         assert (
-    #             self.counterparty_amount >= 0
-    #         ), "Counterparty_amount must be positive when the counterpary is the payment receiver."
+        ), "fee must be None or Dict[str, int] with positive fees only."
+        assert all(
+            [
+                key in self._amount_by_currency_id
+                for key in self._fee_by_currency_id.keys()
+            ]
+        ), "Fee dictionary has keys which are not present in amount dictionary."
+        if self._is_strict:
+            is_pos_amounts = all(
+                [amount >= 0 for amount in self._amount_by_currency_id.values()]
+            )
+            is_neg_amounts = all(
+                [amount <= 0 for amount in self._amount_by_currency_id.values()]
+            )
+            is_pos_quantities = all(
+                [quantity >= 0 for quantity in self._quantities_by_good_id.values()]
+            )
+            is_neg_quantities = all(
+                [quantity <= 0 for quantity in self._quantities_by_good_id.values()]
+            )
+            assert (is_pos_amounts and is_neg_quantities) or (
+                is_neg_amounts and is_pos_quantities
+            ), "quantities and amounts do not constitute valid terms. All quantities must be of same sign. All amounts must be of same sign. Quantities and amounts must be of different sign."
 
     @property
     def id(self) -> str:
@@ -582,9 +562,16 @@ class Terms:
         return copy.copy(self._amount_by_currency_id)
 
     @property
+    def is_sender_payable_tx_fee(self) -> bool:
+        """Bool indicating whether the tx fee is paid by sender or counterparty."""
+        return self._is_sender_payable_tx_fee
+
+    @property
     def is_single_currency(self) -> bool:
         """Check whether a single currency is used for payment."""
-        return len(self._amount_by_currency_id) == 1
+        return (
+            len(self._amount_by_currency_id) == 1 and len(self._fee_by_currency_id) <= 1
+        )
 
     @property
     def currency_id(self) -> str:
@@ -596,40 +583,22 @@ class Terms:
     @property
     def sender_payable_amount(self) -> int:
         """Get the amount the sender must pay."""
-        assert (
-            len(self._amount_by_currency_id) == 1
-        ), "More than one currency id, cannot get amount."
-        value = next(iter(self._amount_by_currency_id.values()))
-        return -value if value <= 0 else 0
+        assert self.is_single_currency, "More than one currency id, cannot get amount."
+        key, value = next(iter(self._amount_by_currency_id.items()))
+        payable = -value if value <= 0 else 0
+        if self.is_sender_payable_tx_fee and len(self._fee_by_currency_id) == 1:
+            payable += self._fee_by_currency_id[key]
+        return payable
 
     @property
     def counterparty_payable_amount(self) -> int:
         """Get the amount the counterparty must pay."""
-        assert (
-            len(self._amount_by_currency_id) == 1
-        ), "More than one currency id, cannot get amount."
-        value = next(iter(self._amount_by_currency_id.values()))
-        return value if value >= 0 else 0
-
-    # @property
-    # def amount(self) -> int:
-    #     """Get the amount."""
-    #     return list(self.amount_by_currency_id.values())[0]
-
-    # @property
-    # def currency_id(self) -> str:
-    #     """Get the currency id."""
-    #     return list(self.amount_by_currency_id.keys())[0]
-
-    # @property
-    # def sender_amount(self) -> int:
-    #     """Get the amount the sender gets/pays."""
-    #     return self.amount - self.sender_fee
-
-    # @property
-    # def counterparty_amount(self) -> int:
-    #     """Get the amount the counterparty gets/pays."""
-    #     return -self.amount - self.counterparty_fee
+        assert self.is_single_currency, "More than one currency id, cannot get amount."
+        key, value = next(iter(self._amount_by_currency_id.items()))
+        payable = value if value >= 0 else 0
+        if not self.is_sender_payable_tx_fee and len(self._fee_by_currency_id) == 1:
+            payable += self._fee_by_currency_id[key]
+        return payable
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
@@ -637,7 +606,7 @@ class Terms:
         return copy.copy(self._quantities_by_good_id)
 
     @property
-    def good_ids(self) -> List[int]:
+    def good_ids(self) -> List[str]:
         """Get the (ordered) good ids."""
         return self._good_ids
 
@@ -652,11 +621,6 @@ class Terms:
         return self._counterparty_supplied_quantities
 
     @property
-    def is_sender_payable_tx_fee(self) -> bool:
-        """Bool indicating whether the tx fee is paid by sender or counterparty."""
-        return self._is_sender_payable_tx_fee
-
-    @property
     def nonce(self) -> str:
         """Get the nonce."""
         return self._nonce
@@ -664,31 +628,32 @@ class Terms:
     @property
     def has_fee(self) -> bool:
         """Check if fee is set."""
-        return self._fee_by_currency_id is not None
+        return self.fee_by_currency_id != {}
 
     @property
     def fee(self) -> int:
         """Get the fee."""
-        assert self._fee_by_currency_id is not None, "fee_by_currency_id not set."
+        assert self.has_fee, "fee_by_currency_id not set."
         assert (
-            len(self._fee_by_currency_id) == 1
+            len(self.fee_by_currency_id) == 1
         ), "More than one currency id, cannot get fee."
         return next(iter(self._fee_by_currency_id.values()))
 
     @property
     def sender_fee(self) -> int:
         """Get the sender fee."""
-        return self.fee
+        value = self.fee if self.is_sender_payable_tx_fee else 0
+        return value
 
     @property
     def counterparty_fee(self) -> int:
         """Get the counterparty fee."""
-        return -self.fee
+        value = 0 if self.is_sender_payable_tx_fee else self.fee
+        return value
 
     @property
     def fee_by_currency_id(self) -> Dict[str, int]:
         """Get fee by currency."""
-        assert self._fee_by_currency_id is not None, "fee_by_currency_id not set."
         return copy.copy(self._fee_by_currency_id)
 
     @property
@@ -696,13 +661,9 @@ class Terms:
         """Get the kwargs."""
         return self._kwargs
 
-    def _get_lists(self) -> Tuple[List[int], List[int], List[int]]:
-        quantities_by_good_id = {
-            int(good_id): quantity
-            for good_id, quantity in self.quantities_by_good_id.items()
-        }  # type: Dict[int, int]
-        ordered = collections.OrderedDict(sorted(quantities_by_good_id.items()))
-        good_ids = []  # type: List[int]
+    def _get_lists(self) -> Tuple[List[str], List[int], List[int]]:
+        ordered = collections.OrderedDict(sorted(self.quantities_by_good_id.items()))
+        good_ids = []  # type: List[str]
         sender_supplied_quantities = []  # type: List[int]
         counterparty_supplied_quantities = []  # type: List[int]
         for good_id, quantity in ordered.items():
@@ -720,7 +681,7 @@ class Terms:
         ledger_id: str,
         sender_address: str,
         counterparty_address: str,
-        good_ids: List[int],
+        good_ids: List[str],
         sender_supplied_quantities: List[int],
         counterparty_supplied_quantities: List[int],
         sender_payable_amount: int,
@@ -744,7 +705,7 @@ class Terms:
             ledger_id,
             b"".join(
                 [
-                    good_ids[0].to_bytes(32, "big"),
+                    good_ids[0].encode("utf-8"),
                     sender_supplied_quantities[0].to_bytes(32, "big"),
                     counterparty_supplied_quantities[0].to_bytes(32, "big"),
                 ]
@@ -758,7 +719,7 @@ class Terms:
                 b"".join(
                     [
                         aggregate_hash.encode("utf-8"),
-                        good_id.to_bytes(32, "big"),
+                        good_id.encode("utf-8"),
                         sender_supplied_quantities[idx].to_bytes(32, "big"),
                         counterparty_supplied_quantities[idx].to_bytes(32, "big"),
                     ]

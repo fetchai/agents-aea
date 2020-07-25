@@ -10,7 +10,7 @@ fingerprint:
   behaviours.py: QmfMvpqjhfS69h9FzkKBVEyMGwy7eqsCd8bjkhWoEQifei
   dialogues.py: QmZadrW961YwRQuDveoSFSVA7NjVVh2ZuvmbyRke2EqseF
   game.py: QmXuvrnJY6ZPocBur8kymPimn6FJYhQyWfduKs7VfYY1P3
-  handlers.py: QmVJQRrzGPKKNF7FLSXsyki89WNfmiZyQQJn8qAzBR29fF
+  handlers.py: QmbB8ECZbycKHxsEbYaWQwzEJUhJXNXi9Z5tSf9wjsfqVW
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0

@@ -518,7 +518,7 @@ class SigningHandler(Handler):
             assert last_msg is not None, "No last message available."
             msg = TacMessage(
                 performative=TacMessage.Performative.TRANSACTION,
-                dialogue_reference=tac_dialogue.dialogue_reference,
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
                 message_id=last_msg.message_id + 1,
                 target=last_msg.message_id,
                 tx_id=tx_id,
