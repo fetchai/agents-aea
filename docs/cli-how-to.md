@@ -26,13 +26,13 @@ respectively.
 
 Be sure that the `bin` folder of your Python environment
 is in the `PATH` variable. If so, you can execute the CLI tool as:
-```bash
+``` bash
 aea
 ```
 
 You might find useful the execution of the `aea.cli` package
 as a script:
-```bash
+``` bash
 python -m aea.cli
 ```
 which is just an alternative entry-point to the CLI tool. 
