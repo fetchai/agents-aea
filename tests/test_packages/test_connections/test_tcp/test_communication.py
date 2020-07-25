@@ -235,13 +235,13 @@ class TestTCPServerConnection:
         await tcp_client.connect()
         await asyncio.sleep(0.1)
 
-        with unittest.mock.patch.object(tcp_client.logger, "debug") as mock_logger:
+        with unittest.mock.patch.object(tcp_server.logger, "error") as mock_logger:
             with unittest.mock.patch(
                 "asyncio.wait", side_effect=Exception("generic exception")
             ):
                 result = await tcp_server.receive()
                 assert result is None
-                mock_logger.assert_called_with(
+                mock_logger.assert_any_call(
                     "Error in the receiving loop: generic exception"
                 )
 
