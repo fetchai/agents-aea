@@ -56,7 +56,14 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         filecmp.clear_cache()
 
     def test_compare_latest_generator_output_with_test_protocol(self):
-        """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
+        """
+        Test that the "t_protocol" test protocol matches with the latest generator output based on its specification.
+
+        Note:
+            - custom_types.py files are not compared as the generated one is only a template.
+            - protocol.yaml files are consequently not compared either because the different
+              custom_types.py files makes their IPFS hashes different.
+        """
         path_to_generated_protocol = self.t
         dotted_path_to_package_for_imports = "tests.data.generator."
 
@@ -78,12 +85,6 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         init_file_generated = Path(self.t, T_PROTOCOL_NAME, "__init__.py")
         init_file_original = Path(PATH_TO_T_PROTOCOL, "__init__.py",)
         assert filecmp.cmp(init_file_generated, init_file_original)
-
-        # protocol.yaml are different because the custom_types.py files are different
-        # # compare protocol.yaml
-        # protocol_yaml_file_generated = Path(self.t, T_PROTOCOL_NAME, "protocol.yaml")
-        # protocol_yaml_file_original = Path(PATH_TO_T_PROTOCOL, "protocol.yaml",)
-        # assert filecmp.cmp(protocol_yaml_file_generated, protocol_yaml_file_original)
 
         # compare message.py
         message_file_generated = Path(self.t, T_PROTOCOL_NAME, "message.py")

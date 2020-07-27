@@ -129,11 +129,7 @@ def _is_valid_set(content_type: str) -> bool:
     if not _has_brackets(content_type):
         return False
 
-    try:
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-    except SyntaxError:
-        return False
-
+    sub_types = _get_sub_types_of_compositional_types(content_type)
     if len(sub_types) != 1:
         return False
 
@@ -159,11 +155,7 @@ def _is_valid_list(content_type: str) -> bool:
     if not _has_brackets(content_type):
         return False
 
-    try:
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-    except SyntaxError:
-        return False
-
+    sub_types = _get_sub_types_of_compositional_types(content_type)
     if len(sub_types) != 1:
         return False
 
@@ -189,11 +181,7 @@ def _is_valid_dict(content_type: str) -> bool:
     if not _has_brackets(content_type):
         return False
 
-    try:
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-    except SyntaxError:
-        return False
-
+    sub_types = _get_sub_types_of_compositional_types(content_type)
     if len(sub_types) != 2:
         return False
 
@@ -220,11 +208,7 @@ def _is_valid_union(content_type: str) -> bool:
     if not _has_brackets(content_type):
         return False
 
-    try:
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-    except SyntaxError:
-        return False
-
+    sub_types = _get_sub_types_of_compositional_types(content_type)
     # check there are at least two subtypes in the union
     if len(sub_types) < 2:
         return False
@@ -265,11 +249,7 @@ def _is_valid_optional(content_type: str) -> bool:
     if not _has_brackets(content_type):
         return False
 
-    try:
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-    except SyntaxError:
-        return False
-
+    sub_types = _get_sub_types_of_compositional_types(content_type)
     if len(sub_types) != 1:
         return False
 
@@ -337,7 +317,7 @@ def _validate_content_name(content_name: str, performative: str) -> Tuple[bool, 
 
     :return: Boolean result, and associated message.
     """
-    if not _is_valid_regex(PERFORMATIVE_REGEX_PATTERN, content_name):
+    if not _is_valid_regex(CONTENT_NAME_REGEX_PATTERN, content_name):
         return (
             False,
             "Invalid name for content '{}' of performative '{}'. Content names must match the following regular expression: {} ".format(
@@ -400,6 +380,14 @@ def _validate_speech_acts_section(
     """
     custom_types_set = set()
     performatives_set = set()
+
+    if len(protocol_specification.speech_acts.read_all()) == 0:
+        return (
+            False,
+            "Speech-acts cannot be empty!",
+            None,
+            None,
+        )
 
     for (
         performative,
@@ -502,6 +490,12 @@ def _validate_initiation(
 
     :return: Boolean result, and associated message.
     """
+    if len(initiation) == 0 or initiation is None:
+        return (
+            False,
+            "At least one initial performative for this dialogue must be specified."
+        )
+
     for performative in initiation:
         if performative not in performatives_set:
             return (
@@ -559,6 +553,12 @@ def _validate_termination(
 
     :return: Boolean result, and associated message.
     """
+    if len(termination) == 0 or termination is None:
+        return (
+            False,
+            "At least one terminal performative for this dialogue must be specified."
+        )
+
     for performative in termination:
         if performative not in performatives_set:
             return (
@@ -578,6 +578,14 @@ def _validate_roles(roles: Set[str]) -> Tuple[bool, str]:
     :param roles: Set of roles of a dialogue.
     :return: Boolean result, and associated message.
     """
+    if not (1 <= len(roles) <= 2):
+        return (
+            False,
+            "There must be either 1 or 2 roles defined in this dialogue. Found {}".format(
+                len(roles)
+            ),
+        )
+
     for role in roles:
         if not _is_valid_regex(ROLE_REGEX_PATTERN, role):
             return (

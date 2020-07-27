@@ -87,9 +87,10 @@ class TestCommon(TestCase):
             _match_brackets(text_2, index_2)
         self.assertEqual(
             str(cm.exception),
-            "'index_of_open_bracket' in 'text' is not an open bracket '['. It is {}".format(
-                text_2[index_2]
-            ),
+            "Index {} in 'text' is not an open bracket '['. It is {}".format(
+                index_2,
+                text_2[index_2],
+            )
         )
 
         index_3 = 2
@@ -97,9 +98,10 @@ class TestCommon(TestCase):
             _match_brackets(text_2, index_3)
         self.assertEqual(
             str(cm.exception),
-            "'index_of_open_bracket' in 'text' is not an open bracket '['. It is {}".format(
-                text_2[index_3]
-            ),
+            "Index {} in 'text' is not an open bracket '['. It is {}".format(
+                index_3,
+                text_2[index_3],
+            )
         )
 
         index_4 = 10
