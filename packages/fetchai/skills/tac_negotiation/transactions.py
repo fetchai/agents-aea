@@ -33,7 +33,7 @@ from aea.mail.base import Address
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
-from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
+from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.helpers import tx_hash_from_values
 
 MessageId = int
@@ -94,7 +94,7 @@ class Transactions(Model):
         performative: SigningMessage.Performative,
         proposal_description: Description,
         dialogue_label: DialogueLabel,
-        role: Dialogue.Role,
+        role: FipaDialogue.Role,
         agent_addr: Address,
     ) -> SigningMessage:
         """
@@ -106,7 +106,7 @@ class Transactions(Model):
         :param agent_addr: the address of the agent
         :return: a transaction message
         """
-        is_seller = role == Dialogue.Role.SELLER
+        is_seller = role == FipaDialogue.Role.SELLER
 
         # sender_tx_fee = (
         #     proposal_description.values["seller_tx_fee"]
@@ -304,7 +304,7 @@ class Transactions(Model):
         self._last_update_for_transactions.append((now, transaction_id))
 
     def add_locked_tx(
-        self, transaction_msg: SigningMessage, role: Dialogue.Role
+        self, transaction_msg: SigningMessage, role: FipaDialogue.Role
     ) -> None:
         """
         Add a lock (in the form of a transaction).
@@ -315,7 +315,7 @@ class Transactions(Model):
 
         :return: None
         """
-        as_seller = role == Dialogue.Role.SELLER
+        as_seller = role == FipaDialogue.Role.SELLER
 
         transaction_id = transaction_msg.dialogue_reference[0]  # TODO: fix
         assert transaction_id not in self._locked_txs

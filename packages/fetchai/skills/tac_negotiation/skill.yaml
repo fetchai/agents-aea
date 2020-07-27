@@ -8,13 +8,13 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: Qmembb4bL9BqWsHy4m97qSpuQpQ6FzG8DQPDzSUrqF9cir
-  dialogues.py: QmZe9PJncaWzJ4yn9b76Mm5R93VLNxGVd5ogUWhfp8Q6km
-  handlers.py: Qme5JNPjEgDSMmXbDFdv6c3L9xdSYm41erk7eKLYcPddiH
+  dialogues.py: QmagBqNj5rJJsciQY1yMCpz7bZbipW8hSGUTn3npog36gr
+  handlers.py: QmcrSwQ4T3FkBQ53g7diKChW4hxZpDVTdAGKyybQNWBYcA
   helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmX6GbrW4sGWeSUFYXuE2Abuj2vXydX9G3tzTyRo1AtXGE
-  transactions.py: Qma4Nqp9p1t2woephydFUUBtJCz5wMZvP1CZapw48EGx2U
+  strategy.py: QmXRZHr4gobQFr2bQoDQk6tzwR5EXYeHT3QxSttY4NfoUT
+  transactions.py: QmQBDGWeSrFeBxxYuyuHckh6dW7bxwv1LKVCqkAs3y12ao
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -33,13 +33,13 @@ behaviours:
 handlers:
   fipa:
     args: {}
-    class_name: FIPANegotiationHandler
+    class_name: FipaNegotiationHandler
   oef:
     args: {}
-    class_name: OEFSearchHandler
-  transaction:
+    class_name: OefSearchHandler
+  signing:
     args: {}
-    class_name: TransactionHandler
+    class_name: SigningHandler
 models:
   dialogues:
     args: {}

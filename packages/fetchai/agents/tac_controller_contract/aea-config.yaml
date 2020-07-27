@@ -16,7 +16,7 @@ protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
-- fetchai/tac:0.3.0
+- fetchai/tac:0.4.0
 skills:
 - fetchai/error:0.3.0
 - fetchai/tac_control_contract:0.5.0

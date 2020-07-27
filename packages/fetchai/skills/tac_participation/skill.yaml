@@ -9,14 +9,14 @@ fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmfMvpqjhfS69h9FzkKBVEyMGwy7eqsCd8bjkhWoEQifei
   dialogues.py: QmZadrW961YwRQuDveoSFSVA7NjVVh2ZuvmbyRke2EqseF
-  game.py: QmXuvrnJY6ZPocBur8kymPimn6FJYhQyWfduKs7VfYY1P3
-  handlers.py: QmbB8ECZbycKHxsEbYaWQwzEJUhJXNXi9Z5tSf9wjsfqVW
+  game.py: Qmcx13KYkLFJnhKA9sS8nY7eExpdCp6PdpFn3tDuUHtni7
+  handlers.py: QmZnQFPzhDH2ucgfpF2taauZYwFJHQVm5qP4c9c4riF2rX
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
 protocols:
 - fetchai/oef_search:0.3.0
-- fetchai/tac:0.3.0
+- fetchai/tac:0.4.0
 skills: []
 behaviours:
   tac:
@@ -39,6 +39,12 @@ models:
       expected_version_id: v1
       is_using_contract: false
       ledger_id: ethereum
+      location:
+        latitude: 0.127
+        longitude: 51.5194
+      service_data:
+        key: tac
+        value: v1
     class_name: Game
   oef_search_dialogues:
     args: {}

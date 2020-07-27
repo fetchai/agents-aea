@@ -92,6 +92,7 @@ class TacBehaviour(Behaviour):
 
         :return: None
         """
+        self._unregister_tac()
         self._unregister_agent()
 
     def _register_agent(self) -> None:

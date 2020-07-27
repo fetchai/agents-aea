@@ -41,7 +41,7 @@ from packages.fetchai.skills.tac_participation.dialogues import (
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 
 
-class OEFSearchHandler(Handler):
+class OefSearchHandler(Handler):
     """This class handles oef messages."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id

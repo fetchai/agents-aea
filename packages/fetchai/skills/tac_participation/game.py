@@ -21,7 +21,7 @@
 from enum import Enum
 from typing import Dict, List, Optional
 
-from aea.helpers.search.models import Constraint, ConstraintType, Query
+from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.mail.base import Address
 from aea.skills.base import Model
 
@@ -29,6 +29,14 @@ from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_participation.dialogues import TacDialogue
 
 DEFAULT_LEDGER_ID = "ethereum"
+
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SEARCH_QUERY = {
+    "search_key": "tac",
+    "search_value": "v1",
+    "constraint_type": "==",
+}
+DEFAULT_SEARCH_RADIUS = 5.0
 
 
 class Phase(Enum):
@@ -169,6 +177,12 @@ class Game(Model):
         self._expected_controller_addr = kwargs.pop(
             "expected_controller_addr", None
         )  # type: Optional[str]
+
+        self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
         super().__init__(**kwargs)
@@ -288,7 +302,15 @@ class Game(Model):
 
         :return: the query
         """
-        query = Query(
-            [Constraint("version", ConstraintType("==", self.expected_version_id))]
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (self._agent_location, self._radius))
         )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
         return query
