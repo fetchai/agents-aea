@@ -118,9 +118,15 @@ class CosmosCrypto(Crypto[SigningKey]):
         return signature_base64_str
 
     @staticmethod
-    def sign_default_transaction(transaction: Any, signed_transaction, base64_pbk) -> Any:
+    def format_default_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any:
         """
-        Sign default CosmosSDK transaction
+        Format default CosmosSDK transaction and add signature
+
+        :param transaction: the transaction to be formatted
+        :param signature: the transaction signature
+        :param base64_pbk: the base64 formatted public key
+
+        :return: formatted transaction with signature
         """
         pushable_tx = {
             "tx": {
@@ -129,7 +135,7 @@ class CosmosCrypto(Crypto[SigningKey]):
                 "memo": transaction["memo"],
                 "signatures": [
                     {
-                        "signature": signed_transaction,
+                        "signature": signature,
                         "pub_key": {
                             "type": "tendermint/PubKeySecp256k1",
                             "value": base64_pbk,
@@ -144,9 +150,15 @@ class CosmosCrypto(Crypto[SigningKey]):
         return pushable_tx
 
     @staticmethod
-    def sign_wasm_transaction(transaction: Any, signed_transaction, base64_pbk) -> Any:
+    def format_wasm_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any:
         """
-        Sign CosmWasm transaction
+        Format CosmWasm transaction and add signature
+
+        :param transaction: the transaction to be formatted
+        :param signature: the transaction signature
+        :param base64_pbk: the base64 formatted public key
+
+        :return: formatted transaction with signature
         """
 
         pushable_tx = {
@@ -160,7 +172,7 @@ class CosmosCrypto(Crypto[SigningKey]):
                             "type": "tendermint/PubKeySecp256k1",
                             "value": base64_pbk,
                         },
-                        "signature": signed_transaction,
+                        "signature": signature,
                     }
                 ],
                 "memo": transaction["memo"],
@@ -185,10 +197,9 @@ class CosmosCrypto(Crypto[SigningKey]):
                 and len(transaction["msgs"])==1 \
                 and "type" in transaction["msgs"][0] \
                 and "wasm" in transaction["msgs"][0]["type"] :
-            return self.sign_wasm_transaction(transaction, signed_transaction, base64_pbk)
+            return self.format_wasm_transaction(transaction, signed_transaction, base64_pbk)
         else:
-            return self.sign_default_transaction(transaction, signed_transaction, base64_pbk)
-
+            return self.format_default_transaction(transaction, signed_transaction, base64_pbk)
 
     @classmethod
     def generate_private_key(cls) -> SigningKey:
