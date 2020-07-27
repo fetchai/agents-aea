@@ -122,7 +122,9 @@ class Contract(Component, ABC):
 
         return contract_class(configuration)
 
-    def get_deploy_transaction(self, api: LedgerApi, **kwargs) -> bytes:
+    def get_deploy_transaction(
+        self, api: LedgerApi, message: "ContractApiMessage"
+    ) -> bytes:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
 
@@ -130,13 +132,13 @@ class Contract(Component, ABC):
         to handle the contract requests manually.
 
         :param api: the ledger apis.
-        :param kwargs: other keyword arguments.
+        :param message: the contract API request.
         :return: the bytes representing the state.
         """
         raise NotImplementedError
 
     def get_raw_transaction(
-        self, api: LedgerApi, contract_address: str, **kwargs
+        self, api: LedgerApi, message: "ContractApiMessage"
     ) -> bytes:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -145,13 +147,12 @@ class Contract(Component, ABC):
         to handle the contract requests manually.
 
         :param api: the ledger apis.
-        :param contract_address: the contract address.
-        :param kwargs: other keyword arguments.
+        :param message: the contract API request.
         :return: the bytes representing the state.
         """
         raise NotImplementedError
 
-    def get_raw_message(self, api: LedgerApi, contract_address: str, **kwargs) -> bytes:
+    def get_raw_message(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
@@ -159,13 +160,12 @@ class Contract(Component, ABC):
         to handle the contract requests manually.
 
         :param api: the ledger apis.
-        :param contract_address: the contract address.
-        :param kwargs: other keyword arguments.
+        :param message: the contract API request.
         :return: the bytes representing the state.
         """
         raise NotImplementedError
 
-    def get_state(self, api: LedgerApi, contract_address: str, **kwargs) -> bytes:
+    def get_state(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:
         """
         Handler method for the 'GET_STATE' requests.
 
@@ -173,8 +173,7 @@ class Contract(Component, ABC):
         to handle the contract requests manually.
 
         :param api: the ledger apis.
-        :param contract_address: the contract address.
-        :param kwargs: other keyword arguments.
+        :param message: the contract API request.
         :return: the bytes representing the state.
         """
         raise NotImplementedError

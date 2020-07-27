@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the contract API request dispatcher."""
-from typing import cast
+from typing import cast, Callable
 
-from aea.contracts import contract_registry
+from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
 from aea.helpers.dialogue.base import (
@@ -94,7 +94,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         return self._contract_api_dialogues
 
     @property
-    def contract_registry(self) -> Registry:
+    def contract_registry(self) -> Registry[Contract]:
         """Get the contract registry."""
         return contract_registry
 
@@ -130,6 +130,46 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         dialogue.update(response)
         return response
 
+    def _handle_request(
+        self,
+        api: LedgerApi,
+        message: ContractApiMessage,
+        dialogue: ContractApiDialogue,
+        custom_handler_name: str,
+        response_builder: Callable[[bytes], ContractApiMessage],
+    ) -> ContractApiMessage:
+        contract = self.contract_registry.make(message.contract_id)
+        try:
+            data = self._get_data(api, message, contract, custom_handler_name)
+            response = response_builder(data)
+            response.counterparty = message.counterparty
+            dialogue.update(response)
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+            response = self.get_error_message(e, api, message, dialogue)
+        return response
+
+    def _get_data(
+        self,
+        api: LedgerApi,
+        message: ContractApiMessage,
+        contract: Contract,
+        custom_handler: str,
+    ) -> bytes:
+        # first, check if the custom handler for this type of request has been implemented.
+        try:
+            method: Callable[[LedgerApi, ContractApiMessage], bytes] = getattr(
+                contract, custom_handler
+            )
+            data = method(api, message)
+            return data
+        except NotImplementedError:
+            pass
+
+        # then, check if there is the handler for the provided callable.
+        method_to_call = getattr(contract, message.callable)
+        data = method_to_call(api, **message.kwargs.body)
+        return data
+
     def get_state(
         self,
         api: LedgerApi,
@@ -144,22 +184,17 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the contract API dialogue
         :return: None
         """
-        contract = self.contract_registry.make(message.contract_id)
-        method_to_call = getattr(contract, message.callable)
-        try:
-            data = method_to_call(api, message.contract_address, **message.kwargs.body)
-            response = ContractApiMessage(
+
+        def build_response(data: bytes) -> ContractApiMessage:
+            return ContractApiMessage(
                 performative=ContractApiMessage.Performative.STATE,
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 state=State(message.ledger_id, data),
             )
-            response.counterparty = message.counterparty
-            dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            response = self.get_error_message(e, api, message, dialogue)
-        return response
+
+        return self._handle_request(api, message, dialogue, "get_state", build_response)
 
     def get_deploy_transaction(
         self,
@@ -175,22 +210,19 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the contract API dialogue
         :return: None
         """
-        contract = self.contract_registry.make(message.contract_id)
-        method_to_call = getattr(contract, message.callable)
-        try:
-            tx = method_to_call(api, **message.kwargs.body)
-            response = ContractApiMessage(
+
+        def build_response(tx: bytes) -> ContractApiMessage:
+            return ContractApiMessage(
                 performative=ContractApiMessage.Performative.RAW_TRANSACTION,
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 raw_transaction=RawTransaction(message.ledger_id, tx),
             )
-            response.counterparty = message.counterparty
-            dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            response = self.get_error_message(e, api, message, dialogue)
-        return response
+
+        return self._handle_request(
+            api, message, dialogue, "get_deploy_transaction", build_response
+        )
 
     def get_raw_transaction(
         self,
@@ -206,22 +238,19 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the contract API dialogue
         :return: None
         """
-        contract = self.contract_registry.make(message.contract_id)
-        method_to_call = getattr(contract, message.callable)
-        try:
-            tx = method_to_call(api, message.contract_address, **message.kwargs.body)
-            response = ContractApiMessage(
+
+        def build_response(tx: bytes) -> ContractApiMessage:
+            return ContractApiMessage(
                 performative=ContractApiMessage.Performative.RAW_TRANSACTION,
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 raw_transaction=RawTransaction(message.ledger_id, tx),
             )
-            response.counterparty = message.counterparty
-            dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            response = self.get_error_message(e, api, message, dialogue)
-        return response
+
+        return self._handle_request(
+            api, message, dialogue, "get_raw_transaction", build_response
+        )
 
     def get_raw_message(
         self,
@@ -237,19 +266,16 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the contract API dialogue
         :return: None
         """
-        contract = self.contract_registry.make(message.contract_id)
-        method_to_call = getattr(contract, message.callable)
-        try:
-            rm = method_to_call(api, message.contract_address, **message.kwargs.body)
-            response = ContractApiMessage(
+
+        def build_response(rm: bytes) -> ContractApiMessage:
+            return ContractApiMessage(
                 performative=ContractApiMessage.Performative.RAW_MESSAGE,
                 message_id=message.message_id + 1,
                 target=message.message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 raw_message=RawMessage(message.ledger_id, rm),
             )
-            response.counterparty = message.counterparty
-            dialogue.update(response)
-        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            response = self.get_error_message(e, api, message, dialogue)
-        return response
+
+        return self._handle_request(
+            api, message, dialogue, "get_raw_message", build_response
+        )
