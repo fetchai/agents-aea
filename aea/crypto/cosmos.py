@@ -66,7 +66,7 @@ class CosmosCrypto(Crypto[SigningKey]):
     def private_key(self) -> str:
         """
         Return a private key.
-        
+
         :return: a private key string
         """
         return self.entity.to_string().hex()
