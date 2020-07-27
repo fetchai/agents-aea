@@ -41,6 +41,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
+COSMOS_CURRENCY = "ATOM"
 COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
@@ -61,15 +62,6 @@ class CosmosCrypto(Crypto[SigningKey]):
         super().__init__(private_key_path=private_key_path)
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = CosmosHelper.get_address_from_public_key(self.public_key)
-
-    @property
-    def private_key(self) -> str:
-        """
-        Return a private key.
-
-        :return: a private key string
-        """
-        return self.entity.to_string().hex()
 
     @property
     def public_key(self) -> str:
@@ -117,17 +109,11 @@ class CosmosCrypto(Crypto[SigningKey]):
         signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
         return signature_base64_str
 
-    def sign_transaction(self, transaction: Any) -> Any:
+    @staticmethod
+    def sign_default_transaction(transaction: Any, signed_transaction, base64_pbk) -> Any:
         """
-        Sign a transaction in bytes string form.
-
-        :param transaction: the transaction to be signed
-        :return: signed transaction
+        Sign default CosmosSDK transaction
         """
-        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
-        transaction_bytes = transaction_str.encode("utf-8")
-        signed_transaction = self.sign_message(transaction_bytes)
-        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
         pushable_tx = {
             "tx": {
                 "msg": transaction["msgs"],
@@ -149,6 +135,53 @@ class CosmosCrypto(Crypto[SigningKey]):
         }
         return pushable_tx
 
+    @staticmethod
+    def sign_wasm_transaction(transaction: Any, signed_transaction, base64_pbk) -> Any:
+        """
+        Sign CosmWasm transaction
+        """
+
+        pushable_tx = {
+            "type": "cosmos-sdk/StdTx",
+            "value": {
+                "msg": transaction["msgs"],
+                "fee": transaction["fee"],
+                "signatures": [
+                    {
+                        "pub_key": {
+                            "type": "tendermint/PubKeySecp256k1",
+                            "value": base64_pbk,
+                        },
+                        "signature": signed_transaction,
+                    }
+                ],
+                "memo": transaction["memo"],
+            },
+        }
+        return pushable_tx
+
+    def sign_transaction(self, transaction: Any) -> Any:
+        """
+        Sign a transaction in bytes string form.
+
+        :param transaction: the transaction to be signed
+        :return: signed transaction
+        """
+
+        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
+        transaction_bytes = transaction_str.encode("utf-8")
+        signed_transaction = self.sign_message(transaction_bytes)
+        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
+
+        if "msgs" in transaction \
+                and len(transaction["msgs"])==1 \
+                and "type" in transaction["msgs"][0] \
+                and "wasm" in transaction["msgs"][0]["type"] :
+            return self.sign_wasm_transaction(transaction, signed_transaction, base64_pbk)
+        else:
+            return self.sign_default_transaction(transaction, signed_transaction, base64_pbk)
+
+
     @classmethod
     def generate_private_key(cls) -> SigningKey:
         """Generate a key pair for cosmos network."""
@@ -162,7 +195,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self.private_key.encode("utf-8"))
+        fp.write(self.entity.to_string().hex().encode("utf-8"))
 
 
 class CosmosHelper(Helper):
@@ -239,7 +272,7 @@ class CosmosHelper(Helper):
         r = hashlib.new("ripemd160", s).digest()
         five_bit_r = convertbits(r, 8, 5)
         assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
-        address = bech32_encode(_COSMOS, five_bit_r)
+        address = bech32_encode("cosmos", five_bit_r)
         return address
 
     @staticmethod
