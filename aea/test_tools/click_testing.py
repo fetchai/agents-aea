@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains an adaptation of click.testing.CliRunner
+This module contains an adaptation of click.testing.CliRunner.
 
 In particular, it fixes an issue in
 CLIRunner.invoke, in the 'finally' clause. More precisely, before reading from
@@ -37,7 +37,7 @@ from click.testing import CliRunner as ClickCliRunner, Result
 
 
 class CliRunner(ClickCliRunner):
-    """Patch of click.testing.CliRunner"""
+    """Patch of click.testing.CliRunner."""
 
     def invoke(
         self,
@@ -49,7 +49,7 @@ class CliRunner(ClickCliRunner):
         color=False,
         **extra
     ):
-        """Patch click.testing.CliRunner.invoke()."""
+        """Call a cli command with click.testing.CliRunner.invoke."""
         exc_info = None
         exception = None
         exit_code = 0
@@ -67,11 +67,14 @@ class CliRunner(ClickCliRunner):
                 cli.main(args=args or (), prog_name=prog_name, **extra)
             except SystemExit as e:
                 exc_info = sys.exc_info()
-
-                if e.code is None:  # pragma: nocover
+                exit_code = e.code
+                if exit_code is None:  # pragma: nocover
                     exit_code = 0
-                else:
+
+                if exit_code != 0:  # pragma: nocover
                     exception = e
+
+                if not isinstance(exit_code, int):
                     sys.stdout.write(str(exit_code))
                     sys.stdout.write("\n")
                     exit_code = 1
