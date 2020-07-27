@@ -380,7 +380,12 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
             return type(
                 pytest_func.__name__,
                 (pytest_func,),
-                {"setup_class": action, "setup": action, "setUp": action, '_skipped': True},
+                {
+                    "setup_class": action,
+                    "setup": action,
+                    "setUp": action,
+                    "_skipped": True,
+                },
             )
 
         @wraps(pytest_func)
@@ -917,7 +922,11 @@ def aea_testcase_teardown_check(request):
     from aea.test_tools.test_cases import BaseAEATestCase  # cause circular import
 
     yield
-    if request.cls and issubclass(request.cls, BaseAEATestCase) and getattr(request.cls, '_skipped', False) is False:
+    if (
+        request.cls
+        and issubclass(request.cls, BaseAEATestCase)
+        and getattr(request.cls, "_skipped", False) is False
+    ):
         assert getattr(
             request.cls, "_is_teardown_class_called", None
         ), "No BaseAEATestCase.teardown_class was called!"

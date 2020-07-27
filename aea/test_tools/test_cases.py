@@ -101,7 +101,7 @@ class BaseAEATestCase(ABC):
         cls.current_agent_context = ""
 
     @classmethod
-    def set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> None:
+    def set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result:
         """
         Set a config.
 
@@ -111,9 +111,9 @@ class BaseAEATestCase(ABC):
         :param value: a new value to set.
         :param type_: the type
 
-        :return: None
+        :return: Result
         """
-        cls.run_cli_command(
+        return cls.run_cli_command(
             "config",
             "set",
             dotted_path,
@@ -130,7 +130,7 @@ class BaseAEATestCase(ABC):
             force_set_config(dotted_path, value)
 
     @classmethod
-    def disable_aea_logging(cls):
+    def disable_aea_logging(cls) -> None:
         """
         Disable AEA logging of specific agent.
 
@@ -146,7 +146,7 @@ class BaseAEATestCase(ABC):
             cls.run_cli_command("config", "set", path, value, cwd=cls._get_cwd())
 
     @classmethod
-    def run_cli_command(cls, *args: str, cwd: str = ".") -> None:
+    def run_cli_command(cls, *args: str, cwd: str = ".") -> Result:
         """
         Run AEA CLI command.
 
@@ -154,7 +154,7 @@ class BaseAEATestCase(ABC):
         :param cwd: the working directory from where to run the command.
         :raises AEATestingException: if command fails.
 
-        :return: None
+        :return: Result
         """
         with cd(cwd):
             result = cls.runner.invoke(
@@ -403,7 +403,7 @@ class BaseAEATestCase(ABC):
         cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
-    def add_item(cls, item_type: str, public_id: str, local: bool = True) -> None:
+    def add_item(cls, item_type: str, public_id: str, local: bool = True) -> Result:
         """
         Add an item to the agent.
 
@@ -413,7 +413,7 @@ class BaseAEATestCase(ABC):
         :param public_id: public id of the item.
         :param local: a flag for local folder add True by default.
 
-        :return: None
+        :return: Result
         """
         cli_args = ["add", "--local", item_type, public_id]
         if not local:  # pragma: nocover
@@ -421,7 +421,7 @@ class BaseAEATestCase(ABC):
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
-    def scaffold_item(cls, item_type: str, name: str) -> None:
+    def scaffold_item(cls, item_type: str, name: str) -> Result:
         """
         Scaffold an item for the agent.
 
@@ -430,12 +430,12 @@ class BaseAEATestCase(ABC):
         :param item_type: str item type.
         :param name: name of the item.
 
-        :return: None
+        :return: Result
         """
         return cls.run_cli_command("scaffold", item_type, name, cwd=cls._get_cwd())
 
     @classmethod
-    def fingerprint_item(cls, item_type: str, public_id: str) -> None:
+    def fingerprint_item(cls, item_type: str, public_id: str) -> Result:
         """
         Fingerprint an item for the agent.
 
@@ -444,14 +444,14 @@ class BaseAEATestCase(ABC):
         :param item_type: str item type.
         :param name: public id of the item.
 
-        :return: None
+        :return: Result
         """
         return cls.run_cli_command(
             "fingerprint", item_type, public_id, cwd=cls._get_cwd()
         )
 
     @classmethod
-    def eject_item(cls, item_type: str, public_id: str) -> None:
+    def eject_item(cls, item_type: str, public_id: str) -> Result:
         """
         Eject an item in the agent.
 
@@ -466,18 +466,18 @@ class BaseAEATestCase(ABC):
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
-    def run_install(cls):
+    def run_install(cls) -> Result:
         """
         Execute AEA CLI install command.
 
         Run from agent's directory.
 
-        :return: None
+        :return: Result
         """
         return cls.run_cli_command("install", cwd=cls._get_cwd())
 
     @classmethod
-    def generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None:
+    def generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER) -> Result:
         """
         Generate AEA private key with CLI command.
 
@@ -485,7 +485,7 @@ class BaseAEATestCase(ABC):
 
         :param ledger_api_id: ledger API ID.
 
-        :return: None
+        :return: Result
         """
         return cls.run_cli_command("generate-key", ledger_api_id, cwd=cls._get_cwd())
 
@@ -495,7 +495,7 @@ class BaseAEATestCase(ABC):
         ledger_api_id: str = DEFAULT_LEDGER,
         private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE,
         connection: bool = False,
-    ) -> None:
+    ) -> Result:
         """
         Add private key with CLI command.
 
@@ -505,7 +505,7 @@ class BaseAEATestCase(ABC):
         :param private_key_filepath: private key filepath.
         :param connection: whether or not the private key filepath is for a connection.
 
-        :return: None
+        :return: Result
         """
         if connection:
             return cls.run_cli_command(
@@ -538,7 +538,7 @@ class BaseAEATestCase(ABC):
                 f.write(private_key)
 
     @classmethod
-    def generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None:
+    def generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> Result:
         """
         Generate wealth with CLI command.
 
@@ -546,7 +546,7 @@ class BaseAEATestCase(ABC):
 
         :param ledger_api_id: ledger API ID.
 
-        :return: None
+        :return: Result
         """
         return cls.run_cli_command(
             "generate-wealth", ledger_api_id, "--sync", cwd=cls._get_cwd()
@@ -801,7 +801,7 @@ class AEATestCaseMany(BaseAEATestCase):
         super(AEATestCaseMany, cls).teardown_class()
 
 
-class AEATestCase(BaseAEATestCase):  # TODO: does not in use at the moment
+class AEATestCase(BaseAEATestCase):
     """
     Test case from an existing AEA project.
 
