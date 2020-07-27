@@ -19,8 +19,8 @@
 """This module contains the tests for generator/validate.py module."""
 import logging
 from unittest import TestCase, mock
-from aea.configurations.base import CRUDCollection, SpeechActContentConfig
 
+from aea.configurations.base import CRUDCollection, SpeechActContentConfig
 from aea.protocols.generator.validate import (
     CONTENT_NAME_REGEX_PATTERN,
     END_STATE_REGEX_PATTERN,
@@ -33,7 +33,6 @@ from aea.protocols.generator.validate import (
     _is_valid_dict,
     _is_valid_list,
     _is_valid_optional,
-    _validate_performatives,
     _is_valid_pt,
     _is_valid_regex,
     _is_valid_set,
@@ -43,6 +42,7 @@ from aea.protocols.generator.validate import (
     _validate_dialogue_section,
     _validate_end_states,
     _validate_initiation,
+    _validate_performatives,
     _validate_protocol_buffer_schema_code_snippets,
     _validate_reply,
     _validate_roles,
@@ -1438,7 +1438,10 @@ class TestValidate(TestCase):
             mocked_spec, valid_performatives_set_1
         )
         assert invalid_result_1 is False
-        assert invalid_msg_1 == "Performative 'new_performative' specified in \"initiation\" is not defined in the protocol's speech-acts."
+        assert (
+            invalid_msg_1
+            == "Performative 'new_performative' specified in \"initiation\" is not defined in the protocol's speech-acts."
+        )
 
         invalid_dialogue_config_2 = valid_dialogue_config_1.copy()
         invalid_dialogue_config_2["reply"] = {
@@ -1456,9 +1459,12 @@ class TestValidate(TestCase):
             mocked_spec, valid_performatives_set_1
         )
         assert invalid_result_2 is False
-        assert invalid_msg_2 == "No reply is provided for the following performatives: {}".format(
+        assert (
+            invalid_msg_2
+            == "No reply is provided for the following performatives: {}".format(
                 {"performative_empty_contents"},
             )
+        )
 
         invalid_dialogue_config_3 = valid_dialogue_config_1.copy()
         invalid_dialogue_config_3["termination"] = ["new_performative"]
@@ -1469,10 +1475,17 @@ class TestValidate(TestCase):
             mocked_spec, valid_performatives_set_1
         )
         assert invalid_result_3 is False
-        assert invalid_msg_3 == "Performative 'new_performative' specified in \"termination\" is not defined in the protocol's speech-acts."
+        assert (
+            invalid_msg_3
+            == "Performative 'new_performative' specified in \"termination\" is not defined in the protocol's speech-acts."
+        )
 
         invalid_dialogue_config_4 = valid_dialogue_config_1.copy()
-        invalid_dialogue_config_4["roles"] = {"role_1": None, "role_2": None, "role_3": None}
+        invalid_dialogue_config_4["roles"] = {
+            "role_1": None,
+            "role_2": None,
+            "role_3": None,
+        }
 
         mocked_spec.dialogue_config = invalid_dialogue_config_4
 
@@ -1480,7 +1493,10 @@ class TestValidate(TestCase):
             mocked_spec, valid_performatives_set_1
         )
         assert invalid_result_4 is False
-        assert invalid_msg_4 == "There must be either 1 or 2 roles defined in this dialogue. Found 3"
+        assert (
+            invalid_msg_4
+            == "There must be either 1 or 2 roles defined in this dialogue. Found 3"
+        )
 
         invalid_dialogue_config_5 = valid_dialogue_config_1.copy()
         invalid_dialogue_config_5["end_states"] = ["end_$tate_1"]
@@ -1491,42 +1507,88 @@ class TestValidate(TestCase):
             mocked_spec, valid_performatives_set_1
         )
         assert invalid_result_5 is False
-        assert invalid_msg_5 == "Invalid name for end_state 'end_$tate_1'. End_state names must match the following regular expression: {} ".format(
+        assert (
+            invalid_msg_5
+            == "Invalid name for end_state 'end_$tate_1'. End_state names must match the following regular expression: {} ".format(
                 END_STATE_REGEX_PATTERN
             )
+        )
 
     @mock.patch("aea.configurations.base.ProtocolSpecification")
-    @mock.patch("aea.protocols.generator.validate._validate_speech_acts_section", return_value=tuple([True, "Speech_acts are correct!", set(), set()]))
-    @mock.patch("aea.protocols.generator.validate._validate_protocol_buffer_schema_code_snippets", return_value=tuple([True, "Protobuf snippets are correct!"]))
-    @mock.patch("aea.protocols.generator.validate._validate_dialogue_section", return_value=tuple([True, "Dialogue section is correct!"]))
-    def test_validate_positive(self, mocked_spec, macked_validate_speech_acts, macked_validate_protobuf, macked_validate_dialogue):
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_speech_acts_section",
+        return_value=tuple([True, "Speech_acts are correct!", set(), set()]),
+    )
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_protocol_buffer_schema_code_snippets",
+        return_value=tuple([True, "Protobuf snippets are correct!"]),
+    )
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_dialogue_section",
+        return_value=tuple([True, "Dialogue section is correct!"]),
+    )
+    def test_validate_positive(
+        self,
+        mocked_spec,
+        macked_validate_speech_acts,
+        macked_validate_protobuf,
+        macked_validate_dialogue,
+    ):
         """Positive test for the 'validate' method: invalid dialogue section."""
         valid_result_1, valid_msg_1, = validate(mocked_spec)
         assert valid_result_1 is True
         assert valid_msg_1 == "Protocol specification is valid."
 
     @mock.patch("aea.configurations.base.ProtocolSpecification")
-    @mock.patch("aea.protocols.generator.validate._validate_speech_acts_section", return_value=tuple([False, "Some error on speech_acts.", None, None]))
-    def test_validate_negative_invalid_speech_acts(self, mocked_spec, macked_validate_speech_acts):
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_speech_acts_section",
+        return_value=tuple([False, "Some error on speech_acts.", None, None]),
+    )
+    def test_validate_negative_invalid_speech_acts(
+        self, mocked_spec, macked_validate_speech_acts
+    ):
         """Negative test for the 'validate' method: invalid speech_acts."""
         invalid_result_1, invalid_msg_1, = validate(mocked_spec)
         assert invalid_result_1 is False
         assert invalid_msg_1 == "Some error on speech_acts."
 
     @mock.patch("aea.configurations.base.ProtocolSpecification")
-    @mock.patch("aea.protocols.generator.validate._validate_speech_acts_section", return_value=tuple([True, "Speech_acts are correct!", set(), set()]))
-    @mock.patch("aea.protocols.generator.validate._validate_protocol_buffer_schema_code_snippets", return_value=tuple([False, "Some error on protobuf snippets."]))
-    def test_validate_negative_invalid_protobuf_snippets(self, mocked_spec, macked_validate_speech_acts, macked_validate_protobuf):
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_speech_acts_section",
+        return_value=tuple([True, "Speech_acts are correct!", set(), set()]),
+    )
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_protocol_buffer_schema_code_snippets",
+        return_value=tuple([False, "Some error on protobuf snippets."]),
+    )
+    def test_validate_negative_invalid_protobuf_snippets(
+        self, mocked_spec, macked_validate_speech_acts, macked_validate_protobuf
+    ):
         """Negative test for the 'validate' method: invalid protobuf snippets."""
         invalid_result_1, invalid_msg_1, = validate(mocked_spec)
         assert invalid_result_1 is False
         assert invalid_msg_1 == "Some error on protobuf snippets."
 
     @mock.patch("aea.configurations.base.ProtocolSpecification")
-    @mock.patch("aea.protocols.generator.validate._validate_speech_acts_section", return_value=tuple([True, "Speech_acts are correct!", set(), set()]))
-    @mock.patch("aea.protocols.generator.validate._validate_protocol_buffer_schema_code_snippets", return_value=tuple([True, "Protobuf snippets are correct!"]))
-    @mock.patch("aea.protocols.generator.validate._validate_dialogue_section", return_value=tuple([False, "Some error on dialogue section."]))
-    def test_validate_negative_invalid_dialogue_section(self, mocked_spec, macked_validate_speech_acts, macked_validate_protobuf, macked_validate_dialogue):
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_speech_acts_section",
+        return_value=tuple([True, "Speech_acts are correct!", set(), set()]),
+    )
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_protocol_buffer_schema_code_snippets",
+        return_value=tuple([True, "Protobuf snippets are correct!"]),
+    )
+    @mock.patch(
+        "aea.protocols.generator.validate._validate_dialogue_section",
+        return_value=tuple([False, "Some error on dialogue section."]),
+    )
+    def test_validate_negative_invalid_dialogue_section(
+        self,
+        mocked_spec,
+        macked_validate_speech_acts,
+        macked_validate_protobuf,
+        macked_validate_dialogue,
+    ):
         """Negative test for the 'validate' method: invalid dialogue section."""
         invalid_result_1, invalid_msg_1, = validate(mocked_spec)
         assert invalid_result_1 is False

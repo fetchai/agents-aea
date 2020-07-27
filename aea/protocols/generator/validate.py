@@ -493,7 +493,7 @@ def _validate_initiation(
     if len(initiation) == 0 or initiation is None:
         return (
             False,
-            "At least one initial performative for this dialogue must be specified."
+            "At least one initial performative for this dialogue must be specified.",
         )
 
     for performative in initiation:
@@ -556,7 +556,7 @@ def _validate_termination(
     if len(termination) == 0 or termination is None:
         return (
             False,
-            "At least one terminal performative for this dialogue must be specified."
+            "At least one terminal performative for this dialogue must be specified.",
         )
 
     for performative in termination:
@@ -578,7 +578,7 @@ def _validate_roles(roles: Set[str]) -> Tuple[bool, str]:
     :param roles: Set of roles of a dialogue.
     :return: Boolean result, and associated message.
     """
-    if not (1 <= len(roles) <= 2):
+    if not 1 <= len(roles) <= 2:
         return (
             False,
             "There must be either 1 or 2 roles defined in this dialogue. Found {}".format(

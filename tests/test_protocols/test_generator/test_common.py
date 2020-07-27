@@ -88,9 +88,8 @@ class TestCommon(TestCase):
         self.assertEqual(
             str(cm.exception),
             "Index {} in 'text' is not an open bracket '['. It is {}".format(
-                index_2,
-                text_2[index_2],
-            )
+                index_2, text_2[index_2],
+            ),
         )
 
         index_3 = 2
@@ -99,9 +98,8 @@ class TestCommon(TestCase):
         self.assertEqual(
             str(cm.exception),
             "Index {} in 'text' is not an open bracket '['. It is {}".format(
-                index_3,
-                text_2[index_3],
-            )
+                index_3, text_2[index_3],
+            ),
         )
 
         index_4 = 10

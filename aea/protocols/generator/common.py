@@ -97,8 +97,7 @@ def _match_brackets(text: str, index_of_open_bracket: int) -> int:
     if text[index_of_open_bracket] != "[":
         raise SyntaxError(
             "Index {} in 'text' is not an open bracket '['. It is {}".format(
-                index_of_open_bracket,
-                text[index_of_open_bracket],
+                index_of_open_bracket, text[index_of_open_bracket],
             )
         )
 
