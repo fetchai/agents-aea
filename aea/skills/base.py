@@ -644,10 +644,6 @@ class Skill(Component):
         """Get the contracts associated with the skill."""
         return self._contracts
 
-    def inject_contracts(self, contracts: Dict[str, Contract]) -> None:
-        """Add the contracts to the skill."""
-        self._contracts = contracts
-
     @property
     def skill_context(self) -> SkillContext:
         """Get the skill context."""
