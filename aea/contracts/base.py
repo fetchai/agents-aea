@@ -121,3 +121,60 @@ class Contract(Component, ABC):
         #     contract_interface = json.load(interface_file)
 
         return contract_class(configuration)
+
+    def get_deploy_transaction(self, api: LedgerApi, **kwargs) -> bytes:
+        """
+        Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
+
+        Implement this method in the sub class if you want
+        to handle the contract requests manually.
+
+        :param api: the ledger apis.
+        :param kwargs: other keyword arguments.
+        :return: the bytes representing the state.
+        """
+        raise NotImplementedError
+
+    def get_raw_transaction(
+        self, api: LedgerApi, contract_address: str, **kwargs
+    ) -> bytes:
+        """
+        Handler method for the 'GET_RAW_TRANSACTION' requests.
+
+        Implement this method in the sub class if you want
+        to handle the contract requests manually.
+
+        :param api: the ledger apis.
+        :param contract_address: the contract address.
+        :param kwargs: other keyword arguments.
+        :return: the bytes representing the state.
+        """
+        raise NotImplementedError
+
+    def get_raw_message(self, api: LedgerApi, contract_address: str, **kwargs) -> bytes:
+        """
+        Handler method for the 'GET_RAW_MESSAGE' requests.
+
+        Implement this method in the sub class if you want
+        to handle the contract requests manually.
+
+        :param api: the ledger apis.
+        :param contract_address: the contract address.
+        :param kwargs: other keyword arguments.
+        :return: the bytes representing the state.
+        """
+        raise NotImplementedError
+
+    def get_state(self, api: LedgerApi, contract_address: str, **kwargs) -> bytes:
+        """
+        Handler method for the 'GET_STATE' requests.
+
+        Implement this method in the sub class if you want
+        to handle the contract requests manually.
+
+        :param api: the ledger apis.
+        :param contract_address: the contract address.
+        :param kwargs: other keyword arguments.
+        :return: the bytes representing the state.
+        """
+        raise NotImplementedError
