@@ -14,7 +14,7 @@
 
 ## Description
 
-This is a protocol for negotiating over a fixed set of resources.
+This is a protocol for two agents to negotiate over a fixed set of resources.
 
 ## Specification
 
