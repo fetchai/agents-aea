@@ -24,6 +24,7 @@ import random
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, cast
 
+from aea.decision_maker.default import OwnershipState, Preferences
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -386,9 +387,13 @@ class Strategy(Model):
         proposals = []
         fee_by_currency_id = self.context.shared_state.get("tx_fee", {"FET": 0})
         buyer_tx_fee = next(iter(fee_by_currency_id.values()))
-        currency_id = list(
-            self.context.decision_maker_handler_context.ownership_state.amount_by_currency_id.keys()
-        )[0]
+        ownership_state = cast(
+            OwnershipState, self.context.decision_maker_handler_context.ownership_state
+        )
+        currency_id = list(ownership_state.amount_by_currency_id.keys())[0]
+        preferences = cast(
+            Preferences, self.context.decision_maker_handler_context.preferences
+        )
         for good_id, quantity in good_id_to_quantities.items():
             if is_seller and quantity == 0:
                 continue
@@ -407,7 +412,7 @@ class Strategy(Model):
                 }  # type: Dict[str, int]
             else:
                 delta_quantities_by_good_id = proposal_dict
-            marginal_utility_from_delta_good_holdings = self.context.decision_maker_handler_context.preferences.marginal_utility(
+            marginal_utility_from_delta_good_holdings = preferences.marginal_utility(
                 ownership_state=ownership_state_after_locks,
                 delta_quantities_by_good_id=delta_quantities_by_good_id,
             )
@@ -453,8 +458,11 @@ class Strategy(Model):
         )
         if not ownership_state_after_locks.is_affordable_transaction(signing_msg.terms):
             return False
-        proposal_delta_score = self.context.decision_maker_handler_context.preferences.utility_diff_from_transaction(
-            ownership_state_after_locks, signing_msg
+        preferences = cast(
+            Preferences, self.context.decision_maker_handler_context.preferences
+        )
+        proposal_delta_score = preferences.utility_diff_from_transaction(
+            ownership_state_after_locks, signing_msg.terms
         )
         if proposal_delta_score >= 0:
             return True

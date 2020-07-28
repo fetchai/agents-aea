@@ -21,10 +21,8 @@
 
 from typing import Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId
 from aea.mail.base import Address
 from aea.protocols.base import Message
-from aea.protocols.signing.message import SigningMessage
 from aea.protocols.state_update.message import StateUpdateMessage
 from aea.skills.base import Handler
 
@@ -33,8 +31,6 @@ from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_participation.dialogues import (
     OefSearchDialogue,
     OefSearchDialogues,
-    SigningDialogue,
-    SigningDialogues,
     StateUpdateDialogue,
     StateUpdateDialogues,
     TacDialogue,
@@ -203,7 +199,7 @@ class OefSearchHandler(Handler):
         assert tac_dialogue is not None, "TacDialogue not created."
         game.tac_dialogue = tac_dialogue
         self.context.outbox.put_message(message=tac_msg)
-        self.context.behaviours.tac.is_active = False
+        self.context.behaviours.tac_search.is_active = False
 
 
 class TacHandler(Handler):
@@ -449,147 +445,5 @@ class TacHandler(Handler):
         self.context.logger.warning(
             "cannot handle tac message of performative={} in dialogue={}.".format(
                 tac_msg.performative, tac_dialogue
-            )
-        )
-
-
-class SigningHandler(Handler):
-    """This class implements the transaction handler."""
-
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        pass
-
-    def handle(self, message: Message) -> None:
-        """
-        Dispatch message to relevant handler and respond.
-
-        :param message: the message
-        :return: None
-        """
-        signing_msg = cast(SigningMessage, message)
-
-        # recover dialogue
-        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        signing_dialogue = cast(
-            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-        )
-        if signing_dialogue is None:
-            self._handle_unidentified_dialogue(signing_msg)
-            return
-
-        # handle message
-        if signing_msg.performative is SigningMessage.Performative.SIGNED_TRANSACTION:
-            self._handle_signed_transaction(signing_msg, signing_dialogue)
-        elif signing_msg.performative is SigningMessage.Performative.ERROR:
-            self._handle_error(signing_msg, signing_dialogue)
-        else:
-            self._handle_invalid(signing_msg, signing_dialogue)
-
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-        pass
-
-    def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
-        """
-        Handle an unidentified dialogue.
-
-        :param msg: the message
-        """
-        self.context.logger.info(
-            "received invalid signing message={}, unidentified dialogue.".format(
-                signing_msg
-            )
-        )
-
-    def _handle_signed_transaction(
-        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param signing_msg: the signing message
-        :param signing_dialogue: the dialogue
-        :return: None
-        """
-        # TODO: Need to modify here and add the contract option in case we are using one.
-        self.context.logger.info(
-            "transaction confirmed by decision maker, sending to controller."
-        )
-        game = cast(Game, self.context.game)
-        tx_counterparty_signature = cast(
-            str, signing_msg.skill_callback_info.get("tx_counterparty_signature")
-        )
-        tx_counterparty_id = cast(
-            str, signing_msg.skill_callback_info.get("tx_counterparty_id")
-        )
-        tx_id = cast(str, signing_msg.skill_callback_info.get("tx_id"))
-        if (tx_counterparty_signature is not None) and (tx_counterparty_id is not None):
-            # tx_id = tx_message.tx_id + "_" + tx_counterparty_id
-            tac_dialogue = game.tac_dialogue
-            last_msg = tac_dialogue.last_message
-            assert last_msg is not None, "No last message available."
-            msg = TacMessage(
-                performative=TacMessage.Performative.TRANSACTION,
-                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
-                message_id=last_msg.message_id + 1,
-                target=last_msg.message_id,
-                tx_id=tx_id,
-                tx_sender_addr=signing_msg.terms.sender_address,
-                tx_counterparty_addr=signing_msg.terms.counterparty_address,
-                amount_by_currency_id=signing_msg.terms.amount_by_currency_id,
-                is_sender_payable_tx_fee=signing_msg.terms.is_sender_payable_tx_fee,
-                quantities_by_good_id=signing_msg.terms.quantities_by_good_id,
-                tx_sender_signature=signing_msg.signed_transaction.body,
-                tx_counterparty_signature=tx_counterparty_signature,
-                tx_nonce=signing_msg.terms.nonce,
-            )
-            msg.counterparty = game.conf.controller_addr
-            tac_dialogue.update(msg)
-            self.context.outbox.put_message(message=msg)
-        else:
-            self.context.logger.warning(
-                "transaction has no counterparty id or signature!"
-            )
-
-    def _handle_error(
-        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param signing_msg: the signing message
-        :param signing_dialogue: the dialogue
-        :return: None
-        """
-        self.context.logger.info(
-            "transaction signing was not successful. Error_code={} in dialogue={}".format(
-                signing_msg.error_code, signing_dialogue
-            )
-        )
-
-    def _handle_invalid(
-        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param signing_msg: the signing message
-        :param signing_dialogue: the dialogue
-        :return: None
-        """
-        self.context.logger.warning(
-            "cannot handle signing message of performative={} in dialogue={}.".format(
-                signing_msg.performative, signing_dialogue
             )
         )

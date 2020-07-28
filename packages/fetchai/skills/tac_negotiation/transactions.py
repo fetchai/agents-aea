@@ -22,18 +22,20 @@
 import copy
 import datetime
 from collections import defaultdict, deque
-from typing import Deque, Dict, Tuple
+from typing import Deque, Dict, List, Tuple, cast
 
-from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
-from aea.helpers.transaction.base import Terms
+from aea.helpers.transaction.base import RawMessage, Terms
 from aea.mail.base import Address
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
-from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
+from packages.fetchai.skills.tac_negotiation.dialogues import (
+    FipaDialogue,
+    SigningDialogues,
+)
 
 MessageId = int
 
@@ -82,8 +84,8 @@ class Transactions(Model):
         self._nonce += 1
         return str(self._nonce)
 
-    @staticmethod
     def generate_signing_message(
+        self,
         performative: SigningMessage.Performative,
         proposal_description: Description,
         dialogue_label: DialogueLabel,
@@ -130,19 +132,37 @@ class Transactions(Model):
             nonce=nonce,
             fee_by_currency_id=fee_by_currency_id,
         )
-        skill_callback_ids = (
-            (str(PublicId.from_str("fetchai/tac_participation:0.5.0")),)
-            if performative == SigningMessage.Performative.SIGN_MESSAGE
-            else (str(PublicId.from_str("fetchai/tac_negotiation:0.6.0")),)
+        skill_callback_ids = (str(self.context.skill_id),)
+        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+        skill_callback_info = {"dialogue_label": str(dialogue_label)}
+        raw_message = RawMessage(
+            ledger_id=ledger_id, body=terms.sender_hash.encode("utf-8")
         )
         signing_msg = SigningMessage(
             performative=performative,
+            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=skill_callback_ids,
             terms=terms,
-            skill_callback_info={"dialogue_label": dialogue_label.json},
-            message=terms.sender_hash,
+            skill_callback_info=skill_callback_info,
+            raw_message=raw_message,
         )
+        signing_msg.counterparty = "decision_maker"
         return signing_msg
+
+    def update_confirmed_transactions(self) -> None:
+        """
+        Update model wrt to confirmed transactions.
+
+        :return: None
+        """
+        confirmed_tx_ids = self.context.shared_state.get(
+            "confirmed_tx_ids", []
+        )  # type: List[str]
+        for transaction_id in confirmed_tx_ids:
+            # remove (safely) the associated pending proposal (if present)
+            self._locked_txs.pop(transaction_id, None)
+            self._locked_txs_as_buyer.pop(transaction_id, None)
+            self._locked_txs_as_seller.pop(transaction_id, None)
 
     def cleanup_pending_transactions(self) -> None:
         """
@@ -326,7 +346,9 @@ class Transactions(Model):
             if is_seller
             else list(self._locked_txs_as_buyer.values())
         )
-        ownership_state_after_locks = self.context.decision_maker_handler_context.ownership_state.apply_transactions(
-            signing_msgs
+        terms = [signing_msg.terms for signing_msg in signing_msgs]
+        ownership_state = cast(
+            OwnershipState, self.context.decision_maker_handler_context.ownership_state
         )
+        ownership_state_after_locks = ownership_state.apply_transactions(terms)
         return ownership_state_after_locks

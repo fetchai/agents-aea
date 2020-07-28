@@ -199,6 +199,7 @@ class TestDialogueLabel:
             dialogue_starter_addr="agent 1",
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
+        assert DialogueLabel.from_str(str(self.dialogue_label)) == self.dialogue_label
 
 
 class TestDialogueBase:
@@ -1248,8 +1249,8 @@ class TestDialoguesBase:
         """Positive test for the 'get_dialogue' method: the dialogue is other initiated and the second message is by this agent."""
         initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
-            message_id=2,
-            target=1,
+            message_id=1,
+            target=0,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )

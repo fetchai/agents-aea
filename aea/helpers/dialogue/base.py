@@ -133,6 +133,21 @@ class DialogueLabel:
             self.dialogue_starter_addr,
         )
 
+    @classmethod
+    def from_str(cls, obj: str) -> "DialogueLabel":
+        (
+            dialogue_starter_reference,
+            dialogue_responder_reference,
+            dialogue_opponent_addr,
+            dialogue_starter_addr,
+        ) = obj.split("_")
+        dialogue_label = DialogueLabel(
+            (dialogue_starter_reference, dialogue_responder_reference),
+            dialogue_opponent_addr,
+            dialogue_starter_addr,
+        )
+        return dialogue_label
+
 
 class Dialogue(ABC):
     """The dialogue class maintains state of a dialogue and manages it."""

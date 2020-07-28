@@ -846,9 +846,6 @@ class SOEFChannel:
         now = datetime.datetime.now()
         if now < self._earliest_next_search:
             await asyncio.sleep(1)
-        self._earliest_next_search = datetime.datetime.now() + datetime.timedelta(
-            seconds=1
-        )
 
         response_text = await self._generic_oef_command(
             "find_around_me", {"range_in_km": [str(radius)], **params}
@@ -893,6 +890,9 @@ class SOEFChannel:
             message=message,
         )
         await self.in_queue.put(envelope)
+        self._earliest_next_search = datetime.datetime.now() + datetime.timedelta(
+            seconds=1
+        )
 
 
 class SOEFConnection(Connection):
