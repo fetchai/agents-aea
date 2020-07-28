@@ -965,39 +965,25 @@ class TestSerialisations:
 
 
 class ProtocolGeneratorTestCase(TestCase):
-    """Test case for ProtocolGenerator class."""
+    """Test for generator/base.py."""
 
-    def setUp(self):
-        protocol_specification = mock.Mock()
-        protocol_specification.name = "name"
+    @classmethod
+    def setup_class(cls):
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
 
-    # @mock.patch(
-    #     "aea.protocols.generator.common._get_sub_types_of_compositional_types",
-    #     return_value=["some"],
-    # )
-    # def test__includes_custom_type_positive(self, *mocks):
-    #     """Test _includes_custom_type method positive result."""
-    #     content_type = "pt:union[pt:str]"
-    #     result = not _is_composition_type_with_custom_type(content_type)
-    #     self.assertTrue(result)
-    #
-    #     content_type = "pt:optional[pt:str]"
-    #     result = not _is_composition_type_with_custom_type(content_type)
-    #     self.assertTrue(result)
+    @mock.patch()
+    def test_init_negative(self):
+        """Negative test for the '__init__' method: check_prerequisites fail"""
+        generator = ProtocolGenerator(PATH_TO_T_PROTOCOL, self.t)
 
-    # @mock.patch("aea.protocols.generator._get_indent_str")
-    # @mock.patch(
-    #     "aea.protocols.generator._get_sub_types_of_compositional_types",
-    #     return_value=["Tuple", "FrozenSet"],
-    # )
-    # def test__check_content_type_str_tuple(self, *mocks):
-    #     """Test _check_content_type_str method tuple."""
-    #     no_of_indents = 1
-    #     content_name = "name"
-    #     content_type = (
-    #         "Union[str, Dict[str, int], FrozenSet[DataModel, int], Dict[str, float]]"
-    #     )
-    #     self.protocol_generator._check_content_type_str(
-    #         no_of_indents, content_name, content_type
-    #     )
-    #     # TODO: finish this test
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
