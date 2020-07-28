@@ -182,6 +182,10 @@ func New(opts ...Option) (*DHTClient, error) {
 	return dhtClient, nil
 }
 
+func (dhtClient *DHTClient) reconnectToRelay() {
+
+}
+
 func (dhtClient *DHTClient) setupLogger() {
 	fields := map[string]string{
 		"package": "DHTClient",
@@ -291,6 +295,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 			break
 		}
 	}
+	err = dhtClient.registerAgentAddress()
 	if err != nil {
 		lerror(err).
 			Str("op", "route").
@@ -386,6 +391,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 			break
 		}
 	}
+	err = dhtClient.registerAgentAddress()
 	if err != nil {
 		lerror(err).
 			Str("op", "route").

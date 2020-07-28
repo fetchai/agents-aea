@@ -26,6 +26,8 @@ import time
 
 import pytest
 
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
@@ -104,8 +106,14 @@ class TestLibp2pConnectionRelayNodeRestart:
 
         genesis_peer = cls.genesis.node.multiaddrs[0]
 
+        with open("node_key", "wb") as f:
+            make_crypto(DEFAULT_LEDGER).dump(f)
+            cls.relay_key_path = "node_key"
+
         cls.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2, entry_peers=[genesis_peer]
+            port=DEFAULT_PORT + 2,
+            entry_peers=[genesis_peer],
+            node_key_file=cls.relay_key_path,
         )
         cls.multiplexer_relay = Multiplexer([cls.relay])
         cls.log_files.append(cls.relay.node.log_file)
@@ -170,10 +178,14 @@ class TestLibp2pConnectionRelayNodeRestart:
         self.multiplexer.put(envelope)
         time.sleep(5)
 
-        self.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2, entry_peers=[self.genesis.node.multiaddrs[0]]
+        TestLibp2pConnectionRelayNodeRestart.relay = _make_libp2p_connection(
+            port=DEFAULT_PORT + 2,
+            entry_peers=[self.genesis.node.multiaddrs[0]],
+            node_key_file=self.relay_key_path,
         )
-        self.multiplexer_relay = Multiplexer([self.relay])
+        TestLibp2pConnectionRelayNodeRestart.multiplexer_relay = Multiplexer(
+            [self.relay]
+        )
         self.multiplexer_relay.connect()
 
         delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)

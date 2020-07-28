@@ -12,7 +12,7 @@ fingerprint:
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
   connection.py: QmNwVqRjbsNnxSpoqYmwLKZAw7h3Wfb7hsDomJ82vsKyyT
-  dht/dhtclient/dhtclient.go: QmRY2V2Ts4LknSu64w4Au428WSqfRYsY3PrqWePYVHwaQM
+  dht/dhtclient/dhtclient.go: QmXNjnLBn7qA2nDBFV2djMvWyBHQ1CLss81TeB6P6wSZen
   dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N

@@ -786,6 +786,7 @@ def _make_libp2p_connection(
     entry_peers: Optional[Sequence[MultiAddr]] = None,
     delegate_port: int = 11234,
     delegate_host: str = "127.0.0.1",
+    node_key_file: Optional[str] = None,
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
@@ -794,7 +795,7 @@ def _make_libp2p_connection(
     identity = Identity("", address=crypto.address)
     if relay and delegate:
         configuration = ConnectionConfig(
-            node_key_file=None,
+            node_key_file=node_key_file,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -804,7 +805,7 @@ def _make_libp2p_connection(
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
-            node_key_file=None,
+            node_key_file=node_key_file,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -813,7 +814,7 @@ def _make_libp2p_connection(
         )
     else:
         configuration = ConnectionConfig(
-            node_key_file=None,
+            node_key_file=node_key_file,
             local_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
             log_file=log_file,
