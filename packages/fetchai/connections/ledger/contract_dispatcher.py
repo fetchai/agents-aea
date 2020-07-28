@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the contract API request dispatcher."""
+import inspect
 from typing import Callable, cast
 
 from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
+from aea.exceptions import AEAException
 from aea.helpers.dialogue.base import (
     Dialogue as BaseDialogue,
     DialogueLabel as BaseDialogueLabel,
@@ -135,40 +137,24 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
-        custom_handler_name: str,
         response_builder: Callable[[bytes], ContractApiMessage],
     ) -> ContractApiMessage:
         contract = self.contract_registry.make(message.contract_id)
         try:
-            data = self._get_data(api, message, contract, custom_handler_name)
+            data = _get_data(api, message, contract)
             response = response_builder(data)
             response.counterparty = message.counterparty
             dialogue.update(response)
+        except AEAException as e:
+            self.logger.error(str(e))
+            response = self.get_error_message(e, api, message, dialogue)
         except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+            # TODO add dialogue reference
+            self.logger.error(
+                f"An error occurred while processing the contract api request {str(e)}."
+            )
             response = self.get_error_message(e, api, message, dialogue)
         return response
-
-    def _get_data(
-        self,
-        api: LedgerApi,
-        message: ContractApiMessage,
-        contract: Contract,
-        custom_handler: str,
-    ) -> bytes:
-        # first, check if the custom handler for this type of request has been implemented.
-        try:
-            method: Callable[[LedgerApi, ContractApiMessage], bytes] = getattr(
-                contract, custom_handler
-            )
-            data = method(api, message)
-            return data
-        except NotImplementedError:
-            pass
-
-        # then, check if there is the handler for the provided callable.
-        method_to_call = getattr(contract, message.callable)
-        data = method_to_call(api, **message.kwargs.body)
-        return data
 
     def get_state(
         self,
@@ -194,7 +180,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 state=State(message.ledger_id, data),
             )
 
-        return self._handle_request(api, message, dialogue, "get_state", build_response)
+        return self._handle_request(api, message, dialogue, build_response)
 
     def get_deploy_transaction(
         self,
@@ -220,9 +206,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raw_transaction=RawTransaction(message.ledger_id, tx),
             )
 
-        return self._handle_request(
-            api, message, dialogue, "get_deploy_transaction", build_response
-        )
+        return self._handle_request(api, message, dialogue, build_response)
 
     def get_raw_transaction(
         self,
@@ -248,9 +232,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raw_transaction=RawTransaction(message.ledger_id, tx),
             )
 
-        return self._handle_request(
-            api, message, dialogue, "get_raw_transaction", build_response
-        )
+        return self._handle_request(api, message, dialogue, build_response)
 
     def get_raw_message(
         self,
@@ -276,6 +258,70 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raw_message=RawMessage(message.ledger_id, rm),
             )
 
-        return self._handle_request(
-            api, message, dialogue, "get_raw_message", build_response
+        return self._handle_request(api, message, dialogue, build_response)
+
+
+def _get_data(
+    api: LedgerApi, message: ContractApiMessage, contract: Contract,
+) -> bytes:
+    # first, check if the custom handler for this type of request has been implemented.
+    try:
+        assert message.performative.value in [
+            "get_state",
+            "get_raw_message",
+            "get_raw_transaction",
+            "get_deploy_transaction",
+        ]
+        method: Callable[[LedgerApi, ContractApiMessage], bytes] = getattr(
+            contract, message.performative.value
         )
+        data = method(api, message)
+        return data
+    except NotImplementedError:
+        pass
+
+    # then, check if there is the handler for the provided callable.
+    method_to_call = getattr(contract, message.callable)
+    data = validate_and_call_callable(api, message, method_to_call)
+    return data
+
+
+def validate_and_call_callable(
+    api: LedgerApi, message: ContractApiMessage, method_to_call: Callable
+):
+    """
+    Validate a Contract callable, given the performative.
+
+    In particular:
+    - if the performative is either 'get_state' or 'get_raw_transaction', the signature
+      must accept ledger api as first argument and contract address as second argument,
+      plus keyword arguments.
+    - if the performative is either 'get_deploy_transaction' or 'get_raw_message', the signature
+      must accept ledger api as first argument, plus keyword arguments.
+
+    :param api: the ledger api object.
+    :param message: the contract api request.
+    :param method_to_call: the callable.
+    :return: the data generated by the method.
+    """
+    full_args_spec = inspect.getfullargspec(method_to_call)
+    if message.performative in [
+        ContractApiMessage.Performative.GET_STATE,
+        ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+    ]:
+        if len(full_args_spec.args) < 2:
+            raise AEAException(
+                f"Expected two or more positional arguments, got {len(full_args_spec)}"
+            )
+        return method_to_call(api, message.contract_address, **message.kwargs.body)
+    elif message.performative in [
+        ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+        ContractApiMessage.Performative.GET_RAW_MESSAGE,
+    ]:
+        if len(full_args_spec.args) < 1:
+            raise AEAException(
+                f"Expected one or more positional arguments, got {len(full_args_spec)}"
+            )
+        return method_to_call(api, **message.kwargs.body)
+    else:  # pragma: nocover
+        raise AEAException(f"Unexpected performative: {message.performative}")
