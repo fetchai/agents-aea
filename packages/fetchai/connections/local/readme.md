@@ -1,6 +1,5 @@
 # Local connection
-Simple oef compatible local connection
+OEF compatible local connection for testing purposes only.
 
 ## Usage
-Oef compatible connection to be used for testing, does not interacts with external nodes.
-Does not preserve state on restart.
+OEF compatible connection to be used for testing, does not interact with external nodes. Does not preserve state on restart.

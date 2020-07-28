@@ -1,5 +1,5 @@
-# scaffold connection
-dummy connection template used as a boilerplate for newly created connection
+# Scaffold connection
+The scaffold connection acts as a boilerplate for a newly created connection.
 
 ## Usage
-create a connection with aea scaffold connection command and implement own connection. mind the ipfs hashes!
+Create a scaffold connection with the `aea scaffold connection {NAME}` command and implement your own connection.

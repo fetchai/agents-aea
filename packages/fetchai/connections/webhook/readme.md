@@ -1,5 +1,5 @@
 # Webhook connection
-http webhook connection. one direction connection, only generates messages based on webhook requests received.
+A http webhook connection which registers a webhook and waits for incoming requests. It generates messages based on webhook requests received and forwards them to the agent.
 
 ## Usage
-register webhooks and await for incoming messages with requests sent to webhook selected
+First, add the connection to your AEA project: `aea add connection fetchai/webhook:0.4.0`. Then ensure the `config` in `connection.yaml` matches your need. In particular, set `webhook_address`, `webhook_port` and `webhook_url_path` appropriately.

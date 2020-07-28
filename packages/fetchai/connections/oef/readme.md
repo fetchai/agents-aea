@@ -1,6 +1,5 @@
-# Oef connection
-Connection to deal with oef node within agents. (https://fetchai.github.io/oef-sdk-python/user/introduction.html)
+# OEF connection
+Connection to interact with an OEF node (https://fetchai.github.io/oef-sdk-python/user/introduction.html).
 
 ## Usage
-Register/unregister services, perform searches using oef protocol.
-Also soef connection is implemented tu use simplified oef protocol version.
+Register/unregister services, perform searches using `fetchai/oef_search:0.3.0` protocol and send messages of any protocol to other agents connected to the same node.

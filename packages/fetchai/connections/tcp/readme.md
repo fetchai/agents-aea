@@ -1,5 +1,5 @@
 # TCP client connection
-Simple tcp client connection to deal with tcp protocol
+A simple tcp client and server connection to use the tcp protocol for sending and receiving envelopes.
 
 ## Usage
-Send and receive binary data stream using messages.
+Add the connection to your AEA project: `aea add connection fetchai/tcp:0.5.0`.

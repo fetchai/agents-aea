@@ -1,5 +1,7 @@
 # SOEF connection
-OEF like simplified protocol version connection to register/unregister and perform agents lookups over the external server.
+The SOEF connection is used to connect to an SOEF node. The SOEF provides OEF services of register/unregister and search.
 
 ## Usage
-Register/unregister services, perform searches for agents using soef protocol.
+First, add the connection to your AEA project: `aea add connection fetchai/soef:0.5.0`. Then ensure the `config` in `connection.yaml` matches your need. In particular, make sure `chain_identifier` matches your `default_ledger`.
+
+To register/unregister services and perform searches use the `fetchai/oef_search:0.3.0` protocol
