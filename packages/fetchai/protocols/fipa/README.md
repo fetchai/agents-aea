@@ -10,8 +10,6 @@
 
 **License**: Apache-2.0
 
-**AEA Framework Versions Supported**: 0.5.0 to 0.6.0
-
 ## Description
 
 This is a protocol for two agents to negotiate over a fixed set of resources.
