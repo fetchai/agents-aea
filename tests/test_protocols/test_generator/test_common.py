@@ -22,7 +22,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError  # nosec
 from unittest import TestCase, mock
 
 from aea.protocols.generator.common import (
