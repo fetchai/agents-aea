@@ -1248,8 +1248,8 @@ class TestDialoguesBase:
         """Positive test for the 'get_dialogue' method: the dialogue is other initiated and the second message is by this agent."""
         initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
-            message_id=2,
-            target=1,
+            message_id=1,
+            target=0,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
