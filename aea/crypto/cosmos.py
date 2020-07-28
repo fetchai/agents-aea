@@ -117,17 +117,19 @@ class CosmosCrypto(Crypto[SigningKey]):
         signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
         return signature_base64_str
 
-    def sign_transaction(self, transaction: Any) -> Any:
+    @staticmethod
+    def format_default_transaction(
+        transaction: Any, signature: str, base64_pbk: str
+    ) -> Any:
         """
-        Sign a transaction in bytes string form.
+        Format default CosmosSDK transaction and add signature
 
-        :param transaction: the transaction to be signed
-        :return: signed transaction
+        :param transaction: the transaction to be formatted
+        :param signature: the transaction signature
+        :param base64_pbk: the base64 formatted public key
+
+        :return: formatted transaction with signature
         """
-        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
-        transaction_bytes = transaction_str.encode("utf-8")
-        signed_transaction = self.sign_message(transaction_bytes)
-        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
         pushable_tx = {
             "tx": {
                 "msg": transaction["msgs"],
@@ -135,7 +137,7 @@ class CosmosCrypto(Crypto[SigningKey]):
                 "memo": transaction["memo"],
                 "signatures": [
                     {
-                        "signature": signed_transaction,
+                        "signature": signature,
                         "pub_key": {
                             "type": "tendermint/PubKeySecp256k1",
                             "value": base64_pbk,
@@ -148,6 +150,66 @@ class CosmosCrypto(Crypto[SigningKey]):
             "mode": "async",
         }
         return pushable_tx
+
+    @staticmethod
+    def format_wasm_transaction(
+        transaction: Any, signature: str, base64_pbk: str
+    ) -> Any:
+        """
+        Format CosmWasm transaction and add signature
+
+        :param transaction: the transaction to be formatted
+        :param signature: the transaction signature
+        :param base64_pbk: the base64 formatted public key
+
+        :return: formatted transaction with signature
+        """
+
+        pushable_tx = {
+            "type": "cosmos-sdk/StdTx",
+            "value": {
+                "msg": transaction["msgs"],
+                "fee": transaction["fee"],
+                "signatures": [
+                    {
+                        "pub_key": {
+                            "type": "tendermint/PubKeySecp256k1",
+                            "value": base64_pbk,
+                        },
+                        "signature": signature,
+                    }
+                ],
+                "memo": transaction["memo"],
+            },
+        }
+        return pushable_tx
+
+    def sign_transaction(self, transaction: Any) -> Any:
+        """
+        Sign a transaction in bytes string form.
+
+        :param transaction: the transaction to be signed
+        :return: signed transaction
+        """
+
+        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
+        transaction_bytes = transaction_str.encode("utf-8")
+        signed_transaction = self.sign_message(transaction_bytes)
+        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
+
+        if (
+            "msgs" in transaction
+            and len(transaction["msgs"]) == 1
+            and "type" in transaction["msgs"][0]
+            and "wasm" in transaction["msgs"][0]["type"]
+        ):
+            return self.format_wasm_transaction(
+                transaction, signed_transaction, base64_pbk
+            )
+        else:
+            return self.format_default_transaction(
+                transaction, signed_transaction, base64_pbk
+            )
 
     @classmethod
     def generate_private_key(cls) -> SigningKey:

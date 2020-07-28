@@ -19,7 +19,7 @@
 
 """This module contains the resources class."""
 from contextlib import suppress
-from typing import Dict, List, Optional, cast
+from typing import List, Optional, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -244,28 +244,6 @@ class Resources:
         if skill.models is not None:
             for model in skill.models.values():
                 self._model_registry.register((skill.public_id, model.name), model)
-        self.inject_contracts(skill)
-
-    def inject_contracts(self, skill: Skill) -> None:
-        """
-        Inject contracts into a skill context.
-
-        :param skill: a skill
-        :return: None
-        """
-        if skill.config.contracts is not None:
-            # check all contracts are present
-            contracts = {}  # type: Dict[str, Contract]
-            for contract_id in skill.config.contracts:
-                contract = self._component_registry.fetch(
-                    ComponentId(ComponentType.CONTRACT, contract_id)
-                )
-                if contract is None:
-                    raise ValueError(
-                        "Missing contract for contract id {}".format(contract_id)
-                    )
-                contracts[contract_id.name] = cast(Contract, contract)
-            skill.inject_contracts(contracts)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """

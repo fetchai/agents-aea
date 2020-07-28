@@ -455,10 +455,3 @@ class TestSkill:
         """Test the skill context getter."""
         context = self.skill.skill_context
         assert isinstance(context, SkillContext)
-
-    def test_inject_contracts(self):
-        """Test inject contracts."""
-        assert self.skill.contracts == {}
-        d = {"foo": MagicMock()}
-        self.skill.inject_contracts(d)
-        assert self.skill.contracts == d
