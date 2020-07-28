@@ -10,7 +10,7 @@
 
 **License**: Apache-2.0
 
-**AEA Version**: 0.5.0 - 0.6.0
+**AEA Framework Versions Supported**: 0.5.0 to 0.6.0
 
 ## Description
 
