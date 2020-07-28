@@ -23,8 +23,6 @@ import shutil
 import tempfile
 from unittest import TestCase, mock
 
-import pytest
-
 from aea.configurations.base import ProtocolSpecificationParseError
 from aea.protocols.generator.common import load_protocol_specification
 from aea.protocols.generator.extract_specification import (
@@ -508,31 +506,20 @@ class TestExtractSpecification(TestCase):
         }
 
     @mock.patch(
-        "aea.protocols.generator.validate.validate",
+        "aea.protocols.generator.extract_specification.validate",
         return_value=tuple([False, "Some error!"]),
     )
-    def test_extract_negative_invalid_specification(self, validate_mock):
-        """Negative test the 'extract' method."""
-        pytest.skip("todo")
-        # ToDo complete this test!
+    def test_extract_negative_invalid_specification(self, mocked_validate):
+        """Negative test the 'extract' method: invalid protocol specification"""
         protocol_specification = load_protocol_specification(
             PATH_TO_T_PROTOCOL_SPECIFICATION
         )
 
-        # with mock.patch("aea.protocols.generator.validate.validate") as validate_mock:
-        #     validate_mock.return_value = tuple([False, "some error."])
         with self.assertRaises(ProtocolSpecificationParseError) as cm:
             extract(protocol_specification)
 
-        expected_msg = "some error."
+        expected_msg = "Some error!"
         assert str(cm.exception) == expected_msg
-
-        # try:
-        #     extract(protocol_specification)
-        #     result = True
-        # except ProtocolSpecificationParseError as e:
-        #     result = False
-        # assert not result
 
     @classmethod
     def teardown_class(cls):

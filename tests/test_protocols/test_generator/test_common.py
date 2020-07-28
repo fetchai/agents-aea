@@ -20,7 +20,6 @@
 import logging
 import os
 import shutil
-
 import tempfile
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -37,8 +36,8 @@ from aea.protocols.generator.common import (
     _to_camel_case,
     _union_sub_type_to_protobuf_variable_name,
     check_prerequisites,
-    is_installed,
     check_protobuf_using_protoc,
+    is_installed,
     load_protocol_specification,
     try_run_black_formatting,
     try_run_protoc,
@@ -51,6 +50,14 @@ from tests.test_protocols.test_generator.common import (
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
+
+
+def black_is_not_installed_side_effect(*args, **kwargs):
+    return not args[0] == "black"
+
+
+def protoc_is_not_installed_side_effect(*args, **kwargs):
+    return not args[0] == "protoc"
 
 
 class TestCommon(TestCase):
@@ -338,26 +345,24 @@ class TestCommon(TestCase):
         except FileNotFoundError:
             self.assertTrue(False)
 
-    def black_is_not_installed(*args, **kwargs):
-        if args[0] == "black":
-            return False
-        else:
-            return True
-
-    @mock.patch("aea.protocols.generator.common.is_installed", side_effect=black_is_not_installed)
-    def test_check_prerequisites_negative_black_is_not_installed(self, mocked_is_installed):
+    @mock.patch(
+        "aea.protocols.generator.common.is_installed",
+        side_effect=black_is_not_installed_side_effect,
+    )
+    def test_check_prerequisites_negative_black_is_not_installed(
+        self, mocked_is_installed
+    ):
         """Negative test for the 'check_prerequisites' method: black isn't installed"""
         with self.assertRaises(FileNotFoundError):
             check_prerequisites()
 
-    def protoc_is_not_installed(*args, **kwargs):
-        if args[0] == "protoc":
-            return False
-        else:
-            return True
-
-    @mock.patch("aea.protocols.generator.common.is_installed", side_effect=protoc_is_not_installed)
-    def test_check_prerequisites_negative_protoc_is_not_installed(self, mocked_is_installed):
+    @mock.patch(
+        "aea.protocols.generator.common.is_installed",
+        side_effect=protoc_is_not_installed_side_effect,
+    )
+    def test_check_prerequisites_negative_protoc_is_not_installed(
+        self, mocked_is_installed
+    ):
         """Negative test for the 'check_prerequisites' method: protoc isn't installed"""
         with self.assertRaises(FileNotFoundError):
             check_prerequisites()
@@ -400,12 +405,23 @@ class TestCommon(TestCase):
     @mock.patch("aea.protocols.generator.common.try_run_protoc")
     def test_check_protobuf_using_protoc_positive(self, mocked_try_run_protoc):
         """Positive test for the 'check_protobuf_using_protoc' method"""
-        # ToDo
-        result, msg = check_protobuf_using_protoc("some_path", "name")
-        assert result is False
-        assert msg == "some_protoc_error"
+        protocol_name = "protocol_name"
+        file_name = protocol_name + "_pb2.py"
 
-    @mock.patch("subprocess.run", side_effect=CalledProcessError(1, "some_command", stderr="name.proto:12:45: some_protoc_error\n"))
+        new_file = open(os.path.join(self.t, file_name), "w+")
+        new_file.close()
+        result, msg = check_protobuf_using_protoc(self.t, protocol_name)
+
+        assert not Path(self.t, file_name).exists()
+        assert result is True
+        assert msg == "protobuf file is valid"
+
+    @mock.patch(
+        "subprocess.run",
+        side_effect=CalledProcessError(
+            1, "some_command", stderr="name.proto:12:45: some_protoc_error\n"
+        ),
+    )
     def test_check_protobuf_using_protoc_nagative(self, mocked_subprocess):
         """Negative test for the 'check_protobuf_using_protoc' method: protoc has some errors"""
         result, msg = check_protobuf_using_protoc("some_path", "name")

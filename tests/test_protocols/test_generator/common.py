@@ -28,3 +28,7 @@ PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
 PATH_TO_T_PROTOCOL = os.path.join(
     ROOT_DIR, "tests", "data", "generator", T_PROTOCOL_NAME
 )
+
+
+def black_is_not_installed(*args, **kwargs):
+    return not args[0] == "black"
