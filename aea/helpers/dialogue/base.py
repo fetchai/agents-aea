@@ -827,10 +827,9 @@ class Dialogues(ABC):
             self._update_self_initiated_dialogue_label_on_second_message(message)
             dialogue = self.get_dialogue(message)
 
-        if dialogue is not None:
-            dialogue.update(message)
+        if dialogue is not None and dialogue.update(message):
             result = dialogue  # type: Optional[Dialogue]
-        else:  # couldn't find the dialogue
+        else:  # couldn't find the dialogue or invalid message
             result = None
 
         return result
