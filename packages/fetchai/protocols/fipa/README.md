@@ -12,11 +12,12 @@
 
 **AEA Version**: 0.5.0 - 0.6.0
 
-##Description
+## Description
 
 This is a protocol for negotiating over a fixed set of resources.
 
-##Specification
+## Specification
+
 ```yaml
 ---
 name: fipa
@@ -69,7 +70,7 @@ end_states: [successful, declined_cfp, declined_propose, declined_accept]
 ...
 ```
 
-##Links
+## Links
 
 * <a href="http://www.fipa.org" target=_blank>FIPA Foundation</a>
 * <a href="#" target=_blank>Report</a>
