@@ -22,7 +22,9 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import TestCase
+from unittest import TestCase, mock
+
+import pytest
 
 from aea.protocols.generator.common import (
     _camel_case_to_snake_case,
@@ -34,6 +36,8 @@ from aea.protocols.generator.common import (
     _python_pt_or_ct_type_to_proto_type,
     _to_camel_case,
     _union_sub_type_to_protobuf_variable_name,
+    check_prerequisites,
+    is_installed,
     load_protocol_specification,
 )
 
@@ -313,15 +317,31 @@ class TestCommon(TestCase):
         )
         assert _includes_custom_type(content_type_not_includes_3) is False
 
-    def test_is_installed(self,):
-        """Test the 'is_installed' method"""
-        # ToDo
-        pass
+    @mock.patch("shutil.which", return_value="some string")
+    def test_is_installed_positive(self, mocked_shutil_which):
+        """Positive test for the 'is_installed' method"""
+        assert is_installed("some_programme") is True
 
-    def test_check_prerequisites(self,):
-        """Test the 'check_prerequisites' method"""
-        # ToDo
-        pass
+    @mock.patch("shutil.which", return_value=None)
+    def test_is_installed_negative(self, mocked_shutil_which):
+        """Negative test for the 'is_installed' method"""
+        assert is_installed("some_programme") is False
+
+    @mock.patch("aea.protocols.generator.common.is_installed", return_value="True")
+    def test_check_prerequisites_positive(self, mocked_is_installed):
+        """Positive test for the 'check_prerequisites' method"""
+        try:
+            check_prerequisites()
+        except FileNotFoundError:
+            self.assertTrue(False)
+
+    @mock.patch("aea.protocols.generator.common.is_installed", return_value="False")
+    def test_check_prerequisites_negative(self):
+        """Negative test for the 'check_prerequisites' method: something isn't installed"""
+        pytest.skip("todo")
+        # ToDo Complete!
+        with self.assertRaises(FileNotFoundError):
+            check_prerequisites()
 
     def test_load_protocol_specification(self,):
         """Test the 'load_protocol_specification' method"""
