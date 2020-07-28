@@ -8,9 +8,9 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmfMvpqjhfS69h9FzkKBVEyMGwy7eqsCd8bjkhWoEQifei
-  dialogues.py: QmZadrW961YwRQuDveoSFSVA7NjVVh2ZuvmbyRke2EqseF
-  game.py: Qmcx13KYkLFJnhKA9sS8nY7eExpdCp6PdpFn3tDuUHtni7
-  handlers.py: QmZnQFPzhDH2ucgfpF2taauZYwFJHQVm5qP4c9c4riF2rX
+  dialogues.py: QmW5z6Djo4ekZTPGevgmb9MmCUDFHyNZmBbdgi1euu47iV
+  game.py: QmVudLRDif5sawxRMmTPzdVhABk1Q3sGNmctNgs2c1QqSJ
+  handlers.py: QmeADWZMubybUmHY9kpTwJemUNTrvT8hYE2S6VbVr2pN6V
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -42,9 +42,11 @@ models:
       location:
         latitude: 0.127
         longitude: 51.5194
-      service_data:
-        key: tac
-        value: v1
+      search_query:
+        constraint_type: ==
+        search_key: tac
+        search_value: v1
+      search_radius: 5.0
     class_name: Game
   oef_search_dialogues:
     args: {}
@@ -52,6 +54,9 @@ models:
   signing_dialogues:
     args: {}
     class_name: SigningDialogues
+  state_update_dialogues:
+    args: {}
+    class_name: StateUpdateDialogues
   tac_dialogues:
     args: {}
     class_name: TacDialogues

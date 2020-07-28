@@ -172,6 +172,15 @@ aea config set agent.default_ledger cosmos
 </p>
 </details>
 
+### Add keys for all AEAs
+
+Create the private key for the AEA for Fetch.ai `AgentLand`:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
+```
+
 ### Update the game parameters in the controller
 
 Navigate to the tac controller project, then use the command line to get and set the start time (set it to at least two minutes in the future):
@@ -180,6 +189,38 @@ Navigate to the tac controller project, then use the command line to get and set
 aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
 ```
+
+### Update the connection params
+
+Briefly run the controller AEA:
+
+``` bash
+aea run
+```
+
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
+Then, update the configuration of the weather client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11002
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9002
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9002
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
 
 ### Run the AEAs
 

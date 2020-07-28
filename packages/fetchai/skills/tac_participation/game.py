@@ -26,7 +26,10 @@ from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_participation.dialogues import TacDialogue
+from packages.fetchai.skills.tac_participation.dialogues import (
+    StateUpdateDialogue,
+    TacDialogue,
+)
 
 DEFAULT_LEDGER_ID = "ethereum"
 
@@ -190,6 +193,7 @@ class Game(Model):
         self._conf = None  # type: Optional[Configuration]
         self._contract_address = None  # type: Optional[str]
         self._tac_dialogue = None  # type: Optional[TacDialogue]
+        self._state_update_dialogue = None  # type: Optional[StateUpdateDialogue]
 
     @property
     def ledger_id(self) -> str:
@@ -234,6 +238,18 @@ class Game(Model):
         """Set the tac dialogue."""
         assert self._tac_dialogue is None, "TacDialogue already set!"
         self._tac_dialogue = tac_dialogue
+
+    @property
+    def state_update_dialogue(self) -> StateUpdateDialogue:
+        """Retrieve the state_update dialogue."""
+        assert self._state_update_dialogue is not None, "StateUpdateDialogue not set!"
+        return self._state_update_dialogue
+
+    @state_update_dialogue.setter
+    def state_update_dialogue(self, state_update_dialogue: StateUpdateDialogue) -> None:
+        """Set the state_update dialogue."""
+        assert self._state_update_dialogue is None, "StateUpdateDialogue already set!"
+        self._state_update_dialogue = state_update_dialogue
 
     @property
     def expected_controller_addr(self) -> Address:

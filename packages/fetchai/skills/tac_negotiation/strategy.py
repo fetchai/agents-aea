@@ -22,9 +22,20 @@
 import copy
 import random
 from enum import Enum
-from typing import Dict, Optional, cast
+from typing import Dict, List, Optional, Tuple, cast
 
-from aea.helpers.search.models import Description, Query
+from aea.helpers.search.generic import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
+)
+from aea.helpers.search.models import (
+    Constraint,
+    ConstraintType,
+    Description,
+    Location,
+    Query,
+)
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
@@ -37,6 +48,14 @@ from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 
 ROUNDING_ADJUSTMENT = 1
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SERVICE_KEY = "tac_service"
+DEFAULT_SEARCH_QUERY = {
+    "search_key": "tac_service",
+    "search_value": "generic_service",
+    "constraint_type": "==",
+}
+DEFAULT_SEARCH_RADIUS = 5.0
 
 
 class Strategy(Model):
@@ -69,39 +88,82 @@ class Strategy(Model):
         self._search_for = Strategy.SearchFor(kwargs.pop("search_for", "both"))
         self._is_contract_tx = kwargs.pop("is_contract_tx", False)
         self._ledger_id = kwargs.pop("ledger_id", "ethereum")
+
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = {
+            "location": Location(location["longitude"], location["latitude"])
+        }
+        service_key = kwargs.pop("service_key", DEFAULT_SERVICE_KEY)
+        self._set_service_data = {"key": service_key, "value": self._register_as.value}
+        self._remove_service_data = {"key": service_key}
+        self._simple_service_data = {service_key: self._register_as.value}
+        self._search_query = {
+            "search_key": service_key,
+            "search_value": self._search_for.value,
+            "constraint_type": "==",
+        }
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+
         super().__init__(**kwargs)
 
     @property
-    def is_registering_as_seller(self) -> bool:
-        """Check if the agent registers as a seller on the OEF service directory."""
+    def registering_as(self) -> str:
+        """Get what the agent is registering as."""
         return (
-            self._register_as == Strategy.RegisterAs.SELLER
-            or self._register_as == Strategy.RegisterAs.BUYER
+            self._register_as.value
+            if self._register_as != self.RegisterAs.BOTH
+            else "buyer and seller"
         )
 
     @property
-    def is_searching_for_sellers(self) -> bool:
-        """Check if the agent searches for sellers on the OEF service directory."""
+    def searching_for(self) -> str:
+        """Get what the agent is searching for."""
         return (
-            self._search_for == Strategy.SearchFor.SELLERS
-            or self._search_for == Strategy.SearchFor.BOTH
+            self._search_for.value
+            if self._search_for != self.SearchFor.BOTH
+            else "buyer and seller"
         )
 
     @property
-    def is_registering_as_buyer(self) -> bool:
-        """Check if the agent registers as a buyer on the OEF service directory."""
-        return (
-            self._register_as == Strategy.RegisterAs.BUYER
-            or self._register_as == Strategy.RegisterAs.BOTH
-        )
+    def searching_for_types(self) -> List[Tuple[bool, str]]:
+        result = []  # type: List[Tuple[bool, str]]
+        if self._search_for in [self.SearchFor.SELLERS, self.SearchFor.BOTH]:
+            result.append((True, "sellers"))
+        if self._search_for in [self.SearchFor.BUYERS, self.SearchFor.BOTH]:
+            result.append((False, "buyers"))
+        return result
 
-    @property
-    def is_searching_for_buyers(self) -> bool:
-        """Check if the agent searches for buyers on the OEF service directory."""
-        return (
-            self._search_for == Strategy.SearchFor.BUYERS
-            or self._search_for == Strategy.SearchFor.BOTH
-        )
+    # @property
+    # def is_registering_as_seller(self) -> bool:
+    #     """Check if the agent registers as a seller on the OEF service directory."""
+    #     return (
+    #         self._register_as == Strategy.RegisterAs.SELLER
+    #         or self._register_as == Strategy.RegisterAs.BUYER
+    #     )
+
+    # @property
+    # def is_searching_for_sellers(self) -> bool:
+    #     """Check if the agent searches for sellers on the OEF service directory."""
+    #     return (
+    #         self._search_for == Strategy.SearchFor.SELLERS
+    #         or self._search_for == Strategy.SearchFor.BOTH
+    #     )
+
+    # @property
+    # def is_registering_as_buyer(self) -> bool:
+    #     """Check if the agent registers as a buyer on the OEF service directory."""
+    #     return (
+    #         self._register_as == Strategy.RegisterAs.BUYER
+    #         or self._register_as == Strategy.RegisterAs.BOTH
+    #     )
+
+    # @property
+    # def is_searching_for_buyers(self) -> bool:
+    #     """Check if the agent searches for buyers on the OEF service directory."""
+    #     return (
+    #         self._search_for == Strategy.SearchFor.BUYERS
+    #         or self._search_for == Strategy.SearchFor.BOTH
+    #     )
 
     @property
     def is_contract_tx(self) -> bool:
@@ -113,32 +175,84 @@ class Strategy(Model):
         """Get the ledger id."""
         return self._ledger_id
 
-    def get_own_service_description(
-        self, is_supply: bool, is_search_description: bool
-    ) -> Description:
+    def get_location_description(self) -> Description:
+        """
+        Get the location description.
+
+        :return: a description of the agent's location
+        """
+        description = Description(
+            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+        )
+        return description
+
+    def get_register_service_description(self) -> Description:
+        """
+        Get the register service description.
+
+        :return: a description of the offered services
+        """
+        description = Description(
+            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_unregister_service_description(self) -> Description:
+        """
+        Get the unregister service description.
+
+        :return: a description of the to be removed service
+        """
+        description = Description(
+            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+        )
+        return description
+
+    def get_location_and_service_query(self) -> Query:
+        """
+        Get the location and service query of the agent.
+
+        :return: the query
+        """
+        close_to_my_service = Constraint(
+            "location",
+            ConstraintType(
+                "distance", (self._agent_location["location"], self._radius)
+            ),
+        )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
+        return query
+
+    def get_own_service_description(self, is_supply: bool) -> Description:
         """
         Get the description of the supplied goods (as a seller), or the demanded goods (as a buyer).
-
         :param is_supply: Boolean indicating whether it is supply or demand.
-        :param is_search_description: whether or not the description is for search.
-
         :return: the description (to advertise on the Service Directory).
         """
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller=is_supply
         )
-        good_id_to_quantities = (
+        quantities_by_good_id = (
             self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
             if is_supply
             else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
         )
-        currency_id = list(ownership_state_after_locks.amount_by_currency_id.keys())[0]
+        currency_id = next(
+            iter(ownership_state_after_locks.amount_by_currency_id.keys())
+        )
         desc = build_goods_description(
-            good_id_to_quantities=good_id_to_quantities,
+            quantities_by_good_id=quantities_by_good_id,
             currency_id=currency_id,
+            ledger_id=self.ledger_id,
             is_supply=is_supply,
-            is_search_description=is_search_description,
         )
         return desc
 
@@ -168,9 +282,7 @@ class Strategy(Model):
             demand[good_id] = 1
         return demand
 
-    def get_own_services_query(
-        self, is_searching_for_sellers: bool, is_search_query: bool
-    ) -> Query:
+    def get_own_services_query(self, is_searching_for_sellers: bool,) -> Query:
         """
         Build a query.
 
@@ -179,7 +291,6 @@ class Strategy(Model):
             - which demand the agent's supplied goods (i.e. buyers).
 
         :param is_searching_for_sellers: Boolean indicating whether the search is for sellers or buyers.
-        :param is_search_query: whether or not the query is used for search on OEF
 
         :return: the Query, or None.
         """
@@ -192,12 +303,14 @@ class Strategy(Model):
             if is_searching_for_sellers
             else self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
         )
-        currency_id = list(ownership_state_after_locks.amount_by_currency_id.keys())[0]
+        currency_id = next(
+            iter(ownership_state_after_locks.amount_by_currency_id.keys())
+        )
         query = build_goods_query(
             good_ids=list(good_id_to_quantities.keys()),
             currency_id=currency_id,
+            ledger_id=self.ledger_id,
             is_searching_for_sellers=is_searching_for_sellers,
-            is_search_query=is_search_query,
         )
         return query
 
@@ -236,9 +349,7 @@ class Strategy(Model):
         """
         is_seller = role == FipaDialogue.Role.SELLER
 
-        own_service_description = self.get_own_service_description(
-            is_supply=is_seller, is_search_description=False
-        )
+        own_service_description = self.get_own_service_description(is_supply=is_seller,)
         if not query.check(own_service_description):
             self.context.logger.debug("current holdings do not satisfy CFP query.")
             return None
@@ -273,12 +384,8 @@ class Strategy(Model):
             good_id: 0 for good_id in good_id_to_quantities.keys()
         }  # type: Dict[str, int]
         proposals = []
-        seller_tx_fee = (
-            self.context.decision_maker_handler_context.preferences.seller_transaction_fee
-        )
-        buyer_tx_fee = (
-            self.context.decision_maker_handler_context.preferences.buyer_transaction_fee
-        )
+        fee_by_currency_id = self.context.shared_state.get("tx_fee", {"FET": 0})
+        buyer_tx_fee = next(iter(fee_by_currency_id.values()))
         currency_id = list(
             self.context.decision_maker_handler_context.ownership_state.amount_by_currency_id.keys()
         )[0]
@@ -288,10 +395,10 @@ class Strategy(Model):
             proposal_dict = copy.copy(nil_proposal_dict)
             proposal_dict[good_id] = 1
             proposal = build_goods_description(
-                good_id_to_quantities=proposal_dict,
+                quantities_by_good_id=proposal_dict,
                 currency_id=currency_id,
+                ledger_id=self.ledger_id,
                 is_supply=is_seller,
-                is_search_description=False,
             )
             if is_seller:
                 delta_quantities_by_good_id = {
@@ -309,24 +416,21 @@ class Strategy(Model):
                 round(marginal_utility_from_delta_good_holdings) * switch
             )
             if is_seller:
-                proposal.values["price"] = (
-                    breakeven_price_rounded + seller_tx_fee + ROUNDING_ADJUSTMENT
-                )
+                proposal.values["price"] = breakeven_price_rounded + ROUNDING_ADJUSTMENT
             else:
                 proposal.values["price"] = (
                     breakeven_price_rounded - buyer_tx_fee - ROUNDING_ADJUSTMENT
                 )
-            proposal.values["seller_tx_fee"] = seller_tx_fee
-            proposal.values["buyer_tx_fee"] = buyer_tx_fee
+            proposal.values["fee"] = buyer_tx_fee
             if not proposal.values["price"] > 0:
                 continue
-            tx_nonce = transactions.get_next_tx_nonce()
-            proposal.values["tx_nonce"] = tx_nonce
+            nonce = transactions.get_next_nonce()
+            proposal.values["nonce"] = nonce
             proposals.append(proposal)
         return proposals
 
     def is_profitable_transaction(
-        self, transaction_msg: SigningMessage, role: FipaDialogue.Role
+        self, signing_msg: SigningMessage, role: FipaDialogue.Role
     ) -> bool:
         """
         Check if a transaction is profitable.
@@ -336,7 +440,7 @@ class Strategy(Model):
         - check if the transaction is consistent with the locks (enough money/holdings)
         - check that we gain score.
 
-        :param transaction_msg: the transaction_msg
+        :param signing_msg: the signing_msg
         :param role: the role of the agent (seller or buyer)
 
         :return: True if the transaction is good (as stated above), False otherwise.
@@ -347,12 +451,10 @@ class Strategy(Model):
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
         )
-        if not ownership_state_after_locks.is_affordable_transaction(
-            transaction_msg.terms
-        ):
+        if not ownership_state_after_locks.is_affordable_transaction(signing_msg.terms):
             return False
         proposal_delta_score = self.context.decision_maker_handler_context.preferences.utility_diff_from_transaction(
-            ownership_state_after_locks, transaction_msg
+            ownership_state_after_locks, signing_msg
         )
         if proposal_delta_score >= 0:
             return True

@@ -41,7 +41,6 @@ from packages.fetchai.skills.tac_negotiation.dialogues import (
     SigningDialogue,
     SigningDialogues,
 )
-from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
@@ -69,8 +68,8 @@ class FipaNegotiationHandler(Handler):
         fipa_msg = cast(FipaMessage, message)
 
         # recover dialogue
-        dialogues = cast(FipaDialogues, self.context.dialogues)
-        fipa_dialogue = cast(FipaDialogue, dialogues.update(fipa_msg))
+        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+        fipa_dialogue = cast(FipaDialogue, fipa_dialogues.update(fipa_msg))
         if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
@@ -158,13 +157,13 @@ class FipaNegotiationHandler(Handler):
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=cfp.message_id,
             )
-            dialogues = cast(FipaDialogues, self.context.dialogues)
-            dialogues.dialogue_stats.add_dialogue_endstate(
+            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated
             )
         else:
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.generate_transaction_message(
+            signing_msg = transactions.generate_signing_message(
                 SigningMessage.Performative.SIGN_MESSAGE,
                 proposal_description,
                 dialogue.dialogue_label,
@@ -172,7 +171,7 @@ class FipaNegotiationHandler(Handler):
                 self.context.agent_address,
             )
             transactions.add_pending_proposal(
-                dialogue.dialogue_label, new_msg_id, transaction_msg
+                dialogue.dialogue_label, new_msg_id, signing_msg
             )
             self.context.logger.info(
                 "sending to {} a Propose {}".format(
@@ -214,7 +213,7 @@ class FipaNegotiationHandler(Handler):
         proposal_description = propose.proposal
         self.context.logger.debug("on Propose as {}.".format(dialogue.role))
         transactions = cast(Transactions, self.context.transactions)
-        transaction_msg = transactions.generate_transaction_message(
+        signing_msg = transactions.generate_signing_message(
             SigningMessage.Performative.SIGN_MESSAGE,
             proposal_description,
             dialogue.dialogue_label,
@@ -223,14 +222,14 @@ class FipaNegotiationHandler(Handler):
         )
 
         if strategy.is_profitable_transaction(
-            transaction_msg, role=cast(FipaDialogue.Role, dialogue.role)
+            signing_msg, role=cast(FipaDialogue.Role, dialogue.role)
         ):
             self.context.logger.info("accepting propose (as {}).".format(dialogue.role))
             transactions.add_locked_tx(
-                transaction_msg, role=cast(FipaDialogue.Role, dialogue.role)
+                signing_msg, role=cast(FipaDialogue.Role, dialogue.role)
             )
             transactions.add_pending_initial_acceptance(
-                dialogue.dialogue_label, new_msg_id, transaction_msg
+                dialogue.dialogue_label, new_msg_id, signing_msg
             )
             fipa_msg = FipaMessage(
                 performative=FipaMessage.Performative.ACCEPT,
@@ -246,8 +245,8 @@ class FipaNegotiationHandler(Handler):
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=propose.message_id,
             )
-            dialogues = cast(FipaDialogues, self.context.dialogues)
-            dialogues.dialogue_stats.add_dialogue_endstate(
+            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated
             )
         fipa_msg.counterparty = propose.counterparty
@@ -271,29 +270,29 @@ class FipaNegotiationHandler(Handler):
             )
         )
         target = decline.target
-        dialogues = cast(FipaDialogues, self.context.dialogues)
+        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
 
         if target == 1:
-            dialogues.dialogue_stats.add_dialogue_endstate(
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated
             )
         elif target == 2:
-            dialogues.dialogue_stats.add_dialogue_endstate(
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated
             )
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.pop_pending_proposal(
+            signing_msg = transactions.pop_pending_proposal(
                 dialogue.dialogue_label, target
             )
         elif target == 3:
-            dialogues.dialogue_stats.add_dialogue_endstate(
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated
             )
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.pop_pending_initial_acceptance(
+            signing_msg = transactions.pop_pending_initial_acceptance(
                 dialogue.dialogue_label, target
             )
-            transactions.pop_locked_tx(transaction_msg)
+            transactions.pop_locked_tx(signing_msg)
 
     def _on_accept(self, accept: FipaMessage, dialogue: FipaDialogue) -> None:
         """
@@ -313,19 +312,19 @@ class FipaNegotiationHandler(Handler):
         )
         new_msg_id = accept.message_id + 1
         transactions = cast(Transactions, self.context.transactions)
-        transaction_msg = transactions.pop_pending_proposal(
+        signing_msg = transactions.pop_pending_proposal(
             dialogue.dialogue_label, accept.target
         )
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_profitable_transaction(
-            transaction_msg, role=cast(FipaDialogue.Role, dialogue.role)
+            signing_msg, role=cast(FipaDialogue.Role, dialogue.role)
         ):
             self.context.logger.info(
                 "locking the current state (as {}).".format(dialogue.role)
             )
             transactions.add_locked_tx(
-                transaction_msg, role=cast(FipaDialogue.Role, dialogue.role)
+                signing_msg, role=cast(FipaDialogue.Role, dialogue.role)
             )
             if strategy.is_contract_tx:
                 pass
@@ -376,9 +375,9 @@ class FipaNegotiationHandler(Handler):
                 #     },
                 # )
             self.context.logger.info(
-                "sending tx_message={} to decison maker.".format(transaction_msg)
+                "sending tx_message={} to decison maker.".format(signing_msg)
             )
-            self.context.decision_maker_message_queue.put(transaction_msg)
+            self.context.decision_maker_message_queue.put(signing_msg)
         else:
             self.context.logger.debug(
                 "decline the Accept (as {}).".format(dialogue.role)
@@ -391,7 +390,7 @@ class FipaNegotiationHandler(Handler):
             )
             fipa_msg.counterparty = accept.counterparty
             dialogue.update(fipa_msg)
-            dialogues = cast(FipaDialogues, self.context.dialogues)
+            dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated
             )
@@ -419,7 +418,7 @@ class FipaNegotiationHandler(Handler):
             match_accept.info.get("tx_id") is not None
         ):
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.pop_pending_initial_acceptance(
+            signing_msg = transactions.pop_pending_initial_acceptance(
                 dialogue.dialogue_label, match_accept.target
             )
             strategy = cast(Strategy, self.context.strategy)
@@ -480,14 +479,14 @@ class FipaNegotiationHandler(Handler):
                 #     },
                 # )
             else:
-                transaction_msg.set(
+                signing_msg.set(
                     "skill_callback_ids",
                     [PublicId.from_str("fetchai/tac_participation:0.5.0")],
                 )
-                transaction_msg.set(
+                signing_msg.set(
                     "skill_callback_info",
                     {
-                        **transaction_msg.skill_callback_info,
+                        **signing_msg.skill_callback_info,
                         **{
                             "tx_counterparty_signature": match_accept.info.get(
                                 "tx_signature"
@@ -497,9 +496,9 @@ class FipaNegotiationHandler(Handler):
                     },
                 )
             self.context.logger.info(
-                "sending tx_message={} to decison maker.".format(transaction_msg)
+                "sending tx_message={} to decison maker.".format(signing_msg)
             )
-            self.context.decision_maker_message_queue.put(transaction_msg)
+            self.context.decision_maker_message_queue.put(signing_msg)
         else:
             self.context.logger.warning(
                 "match_accept did not contain tx_signature and tx_id!"
@@ -580,8 +579,8 @@ class SigningHandler(Handler):
         dialogue_label = DialogueLabel.from_json(
             cast(Dict[str, str], signing_msg.skill_callback_info.get("dialogue_label"))
         )
-        dialogues = cast(FipaDialogues, self.context.dialogues)
-        dialogue = dialogues.dialogues[dialogue_label]
+        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+        dialogue = fipa_dialogues.dialogues[dialogue_label]
         last_fipa_message = cast(FipaMessage, dialogue.last_incoming_message)
         if (
             last_fipa_message is not None
@@ -785,18 +784,14 @@ class OefSearchHandler(Handler):
         """
         agents = list(oef_search_msg.agents)
         search_id = int(oef_search_msg.dialogue_reference[0])
-        search = cast(Search, self.context.search)
         if self.context.agent_address in agents:
             agents.remove(self.context.agent_address)
         agents_less_self = tuple(agents)
-        if search_id in search.ids_for_sellers:
-            self._handle_search(
-                agents_less_self, search_id, is_searching_for_sellers=True
-            )
-        elif search_id in search.ids_for_buyers:
-            self._handle_search(
-                agents_less_self, search_id, is_searching_for_sellers=False
-            )
+        self._handle_search(
+            agents_less_self,
+            search_id,
+            is_searching_for_sellers=oef_search_dialogue.is_seller_search,
+        )
 
     def _handle_search(
         self, agents: Tuple[str, ...], search_id: int, is_searching_for_sellers: bool
@@ -816,22 +811,20 @@ class OefSearchHandler(Handler):
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
-            dialogues = cast(FipaDialogues, self.context.dialogues)
-            query = strategy.get_own_services_query(
-                is_searching_for_sellers, is_search_query=False
-            )
+            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+            query = strategy.get_own_services_query(is_searching_for_sellers)
 
             for opponent_addr in agents:
                 self.context.logger.info(
                     "sending CFP to agent={}".format(opponent_addr[-5:])
                 )
                 fipa_msg = FipaMessage(
-                    dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
+                    dialogue_reference=fipa_dialogues.new_self_initiated_dialogue_reference(),
                     performative=FipaMessage.Performative.CFP,
                     query=query,
                 )
                 fipa_msg.counterparty = opponent_addr
-                dialogues.update(fipa_msg)
+                fipa_dialogues.update(fipa_msg)
                 self.context.outbox.put_message(message=fipa_msg)
         else:
             self.context.logger.info(

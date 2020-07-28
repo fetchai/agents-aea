@@ -20,6 +20,7 @@
 
 import asyncio
 import copy
+import datetime
 import logging
 from asyncio import CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -213,6 +214,7 @@ class SOEFChannel:
         self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
+        self._earliest_next_search = datetime.datetime.now()
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -840,6 +842,13 @@ class SOEFChannel:
         """
         assert self.in_queue is not None, "Inqueue not set!"
         logger.debug("Searching in radius={} of myself".format(radius))
+
+        now = datetime.datetime.now()
+        if now < self._earliest_next_search:
+            await asyncio.sleep(1)
+        self._earliest_next_search = datetime.datetime.now() + datetime.timedelta(
+            seconds=1
+        )
 
         response_text = await self._generic_oef_command(
             "find_around_me", {"range_in_km": [str(radius)], **params}

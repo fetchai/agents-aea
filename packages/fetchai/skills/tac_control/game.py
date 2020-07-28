@@ -108,9 +108,9 @@ class Configuration:
         return self._version_id
 
     @property
-    def tx_fee(self) -> int:
+    def fee_by_currency_id(self) -> Dict[str, int]:
         """Transaction fee for the TAC instance."""
-        return self._tx_fee
+        return {next(iter(self.currency_id_to_name.keys())): self._tx_fee}
 
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
@@ -135,7 +135,7 @@ class Configuration:
         :raises: AssertionError: if some constraint is not satisfied.
         """
         assert self.version_id is not None, "A version id must be set."
-        assert self.tx_fee >= 0, "Tx fee must be non-negative."
+        assert self._tx_fee >= 0, "Tx fee must be non-negative."
         assert len(self.agent_addr_to_name) >= 2, "Must have at least two agents."
         assert len(self.good_id_to_name) >= 2, "Must have at least two goods."
         assert len(self.currency_id_to_name) == 1, "Must have exactly one currency."

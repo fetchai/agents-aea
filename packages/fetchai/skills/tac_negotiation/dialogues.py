@@ -23,9 +23,10 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import cast
+from typing import Optional, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel
+from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
@@ -96,7 +97,40 @@ class FipaDialogues(Model, BaseFipaDialogues):
         return role
 
 
-OefSearchDialogue = BaseOefSearchDialogue
+class OefSearchDialogue(BaseOefSearchDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: Dialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseOefSearchDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self._is_seller_search = None  # type: Optional[bool]
+
+    @property
+    def is_seller_search(self) -> bool:
+        """Get if it is a seller search."""
+        assert self._is_seller_search is not None, "is_seller_search not set!"
+        return self._is_seller_search
+
+    @is_seller_search.setter
+    def is_seller_search(self, is_seller_search: bool) -> None:
+        """Set is_seller_search."""
+        assert self._is_seller_search is None, "is_seller_search already set!"
+        self._is_seller_search = is_seller_search
 
 
 class OefSearchDialogues(Model, BaseOefSearchDialogues):

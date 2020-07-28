@@ -7,28 +7,28 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
-  behaviours.py: Qmembb4bL9BqWsHy4m97qSpuQpQ6FzG8DQPDzSUrqF9cir
-  dialogues.py: QmagBqNj5rJJsciQY1yMCpz7bZbipW8hSGUTn3npog36gr
-  handlers.py: QmcrSwQ4T3FkBQ53g7diKChW4hxZpDVTdAGKyybQNWBYcA
-  helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
-  registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
-  search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmXRZHr4gobQFr2bQoDQk6tzwR5EXYeHT3QxSttY4NfoUT
-  transactions.py: QmQBDGWeSrFeBxxYuyuHckh6dW7bxwv1LKVCqkAs3y12ao
+  behaviours.py: QmTvzYLaHWXCLgJ48pCWdmicZuAPXAtCUwQuQrXEZmPXye
+  dialogues.py: QmcpDZrkrvVAkV6Eh4C4pAufQ3TPPnNtXx3qBrukVvsGzf
+  handlers.py: QmaTxHx1TjNY1NLUQjfRuz74gQdkKPK6JXgokt5gBEBFkS
+  helpers.py: QmUMCBgsZ5tB24twoWjfGibb1v5uDpUBxHPtzqZbzbvyL1
+  strategy.py: QmTUQiuhTfMDqmuxcpsM2nkfPsBvjSS7B2YKR5snTtzjHF
+  transactions.py: QmbXjCj95bEPDa7fADiQR6ZrVbbn5d7StbHsN4sc7TK71P
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
 protocols:
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
-skills: []
+skills:
+- fetchai/tac_participation:0.5.0
 behaviours:
   clean_up:
     args:
       tick_interval: 5.0
     class_name: TransactionCleanUpBehaviour
   tac_negotiation:
-    args: {}
+    args:
+      search_interval: 5.0
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
   fipa:
@@ -41,23 +41,26 @@ handlers:
     args: {}
     class_name: SigningHandler
 models:
-  dialogues:
+  fipa_dialogues:
     args: {}
-    class_name: Dialogues
-  registration:
-    args:
-      update_interval: 5
-    class_name: Registration
-  search:
-    args:
-      search_interval: 5
-    class_name: Search
+    class_name: FipaDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       is_contract_tx: false
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       register_as: both
       search_for: both
+      search_radius: 5.0
+      service_key: tac_service
     class_name: Strategy
   transactions:
     args:

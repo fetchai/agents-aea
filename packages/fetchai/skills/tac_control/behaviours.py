@@ -191,15 +191,21 @@ class TacBehaviour(Behaviour):
         )
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.conf.agent_addr_to_name.keys():
+            tac_dialogue = tac_dialogues.dialogue_by_address.get(agent_address, None)
+            assert tac_dialogue is not None, "Error when retrieving dialogue."
+            last_msg = tac_dialogue.last_message
+            assert last_msg is not None, "Error when retrieving last message."
             agent_state = game.current_agent_states[agent_address]
             tac_msg = TacMessage(
                 performative=TacMessage.Performative.GAME_DATA,
-                dialogue_reference=tac_dialogues.new_self_initiated_dialogue_reference(),  # TODO: continue correct dialogue
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
+                message_id=last_msg.message_id + 1,
+                target=last_msg.message_id,
                 amount_by_currency_id=agent_state.amount_by_currency_id,
                 exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                 quantities_by_good_id=agent_state.quantities_by_good_id,
                 utility_params_by_good_id=agent_state.utility_params_by_good_id,
-                tx_fee=game.conf.tx_fee,
+                fee_by_currency_id=game.conf.fee_by_currency_id,
                 currency_id_to_name=game.conf.currency_id_to_name,
                 agent_addr_to_name=game.conf.agent_addr_to_name,
                 good_id_to_name=game.conf.good_id_to_name,
@@ -216,12 +222,18 @@ class TacBehaviour(Behaviour):
         """Notify agents that the TAC is cancelled."""
         self.context.logger.info("notifying agents that TAC is cancelled.")
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
-        for agent_addr in game.registration.agent_addr_to_name.keys():
+        for agent_address in game.registration.agent_addr_to_name.keys():
+            tac_dialogue = tac_dialogues.dialogue_by_address.get(agent_address, None)
+            assert tac_dialogue is not None, "Error when retrieving dialogue."
+            last_msg = tac_dialogue.last_message
+            assert last_msg is not None, "Error when retrieving last message."
             tac_msg = TacMessage(
                 performative=TacMessage.Performative.CANCELLED,
-                dialogue_reference=tac_dialogues.new_self_initiated_dialogue_reference(),  # TODO: continue correct dialogue
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
+                message_id=last_msg.message_id + 1,
+                target=last_msg.message_id,
             )
-            tac_msg.counterparty = agent_addr
+            tac_msg.counterparty = agent_address
             tac_dialogues.update(tac_msg)
             self.context.outbox.put_message(message=tac_msg)
         if game.phase == Phase.GAME:

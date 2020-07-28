@@ -19,20 +19,31 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from typing import cast
+from typing import Optional, cast
 
-from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.tac_negotiation.registration import Registration
-from packages.fetchai.skills.tac_negotiation.search import Search
+from packages.fetchai.skills.tac_negotiation.dialogues import (
+    OefSearchDialogue,
+    OefSearchDialogues,
+)
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
+DEFAULT_REGISTER_AND_SEARCH_INTERVAL = 5.0
 
-class GoodsRegisterAndSearchBehaviour(Behaviour):
+
+class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
     """This class implements the goods register and search behaviour."""
+
+    def __init__(self, **kwargs):
+        """Initialize the search behaviour."""
+        search_interval = cast(
+            float, kwargs.pop("search_interval", DEFAULT_REGISTER_AND_SEARCH_INTERVAL)
+        )
+        super().__init__(tick_interval=search_interval, **kwargs)
+        self.is_registered = False
 
     def setup(self) -> None:
         """
@@ -54,16 +65,16 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self.context.is_active = False
             return
 
-        if self.context.decision_maker_handler_context.goal_pursuit_readiness.is_ready:
+        if (
+            not self.context.decision_maker_handler_context.goal_pursuit_readiness.is_ready
+        ):
+            return
 
-            registration = cast(Registration, self.context.registration)
-            if registration.is_time_to_update_services():
-                self._unregister_service()
-                self._register_service()
-
-            search = cast(Search, self.context.search)
-            if search.is_time_to_search_services():
-                self._search_services()
+        if not self.is_registered:
+            self._register_agent()
+            self._register_service()
+            self.is_registered = True
+        self._search_services()
 
     def teardown(self) -> None:
         """
@@ -71,35 +82,31 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        self._unregister_service()
+        if self.is_registered:
+            self._unregister_service()
+            self._unregister_agent()
+            self.is_registered = False
 
-    def _unregister_service(self) -> None:
+    def _register_agent(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Register the agent's location.
 
         :return: None
         """
-        registration = cast(Registration, self.context.registration)
-
-        if registration.registered_goods_demanded_description is not None:
-            oef_msg = OefSearchMessage(
-                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                dialogue_reference=(str(registration.get_next_id()), ""),
-                service_description=registration.registered_goods_demanded_description,
-            )
-            oef_msg.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=oef_msg)
-            registration.registered_goods_demanded_description = None
-
-        if registration.registered_goods_supplied_description is not None:
-            oef_msg = OefSearchMessage(
-                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                dialogue_reference=(str(registration.get_next_id()), ""),
-                service_description=registration.registered_goods_supplied_description,
-            )
-            oef_msg.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=oef_msg)
-            registration.registered_goods_supplied_description = None
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering agent on SOEF.")
 
     def _register_service(self) -> None:
         """
@@ -112,44 +119,68 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        registration = cast(Registration, self.context.registration)
         strategy = cast(Strategy, self.context.strategy)
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        self.context.logger.debug(
+            "updating service directory as {}.".format(strategy.registering_as)
+        )
+        description = strategy.get_register_service_description()
+        oef_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_msg)
+        self.context.outbox.put_message(message=oef_msg)
 
-        if strategy.is_registering_as_seller:
-            self.context.logger.debug(
-                "updating service directory as seller with goods supplied."
-            )
-            goods_supplied_description = strategy.get_own_service_description(
-                is_supply=True, is_search_description=False,
-            )
-            registration.registered_goods_supplied_description = (
-                goods_supplied_description
-            )
-            oef_msg = OefSearchMessage(
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                dialogue_reference=(str(registration.get_next_id()), ""),
-                service_description=goods_supplied_description,
-            )
-            oef_msg.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=oef_msg)
+    def _unregister_service(self) -> None:
+        """
+        Unregister service from OEF Service Directory.
 
-        if strategy.is_registering_as_buyer:
-            self.context.logger.debug(
-                "updating service directory as buyer with goods demanded."
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        self.context.logger.debug(
+            "unregistering from service directory as {}.".format(
+                strategy.registering_as
             )
-            goods_demanded_description = strategy.get_own_service_description(
-                is_supply=False, is_search_description=False,
-            )
-            registration.registered_goods_demanded_description = (
-                goods_demanded_description
-            )
-            oef_msg = OefSearchMessage(
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                dialogue_reference=(str(registration.get_next_id()), ""),
-                service_description=goods_demanded_description,
-            )
-            oef_msg.counterparty = self.context.search_service_address
-            self.context.outbox.put_message(message=oef_msg)
+        )
+        description = strategy.get_unregister_service_description()
+        oef_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_msg)
+        self.context.outbox.put_message(message=oef_msg)
+
+    def _unregister_agent(self) -> None:
+        """
+        Unregister agent from the SOEF.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=description,
+        )
+        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_dialogues.update(oef_search_msg)
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("unregistering agent from SOEF.")
 
     def _search_services(self) -> None:
         """
@@ -163,55 +194,28 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        search = cast(Search, self.context.search)
-
-        if strategy.is_searching_for_sellers:
-            query = strategy.get_own_services_query(
-                is_searching_for_sellers=True, is_search_query=True
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        query = strategy.get_location_and_service_query()
+        for (is_seller_search, searching_for) in strategy.searching_for_types:
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+                query=query,
             )
-            if query is None:
-                self.context.logger.warning(
-                    "not searching the OEF for sellers because the agent demands no goods."
-                )
-                return None
-            else:
-                search_id = search.get_next_id(is_searching_for_sellers=True)
-                self.context.logger.info(
-                    "searching for sellers which match the demand of the agent, search_id={}.".format(
-                        search_id
-                    )
-                )
-                oef_msg = OefSearchMessage(
-                    performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                    dialogue_reference=(str(search_id), ""),
-                    query=query,
-                )
-                oef_msg.counterparty = self.context.search_service_address
-                self.context.outbox.put_message(message=oef_msg)
-
-        if strategy.is_searching_for_buyers:
-            query = strategy.get_own_services_query(
-                is_searching_for_sellers=False, is_search_query=True
+            oef_msg.counterparty = self.context.search_service_address
+            oef_search_dialogue = cast(
+                Optional[OefSearchDialogue], oef_search_dialogues.update(oef_msg)
             )
-            if query is None:
-                self.context.logger.warning(
-                    "not searching the OEF for buyers because the agent supplies no goods."
+            assert oef_search_dialogue is not None, "OefSearchDialogue not created."
+            oef_search_dialogue.is_seller_search = is_seller_search
+            self.context.outbox.put_message(message=oef_msg)
+            self.context.logger.info(
+                "searching for {}, search_id={}.".format(
+                    searching_for, oef_msg.dialogue_reference
                 )
-                return None
-            else:
-                search_id = search.get_next_id(is_searching_for_sellers=False)
-                self.context.logger.info(
-                    "searching for buyers which match the supply of the agent, search_id={}.".format(
-                        search_id
-                    )
-                )
-                oef_msg = OefSearchMessage(
-                    performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                    dialogue_reference=(str(search_id), ""),
-                    query=query,
-                )
-                oef_msg.counterparty = self.context.search_service_address
-                self.context.outbox.put_message(message=oef_msg)
+            )
 
 
 class TransactionCleanUpBehaviour(TickerBehaviour):

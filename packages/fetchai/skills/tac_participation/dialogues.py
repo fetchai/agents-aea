@@ -33,6 +33,12 @@ from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.base import Message
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.state_update.dialogues import (
+    StateUpdateDialogue as BaseStateUpdateDialogue,
+)
+from aea.protocols.state_update.dialogues import (
+    StateUpdateDialogues as BaseStateUpdateDialogues,
+)
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -124,6 +130,48 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :return: the created dialogue
         """
         dialogue = SigningDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+
+StateUpdateDialogue = BaseStateUpdateDialogue
+
+
+class StateUpdateDialogues(Model, BaseStateUpdateDialogues):
+    """This class keeps track of all state_update dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :param agent_address: the address of the agent for whom dialogues are maintained
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+        BaseStateUpdateDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return BaseStateUpdateDialogue.Role.SKILL
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> StateUpdateDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = StateUpdateDialogue(
             dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue
