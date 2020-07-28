@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the contract API request dispatcher."""
-from typing import cast, Callable
+from typing import Callable, cast
 
 from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi

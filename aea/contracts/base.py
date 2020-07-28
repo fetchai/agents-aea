@@ -122,8 +122,11 @@ class Contract(Component, ABC):
 
         return contract_class(configuration)
 
+    # TODO if 'ContractApiMessage' was a default package
+    #   we could import it and remove the 'type ignore' tag.
+    #   the same applies to the below methods.
     def get_deploy_transaction(
-        self, api: LedgerApi, message: "ContractApiMessage"
+        self, api: LedgerApi, message: "ContractApiMessage"  # type: ignore  # noqa
     ) -> bytes:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
@@ -138,7 +141,7 @@ class Contract(Component, ABC):
         raise NotImplementedError
 
     def get_raw_transaction(
-        self, api: LedgerApi, message: "ContractApiMessage"
+        self, api: LedgerApi, message: "ContractApiMessage"  # type: ignore   # noqa
     ) -> bytes:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -152,7 +155,7 @@ class Contract(Component, ABC):
         """
         raise NotImplementedError
 
-    def get_raw_message(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:
+    def get_raw_message(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:  # type: ignore   # noqa
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
@@ -165,7 +168,7 @@ class Contract(Component, ABC):
         """
         raise NotImplementedError
 
-    def get_state(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:
+    def get_state(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:  # type: ignore   # noqa
         """
         Handler method for the 'GET_STATE' requests.
 
