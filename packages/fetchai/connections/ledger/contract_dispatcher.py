@@ -151,7 +151,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             # TODO add dialogue reference
             self.logger.error(
-                f"An error occurred while processing the contract api request {str(e)}."
+                f"An error occurred while processing the contract api request: '{str(e)}'."
             )
             response = self.get_error_message(e, api, message, dialogue)
         return response
@@ -307,20 +307,20 @@ def validate_and_call_callable(
     full_args_spec = inspect.getfullargspec(method_to_call)
     if message.performative in [
         ContractApiMessage.Performative.GET_STATE,
+        ContractApiMessage.Performative.GET_RAW_MESSAGE,
         ContractApiMessage.Performative.GET_RAW_TRANSACTION,
     ]:
         if len(full_args_spec.args) < 2:
             raise AEAException(
-                f"Expected two or more positional arguments, got {len(full_args_spec)}"
+                f"Expected two or more positional arguments, got {len(full_args_spec.args)}"
             )
         return method_to_call(api, message.contract_address, **message.kwargs.body)
     elif message.performative in [
         ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
-        ContractApiMessage.Performative.GET_RAW_MESSAGE,
     ]:
         if len(full_args_spec.args) < 1:
             raise AEAException(
-                f"Expected one or more positional arguments, got {len(full_args_spec)}"
+                f"Expected one or more positional arguments, got {len(full_args_spec.args)}"
             )
         return method_to_call(api, **message.kwargs.body)
     else:  # pragma: nocover
