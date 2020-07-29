@@ -520,6 +520,32 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
         return tx
 
+    @staticmethod
+    def execute_wasm_query(contract_address: Address, query_msg: Any):
+        """
+        Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
+
+        :param contract_address: the address of the smart contract.
+        :param query_msg: QueryMsg in JSON format.
+        :return: the message receipt
+        """
+
+        command = [
+            "wasmcli",
+            "query",
+            "wasm",
+            "contract-state",
+            "smart",
+            str(contract_address),
+            json.dumps(query_msg),
+        ]
+
+        stdout, stderr = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        return stdout.decode("ascii")
+
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
         sender_address: Address,
