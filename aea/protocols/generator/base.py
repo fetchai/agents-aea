@@ -1204,9 +1204,6 @@ class ProtocolGenerator:
         # Module docstring
         cls_str += '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n'
 
-        if len(self.spec.all_custom_types) == 0:
-            return cls_str
-
         # class code per custom type
         for custom_type in self.spec.all_custom_types:
             cls_str += self.indent + "\n\nclass {}:\n".format(custom_type)

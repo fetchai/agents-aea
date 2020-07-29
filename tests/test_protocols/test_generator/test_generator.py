@@ -28,8 +28,13 @@ from unittest import TestCase, mock
 
 import pytest
 
+from aea.configurations.base import (
+    ProtocolSpecification,
+    ProtocolSpecificationParseError,
+)
 from aea.protocols.generator.base import ProtocolGenerator
 
+from tests.conftest import ROOT_DIR
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )
@@ -117,6 +122,97 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         # )
         # pb2_file_original = Path(
         #     PATH_TO_T_PROTOCOL, "{}_pb2.py".format(T_PROTOCOL_NAME),
+        # )
+        # assert filecmp.cmp(pb2_file_generated, pb2_file_original)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
+    """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+        filecmp.clear_cache()
+
+    def test_compare_latest_generator_output_with_test_protocol(self):
+        """
+        Test that the "t_protocol" test protocol matches with the latest generator output based on its specification.
+
+        Note:
+            - custom_types.py files are not compared as the generated one is only a template.
+            - protocol.yaml files are consequently not compared either because the different
+              custom_types.py files makes their IPFS hashes different.
+        """
+        protocol_name = "t_protocol_no_ct"
+        path_to_protocol_specification_with_no_custom_types = os.path.join(
+            ROOT_DIR, "tests", "data", "sample_specification_no_custom_types.yaml"
+        )
+        path_to_generated_protocol = self.t
+        dotted_path_to_package_for_imports = "tests.data.generator."
+        path_to_protocol = os.path.join(
+            ROOT_DIR, "tests", "data", "generator", protocol_name
+        )
+
+        # Generate the protocol
+        try:
+            protocol_generator = ProtocolGenerator(
+                path_to_protocol_specification=path_to_protocol_specification_with_no_custom_types,
+                output_path=path_to_generated_protocol,
+                dotted_path_to_protocol_package=dotted_path_to_package_for_imports,
+            )
+            protocol_generator.generate()
+        except Exception as e:
+            pytest.skip(
+                "Something went wrong when generating the protocol. The exception:"
+                + str(e)
+            )
+
+        # compare __init__.py
+        init_file_generated = Path(self.t, protocol_name, "__init__.py")
+        init_file_original = Path(path_to_protocol, "__init__.py",)
+        assert filecmp.cmp(init_file_generated, init_file_original)
+
+        # compare message.py
+        message_file_generated = Path(self.t, protocol_name, "message.py")
+        message_file_original = Path(path_to_protocol, "message.py",)
+        assert filecmp.cmp(message_file_generated, message_file_original)
+
+        # compare serialization.py
+        serialization_file_generated = Path(self.t, protocol_name, "serialization.py")
+        serialization_file_original = Path(path_to_protocol, "serialization.py",)
+        assert filecmp.cmp(serialization_file_generated, serialization_file_original)
+
+        # compare dialogues.py
+        dialogue_file_generated = Path(self.t, protocol_name, "dialogues.py")
+        dialogue_file_original = Path(path_to_protocol, "dialogues.py",)
+        assert filecmp.cmp(dialogue_file_generated, dialogue_file_original)
+
+        # compare .proto
+        proto_file_generated = Path(
+            self.t, protocol_name, "{}.proto".format(protocol_name)
+        )
+        proto_file_original = Path(path_to_protocol, "{}.proto".format(protocol_name),)
+        assert filecmp.cmp(proto_file_generated, proto_file_original)
+
+        # compare _pb2.py
+        # ToDo Fails in CI. Investigate!
+        # pb2_file_generated = Path(
+        #     self.t, protocol_name, "{}_pb2.py".format(protocol_name)
+        # )
+        # pb2_file_original = Path(
+        #     path_to_protocol, "{}_pb2.py".format(protocol_name),
         # )
         # assert filecmp.cmp(pb2_file_generated, pb2_file_original)
 
@@ -973,11 +1069,196 @@ class ProtocolGeneratorTestCase(TestCase):
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    @mock.patch()
-    def test_init_negative(self):
-        """Negative test for the '__init__' method: check_prerequisites fail"""
-        generator = ProtocolGenerator(PATH_TO_T_PROTOCOL, self.t)
+    @mock.patch(
+        "aea.protocols.generator.base.check_prerequisites",
+        side_effect=FileNotFoundError("Some error!"),
+    )
+    def test_init_negative_no_prerequisits(self, mocked_check_prerequisites):
+        """Negative test for the '__init__' method: check_prerequisites fails."""
+        with self.assertRaises(FileNotFoundError) as cm:
+            ProtocolGenerator(PATH_TO_T_PROTOCOL, self.t)
+            expected_msg = "Some error!"
+            assert str(cm.exception) == expected_msg
 
+    @mock.patch(
+        "aea.protocols.generator.base.load_protocol_specification",
+        side_effect=ValueError("Some error!"),
+    )
+    def test_init_negative_loading_specification_fails(self, mocked_load):
+        """Negative test for the '__init__' method: loading the specification fails."""
+        with mock.patch("aea.protocols.generator.base.check_prerequisites"):
+            with self.assertRaises(ValueError) as cm:
+                ProtocolGenerator(PATH_TO_T_PROTOCOL, self.t)
+                expected_msg = "Some error!"
+                assert str(cm.exception) == expected_msg
+
+    @mock.patch(
+        "aea.protocols.generator.base.extract",
+        side_effect=ProtocolSpecificationParseError("Some error!"),
+    )
+    def test_init_negative_extracting_specification_fails(self, mocked_extract):
+        """Negative test for the '__init__' method: extracting the specification fails."""
+        with mock.patch("aea.protocols.generator.base.check_prerequisites"):
+            p_spec_mock = mock.MagicMock(ProtocolSpecification)
+            p_spec_mock.name = "some_name"
+            p_spec_mock.author = "some_author"
+            with mock.patch(
+                "aea.protocols.generator.base.load_protocol_specification",
+                return_value=p_spec_mock,
+            ):
+                with self.assertRaises(ProtocolSpecificationParseError) as cm:
+                    ProtocolGenerator(
+                        "some_path_to_protocol_specification", "some_path_to_output"
+                    )
+                    expected_msg = "Some error!"
+                    assert str(cm.exception) == expected_msg
+
+    def test_change_indent_negative_set_indent_to_negative_value(self):
+        """Negative test for the '_change_indent' method: setting indent level to negative value."""
+        with mock.patch("aea.protocols.generator.base.check_prerequisites"):
+            p_spec_mock = mock.MagicMock(ProtocolSpecification)
+            p_spec_mock.name = "some_name"
+            p_spec_mock.author = "some_author"
+            with mock.patch(
+                "aea.protocols.generator.base.load_protocol_specification",
+                return_value=p_spec_mock,
+            ):
+                with mock.patch("aea.protocols.generator.base.extract"):
+                    protocol_generator = ProtocolGenerator(
+                        "some_path_to_protocol_specification", "some_path_to_output"
+                    )
+                    with self.assertRaises(ValueError) as cm:
+                        protocol_generator._change_indent(-1, "s")
+                        expected_msg = "Error: setting indent to be a negative number."
+                        assert str(cm.exception) == expected_msg
+
+    def test_change_indent_negative_decreasing_more_spaces_than_available(self):
+        """Negative test for the '_change_indent' method: decreasing more spaces than available."""
+        with mock.patch("aea.protocols.generator.base.check_prerequisites"):
+            p_spec_mock = mock.MagicMock(ProtocolSpecification)
+            p_spec_mock.name = "some_name"
+            p_spec_mock.author = "some_author"
+            with mock.patch(
+                "aea.protocols.generator.base.load_protocol_specification",
+                return_value=p_spec_mock,
+            ):
+                with mock.patch("aea.protocols.generator.base.extract"):
+                    protocol_generator = ProtocolGenerator(
+                        "some_path_to_protocol_specification", "some_path_to_output"
+                    )
+                    protocol_generator.indent = "    "
+                    with self.assertRaises(ValueError) as cm:
+                        protocol_generator._change_indent(-2)
+                        expected_msg = (
+                            "Not enough spaces in the 'indent' variable to remove."
+                        )
+                        assert str(cm.exception) == expected_msg
+
+    def test_import_from_custom_types_module_no_custom_types(self):
+        """Test the '_import_from_custom_types_module' method: no custom types."""
+        with mock.patch("aea.protocols.generator.base.check_prerequisites"):
+            p_spec_mock = mock.MagicMock(ProtocolSpecification)
+            p_spec_mock.name = "some_name"
+            p_spec_mock.author = "some_author"
+            with mock.patch(
+                "aea.protocols.generator.base.load_protocol_specification",
+                return_value=p_spec_mock,
+            ):
+                with mock.patch("aea.protocols.generator.base.extract"):
+                    protocol_generator = ProtocolGenerator(
+                        "some_path_to_protocol_specification", "some_path_to_output"
+                    )
+                    protocol_generator.spec.all_custom_types = []
+                    assert protocol_generator._import_from_custom_types_module() == ""
+
+    def test_protocol_buffer_schema_str(self):
+        """Negative test for the '_protocol_buffer_schema_str' method: 1 line protobuf snippet."""
+        with mock.patch("aea.protocols.generator.base.check_prerequisites"):
+            p_spec_mock = mock.MagicMock(ProtocolSpecification)
+            p_spec_mock.name = "some_name"
+            p_spec_mock.author = "some_author"
+            with mock.patch(
+                "aea.protocols.generator.base.load_protocol_specification",
+                return_value=p_spec_mock,
+            ):
+                with mock.patch("aea.protocols.generator.base.extract"):
+                    protocol_generator = ProtocolGenerator(
+                        "some_path_to_protocol_specification", "some_path_to_output"
+                    )
+                    protocol_generator.spec.all_custom_types = ["SomeCustomType"]
+                    protocol_generator.protocol_specification.protobuf_snippets = {
+                        "ct:SomeCustomType": "bytes description = 1;"
+                    }
+                    proto_buff_schema_str = (
+                        protocol_generator._protocol_buffer_schema_str()
+                    )
+                    print(proto_buff_schema_str)
+                    expected = (
+                        'syntax = "proto3";\n\n'
+                        "package fetch.aea.SomeName;\n\n"
+                        "message SomeNameMessage{\n\n"
+                        "    // Custom Types\n"
+                        "    message SomeCustomType{\n"
+                        "        bytes description = 1;    }\n\n\n"
+                        "    // Performatives and contents\n\n"
+                        "    // Standard SomeNameMessage fields\n"
+                        "    int32 message_id = 1;\n"
+                        "    string dialogue_starter_reference = 2;\n"
+                        "    string dialogue_responder_reference = 3;\n"
+                        "    int32 target = 4;\n"
+                        "    oneof performative{\n"
+                        "    }\n"
+                        "}\n"
+                    )
+                    assert proto_buff_schema_str == expected
+
+    def test_generate_protobuf_only_mode_positive(self):
+        """Positive test for the 'generate_protobuf_only_mode' method."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate_protobuf_only_mode()
+        path_to_protobuf_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        assert Path(path_to_protobuf_file).exists()
+
+    @mock.patch(
+        "aea.protocols.generator.base.check_protobuf_using_protoc",
+        return_value=(False, "Some error!"),
+    )
+    def test_generate_protobuf_only_mode_negative(self, mocked_check_protobuf):
+        """Negative test for the 'generate_protobuf_only_mode' method: protobuf schema file is invalid"""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        with self.assertRaises(SyntaxError) as cm:
+            protocol_generator.generate_protobuf_only_mode()
+            expected_msg = "Error in the protocol buffer schema code:\n" + "Some error!"
+            assert str(cm.exception) == expected_msg
+
+        path_to_protobuf_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        assert not Path(path_to_protobuf_file).exists()
+
+    @mock.patch(
+        "aea.protocols.generator.base.ProtocolGenerator.generate_protobuf_only_mode"
+    )
+    @mock.patch("aea.protocols.generator.base.ProtocolGenerator.generate_full_mode")
+    def test_generate_1(self, mocked_full_mode, mocked_protobuf_mode):
+        """Test the 'generate' method: protobuf_only mode"""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate(protobuf_only=True)
+        mocked_protobuf_mode.assert_called_once()
+        mocked_full_mode.assert_not_called()
+
+    @mock.patch(
+        "aea.protocols.generator.base.ProtocolGenerator.generate_protobuf_only_mode"
+    )
+    @mock.patch("aea.protocols.generator.base.ProtocolGenerator.generate_full_mode")
+    def test_generate_2(self, mocked_full_mode, mocked_protobuf_mode):
+        """Test the 'generate' method: full mode"""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate(protobuf_only=False)
+        mocked_protobuf_mode.assert_not_called()
+        mocked_full_mode.assert_called_once()
 
     @classmethod
     def teardown_class(cls):

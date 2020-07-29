@@ -507,7 +507,7 @@ class TestExtractSpecification(TestCase):
 
     @mock.patch(
         "aea.protocols.generator.extract_specification.validate",
-        return_value=tuple([False, "Some error!"]),
+        return_value=(False, "Some error!"),
     )
     def test_extract_negative_invalid_specification(self, mocked_validate):
         """Negative test the 'extract' method: invalid protocol specification"""
@@ -517,9 +517,8 @@ class TestExtractSpecification(TestCase):
 
         with self.assertRaises(ProtocolSpecificationParseError) as cm:
             extract(protocol_specification)
-
-        expected_msg = "Some error!"
-        assert str(cm.exception) == expected_msg
+            expected_msg = "Some error!"
+            assert str(cm.exception) == expected_msg
 
     @classmethod
     def teardown_class(cls):
