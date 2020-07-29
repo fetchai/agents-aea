@@ -391,7 +391,9 @@ class FipaNegotiationHandler(Handler):
                     signing_dialogue is not None
                 ), "Could not construct sigining dialogue."
                 self.context.logger.info(
-                    "sending signing_msg={} to decison maker.".format(signing_msg)
+                    "sending signing_msg={} to decison maker following ACCEPT.".format(
+                        signing_msg
+                    )
                 )
                 self.context.decision_maker_message_queue.put(signing_msg)
         else:
@@ -430,14 +432,13 @@ class FipaNegotiationHandler(Handler):
                 match_accept.target,
             )
         )
-        if (match_accept.info.get("tx_signature") is not None) and (
-            match_accept.info.get("tx_id") is not None
-        ):
+        if match_accept.info.get("signature") is not None:
             transactions = cast(Transactions, self.context.transactions)
             signing_msg = transactions.pop_pending_initial_acceptance(
                 fipa_dialogue.dialogue_label, match_accept.target
             )
             strategy = cast(Strategy, self.context.strategy)
+            counterparty_signature = match_accept.info.get("signature")
             if strategy.is_contract_tx:
                 pass
                 # contract = cast(ERC1155Contract, self.context.contracts.erc1155)
@@ -499,11 +500,7 @@ class FipaNegotiationHandler(Handler):
                     "skill_callback_info",
                     {
                         **signing_msg.skill_callback_info,
-                        **{
-                            "counterparty_signature": match_accept.info.get(
-                                "signature"
-                            ),
-                        },
+                        **{"counterparty_signature": counterparty_signature},
                     },
                 )
                 signing_dialogues = cast(
@@ -516,13 +513,13 @@ class FipaNegotiationHandler(Handler):
                     signing_dialogue is not None
                 ), "Could not construct sigining dialogue."
                 self.context.logger.info(
-                    "sending signing_msg={} to decison maker.".format(signing_msg)
+                    "sending signing_msg={} to decison maker following MATCH_ACCEPT.".format(
+                        signing_msg
+                    )
                 )
                 self.context.decision_maker_message_queue.put(signing_msg)
         else:
-            self.context.logger.warning(
-                "match_accept did not contain tx_signature and tx_id!"
-            )
+            self.context.logger.warning("match_accept did not contain signature!")
 
 
 class SigningHandler(Handler):
@@ -557,8 +554,10 @@ class SigningHandler(Handler):
             return
 
         # handle message
-        if signing_msg.performative is SigningMessage.Performative.SIGNED_TRANSACTION:
+        if signing_msg.performative is SigningMessage.Performative.SIGNED_MESSAGE:
             self._handle_signed_message(signing_msg, signing_dialogue)
+        elif signing_msg.performative is SigningMessage.Performative.SIGNED_TRANSACTION:
+            self._handle_signed_transaction(signing_msg, signing_dialogue)
         elif signing_msg.performative is SigningMessage.Performative.ERROR:
             self._handle_error(signing_msg, signing_dialogue)
         else:
@@ -611,11 +610,6 @@ class SigningHandler(Handler):
             last_fipa_message is not None
             and last_fipa_message.performative == FipaMessage.Performative.ACCEPT
         ):
-            self.context.logger.info(
-                "sending match accept to {}.".format(
-                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
-                )
-            )
             fipa_msg = FipaMessage(
                 performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
                 message_id=last_fipa_message.message_id + 1,
@@ -626,31 +620,42 @@ class SigningHandler(Handler):
             fipa_msg.counterparty = last_fipa_message.counterparty
             fipa_dialogue.update(fipa_msg)
             self.context.outbox.put_message(message=fipa_msg)
+            self.context.logger.info(
+                "sending match accept to {}.".format(
+                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+                )
+            )
         elif (
             last_fipa_message is not None
             and last_fipa_message.performative
             == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM
         ):
-            self.context.logger.info("sending transaction to controller.")
             counterparty_signature = cast(
                 str, signing_msg.skill_callback_info.get("counterparty_signature")
             )
             if counterparty_signature is not None:
+                last_signing_msg = cast(
+                    Optional[SigningMessage], signing_dialogue.last_outgoing_message
+                )
+                assert (
+                    last_signing_msg is not None
+                ), "Could not recover last signing message."
                 tx_id = (
-                    signing_msg.terms.sender_hash
+                    last_signing_msg.terms.sender_hash
                     + "_"
-                    + signing_msg.terms.counterparty_hash
+                    + last_signing_msg.terms.counterparty_hash
                 )
                 if "transactions" not in self.context.shared_state.keys():
                     self.context.shared_state["transactions"] = {}
                 self.context.shared_state["transactions"][tx_id] = {
-                    "terms": signing_msg.terms,
+                    "terms": last_signing_msg.terms,
                     "sender_signature": signing_msg.signed_message.body,
                     "counterparty_signature": counterparty_signature,
                 }
+                self.context.logger.info("sending transaction to controller.")
             else:
                 self.context.logger.warning(
-                    "transaction has no counterparty id or signature!"
+                    "transaction has no counterparty signature!"
                 )
         else:
             self.context.logger.warning(
