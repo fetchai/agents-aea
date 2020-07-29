@@ -34,7 +34,9 @@ from aea.mail.base import Envelope
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
 )
-from packages.fetchai.connections.gym.connection import GymConnection  # noqa: E402
+from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylint: disable=wrong-import-position
+    GymConnection,
+)
 
 ADDRESS = "some_address"
 

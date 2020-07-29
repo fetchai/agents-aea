@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
-import logging
 import os
 import tempfile
 from pathlib import Path
@@ -500,7 +499,7 @@ def test_error_handler_is_not_set():
     mocked_stop.assert_called()
 
 
-def test_no_handlers_registered(caplog):
+def test_no_handlers_registered():
     """Test no handlers are registered for message processing."""
     agent_name = "MyAgent"
     builder = AEABuilder()
@@ -511,9 +510,9 @@ def test_no_handlers_registered(caplog):
     # builder.set_default_connection(local_connection_id)
     aea = builder.build()
 
-    with caplog.at_level(
-        logging.WARNING, logger=aea._get_error_handler().context.logger.name
-    ):
+    with patch.object(
+        aea._get_error_handler().context._logger, "warning"
+    ) as mock_logger:
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -530,8 +529,9 @@ def test_no_handlers_registered(caplog):
         )
         with patch.object(aea.filter, "get_active_handlers", return_value=[]):
             aea._handle(envelope)
-
-        assert "Cannot handle envelope: no active handler registered" in caplog.text
+            mock_logger.assert_any_call(
+                f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
+            )
 
 
 class TestContextNamespace:

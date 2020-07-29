@@ -38,7 +38,7 @@ Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
 
 
-class PriceBandit(object):
+class PriceBandit:
     """A class for a multi-armed bandit model of price."""
 
     def __init__(self, price: float, beta_a: float = 1.0, beta_b: float = 1.0):
@@ -73,7 +73,7 @@ class PriceBandit(object):
         self.beta_b += 1 - outcome
 
 
-class GoodPriceModel(object):
+class GoodPriceModel:
     """A class for a price model of a good."""
 
     def __init__(self, bound: int = 100):

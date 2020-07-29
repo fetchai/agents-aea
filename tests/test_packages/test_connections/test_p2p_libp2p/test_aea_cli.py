@@ -38,8 +38,8 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 
     @libp2p_log_on_failure
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
 
         # for logging
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -68,7 +68,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         """Tear down the test"""
         cls.terminate_agents()
 
-        AEATestCaseEmpty.teardown_class()
+        super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).teardown_class()
 
 
 @skip_test_windows
@@ -77,7 +77,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
 
     @libp2p_log_on_failure
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.5.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -118,5 +118,4 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     def teardown_class(cls):
         """Tear down the test"""
         cls.terminate_agents()
-
-        AEATestCaseEmpty.teardown_class()
+        super(TestP2PLibp2pConnectionAEARunningFullNode, cls).teardown_class()
