@@ -24,6 +24,7 @@ import hashlib
 import json
 import logging
 import time
+import subprocess
 from pathlib import Path
 from typing import Any, BinaryIO, Optional, Tuple
 
@@ -310,6 +311,51 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 balance = int(result[0]["amount"])
         return balance
 
+    def get_wasm_handle_transaction(  # pylint: disable=arguments-differ
+        self,
+        sender_address: Address,
+        contract_address: Address,
+        msg: Any,
+        gas: int = 80000,
+        memo: str = "",
+        chain_id: Optional[str] = None,
+    ) -> Optional[Any]:
+        """
+        Submit a CosmWasm HandleMsg transaction to the ledger.
+
+        :param sender_address: the sender address of the message initiator.
+        :param contract_address: the address of the smart contract.
+        :param msg: HandleMsg in JSON format.
+        :param gas: Maximum amount of gas to be used on executing command.
+        :param memo: Any string comment.
+        :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+        :return: the unsigned CosmWasm HandleMsg
+        """
+        chain_id = chain_id if chain_id is not None else self.chain_id
+        account_number, sequence = self._try_get_account_number_and_sequence(
+            sender_address
+        )
+        tx = {
+            "account_number": str(account_number),
+            "chain_id": chain_id,
+            "fee": {"amount": [], "gas": str(gas)},
+            "memo": memo,
+            "msgs": [
+                {
+                    "type": "wasm/execute",
+                    "value": {
+                        "sender": sender_address,
+                        "contract": contract_address,
+                        "msg": msg,
+                        "sent_funds": [],
+                    },
+                }
+            ],
+            "sequence": str(sequence),
+        }
+
+        return tx
+
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
         sender_address: Address,
@@ -384,6 +430,23 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 int(response.json()["result"]["value"]["sequence"]),
             )
         return result
+
+    def send_signed_cosmwasm_transaction(self, signed_tx: Any, signed_tx_filename: str = "tx.signed") -> str:
+        with open(signed_tx_filename, "w") as f:
+            f.write(json.dumps(signed_tx))
+
+        command = [
+            "wasmcli",
+            "tx",
+            "broadcast",
+            signed_tx_filename,
+        ]
+
+        stdout, stderr = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        return stdout.decode("ascii")
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
