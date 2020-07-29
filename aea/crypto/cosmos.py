@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
+TESTNET_NAME = "testnet"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "agent-land"
@@ -518,6 +519,7 @@ class CosmosFaucetApi(FaucetApi):
     """Cosmos testnet faucet API."""
 
     identifier = _COSMOS
+    testnet_name = TESTNET_NAME
 
     def get_wealth(self, address: Address) -> None:
         """

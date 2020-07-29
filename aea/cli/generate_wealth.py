@@ -27,11 +27,8 @@ import click
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import try_get_balance, verify_or_create_private_keys
-from aea.crypto.helpers import (
-    IDENTIFIER_TO_FAUCET_APIS,
-    TESTNETS,
-    try_generate_testnet_wealth,
-)
+from aea.crypto.helpers import try_generate_testnet_wealth
+from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
 from aea.crypto.wallet import Wallet
 
 
@@ -42,7 +39,7 @@ FUNDS_RELEASE_TIMEOUT = 10
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(list(IDENTIFIER_TO_FAUCET_APIS.keys())),
+    type=click.Choice(list(faucet_apis_registry.supported_ids)),
     required=True,
 )
 @click.option(
@@ -66,7 +63,8 @@ def _try_generate_wealth(click_context, type_, sync):
     wallet = Wallet(private_key_paths)
     try:
         address = wallet.addresses[type_]
-        testnet = TESTNETS[type_]
+        faucet_api_cls = make_faucet_api_cls(type_)
+        testnet = faucet_api_cls.testnet_name
         click.echo(
             "Requesting funds for address {} on test network '{}'".format(
                 address, testnet
