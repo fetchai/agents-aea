@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the tests of the agent module."""
 import asyncio
 from threading import Thread
@@ -87,6 +85,11 @@ def test_run_agent():
                 lambda: agent.state == RuntimeStates.running,
                 timeout=5,
                 error_msg="Agent state must be 'running'",
+            )
+            wait_for_condition(
+                lambda: agent.is_running,
+                timeout=5,
+                error_msg="agent_state must be 'running'",
             )
         finally:
             agent.stop()
