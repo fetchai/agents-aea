@@ -100,8 +100,9 @@ class Filter:
         :return: None
         """
         self._handle_decision_maker_out_queue()
-        # get new behaviours from the agent skills
+        # get new behaviours and handlers from the agent skills
         self._handle_new_behaviours()
+        self._handle_new_handlers()
 
     def _handle_decision_maker_out_queue(self) -> None:
         """Process descision maker's messages."""
@@ -140,6 +141,20 @@ class Filter:
                 except ValueError as e:
                     logger.warning(
                         "Error when trying to add a new behaviour: {}".format(str(e))
+                    )
+
+    def _handle_new_handlers(self) -> None:
+        """Register new handlers added to skills."""
+        for skill in self.resources.get_all_skills():
+            while not skill.skill_context.new_handlers.empty():
+                new_handler = skill.skill_context.new_handlers.get()
+                try:
+                    self.resources.handler_registry.register(
+                        (skill.skill_context.skill_id, new_handler.name), new_handler,
+                    )
+                except ValueError as e:
+                    logger.warning(
+                        "Error when trying to add a new handler: {}".format(str(e))
                     )
 
     def _handle_signing_message(self, signing_message: SigningMessage):

@@ -74,6 +74,7 @@ class SkillContext:
 
         self._is_active = True  # type: bool
         self._new_behaviours_queue = queue.Queue()  # type: Queue
+        self._new_handlers_queue = queue.Queue()  # type: Queue
         self._logger: Optional[Union[Logger, LoggerAdapter]] = None
 
     @property
@@ -129,7 +130,7 @@ class SkillContext:
         )
 
     @property
-    def new_behaviours(self) -> Queue:
+    def new_behaviours(self) -> "Queue[Behaviour]":
         """
         Queue for the new behaviours.
 
@@ -139,6 +140,18 @@ class SkillContext:
         :return the queue of new behaviours.
         """
         return self._new_behaviours_queue
+
+    @property
+    def new_handlers(self) -> "Queue[Handler]":
+        """
+        Queue for the new handlers.
+
+        This queue can be used to send messages to the framework
+        to request the registration of a handler.
+
+        :return the queue of new handlers.
+        """
+        return self._new_handlers_queue
 
     @property
     def agent_addresses(self) -> Dict[str, str]:
