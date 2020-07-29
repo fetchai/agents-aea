@@ -45,7 +45,6 @@ class GenerateWealthTestCase(TestCase):
     """Test case for _generate_wealth method."""
 
     @mock.patch("aea.cli.generate_wealth.Wallet")
-    @mock.patch("aea.cli.generate_wealth.TESTNETS", {"type": "value"})
     @mock.patch("aea.cli.generate_wealth.click.echo")
     @mock.patch("aea.cli.generate_wealth.try_generate_testnet_wealth")
     @mock.patch("aea.cli.generate_wealth._wait_funds_release")
@@ -53,7 +52,7 @@ class GenerateWealthTestCase(TestCase):
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
-        _try_generate_wealth(ctx, "type", True)
+        _try_generate_wealth(ctx, "cosmos", True)
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
