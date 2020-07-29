@@ -68,7 +68,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         """Tear down the test"""
         cls.terminate_agents()
 
-        AEATestCaseEmpty.teardown_class()
+        super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).teardown_class()
 
 
 @skip_test_windows
@@ -118,5 +118,4 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     def teardown_class(cls):
         """Tear down the test"""
         cls.terminate_agents()
-
-        AEATestCaseEmpty.teardown_class()
+        super(TestP2PLibp2pConnectionAEARunningFullNode, cls).teardown_class()
