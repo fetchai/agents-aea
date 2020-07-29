@@ -17,14 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains the tests of the agent module."""
 
 from threading import Thread
 
 import pytest
 
-from aea.agent import Agent, AgentState, Identity, Liveness
+from aea.agent import Agent, AgentState, Identity
 from aea.multiplexer import InBox, OutBox
+from aea.runtime import RuntimeStates
 
 from packages.fetchai.connections.local.connection import LocalNode
 
@@ -100,23 +102,18 @@ def test_run_agent():
                 error_msg="Agent loop not started!'",
             )
             wait_for_condition(
-                lambda: agent.agent_state == AgentState.RUNNING,
+                lambda: agent.state == RuntimeStates.running,
                 timeout=5,
                 error_msg="Agent state must be 'running'",
+            )
+            wait_for_condition(
+                lambda: agent.agent_state == AgentState.RUNNING,
+                timeout=5,
+                error_msg="agent_state must be 'running'",
             )
         finally:
             agent.stop()
             agent_thread.join()
-
-
-def test_liveness():
-    """Test liveness object states."""
-    liveness = Liveness()
-    assert liveness.is_stopped
-    liveness.start()
-    assert not liveness.is_stopped
-    liveness.stop()
-    assert liveness.is_stopped
 
 
 def test_runtime_modes():

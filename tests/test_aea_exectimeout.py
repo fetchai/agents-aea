@@ -69,7 +69,7 @@ class BaseTimeExecutionCase(TestCase):
 
     def tearDown(self) -> None:
         """Tear down."""
-        self.aea_tool.stop()
+        self.aea_tool.teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -110,7 +110,6 @@ class BaseTimeExecutionCase(TestCase):
 
         builder.add_component_instance(test_skill)
         aea = builder.build()
-
         self.aea_tool = AeaTool(aea)
         self.aea_tool.put_inbox(AeaTool.dummy_envelope())
 
@@ -131,7 +130,6 @@ class BaseTimeExecutionCase(TestCase):
 
         assert execution_timeout <= timeit.time_passed <= function_sleep_time
         assert not self.function_finished
-        self.aea_tool.stop()
 
     def test_short_handler_not_cancelled_by_timeout(self):
         """Test short function NOTterminated by timeout."""
@@ -151,7 +149,6 @@ class BaseTimeExecutionCase(TestCase):
 
         assert function_sleep_time <= timeit.time_passed <= execution_timeout
         assert self.function_finished
-        self.aea_tool.stop()
 
     def test_no_timeout(self):
         """Test function NOT terminated by timeout cause timeout == 0."""
@@ -169,7 +166,6 @@ class BaseTimeExecutionCase(TestCase):
 
         assert function_sleep_time <= timeit.time_passed
         assert self.function_finished
-        self.aea_tool.stop()
 
 
 class HandleTimeoutExecutionCase(BaseTimeExecutionCase):

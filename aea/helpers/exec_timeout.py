@@ -203,7 +203,9 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
 
             cls._loop = asyncio.new_event_loop()
             cls._stopped_future = Future(loop=cls._loop)
-            cls._supervisor_thread = threading.Thread(target=cls._supervisor_event_loop)
+            cls._supervisor_thread = threading.Thread(
+                target=cls._supervisor_event_loop, daemon=True
+            )
             cls._supervisor_thread.start()
 
     @classmethod
@@ -227,6 +229,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
                 if cls._supervisor_thread and cls._supervisor_thread.is_alive():
                     cls._supervisor_thread.join()
                 cls._supervisor_thread = None
+                cls._start_count = 0
 
     @classmethod
     def _supervisor_event_loop(cls) -> None:
