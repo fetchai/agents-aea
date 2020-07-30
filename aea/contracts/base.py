@@ -152,8 +152,9 @@ class Contract(Component, ABC):
         """
         raise NotImplementedError
 
+    @classmethod
     def get_raw_message(
-        self, ledger_api: LedgerApi, contract_address: str, **kwargs
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
     ) -> bytes:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
@@ -167,8 +168,9 @@ class Contract(Component, ABC):
         """
         raise NotImplementedError
 
+    @classmethod
     def get_state(
-        self, ledger_api: LedgerApi, contract_address: str, **kwargs
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
     ) -> bytes:
         """
         Handler method for the 'GET_STATE' requests.
