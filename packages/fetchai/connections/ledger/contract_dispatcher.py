@@ -264,6 +264,8 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 def _call_stub(
     api: LedgerApi, message: ContractApiMessage, contract: Contract
 ) -> Optional[bytes]:
+    """Try to call stub methods associated to the
+    contract API request performative."""
     try:
         method: Callable = getattr(contract, message.performative.value)
         if message.performative in [
@@ -287,6 +289,8 @@ def _call_stub(
 def _get_data(
     api: LedgerApi, message: ContractApiMessage, contract: Contract,
 ) -> bytes:
+    """Get the data from the contract method, either from the stub or
+    from the callable specified by the message."""
     # first, check if the custom handler for this type of request has been implemented.
     data = _call_stub(api, message, contract)
     if data is not None:
