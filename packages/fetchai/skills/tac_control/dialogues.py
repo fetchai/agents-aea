@@ -20,37 +20,37 @@
 """
 This module contains the classes required for dialogue management.
 
-- Dialogues: The dialogues class keeps track of all dialogues.
+- DefaultDialogue: The dialogue class maintains state of a dialogue of type default and manages it.
+- DefaultDialogues: The dialogues class keeps track of all dialogues of type default.
+- OefSearchDialogue: The dialogue class maintains state of a dialogue of type oef_search and manages it.
+- OefSearchDialogues: The dialogues class keeps track of all dialogues of type oef_search.
+- TacDialogue: The dialogue class maintains state of a dialogue of type tac and manages it.
+- TacDialogues: The dialogues class keeps track of all dialogues of type tac.
 """
 
-from typing import Optional, cast
+from typing import Dict
 
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel
-from aea.mail.base import Address
+from aea.helpers.dialogue.base import Dialogue
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
-from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
+from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
-from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
-from packages.fetchai.skills.tac_negotiation.helpers import (
-    DEMAND_DATAMODEL_NAME,
-    SUPPLY_DATAMODEL_NAME,
-)
+from packages.fetchai.protocols.tac.dialogues import TacDialogue as BaseTacDialogue
+from packages.fetchai.protocols.tac.dialogues import TacDialogues as BaseTacDialogues
 
 
-FipaDialogue = BaseFipaDialogue
+DefaultDialogue = BaseDefaultDialogue
 
 
-class FipaDialogues(Model, BaseFipaDialogues):
+class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -60,77 +60,35 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseFipaDialogues.__init__(self, self.context.agent_address)
+        BaseDefaultDialogues.__init__(self, self.context.agent_address)
 
     @staticmethod
     def role_from_first_message(message: Message) -> Dialogue.Role:
-        """
-        Infer the role of the agent from an incoming or outgoing first message
+        """Infer the role of the agent from an incoming/outgoing first message
 
         :param message: an incoming/outgoing first message
-        :return: the agent's role
+        :return: The role of the agent
         """
-        fipa_message = cast(FipaMessage, message)
-        if fipa_message.performative != FipaMessage.Performative.CFP:
-            raise ValueError("First message must be a CFP!")
-        query = fipa_message.query
-        if query.model is None:
-            raise ValueError("Query must have a data model!")
-        if query.model.name not in [
-            SUPPLY_DATAMODEL_NAME,
-            DEMAND_DATAMODEL_NAME,
-        ]:
-            raise ValueError(
-                "Query data model name must be in [{},{}]".format(
-                    SUPPLY_DATAMODEL_NAME, DEMAND_DATAMODEL_NAME
-                )
-            )
-        if message.is_incoming:
-            is_seller = (
-                query.model.name == SUPPLY_DATAMODEL_NAME
-            )  # the counterparty is querying for supply/sellers (this agent is receiving their CFP so is the seller)
-        else:
-            is_seller = (
-                query.model.name == DEMAND_DATAMODEL_NAME
-            )  # the agent is querying for demand/buyers (this agent is sending the CFP so it is the seller)
-        role = FipaDialogue.Role.SELLER if is_seller else FipaDialogue.Role.BUYER
-        return role
+        return DefaultDialogue.Role.AGENT
 
-
-class OefSearchDialogue(BaseOefSearchDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: DialogueLabel,
-        agent_address: Address,
-        role: Dialogue.Role,
-    ) -> None:
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+    ) -> DefaultDialogue:
         """
-        Initialize a dialogue.
+        Create an instance of fipa dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
-        :return: None
+        :return: the created dialogue
         """
-        BaseOefSearchDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        dialogue = DefaultDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
-        self._is_seller_search = None  # type: Optional[bool]
+        return dialogue
 
-    @property
-    def is_seller_search(self) -> bool:
-        """Get if it is a seller search."""
-        assert self._is_seller_search is not None, "is_seller_search not set!"
-        return self._is_seller_search
 
-    @is_seller_search.setter
-    def is_seller_search(self, is_seller_search: bool) -> None:
-        """Set is_seller_search."""
-        assert self._is_seller_search is None, "is_seller_search already set!"
-        self._is_seller_search = is_seller_search
+OefSearchDialogue = BaseOefSearchDialogue
 
 
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
@@ -172,21 +130,26 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         return dialogue
 
 
-SigningDialogue = BaseSigningDialogue
+TacDialogue = BaseTacDialogue
 
 
-class SigningDialogues(Model, BaseSigningDialogues):
-    """This class keeps track of all oef_search dialogues."""
+class TacDialogues(Model, BaseTacDialogues):
+    """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseSigningDialogues.__init__(self, self.context.agent_address)
+        BaseTacDialogues.__init__(self, self.context.agent_address)
+        self._dialogue_by_address = {}  # type: Dict[str, Dialogue]
+
+    @property
+    def dialogue_by_address(self) -> Dict[str, Dialogue]:
+        """Get the dialogue by address."""
+        return self._dialogue_by_address
 
     @staticmethod
     def role_from_first_message(message: Message) -> Dialogue.Role:
@@ -195,11 +158,11 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseSigningDialogue.Role.SKILL
+        return TacDialogue.Role.CONTROLLER
 
     def create_dialogue(
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> SigningDialogue:
+    ) -> TacDialogue:
         """
         Create an instance of fipa dialogue.
 
@@ -208,7 +171,8 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         :return: the created dialogue
         """
-        dialogue = SigningDialogue(
+        dialogue = TacDialogue(
             dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
+        self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = dialogue
         return dialogue

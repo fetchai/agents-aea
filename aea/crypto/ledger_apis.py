@@ -19,7 +19,7 @@
 
 """Module wrapping all the public and private keys cryptography."""
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Type, Union
 
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
@@ -220,3 +220,44 @@ class LedgerApis:
         api_class = make_ledger_api_cls(identifier)
         tx_nonce = api_class.generate_tx_nonce(seller=seller, client=client)
         return tx_nonce
+
+    @staticmethod
+    def recover_message(
+        identifier: str,
+        message: bytes,
+        signature: str,
+        is_deprecated_mode: bool = False,
+    ) -> Tuple[Address, ...]:
+        """
+        Recover the addresses from the hash.
+
+        :param identifier: ledger identifier.
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
+        """
+        assert (
+            identifier in SUPPORTED_LEDGER_APIS.keys()
+        ), "Not a registered ledger api identifier."
+        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        addresses = api_class.recover_message(
+            message=message, signature=signature, is_deprecated_mode=is_deprecated_mode
+        )
+        return addresses
+
+    @staticmethod
+    def get_hash(identifier: str, message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param identifier: ledger identifier.
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        assert (
+            identifier in SUPPORTED_LEDGER_APIS.keys()
+        ), "Not a registered ledger api identifier."
+        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        digest = api_class.get_hash(message=message)
+        return digest

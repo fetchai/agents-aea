@@ -145,6 +145,26 @@ class TestLedgerApis:
             )
             assert is_valid
 
+    def test_recover_message(self):
+        """Test the is_transaction_valid."""
+        expected_addresses = ("address_1", "address_2")
+        with mock.patch.object(
+            FetchAIApi, "recover_message", return_value=expected_addresses,
+        ):
+            addresses = self.ledger_apis.recover_message(
+                identifier="fetchai", message="message", signature="signature",
+            )
+            assert addresses == expected_addresses
+
+    def test_get_hash(self):
+        """Test the is_transaction_valid."""
+        expected_hash = "hash"
+        with mock.patch.object(
+            FetchAIApi, "get_hash", return_value=expected_hash,
+        ):
+            hash_ = self.ledger_apis.get_hash(identifier="fetchai", message=b"message",)
+            assert hash_ == expected_hash
+
     def test_generate_tx_nonce_positive(self):
         """Test generate_tx_nonce positive result."""
         result = LedgerApis.generate_tx_nonce(FetchAIApi.identifier, "seller", "client")

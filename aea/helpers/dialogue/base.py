@@ -142,6 +142,21 @@ class DialogueLabel:
             self.dialogue_starter_addr,
         )
 
+    @classmethod
+    def from_str(cls, obj: str) -> "DialogueLabel":
+        (
+            dialogue_starter_reference,
+            dialogue_responder_reference,
+            dialogue_opponent_addr,
+            dialogue_starter_addr,
+        ) = obj.split("_")
+        dialogue_label = DialogueLabel(
+            (dialogue_starter_reference, dialogue_responder_reference),
+            dialogue_opponent_addr,
+            dialogue_starter_addr,
+        )
+        return dialogue_label
+
 
 class Dialogue(ABC):
     """The dialogue class maintains state of a dialogue and manages it."""
@@ -703,10 +718,10 @@ class Dialogues(ABC):
         :param end_states: the list of dialogue endstates
         :return: None
         """
+        self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
         self._incomplete_to_complete_dialogue_labels = (
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
-        self._dialogues = {}  # type: Dict[DialogueLabel, Dialogue]
         self._agent_address = agent_address
         self._dialogue_nonce = 0
         self._dialogue_stats = DialogueStats(end_states)
@@ -729,7 +744,8 @@ class Dialogues(ABC):
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
         """Get dictionary of dialogues in which the agent engages."""
-        return self._dialogues
+        return self.
+      _by_dialogue_label
 
     @property
     def agent_address(self) -> Address:
@@ -788,7 +804,7 @@ class Dialogues(ABC):
         successfully_updated = dialogue.update(initial_message)
 
         if not successfully_updated:
-            self._dialogues.pop(dialogue.dialogue_label)
+            self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
             self._dialogue_nonce -= 1
             raise Exception(
                 "Cannot create the a dialogue with the specified performative and contents."

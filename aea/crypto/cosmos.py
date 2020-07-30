@@ -331,6 +331,17 @@ class CosmosHelper(Helper):
         ]
         return tuple(addresses)
 
+    @staticmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        digest = hashlib.sha256(message).hexdigest()
+        return digest
+
 
 class CosmosApi(LedgerApi, CosmosHelper):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""

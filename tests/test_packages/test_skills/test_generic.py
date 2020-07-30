@@ -47,13 +47,13 @@ class TestGenericSkills(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_seller:0.8.0")
@@ -80,7 +80,7 @@ class TestGenericSkills(AEATestCaseMany):
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_buyer:0.7.0")
@@ -199,13 +199,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_seller:0.8.0")
@@ -235,7 +235,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/generic_buyer:0.7.0")

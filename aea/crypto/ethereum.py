@@ -245,6 +245,17 @@ class EthereumHelper(Helper):
             )
         return (address,)
 
+    @staticmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        digest = Web3.keccak(message).hex()
+        return digest
+
 
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""

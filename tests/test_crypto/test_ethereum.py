@@ -95,6 +95,13 @@ def test_sign_and_recover_message_deprecated():
     ), "Failed to recover the correct address."
 
 
+def test_get_hash():
+    """Test the get hash functionality."""
+    expected_hash = "0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8"
+    hash_ = EthereumApi.get_hash(message=b"hello")
+    assert expected_hash == hash_
+
+
 def test_dump_positive():
     """Test dump."""
     account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)

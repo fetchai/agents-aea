@@ -202,6 +202,7 @@ class TestDialogueLabel:
             dialogue_starter_addr="agent 1",
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
+        assert DialogueLabel.from_str(str(self.dialogue_label)) == self.dialogue_label
 
 
 class TestDialogueBase:
