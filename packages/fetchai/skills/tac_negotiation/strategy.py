@@ -127,6 +127,7 @@ class Strategy(Model):
 
     @property
     def searching_for_types(self) -> List[Tuple[bool, str]]:
+        """Get the types the agent is searching for."""
         result = []  # type: List[Tuple[bool, str]]
         if self._search_for in [self.SearchFor.SELLERS, self.SearchFor.BOTH]:
             result.append((True, "sellers"))

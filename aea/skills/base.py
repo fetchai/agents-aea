@@ -42,7 +42,6 @@ from aea.configurations.base import (
 )
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
-from aea.contracts.base import Contract
 from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
 from aea.helpers.logging import AgentLoggerAdapter
@@ -212,12 +211,6 @@ class SkillContext:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.behaviours)
-
-    @property
-    def contracts(self) -> SimpleNamespace:
-        """Get contracts the skill has access to."""
-        assert self._skill is not None, "Skill not initialized."
-        return SimpleNamespace(**self._skill.contracts)
 
     @property
     def namespace(self) -> SimpleNamespace:
@@ -648,14 +641,7 @@ class Skill(Component):
         )  # type: Dict[str, Behaviour]
         self._models = {} if models is None else models  # type: Dict[str, Model]
 
-        self._contracts = {}  # type: Dict[str, Contract]
-
         self._skill_context._skill = self
-
-    @property
-    def contracts(self) -> Dict[str, Contract]:
-        """Get the contracts associated with the skill."""
-        return self._contracts
 
     @property
     def skill_context(self) -> SkillContext:
