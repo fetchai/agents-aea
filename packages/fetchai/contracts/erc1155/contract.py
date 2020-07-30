@@ -67,9 +67,8 @@ class ERC1155Contract(Contract):
         token_id = (token_type << 128) + index
         return token_id
 
-    # TODO rename this method to avoid conflicts with the base class method.
     @classmethod
-    def get_deploy_transaction(  # type: ignore
+    def get_deploy_transaction(
         cls,
         ledger_api: LedgerApi,
         deployer_address: Address,

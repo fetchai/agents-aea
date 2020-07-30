@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
+import builtins
 import unittest.mock
 from typing import cast
 
@@ -36,7 +37,6 @@ from packages.fetchai.protocols.contract_api import ContractApiMessage
 from tests.conftest import ETHEREUM, ETHEREUM_ADDRESS_ONE
 
 
-@pytest.mark.skip()
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
@@ -340,7 +340,6 @@ async def test_callable_wrong_number_of_arguments_apis(
 
     Test the case of either GET_DEPLOY_TRANSACTION.
     """
-    # TODO to fix
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues()
     request = ContractApiMessage(
@@ -348,7 +347,7 @@ async def test_callable_wrong_number_of_arguments_apis(
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
         contract_id="fetchai/erc1155:0.6.0",
-        callable="get_deploy_transaction",
+        callable="some_callable",
         kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
     )
     request.counterparty = str(ledger_apis_connection.connection_id)
@@ -362,10 +361,10 @@ async def test_callable_wrong_number_of_arguments_apis(
     )
 
     with unittest.mock.patch(
-        "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[])
+            "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[])
     ):
         with unittest.mock.patch.object(
-            ledger_apis_connection._logger, "error"
+                ledger_apis_connection._logger, "error"
         ) as mock_logger:
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
@@ -374,11 +373,12 @@ async def test_callable_wrong_number_of_arguments_apis(
                 "Expected one or more positional arguments, got 0"
             )
             assert (
-                response.message.performative == ContractApiMessage.Performative.ERROR
+                    response.message.performative
+                    == ContractApiMessage.Performative.ERROR
             )
             assert (
-                response.message.message
-                == "Expected one or more positional arguments, got 0"
+                    response.message.message
+                    == "Expected one or more positional arguments, got 0"
             )
 
 

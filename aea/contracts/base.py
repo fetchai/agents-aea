@@ -122,26 +122,23 @@ class Contract(Component, ABC):
 
         return contract_class(configuration)
 
-    # TODO if 'ContractApiMessage' was a default package
-    #   we could import it and remove the 'type ignore' tag.
-    #   the same applies to the below methods.
-    def get_deploy_transaction(
-        self, api: LedgerApi, message: "ContractApiMessage"  # type: ignore  # noqa
-    ) -> bytes:
+    @classmethod
+    def get_deploy_transaction(cls, ledger_api: LedgerApi, **kwargs) -> bytes:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
 
         Implement this method in the sub class if you want
         to handle the contract requests manually.
 
-        :param api: the ledger apis.
-        :param message: the contract API request.
+        :param ledger_api: the ledger apis.
+        :param kwargs: keyword arguments.
         :return: the bytes representing the state.
         """
         raise NotImplementedError
 
+    @classmethod
     def get_raw_transaction(
-        self, api: LedgerApi, message: "ContractApiMessage"  # type: ignore   # noqa
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
     ) -> bytes:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -149,34 +146,38 @@ class Contract(Component, ABC):
         Implement this method in the sub class if you want
         to handle the contract requests manually.
 
-        :param api: the ledger apis.
-        :param message: the contract API request.
+        :param ledger_api: the ledger apis.
+        :param contract_address: the contract address.
         :return: the bytes representing the state.
         """
         raise NotImplementedError
 
-    def get_raw_message(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:  # type: ignore   # noqa
+    def get_raw_message(
+        self, ledger_api: LedgerApi, contract_address: str, **kwargs
+    ) -> bytes:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
         Implement this method in the sub class if you want
         to handle the contract requests manually.
 
-        :param api: the ledger apis.
-        :param message: the contract API request.
+        :param ledger_api: the ledger apis.
+        :param contract_address: the contract address.
         :return: the bytes representing the state.
         """
         raise NotImplementedError
 
-    def get_state(self, api: LedgerApi, message: "ContractApiMessage") -> bytes:  # type: ignore   # noqa
+    def get_state(
+        self, ledger_api: LedgerApi, contract_address: str, **kwargs
+    ) -> bytes:
         """
         Handler method for the 'GET_STATE' requests.
 
         Implement this method in the sub class if you want
         to handle the contract requests manually.
 
-        :param api: the ledger apis.
-        :param message: the contract API request.
+        :param ledger_api: the ledger apis.
+        :param contract_address: the contract address.
         :return: the bytes representing the state.
         """
         raise NotImplementedError
