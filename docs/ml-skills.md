@@ -85,7 +85,7 @@ aea install
 In `ml_data_provider/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.2.0
   fetchai/oef_search:0.3.0: fetchai/soef:0.6.0
 ```
 
@@ -119,7 +119,7 @@ aea install
 In `ml_model_trainer/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.2.0
   fetchai/oef_search:0.3.0: fetchai/soef:0.6.0
 ```
 

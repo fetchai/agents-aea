@@ -406,7 +406,9 @@ class TestSoef:
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
         message = OefSearchMessage(
-            performative="oef_error", service_description=service_description,
+            performative="oef_error",
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=service_description,
         )
         envelope = Envelope(
             to="soef",

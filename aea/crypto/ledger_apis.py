@@ -19,8 +19,9 @@
 
 """Module wrapping all the public and private keys cryptography."""
 import logging
-from typing import Any, Dict, Optional, Tuple, Type, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
 from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
@@ -238,9 +239,9 @@ class LedgerApis:
         :return: the recovered addresses
         """
         assert (
-            identifier in SUPPORTED_LEDGER_APIS.keys()
+            identifier in ledger_apis_registry.supported_ids
         ), "Not a registered ledger api identifier."
-        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        api_class = make_ledger_api_cls(identifier)
         addresses = api_class.recover_message(
             message=message, signature=signature, is_deprecated_mode=is_deprecated_mode
         )
@@ -255,9 +256,11 @@ class LedgerApis:
         :param message: the message to be hashed.
         :return: the hash of the message.
         """
-        assert (
-            identifier in SUPPORTED_LEDGER_APIS.keys()
-        ), "Not a registered ledger api identifier."
-        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        identifier = (
+            identifier
+            if identifier in ledger_apis_registry.supported_ids
+            else DEFAULT_LEDGER
+        )
+        api_class = make_ledger_api_cls(identifier)
         digest = api_class.get_hash(message=message)
         return digest

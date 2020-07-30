@@ -154,10 +154,6 @@ class TestSkillContext:
             == self.my_aea.context.search_service_address
         )
 
-    def test_contracts(self):
-        """Test the 'contracts' property getter."""
-        assert isinstance(self.skill_context.contracts, SimpleNamespace)
-
     def test_namespace(self):
         """Test the 'namespace' property getter."""
         assert isinstance(self.skill_context.namespace, SimpleNamespace)

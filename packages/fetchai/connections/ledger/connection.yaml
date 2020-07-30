@@ -10,11 +10,11 @@ fingerprint:
   connection.py: QmS9eBSJ7pvbbs71mDtkGYqtivhjWCM2XHs2MYvAy3nULt
   contract_dispatcher.py: QmVpV9f4keF7KsqaMPw4HKCDLijKhMv8ymdqjt4DJUUSnQ
   ledger_dispatcher.py: QmaETup4DzFYVkembK2yZL6TfbNDL13fdr6i29CPubG3CN
-  readme.md: QmWQd7SG4yJyeHNA7KF94iKU1F76EWwv9Gncn4hf4DRQBN
+  readme.md: QmZ6i6zGUddhKWbUHn5qYiwxJH4igxqaBfisr5ueiVX1gS
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/contract_api:0.1.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 class_name: LedgerConnection
 config:
   ledger_apis:
@@ -28,5 +28,5 @@ config:
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:0.1.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 dependencies: {}

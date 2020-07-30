@@ -144,6 +144,7 @@ class DialogueLabel:
 
     @classmethod
     def from_str(cls, obj: str) -> "DialogueLabel":
+        """Get the dialogue label from string representation."""
         (
             dialogue_starter_reference,
             dialogue_responder_reference,
@@ -744,8 +745,7 @@ class Dialogues(ABC):
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
         """Get dictionary of dialogues in which the agent engages."""
-        return self.
-      _by_dialogue_label
+        return self._dialogues_by_dialogue_label
 
     @property
     def agent_address(self) -> Address:

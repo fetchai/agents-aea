@@ -11,7 +11,7 @@ fingerprint:
   dialogues.py: QmcpDZrkrvVAkV6Eh4C4pAufQ3TPPnNtXx3qBrukVvsGzf
   handlers.py: Qmd2gTfW8cxuUKYomnPecBxPqG9bgTWpQqxe3tyoNg8qA4
   helpers.py: QmUMCBgsZ5tB24twoWjfGibb1v5uDpUBxHPtzqZbzbvyL1
-  strategy.py: Qme1Ft8MCCRq1Zw2Spi3aeUr9AWPL5mBk4jNtqQFauNzTP
+  strategy.py: QmdrwXQVW49zkACzaFEbpyjX11fz7aC8riLxXamsvekR1v
   transactions.py: QmZkb2GfiGHwSSQuMafEkGKF4GHiyNu6mQancZkTWS7D6F
 fingerprint_ignore_patterns: []
 contracts:

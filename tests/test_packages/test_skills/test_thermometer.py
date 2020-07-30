@@ -47,7 +47,7 @@ class TestThermometerSkill(AEATestCaseMany):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.2.0",
             "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
@@ -198,7 +198,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.2.0",
             "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 

@@ -66,7 +66,7 @@ def run():
 
     # specify the default routing for some protocols
     default_routing = {
-        PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerConnection.connection_id,
+        PublicId.from_str("fetchai/ledger_api:0.2.0"): LedgerConnection.connection_id,
         PublicId.from_str("fetchai/oef_search:0.3.0"): SOEFConnection.connection_id,
     }
     default_connection = P2PLibp2pConnection.connection_id
