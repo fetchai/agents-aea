@@ -265,9 +265,7 @@ def _call_stub(
     api: LedgerApi, message: ContractApiMessage, contract: Contract
 ) -> Optional[bytes]:
     try:
-        method: Callable[[LedgerApi, ContractApiMessage], bytes] = getattr(
-            contract, message.performative.value
-        )
+        method: Callable = getattr(contract, message.performative.value)
         if message.performative in [
             ContractApiMessage.Performative.GET_STATE,
             ContractApiMessage.Performative.GET_RAW_MESSAGE,

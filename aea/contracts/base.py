@@ -169,9 +169,7 @@ class Contract(Component, ABC):
         raise NotImplementedError
 
     @classmethod
-    def get_state(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> bytes:
+    def get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes:
         """
         Handler method for the 'GET_STATE' requests.
 

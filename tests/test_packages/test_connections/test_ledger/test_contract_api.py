@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
-import builtins
 import unittest.mock
 from typing import cast
 
@@ -361,10 +360,10 @@ async def test_callable_wrong_number_of_arguments_apis(
     )
 
     with unittest.mock.patch(
-            "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[])
+        "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[])
     ):
         with unittest.mock.patch.object(
-                ledger_apis_connection._logger, "error"
+            ledger_apis_connection._logger, "error"
         ) as mock_logger:
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
@@ -373,12 +372,11 @@ async def test_callable_wrong_number_of_arguments_apis(
                 "Expected one or more positional arguments, got 0"
             )
             assert (
-                    response.message.performative
-                    == ContractApiMessage.Performative.ERROR
+                response.message.performative == ContractApiMessage.Performative.ERROR
             )
             assert (
-                    response.message.message
-                    == "Expected one or more positional arguments, got 0"
+                response.message.message
+                == "Expected one or more positional arguments, got 0"
             )
 
 
