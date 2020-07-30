@@ -19,7 +19,7 @@
 
 """Module wrapping all the public and private keys cryptography."""
 import logging
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Dict, Optional, Union
 
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
@@ -27,14 +27,13 @@ from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.ethereum import DEFAULT_CHAIN_ID, EthereumApi
 from aea.crypto.fetchai import DEFAULT_NETWORK, FetchAIApi
-from aea.crypto.registries import make_ledger_api
+from aea.crypto.registries import (
+    ledger_apis_registry,
+    make_ledger_api,
+    make_ledger_api_cls,
+)
 from aea.mail.base import Address
 
-SUPPORTED_LEDGER_APIS = {
-    CosmosApi.identifier: CosmosApi,
-    EthereumApi.identifier: EthereumApi,
-    FetchAIApi.identifier: FetchAIApi,
-}  # type: Dict[str, Type[LedgerApi]]
 DEFAULT_LEDGER_CONFIGS = {
     CosmosApi.identifier: {"address": COSMOS_DEFAULT_ADDRESS},
     EthereumApi.identifier: {
@@ -50,55 +49,24 @@ logger = logging.getLogger(__name__)
 class LedgerApis:
     """Store all the ledger apis we initialise."""
 
-    def __init__(
-        self,
-        ledger_api_configs: Dict[str, Dict[str, Union[str, int]]],
-        default_ledger_id: str,
-    ):
-        """
-        Instantiate a wallet object.
+    ledger_api_configs: Dict[str, Dict[str, Union[str, int]]] = DEFAULT_LEDGER_CONFIGS
 
-        :param ledger_api_configs: the ledger api configs.
-        :param default_ledger_id: the default ledger id.
-        """
-        apis = {}  # type: Dict[str, LedgerApi]
-        for identifier, config in ledger_api_configs.items():
-            api = make_ledger_api(identifier, **config)
-            apis[identifier] = api
-        self._apis = apis
-        self._configs = ledger_api_configs
-        self._default_ledger_id = default_ledger_id
+    @staticmethod
+    def has_ledger(identifier: str) -> bool:
+        """Check if it has the api."""
+        return identifier in ledger_apis_registry.supported_ids
 
-    @property
-    def configs(self) -> Dict[str, Dict[str, Union[str, int]]]:
-        """Get the configs."""
-        return self._configs
-
-    @property
-    def apis(self) -> Dict[str, LedgerApi]:
-        """Get the apis."""
-        return self._apis
-
-    def has_ledger(self, identifier: str) -> bool:
-        """Check if it has a ."""
-        return identifier in self.apis
-
-    def get_api(self, identifier: str) -> LedgerApi:
+    @classmethod
+    def get_api(cls, identifier: str) -> LedgerApi:
         """Get the ledger API."""
-        assert self.has_ledger(identifier), "Ledger API not instantiated!"
-        return self.apis[identifier]
+        assert (
+            identifier in ledger_apis_registry.supported_ids
+        ), "Not a registered ledger api identifier."
+        api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
+        return api
 
-    @property
-    def has_default_ledger(self) -> bool:
-        """Check if it has the default ledger API."""
-        return self.default_ledger_id in self.apis.keys()
-
-    @property
-    def default_ledger_id(self) -> str:
-        """Get the default ledger id."""
-        return self._default_ledger_id
-
-    def get_balance(self, identifier: str, address: str) -> Optional[int]:
+    @classmethod
+    def get_balance(cls, identifier: str, address: str) -> Optional[int]:
         """
         Get the token balance.
 
@@ -106,13 +74,16 @@ class LedgerApis:
         :param address: the address to check for
         :return: the token balance
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
+        assert (
+            identifier in ledger_apis_registry.supported_ids
+        ), "Not a registered ledger api identifier."
+        api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         balance = api.get_balance(address)
         return balance
 
+    @classmethod
     def get_transfer_transaction(
-        self,
+        cls,
         identifier: str,
         sender_address: str,
         destination_address: str,
@@ -133,14 +104,17 @@ class LedgerApis:
 
         :return: tx
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
+        assert (
+            identifier in ledger_apis_registry.supported_ids
+        ), "Not a registered ledger api identifier."
+        api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         tx = api.get_transfer_transaction(
             sender_address, destination_address, amount, tx_fee, tx_nonce, **kwargs,
         )
         return tx
 
-    def send_signed_transaction(self, identifier: str, tx_signed: Any) -> Optional[str]:
+    @classmethod
+    def send_signed_transaction(cls, identifier: str, tx_signed: Any) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
@@ -148,12 +122,15 @@ class LedgerApis:
         :param tx_signed: the signed transaction
         :return: the tx_digest, if present
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
+        assert (
+            identifier in ledger_apis_registry.supported_ids
+        ), "Not a registered ledger api identifier."
+        api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         tx_digest = api.send_signed_transaction(tx_signed)
         return tx_digest
 
-    def get_transaction_receipt(self, identifier: str, tx_digest: str) -> Optional[Any]:
+    @classmethod
+    def get_transaction_receipt(cls, identifier: str, tx_digest: str) -> Optional[Any]:
         """
         Get the transaction receipt for a transaction digest.
 
@@ -161,12 +138,15 @@ class LedgerApis:
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
+        assert (
+            identifier in ledger_apis_registry.supported_ids
+        ), "Not a registered ledger api identifier."
+        api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         tx_receipt = api.get_transaction_receipt(tx_digest)
         return tx_receipt
 
-    def get_transaction(self, identifier: str, tx_digest: str) -> Optional[Any]:
+    @classmethod
+    def get_transaction(cls, identifier: str, tx_digest: str) -> Optional[Any]:
         """
         Get the transaction for a transaction digest.
 
@@ -174,8 +154,10 @@ class LedgerApis:
         :param tx_digest: the digest associated to the transaction.
         :return: the tx, if present
         """
-        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
-        api = self.apis[identifier]
+        assert (
+            identifier in ledger_apis_registry.supported_ids
+        ), "Not a registered ledger api identifier."
+        api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         tx = api.get_transaction(tx_digest)
         return tx
 
@@ -189,9 +171,9 @@ class LedgerApis:
         :return: True if correctly settled, False otherwise
         """
         assert (
-            identifier in SUPPORTED_LEDGER_APIS.keys()
+            identifier in ledger_apis_registry.supported_ids
         ), "Not a registered ledger api identifier."
-        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        api_class = make_ledger_api_cls(identifier)
         is_settled = api_class.is_transaction_settled(tx_receipt)
         return is_settled
 
@@ -216,9 +198,9 @@ class LedgerApis:
         :return: True if is valid , False otherwise
         """
         assert (
-            identifier in SUPPORTED_LEDGER_APIS.keys()
+            identifier in ledger_apis_registry.supported_ids
         ), "Not a registered ledger api identifier."
-        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        api_class = make_ledger_api_cls(identifier)
         is_valid = api_class.is_transaction_valid(tx, seller, client, tx_nonce, amount)
         return is_valid
 
@@ -233,8 +215,8 @@ class LedgerApis:
         :return: return the hash in hex.
         """
         assert (
-            identifier in SUPPORTED_LEDGER_APIS.keys()
+            identifier in ledger_apis_registry.supported_ids
         ), "Not a registered ledger api identifier."
-        api_class = SUPPORTED_LEDGER_APIS[identifier]
+        api_class = make_ledger_api_cls(identifier)
         tx_nonce = api_class.generate_tx_nonce(seller=seller, client=client)
         return tx_nonce

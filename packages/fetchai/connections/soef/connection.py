@@ -22,6 +22,7 @@ import asyncio
 import copy
 import logging
 from asyncio import CancelledError
+from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from typing import Callable, Dict, List, Optional, Set, Union, cast
@@ -387,6 +388,8 @@ class SOEFChannel:
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
+        except (asyncio.CancelledError, ConcurrentCancelledError):
+            pass
         except Exception:  # pylint: disable=broad-except # pragma: nocover
             logger.exception("Exception during envelope processing")
             await self._send_error_response(
