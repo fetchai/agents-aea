@@ -37,7 +37,6 @@ from aea.helpers.transaction.base import (
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
-from packages.fetchai.connections.ledger.contract_dispatcher import ContractApiDialogues
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiDialogues,
     LedgerApiRequestDispatcher,
@@ -178,6 +177,8 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     signed_transaction = crypto1.sign_transaction(response_message.raw_transaction.body)
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+        message_id=response_message.message_id + 1,
+        target=response_message.message_id,
         dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
         signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
     )
@@ -216,6 +217,8 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
         dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
+        message_id=response_message.message_id + 1,
+        target=response_message.message_id,
         transaction_digest=response_message.transaction_digest,
     )
     request.counterparty = str(ledger_apis_connection.connection_id)
@@ -287,15 +290,14 @@ async def test_no_balance():
     """Test no balance."""
     dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
     mock_api = Mock()
-    contract_api_dialogues = ContractApiDialogues()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
-        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
         address="test",
     )
     message.counterparty = "test"
-    dialogue = contract_api_dialogues.update(message)
+    dialogue = dispatcher.dialogues.update(message)
     mock_api.get_balance.return_value = None
     msg = dispatcher.get_balance(mock_api, message, dialogue)
 
@@ -307,10 +309,9 @@ async def test_no_raw_tx():
     """Test no raw tx returned."""
     dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
     mock_api = Mock()
-    contract_api_dialogues = ContractApiDialogues()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
             ledger_id=ETHEREUM,
             sender_address="1111",
@@ -324,7 +325,7 @@ async def test_no_raw_tx():
         ),
     )
     message.counterparty = "test"
-    dialogue = contract_api_dialogues.update(message)
+    dialogue = dispatcher.dialogues.update(message)
     mock_api.get_transfer_transaction.return_value = None
     msg = dispatcher.get_raw_transaction(mock_api, message, dialogue)
 
@@ -337,14 +338,14 @@ async def test_attempts_get_transaction_receipt():
     dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
     dispatcher.connection_status.is_connected = True
     mock_api = Mock()
-    contract_api_dialogues = ContractApiDialogues()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         transaction_digest=TransactionDigest("asdad", "sdfdsf"),
     )
     message.counterparty = "test"
-    dialogue = contract_api_dialogues.update(message)
+    dialogue = dispatcher.dialogues.update(message)
+    assert dialogue is not None
     mock_api.get_transaction.return_value = None
     mock_api.is_transaction_settled.return_value = True
     with patch.object(dispatcher, "MAX_ATTEMPTS", 2):
