@@ -430,9 +430,8 @@ def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> in
     try:
         if type_ not in DEFAULT_LEDGER_CONFIGS:  # pragma: no cover
             raise ValueError("No ledger api config for {} available.".format(type_))
-        ledger_apis = LedgerApis(DEFAULT_LEDGER_CONFIGS, agent_config.default_ledger)
         address = wallet.addresses[type_]
-        balance = ledger_apis.get_balance(type_, address)
+        balance = LedgerApis.get_balance(type_, address)
         if balance is None:  # pragma: no cover
             raise ValueError("No balance returned!")
         return balance

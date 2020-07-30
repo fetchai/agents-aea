@@ -26,13 +26,16 @@ import click
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import try_get_balance, verify_or_create_private_keys
-from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
+from aea.crypto.registries import ledger_apis_registry
 from aea.crypto.wallet import Wallet
 
 
 @click.command()
 @click.argument(
-    "type_", metavar="TYPE", type=click.Choice(SUPPORTED_LEDGER_APIS), required=True,
+    "type_",
+    metavar="TYPE",
+    type=click.Choice(ledger_apis_registry.supported_ids),
+    required=True,
 )
 @click.pass_context
 @check_aea_project

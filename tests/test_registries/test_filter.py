@@ -29,6 +29,7 @@ from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
 from tests.data.dummy_skill.behaviours import DummyBehaviour
+from tests.data.dummy_skill.handlers import DummyHandler
 
 
 class TestFilter:
@@ -139,6 +140,52 @@ class TestFilter:
         )
         assert self.decision_make_queue.empty()
         assert len(self.resources.behaviour_registry.fetch_all()) == 0
+        # restore previous state
+        self.resources.component_registry.unregister(skill.component_id)
+
+    def test_handle_internal_message_new_handlers(self):
+        """Test handle internal message when there are new handlers to register."""
+        skill = Skill(
+            SkillConfig("name", "author", "0.1.0"),
+            handlers={},
+            behaviours={},
+            models={},
+        )
+        self.resources.add_skill(skill)
+        new_handler = DummyHandler(name="dummy2", skill_context=skill.skill_context)
+        skill.skill_context.new_handlers.put(new_handler)
+        self.filter.handle_internal_messages()
+
+        assert self.decision_make_queue.empty()
+        assert len(self.resources.handler_registry.fetch_all()) == 1
+        # restore previous state
+        self.resources.remove_skill(skill.public_id)
+        assert len(self.resources.handler_registry.fetch_all()) == 0
+
+    def test_handle_internal_message_new_handlers_with_error(self):
+        """Test handle internal message when an error happens while registering a new handler."""
+        skill = Skill(
+            SkillConfig("name", "author", "0.1.0"),
+            handlers={},
+            behaviours={},
+            models={},
+        )
+        self.resources.add_skill(skill)
+        new_handler = DummyHandler(name="dummy2", skill_context=skill.skill_context)
+        with unittest.mock.patch.object(
+            self.resources.handler_registry, "register", side_effect=ValueError
+        ):
+            with unittest.mock.patch.object(
+                aea.registries.filter.logger, "warning"
+            ) as mock_logger_warning:
+                skill.skill_context.new_handlers.put(new_handler)
+                self.filter.handle_internal_messages()
+
+        mock_logger_warning.assert_called_with(
+            "Error when trying to add a new handler: "
+        )
+        assert self.decision_make_queue.empty()
+        assert len(self.resources.handler_registry.fetch_all()) == 0
         # restore previous state
         self.resources.component_registry.unregister(skill.component_id)
 

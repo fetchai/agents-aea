@@ -28,15 +28,11 @@ from aea.crypto.cosmos import CosmosApi
 from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import FetchAIApi
 from aea.crypto.ledger_apis import LedgerApis
-from aea.exceptions import AEAException
 
 from tests.conftest import (
-    COSMOS_TESTNET_CONFIG,
     ETHEREUM_ADDRESS_ONE,
-    ETHEREUM_TESTNET_CONFIG,
     FETCHAI,
     FETCHAI_ADDRESS_ONE,
-    FETCHAI_TESTNET_CONFIG,
 )
 
 logger = logging.getLogger(__name__)
@@ -48,24 +44,15 @@ def _raise_exception(*args, **kwargs):
 
 def test_initialisation():
     """Test the initialisation of the ledger APIs."""
-    ledger_apis = LedgerApis(
-        {
-            EthereumApi.identifier: ETHEREUM_TESTNET_CONFIG,
-            FetchAIApi.identifier: FETCHAI_TESTNET_CONFIG,
-            CosmosApi.identifier: COSMOS_TESTNET_CONFIG,
-        },
-        FetchAIApi.identifier,
-    )
-    assert ledger_apis.configs.get(EthereumApi.identifier) == ETHEREUM_TESTNET_CONFIG
+    ledger_apis = LedgerApis
     assert ledger_apis.has_ledger(FetchAIApi.identifier)
-    assert type(ledger_apis.get_api(FetchAIApi.identifier)) == FetchAIApi
-    assert ledger_apis.has_ledger(EthereumApi.identifier)
-    assert type(ledger_apis.get_api(EthereumApi.identifier)) == EthereumApi
-    assert ledger_apis.has_ledger(CosmosApi.identifier)
-    assert type(ledger_apis.get_api(CosmosApi.identifier)) == CosmosApi
-    unknown_config = {"UnknownPath": 8080}
-    with pytest.raises(AEAException):
-        LedgerApis({"UNKNOWN": unknown_config}, FetchAIApi.identifier)
+    assert type(LedgerApis.get_api(FetchAIApi.identifier)) == FetchAIApi
+    assert LedgerApis.has_ledger(EthereumApi.identifier)
+    assert type(LedgerApis.get_api(EthereumApi.identifier)) == EthereumApi
+    assert LedgerApis.has_ledger(CosmosApi.identifier)
+    assert type(LedgerApis.get_api(CosmosApi.identifier)) == CosmosApi
+    with pytest.raises(AssertionError):
+        ledger_apis.get_api("UNKNOWN")
 
 
 class TestLedgerApis:
@@ -74,37 +61,20 @@ class TestLedgerApis:
     @classmethod
     def setup_class(cls):
         """Setup the test case."""
-        cls.ledger_apis = LedgerApis(
-            {
-                EthereumApi.identifier: ETHEREUM_TESTNET_CONFIG,
-                FetchAIApi.identifier: FETCHAI_TESTNET_CONFIG,
-            },
-            FetchAIApi.identifier,
-        )
+        cls.ledger_apis = LedgerApis
 
     def test_get_balance(self):
         """Test the get_balance."""
-        api = self.ledger_apis.apis[EthereumApi.identifier]
-        with mock.patch.object(api.api.eth, "getBalance", return_value=10):
+        with mock.patch.object(EthereumApi, "get_balance", return_value=10):
             balance = self.ledger_apis.get_balance(
                 EthereumApi.identifier, ETHEREUM_ADDRESS_ONE
             )
             assert balance == 10
 
-        with mock.patch.object(
-            api.api.eth, "getBalance", return_value=0, side_effect=Exception
-        ):
-            balance = self.ledger_apis.get_balance(
-                EthereumApi.identifier, FETCHAI_ADDRESS_ONE
-            )
-            assert balance is None, "This must be None since the address is wrong"
-
     def test_get_transfer_transaction(self):
         """Test the get_transfer_transaction."""
         with mock.patch.object(
-            self.ledger_apis.apis.get(FetchAIApi.identifier),
-            "get_transfer_transaction",
-            return_value="mock_transaction",
+            FetchAIApi, "get_transfer_transaction", return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transfer_transaction(
                 identifier=FETCHAI,
@@ -119,7 +89,7 @@ class TestLedgerApis:
     def test_send_signed_transaction(self):
         """Test the send_signed_transaction."""
         with mock.patch.object(
-            self.ledger_apis.apis.get(FetchAIApi.identifier),
+            FetchAIApi,
             "send_signed_transaction",
             return_value="mock_transaction_digest",
         ):
@@ -131,7 +101,7 @@ class TestLedgerApis:
     def test_get_transaction_receipt(self):
         """Test the get_transaction_receipt."""
         with mock.patch.object(
-            self.ledger_apis.apis.get(FetchAIApi.identifier),
+            FetchAIApi,
             "get_transaction_receipt",
             return_value="mock_transaction_receipt",
         ):
@@ -143,9 +113,7 @@ class TestLedgerApis:
     def test_get_transaction(self):
         """Test the get_transaction."""
         with mock.patch.object(
-            self.ledger_apis.apis.get(FetchAIApi.identifier),
-            "get_transaction",
-            return_value="mock_transaction",
+            FetchAIApi, "get_transaction", return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transaction(
                 identifier=FETCHAI, tx_digest="tx_digest",
@@ -179,11 +147,5 @@ class TestLedgerApis:
 
     def test_generate_tx_nonce_positive(self):
         """Test generate_tx_nonce positive result."""
-        result = self.ledger_apis.generate_tx_nonce(
-            FetchAIApi.identifier, "seller", "client"
-        )
+        result = LedgerApis.generate_tx_nonce(FetchAIApi.identifier, "seller", "client")
         assert int(result, 16)
-
-    def test_has_default_ledger_positive(self):
-        """Test has_default_ledger init positive result."""
-        assert self.ledger_apis.has_default_ledger

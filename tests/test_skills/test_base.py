@@ -143,6 +143,10 @@ class TestSkillContext:
         """Test 'new_behaviours_queue' property getter."""
         assert isinstance(self.skill_context.new_behaviours, Queue)
 
+    def test_new_handlers_queue(self):
+        """Test 'new_behaviours_queue' property getter."""
+        assert isinstance(self.skill_context.new_handlers, Queue)
+
     def test_search_service_address(self):
         """Test 'search_service_address' property getter."""
         assert (
