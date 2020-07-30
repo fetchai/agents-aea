@@ -34,16 +34,16 @@ def test_tac_message_instantiation():
     assert TacMessage(performative=TacMessage.Performative.UNREGISTER)
     assert TacMessage(
         performative=TacMessage.Performative.TRANSACTION,
-        tx_id="some_id",
-        tx_sender_addr="some_address",
-        tx_counterparty_addr="some_other_address",
+        transaction_id="some_id",
+        ledger_id="some_ledger",
+        sender_address="some_address",
+        counterparty_address="some_other_address",
         amount_by_currency_id={"FET": 10},
-        tx_sender_fee=10,
-        tx_counterparty_fee=10,
+        fee_by_currency_id={"FET": 1},
         quantities_by_good_id={"123": 0, "1234": 10},
-        tx_nonce=1,
-        tx_sender_signature="some_signature",
-        tx_counterparty_signature="some_other_signature",
+        nonce=1,
+        sender_signature="some_signature",
+        counterparty_signature="some_other_signature",
     )
     assert TacMessage(performative=TacMessage.Performative.CANCELLED)
     assert TacMessage(
@@ -52,7 +52,7 @@ def test_tac_message_instantiation():
         exchange_params_by_currency_id={"FET": 10.0},
         quantities_by_good_id={"123": 20, "1234": 15},
         utility_params_by_good_id={"123": 30.0, "1234": 50.0},
-        tx_fee=20,
+        fee_by_currency_id={"FET": 1},
         agent_addr_to_name={"agent_1": "Agent one", "agent_2": "Agent two"},
         currency_id_to_name={"FET": "currency_name"},
         good_id_to_name={"123": "First good", "1234": "Second good"},
@@ -60,7 +60,7 @@ def test_tac_message_instantiation():
     )
     assert TacMessage(
         performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
-        tx_id="some_id",
+        transaction_id="some_id",
         amount_by_currency_id={"FET": 10},
         quantities_by_good_id={"123": 20, "1234": 15},
     )
@@ -90,16 +90,16 @@ def test_tac_serialization():
 
     msg = TacMessage(
         performative=TacMessage.Performative.TRANSACTION,
-        tx_id="some_id",
-        tx_sender_addr="some_address",
-        tx_counterparty_addr="some_other_address",
+        ledger_id="some_ledger",
+        transaction_id="some_id",
+        sender_address="some_address",
+        counterparty_address="some_other_address",
         amount_by_currency_id={"FET": -10},
-        tx_sender_fee=10,
-        tx_counterparty_fee=10,
+        fee_by_currency_id={"FET": 1},
         quantities_by_good_id={"123": 0, "1234": 10},
-        tx_nonce=1,
-        tx_sender_signature="some_signature",
-        tx_counterparty_signature="some_other_signature",
+        nonce=1,
+        sender_signature="some_signature",
+        counterparty_signature="some_other_signature",
     )
     msg_bytes = TacMessage.serializer.encode(msg)
     actual_msg = TacMessage.serializer.decode(msg_bytes)
@@ -118,7 +118,7 @@ def test_tac_serialization():
         exchange_params_by_currency_id={"FET": 10.0},
         quantities_by_good_id={"123": 20, "1234": 15},
         utility_params_by_good_id={"123": 30.0, "1234": 50.0},
-        tx_fee=20,
+        fee_by_currency_id={"FET": 1},
         agent_addr_to_name={"agent_1": "Agent one", "agent_2": "Agent two"},
         currency_id_to_name={"FET": "currency_name"},
         good_id_to_name={"123": "First good", "1234": "Second good"},
@@ -131,7 +131,7 @@ def test_tac_serialization():
 
     msg = TacMessage(
         performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
-        tx_id="some_id",
+        transaction_id="some_id",
         amount_by_currency_id={"FET": 10},
         quantities_by_good_id={"123": 20, "1234": 15},
     )
