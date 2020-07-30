@@ -184,6 +184,11 @@ class TestSearchAgentsLocal:
 
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        cls.cli_config_file = f"{cls.t}/cli_config.yaml"
+        cls.cli_config_patch = mock.patch(
+            "aea.cli.utils.config.CLI_CONFIG_PATH", cls.cli_config_file
+        )
+        cls.cli_config_patch.start()
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
@@ -233,6 +238,7 @@ class TestSearchAgentsLocal:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
+        cls.cli_config_patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

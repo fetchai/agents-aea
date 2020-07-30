@@ -23,28 +23,18 @@ import logging
 import sys
 from typing import Optional
 
-from aea.crypto.cosmos import CosmosCrypto, CosmosFaucetApi
-from aea.crypto.ethereum import EthereumCrypto, EthereumFaucetApi
-from aea.crypto.fetchai import FetchAICrypto, FetchAIFaucetApi
-from aea.crypto.registries import make_crypto
+from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto, make_faucet_api
 
 COSMOS_PRIVATE_KEY_FILE = "cosmos_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
 ETHEREUM_PRIVATE_KEY_FILE = "eth_private_key.txt"
-TESTNETS = {
-    FetchAICrypto.identifier: "testnet",
-    EthereumCrypto.identifier: "ropsten",
-    CosmosCrypto.identifier: "testnet",
-}
 IDENTIFIER_TO_KEY_FILES = {
     CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE,
     EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_FILE,
     FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE,
-}
-IDENTIFIER_TO_FAUCET_APIS = {
-    CosmosCrypto.identifier: CosmosFaucetApi(),
-    EthereumCrypto.identifier: EthereumFaucetApi(),
-    FetchAICrypto.identifier: FetchAIFaucetApi(),
 }
 
 logger = logging.getLogger(__name__)
@@ -99,6 +89,6 @@ def try_generate_testnet_wealth(identifier: str, address: str) -> None:
     :param address: the address to check for
     :return: None
     """
-    faucet_api = IDENTIFIER_TO_FAUCET_APIS.get(identifier, None)
+    faucet_api = make_faucet_api(identifier)
     if faucet_api is not None:
         faucet_api.get_wealth(address)

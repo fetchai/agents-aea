@@ -293,6 +293,7 @@ class FaucetApi(ABC):
     """Interface for testnet faucet APIs."""
 
     identifier = "base"  # type: str
+    network_name = "testnet"  # type: str
 
     @abstractmethod
     def get_wealth(self, address: Address) -> None:

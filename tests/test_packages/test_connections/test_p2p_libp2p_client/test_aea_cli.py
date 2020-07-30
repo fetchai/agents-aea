@@ -46,7 +46,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def setup_class(cls):
         """Set up the test class."""
-        AEATestCaseEmpty.setup_class()
+        super(TestP2PLibp2pClientConnectionAEARunning, cls).setup_class()
 
         cls.node_connection = _make_libp2p_connection(
             delegate_host=DEFAULT_HOST,
@@ -91,6 +91,6 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         """Tear down the test"""
         cls.terminate_agents()
 
-        AEATestCaseEmpty.teardown_class()
+        super(TestP2PLibp2pClientConnectionAEARunning, cls).teardown_class()
 
         cls.node_multiplexer.disconnect()

@@ -1121,7 +1121,7 @@ class TestSendWithOEF(UseOef):
 @pytest.mark.skipif(
     sys.version_info < (3, 7), reason="Python version < 3.7 not supported by the OEF."
 )
-async def test_cannot_connect_to_oef(caplog):
+async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
     oef_connection = _make_oef_connection(
         address=FETCHAI_ADDRESS_ONE,
@@ -1129,13 +1129,15 @@ async def test_cannot_connect_to_oef(caplog):
         oef_port=61234,  # use addr instead of hostname to avoid name resolution
     )
 
-    with caplog.at_level(logging.DEBUG, logger="aea.packages.fetchai.connections.oef"):
+    with mock.patch.object(oef_connection.logger, "warning") as mock_logger:
 
         task = asyncio.ensure_future(
             oef_connection.connect(), loop=asyncio.get_event_loop()
         )
         await asyncio.sleep(3.0)
-        assert "Cannot connect to OEFChannel. Retrying in 5 seconds..." in caplog.text
+        mock_logger.assert_any_call(
+            "Cannot connect to OEFChannel. Retrying in 5 seconds..."
+        )
 
         await cancel_and_wait(task)
         await oef_connection.disconnect()

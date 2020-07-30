@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import shutil
@@ -27,6 +29,8 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 from click import ClickException
+
+from pexpect.exceptions import EOF  # type: ignore
 
 import pytest
 
@@ -203,26 +207,24 @@ def test_run_multiple_connections(connection_ids):
         cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(DEFAULT_CONNECTION)]
     )
     assert result.exit_code == 1
+    process = PexpectWrapper(  # nosec
+        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
+        env=os.environ,
+        maxread=10000,
+        encoding="utf-8",
+        logfile=sys.stdout,
+    )
 
     try:
-        process = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
+        process.expect_all(["Start processing messages"], timeout=20)
+        process.control_c()
+        process.expect(
+            EOF, timeout=20,
         )
-
-        time.sleep(5.0)
-        sigint_crossplatform(process)
-        process.wait(timeout=5)
-
+        process.wait_to_complete(10)
         assert process.returncode == 0
-
     finally:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
-
+        process.wait_to_complete(10)
         os.chdir(cwd)
         try:
             shutil.rmtree(t)
