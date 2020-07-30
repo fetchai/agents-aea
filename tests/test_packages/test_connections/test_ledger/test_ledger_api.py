@@ -19,17 +19,14 @@
 """This module contains the tests of the ledger API connection module."""
 import asyncio
 import logging
-from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
 
 from aea.configurations.base import ProtocolId
-from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStatus
 from aea.crypto.registries import make_crypto, make_ledger_api
-from aea.crypto.wallet import CryptoStore
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
@@ -37,7 +34,6 @@ from aea.helpers.transaction.base import (
     TransactionDigest,
     TransactionReceipt,
 )
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
@@ -47,7 +43,6 @@ from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-
 
 from tests.conftest import (
     COSMOS,
@@ -60,7 +55,6 @@ from tests.conftest import (
     FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
-    ROOT_DIR,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,22 +68,6 @@ ledger_ids = pytest.mark.parametrize(
         (COSMOS, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
-
-
-@pytest.fixture()
-async def ledger_apis_connection(request):
-    """Make a connection."""
-    crypto = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("name", crypto.address)
-    crypto_store = CryptoStore()
-    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
-    connection = Connection.from_dir(
-        directory, identity=identity, crypto_store=crypto_store
-    )
-    connection = cast(Connection, connection)
-    await connection.connect()
-    yield connection
-    await connection.disconnect()
 
 
 @pytest.mark.integration

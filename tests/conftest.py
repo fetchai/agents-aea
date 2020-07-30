@@ -59,7 +59,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML,
     PublicId,
 )
-from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.contracts import Contract, contract_registry
@@ -72,6 +72,7 @@ from aea.crypto.helpers import (
     FETCHAI_PRIVATE_KEY_FILE,
 )
 from aea.crypto.registries import make_crypto
+from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
@@ -969,6 +970,23 @@ def check_test_threads(request):
     yield
     new_num_threads = threading.activeCount()
     assert num_threads >= new_num_threads, "Non closed threads!"
+
+
+@pytest.fixture()
+async def ledger_apis_connection(request):
+    """Make a connection."""
+    crypto = make_crypto(DEFAULT_LEDGER)
+    identity = Identity("name", crypto.address)
+    crypto_store = CryptoStore()
+    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
+    connection = Connection.from_dir(
+        directory, identity=identity, crypto_store=crypto_store
+    )
+    connection = cast(Connection, connection)
+    connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")
+    await connection.connect()
+    yield connection
+    await connection.disconnect()
 
 
 @pytest.fixture()
