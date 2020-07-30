@@ -132,40 +132,48 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         dialogue.update(response)
         return response
 
-    def _handle_request(
+    def dispatch_request(
         self,
-        api: LedgerApi,
+        ledger_api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
         response_builder: Callable[[bytes], ContractApiMessage],
     ) -> ContractApiMessage:
+        """
+        Dispatch a request to a user-defined contract method.
+
+        :param ledger_api: the ledger apis.
+        :param message: the contract API request message.
+        :param dialogue: the contract API dialogue.
+        :param response_builder: callable that from bytes builds a contract API message.
+        :return: the response message.
+        """
         contract = self.contract_registry.make(message.contract_id)
         try:
-            data = _get_data(api, message, contract)
+            data = _get_data(ledger_api, message, contract)
             response = response_builder(data)
             response.counterparty = message.counterparty
             dialogue.update(response)
         except AEAException as e:
             self.logger.error(str(e))
-            response = self.get_error_message(e, api, message, dialogue)
+            response = self.get_error_message(e, ledger_api, message, dialogue)
         except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            # TODO add dialogue reference
             self.logger.error(
                 f"An error occurred while processing the contract api request: '{str(e)}'."
             )
-            response = self.get_error_message(e, api, message, dialogue)
+            response = self.get_error_message(e, ledger_api, message, dialogue)
         return response
 
     def get_state(
         self,
-        api: LedgerApi,
+        ledger_api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
         """
         Send the request 'get_state'.
 
-        :param api: the API object.
+        :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
         :return: None
@@ -180,18 +188,18 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 state=State(message.ledger_id, data),
             )
 
-        return self._handle_request(api, message, dialogue, build_response)
+        return self.dispatch_request(ledger_api, message, dialogue, build_response)
 
     def get_deploy_transaction(
         self,
-        api: LedgerApi,
+        ledger_api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
         """
         Send the request 'get_raw_transaction'.
 
-        :param api: the API object.
+        :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
         :return: None
@@ -206,18 +214,18 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raw_transaction=RawTransaction(message.ledger_id, tx),
             )
 
-        return self._handle_request(api, message, dialogue, build_response)
+        return self.dispatch_request(ledger_api, message, dialogue, build_response)
 
     def get_raw_transaction(
         self,
-        api: LedgerApi,
+        ledger_api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
         """
         Send the request 'get_raw_transaction'.
 
-        :param api: the API object.
+        :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
         :return: None
@@ -232,18 +240,18 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raw_transaction=RawTransaction(message.ledger_id, tx),
             )
 
-        return self._handle_request(api, message, dialogue, build_response)
+        return self.dispatch_request(ledger_api, message, dialogue, build_response)
 
     def get_raw_message(
         self,
-        api: LedgerApi,
+        ledger_api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
     ) -> ContractApiMessage:
         """
         Send the request 'get_raw_message'.
 
-        :param api: the API object.
+        :param ledger_api: the ledger API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
         :return: None
@@ -258,11 +266,11 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raw_message=RawMessage(message.ledger_id, rm),
             )
 
-        return self._handle_request(api, message, dialogue, build_response)
+        return self.dispatch_request(ledger_api, message, dialogue, build_response)
 
 
 def _call_stub(
-    api: LedgerApi, message: ContractApiMessage, contract: Contract
+    ledger_api: LedgerApi, message: ContractApiMessage, contract: Contract
 ) -> Optional[bytes]:
     """Try to call stub methods associated to the
     contract API request performative."""
@@ -273,11 +281,11 @@ def _call_stub(
             ContractApiMessage.Performative.GET_RAW_MESSAGE,
             ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         ]:
-            args, kwargs = [api, message.contract_address], message.kwargs.body
+            args, kwargs = [ledger_api, message.contract_address], message.kwargs.body
         elif message.performative in [  # pragma: nocover
             ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         ]:
-            args, kwargs = [api], message.kwargs.body
+            args, kwargs = [ledger_api], message.kwargs.body
         else:  # pragma: nocover
             raise AEAException(f"Unexpected performative: {message.performative}")
         data = method(*args, **kwargs)
