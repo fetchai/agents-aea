@@ -28,8 +28,8 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
-from packages.fetchai.connections.oef.connection import (
-    PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -87,7 +87,7 @@ class FaberHTTPHandler(Handler):
             content=json.dumps(content).encode("utf-8"),
         )
         message.counterparty = self.alice_address
-        context = EnvelopeContext(connection_id=OEF_CONNECTION_PUBLIC_ID)
+        context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
         self.context.outbox.put_message(message=message, context=context)
 
     def setup(self) -> None:
