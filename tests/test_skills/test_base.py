@@ -143,16 +143,16 @@ class TestSkillContext:
         """Test 'new_behaviours_queue' property getter."""
         assert isinstance(self.skill_context.new_behaviours, Queue)
 
+    def test_new_handlers_queue(self):
+        """Test 'new_behaviours_queue' property getter."""
+        assert isinstance(self.skill_context.new_handlers, Queue)
+
     def test_search_service_address(self):
         """Test 'search_service_address' property getter."""
         assert (
             self.skill_context.search_service_address
             == self.my_aea.context.search_service_address
         )
-
-    def test_contracts(self):
-        """Test the 'contracts' property getter."""
-        assert isinstance(self.skill_context.contracts, SimpleNamespace)
 
     def test_namespace(self):
         """Test the 'namespace' property getter."""

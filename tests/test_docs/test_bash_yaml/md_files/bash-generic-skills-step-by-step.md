@@ -88,7 +88,7 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 skills: []
 behaviours:
@@ -156,7 +156,7 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 skills: []
 behaviours:
@@ -218,7 +218,7 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.2.0
 ```
 ``` yaml
 currency_id: 'ETH'

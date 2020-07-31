@@ -220,14 +220,12 @@ class Strategy(Model):
         :return: terms
         """
         terms = Terms(
-            self.ledger_id,
-            self.context.agent_address,
-            self.context.agent_address,
-            {},
-            {},
-            True,
-            "",
-            {},
+            ledger_id=self.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=self.context.agent_address,
+            amount_by_currency_id={},
+            quantities_by_good_id={},
+            nonce="",
         )
         return terms
 
@@ -238,14 +236,12 @@ class Strategy(Model):
         :return: terms
         """
         terms = Terms(
-            self.ledger_id,
-            self.context.agent_address,
-            self.context.agent_address,
-            {},
-            {},
-            True,
-            "",
-            {},
+            ledger_id=self.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=self.context.agent_address,
+            amount_by_currency_id={},
+            quantities_by_good_id={},
+            nonce="",
         )
         return terms
 
@@ -256,14 +252,12 @@ class Strategy(Model):
         :return: terms
         """
         terms = Terms(
-            self.ledger_id,
-            self.context.agent_address,
-            self.context.agent_address,
-            {},
-            {},
-            True,
-            "",
-            {},
+            ledger_id=self.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=self.context.agent_address,
+            amount_by_currency_id={},
+            quantities_by_good_id={},
+            nonce="",
         )
         return terms
 

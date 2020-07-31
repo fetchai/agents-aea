@@ -517,11 +517,13 @@ class TestFilter:
         """Test that the internal messages are handled."""
         t = SigningMessage(
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
-            skill_callback_ids=[str(PublicId("dummy_author", "dummy", "0.1.0"))],
+            skill_callback_ids=(str(PublicId("dummy_author", "dummy", "0.1.0")),),
             skill_callback_info={},
-            crypto_id="ledger_id",
+            # crypto_id="ledger_id",
             signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
+        t.counterparty = "skill"
+        t.sender = "decision_maker"
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea._filter.handle_internal_messages()
 

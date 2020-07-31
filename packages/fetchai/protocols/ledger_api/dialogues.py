@@ -42,6 +42,7 @@ class LedgerApiDialogue(Dialogue):
             LedgerApiMessage.Performative.GET_BALANCE,
             LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
             LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+            LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
         }
     )
     TERMINAL_PERFORMATIVES = frozenset(
@@ -158,7 +159,7 @@ class LedgerApiDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> LedgerApiDialogue:
         """
-        Create an instance of fipa dialogue.
+        Create an instance of {} dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

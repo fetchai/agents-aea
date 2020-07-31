@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Conftest module for Pytest."""
 import asyncio
 import inspect
@@ -58,7 +59,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML,
     PublicId,
 )
-from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.contracts import Contract, contract_registry
@@ -71,6 +72,7 @@ from aea.crypto.helpers import (
     FETCHAI_PRIVATE_KEY_FILE,
 )
 from aea.crypto.registries import make_crypto
+from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
@@ -350,6 +352,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     def decorator(pytest_func):
         """
         For the sake of clarity, assume the chosen platform for the action is "Windows".
+
         If the following condition is true:
           - the current system is not Windows (is_different) AND we want to skip it (skip)
          OR
@@ -378,7 +381,12 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
             return type(
                 pytest_func.__name__,
                 (pytest_func,),
-                {"setup_class": action, "setup": action, "setUp": action},
+                {
+                    "setup_class": action,
+                    "setup": action,
+                    "setUp": action,
+                    "_skipped": True,
+                },
             )
 
         @wraps(pytest_func)
@@ -839,7 +847,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 
     :return: decorated method.
     """
-
+    # for pydcostyle
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
         try:
@@ -857,7 +865,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 
 def libp2p_log_on_failure_all(cls):
     """
-    Decorate every method of a class with `libp2p_log_on_failure`
+    Decorate every method of a class with `libp2p_log_on_failure`.
 
     :return: class with decorated methods.
     """
@@ -879,7 +887,7 @@ def libp2p_log_on_failure_all(cls):
     return cls
 
 
-def do_for_all(method_decorator):
+def _do_for_all(method_decorator):
     def class_decorator(cls):
         class GetAttributeMetaClass(type):
             def __getattribute__(cls, name):
@@ -910,6 +918,22 @@ class CwdException(Exception):
 
 
 @pytest.fixture(scope="class", autouse=True)
+def aea_testcase_teardown_check(request):
+    """Check BaseAEATestCase.teardown_class for BaseAEATestCase based test cases."""
+    from aea.test_tools.test_cases import BaseAEATestCase  # cause circular import
+
+    yield
+    if (
+        request.cls
+        and issubclass(request.cls, BaseAEATestCase)
+        and getattr(request.cls, "_skipped", False) is False
+    ):
+        assert getattr(
+            request.cls, "_is_teardown_class_called", None
+        ), "No BaseAEATestCase.teardown_class was called!"
+
+
+@pytest.fixture(scope="class", autouse=True)
 def check_test_class_cwd():
     """Check test case class restore CWD."""
     os.chdir(ROOT_DIR)
@@ -929,6 +953,7 @@ def check_test_cwd(request):
     old_cwd = os.getcwd()
     yield
     if old_cwd != os.getcwd():
+        os.chdir(ROOT_DIR)
         raise CwdException()
 
 
@@ -948,10 +973,28 @@ def check_test_threads(request):
 
 
 @pytest.fixture()
+async def ledger_apis_connection(request):
+    """Make a connection."""
+    crypto = make_crypto(DEFAULT_LEDGER)
+    identity = Identity("name", crypto.address)
+    crypto_store = CryptoStore()
+    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
+    connection = Connection.from_dir(
+        directory, identity=identity, crypto_store=crypto_store
+    )
+    connection = cast(Connection, connection)
+    connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")
+    await connection.connect()
+    yield connection
+    await connection.disconnect()
+
+
+@pytest.fixture()
 def erc1155_contract():
     """
-    Instantiate an ERC1155 contract instance. As a side effect,
-    register it to the registry, if not already registered.
+    Instantiate an ERC1155 contract instance.
+
+    As a side effect, register it to the registry, if not already registered.
     """
     directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
     configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)

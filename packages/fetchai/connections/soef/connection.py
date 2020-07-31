@@ -20,8 +20,10 @@
 
 import asyncio
 import copy
+import datetime
 import logging
 from asyncio import CancelledError
+from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from typing import Callable, Dict, List, Optional, Set, Union, cast
@@ -55,7 +57,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.6.0")
 
 NOT_SPECIFIED = object()
 
@@ -213,6 +215,7 @@ class SOEFChannel:
         self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
+        self._earliest_next_search = datetime.datetime.now()
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -387,6 +390,8 @@ class SOEFChannel:
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
+        except (asyncio.CancelledError, ConcurrentCancelledError):
+            pass
         except Exception:  # pylint: disable=broad-except # pragma: nocover
             logger.exception("Exception during envelope processing")
             await self._send_error_response(
@@ -841,6 +846,10 @@ class SOEFChannel:
         assert self.in_queue is not None, "Inqueue not set!"
         logger.debug("Searching in radius={} of myself".format(radius))
 
+        now = datetime.datetime.now()
+        if now < self._earliest_next_search:
+            await asyncio.sleep(1)
+
         response_text = await self._generic_oef_command(
             "find_around_me", {"range_in_km": [str(radius)], **params}
         )
@@ -884,6 +893,9 @@ class SOEFChannel:
             message=message,
         )
         await self.in_queue.put(envelope)
+        self._earliest_next_search = datetime.datetime.now() + datetime.timedelta(
+            seconds=1
+        )
 
 
 class SOEFConnection(Connection):

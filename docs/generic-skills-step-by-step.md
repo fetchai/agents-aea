@@ -1363,7 +1363,7 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 skills: []
 behaviours:
@@ -2894,7 +2894,7 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 skills: []
 behaviours:
@@ -3003,7 +3003,7 @@ aea add-key fetchai fet_private_key.txt
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.2.0
 ```
 
 #### Fund the buyer AEA

@@ -202,6 +202,16 @@ class Helper(ABC):
         :return: the recovered addresses
         """
 
+    @staticmethod
+    @abstractmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+
 
 class LedgerApi(Helper, ABC):
     """Interface for ledger APIs."""
@@ -283,6 +293,7 @@ class FaucetApi(ABC):
     """Interface for testnet faucet APIs."""
 
     identifier = "base"  # type: str
+    network_name = "testnet"  # type: str
 
     @abstractmethod
     def get_wealth(self, address: Address) -> None:
