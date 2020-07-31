@@ -23,7 +23,7 @@ import json
 from typing import Dict, Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import EnvelopeContext
+from aea.mail.base import Address, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -32,32 +32,40 @@ from packages.fetchai.connections.oef.connection import (
     PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.aries_faber.dialogues import (
+    OefSearchDialogue,
+    OefSearchDialogues,
+)
+from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
 
-DEFAULT_ADMIN_HOST = "127.0.0.1"
-DEFAULT_ADMIN_PORT = 8021
 SUPPORT_REVOCATION = False
 
 ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
+ADMIN_COMMAND_STATUS = "/status"
 
 
-class HTTPHandler(Handler):
+class FaberHTTPHandler(Handler):
     """This class represents faber's handler for default messages."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        self.admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
-        self.admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
-        self.alice_id = kwargs.pop("alice_id")
-
         super().__init__(**kwargs)
 
-        self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
         self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Alice = False
 
         self.handled_message = None
+
+    @property
+    def admin_url(self) -> str:
+        return self.context.behaviours.faber.admin_url
+
+    @property
+    def alice_address(self) -> Address:
+        return self.context.behaviours.faber.alice_address
 
     def _admin_post(self, path: str, content: Dict = None) -> None:
         # Request message & envelope
@@ -78,7 +86,7 @@ class HTTPHandler(Handler):
             performative=DefaultMessage.Performative.BYTES,
             content=json.dumps(content).encode("utf-8"),
         )
-        message.counterparty = self.alice_id
+        message.counterparty = self.alice_address
         context = EnvelopeContext(connection_id=OEF_CONNECTION_PUBLIC_ID)
         self.context.outbox.put_message(message=message, context=context)
 
@@ -138,3 +146,122 @@ class HTTPHandler(Handler):
         :return: None
         """
         pass
+
+
+class FaberOefSearchHandler(Handler):
+    """This class implements an OEF search handler."""
+
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Call to setup the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        self.context.logger.info("Handling SOEF message...")
+        oef_search_msg = cast(OefSearchMessage, message)
+
+        # recover dialogue
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_dialogue = cast(
+            Optional[OefSearchDialogue], oef_search_dialogues.update(oef_search_msg)
+        )
+        if oef_search_dialogue is None:
+            self._handle_unidentified_dialogue(oef_search_msg)
+            return
+
+        # handle message
+        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+            self._handle_error(oef_search_msg, oef_search_dialogue)
+        elif oef_search_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
+            self._handle_search(oef_search_msg)
+        else:
+            self._handle_invalid(oef_search_msg, oef_search_dialogue)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param oef_search_msg: the oef search message to be handled
+        :return: None
+        """
+        self.context.logger.info(
+            "received invalid oef_search message={}, unidentified dialogue.".format(
+                oef_search_msg
+            )
+        )
+
+    def _handle_error(
+        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_msg: the oef search message to be handled
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search error message={} in dialogue={}.".format(
+                oef_search_msg, oef_search_dialogue
+            )
+        )
+
+    def _handle_search(self, oef_search_msg: OefSearchMessage) -> None:
+        """
+        Handle the search response.
+
+        :param oef_search_msg: the oef search message to be handled
+        :return: None
+        """
+        if len(oef_search_msg.agents) != 1:
+            self.context.logger.info(
+                "did not find Alice. found {} agents. continue searching.".format(
+                    len(oef_search_msg.agents)
+                )
+            )
+            return
+
+        self.context.logger.info(
+            "found Alice with address {}, stopping search.".format(oef_search_msg.agents[0])
+        )
+        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy.is_searching = False  # stopping search
+
+        # set alice address
+        self.context.behaviours.faber.alice_address = oef_search_msg.agents[0]
+
+        # check ACA is running
+        self.context.behaviours.faber.admin_get(ADMIN_COMMAND_STATUS)
+
+    def _handle_invalid(
+        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.warning(
+            "cannot handle oef_search message of performative={} in dialogue={}.".format(
+                oef_search_msg.performative, oef_search_dialogue,
+            )
+        )
