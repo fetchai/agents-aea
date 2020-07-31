@@ -126,14 +126,17 @@ def test_double_start():
     agent = builder.build()
 
     with run_in_thread(agent.start, timeout=20):
-        wait_for_condition(
-            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
-        )
-        t = Thread(target=agent.start)
-        t.start()
-        sleep(1)
-        assert not t.is_alive()
-        agent.stop()
+        try:
+            wait_for_condition(
+                lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
+            )
+
+            t = Thread(target=agent.start)
+            t.start()
+            sleep(1)
+            assert not t.is_alive()
+        finally:
+            agent.stop()
 
 
 def test_react():

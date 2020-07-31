@@ -74,7 +74,7 @@ class AsyncState:
         """
         self._state = initial_state
         self._watchers: Set[Future] = set()
-        self._callbacks: List[Callable] = []
+        self._callbacks: List[Callable[[Any], None]] = []
         self._states_enum = states_enum
 
     def set(self, state: Any) -> None:
@@ -90,7 +90,7 @@ class AsyncState:
         self._state_changed(state)
         self._state = state
 
-    def add_callback(self, callback_fn: Callable) -> None:
+    def add_callback(self, callback_fn: Callable[[Any], None]) -> None:
         """
         Add callback to track state changes.
 
