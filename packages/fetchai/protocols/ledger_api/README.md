@@ -4,7 +4,7 @@
 
 **Author**: fetchai
 
-**Version**: 0.1.0
+**Version**: 0.2.0
 
 **Short Description**: A protocol for ledger APIs' requests and responses.
 
@@ -20,7 +20,7 @@ This is a protocol for interacting with ledger APIs.
 ---
 name: ledger_api
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -61,7 +61,7 @@ ct:TransactionReceipt: |
   bytes transaction_receipt = 1;
 ...
 ---
-initiation: [get_balance, get_raw_transaction, send_signed_transaction]
+initiation: [get_balance, get_raw_transaction, send_signed_transaction, get_transaction_receipt]
 reply:
   get_balance: [balance]
   balance: []
