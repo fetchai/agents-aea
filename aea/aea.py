@@ -390,7 +390,6 @@ class AEA(Agent, WithLogger):
         self.logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.decision_maker.stop()
         self.task_manager.stop()
-        self.resources.teardown()
         ExecTimeoutThreadGuard.stop()
 
     def _setup_loggers(self):
