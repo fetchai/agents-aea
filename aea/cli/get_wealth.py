@@ -47,7 +47,7 @@ def get_wealth(click_context, type_):
 
 def _try_get_wealth(click_context, type_):
     ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys(ctx=ctx)
     private_key_paths = {
         config_pair[0]: config_pair[1]
         for config_pair in ctx.agent_config.private_key_paths.read_all()

@@ -574,6 +574,11 @@ class Terms:
         )
 
     @property
+    def is_empty_currency(self) -> bool:
+        """Check whether a single currency is used for payment."""
+        return len(self._amount_by_currency_id) == 0
+
+    @property
     def currency_id(self) -> str:
         """Get the amount the sender must pay."""
         assert self.is_single_currency, "More than one currency id, cannot get id."
@@ -583,21 +588,51 @@ class Terms:
     @property
     def sender_payable_amount(self) -> int:
         """Get the amount the sender must pay."""
-        assert self.is_single_currency, "More than one currency id, cannot get amount."
-        key, value = next(iter(self._amount_by_currency_id.items()))
+        assert (
+            self.is_single_currency or self.is_empty_currency
+        ), "More than one currency id, cannot get amount."
+        value = (
+            next(iter(self._amount_by_currency_id.values()))
+            if not self.is_empty_currency
+            else 0
+        )
         payable = -value if value <= 0 else 0
+        return payable
+
+    @property
+    def sender_payable_amount_incl_fee(self) -> int:
+        """Get the amount the sender must pay inclusive fee."""
+        assert (
+            self.is_single_currency or self.is_empty_currency
+        ), "More than one currency id, cannot get amount."
+        payable = self.sender_payable_amount
         if self.is_sender_payable_tx_fee and len(self._fee_by_currency_id) == 1:
-            payable += self._fee_by_currency_id[key]
+            payable += next(iter(self._fee_by_currency_id.values()))
         return payable
 
     @property
     def counterparty_payable_amount(self) -> int:
         """Get the amount the counterparty must pay."""
-        assert self.is_single_currency, "More than one currency id, cannot get amount."
-        key, value = next(iter(self._amount_by_currency_id.items()))
+        assert (
+            self.is_single_currency or self.is_empty_currency
+        ), "More than one currency id, cannot get amount."
+        value = (
+            next(iter(self._amount_by_currency_id.values()))
+            if not self.is_empty_currency
+            else 0
+        )
         payable = value if value >= 0 else 0
+        return payable
+
+    @property
+    def counterparty_payable_amount_incl_fee(self) -> int:
+        """Get the amount the counterparty must pay."""
+        assert (
+            self.is_single_currency or self.is_empty_currency
+        ), "More than one currency id, cannot get amount."
+        payable = self.counterparty_payable_amount
         if not self.is_sender_payable_tx_fee and len(self._fee_by_currency_id) == 1:
-            payable += self._fee_by_currency_id[key]
+            payable += next(iter(self._fee_by_currency_id.values()))
         return payable
 
     @property
@@ -701,16 +736,19 @@ class Terms:
         :param tx_nonce: the nonce of the transaction
         :return: the hash
         """
-        aggregate_hash = LedgerApis.get_hash(
-            ledger_id,
-            b"".join(
-                [
-                    good_ids[0].encode("utf-8"),
-                    sender_supplied_quantities[0].to_bytes(32, "big"),
-                    counterparty_supplied_quantities[0].to_bytes(32, "big"),
-                ]
-            ),
-        )
+        if len(good_ids) == 0:
+            aggregate_hash = LedgerApis.get_hash(ledger_id, b"")
+        else:
+            aggregate_hash = LedgerApis.get_hash(
+                ledger_id,
+                b"".join(
+                    [
+                        good_ids[0].encode("utf-8"),
+                        sender_supplied_quantities[0].to_bytes(32, "big"),
+                        counterparty_supplied_quantities[0].to_bytes(32, "big"),
+                    ]
+                ),
+            )
         for idx, good_id in enumerate(good_ids):
             if idx == 0:
                 continue
