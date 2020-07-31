@@ -54,7 +54,7 @@ def generate_wealth(click_context, sync, type_):
 
 def _try_generate_wealth(click_context, type_, sync):
     ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys(ctx=ctx)
 
     private_key_paths = {
         config_pair[0]: config_pair[1]

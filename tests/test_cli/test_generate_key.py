@@ -129,3 +129,44 @@ class TestGenerateKeyWhenAlreadyExists:
         """Tear the test down."""
         os.chdir(cls.cwd)
         shutil.rmtree(cls.t)
+
+
+class TestGenerateKeyWithFile:
+    """Test that the command 'aea generate-key' can accept a file path."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+    def test_fetchai(self):
+        """Test that the fetchai private key can be deposited in a custom file."""
+        test_file = "test.txt"
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", FETCHAI, test_file]
+        )
+        assert result.exit_code == 0
+        assert Path(test_file).exists()
+
+        # This tests if the file has been created and its content is correct.
+        crypto = make_crypto(FETCHAI, private_key_path=test_file)
+        content = Path(test_file).read_bytes()
+        assert content.decode("utf-8") == crypto.private_key
+
+    def test_all(self):
+        """Test that the all command does not allow a file to be provided."""
+        test_file = "test.txt"
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", "all", test_file]
+        )
+        assert result.exit_code == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        shutil.rmtree(cls.t)

@@ -130,6 +130,8 @@ COSMOS = _COSMOS
 ETHEREUM = _ETHEREUM
 FETCHAI = _FETCHAI
 
+COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
+
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE

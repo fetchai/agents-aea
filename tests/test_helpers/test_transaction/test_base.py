@@ -116,7 +116,8 @@ def test_init_terms_w_fee():
     assert terms.fee == next(iter(fee_by_currency_id.values()))
     assert terms.fee_by_currency_id == fee_by_currency_id
     assert terms.counterparty_payable_amount == 0
-    assert terms.sender_payable_amount == -next(
+    assert terms.sender_payable_amount == -next(iter(amount_by_currency_id.values()))
+    assert terms.sender_payable_amount_incl_fee == -next(
         iter(amount_by_currency_id.values())
     ) + next(iter(fee_by_currency_id.values()))
     assert terms.sender_fee == next(iter(fee_by_currency_id.values()))
@@ -149,6 +150,9 @@ def test_init_terms_w_fee_counterparty():
     assert terms.fee == next(iter(fee_by_currency_id.values()))
     assert terms.fee_by_currency_id == fee_by_currency_id
     assert terms.counterparty_payable_amount == next(
+        iter(amount_by_currency_id.values())
+    )
+    assert terms.counterparty_payable_amount_incl_fee == next(
         iter(amount_by_currency_id.values())
     ) + next(iter(fee_by_currency_id.values()))
     assert terms.sender_payable_amount == 0
@@ -200,7 +204,7 @@ def test_init_terms_strict_negative():
 
 
 def test_init_terms_multiple_goods():
-    """Test the terms object initialization in strict mode."""
+    """Test the terms object initialization with multiple goods."""
     ledger_id = DEFAULT_LEDGER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
@@ -220,6 +224,32 @@ def test_init_terms_multiple_goods():
     assert (
         terms.id == "f81812773f5242d0cb52cfa82bc08bdba8d17b1e56e2cf02b3056749184e198c"
     )
+
+
+def test_init_terms_no_amount_and_quantity():
+    """Test the terms object initialization with no amount."""
+    ledger_id = DEFAULT_LEDGER
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {}
+    quantities_by_good_id = {}
+    nonce = "somestring"
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address=sender_addr,
+        counterparty_address=counterparty_addr,
+        amount_by_currency_id=amount_by_currency_id,
+        quantities_by_good_id=quantities_by_good_id,
+        nonce=nonce,
+    )
+    new_counterparty_address = "CounterpartyAddressNew"
+    terms.counterparty_address = new_counterparty_address
+    assert terms.counterparty_address == new_counterparty_address
+    assert not terms.has_fee
+    assert terms.counterparty_payable_amount == 0
+    assert terms.counterparty_payable_amount_incl_fee == 0
+    assert terms.sender_payable_amount == 0
+    assert terms.sender_payable_amount_incl_fee == 0
 
 
 def test_terms_encode_decode():

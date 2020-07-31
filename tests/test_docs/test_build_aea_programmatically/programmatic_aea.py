@@ -36,7 +36,7 @@ OUTPUT_FILE = "output_file"
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):

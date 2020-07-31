@@ -51,16 +51,22 @@ from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 
+ROOT = Path(".")
 
-def verify_or_create_private_keys(ctx: Context) -> None:
+
+def verify_or_create_private_keys(
+    ctx: Optional[Context] = None,
+    aea_project_path: Path = ROOT,
+    exit_on_error: bool = True,
+) -> None:
     """
     Verify or create private keys.
 
     :param ctx: Context
     """
-    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    path_to_aea_config = aea_project_path / DEFAULT_AEA_CONFIG_FILE
     agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp = path.open(mode="r", encoding="utf-8")
+    fp = path_to_aea_config.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
     for identifier, _value in aea_conf.private_key_paths.read_all():
@@ -70,11 +76,19 @@ def verify_or_create_private_keys(ctx: Context) -> None:
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
         config_private_key_path = aea_conf.private_key_paths.read(identifier)
         if config_private_key_path is None:
-            create_private_key(identifier)
-            aea_conf.private_key_paths.update(identifier, private_key_path)
+            if identifier == aea_conf.default_ledger:
+                create_private_key(
+                    identifier,
+                    private_key_file=str(aea_project_path / private_key_path),
+                )
+                aea_conf.private_key_paths.update(identifier, private_key_path)
         else:
             try:
-                try_validate_private_key_path(identifier, private_key_path)
+                try_validate_private_key_path(
+                    identifier,
+                    str(aea_project_path / private_key_path),
+                    exit_on_error=exit_on_error,
+                )
             except FileNotFoundError:  # pragma: no cover
                 raise click.ClickException(
                     "File {} for private key {} not found.".format(
@@ -83,10 +97,10 @@ def verify_or_create_private_keys(ctx: Context) -> None:
                 )
 
     # update aea config
-    path = Path(DEFAULT_AEA_CONFIG_FILE)
-    fp = path.open(mode="w", encoding="utf-8")
+    fp = path_to_aea_config.open(mode="w", encoding="utf-8")
     agent_loader.dump(aea_conf, fp)
-    ctx.agent_config = aea_conf
+    if ctx is not None:
+        ctx.agent_config = aea_conf
 
 
 def validate_package_name(package_name: str):
