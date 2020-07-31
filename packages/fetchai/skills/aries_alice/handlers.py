@@ -54,6 +54,7 @@ class AliceDefaultHandler(Handler):
 
     @property
     def admin_url(self) -> str:
+        """Get the admin URL."""
         return self.context.behaviours.alice.admin_url
 
     def _admin_post(self, path: str, content: Dict = None):

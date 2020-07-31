@@ -61,10 +61,12 @@ class FaberHTTPHandler(Handler):
 
     @property
     def admin_url(self) -> str:
+        """Get the admin URL."""
         return self.context.behaviours.faber.admin_url
 
     @property
     def alice_address(self) -> Address:
+        """Get Alice's address."""
         return self.context.behaviours.faber.alice_address
 
     def _admin_post(self, path: str, content: Dict = None) -> None:
@@ -239,7 +241,9 @@ class FaberOefSearchHandler(Handler):
             return
 
         self.context.logger.info(
-            "found Alice with address {}, stopping search.".format(oef_search_msg.agents[0])
+            "found Alice with address {}, stopping search.".format(
+                oef_search_msg.agents[0]
+            )
         )
         strategy = cast(FaberStrategy, self.context.strategy)
         strategy.is_searching = False  # stopping search

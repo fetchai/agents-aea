@@ -53,18 +53,22 @@ class FaberBehaviour(TickerBehaviour):
 
     @property
     def admin_host(self) -> str:
+        """Get the admin host."""
         return self._admin_host
 
     @property
     def admin_port(self) -> str:
+        """Get the admin port."""
         return self._admin_port
 
     @property
     def admin_url(self) -> str:
+        """Get the admin URL."""
         return self._admin_url
 
     @property
     def alice_address(self) -> Address:
+        """Get Alice's address."""
         return self._alice_address
 
     @alice_address.setter
