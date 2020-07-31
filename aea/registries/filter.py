@@ -174,10 +174,12 @@ class Filter:
                     "Calling handler {} of skill {}".format(type(handler), skill_id)
                 )
                 # TODO: remove next three lines
-                copy_signing_message = copy.deepcopy(signing_message)
+                copy_signing_message = copy.copy(
+                    signing_message
+                )  # we do a shallow copy as we only need the message object to be copied; not its referenced objects
                 copy_signing_message.counterparty = signing_message.sender
                 copy_signing_message.is_incoming = True
-                handler.handle(cast(Message, signing_message))
+                handler.handle(cast(Message, copy_signing_message))
             else:
                 logger.warning(
                     "No internal handler fetched for skill_id={}".format(skill_id)

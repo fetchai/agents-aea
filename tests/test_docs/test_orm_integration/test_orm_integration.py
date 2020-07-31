@@ -31,6 +31,7 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
+    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
@@ -152,7 +153,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         seller_stategy_path = Path(
             seller_aea_name, "skills", "thermometer", "strategy.py",
         )
-        self.replace_file_content(seller_stategy_path, ORM_SELLER_STRATEGY_PATH)
+        self.replace_file_content(ORM_SELLER_STRATEGY_PATH, seller_stategy_path)
         self.fingerprint_item(
             "skill", "{}/thermometer:0.1.0".format(self.author),
         )
@@ -160,10 +161,13 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # add non-funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
 
         # Setup Buyer
@@ -184,8 +188,11 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # add funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )

@@ -21,7 +21,6 @@
 
 import logging
 import sys
-from typing import Optional
 
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
@@ -67,16 +66,15 @@ def try_validate_private_key_path(
             raise
 
 
-def create_private_key(ledger_id: str, private_key_file: Optional[str] = None) -> None:
+def create_private_key(ledger_id: str, private_key_file: str) -> None:
     """
     Create a private key for the specified ledger identifier.
 
     :param ledger_id: the ledger identifier.
+    :param private_key_file: the private key file.
     :return: None
     :raises: ValueError if the identifier is invalid.
     """
-    if private_key_file is None:
-        private_key_file = IDENTIFIER_TO_KEY_FILES[ledger_id]
     crypto = make_crypto(ledger_id)
     crypto.dump(open(private_key_file, "wb"))
 
