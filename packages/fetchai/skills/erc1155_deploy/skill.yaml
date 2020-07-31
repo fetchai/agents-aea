@@ -10,7 +10,7 @@ fingerprint:
   behaviours.py: QmVujGtobQ5SeaVRc8n7PJaVsnnUdixUsmmQyjpMjyLe7Z
   dialogues.py: QmR6qb8PdmUozHANKMuLaKfLGKxgnx2zFzbkmcgqXq8wgg
   handlers.py: QmRM7w75L1EXohnnXU2y9wHKfSCn37yn4t9BHLYxU9dMUm
-  strategy.py: QmUFKGQKuctWQY72DRPuxWBtPtPj6pjBHFpD4QS1X5X3bM
+  strategy.py: QmYvu2yH9fh2reqPXuTLFcX82fjeFA5Wm5K9DrTrDduJ49
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.6.0
@@ -18,7 +18,7 @@ protocols:
 - fetchai/contract_api:0.1.0
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 - fetchai/signing:0.1.0
 skills: []

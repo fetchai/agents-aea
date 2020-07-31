@@ -19,9 +19,11 @@
 
 """This module contains base classes for the ledger API connection."""
 import asyncio
+import logging
 from abc import ABC, abstractmethod
 from asyncio import Task
 from concurrent.futures._base import Executor
+from logging import Logger
 from typing import Any, Callable, Dict, Optional
 
 from aea.configurations.base import PublicId
@@ -48,6 +50,7 @@ class RequestDispatcher(ABC):
         loop: Optional[asyncio.AbstractEventLoop] = None,
         executor: Optional[Executor] = None,
         api_configs: Optional[Dict[str, Dict[str, str]]] = None,
+        logger: Optional[Logger] = None,
     ):
         """
         Initialize the request dispatcher.
@@ -59,6 +62,13 @@ class RequestDispatcher(ABC):
         self.loop = loop if loop is not None else asyncio.get_event_loop()
         self.executor = executor
         self._api_configs = api_configs
+        self.logger = (
+            logger
+            if logger is not None
+            else logging.getLogger(
+                "aea.packages.fetchai.connections.ledger.contract_dispatcher"
+            )
+        )
 
     def api_config(self, ledger_id: str) -> Dict[str, str]:
         """Get api config."""

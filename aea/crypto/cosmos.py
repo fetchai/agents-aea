@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
+TESTNET_NAME = "testnet"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "agent-land"
@@ -330,6 +331,17 @@ class CosmosHelper(Helper):
         ]
         return tuple(addresses)
 
+    @staticmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        digest = hashlib.sha256(message).hexdigest()
+        return digest
+
 
 class CosmosApi(LedgerApi, CosmosHelper):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
@@ -518,6 +530,7 @@ class CosmosFaucetApi(FaucetApi):
     """Cosmos testnet faucet API."""
 
     identifier = _COSMOS
+    testnet_name = TESTNET_NAME
 
     def get_wealth(self, address: Address) -> None:
         """

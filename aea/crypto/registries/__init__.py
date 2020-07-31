@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the crypto and the ledger APIs registries."""
-from typing import Callable
+from typing import Callable, Type
 
-from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.crypto.registries.base import Registry
 
 crypto_registry: Registry[Crypto] = Registry[Crypto]()
@@ -30,3 +30,9 @@ make_crypto: Callable[..., Crypto] = crypto_registry.make
 ledger_apis_registry: Registry[LedgerApi] = Registry[LedgerApi]()
 register_ledger_api = ledger_apis_registry.register
 make_ledger_api: Callable[..., LedgerApi] = ledger_apis_registry.make
+make_ledger_api_cls: Callable[..., Type[LedgerApi]] = ledger_apis_registry.make_cls
+
+faucet_apis_registry: Registry[FaucetApi] = Registry[FaucetApi]()
+register_faucet_api = faucet_apis_registry.register
+make_faucet_api: Callable[..., FaucetApi] = faucet_apis_registry.make
+make_faucet_api_cls: Callable[..., Type[FaucetApi]] = faucet_apis_registry.make_cls

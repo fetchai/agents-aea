@@ -56,7 +56,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.6.0")
 
 NOT_SPECIFIED = object()
 
@@ -165,6 +165,7 @@ class SOEFChannel:
     DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
 
     PING_PERIOD = 30 * 60  # 30 minutes
+    FIND_AROUND_ME_REQUEST_DELAY = 2  # seconds
 
     def __init__(
         self,
@@ -214,6 +215,31 @@ class SOEFChannel:
         self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
+
+        self._find_around_me_queue: Optional[asyncio.Queue] = None
+        self._find_around_me_processor_task: Optional[asyncio.Task] = None
+
+    async def _find_around_me_processor(self) -> None:
+        """Process find me around requests in background task."""
+        while self._find_around_me_queue is not None:
+            try:
+                task = await self._find_around_me_queue.get()
+                oef_message, oef_search_dialogue, radius, params = task
+                await self._find_around_me_handle_requet(
+                    oef_message, oef_search_dialogue, radius, params
+                )
+                await asyncio.sleep(self.FIND_AROUND_ME_REQUEST_DELAY)
+            except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                return
+            except Exception:  # pylint: disable=broad-except  # pragma: nocover
+                logger.exception("Exception occoured in  _find_around_me_processor")
+                await self._send_error_response(
+                    oef_message,
+                    oef_search_dialogue,
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
+                )
+            finally:
+                logger.debug("_find_around_me_processor exited")
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -771,7 +797,11 @@ class SOEFChannel:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
         self.in_queue = asyncio.Queue()
+        self._find_around_me_queue = asyncio.Queue()
         self._executor_pool = ThreadPoolExecutor(max_workers=10)
+        self._find_around_me_processor_task = self._loop.create_task(
+            self._find_around_me_processor()
+        )
 
     async def disconnect(self) -> None:
         """
@@ -783,7 +813,14 @@ class SOEFChannel:
 
         assert self.in_queue, ValueError("Queue is not set, use connect first!")
         await self._unregister_agent()
+
+        if self._find_around_me_processor_task:
+            if not self._find_around_me_processor_task.done():
+                self._find_around_me_processor_task.cancel()
+            await self._find_around_me_processor_task
+
         await self.in_queue.put(None)
+        self._find_around_me_queue = None
 
     async def search_services(
         self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -823,9 +860,32 @@ class SOEFChannel:
         if self.agent_location is None or self.agent_location != service_location:
             # we update the location to match the query.
             await self._set_location(service_location)  # pragma: nocover
+
         await self._find_around_me(oef_message, oef_search_dialogue, radius, params)
 
     async def _find_around_me(
+        self,
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+        radius: float,
+        params: Dict[str, List[str]],
+    ) -> None:
+        """
+        Add find agent task to queue to process in dedictated loop respectful to timeouts.
+
+        :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
+        :param radius: the radius in which to search
+        :param params: the parameters for the query
+        :return: None
+        """
+        if not self._find_around_me_queue:
+            raise ValueError("SOEFChannel not started")
+        await self._find_around_me_queue.put(
+            (oef_message, oef_search_dialogue, radius, params)
+        )
+
+    async def _find_around_me_handle_requet(
         self,
         oef_message: OefSearchMessage,
         oef_search_dialogue: OefSearchDialogue,

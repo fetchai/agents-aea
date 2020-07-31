@@ -406,7 +406,9 @@ class TestSoef:
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
         message = OefSearchMessage(
-            performative="oef_error", service_description=service_description,
+            performative="oef_error",
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=service_description,
         )
         envelope = Envelope(
             to="soef",
@@ -495,8 +497,10 @@ class TestSoef:
             make_async(self.search_success_response),
         ):
             await self.connection.send(envelope)
+            expected_envelope = await asyncio.wait_for(
+                self.connection.receive(), timeout=1
+            )
 
-        expected_envelope = await asyncio.wait_for(self.connection.receive(), timeout=1)
         assert expected_envelope
         message = expected_envelope.message
         assert len(message.agents) >= 1
@@ -544,14 +548,14 @@ class TestSoef:
                 wrap_future(self.search_fail_response),
             ],
         ):
-            await self.connection.channel._find_around_me(
+            await self.connection.channel._find_around_me_handle_requet(
                 message, sending_dialogue, 1, {}
             )
-            await self.connection.channel._find_around_me(
+            await self.connection.channel._find_around_me_handle_requet(
                 message, sending_dialogue, 1, {}
             )
             with pytest.raises(SOEFException, match=r"`find_around_me` error: .*"):
-                await self.connection.channel._find_around_me(
+                await self.connection.channel._find_around_me_handle_requet(
                     message, sending_dialogue, 1, {}
                 )
 

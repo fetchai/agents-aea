@@ -1,55 +1,68 @@
 name: tac_control
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
-  behaviours.py: Qmcb6RPGT6x5aupA4m95nAFXJioUNjQersWfaAApL83GEA
-  game.py: QmRM1gtNS9aiLwHUa3WKSLVm3hbXRsnBYr93tZF4bSm4mf
-  handlers.py: QmRvgtFvtMsNeTUoKLSeap9efQpohySi4X6UJXDhXVv8Xx
-  helpers.py: QmT8vvpwxA9rUNX7Xdob4ZNXYXG8LW8nhFfyeV5dUbAFbB
-  parameters.py: QmSmR8PycMvfB9omUz7nzZZXqwFkSZMDTb8pBZrntfDPre
+  behaviours.py: QmeJhvrP7GhLPLpQVFHeyXFiaGdcTzF9Cwe8BUZS1SuRbB
+  dialogues.py: QmYYvm4fKUxceKc9CzkZXKZbmRegoVdBFkXqAj5YhKN8eb
+  game.py: QmXmGh6nBzbMSUjJqpJxbtVCm8Sn7EqQhyE9Wf6evYRekS
+  handlers.py: Qme9aCQDrzLT47GdnkAEj7decZsYpVNo3ZR7eg25Y6nMTz
+  helpers.py: QmdhGNhBwn5Zn4yacQEo3EAU74kSkhMR7icvPoj6ZVAJfV
+  parameters.py: QmR7EcnmmQstPKwpT7D5HjbfqWYN7cNEYsKWUE5Dvgn1LG
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/oef_search:0.3.0
-- fetchai/tac:0.3.0
+- fetchai/tac:0.4.0
 skills: []
 behaviours:
   tac:
     args: {}
-    class_name: TACBehaviour
+    class_name: TacBehaviour
 handlers:
   oef:
     args: {}
-    class_name: OEFRegistrationHandler
+    class_name: OefSearchHandler
   tac:
     args: {}
-    class_name: TACHandler
+    class_name: TacHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   game:
     args: {}
     class_name: Game
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   parameters:
     args:
       base_good_endowment: 2
       competition_timeout: 180
       inactivity_timeout: 60
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
       nb_goods: 10
       registration_timeout: 60
+      service_data:
+        key: tac
+        value: v1
       start_time: 01 01 2020  00:01
       tx_fee: 1
       upper_bound_factor: 1
-      version_id: v1
       whitelist: []
     class_name: Parameters
+  tac_dialogues:
+    args: {}
+    class_name: TacDialogues
 dependencies:
   numpy: {}
-  web3:
-    version: ==5.2.2

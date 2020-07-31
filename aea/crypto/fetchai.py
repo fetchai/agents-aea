@@ -48,6 +48,7 @@ _FETCHAI = "fetchai"
 DEFAULT_NETWORK = "testnet"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
+TESTNET_NAME = "testnet"
 
 
 class FetchAICrypto(Crypto[Entity]):
@@ -241,6 +242,17 @@ class FetchAIHelper(Helper):
         ]
         return tuple(addresses)
 
+    @staticmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        digest = sha256_hash(message)
+        return digest.hex()
+
 
 class FetchAIApi(LedgerApi, FetchAIHelper):
     """Class to interact with the Fetch ledger APIs."""
@@ -366,6 +378,7 @@ class FetchAIFaucetApi(FaucetApi):
     """Fetchai testnet faucet API."""
 
     identifier = _FETCHAI
+    testnet_name = TESTNET_NAME
 
     def get_wealth(self, address: Address) -> None:
         """

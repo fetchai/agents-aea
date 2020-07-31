@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the decision maker class."""
+
+import copy
 import hashlib
 import logging
 import threading
-import uuid
 from abc import ABC, abstractmethod
 from queue import Queue
 from threading import Thread
@@ -296,7 +297,7 @@ class DecisionMaker:
         :param decision_maker_handler: the decision maker handler
         """
         self._agent_name = decision_maker_handler.identity.name
-        self._queue_access_code = uuid.uuid4().hex
+        self._queue_access_code = uuid4().hex
         self._message_in_queue = ProtectedQueue(
             self._queue_access_code
         )  # type: ProtectedQueue
@@ -376,6 +377,8 @@ class DecisionMaker:
         :param message: the internal message
         :return: None
         """
-        message.counterparty = uuid4().hex  # TODO: temporary fix only
-        message.is_incoming = True
-        self.decision_maker_handler.handle(message)
+        # TODO: remove next three lines
+        copy_message = copy.deepcopy(message)
+        copy_message.counterparty = message.sender
+        copy_message.is_incoming = True
+        self.decision_maker_handler.handle(copy_message)

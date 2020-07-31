@@ -24,6 +24,7 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
+    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
@@ -47,14 +48,14 @@ class TestThermometerSkill(AEATestCaseMany):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/thermometer:0.7.0")
@@ -68,16 +69,19 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # add non-funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/thermometer_client:0.6.0")
@@ -91,8 +95,11 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # add funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
@@ -198,14 +205,14 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.2.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/thermometer:0.7.0")
@@ -222,16 +229,19 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # add non-funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/ledger:0.2.0")
         self.add_item("skill", "fetchai/thermometer_client:0.6.0")
@@ -248,8 +258,11 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # add funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )

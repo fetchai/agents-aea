@@ -166,7 +166,7 @@ def test_soef():
         message.counterparty = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
-        envelope = Envelope(
+        search_envelope = Envelope(
             to=message.counterparty,
             sender=crypto.address,
             protocol_id=message.protocol_id,
@@ -177,7 +177,7 @@ def test_soef():
                 radius, agent_location.latitude, agent_location.longitude,
             )
         )
-        multiplexer.put(envelope)
+        multiplexer.put(search_envelope)
         wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
 
         # check for search results
@@ -190,6 +190,14 @@ def test_soef():
         message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
         receiving_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
+
+        # double send to check issue with too many requests
+        multiplexer.put(search_envelope)
+        wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
+        # check for search results
+        envelope = multiplexer.get()
+        message = envelope.message
+        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
 
         # find agents near me with filter
         radius = 0.1

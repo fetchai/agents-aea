@@ -477,17 +477,23 @@ class BaseAEATestCase(ABC):
         return cls.run_cli_command("install", cwd=cls._get_cwd())
 
     @classmethod
-    def generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER) -> Result:
+    def generate_private_key(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_file: Optional[str] = None
+    ) -> Result:
         """
         Generate AEA private key with CLI command.
 
         Run from agent's directory.
 
         :param ledger_api_id: ledger API ID.
+        :param private_key_file: the private key file.
 
         :return: Result
         """
-        return cls.run_cli_command("generate-key", ledger_api_id, cwd=cls._get_cwd())
+        cli_args = ["generate-key", ledger_api_id]
+        if private_key_file is not None:
+            cli_args.append(private_key_file)
+        return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
     def add_private_key(

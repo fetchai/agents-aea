@@ -33,6 +33,7 @@ from tests.conftest import (
     AUTHOR,
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
+    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
@@ -73,14 +74,17 @@ class TestBuildSkill(AEATestCaseMany):
         self.set_agent_context(simple_service_registration_aea)
         # add non-funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
 
         default_routing = {
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
         search_aea = "search_aea"
@@ -90,7 +94,7 @@ class TestBuildSkill(AEATestCaseMany):
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
@@ -127,8 +131,11 @@ class TestBuildSkill(AEATestCaseMany):
 
         # add funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )

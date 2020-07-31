@@ -30,16 +30,16 @@ message TacMessage{
     message Unregister_Performative{}
 
     message Transaction_Performative{
-        string tx_id = 1;
-        string tx_sender_addr = 2;
-        string tx_counterparty_addr = 3;
-        map<string, int32> amount_by_currency_id = 4;
-        int32 tx_sender_fee = 5;
-        int32 tx_counterparty_fee = 6;
+        string transaction_id = 1;
+        string ledger_id = 2;
+        string sender_address = 3;
+        string counterparty_address = 4;
+        map<string, int32> amount_by_currency_id = 5;
+        map<string, int32> fee_by_currency_id = 6;
         map<string, int32> quantities_by_good_id = 7;
-        int32 tx_nonce = 8;
-        string tx_sender_signature = 9;
-        string tx_counterparty_signature = 10;
+        int32 nonce = 8;
+        string sender_signature = 9;
+        string counterparty_signature = 10;
     }
 
     message Cancelled_Performative{}
@@ -49,7 +49,7 @@ message TacMessage{
         map<string, float> exchange_params_by_currency_id = 2;
         map<string, int32> quantities_by_good_id = 3;
         map<string, float> utility_params_by_good_id = 4;
-        int32 tx_fee = 5;
+        map<string, int32> fee_by_currency_id = 5;
         map<string, string> agent_addr_to_name = 6;
         map<string, string> currency_id_to_name = 7;
         map<string, string> good_id_to_name = 8;
@@ -59,7 +59,7 @@ message TacMessage{
     }
 
     message Transaction_Confirmation_Performative{
-        string tx_id = 1;
+        string transaction_id = 1;
         map<string, int32> amount_by_currency_id = 2;
         map<string, int32> quantities_by_good_id = 3;
     }
