@@ -32,7 +32,7 @@ OUTPUT_FILE = "output_file"
 We need a private key to populate the AEA's wallet.
 ``` python
     # Create a private key
-    create_private_key(CosmosCrypto.identifier)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 ```
 
 ## Clearing the input and output files
@@ -175,7 +175,7 @@ OUTPUT_FILE = "output_file"
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
