@@ -252,7 +252,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         tasks = [
             self._task_process_inbox(),
             self._task_process_internal_messages(),
-            self._task_process_new_behaviours(),
+            self._task_process_new_skill_components(),
             self._task_wait_for_error(),
         ]
         return list(map(self._loop.create_task, tasks))  # type: ignore  # some issue with map and create_task
@@ -275,11 +275,12 @@ class AsyncAgentLoop(BaseAgentLoop):
                 msg
             )
 
-    async def _task_process_new_behaviours(self) -> None:
+    async def _task_process_new_skill_components(self) -> None:
         """Process new behaviours added to skills in runtime."""
         while self.is_running:
             # TODO: better handling internal messages for skills internal updates
             self._agent.filter._handle_new_behaviours()  # pylint: disable=protected-access # TODO: refactoring!
+            self._agent.filter._handle_new_handlers()  # pylint: disable=protected-access # TODO: refactoring!
             self._register_all_behaviours()  # re register, cause new may appear
             await asyncio.sleep(self.NEW_BEHAVIOURS_PROCESS_SLEEP)
 

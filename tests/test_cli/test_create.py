@@ -75,6 +75,11 @@ class TestCreate:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        cls.cli_config_file = f"{cls.t}/cli_config.yaml"
+        cls.cli_config_patch = patch(
+            "aea.cli.utils.config.CLI_CONFIG_PATH", cls.cli_config_file
+        )
+        cls.cli_config_patch.start()
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
@@ -262,6 +267,7 @@ class TestCreate:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
+        cls.cli_config_patch.start()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

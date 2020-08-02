@@ -47,6 +47,7 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.cli.utils.package_utils import verify_or_create_private_keys
 from aea.components.base import Component
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -71,12 +72,6 @@ from aea.configurations.constants import (
 )
 from aea.configurations.loader import ConfigLoader
 from aea.contracts import contract_registry
-from aea.crypto.helpers import (
-    IDENTIFIER_TO_KEY_FILES,
-    create_private_key,
-    try_validate_private_key_path,
-)
-from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
@@ -1301,7 +1296,9 @@ class AEABuilder:
         """
         aea_project_path = Path(aea_project_path)
         cls._try_to_load_agent_configuration_file(aea_project_path)
-        _verify_or_create_private_keys(aea_project_path)
+        verify_or_create_private_keys(
+            ctx=None, aea_project_path=aea_project_path, exit_on_error=False
+        )
         builder = AEABuilder(with_default_packages=False)
 
         # TODO isolate environment
@@ -1411,41 +1408,3 @@ def _set_logger_to_component(
     logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
     logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
     component.logger = logger
-
-
-# TODO this function is repeated in 'aea.cli.utils.package_utils.py'
-def _verify_or_create_private_keys(aea_project_path: Path) -> None:
-    """Verify or create private keys."""
-    path_to_configuration = aea_project_path / DEFAULT_AEA_CONFIG_FILE
-    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp_read = path_to_configuration.open(mode="r", encoding="utf-8")
-    agent_configuration = agent_loader.load(fp_read)
-
-    for identifier, _value in agent_configuration.private_key_paths.read_all():
-        if identifier not in crypto_registry.supported_ids:
-            raise ValueError(f"Item not registered with id '{identifier}'.")
-
-    for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
-        config_private_key_path = agent_configuration.private_key_paths.read(identifier)
-        if config_private_key_path is None:
-            create_private_key(
-                identifier, private_key_file=str(aea_project_path / private_key_path)
-            )
-            agent_configuration.private_key_paths.update(identifier, private_key_path)
-        else:
-            try:
-                try_validate_private_key_path(
-                    identifier,
-                    str(aea_project_path / private_key_path),
-                    exit_on_error=False,
-                )
-            except FileNotFoundError:  # pragma: no cover
-                logger.error(
-                    "File {} for private key {} not found.".format(
-                        repr(private_key_path), identifier,
-                    )
-                )
-                raise
-
-    fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
-    agent_loader.dump(agent_configuration, fp_write)

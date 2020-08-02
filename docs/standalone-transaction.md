@@ -7,7 +7,7 @@ import logging
 
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
 
@@ -40,14 +40,6 @@ Once we created the private keys we need to generate the wallets.
     wallet_2 = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_2})
 ```
 
-## Create LedgerApis
-
-We need to create the LedgerApis object in order to be able to interact with the Fetch.ai `testnet`
-``` python
-    # Set up the LedgerApis
-    ledger_apis = LedgerApis(DEFAULT_LEDGER_CONFIGS, CosmosCrypto.identifier)
-```
-
 ## Generate wealth
 
 Since we want to send funds from `wallet_1` to `wallet_2`, we need to generate some wealth for the `wallet_1`. We can
@@ -65,12 +57,12 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 
 ``` python
     # Create the transaction and send it to the ledger.
-    tx_nonce = ledger_apis.generate_tx_nonce(
+    tx_nonce = LedgerApis.generate_tx_nonce(
         CosmosCrypto.identifier,
         wallet_2.addresses.get(CosmosCrypto.identifier),
         wallet_1.addresses.get(CosmosCrypto.identifier),
     )
-    transaction = ledger_apis.get_transfer_transaction(
+    transaction = LedgerApis.get_transfer_transaction(
         identifier=CosmosCrypto.identifier,
         sender_address=wallet_1.addresses.get(CosmosCrypto.identifier),
         destination_address=wallet_2.addresses.get(CosmosCrypto.identifier),
@@ -79,7 +71,7 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
         tx_nonce=tx_nonce,
     )
     signed_transaction = wallet_1.sign_transaction(CosmosCrypto.identifier, transaction)
-    transaction_digest = ledger_apis.send_signed_transaction(
+    transaction_digest = LedgerApis.send_signed_transaction(
         CosmosCrypto.identifier, signed_transaction
     )
 
@@ -94,7 +86,7 @@ import logging
 
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
 
@@ -118,9 +110,6 @@ def run():
     wallet_1 = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_1})
     wallet_2 = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_2})
 
-    # Set up the LedgerApis
-    ledger_apis = LedgerApis(DEFAULT_LEDGER_CONFIGS, CosmosCrypto.identifier)
-
     # Generate some wealth
     try_generate_testnet_wealth(
         CosmosCrypto.identifier, wallet_1.addresses[CosmosCrypto.identifier]
@@ -131,12 +120,12 @@ def run():
     )
 
     # Create the transaction and send it to the ledger.
-    tx_nonce = ledger_apis.generate_tx_nonce(
+    tx_nonce = LedgerApis.generate_tx_nonce(
         CosmosCrypto.identifier,
         wallet_2.addresses.get(CosmosCrypto.identifier),
         wallet_1.addresses.get(CosmosCrypto.identifier),
     )
-    transaction = ledger_apis.get_transfer_transaction(
+    transaction = LedgerApis.get_transfer_transaction(
         identifier=CosmosCrypto.identifier,
         sender_address=wallet_1.addresses.get(CosmosCrypto.identifier),
         destination_address=wallet_2.addresses.get(CosmosCrypto.identifier),
@@ -145,7 +134,7 @@ def run():
         tx_nonce=tx_nonce,
     )
     signed_transaction = wallet_1.sign_transaction(CosmosCrypto.identifier, transaction)
-    transaction_digest = ledger_apis.send_signed_transaction(
+    transaction_digest = LedgerApis.send_signed_transaction(
         CosmosCrypto.identifier, signed_transaction
     )
 

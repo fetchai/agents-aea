@@ -68,7 +68,7 @@ class ERC1155Contract(Contract):
         return token_id
 
     @classmethod
-    def get_deploy_transaction(
+    def get_deploy_transaction(  # type: ignore
         cls,
         ledger_api: LedgerApi,
         deployer_address: Address,

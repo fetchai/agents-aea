@@ -157,7 +157,7 @@ class TestDecisionMaker:
         cls.mocked_logger_warning.__exit__()
 
     @classmethod
-    def setup_class(cls):
+    def setup(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
         cls.wallet = Wallet(
@@ -239,7 +239,7 @@ class TestDecisionMaker:
             quantities_by_good_id=good_deltas,
         )
         state_update_message_2.counterparty = "decision_maker"
-        state_update_dialogue.update(state_update_message_2)
+        assert state_update_dialogue.update(state_update_message_2)
         self.decision_maker.handle(state_update_message_2)
         expected_amount_by_currency_id = {
             key: currency_holdings.get(key, 0) + currency_deltas.get(key, 0)
@@ -259,7 +259,7 @@ class TestDecisionMaker:
         )
 
     @classmethod
-    def teardown_class(cls):
+    def teardown(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
         cls.decision_maker.stop()
@@ -280,7 +280,7 @@ class TestDecisionMaker2:
         cls.mocked_logger_warning.__exit__()
 
     @classmethod
-    def setup_class(cls):
+    def setup(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
         cls.wallet = Wallet(
@@ -333,7 +333,7 @@ class TestDecisionMaker2:
             1,
             [],
         )
-        signing_dialogues = SigningDialogues("agent1")
+        signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
@@ -351,8 +351,14 @@ class TestDecisionMaker2:
             raw_transaction=RawTransaction(FETCHAI, tx),
         )
         signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.is_incoming = True
+        recovered_dialogue = signing_dialogues.update(signing_msg_response)
+        assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_TRANSACTION
@@ -363,7 +369,7 @@ class TestDecisionMaker2:
     def test_handle_tx_signing_ethereum(self):
         """Test tx signing for ethereum."""
         tx = {"gasPrice": 30, "nonce": 1, "gas": 20000}
-        signing_dialogues = SigningDialogues("agent2")
+        signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
@@ -381,8 +387,14 @@ class TestDecisionMaker2:
             raw_transaction=RawTransaction(ETHEREUM, tx),
         )
         signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.is_incoming = True
+        recovered_dialogue = signing_dialogues.update(signing_msg_response)
+        assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_TRANSACTION
@@ -396,7 +408,7 @@ class TestDecisionMaker2:
     def test_handle_tx_signing_unknown(self):
         """Test tx signing for unknown."""
         tx = {}
-        signing_dialogues = SigningDialogues("agent3")
+        signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
@@ -414,8 +426,14 @@ class TestDecisionMaker2:
             raw_transaction=RawTransaction("unknown", tx),
         )
         signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.is_incoming = True
+        recovered_dialogue = signing_dialogues.update(signing_msg_response)
+        assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR
         assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
@@ -426,7 +444,7 @@ class TestDecisionMaker2:
     def test_handle_message_signing_fetchai(self):
         """Test message signing for fetchai."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        signing_dialogues = SigningDialogues("agent4")
+        signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
@@ -444,8 +462,14 @@ class TestDecisionMaker2:
             raw_message=RawMessage(FETCHAI, message),
         )
         signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.is_incoming = True
+        recovered_dialogue = signing_dialogues.update(signing_msg_response)
+        assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_MESSAGE
@@ -456,7 +480,7 @@ class TestDecisionMaker2:
     def test_handle_message_signing_ethereum(self):
         """Test message signing for ethereum."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        signing_dialogues = SigningDialogues("agent4")
+        signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
@@ -474,8 +498,14 @@ class TestDecisionMaker2:
             raw_message=RawMessage(ETHEREUM, message),
         )
         signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.is_incoming = True
+        recovered_dialogue = signing_dialogues.update(signing_msg_response)
+        assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_MESSAGE
@@ -486,7 +516,7 @@ class TestDecisionMaker2:
     def test_handle_message_signing_ethereum_deprecated(self):
         """Test message signing for ethereum deprecated."""
         message = b"0x11f3f9487724404e3a1fb7252a3226"
-        signing_dialogues = SigningDialogues("agent5")
+        signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
@@ -504,8 +534,14 @@ class TestDecisionMaker2:
             raw_message=RawMessage(ETHEREUM, message, is_deprecated_mode=True),
         )
         signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.is_incoming = True
+        recovered_dialogue = signing_dialogues.update(signing_msg_response)
+        assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_MESSAGE
@@ -514,10 +550,10 @@ class TestDecisionMaker2:
         assert type(signing_msg_response.signed_message) == SignedMessage
         assert signing_msg_response.signed_message.is_deprecated_mode
 
-    def test_handle_message_signing_unknown(self):
+    def test_handle_message_signing_unknown_and_two_dialogues(self):
         """Test message signing for unknown."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        signing_dialogues = SigningDialogues("agent6")
+        signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
@@ -535,8 +571,14 @@ class TestDecisionMaker2:
             raw_message=RawMessage("unknown", message),
         )
         signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.is_incoming = True
+        recovered_dialogue = signing_dialogues.update(signing_msg_response)
+        assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR
         assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
@@ -544,8 +586,59 @@ class TestDecisionMaker2:
             == SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING
         )
 
+    def test_handle_messages_from_two_dialogues_same_agent(self):
+        """Test message signing for unknown."""
+        message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
+        signing_dialogues = SigningDialogues("agent")
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
+            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
+            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
+            skill_callback_info={},
+            terms=Terms(
+                ledger_id="unknown",
+                sender_address="pk1",
+                counterparty_address="pk2",
+                amount_by_currency_id={"FET": -1},
+                is_sender_payable_tx_fee=True,
+                quantities_by_good_id={"good_id": 10},
+                nonce="transaction nonce",
+            ),
+            raw_message=RawMessage("unknown", message),
+        )
+        signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        assert signing_msg_response is not None
+        signing_dialogues = SigningDialogues("agent")
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
+            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
+            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
+            skill_callback_info={},
+            terms=Terms(
+                ledger_id="unknown",
+                sender_address="pk1",
+                counterparty_address="pk2",
+                amount_by_currency_id={"FET": -1},
+                is_sender_payable_tx_fee=True,
+                quantities_by_good_id={"good_id": 10},
+                nonce="transaction nonce",
+            ),
+            raw_message=RawMessage("unknown", message),
+        )
+        signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
+        self.decision_maker.message_in_queue.put_nowait(signing_msg)
+        with pytest.raises(Exception):
+            # Exception occurs because the same counterparty sends two identical dialogue references
+            self.decision_maker.message_out_queue.get(timeout=1)
+
     @classmethod
-    def teardown_class(cls):
+    def teardown(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
         cls.decision_maker.stop()

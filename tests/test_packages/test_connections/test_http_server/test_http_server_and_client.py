@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """Tests for the HTTP Client and Server connections together."""
 import asyncio
 import logging
@@ -29,10 +31,10 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
+from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.conftest import (
-    HTTP_PROTOCOL_PUBLIC_ID,
     get_host,
     get_unused_tcp_port,
 )
@@ -78,6 +80,7 @@ class TestClientServer:
         )
         self.client.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.client.connect())
+        self._client_dialogues = HttpDialogues("some_addr")
 
     def setup(self):
         """Set up test case."""
@@ -89,7 +92,7 @@ class TestClientServer:
     ) -> Envelope:
         """Make request envelope."""
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=self._client_dialogues.new_self_initiated_dialogue_reference(),
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
@@ -99,10 +102,12 @@ class TestClientServer:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = "receiver"
+        request_http_message.sender = "sender"
         request_envelope = Envelope(
-            to="receiver",
-            sender="sender",
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
+            to=request_http_message.counterparty,
+            sender=request_http_message.sender,
+            protocol_id=request_http_message.protocol_id,
             message=request_http_message,
         )
         return request_envelope
@@ -114,7 +119,7 @@ class TestClientServer:
         incoming_message = cast(HttpMessage, request_envelope.message)
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("", ""),
+            dialogue_reference=("1", ""),
             target=incoming_message.message_id,
             message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
@@ -123,10 +128,12 @@ class TestClientServer:
             status_text=status_text,
             bodyy=incoming_message.bodyy,
         )
+        message.counterparty = incoming_message.counterparty
+        message.sender = request_envelope.to
         response_envelope = Envelope(
-            to=request_envelope.sender,
-            sender=request_envelope.to,
-            protocol_id=request_envelope.protocol_id,
+            to=message.counterparty,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
             context=request_envelope.context,
             message=message,
         )

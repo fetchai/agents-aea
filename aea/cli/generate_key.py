@@ -20,6 +20,7 @@
 """Implementation of the 'aea generate_key' subcommand."""
 
 from pathlib import Path
+from typing import Optional
 
 import click
 
@@ -34,24 +35,36 @@ from aea.crypto.registries import crypto_registry
     type=click.Choice([*list(crypto_registry.supported_ids), "all"]),
     required=True,
 )
-def generate_key(type_):
+@click.argument(
+    "file",
+    metavar="FILE",
+    type=click.Path(exists=False, file_okay=True, dir_okay=False, readable=True),
+    required=False,
+)
+def generate_key(type_, file):
     """Generate private keys."""
-    _generate_private_key(type_)
+    _generate_private_key(type_, file)
 
 
-def _generate_private_key(type_: str) -> None:
+def _generate_private_key(type_: str, file: Optional[str] = None) -> None:
     """
     Generate private key.
 
     :param type_: type.
+    :param file: path to file.
 
     :return: None
     """
-    types = list(IDENTIFIER_TO_KEY_FILES.keys()) if type_ == "all" else [type_]
+    if type_ == "all" and file is not None:
+        raise click.ClickException("Type all cannot be used in combination with file.")
+    elif type_ == "all":
+        types = list(IDENTIFIER_TO_KEY_FILES.keys())
+    else:
+        types = [type_]
     for type_ in types:
-        private_key_file = IDENTIFIER_TO_KEY_FILES[type_]
+        private_key_file = IDENTIFIER_TO_KEY_FILES[type_] if file is None else file
         if _can_write(private_key_file):
-            create_private_key(type_)
+            create_private_key(type_, private_key_file)
 
 
 def _can_write(path) -> bool:

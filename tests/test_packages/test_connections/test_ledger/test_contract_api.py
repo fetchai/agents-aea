@@ -18,42 +18,24 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
-from pathlib import Path
+import copy
+import logging
+import unittest.mock
 from typing import cast
 
 import pytest
 
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.connections.base import Connection, ConnectionStatus
-from aea.crypto.registries import make_crypto
-from aea.crypto.wallet import CryptoStore
+from aea.connections.base import ConnectionStatus
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.ledger.contract_dispatcher import (
-    ContractApiDialogues,
     ContractApiRequestDispatcher,
 )
-from packages.fetchai.protocols.contract_api import ContractApiMessage
+from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogues
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 
-from tests.conftest import ETHEREUM, ETHEREUM_ADDRESS_ONE, ROOT_DIR
-
-
-@pytest.fixture()
-async def ledger_apis_connection(request):
-    """Create connection."""
-    crypto = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("name", crypto.address)
-    crypto_store = CryptoStore()
-    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
-    connection = Connection.from_dir(
-        directory, identity=identity, crypto_store=crypto_store
-    )
-    connection = cast(Connection, connection)
-    await connection.connect()
-    yield connection
-    await connection.disconnect()
+from tests.conftest import ETHEREUM, ETHEREUM_ADDRESS_ONE
 
 
 @pytest.mark.integration
@@ -61,8 +43,9 @@ async def ledger_apis_connection(request):
 @pytest.mark.asyncio
 async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
+    # TODO to fix
     address = ETHEREUM_ADDRESS_ONE
-    contract_api_dialogues = ContractApiDialogues()
+    contract_api_dialogues = ContractApiDialogues("agent_address")
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
@@ -87,7 +70,10 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message = cast(ContractApiMessage, response.message)
+    response_message_orig = cast(ContractApiMessage, response.message)
+    response_message = copy.copy(response_message_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_message_orig.sender
     assert (
         response_message.performative == ContractApiMessage.Performative.RAW_TRANSACTION
     ), "Error: {}".format(response_message.message)
@@ -106,7 +92,7 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
-    contract_api_dialogues = ContractApiDialogues()
+    contract_api_dialogues = ContractApiDialogues("agent_address")
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
@@ -134,10 +120,14 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message = cast(ContractApiMessage, response.message)
+    response_message_orig = cast(ContractApiMessage, response.message)
+    response_message = copy.copy(response_message_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_message_orig.sender
     assert (
         response_message.performative == ContractApiMessage.Performative.RAW_TRANSACTION
     ), "Error: {}".format(response_message.message)
+
     response_dialogue = contract_api_dialogues.update(response_message)
     assert response_dialogue == contract_api_dialogue
     assert type(response_message.raw_transaction) == RawTransaction
@@ -153,7 +143,7 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
-    contract_api_dialogues = ContractApiDialogues()
+    contract_api_dialogues = ContractApiDialogues("agent_address")
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
@@ -189,7 +179,10 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message = cast(ContractApiMessage, response.message)
+    response_message_orig = cast(ContractApiMessage, response.message)
+    response_message = copy.copy(response_message_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_message_orig.sender
     assert (
         response_message.performative == ContractApiMessage.Performative.RAW_MESSAGE
     ), "Error: {}".format(response_message.message)
@@ -207,7 +200,7 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
-    contract_api_dialogues = ContractApiDialogues()
+    contract_api_dialogues = ContractApiDialogues("agent_address")
     token_id = 1
     request = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_STATE,
@@ -236,7 +229,10 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message = cast(ContractApiMessage, response.message)
+    response_message_orig = cast(ContractApiMessage, response.message)
+    response_message = copy.copy(response_message_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_message_orig.sender
     assert (
         response_message.performative == ContractApiMessage.Performative.STATE
     ), "Error: {}".format(response_message.message)
@@ -256,7 +252,7 @@ async def test_run_async():
     def _raise():
         raise Exception("Expected")
 
-    contract_api_dialogues = ContractApiDialogues()
+    contract_api_dialogues = ContractApiDialogues("agent_address")
     message = ContractApiMessage(
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
@@ -287,3 +283,243 @@ async def test_get_handler():
         ContractApiRequestDispatcher(ConnectionStatus()).get_handler(
             ContractApiMessage.Performative.ERROR
         )
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_callable_wrong_number_of_arguments_api_and_contract_address(
+    erc1155_contract, ledger_apis_connection
+):
+    """
+    Test a contract callable with wrong number of arguments.
+
+    Test the case of either GET_STATE, GET_RAW_MESSAGE or GET_RAW_TRANSACTION.
+    """
+    address = ETHEREUM_ADDRESS_ONE
+    contract_api_dialogues = ContractApiDialogues("agent_address")
+    token_id = 1
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_STATE,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=ETHEREUM,
+        contract_id="fetchai/erc1155:0.6.0",
+        contract_address=contract_address,
+        callable="get_balance",
+        kwargs=ContractApiMessage.Kwargs(
+            {"agent_address": address, "token_id": token_id}
+        ),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    with unittest.mock.patch(
+        "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[None])
+    ):
+        with unittest.mock.patch.object(
+            ledger_apis_connection._logger, "error"
+        ) as mock_logger:
+            await ledger_apis_connection.send(envelope)
+            await asyncio.sleep(0.01)
+            response = await ledger_apis_connection.receive()
+            mock_logger.assert_any_call(
+                "Expected two or more positional arguments, got 1"
+            )
+            assert (
+                response.message.performative == ContractApiMessage.Performative.ERROR
+            )
+            assert (
+                response.message.message
+                == "Expected two or more positional arguments, got 1"
+            )
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_callable_wrong_number_of_arguments_apis(
+    erc1155_contract, ledger_apis_connection
+):
+    """
+    Test a contract callable with wrong number of arguments.
+
+    Test the case of either GET_DEPLOY_TRANSACTION.
+    """
+    address = ETHEREUM_ADDRESS_ONE
+    contract_api_dialogues = ContractApiDialogues("agent_address")
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=ETHEREUM,
+        contract_id="fetchai/erc1155:0.6.0",
+        callable="get_deploy_transaction",
+        kwargs=ContractApiMessage.Kwargs({}),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    with unittest.mock.patch(
+        "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[])
+    ):
+        with unittest.mock.patch.object(
+            ledger_apis_connection._contract_dispatcher, "_call_stub", return_value=None
+        ):
+            with unittest.mock.patch.object(
+                ledger_apis_connection._contract_dispatcher.logger, "error"
+            ) as mock_logger:
+                await ledger_apis_connection.send(envelope)
+                await asyncio.sleep(0.01)
+                response = await ledger_apis_connection.receive()
+                mock_logger.assert_any_call(
+                    "Expected one or more positional arguments, got 0"
+                )
+                assert (
+                    response.message.performative
+                    == ContractApiMessage.Performative.ERROR
+                )
+                assert (
+                    response.message.message
+                    == "Expected one or more positional arguments, got 0"
+                )
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_callable_wrong_number_of_arguments_apis_method_call(
+    erc1155_contract, ledger_apis_connection, caplog
+):
+    """
+    Test a contract callable with wrong number of arguments.
+
+    Test the case of either GET_DEPLOY_TRANSACTION.
+    """
+    address = ETHEREUM_ADDRESS_ONE
+    contract_api_dialogues = ContractApiDialogues("agent_address")
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=ETHEREUM,
+        contract_id="fetchai/erc1155:0.6.0",
+        callable="get_deploy_transaction",
+        kwargs=ContractApiMessage.Kwargs({}),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    with unittest.mock.patch.object(
+        ledger_apis_connection._contract_dispatcher, "_call_stub", return_value=None
+    ):
+        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.ledger"):
+            await ledger_apis_connection.send(envelope)
+            await asyncio.sleep(0.01)
+            assert (
+                "An error occurred while processing the contract api request: 'get_deploy_transaction() missing 1 required positional argument: 'deployer_address''."
+                in caplog.text
+            )
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
+    """Test error messages when an exception is raised while processing the request."""
+    address = ETHEREUM_ADDRESS_ONE
+    contract_api_dialogues = ContractApiDialogues("agent_address")
+    token_id = 1
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_STATE,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=ETHEREUM,
+        contract_id="fetchai/erc1155:0.6.0",
+        contract_address=contract_address,
+        callable="get_balance",
+        kwargs=ContractApiMessage.Kwargs(
+            {"agent_address": address, "token_id": token_id}
+        ),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    with unittest.mock.patch(
+        "inspect.getfullargspec", side_effect=Exception("Generic error")
+    ):
+        with unittest.mock.patch.object(
+            ledger_apis_connection._logger, "error"
+        ) as mock_logger:
+            await ledger_apis_connection.send(envelope)
+            await asyncio.sleep(0.01)
+            response = await ledger_apis_connection.receive()
+            mock_logger.assert_any_call(
+                "An error occurred while processing the contract api request: 'Generic error'."
+            )
+            assert (
+                response.message.performative == ContractApiMessage.Performative.ERROR
+            )
+            assert response.message.message == "Generic error"
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, caplog):
+    """Test error messages when an exception is raised while processing the request."""
+    address = ETHEREUM_ADDRESS_ONE
+    contract_api_dialogues = ContractApiDialogues("agent_address")
+    token_id = 1
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_STATE,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=ETHEREUM,
+        contract_id="fetchai/erc1155:0.6.0",
+        contract_address=contract_address,
+        callable="unknown_callable",
+        kwargs=ContractApiMessage.Kwargs(
+            {"agent_address": address, "token_id": token_id}
+        ),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.ledger"):
+        await ledger_apis_connection.send(envelope)
+        await asyncio.sleep(0.01)
+        assert f"Cannot find {request.callable} in contract" in caplog.text

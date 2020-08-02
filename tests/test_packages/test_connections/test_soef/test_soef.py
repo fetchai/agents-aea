@@ -302,9 +302,10 @@ class TestSoef:
             expected_envelope.message.performative
             == OefSearchMessage.Performative.OEF_ERROR
         )
-        message = copy.deepcopy(expected_envelope.message)
+        orig = expected_envelope.message
+        message = copy.copy(orig)
         message.is_incoming = True  # TODO: fix
-        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        message.counterparty = orig.sender  # TODO; fix
         receiving_dialogue = self.oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 
@@ -406,11 +407,17 @@ class TestSoef:
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
         message = OefSearchMessage(
-            performative="oef_error", service_description=service_description,
+            performative="oef_error",
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            service_description=service_description,
         )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue is None
+        message.sender = self.crypto.address
         envelope = Envelope(
-            to="soef",
-            sender=self.crypto.address,
+            to=message.counterparty,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -448,9 +455,10 @@ class TestSoef:
         assert expected_envelope
         message = expected_envelope.message
         assert message.performative == OefSearchMessage.Performative.OEF_ERROR
-        message = copy.deepcopy(expected_envelope.message)
+        orig = expected_envelope.message
+        message = copy.copy(orig)
         message.is_incoming = True  # TODO: fix
-        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        message.counterparty = orig.sender  # TODO; fix
         receiving_dialogue = self.oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 
@@ -495,14 +503,17 @@ class TestSoef:
             make_async(self.search_success_response),
         ):
             await self.connection.send(envelope)
+            expected_envelope = await asyncio.wait_for(
+                self.connection.receive(), timeout=1
+            )
 
-        expected_envelope = await asyncio.wait_for(self.connection.receive(), timeout=1)
         assert expected_envelope
         message = expected_envelope.message
         assert len(message.agents) >= 1
-        message = copy.deepcopy(expected_envelope.message)
+        orig = expected_envelope.message
+        message = copy.copy(orig)
         message.is_incoming = True  # TODO: fix
-        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        message.counterparty = orig.sender  # TODO; fix
         receiving_dialogue = self.oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 
@@ -526,14 +537,58 @@ class TestSoef:
         closeness_query = Query(
             [close_to_my_service] + personality_filters + service_key_filters
         )
-        message = OefSearchMessage(
+
+        message_1 = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message)
+        message_1.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message_1)
         assert sending_dialogue is not None
+
+        internal_msg_1 = copy.copy(message_1)
+        internal_msg_1.is_incoming = True
+        internal_msg_1.counterparty = message_1.sender
+        internal_dialogue_1 = self.connection.channel.oef_search_dialogues.update(
+            internal_msg_1
+        )
+        assert internal_dialogue_1 is not None
+
+        message_2 = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            query=closeness_query,
+        )
+        message_2.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message_2)
+        assert sending_dialogue is not None
+
+        internal_msg_2 = copy.copy(message_2)
+        internal_msg_2.is_incoming = True
+        internal_msg_2.counterparty = message_2.sender
+        internal_dialogue_2 = self.connection.channel.oef_search_dialogues.update(
+            internal_msg_2
+        )
+        assert internal_dialogue_2 is not None
+
+        message_3 = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            query=closeness_query,
+        )
+        message_3.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = self.oef_search_dialogues.update(message_3)
+        assert sending_dialogue is not None
+
+        internal_msg_3 = copy.copy(message_3)
+        internal_msg_3.is_incoming = True
+        internal_msg_3.counterparty = message_3.sender
+        internal_dialogue_3 = self.connection.channel.oef_search_dialogues.update(
+            internal_msg_3
+        )
+        assert internal_dialogue_3 is not None
+
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -544,15 +599,15 @@ class TestSoef:
                 wrap_future(self.search_fail_response),
             ],
         ):
-            await self.connection.channel._find_around_me(
-                message, sending_dialogue, 1, {}
+            await self.connection.channel._find_around_me_handle_requet(
+                internal_msg_1, internal_dialogue_1, 1, {}
             )
-            await self.connection.channel._find_around_me(
-                message, sending_dialogue, 1, {}
+            await self.connection.channel._find_around_me_handle_requet(
+                internal_msg_2, internal_dialogue_2, 1, {}
             )
             with pytest.raises(SOEFException, match=r"`find_around_me` error: .*"):
-                await self.connection.channel._find_around_me(
-                    message, sending_dialogue, 1, {}
+                await self.connection.channel._find_around_me_handle_requet(
+                    internal_msg_3, internal_dialogue_3, 1, {}
                 )
 
     @pytest.mark.asyncio

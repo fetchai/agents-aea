@@ -2,13 +2,13 @@ The command line interface is the easiest way to build an AEA.
 
 ## Installation
 
-The following installs the AEA cli package.
+The following installs the AEA CLI package.
 
 ``` bash
 pip install aea[cli]
 ```
 
-The following installs the entire AEA package including the cli.
+The following installs the entire AEA package including the CLI.
 
 ``` bash
 pip install aea[all]
@@ -23,6 +23,19 @@ and
 pip install 'aea[all]'
 ```
 respectively.
+
+Be sure that the `bin` folder of your Python environment
+is in the `PATH` variable. If so, you can execute the CLI tool as:
+``` bash
+aea
+```
+
+You might find useful the execution of the `aea.cli` package
+as a script:
+``` bash
+python -m aea.cli
+```
+which is just an alternative entry-point to the CLI tool. 
 
 ## Troubleshooting
 

@@ -134,11 +134,20 @@ class ItemSpec(Generic[ItemType]):
         """
         _kwargs = self._kwargs.copy()
         _kwargs.update(kwargs)
+        cls = self.get_class()
+        item = cls(**_kwargs)  # type: ignore
+        return item
+
+    def get_class(self) -> Type[ItemType]:
+        """
+        Get the class of the item with class variables instantiated.
+
+        :return: an item class
+        """
         cls = self.entry_point.load()
         for key, value in self._class_kwargs.items():
             setattr(cls, key, value)
-        item = cls(**_kwargs)  # type: ignore
-        return item
+        return cls
 
 
 class Registry(Generic[ItemType]):
@@ -200,6 +209,29 @@ class Registry(Generic[ItemType]):
         spec = self._get_spec(item_id, module=module)
         item = spec.make(**kwargs)
         return item
+
+    def make_cls(
+        self, id_: Union[ItemId, str], module: Optional[str] = None
+    ) -> Type[ItemType]:
+        """
+        Load a class of the associated type item id.
+
+        :param id_: the id of the item class. Make sure it has been registered earlier
+            before calling this function.
+        :param module: dotted path to a module.
+            whether a module should be loaded before creating the object.
+            this argument is useful when the item might not be registered
+            beforehand, and loading the specified module will make the registration.
+            E.g. suppose the call to 'register' for a custom object
+            is located in some_package/__init__.py. By providing module="some_package",
+            the call to 'register' in such module gets triggered and
+            the make can then find the identifier.
+        :return: the new item class.
+        """
+        item_id = ItemId(id_)
+        spec = self._get_spec(item_id, module=module)
+        cls = spec.get_class()
+        return cls
 
     def has_spec(self, item_id: ItemId) -> bool:
         """

@@ -48,6 +48,7 @@ _FETCHAI = "fetchai"
 DEFAULT_NETWORK = "testnet"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
+TESTNET_NAME = "testnet"
 
 
 class FetchAICrypto(Crypto[Entity]):
@@ -377,6 +378,7 @@ class FetchAIFaucetApi(FaucetApi):
     """Fetchai testnet faucet API."""
 
     identifier = _FETCHAI
+    testnet_name = TESTNET_NAME
 
     def get_wealth(self, address: Address) -> None:
         """

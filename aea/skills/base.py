@@ -42,7 +42,6 @@ from aea.configurations.base import (
 )
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
-from aea.contracts.base import Contract
 from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
 from aea.helpers.logging import AgentLoggerAdapter
@@ -74,6 +73,7 @@ class SkillContext:
 
         self._is_active = True  # type: bool
         self._new_behaviours_queue = queue.Queue()  # type: Queue
+        self._new_handlers_queue = queue.Queue()  # type: Queue
         self._logger: Optional[Union[Logger, LoggerAdapter]] = None
 
     @property
@@ -129,7 +129,7 @@ class SkillContext:
         )
 
     @property
-    def new_behaviours(self) -> Queue:
+    def new_behaviours(self) -> "Queue[Behaviour]":
         """
         Queue for the new behaviours.
 
@@ -139,6 +139,18 @@ class SkillContext:
         :return the queue of new behaviours.
         """
         return self._new_behaviours_queue
+
+    @property
+    def new_handlers(self) -> "Queue[Handler]":
+        """
+        Queue for the new handlers.
+
+        This queue can be used to send messages to the framework
+        to request the registration of a handler.
+
+        :return the queue of new handlers.
+        """
+        return self._new_handlers_queue
 
     @property
     def agent_addresses(self) -> Dict[str, str]:
@@ -199,12 +211,6 @@ class SkillContext:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.behaviours)
-
-    @property
-    def contracts(self) -> SimpleNamespace:
-        """Get contracts the skill has access to."""
-        assert self._skill is not None, "Skill not initialized."
-        return SimpleNamespace(**self._skill.contracts)
 
     @property
     def namespace(self) -> SimpleNamespace:
@@ -635,18 +641,7 @@ class Skill(Component):
         )  # type: Dict[str, Behaviour]
         self._models = {} if models is None else models  # type: Dict[str, Model]
 
-        self._contracts = {}  # type: Dict[str, Contract]
-
         self._skill_context._skill = self
-
-    @property
-    def contracts(self) -> Dict[str, Contract]:
-        """Get the contracts associated with the skill."""
-        return self._contracts
-
-    def inject_contracts(self, contracts: Dict[str, Contract]) -> None:
-        """Add the contracts to the skill."""
-        self._contracts = contracts
 
     @property
     def skill_context(self) -> SkillContext:
