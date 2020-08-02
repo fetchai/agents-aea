@@ -333,7 +333,6 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_send_connection_drop(self):
         """Test unexpected response."""
-        client_id = "to_key"
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
             dialogue_reference=("", ""),
@@ -345,10 +344,12 @@ class TestHTTPServer:
             status_text="Success",
             bodyy=b"",
         )
+        message.counterparty = "to_key"
+        message.sender = "from_key"
         envelope = Envelope(
-            to=client_id,
-            sender="from_key",
-            protocol_id=self.protocol_id,
+            to=message.counterparty,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
             message=message,
         )
         await self.http_connection.send(envelope)

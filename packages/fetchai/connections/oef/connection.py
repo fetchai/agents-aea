@@ -442,7 +442,7 @@ class OEFChannel(OEFAgent):
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_services(self.oef_msg_id, oef_query)
         else:
-            raise ValueError("OEF request not recognized.")
+            raise ValueError("OEF request not recognized.")  # pragma: nocover
 
     def handle_failure(  # pylint: disable=no-self-use
         self, exception: Exception, conn

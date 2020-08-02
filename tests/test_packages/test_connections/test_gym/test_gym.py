@@ -94,9 +94,9 @@ class TestGymConnection:
         sending_dialogue = self.dialogues.update(msg)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=self.gym_address,
-            sender=self.agent_address,
-            protocol_id=GymMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
 
@@ -120,9 +120,9 @@ class TestGymConnection:
         msg.counterparty = self.gym_address
         assert sending_dialogue.update(msg)
         envelope = Envelope(
-            to=self.gym_address,
-            sender=self.agent_address,
-            protocol_id=GymMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
         await self.gym_con.connect()
@@ -172,9 +172,9 @@ class TestGymConnection:
         msg.counterparty = self.gym_address
         assert sending_dialogue.update(msg)
         envelope = Envelope(
-            to=self.gym_address,
-            sender=self.agent_address,
-            protocol_id=GymMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
         await self.gym_con.connect()
@@ -191,10 +191,13 @@ class TestGymConnection:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
         )
         msg.counterparty = self.gym_address
+        dialogue = self.dialogues.update(msg)
+        assert dialogue is None
+        msg.sender = self.agent_address
         envelope = Envelope(
-            to=self.gym_address,
-            sender=self.agent_address,
-            protocol_id=GymMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
         await self.gym_con.connect()
@@ -213,9 +216,9 @@ class TestGymConnection:
         sending_dialogue = self.dialogues.update(msg)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=self.gym_address,
-            sender=self.agent_address,
-            protocol_id=GymMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
         await self.gym_con.connect()

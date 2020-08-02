@@ -117,12 +117,14 @@ class HTTPClientAsyncChannel:
 
         :return: Tuple[MEssage, Optional[Dialogue]]
         """
-        message = cast(HttpMessage, envelope.message)
+        orig_message = cast(HttpMessage, envelope.message)
         message = copy.copy(
-            message
+            orig_message
         )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
         message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+        message.counterparty = (
+            orig_message.sender
+        )  # TODO: fix; should be done by framework
         dialogue = cast(HttpDialogue, self._dialogues.update(message))
         return message, dialogue
 

@@ -40,9 +40,6 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-
-"""default 'to' field for Gym envelopes."""
-DEFAULT_GYM = "gym"
 PUBLIC_ID = PublicId.from_str("fetchai/gym:0.4.0")
 
 
@@ -73,12 +70,14 @@ class GymChannel:
 
         :return: Tuple[MEssage, Optional[Dialogue]]
         """
-        message = cast(GymMessage, envelope.message)
+        orig_message = cast(GymMessage, envelope.message)
         message = copy.copy(
-            message
+            orig_message
         )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
         message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+        message.counterparty = (
+            orig_message.sender
+        )  # TODO: fix; should be done by framework
         dialogue = cast(GymDialogue, self._dialogues.update(message))
         if dialogue is None:  # pragma: nocover
             logger.warning("Could not create dialogue for message={}".format(message))
@@ -168,9 +167,9 @@ class GymChannel:
         msg.counterparty = gym_message.counterparty
         assert dialogue.update(msg), "Error during dialogue update."
         envelope = Envelope(
-            to=envelope.sender,
-            sender=DEFAULT_GYM,
-            protocol_id=GymMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
         await self._send(envelope)
@@ -181,7 +180,6 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        assert envelope.to == self.address, "Invalid destination address"
         await self.queue.put(envelope)
 
     async def disconnect(self) -> None:

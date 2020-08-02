@@ -317,9 +317,13 @@ class TestHTTPClientConnect:
             bodyy=b"",
             version="",
         )
+        http_message.counterparty = self.connection_address
+        http_dialogue = self.http_dialogs.update(http_message)
+        http_message.sender = self.agent_address
+        assert http_dialogue is None
         envelope = Envelope(
-            to=self.connection_address,
-            sender=self.agent_address,
+            to=http_message.counterparty,
+            sender=http_message.sender,
             protocol_id=http_message.protocol_id,
             message=http_message,
         )

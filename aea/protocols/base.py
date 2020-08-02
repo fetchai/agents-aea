@@ -115,7 +115,7 @@ class Message:
         self._to = to
 
     @property
-    def is_counterparty_set(self) -> bool:
+    def has_counterparty(self) -> bool:
         """Check if the counterparty is set."""
         return self._counterparty is not None
 

@@ -35,7 +35,6 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.conftest import (
-    HTTP_PROTOCOL_PUBLIC_ID,
     get_host,
     get_unused_tcp_port,
 )
@@ -103,10 +102,12 @@ class TestClientServer:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = "receiver"
+        request_http_message.sender = "sender"
         request_envelope = Envelope(
-            to="receiver",
-            sender="sender",
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
+            to=request_http_message.counterparty,
+            sender=request_http_message.sender,
+            protocol_id=request_http_message.protocol_id,
             message=request_http_message,
         )
         return request_envelope
@@ -127,10 +128,12 @@ class TestClientServer:
             status_text=status_text,
             bodyy=incoming_message.bodyy,
         )
+        message.counterparty = incoming_message.counterparty
+        message.sender = request_envelope.to
         response_envelope = Envelope(
-            to=request_envelope.sender,
-            sender=request_envelope.to,
-            protocol_id=request_envelope.protocol_id,
+            to=message.counterparty,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
             context=request_envelope.context,
             message=message,
         )

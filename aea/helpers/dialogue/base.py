@@ -834,6 +834,13 @@ class Dialogues(ABC):
         """
         dialogue_reference = message.dialogue_reference
 
+        if not message.has_counterparty:
+            raise ValueError(
+                "The message counterparty field is not set {}".format(message)
+            )
+        if message.is_incoming and not message.has_sender:
+            raise ValueError("The message sender field is not set {}".format(message))
+
         is_invalid_label = (
             dialogue_reference[0] == Dialogue.OPPONENT_STARTER_REFERENCE
             and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
@@ -858,10 +865,6 @@ class Dialogues(ABC):
                 role=self._role_from_first_message(message),
             )
         elif is_new_dialogue and not message.is_incoming:  # new dialogue by self
-            if not message.is_counterparty_set:
-                raise ValueError(
-                    "The message counterparty field is not set {}".format(message)
-                )
             dialogue = self._create_self_initiated(
                 dialogue_opponent_addr=message.counterparty,
                 dialogue_reference=dialogue_reference,

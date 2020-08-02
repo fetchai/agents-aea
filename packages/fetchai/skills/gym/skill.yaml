@@ -6,10 +6,11 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
-  handlers.py: QmaYf2XGHhGDYQpyud9BDrP7jfENpjRKARr6Y1H2vKM5cQ
-  helpers.py: QmYo7bZqf6aRFsK7zqhuYZ5QT8WzM3a1YC3VSMs6bfE2SW
+  dialogues.py: Qmdrdg3ybytysscytzKGj9s9ZEvb2yHT7Ao8XoeMUbp1hr
+  handlers.py: QmWqN7TrqZ9Hfh4yVU7JmR7655TsdLPASSkLsVHbTkDEjV
+  helpers.py: QmVE6Wv9jBqH6p3BgUpUCZhLRMaeMGi41KX8UYeiLfJmrd
   rl_agent.py: QmVQHRWY4w8Ch8hhCxuzS1qZqG7ZJENiTEWHCGH484FPMP
-  tasks.py: QmURSaDncmKj9Ri6JM4eBwWkEg2JEJrMdxMygKiBNiD2cf
+  tasks.py: QmVTSmkzANi6kNYETkc6CwSWEjPLyU8kLCrD4ZMFFWwh7o
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -21,6 +22,12 @@ handlers:
     args:
       nb_steps: 4000
     class_name: GymHandler
-models: {}
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  gym_dialogues:
+    args: {}
+    class_name: GymDialogues
 dependencies:
   gym: {}
