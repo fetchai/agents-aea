@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ledger API connection module."""
 import asyncio
+import copy
 import logging
 from typing import cast
 from unittest.mock import Mock, patch
@@ -26,6 +27,7 @@ import pytest
 
 from aea.configurations.base import ProtocolId
 from aea.connections.base import Connection, ConnectionStatus
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.helpers.transaction.base import (
     RawTransaction,
@@ -38,9 +40,9 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
-    LedgerApiDialogues,
     LedgerApiRequestDispatcher,
 )
+from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogues
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
@@ -79,7 +81,7 @@ async def test_get_balance(
     """Test get balance."""
     import aea  # noqa # to load registries
 
-    ledger_api_dialogues = LedgerApiDialogues()
+    ledger_api_dialogues = LedgerApiDialogues(address)
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
@@ -103,7 +105,10 @@ async def test_get_balance(
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_msg = copy.copy(response_msg_orig)
+    response_msg.is_incoming = True
+    response_msg.counterparty = response_msg_orig.sender
     response_dialogue = ledger_api_dialogues.update(response_msg)
     assert response_dialogue == ledger_api_dialogue
     assert response_msg.performative == LedgerApiMessage.Performative.BALANCE
@@ -121,7 +126,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     crypto1 = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     crypto2 = make_crypto(ETHEREUM)
-    ledger_api_dialogues = LedgerApiDialogues()
+    ledger_api_dialogues = LedgerApiDialogues(crypto1.address)
 
     amount = 40000
     fee = 30000
@@ -156,7 +161,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_message = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_message = copy.copy(response_msg_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_msg_orig.sender
     assert (
         response_message.performative == LedgerApiMessage.Performative.RAW_TRANSACTION
     )
@@ -164,15 +172,6 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert response_dialogue == ledger_api_dialogue
     assert type(response_message.raw_transaction) == RawTransaction
     assert response_message.raw_transaction.ledger_id == request.terms.ledger_id
-
-    # raw_tx = api.get_transfer_transaction(
-    #     sender_address=crypto1.address,
-    #     destination_address=crypto2.address,
-    #     amount=amount,
-    #     tx_fee=fee,
-    #     tx_nonce="",
-    #     chain_id=3,
-    # )
 
     signed_transaction = crypto1.sign_transaction(response_message.raw_transaction.body)
     request = LedgerApiMessage(
@@ -196,7 +195,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_message = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_message = copy.copy(response_msg_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_msg_orig.sender
     assert (
         response_message.performative != LedgerApiMessage.Performative.ERROR
     ), f"Received error: {response_message.message}"
@@ -235,7 +237,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_message = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_message = copy.copy(response_msg_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_msg_orig.sender
     assert (
         response_message.performative
         == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
@@ -249,18 +254,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         response_message.transaction_receipt.ledger_id
         == request.transaction_digest.ledger_id
     )
-
-    # # check that the transaction is settled (to update nonce!)
-    # is_settled = False
-    # attempts = 0
-    # while not is_settled and attempts < 60:
-    #     attempts += 1
-    #     tx_receipt = api.get_transaction_receipt(
-    #         response_message.transaction_digest.body
-    #     )
-    #     is_settled = api.is_transaction_settled(tx_receipt)
-    #     await asyncio.sleep(4.0)
-    # assert is_settled, "Transaction not settled."
+    assert LedgerApis.is_transaction_settled(
+        response_message.transaction_receipt.ledger_id,
+        response_message.transaction_receipt.receipt,
+    ), "Transaction not settled."
 
 
 @pytest.mark.asyncio

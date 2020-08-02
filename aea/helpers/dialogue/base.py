@@ -291,6 +291,15 @@ class Dialogue(ABC):
         return self._dialogue_label
 
     @property
+    def incomplete_dialogue_label(self) -> DialogueLabel:
+        """
+        Get the dialogue label.
+
+        :return: The incomplete dialogue label
+        """
+        return self._incomplete_dialogue_label
+
+    @property
     def dialogue_labels(self) -> Set[DialogueLabel]:
         """
         Get the dialogue labels (incomplete and complete, if it exists)
@@ -825,6 +834,17 @@ class Dialogues(ABC):
         """
         dialogue_reference = message.dialogue_reference
 
+        if not message.has_counterparty:
+            raise ValueError(
+                "The message counterparty field is not set {}".format(message)
+            )
+        if message.is_incoming and not message.has_sender:
+            raise ValueError("The message sender field is not set {}".format(message))
+
+        is_invalid_label = (
+            dialogue_reference[0] == Dialogue.OPPONENT_STARTER_REFERENCE
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+        )
         is_new_dialogue = (
             dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
             and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
@@ -836,16 +856,15 @@ class Dialogues(ABC):
             and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
             and message.message_id > 1
         )
-        if is_new_dialogue and message.is_incoming:  # new dialogue by other
+        if is_invalid_label:
+            dialogue = None  # type: Optional[Dialogue]
+        elif is_new_dialogue and message.is_incoming:  # new dialogue by other
             dialogue = self._create_opponent_initiated(
                 dialogue_opponent_addr=message.counterparty,
                 dialogue_reference=dialogue_reference,
                 role=self._role_from_first_message(message),
-            )  # type: Optional[Dialogue]
+            )
         elif is_new_dialogue and not message.is_incoming:  # new dialogue by self
-            assert (
-                message.counterparty is not None
-            ), "The message counter-party field is not set {}".format(message)
             dialogue = self._create_self_initiated(
                 dialogue_opponent_addr=message.counterparty,
                 dialogue_reference=dialogue_reference,

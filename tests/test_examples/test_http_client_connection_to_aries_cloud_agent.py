@@ -113,7 +113,7 @@ class TestAEAToACA:
 
         # Request messages
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=("1", ""),
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,

@@ -18,9 +18,34 @@
 # ------------------------------------------------------------------------------
 
 """This module contains mocking utils testing purposes."""
+import re
 import unittest
 from contextlib import contextmanager
 from unittest.mock import MagicMock
+
+
+class AnyStringWith(str):
+    """
+    Helper class to assert calls of mocked method with string arguments.
+
+    It will use string inclusion as equality comparator.
+    """
+
+    def __eq__(self, other):
+        return self in other
+
+
+class RegexComparator(str):
+    """
+    Helper class to assert calls of mocked method with string arguments.
+
+    It will use regex matching as equality comparator.
+    """
+
+    def __eq__(self, other):
+        regex = re.compile(str(self), re.MULTILINE | re.DOTALL)
+        s = str(other)
+        return bool(regex.match(s))
 
 
 @contextmanager
