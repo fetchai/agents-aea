@@ -50,7 +50,7 @@ from aea.multiplexer import OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class SkillContext:
@@ -80,7 +80,7 @@ class SkillContext:
     def logger(self) -> Logger:
         """Get the logger."""
         if self._logger is None:
-            return logging.getLogger("aea")
+            return _default_logger
         return self._logger
 
     @logger.setter
@@ -122,7 +122,7 @@ class SkillContext:
     def is_active(self, value: bool) -> None:
         """Set the status of the skill (active/not active)."""
         self._is_active = value
-        logger.debug(
+        self.logger.debug(
             "New status of skill {}: is_active={}".format(
                 self.skill_id, self._is_active
             )
@@ -248,7 +248,7 @@ class SkillComponent(ABC):
         self._name = name
         self._context = skill_context
         if len(kwargs) != 0:
-            logger.warning(
+            self.context.logger.warning(
                 "The kwargs={} passed to {} have not been set!".format(kwargs, name)
             )
 
@@ -387,6 +387,7 @@ class Behaviour(AbstractBehaviour, ABC):
 
         name_to_class = dict(behaviours_classes)
         _print_warning_message_for_non_declared_skill_components(
+            skill_context,
             set(name_to_class.keys()),
             {
                 behaviour_config.class_name
@@ -398,13 +399,15 @@ class Behaviour(AbstractBehaviour, ABC):
 
         for behaviour_id, behaviour_config in behaviour_configs.items():
             behaviour_class_name = cast(str, behaviour_config.class_name)
-            logger.debug("Processing behaviour {}".format(behaviour_class_name))
+            skill_context.logger.debug(
+                "Processing behaviour {}".format(behaviour_class_name)
+            )
             assert (
                 behaviour_id.isidentifier()
             ), "'{}' is not a valid identifier.".format(behaviour_id)
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
-                logger.warning(
+                skill_context.logger.warning(
                     "Behaviour '{}' cannot be found.".format(behaviour_class_name)
                 )
             else:
@@ -468,6 +471,7 @@ class Handler(SkillComponent, ABC):
 
         name_to_class = dict(handler_classes)
         _print_warning_message_for_non_declared_skill_components(
+            skill_context,
             set(name_to_class.keys()),
             {handler_config.class_name for handler_config in handler_configs.values()},
             "handlers",
@@ -475,13 +479,15 @@ class Handler(SkillComponent, ABC):
         )
         for handler_id, handler_config in handler_configs.items():
             handler_class_name = cast(str, handler_config.class_name)
-            logger.debug("Processing handler {}".format(handler_class_name))
+            skill_context.logger.debug(
+                "Processing handler {}".format(handler_class_name)
+            )
             assert handler_id.isidentifier(), "'{}' is not a valid identifier.".format(
                 handler_id
             )
             handler_class = name_to_class.get(handler_class_name, None)
             if handler_class is None:
-                logger.warning(
+                skill_context.logger.warning(
                     "Handler '{}' cannot be found.".format(handler_class_name)
                 )
             else:
@@ -540,7 +546,7 @@ class Model(SkillComponent, ABC):
         )
 
         for module_path in module_paths:
-            logger.debug("Trying to load module {}".format(module_path))
+            skill_context.logger.debug("Trying to load module {}".format(module_path))
             module_name = module_path.replace(".py", "")
             model_module = load_module(module_name, Path(module_path))
             classes = inspect.getmembers(model_module, inspect.isclass)
@@ -561,6 +567,7 @@ class Model(SkillComponent, ABC):
         _check_duplicate_classes(models)
         name_to_class = dict(models)
         _print_warning_message_for_non_declared_skill_components(
+            skill_context,
             set(name_to_class.keys()),
             {model_config.class_name for model_config in model_configs.values()},
             "models",
@@ -568,7 +575,7 @@ class Model(SkillComponent, ABC):
         )
         for model_id, model_config in model_configs.items():
             model_class_name = model_config.class_name
-            logger.debug(
+            skill_context.logger.debug(
                 "Processing model id={}, class={}".format(model_id, model_class_name)
             )
             assert model_id.isidentifier(), "'{}' is not a valid identifier.".format(
@@ -576,7 +583,9 @@ class Model(SkillComponent, ABC):
             )
             model = name_to_class.get(model_class_name, None)
             if model is None:
-                logger.warning("Model '{}' cannot be found.".format(model_class_name))
+                skill_context.logger.warning(
+                    "Model '{}' cannot be found.".format(model_class_name)
+                )
             else:
                 model_instance = model(
                     name=model_id,
@@ -748,11 +757,15 @@ class Skill(Component):
 
 
 def _print_warning_message_for_non_declared_skill_components(
-    classes: Set[str], config_components: Set[str], item_type, skill_path
+    skill_context: SkillContext,
+    classes: Set[str],
+    config_components: Set[str],
+    item_type,
+    skill_path,
 ):
     """Print a warning message if a skill component is not declared in the config files."""
     for class_name in classes.difference(config_components):
-        logger.warning(
+        skill_context.logger.warning(
             "Class {} of type {} found but not declared in the configuration file {}.".format(
                 class_name, item_type, skill_path
             )

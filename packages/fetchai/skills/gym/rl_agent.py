@@ -21,7 +21,7 @@
 
 import logging
 import random
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import numpy as np
 
@@ -29,6 +29,8 @@ from packages.fetchai.skills.gym.helpers import ProxyEnv, RLAgent
 
 DEFAULT_NB_STEPS = 4000
 NB_GOODS = 10
+
+_default_logger = logging.getLogger("aea.packages.fetchai.skills.gym.rl_agent")
 
 
 class PriceBandit:
@@ -106,7 +108,7 @@ class GoodPriceModel:
 class MyRLAgent(RLAgent):
     """This class is a reinforcement learning agent that interacts with the agent framework."""
 
-    def __init__(self, nb_goods: int, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, nb_goods: int, logger: logging.Logger = _default_logger) -> None:
         """
         Instantiate the RL agent.
 
@@ -117,11 +119,7 @@ class MyRLAgent(RLAgent):
         self.good_price_models = dict(
             (good_id, GoodPriceModel()) for good_id in range(nb_goods)
         )  # type: Dict[int, GoodPriceModel]
-        self.logger = (
-            logger
-            if logger is not None
-            else logging.getLogger("aea.packages.fetchai.skills.gym.rl_agent")
-        )
+        self.logger = logger
 
     def _pick_an_action(self) -> Any:
         """
