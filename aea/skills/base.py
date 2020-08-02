@@ -665,7 +665,7 @@ class Skill(Component):
         return self._models
 
     @classmethod
-    def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
+    def from_dir(cls, directory: str, agent_context: AgentContext, **kwargs) -> "Skill":
         """
         Load the skill from a directory.
 
@@ -697,7 +697,7 @@ class Skill(Component):
 
     @classmethod
     def from_config(
-        cls, configuration: SkillConfig, agent_context: AgentContext
+        cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs
     ) -> "Skill":
         """
         Load the skill from configuration.
@@ -716,10 +716,10 @@ class Skill(Component):
         skill_context = SkillContext()
         skill_context.set_agent_context(agent_context)
         logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
-        logger = AgentLoggerAdapter(
+        _logger = AgentLoggerAdapter(
             logging.getLogger(logger_name), agent_context.agent_name
         )
-        skill_context.logger = cast(Logger, logger)
+        skill_context.logger = cast(Logger, _logger)
 
         skill = Skill(configuration, skill_context)
 

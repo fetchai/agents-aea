@@ -207,7 +207,7 @@ class APISpec:
         self,
         api_spec_path: Optional[str] = None,
         server: Optional[str] = None,
-        logger: Optional[logging.Logger] = _default_logger,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize the API spec.
@@ -329,7 +329,7 @@ class HTTPChannel(BaseAsyncChannel):
         connection_id: PublicId,
         restricted_to_protocols: Set[PublicId],
         timeout_window: float = 5.0,
-        logger: Optional[logging.Logger] = _default_logger,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a channel and process the initial API specification from the file path (if given).

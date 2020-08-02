@@ -1340,7 +1340,10 @@ class AEABuilder:
 
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
-                component.logger = make_logger(configuration, agent_name)
+                if configuration.component_type != ComponentType.SKILL:
+                    component.logger = cast(
+                        logging.Logger, make_logger(configuration, agent_name)
+                    )
             else:
                 configuration = deepcopy(configuration)
                 _logger = make_logger(configuration, agent_name)

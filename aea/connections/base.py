@@ -68,6 +68,7 @@ class Connection(Component, ABC):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
+        **kwargs
     ):
         """
         Initialize the connection.
@@ -82,7 +83,7 @@ class Connection(Component, ABC):
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         assert configuration is not None, "The configuration must be provided."
-        super().__init__(configuration)
+        super().__init__(configuration, **kwargs)
         assert (
             super().public_id == self.connection_id
         ), "Connection ids in configuration and class not matching."
