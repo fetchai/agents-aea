@@ -1340,11 +1340,14 @@ class AEABuilder:
 
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
+                component.logger = make_logger(configuration, agent_name)
             else:
                 configuration = deepcopy(configuration)
-                component = load_component_from_config(configuration, **kwargs)
+                _logger = make_logger(configuration, agent_name)
+                component = load_component_from_config(
+                    configuration, logger=_logger, **kwargs
+                )
 
-            _set_logger_to_component(component, configuration, agent_name)
             resources.add_component(component)
 
     def _populate_contract_registry(self):
@@ -1391,20 +1394,19 @@ class AEABuilder:
             )
 
 
-def _set_logger_to_component(
-    component: Component, configuration: ComponentConfiguration, agent_name: str,
-) -> None:
+def make_logger(
+    configuration: ComponentConfiguration, agent_name: str,
+) -> Optional[logging.Logger]:
     """
-    Set the logger to the component.
+    Make the logger for a component.
 
-    :param component: the component instance.
     :param configuration: the component configuration
     :param agent_name: the agent name
-    :return: None
+    :return: the logger.
     """
     if configuration.component_type == ComponentType.SKILL:
         # skip because skill object already have their own logger from the skill context.
-        return
+        return None
     logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
-    logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
-    component.logger = cast(logging.Logger, logger)
+    _logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
+    return cast(logging.Logger, _logger)
