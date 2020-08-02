@@ -23,7 +23,6 @@ from unittest.mock import patch
 
 import pytest
 
-from aea.aea import logger
 from aea.aea_builder import AEABuilder
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import AEAException
@@ -120,7 +119,7 @@ class TestAeaExceptionPolicy:
         self.aea._skills_exception_policy = ExceptionPolicyEnum.just_log
         self.handler.handle = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        with patch.object(logger, "exception") as patched:
+        with patch.object(self.aea._logger, "exception") as patched:
             t = Thread(target=self.aea.start)
             t.start()
 
@@ -157,7 +156,7 @@ class TestAeaExceptionPolicy:
         self.aea._skills_exception_policy = ExceptionPolicyEnum.just_log
         self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        with patch.object(logger, "exception") as patched:
+        with patch.object(self.aea._logger, "exception") as patched:
             t = Thread(target=self.aea.start)
             t.start()
 

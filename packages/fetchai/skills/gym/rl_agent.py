@@ -21,7 +21,7 @@
 
 import logging
 import random
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -29,8 +29,6 @@ from packages.fetchai.skills.gym.helpers import ProxyEnv, RLAgent
 
 DEFAULT_NB_STEPS = 4000
 NB_GOODS = 10
-
-logger = logging.getLogger("aea.packages.fetchai.skills.gym.rl_agent")
 
 
 class PriceBandit:
@@ -108,16 +106,22 @@ class GoodPriceModel:
 class MyRLAgent(RLAgent):
     """This class is a reinforcement learning agent that interacts with the agent framework."""
 
-    def __init__(self, nb_goods: int) -> None:
+    def __init__(self, nb_goods: int, logger: Optional[logging.Logger] = None) -> None:
         """
         Instantiate the RL agent.
 
         :param nb_goods: number of goods
+        :param logger: the logger.
         :return: None
         """
         self.good_price_models = dict(
             (good_id, GoodPriceModel()) for good_id in range(nb_goods)
         )  # type: Dict[int, GoodPriceModel]
+        self.logger = (
+            logger
+            if logger is not None
+            else logging.getLogger("aea.packages.fetchai.skills.gym.rl_agent")
+        )
 
     def _pick_an_action(self) -> Any:
         """
@@ -178,7 +182,7 @@ class MyRLAgent(RLAgent):
             self._update_model(obs, reward, done, info, action)
             action_counter += 1
             if action_counter % 10 == 0:
-                logger.info(
+                self.logger.info(
                     "Action: step_id='{}' action='{}' reward='{}'".format(
                         action_counter, action, reward
                     )

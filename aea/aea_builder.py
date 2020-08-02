@@ -1407,4 +1407,4 @@ def _set_logger_to_component(
         return
     logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
     logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
-    component.logger = logger
+    component.logger = cast(logging.Logger, logger)
