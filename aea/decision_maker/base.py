@@ -378,7 +378,9 @@ class DecisionMaker:
         :return: None
         """
         # TODO: remove next three lines
-        copy_message = copy.deepcopy(message)
+        copy_message = copy.copy(message)
         copy_message.counterparty = message.sender
+        copy_message.sender = message.sender
+        # copy_message.to = message.to
         copy_message.is_incoming = True
         self.decision_maker_handler.handle(copy_message)

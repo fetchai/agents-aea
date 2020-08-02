@@ -115,6 +115,11 @@ class Message:
         self._to = to
 
     @property
+    def has_counterparty(self) -> bool:
+        """Check if the counterparty is set."""
+        return self._counterparty is not None
+
+    @property
     def counterparty(self) -> Address:
         """
         Get the counterparty of the message in Address form.

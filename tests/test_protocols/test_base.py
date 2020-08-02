@@ -32,6 +32,25 @@ from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Prot
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 
+class TestMessageProperties:
+    """Test that the base serializations work."""
+
+    @classmethod
+    def setup_class(cls):
+        cls.body = {"body_1": "1", "body_2": "2"}
+        cls.kwarg = 1
+        cls.message = Message(cls.body, kwarg=cls.kwarg)
+
+    def test_message_properties(self):
+        for key, value in self.body.items():
+            assert self.message.get(key) == value
+        assert self.message.get("kwarg") == self.kwarg
+        assert not self.message.has_sender
+        assert not self.message.has_counterparty
+        assert not self.message.has_to
+        assert not self.message.is_incoming
+
+
 class TestBaseSerializations:
     """Test that the base serializations work."""
 
