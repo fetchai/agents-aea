@@ -19,7 +19,9 @@
 
 """This module contains mocking utils testing purposes."""
 import unittest
+from collections import Sequence
 from contextlib import contextmanager
+from typing import Any
 from unittest.mock import MagicMock
 
 
@@ -37,3 +39,26 @@ def ctx_mock_Popen() -> MagicMock:
 
     with unittest.mock.patch("subprocess.Popen", return_value=return_value) as mocked:
         yield mocked
+
+
+class MockCallableNTimes:
+    """Mock a callable for N times."""
+
+    def __init__(self, values: Sequence, default: Any):
+        """Initialize."""
+        self.values = values
+        self.default = default
+
+        self._iterator = iter(self.values)
+
+    def __call__(self, *args, **kwargs):
+        try:
+            n = next(self._iterator)
+            if n is None:
+                return self.default
+            if issubclass(n, BaseException):
+                raise n
+            print(n)
+            return n
+        except StopIteration:
+            return self.default

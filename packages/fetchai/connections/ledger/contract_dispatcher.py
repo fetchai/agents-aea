@@ -331,7 +331,7 @@ def _validate_and_call_callable(
         method_to_call = getattr(contract, message.callable)
     except AttributeError:
         raise AEAException(
-            f"Cannot find {message.callable} in contract {type(contract)}"
+            f"Cannot find '{message.callable}' in contract '{type(contract).__name__}'"
         )
     full_args_spec = inspect.getfullargspec(method_to_call)
     if message.performative in [

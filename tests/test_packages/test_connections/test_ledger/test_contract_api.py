@@ -33,6 +33,7 @@ from packages.fetchai.connections.ledger.contract_dispatcher import (
 )
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 
+from tests.common.mocks import MockCallableNTimes
 from tests.conftest import ETHEREUM, ETHEREUM_ADDRESS_ONE
 
 
@@ -78,6 +79,69 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
     assert response_message.raw_transaction.ledger_id == ETHEREUM
     assert len(response.message.raw_transaction.body) == 6
     assert len(response.message.raw_transaction.body["data"]) > 0
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_erc1155_get_deploy_transaction_via_callable(
+    erc1155_contract, ledger_apis_connection
+):
+    """Test get_deploy_transaction with contract erc1155 via callable."""
+    address = ETHEREUM_ADDRESS_ONE
+    contract_api_dialogues = ContractApiDialogues()
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=ETHEREUM,
+        contract_id="fetchai/erc1155:0.6.0",
+        callable="get_deploy_transaction",
+        kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    original_get = request.get
+
+    class mocked_get:
+        def __init__(self):
+            self.performative_values = MockCallableNTimes(
+                [None, None, NotImplementedError], original_get("performative")
+            )
+
+        def __call__(self, key, *args, **kwargs):
+            if key == "performative":
+                return self.performative_values()
+            else:
+                return original_get(key)
+
+    with unittest.mock.patch.object(
+        request, "get", side_effect=mocked_get(),
+    ):
+        await ledger_apis_connection.send(envelope)
+        await asyncio.sleep(0.01)
+        response = await ledger_apis_connection.receive()
+
+        assert response is not None
+        assert type(response.message) == ContractApiMessage
+        response_message = cast(ContractApiMessage, response.message)
+        assert (
+            response_message.performative
+            == ContractApiMessage.Performative.RAW_TRANSACTION
+        ), "Error: {}".format(response_message.message)
+        response_dialogue = contract_api_dialogues.update(response_message)
+        assert response_dialogue == contract_api_dialogue
+        assert type(response_message.raw_transaction) == RawTransaction
+        assert response_message.raw_transaction.ledger_id == ETHEREUM
+        assert len(response.message.raw_transaction.body) == 6
+        assert len(response.message.raw_transaction.body["data"]) > 0
 
 
 @pytest.mark.integration
@@ -327,7 +391,6 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
             )
 
 
-@pytest.mark.skip()
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
@@ -337,7 +400,7 @@ async def test_callable_wrong_number_of_arguments_apis(
     """
     Test a contract callable with wrong number of arguments.
 
-    Test the case of either GET_DEPLOY_TRANSACTION.
+    Test the case of GET_DEPLOY_TRANSACTION.
     """
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues()
@@ -346,7 +409,7 @@ async def test_callable_wrong_number_of_arguments_apis(
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
         contract_id="fetchai/erc1155:0.6.0",
-        callable="some_callable",
+        callable="get_create_batch_transaction",
         kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
     )
     request.counterparty = str(ledger_apis_connection.connection_id)
@@ -359,25 +422,79 @@ async def test_callable_wrong_number_of_arguments_apis(
         message=request,
     )
 
+    original_get = request.get
+
+    class mocked_get:
+        def __init__(self):
+            self.performative_values = MockCallableNTimes(
+                [None, None, NotImplementedError], original_get("performative")
+            )
+
+        def __call__(self, key, *args, **kwargs):
+            if key == "performative":
+                return self.performative_values()
+            else:
+                return original_get(key)
+
     with unittest.mock.patch(
         "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[])
-    ):
-        with unittest.mock.patch.object(
-            ledger_apis_connection._logger, "error"
-        ) as mock_logger:
-            await ledger_apis_connection.send(envelope)
-            await asyncio.sleep(0.01)
-            response = await ledger_apis_connection.receive()
-            mock_logger.assert_any_call(
-                "Expected one or more positional arguments, got 0"
-            )
-            assert (
-                response.message.performative == ContractApiMessage.Performative.ERROR
-            )
-            assert (
-                response.message.message
-                == "Expected one or more positional arguments, got 0"
-            )
+    ), unittest.mock.patch.object(
+        request, "get", side_effect=mocked_get(),
+    ), unittest.mock.patch.object(
+        ledger_apis_connection._logger, "error"
+    ) as mock_logger:
+        await ledger_apis_connection.send(envelope)
+        await asyncio.sleep(0.01)
+        response = await ledger_apis_connection.receive()
+        mock_logger.assert_any_call("Expected one or more positional arguments, got 0")
+        assert response.message.performative == ContractApiMessage.Performative.ERROR
+        assert (
+            response.message.message
+            == "Expected one or more positional arguments, got 0"
+        )
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_nonexisting_callable(erc1155_contract, ledger_apis_connection):
+    """Test the case where the specified callable does not exist."""
+    address = ETHEREUM_ADDRESS_ONE
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    contract_api_dialogues = ContractApiDialogues()
+    request = ContractApiMessage(
+        performative=ContractApiMessage.Performative.GET_STATE,
+        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        ledger_id=ETHEREUM,
+        contract_address=contract_address,
+        contract_id="fetchai/erc1155:0.6.0",
+        callable="not_existing_callable",
+        kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
+    )
+    request.counterparty = str(ledger_apis_connection.connection_id)
+    contract_api_dialogue = contract_api_dialogues.update(request)
+    assert contract_api_dialogue is not None
+    envelope = Envelope(
+        to=str(ledger_apis_connection.connection_id),
+        sender=address,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    with unittest.mock.patch.object(
+        ledger_apis_connection._logger, "error"
+    ) as mock_logger:
+        await ledger_apis_connection.send(envelope)
+        await asyncio.sleep(0.01)
+        response = await ledger_apis_connection.receive()
+        mock_logger.assert_any_call(
+            f"Cannot find '{request.callable}' in contract '{type(erc1155_contract).__name__}'"
+        )
+        assert response.message.performative == ContractApiMessage.Performative.ERROR
+        assert (
+            response.message.message
+            == f"Cannot find '{request.callable}' in contract '{type(erc1155_contract).__name__}'"
+        )
 
 
 @pytest.mark.integration
