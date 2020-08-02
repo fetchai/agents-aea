@@ -79,8 +79,6 @@ class GymChannel:
             orig_message.sender
         )  # TODO: fix; should be done by framework
         dialogue = cast(GymDialogue, self._dialogues.update(message))
-        if dialogue is None:  # pragma: nocover
-            logger.warning("Could not create dialogue for message={}".format(message))
         return message, dialogue
 
     @property
@@ -128,7 +126,7 @@ class GymChannel:
         ), "Message not of type GymMessage"
         gym_message, dialogue = self._get_message_and_dialogue(envelope)
 
-        if not dialogue:
+        if dialogue is None:
             logger.warning(
                 "Could not create dialogue from message={}".format(gym_message)
             )

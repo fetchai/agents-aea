@@ -184,7 +184,7 @@ class TestGymConnection:
             mock.assert_called()
 
     @pytest.mark.asyncio
-    async def test_send_close_negative(self, caplog):
+    async def test_send_close_negative(self):
         """Test send close message with invalid reference and message id and target."""
         msg = GymMessage(
             performative=GymMessage.Performative.CLOSE,
@@ -202,9 +202,9 @@ class TestGymConnection:
         )
         await self.gym_con.connect()
 
-        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.gym"):
+        with patch.object(self.gym_con.channel.logger, "warning") as mock_logger:
             await self.gym_con.send(envelope)
-            assert "Could not create dialogue for message=" in caplog.text
+            mock_logger.assert_any_call(f"Could not create dialogue from message={msg}")
 
     async def send_reset(self) -> GymDialogue:
         """Send a reset."""
