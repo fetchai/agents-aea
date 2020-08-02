@@ -95,7 +95,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -121,7 +121,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -143,7 +143,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -168,7 +168,7 @@ def test_soef():
         assert sending_dialogue is not None
         search_envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -182,16 +182,30 @@ def test_soef():
 
         # check for search results
         envelope = multiplexer.get()
-        message = envelope.message
-        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(message.agents) >= 0
-        message = copy.deepcopy(message)
+        orig_message = envelope.message
+        assert orig_message.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert len(orig_message.agents) >= 0
+        message = copy.copy(orig_message)
         message.is_incoming = True  # TODO: fix
-        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        message.counterparty = orig_message.sender  # TODO; fix
         receiving_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 
         # double send to check issue with too many requests
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            query=closeness_query,
+        )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
+        search_envelope = Envelope(
+            to=message.counterparty,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
         multiplexer.put(search_envelope)
         wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
         # check for search results
@@ -229,7 +243,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -243,12 +257,12 @@ def test_soef():
         wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
 
         envelope = multiplexer.get()
-        message = envelope.message
-        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(message.agents) >= 0
-        message = copy.deepcopy(message)
+        orig_message = envelope.message
+        assert orig_message.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert len(orig_message.agents) >= 0
+        message = copy.copy(orig_message)
         message.is_incoming = True  # TODO: fix
-        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        message.counterparty = orig_message.sender  # TODO; fix
         receiving_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 

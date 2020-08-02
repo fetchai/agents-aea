@@ -50,6 +50,11 @@ class GymTask(Task):
         self.logger.info("Training finished. You can exit now via CTRL+C.")
 
     @property
+    def proxy_env(self) -> ProxyEnv:
+        """Get the queue."""
+        return self._proxy_env
+
+    @property
     def proxy_env_queue(self) -> Queue:
         """Get the queue."""
         return self._proxy_env.queue

@@ -17,8 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """HTTP server connection, channel, server, and handler."""
 import asyncio
+import copy
 import email
 import logging
 from abc import ABC, abstractmethod
@@ -28,7 +30,6 @@ from asyncio.futures import Future
 from traceback import format_exc
 from typing import Dict, Optional, Set, cast
 from urllib.parse import parse_qs, urlencode, urlparse
-from uuid import uuid4
 
 from aiohttp import web
 from aiohttp.web_request import BaseRequest
@@ -55,8 +56,10 @@ from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
+from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
@@ -66,7 +69,7 @@ SERVER_ERROR = 500
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
-RequestId = str
+RequestId = DialogueLabel
 PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.5.0")
 
 
@@ -86,6 +89,11 @@ def headers_to_string(headers: Dict):
 
 class Request(OpenAPIRequest):
     """Generic request object."""
+
+    @property
+    def is_id_set(self):
+        """Check if id is set."""
+        return self._id is not None
 
     @property
     def id(self) -> RequestId:
@@ -130,20 +138,19 @@ class Request(OpenAPIRequest):
             body=body,
             mimetype=mimetype,
         )
-
-        request.id = uuid4().hex
         return request
 
-    def to_envelope(self, connection_id: PublicId, agent_address: str) -> Envelope:
+    def to_envelope_and_set_id(
+        self, connection_id: PublicId, agent_address: str, dialogues: HttpDialogues,
+    ) -> Envelope:
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
 
-        The Envelope's message body contains the "performative", "path", "params", and "payload".
+        :param connection_id: id of the connection
+        :param agent_address: agent's address
+        :param dialogue_reference: new dialog refernece for envelope
 
-        :param http_method: the http method
-        :param url: the url
-        :param param: the parameter
-        :param body: the body
+        :return: envelope
         """
         url = (
             self.full_url_pattern
@@ -153,9 +160,7 @@ class Request(OpenAPIRequest):
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
         http_message = HttpMessage(
-            dialogue_reference=("", ""),
-            target=0,
-            message_id=1,
+            dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method=self.method,
             url=url,
@@ -163,10 +168,16 @@ class Request(OpenAPIRequest):
             bodyy=self.body if self.body is not None else b"",
             version="",
         )
+        http_message.counterparty = agent_address
+        dialogue = cast(Optional[HttpDialogue], dialogues.update(http_message))
+        assert dialogue is not None, "Could not create dialogue for message={}".format(
+            http_message
+        )
+        self.id = dialogue.incomplete_dialogue_label
         envelope = Envelope(
             to=agent_address,
-            sender=self.id,
-            protocol_id=PublicId.from_str("fetchai/http:0.3.0"),
+            sender=str(connection_id),
+            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )
@@ -177,25 +188,20 @@ class Response(web.Response):
     """Generic response object."""
 
     @classmethod
-    def from_envelope(cls, envelope: Envelope) -> "Response":
+    def from_message(cls, http_message: HttpMessage) -> "Response":
         """
         Turn an envelope into a response.
 
-        :param envelope: the envelope
+        :param http_message: the http_message
         :return: the response
         """
-        assert isinstance(
-            envelope.message, HttpMessage
-        ), "Message not of type HttpMessage"
-
-        http_message = cast(HttpMessage, envelope.message)
         if http_message.performative == HttpMessage.Performative.RESPONSE:
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
                 body=http_message.bodyy,
             )
-        else:
+        else:  # pragma: nocover
             response = cls(status=SERVER_ERROR, text="Server error")
         return response
 
@@ -352,7 +358,7 @@ class HTTPChannel(BaseAsyncChannel):
         self.timeout_window = timeout_window
         self.http_server: Optional[web.TCPSite] = None
         self.pending_requests: Dict[RequestId, Future] = {}
-
+        self._dialogues = HttpDialogues(self.address)
         self.logger = logger
 
     @property
@@ -403,26 +409,33 @@ class HTTPChannel(BaseAsyncChannel):
             return Response(status=NOT_FOUND, reason="Request Not Found")
 
         try:
-            self.pending_requests[request.id] = Future()
             # turn request into envelope
-            envelope = request.to_envelope(self.connection_id, self.address)
+            envelope = request.to_envelope_and_set_id(
+                self.connection_id, self.address, dialogues=self._dialogues,
+            )
+
+            self.pending_requests[request.id] = Future()
+
             # send the envelope to the agent's inbox (via self.in_queue)
             await self._in_queue.put(envelope)
             # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
 
-            response_envelope = await asyncio.wait_for(
-                self.pending_requests[request.id], timeout=self.RESPONSE_TIMEOUT
+            response_message = await asyncio.wait_for(
+                self.pending_requests[request.id], timeout=self.RESPONSE_TIMEOUT,
             )
-            return Response.from_envelope(response_envelope)
+
+            return Response.from_message(response_message)
 
         except asyncio.TimeoutError:
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
         except BaseException:  # pragma: nocover # pylint: disable=broad-except
+            self.logger.exception("Error during handling incoming request")
             return Response(
                 status=SERVER_ERROR, reason="Server Error", text=format_exc()
             )
         finally:
-            self.pending_requests.pop(request.id, None)
+            if request.is_id_set:
+                self.pending_requests.pop(request.id, None)
 
     async def _start_http_server(self) -> None:
         """Start http server."""
@@ -449,16 +462,31 @@ class HTTPChannel(BaseAsyncChannel):
             )
             raise ValueError("Cannot send message.")
 
-        future = self.pending_requests.pop(envelope.to, None)
+        http_message = cast(HttpMessage, envelope.message)
+        message = copy.copy(
+            http_message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+
+        dialogue = self._dialogues.update(message)
+
+        if dialogue is None:
+            self.logger.warning(
+                "Could not create dialogue for message={}".format(message)
+            )
+            return
+
+        future = self.pending_requests.pop(dialogue.incomplete_dialogue_label, None)
 
         if not future:
             self.logger.warning(
-                "Dropping envelope for request id {} which has timed out.".format(
-                    envelope.to
+                "Dropping message={} for incomplete_dialogue_label={} which has timed out.".format(
+                    message, dialogue.incomplete_dialogue_label
                 )
             )
         else:
-            future.set_result(envelope)
+            future.set_result(message)
 
     async def disconnect(self) -> None:
         """

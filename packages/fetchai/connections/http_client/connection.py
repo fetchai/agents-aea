@@ -16,16 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """HTTP client connection and channel."""
 
 import asyncio
+import copy
 import json
 import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Union, cast
+from typing import Any, Optional, Set, Tuple, Union, cast
 
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse
@@ -34,7 +36,9 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext
 
+from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
+
 
 SUCCESS = 200
 NOT_FOUND = 404
@@ -78,6 +82,7 @@ class HTTPClientAsyncChannel:
         self.port = port
         self.connection_id = connection_id
         self.restricted_to_protocols = restricted_to_protocols
+        self._dialogues = HttpDialogues(str(HTTPClientConnection.connection_id))
 
         self._in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self._loop = (
@@ -102,7 +107,28 @@ class HTTPClientAsyncChannel:
         self._in_queue = asyncio.Queue()
         self.is_stopped = False
 
-    async def _http_request_task(self, request_http_message: HttpMessage) -> None:
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[HttpMessage, Optional[HttpDialogue]]:
+        """
+        Get a message copy and dialogue related to this message.
+
+        :param envelope: incoming envelope
+
+        :return: Tuple[MEssage, Optional[Dialogue]]
+        """
+        orig_message = cast(HttpMessage, envelope.message)
+        message = copy.copy(
+            orig_message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = (
+            orig_message.sender
+        )  # TODO: fix; should be done by framework
+        dialogue = cast(HttpDialogue, self._dialogues.update(message))
+        return message, dialogue
+
+    async def _http_request_task(self, request_envelope: Envelope) -> None:
         """
         Perform http request and send back response.
 
@@ -112,6 +138,16 @@ class HTTPClientAsyncChannel:
         """
         if not self._loop:  # pragma: nocover
             raise ValueError("Channel is not connected")
+
+        request_http_message, dialogue = self._get_message_and_dialogue(
+            request_envelope
+        )
+
+        if not dialogue:
+            logger.warning(
+                "Could not create dialogue for message={}".format(request_http_message)
+            )
+            return
 
         try:
             resp = await asyncio.wait_for(
@@ -127,6 +163,7 @@ class HTTPClientAsyncChannel:
                 bodyy=resp._body  # pylint: disable=protected-access
                 if resp._body is not None  # pylint: disable=protected-access
                 else b"",
+                dialogue=dialogue,
             )
         except Exception:  # pragma: nocover # pylint: disable=broad-except
             envelope = self.to_envelope(
@@ -136,6 +173,7 @@ class HTTPClientAsyncChannel:
                 headers={},
                 status_text="HTTPConnection request error.",
                 bodyy=format_exc().encode("utf-8"),
+                dialogue=dialogue,
             )
 
         if self._in_queue is not None:
@@ -209,7 +247,7 @@ class HTTPClientAsyncChannel:
             )
             return
 
-        task = self._loop.create_task(self._http_request_task(request_http_message))
+        task = self._loop.create_task(self._http_request_task(request_envelope))
         task.add_done_callback(self._task_done_callback)
         self._tasks.add(task)
 
@@ -248,6 +286,7 @@ class HTTPClientAsyncChannel:
         headers: dict,
         status_text: Optional[Any],
         bodyy: bytes,
+        dialogue: HttpDialogue,
     ) -> Envelope:
         """
         Convert an HTTP response object (from the 'requests' library) into an Envelope containing an HttpMessage (from the 'http' Protocol).
@@ -263,16 +302,18 @@ class HTTPClientAsyncChannel:
         """
         context = EnvelopeContext(connection_id=connection_id)
         http_message = HttpMessage(
-            dialogue_reference=http_request_message.dialogue_reference,
-            target=http_request_message.target,
-            message_id=http_request_message.message_id,
             performative=HttpMessage.Performative.RESPONSE,
             status_code=status_code,
             headers=json.dumps(dict(headers.items())),
             status_text=status_text,
             bodyy=bodyy,
             version="",
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            target=http_request_message.message_id,
+            message_id=http_request_message.message_id + 1,
         )
+        http_message.counterparty = http_request_message.counterparty
+        assert dialogue.update(http_message)
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",

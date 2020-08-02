@@ -213,8 +213,6 @@ class SOEFChannel:
         self.excluded_protocols = excluded_protocols
         self.restricted_to_protocols = restricted_to_protocols
         self.oef_search_dialogues = OefSearchDialogues()
-        self.oef_msg_id = 0
-        self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
 
         self.declared_name = uuid4().hex
         self.unique_page_address = None  # type: Optional[str]
@@ -376,13 +374,13 @@ class SOEFChannel:
         assert isinstance(envelope.message, OefSearchMessage), ValueError(
             "Message not of type OefSearchMessage"
         )
-        oef_message = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.deepcopy(
-            oef_message
+        oef_message_orig = cast(OefSearchMessage, envelope.message)
+        oef_message = copy.copy(
+            oef_message_orig
         )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
         oef_message.is_incoming = True  # TODO: fix; should be done by framework
         oef_message.counterparty = (
-            envelope.sender
+            oef_message_orig.sender
         )  # TODO: fix; should be done by framework
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
@@ -426,7 +424,7 @@ class SOEFChannel:
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
-        except (asyncio.CancelledError, ConcurrentCancelledError):
+        except (asyncio.CancelledError, ConcurrentCancelledError):  # pragma: nocover
             pass
         except Exception:  # pylint: disable=broad-except # pragma: nocover
             self.logger.exception("Exception during envelope processing")
@@ -738,10 +736,7 @@ class SOEFChannel:
             message_id=oef_search_message.message_id + 1,
         )
         message.counterparty = oef_search_message.counterparty
-        oef_search_dialogue.update(message)
-        message = copy.deepcopy(
-            message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        assert oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.counterparty,
             sender=SOEFConnection.connection_id.latest,
@@ -768,7 +763,7 @@ class SOEFChannel:
         }  # type: Dict[str, Callable]
         data_model_name = service_description.data_model.name
 
-        if data_model_name not in data_model_handlers:
+        if data_model_name not in data_model_handlers:  # pragma: nocover
             raise SOEFException.error(
                 f'Data model name: {data_model_name} is not supported. Valid models are: {", ".join(data_model_handlers.keys())}'
             )
@@ -892,7 +887,7 @@ class SOEFChannel:
         :return: None
         """
         if not self._find_around_me_queue:
-            raise ValueError("SOEFChannel not started")
+            raise ValueError("SOEFChannel not started.")  # pragma: nocover
         await self._find_around_me_queue.put(
             (oef_message, oef_search_dialogue, radius, params)
         )
@@ -948,10 +943,7 @@ class SOEFChannel:
             message_id=oef_message.message_id + 1,
         )
         message.counterparty = oef_message.counterparty
-        oef_search_dialogue.update(message)
-        message = copy.deepcopy(
-            message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        assert oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.counterparty,
             sender=SOEFConnection.connection_id.latest,

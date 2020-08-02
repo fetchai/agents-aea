@@ -17,11 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains the helpers for the 'gym' skill."""
 
 from abc import ABC, abstractmethod
 from queue import Queue
-from typing import Any, Tuple, cast
+from typing import Any, Optional, Tuple, cast
 
 import gym
 
@@ -29,6 +30,7 @@ from aea.protocols.base import Message
 from aea.skills.base import SkillContext
 
 from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.skills.gym.dialogues import GymDialogue, GymDialogues
 
 Action = Any
 Observation = Any
@@ -56,6 +58,19 @@ class ProxyEnv(gym.Env):
         self._queue = Queue()  # type: Queue
         self._is_rl_agent_trained = False
         self._step_count = 0
+        self._active_dialogue = None  # type: Optional[GymDialogue]
+        self.gym_address = "fetchai/gym:0.4.0"
+
+    @property
+    def gym_dialogues(self) -> GymDialogues:
+        """Get the gym dialogues."""
+        return cast(GymDialogues, self._skill_context.gym_dialogues)
+
+    @property
+    def active_gym_dialogue(self) -> GymDialogue:
+        """Get the active gym dialogue."""
+        assert self._active_dialogue is not None, "GymDialogue not set yet."
+        return self._active_dialogue
 
     @property
     def queue(self) -> Queue:
@@ -90,6 +105,13 @@ class ProxyEnv(gym.Env):
         # Wait (blocking!) for the response envelope from the environment
         gym_msg = self._queue.get(block=True, timeout=None)  # type: GymMessage
 
+        if gym_msg.performative != GymMessage.Performative.PERCEPT:
+            raise ValueError(
+                "Unexpected performative. Expected={} got={}".format(
+                    GymMessage.Performative.PERCEPT, gym_msg.performative
+                )
+            )
+
         if gym_msg.step_id == step_id:
             observation, reward, done, info = self._message_to_percept(gym_msg)
         else:
@@ -117,9 +139,25 @@ class ProxyEnv(gym.Env):
         """
         self._step_count = 0
         self._is_rl_agent_trained = False
-        gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
-        gym_msg.counterparty = DEFAULT_GYM
+        gym_msg = GymMessage(
+            dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
+            performative=GymMessage.Performative.RESET,
+        )
+        gym_msg.counterparty = self.gym_address
+        gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
+        assert gym_dialogue is not None
+        self._active_dialogue = gym_dialogue
         self._skill_context.outbox.put_message(message=gym_msg)
+
+        # Wait (blocking!) for the response envelope from the environment
+        response_msg = self._queue.get(block=True, timeout=None)  # type: GymMessage
+
+        if response_msg.performative != GymMessage.Performative.STATUS:
+            raise ValueError(
+                "Unexpected performative. Expected={} got={}".format(
+                    GymMessage.Performative.PERCEPT, response_msg.performative
+                )
+            )
 
     def close(self) -> None:
         """
@@ -128,8 +166,16 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         self._is_rl_agent_trained = True
-        gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
-        gym_msg.counterparty = DEFAULT_GYM
+        last_msg = self.active_gym_dialogue.last_message
+        assert last_msg is not None, "Cannot retrieve last message."
+        gym_msg = GymMessage(
+            dialogue_reference=self.active_gym_dialogue.dialogue_label.dialogue_reference,
+            performative=GymMessage.Performative.CLOSE,
+            message_id=last_msg.message_id + 1,
+            target=last_msg.message_id,
+        )
+        gym_msg.counterparty = self.gym_address
+        assert self.active_gym_dialogue.update(gym_msg)
         self._skill_context.outbox.put_message(message=gym_msg)
 
     def _encode_and_send_action(self, action: Action, step_id: int) -> None:
@@ -140,12 +186,18 @@ class ProxyEnv(gym.Env):
         :param step_id: the step id
         :return: an envelope
         """
+        last_msg = self.active_gym_dialogue.last_message
+        assert last_msg is not None, "Cannot retrieve last message."
         gym_msg = GymMessage(
+            dialogue_reference=self.active_gym_dialogue.dialogue_label.dialogue_reference,
             performative=GymMessage.Performative.ACT,
             action=GymMessage.AnyObject(action),
             step_id=step_id,
+            message_id=last_msg.message_id + 1,
+            target=last_msg.message_id,
         )
-        gym_msg.counterparty = DEFAULT_GYM
+        gym_msg.counterparty = self.gym_address
+        assert self.active_gym_dialogue.update(gym_msg)
         # Send the message via the proxy agent and to the environment
         self._skill_context.outbox.put_message(message=gym_msg)
 
