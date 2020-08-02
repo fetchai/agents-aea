@@ -87,25 +87,33 @@ class SOEFException(Exception):
     """SOEF channel expected exception."""
 
     @classmethod
-    def warning(cls, msg: str, logger: logging.Logger = _default_logger) -> "SOEFException":  # pragma: no cover
+    def warning(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.warning(msg)
         return cls(msg)
 
     @classmethod
-    def debug(cls, msg: str, logger: logging.Logger = _default_logger) -> "SOEFException":  # pragma: no cover
+    def debug(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.debug(msg)
         return cls(msg)
 
     @classmethod
-    def error(cls, msg: str, logger: logging.Logger = _default_logger) -> "SOEFException":  # pragma: no cover
+    def error(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.error(msg)
         return cls(msg)
 
     @classmethod
-    def exception(cls, msg: str, logger: logging.Logger = _default_logger) -> "SOEFException":  # pragma: no cover
+    def exception(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.exception(msg)
         return cls(msg)
@@ -176,7 +184,7 @@ class SOEFChannel:
         excluded_protocols: Set[PublicId],
         restricted_to_protocols: Set[PublicId],
         chain_identifier: Optional[str] = None,
-        logger: logging.Logger = _default_logger
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize.
@@ -234,7 +242,9 @@ class SOEFChannel:
             except asyncio.CancelledError:  # pylint: disable=try-except-raise
                 return
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
-                self.logger.exception("Exception occoured in  _find_around_me_processor")
+                self.logger.exception(
+                    "Exception occoured in  _find_around_me_processor"
+                )
                 await self._send_error_response(
                     oef_message,
                     oef_search_dialogue,
