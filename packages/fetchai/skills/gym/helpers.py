@@ -68,6 +68,7 @@ class ProxyEnv(gym.Env):
 
     @property
     def active_gym_dialogue(self) -> GymDialogue:
+        """Get the active gym dialogue."""
         assert self._active_dialogue is not None, "GymDialogue not set yet."
         return self._active_dialogue
 
