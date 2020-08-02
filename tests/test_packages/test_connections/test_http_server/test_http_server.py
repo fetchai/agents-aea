@@ -43,6 +43,7 @@ from packages.fetchai.connections.http_server.connection import (
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
+from tests.common.mocks import RegexComparator
 from tests.conftest import (
     HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
@@ -162,7 +163,7 @@ class TestHTTPServer:
         )
 
     @pytest.mark.asyncio
-    async def test_bad_performative_get_timeout_error(self, caplog):
+    async def test_bad_performative_get_timeout_error(self):
         """Test send get request w/ 200 response."""
         self.http_connection.channel.RESPONSE_TIMEOUT = 3
         request_task = self.loop.create_task(self.request("get", "/pets"))
@@ -189,11 +190,11 @@ class TestHTTPServer:
             context=envelope.context,
             message=message,
         )
-        with caplog.at_level(
-            logging.DEBUG, "aea.packages.fetchai.connections.http_server"
-        ):
+        with patch.object(self.http_connection.logger, "warning") as mock_logger:
             await self.http_connection.send(response_envelope)
-            assert "Could not create dialogue for message=" in caplog.text
+            mock_logger.assert_any_call(
+                f"Could not create dialogue for message={message}"
+            )
 
         response = await asyncio.wait_for(request_task, timeout=10)
 
@@ -204,7 +205,7 @@ class TestHTTPServer:
         )
 
     @pytest.mark.asyncio
-    async def test_late_message_get_timeout_error(self, caplog):
+    async def test_late_message_get_timeout_error(self):
         """Test send get request w/ 200 response."""
         self.http_connection.channel.RESPONSE_TIMEOUT = 1
         request_task = self.loop.create_task(self.request("get", "/pets"))
@@ -232,11 +233,13 @@ class TestHTTPServer:
             message=message,
         )
         await asyncio.sleep(1.5)
-        with caplog.at_level(
-            logging.DEBUG, "aea.packages.fetchai.connections.http_server"
-        ):
+        with patch.object(self.http_connection.logger, "warning") as mock_logger:
             await self.http_connection.send(response_envelope)
-            assert "Dropping message=" in caplog.text
+            mock_logger.assert_any_call(
+                RegexComparator(
+                    "Dropping message=.* for incomplete_dialogue_label=.* which has timed out."
+                )
+            )
 
         response = await asyncio.wait_for(request_task, timeout=10)
 
