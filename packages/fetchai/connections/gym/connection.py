@@ -127,7 +127,7 @@ class GymChannel:
         gym_message, dialogue = self._get_message_and_dialogue(envelope)
 
         if dialogue is None:
-            logger.warning(
+            self.logger.warning(
                 "Could not create dialogue from message={}".format(gym_message)
             )
             return
