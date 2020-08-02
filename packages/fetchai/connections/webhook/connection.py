@@ -146,7 +146,7 @@ class WebhookChannel:
 
         :param envelope: the envelope
         """
-        logger.warning(
+        self.logger.warning(
             "Dropping envelope={} as sending via the webhook is not possible!".format(
                 envelope
             )
