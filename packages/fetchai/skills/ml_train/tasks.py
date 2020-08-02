@@ -19,16 +19,14 @@
 
 """This module contains the tasks for the 'ml_train' skill."""
 
-import logging
 from typing import Tuple
 
 import numpy as np
 
 from tensorflow import keras
 
+from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
-
-logger = logging.getLogger("aea.packages.fetchai.skills.ml_train.tasks")
 
 
 class MLTrainTask(Task):
@@ -36,13 +34,14 @@ class MLTrainTask(Task):
 
     def __init__(
         self,
+        skill_context: SkillContext,
         train_data: Tuple[np.ndarray, np.ndarray],
         model: keras.Model,
         epochs_per_batch: int = 10,
         batch_size: int = 32,
     ):
         """Initialize the task."""
-        super().__init__()
+        super().__init__(logger=skill_context.logger)
         self.train_x, self.train_y = train_data
 
         self.model = model
@@ -51,16 +50,16 @@ class MLTrainTask(Task):
 
     def setup(self) -> None:
         """Set up the task."""
-        logger.info("ML Train task: setup method called.")
+        self.logger.info("ML Train task: setup method called.")
 
     def execute(self, *args, **kwargs) -> keras.Model:
         """Execute the task."""
-        logger.info("Start training with {} rows".format(self.train_x.shape[0]))
+        self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
         self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
         loss, acc = self.model.evaluate(self.train_x, self.train_y, verbose=2)
-        logger.info("Loss: {}, Acc: {}".format(loss, acc))
+        self.logger.info("Loss: {}, Acc: {}".format(loss, acc))
         return self.model
 
     def teardown(self) -> None:
         """Teardown the task."""
-        logger.info("ML Train task: teardown method called.")
+        self.logger.info("ML Train task: teardown method called.")
