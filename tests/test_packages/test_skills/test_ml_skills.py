@@ -37,6 +37,15 @@ from tests.conftest import (
 )
 
 
+def _check_tensorflow_installed():
+    try:
+        import tensorflow  # noqa
+
+        return True
+    except ImportError:
+        return False
+
+
 @pytest.mark.integration
 class TestMLSkills(AEATestCaseMany):
     """Test that ml skills work."""
@@ -45,8 +54,7 @@ class TestMLSkills(AEATestCaseMany):
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
     @pytest.mark.skipif(
-        sys.version_info >= (3, 8),
-        reason="cannot run on 3.8 as tensorflow not installable",
+        _check_tensorflow_installed(), reason="This test requires Tensorflow.",
     )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
