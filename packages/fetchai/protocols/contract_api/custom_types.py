@@ -44,9 +44,9 @@ class Kwargs:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         assert self._body is not None, "body must not be None"
-        assert isinstance(self._body, dict) and [
-            isinstance(key, str) for key in self._body.keys()
-        ]
+        assert isinstance(self._body, dict) and all(
+            [isinstance(key, str) for key in self._body.keys()]
+        )
 
     @property
     def body(self) -> Dict[str, Any]:

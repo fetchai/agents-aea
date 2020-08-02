@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This contains the proxy gym environment."""
 
 import sys
@@ -30,7 +29,6 @@ import gym
 from aea.configurations.base import PublicId
 from aea.helpers.base import locate
 from aea.mail.base import Envelope
-from aea.protocols.base import Message
 
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
@@ -63,8 +61,8 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         super().__init__()
-        self._queue = Queue()
-        self._action_counter = 0
+        self._queue: Queue = Queue()
+        self._action_counter: int = 0
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
@@ -174,7 +172,8 @@ class ProxyEnv(gym.Env):
         self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
 
     @staticmethod
-    def _decode_percept(envelope: Envelope, expected_step_id: int) -> Message:
+    def _decode_percept(envelope: Envelope, expected_step_id: int) -> GymMessage:
+
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 
@@ -185,7 +184,7 @@ class ProxyEnv(gym.Env):
         """
         if envelope is not None:
             if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.3.0"):
-                gym_msg = envelope.message
+                gym_msg = cast(GymMessage, envelope.message)
                 if (
                     gym_msg.performative == GymMessage.Performative.PERCEPT
                     and gym_msg.step_id == expected_step_id
@@ -203,7 +202,7 @@ class ProxyEnv(gym.Env):
             raise ValueError("Missing envelope.")
 
     @staticmethod
-    def _message_to_percept(message: Message) -> Feedback:
+    def _message_to_percept(message: GymMessage) -> Feedback:
         """
         Transform the message received from the gym environment into observation, reward, done, info.
 

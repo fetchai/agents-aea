@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains the helpers for the 'gym' skill."""
 
 from abc import ABC, abstractmethod
@@ -28,6 +29,7 @@ import gym
 from aea.protocols.base import Message
 from aea.skills.base import SkillContext
 
+from packages.fetchai.protocols.gym.dialogues import GymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 
 Action = Any
@@ -56,6 +58,7 @@ class ProxyEnv(gym.Env):
         self._queue = Queue()  # type: Queue
         self._is_rl_agent_trained = False
         self._step_count = 0
+        self._dialogues = GymDialogues(skill_context.agent_address)
 
     @property
     def queue(self) -> Queue:
@@ -117,7 +120,10 @@ class ProxyEnv(gym.Env):
         """
         self._step_count = 0
         self._is_rl_agent_trained = False
-        gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
+        gym_msg = GymMessage(
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
+            performative=GymMessage.Performative.RESET,
+        )
         gym_msg.counterparty = DEFAULT_GYM
         self._skill_context.outbox.put_message(message=gym_msg)
 
@@ -128,7 +134,10 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         self._is_rl_agent_trained = True
-        gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
+        gym_msg = GymMessage(
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
+            performative=GymMessage.Performative.CLOSE,
+        )
         gym_msg.counterparty = DEFAULT_GYM
         self._skill_context.outbox.put_message(message=gym_msg)
 
@@ -141,6 +150,7 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         gym_msg = GymMessage(
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
             performative=GymMessage.Performative.ACT,
             action=GymMessage.AnyObject(action),
             step_id=step_id,

@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """Tests for the HTTP Client connection and channel."""
 import asyncio
+import copy
 import logging
 from asyncio import CancelledError
 from unittest.mock import Mock, patch
@@ -32,6 +33,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.conftest import (
@@ -68,6 +70,7 @@ class TestHTTPClientConnect:
         self.address = get_host()
         self.port = get_unused_tcp_port()
         self.agent_identity = Identity("name", address="some string")
+        self.agent_address = self.agent_identity.address
         configuration = ConnectionConfig(
             host=self.address,
             port=self.port,
@@ -77,6 +80,8 @@ class TestHTTPClientConnect:
             configuration=configuration, identity=self.agent_identity
         )
         self.http_client_connection.loop = asyncio.get_event_loop()
+        self.connection_address = str(HTTPClientConnection.connection_id)
+        self.http_dialogs = HttpDialogues(self.connection_address)
 
     @pytest.mark.asyncio
     async def test_initialization(self):
@@ -104,9 +109,7 @@ class TestHTTPClientConnect:
         await self.http_client_connection.connect()
 
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
-            target=0,
-            message_id=1,
+            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="bad url",
@@ -114,9 +117,12 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = self.connection_address
+        sending_dialogue = self.http_dialogs.update(request_http_message)
+        assert sending_dialogue is not None
         request_envelope = Envelope(
-            to="receiver",
-            sender="sender",
+            to=self.connection_address,
+            sender=self.agent_address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
@@ -150,9 +156,7 @@ class TestHTTPClientConnect:
     async def test_send_envelope_excluded_protocol_fail(self):
         """Test send error if protocol not supported."""
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
-            target=0,
-            message_id=1,
+            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="bad url",
@@ -160,9 +164,12 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = self.connection_address
+        sending_dialogue = self.http_dialogs.update(request_http_message)
+        assert sending_dialogue is not None
         request_envelope = Envelope(
-            to="receiver",
-            sender="sender",
+            to=self.connection_address,
+            sender=self.agent_address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
@@ -198,9 +205,7 @@ class TestHTTPClientConnect:
         await self.http_client_connection.connect()
 
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
-            target=0,
-            message_id=1,
+            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="https://not-a-google.com",
@@ -208,9 +213,12 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = self.connection_address
+        sending_dialogue = self.http_dialogs.update(request_http_message)
+        assert sending_dialogue is not None
         request_envelope = Envelope(
-            to="receiver",
-            sender="sender",
+            to=self.connection_address,
+            sender=self.agent_address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
@@ -246,9 +254,7 @@ class TestHTTPClientConnect:
         await self.http_client_connection.connect()
 
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
-            target=0,
-            message_id=1,
+            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="https://not-a-google.com",
@@ -256,10 +262,13 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = self.connection_address
+        sending_dialogue = self.http_dialogs.update(request_http_message)
+        assert sending_dialogue is not None
         request_envelope = Envelope(
-            to="receiver",
-            sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            to=self.connection_address,
+            sender=self.agent_address,
+            protocol_id=request_http_message.protocol_id,
             message=request_http_message,
         )
 
@@ -283,9 +292,39 @@ class TestHTTPClientConnect:
                 self.http_client_connection.receive(), timeout=10
             )
 
-        assert envelope
-        assert (
-            envelope.message.status_code == response_mock.status
-        ), envelope.message.bodyy.decode("utf-8")
-
+        assert envelope is not None and envelope.message is not None
+        response = copy.copy(envelope.message)
+        response.is_incoming = True
+        response.counterparty = envelope.message.sender
+        response_dialogue = self.http_dialogs.update(response)
+        assert response.status_code == response_mock.status, response.bodyy.decode(
+            "utf-8"
+        )
+        assert sending_dialogue == response_dialogue
         await self.http_client_connection.disconnect()
+
+    @pytest.mark.asyncio
+    async def test_http_dialogue_construct_fail(self, caplog):
+        """Test dialogue not properly constructed."""
+        await self.http_client_connection.connect()
+
+        http_message = HttpMessage(
+            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
+            performative=HttpMessage.Performative.RESPONSE,
+            status_code=500,
+            headers="",
+            status_text="",
+            bodyy=b"",
+            version="",
+        )
+        envelope = Envelope(
+            to=self.connection_address,
+            sender=self.agent_address,
+            protocol_id=http_message.protocol_id,
+            message=http_message,
+        )
+        with caplog.at_level(
+            logging.DEBUG, "aea.packages.fetchai.connections.http_client"
+        ):
+            await self.http_client_connection.channel._http_request_task(envelope)
+            assert "Could not create dialogue for message=" in caplog.text

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Webhook connection and channel."""
 
 import asyncio
@@ -31,6 +30,7 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
+from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
@@ -80,6 +80,7 @@ class WebhookChannel:
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self.logger = logger
         self.logger.info("Initialised a webhook channel")
+        self._dialogues = HttpDialogues(str(WebhookConnection.connection_id))
 
     async def connect(self) -> None:
         """
@@ -169,11 +170,15 @@ class WebhookChannel:
             version=version,
             headers=json.dumps(dict(request.headers)),
             bodyy=payload_bytes if payload_bytes is not None else b"",
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
         )
+        http_message.counterparty = self.agent_address
+        http_dialogue = self._dialogues.update(http_message)
+        assert http_dialogue is not None, "Could not create dialogue."
         envelope = Envelope(
-            to=self.agent_address,
-            sender=request.remote,
-            protocol_id=PublicId.from_str("fetchai/http:0.3.0"),
+            to=http_message.counterparty,
+            sender=http_message.sender,
+            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )
