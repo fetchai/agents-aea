@@ -38,7 +38,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-logger = logging.getLogger("aea.packages.fetchai.connections.local")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.local")
 
 TARGET = 0
 MESSAGE_ID = 1
@@ -51,7 +51,9 @@ PUBLIC_ID = PublicId.from_str("fetchai/local:0.5.0")
 class LocalNode:
     """A light-weight local implementation of a OEF Node."""
 
-    def __init__(self, loop: AbstractEventLoop = None):
+    def __init__(
+        self, loop: AbstractEventLoop = None, logger: logging.Logger = _default_logger
+    ):
         """
         Initialize a local (i.e. non-networked) implementation of an OEF Node.
 
@@ -68,6 +70,7 @@ class LocalNode:
         self._receiving_loop_task = None  # type: Optional[asyncio.Task]
         self.address: Optional[Address] = None
         self._dialogues: Optional[OefSearchDialogues] = None
+        self.logger = logger
 
     def __enter__(self):
         """Start the local node."""
@@ -84,10 +87,10 @@ class LocalNode:
 
         This method is supposed to be run only in the Multiplexer thread.
         """
-        logger.debug("Starting threaded asyncio loop...")
+        self.logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
         self._loop.run_forever()
-        logger.debug("Asyncio loop has been stopped.")
+        self.logger.debug("Asyncio loop has been stopped.")
 
     async def connect(
         self, address: Address, writer: asyncio.Queue
@@ -119,7 +122,7 @@ class LocalNode:
         self._receiving_loop_task = asyncio.run_coroutine_threadsafe(
             self.receiving_loop(), loop=self._loop
         )
-        logger.debug("Local node has been started.")
+        self.logger.debug("Local node has been started.")
 
     def stop(self):
         """Stop the node."""
@@ -136,9 +139,9 @@ class LocalNode:
         while True:
             envelope = await self._in_queue.get()
             if envelope is None:
-                logger.debug("Receiving loop terminated.")
+                self.logger.debug("Receiving loop terminated.")
                 return
-            logger.debug("Handling envelope: {}".format(envelope))
+            self.logger.debug("Handling envelope: {}".format(envelope))
             await self._handle_envelope(envelope)
 
     async def _handle_envelope(self, envelope: Envelope) -> None:
@@ -147,7 +150,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.3.0"):
+        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.4.0"):
             await self._handle_oef_message(envelope)
         else:
             await self._handle_agent_message(envelope)
@@ -164,7 +167,7 @@ class LocalNode:
         oef_message, dialogue = self._get_message_and_dialogue(envelope)
 
         if dialogue is None:
-            logger.warning(
+            self.logger.warning(
                 "Could not create dialogue for message={}".format(oef_message)
             )
             return
@@ -329,7 +332,7 @@ class LocalNode:
         destination = envelope.to
         destination_queue = self._out_queues[destination]
         destination_queue._loop.call_soon_threadsafe(destination_queue.put_nowait, envelope)  # type: ignore  # pylint: disable=protected-access
-        logger.debug("Send envelope {}".format(envelope))
+        self.logger.debug("Send envelope {}".format(envelope))
 
     async def disconnect(self, address: Address) -> None:
         """

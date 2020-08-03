@@ -56,7 +56,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         default_routing = {
             "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
             "fetchai/contract_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
         # add packages for agent one

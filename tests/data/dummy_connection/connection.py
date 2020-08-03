@@ -77,16 +77,20 @@ class DummyConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+        cls,
+        configuration: ConnectionConfig,
+        identity: Identity,
+        crypto_store: CryptoStore,
+        **kwargs
     ) -> "Connection":
         """
         Get the dummy connection from the connection configuration.
 
         :param configuration: the connection configuration.
         :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
+        :param crypto_store: object to access the connection crypto objects.
         :return: the connection object
         """
         return DummyConnection(
-            configuration=configuration, identity=identity, cryptos=cryptos
+            configuration=configuration, identity=identity, crypto_store=crypto_store
         )

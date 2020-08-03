@@ -84,7 +84,7 @@ class TestBuildSkill(AEATestCaseMany):
         )
 
         default_routing = {
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
         search_aea = "search_aea"

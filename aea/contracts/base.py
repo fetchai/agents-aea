@@ -43,13 +43,13 @@ class Contract(Component, ABC):
 
     contract_interface: Any = None
 
-    def __init__(self, contract_config: ContractConfig):
+    def __init__(self, contract_config: ContractConfig, **kwargs):
         """
         Initialize the contract.
 
         :param contract_config: the contract configurations.
         """
-        super().__init__(contract_config)
+        super().__init__(contract_config, **kwargs)
 
     @property
     def id(self) -> ContractId:
@@ -76,7 +76,7 @@ class Contract(Component, ABC):
         """
 
     @classmethod
-    def from_dir(cls, directory: str) -> "Contract":
+    def from_dir(cls, directory: str, **kwargs) -> "Contract":
         """
         Load the protocol from a directory.
 
@@ -88,10 +88,10 @@ class Contract(Component, ABC):
             ComponentConfiguration.load(ComponentType.CONTRACT, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Contract.from_config(configuration)
+        return Contract.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ContractConfig) -> "Contract":
+    def from_config(cls, configuration: ContractConfig, **kwargs) -> "Contract":
         """
         Load contract from configuration.
 
@@ -120,7 +120,7 @@ class Contract(Component, ABC):
         # with open(path, "r") as interface_file:
         #     contract_interface = json.load(interface_file)
 
-        return contract_class(configuration)
+        return contract_class(configuration, **kwargs)
 
     @classmethod
     def get_deploy_transaction(cls, ledger_api: LedgerApi, **kwargs) -> bytes:

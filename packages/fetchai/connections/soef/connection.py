@@ -54,7 +54,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-logger = logging.getLogger("aea.packages.fetchai.connections.oef")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
 PUBLIC_ID = PublicId.from_str("fetchai/soef:0.6.0")
 
@@ -84,28 +84,36 @@ class ModelNames:
 
 
 class SOEFException(Exception):
-    """Soef chanlle expected  exception."""
+    """SOEF channel expected exception."""
 
     @classmethod
-    def warning(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def warning(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.warning(msg)
         return cls(msg)
 
     @classmethod
-    def debug(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def debug(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.debug(msg)
         return cls(msg)
 
     @classmethod
-    def error(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def error(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.error(msg)
         return cls(msg)
 
     @classmethod
-    def exception(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def exception(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.exception(msg)
         return cls(msg)
@@ -176,6 +184,7 @@ class SOEFChannel:
         excluded_protocols: Set[PublicId],
         restricted_to_protocols: Set[PublicId],
         chain_identifier: Optional[str] = None,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize.
@@ -215,6 +224,7 @@ class SOEFChannel:
         self._ping_periodic_task: Optional[asyncio.Task] = None
         self._find_around_me_queue: Optional[asyncio.Queue] = None
         self._find_around_me_processor_task: Optional[asyncio.Task] = None
+        self.logger = logger
 
     async def _find_around_me_processor(self) -> None:
         """Process find me around requests in background task."""
@@ -229,14 +239,16 @@ class SOEFChannel:
             except asyncio.CancelledError:  # pylint: disable=try-except-raise
                 return
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
-                logger.exception("Exception occoured in  _find_around_me_processor")
+                self.logger.exception(
+                    "Exception occoured in  _find_around_me_processor"
+                )
                 await self._send_error_response(
                     oef_message,
                     oef_search_dialogue,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
                 )
             finally:
-                logger.debug("_find_around_me_processor exited")
+                self.logger.debug("_find_around_me_processor exited")
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -324,7 +336,7 @@ class SOEFChannel:
         )
 
         if is_in_excluded or not is_in_restricted:
-            logger.error(
+            self.logger.error(
                 "This envelope cannot be sent with the soef connection: protocol_id={}".format(
                     envelope.protocol_id
                 )
@@ -414,7 +426,7 @@ class SOEFChannel:
         except (asyncio.CancelledError, ConcurrentCancelledError):  # pragma: nocover
             pass
         except Exception:  # pylint: disable=broad-except # pragma: nocover
-            logger.exception("Exception during envelope processing")
+            self.logger.exception("Exception during envelope processing")
             await self._send_error_response(
                 oef_message,
                 oef_search_dialogue,
@@ -480,7 +492,7 @@ class SOEFChannel:
                 except asyncio.CancelledError:  # pylint: disable=try-except-raise
                     raise
                 except Exception:  # pylint: disable=broad-except
-                    logger.exception("Error on periodic ping command!")
+                    self.logger.exception("Error on periodic ping command!")
                 await asyncio.sleep(period)
 
     async def _set_service_key_handler(self, service_description: Description) -> None:
@@ -510,7 +522,7 @@ class SOEFChannel:
         :return: response text
         """
         params = params or {}
-        logger.debug(f"Perform `{command}` with {params}")
+        self.logger.debug(f"Perform `{command}` with {params}")
         url = parse.urljoin(
             self.base_url, unique_page_address or self.unique_page_address
         )
@@ -524,7 +536,7 @@ class SOEFChannel:
                 el = root.find("./success")
                 assert el is not None, "No success element"
                 assert str(el.text).strip() == "1", "Success is not 1"
-            logger.debug(f"`{command}` SUCCESS!")
+            self.logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
             raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
@@ -659,7 +671,7 @@ class SOEFChannel:
 
         :return: None
         """
-        logger.debug("Applying to SOEF lobby with address={}".format(self.address))
+        self.logger.debug("Applying to SOEF lobby with address={}".format(self.address))
         url = parse.urljoin(self.base_url, "register")
         params = {
             "api_key": self.api_key,
@@ -669,11 +681,11 @@ class SOEFChannel:
         }
         response_text = await self._request_text("get", url=url, params=params)
         root = ET.fromstring(response_text)
-        logger.debug("Root tag: {}".format(root.tag))
+        self.logger.debug("Root tag: {}".format(root.tag))
         unique_page_address = ""
         unique_token = ""  # nosec
         for child in root:
-            logger.debug(
+            self.logger.debug(
                 "Child tag={}, child attrib={}, child text={}".format(
                     child.tag, child.attrib, child.text
                 )
@@ -686,7 +698,7 @@ class SOEFChannel:
             raise SOEFException.error(
                 "Agent registration error - page address or token not received"
             )
-        logger.debug("Registering agent")
+        self.logger.debug("Registering agent")
         params = {"token": unique_token}
         await self._generic_oef_command(
             "acknowledge", params, unique_page_address=unique_page_address
@@ -769,7 +781,7 @@ class SOEFChannel:
         """
         await self._stop_periodic_ping_task()
         if self.unique_page_address is None:  # pragma: nocover
-            logger.debug(
+            self.logger.debug(
                 "The service is not registered to the simple OEF. Cannot unregister."
             )
             return
@@ -896,7 +908,7 @@ class SOEFChannel:
         :return: None
         """
         assert self.in_queue is not None, "Inqueue not set!"
-        logger.debug("Searching in radius={} of myself".format(radius))
+        self.logger.debug("Searching in radius={} of myself".format(radius))
 
         response_text = await self._generic_oef_command(
             "find_around_me", {"range_in_km": [str(radius)], **params}
@@ -950,7 +962,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.3.0")
+                PublicId.from_str("fetchai/oef_search:0.4.0")
             ]
 
         super().__init__(**kwargs)

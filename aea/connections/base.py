@@ -68,6 +68,7 @@ class Connection(Component, ABC):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
+        **kwargs
     ):
         """
         Initialize the connection.
@@ -82,7 +83,7 @@ class Connection(Component, ABC):
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         assert configuration is not None, "The configuration must be provided."
-        super().__init__(configuration)
+        super().__init__(configuration, **kwargs)
         assert (
             super().public_id == self.connection_id
         ), "Connection ids in configuration and class not matching."
@@ -195,7 +196,7 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_dir(
-        cls, directory: str, identity: Identity, crypto_store: CryptoStore
+        cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs
     ) -> "Connection":
         """
         Load the connection from a directory.
@@ -210,7 +211,7 @@ class Connection(Component, ABC):
             ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Connection.from_config(configuration, identity, crypto_store)
+        return Connection.from_config(configuration, identity, crypto_store, **kwargs)
 
     @classmethod
     def from_config(
@@ -218,6 +219,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
+        **kwargs
     ) -> "Connection":
         """
         Load a connection from a configuration.
@@ -249,5 +251,8 @@ class Connection(Component, ABC):
             connection_class_name
         )
         return connection_class(
-            configuration=configuration, identity=identity, crypto_store=crypto_store
+            configuration=configuration,
+            identity=identity,
+            crypto_store=crypto_store,
+            **kwargs
         )

@@ -62,7 +62,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/error:0.3.0")
+        cls.skill_id = PublicId.from_str("fetchai/error:0.4.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -144,7 +144,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/echo:0.3.0")
+        cls.skill_id = PublicId.from_str("fetchai/echo:0.4.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -354,7 +354,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.3.0"
+        cls.skill_id = "fetchai/echo:0.4.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -426,7 +426,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.3.0"
+        cls.skill_id = "fetchai/echo:0.4.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -503,7 +503,7 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""
-        self.add_item("skill", "fetchai/echo:0.3.0", local=False)
+        self.add_item("skill", "fetchai/echo:0.4.0", local=False)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

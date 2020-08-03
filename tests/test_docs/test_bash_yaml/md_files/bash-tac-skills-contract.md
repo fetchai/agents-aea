@@ -121,5 +121,5 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef_search:0.3.0', 'fetchai/fipa:0.4.0']
+protocols: ['fetchai/oef_search:0.4.0', 'fetchai/fipa:0.5.0']
 ```

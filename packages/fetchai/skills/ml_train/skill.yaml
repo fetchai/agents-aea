@@ -13,14 +13,14 @@ fingerprint:
   ml_model.py: QmZiJGCarjpczcHKQ4EFYSx1e4mEehfaApnHp2W4VQs1od
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   strategy.py: QmPVHfq6okd7Yq9RqA2697L5pnXzBjcJfad97sAXfDUQq9
-  tasks.py: QmS5pGbxvMXSh1Vmuvq26e5APnheQJJ3r3BK6GEyUBUpAf
+  tasks.py: QmTb7kCt2UheQ8kwPewkzgfX8m2DF4KtnYCugWdmERJnTU
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.3.0
+- fetchai/default:0.4.0
 - fetchai/ledger_api:0.2.0
-- fetchai/ml_trade:0.3.0
-- fetchai/oef_search:0.3.0
+- fetchai/ml_trade:0.4.0
+- fetchai/oef_search:0.4.0
 skills:
 - fetchai/generic_buyer:0.8.0
 behaviours:
