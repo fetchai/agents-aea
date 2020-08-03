@@ -30,8 +30,8 @@ import jsonschema
 from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
-from aea.configurations.base import PublicId
 from aea.cli import cli
+from aea.configurations.base import PublicId
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -377,7 +377,12 @@ class TestSearchWithRegistryInSubfolderLocal:
             "Author: fetchai\n"
             "Version: {}\n"
             "------------------------------\n\n"
-        ).format(str(public_id_echo), str(public_id_echo.version), str(public_id_error), str(public_id_error.version))
+        ).format(
+            str(public_id_echo),
+            str(public_id_echo.version),
+            str(public_id_error),
+            str(public_id_error.version),
+        )
         assert self.result.output == expected
 
     @classmethod
@@ -454,7 +459,12 @@ class TestSearchInAgentDirectoryLocal:
             "Author: fetchai\n"
             "Version: {}\n"
             "------------------------------\n\n"
-        ).format(str(public_id_echo), str(public_id_echo.version), str(public_id_error), str(public_id_error.version))
+        ).format(
+            str(public_id_echo),
+            str(public_id_echo.version),
+            str(public_id_error),
+            str(public_id_error.version),
+        )
         assert self.result.output == expected
 
     @classmethod
