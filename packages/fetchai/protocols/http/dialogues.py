@@ -121,7 +121,7 @@ class HttpDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> HttpDialogue:
         """
-        Create an instance of http dialogue.
+        Create an instance of fipa dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for
