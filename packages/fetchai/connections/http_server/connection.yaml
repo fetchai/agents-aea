@@ -11,7 +11,7 @@ fingerprint:
   connection.py: QmTgdkwC91DyiXEeY6WzwLCPWoyNFfsvbKWvyWkeLturqK
 fingerprint_ignore_patterns: []
 protocols:
-- fetchai/http:0.3.0
+- fetchai/http:0.4.0
 class_name: HTTPServerConnection
 config:
   api_spec_path: ''
@@ -19,7 +19,7 @@ config:
   port: 8000
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:0.3.0
+- fetchai/http:0.4.0
 dependencies:
   aiohttp:
     version: '>=3.6.2,<3.7'

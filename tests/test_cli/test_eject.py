@@ -43,7 +43,7 @@ class TestEjectCommands(AEATestCaseMany):
         )
         assert "gym" in os.listdir((os.path.join(cwd, "connections")))
 
-        self.run_cli_command("eject", "protocol", "fetchai/gym:0.3.0", cwd=cwd)
+        self.run_cli_command("eject", "protocol", "fetchai/gym:0.4.0", cwd=cwd)
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "protocols"))
         )

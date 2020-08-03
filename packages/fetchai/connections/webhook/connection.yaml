@@ -10,7 +10,7 @@ fingerprint:
   connection.py: QmRZbGAckYCMx9JpLEDruNvrsKGwt3De1wy1QNhWS5sys2
 fingerprint_ignore_patterns: []
 protocols:
-- fetchai/http:0.3.0
+- fetchai/http:0.4.0
 class_name: WebhookConnection
 config:
   webhook_address: 127.0.0.1
@@ -18,7 +18,7 @@ config:
   webhook_url_path: /some/url/path
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:0.3.0
+- fetchai/http:0.4.0
 dependencies:
   aiohttp:
     version: ==3.6.2

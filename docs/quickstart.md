@@ -141,9 +141,9 @@ cd my_first_aea
 <br>
 Second, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.3.0
+aea add skill fetchai/echo:0.4.0
 ```
-This copies the `fetchai/echo:0.3.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.3.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.4.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.4.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ## Usage of the stub connection
@@ -165,7 +165,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,
 ```
 
 ## Run the AEA
@@ -212,7 +212,7 @@ Let's look at the `Handler` in more depth.
 From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.

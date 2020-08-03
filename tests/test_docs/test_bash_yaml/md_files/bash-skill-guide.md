@@ -6,7 +6,7 @@ aea scaffold skill my_search
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
 ``` bash
-aea add protocol fetchai/oef_search:0.3.0
+aea add protocol fetchai/oef_search:0.4.0
 ```
 ``` bash
 aea add connection fetchai/soef:0.6.0
@@ -44,7 +44,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.3.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -71,7 +71,7 @@ dependencies: {}
 ```
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.3.0: fetchai/soef:0.6.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 ``` yaml
 name: simple_service_registration
@@ -89,7 +89,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.3.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   service:

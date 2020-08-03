@@ -120,10 +120,10 @@ class TestAddAndRejectComponent(AEATestCaseEmpty):
 
     def test_add_and_eject(self):
         """Test add/reject components."""
-        result = self.add_item("skill", "fetchai/echo:0.3.0", local=True)
+        result = self.add_item("skill", "fetchai/echo:0.4.0", local=True)
         assert result.exit_code == 0
 
-        result = self.eject_item("skill", "fetchai/echo:0.3.0")
+        result = self.eject_item("skill", "fetchai/echo:0.4.0")
         assert result.exit_code == 0
 
 
