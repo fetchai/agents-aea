@@ -28,7 +28,6 @@ from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
-    FUNDED_COSMOS_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
@@ -126,9 +125,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
-        )
-        self.replace_private_key_in_file(
-            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")

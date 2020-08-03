@@ -38,7 +38,8 @@ class WaitFundsReleaseTestCase(TestCase):
 
     def test__wait_funds_release_positive(self, try_get_balance_mock):
         """Test for _wait_funds_release method positive result."""
-        _wait_funds_release("agent_config", "wallet", "type_")
+        with pytest.raises(ValueError):
+            _wait_funds_release("agent_config", "wallet", "type_")
 
 
 class GenerateWealthTestCase(TestCase):
