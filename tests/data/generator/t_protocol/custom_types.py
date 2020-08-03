@@ -67,8 +67,8 @@ class DataModel:
         data_model_protobuf_object.list_field.extend(data_model_object.list_field)
         data_model_protobuf_object.dict_field.update(data_model_object.dict_field)
 
-    @staticmethod
-    def decode(data_model_protobuf_object) -> "DataModel":
+    @classmethod
+    def decode(cls, data_model_protobuf_object) -> "DataModel":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 

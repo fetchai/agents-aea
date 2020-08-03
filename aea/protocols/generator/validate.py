@@ -26,6 +26,7 @@ from aea.protocols.generator.common import (
     SPECIFICATION_COMPOSITIONAL_TYPES,
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
+    _has_matched_brackets,
 )
 
 # The following names are reserved for standard message fields and cannot be
@@ -36,7 +37,7 @@ RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "perform
 PERFORMATIVE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 CONTENT_NAME_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 
-CT_CONTENT_REGEX_PATTERN = "^ct:([A-Z]+[a-z]*)+$"  # or maybe "ct:(?:[A-Z][a-z]+)+" or # "^ct:[A-Z][a-zA-Z0-9]*$"
+CT_CONTENT_TYPE_REGEX_PATTERN = "^ct:([A-Z]+[a-z]*)+$"  # or maybe "ct:(?:[A-Z][a-z]+)+" or # "^ct:[A-Z][a-zA-Z0-9]*$"
 
 ROLE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 END_STATE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
@@ -69,27 +70,60 @@ def _is_valid_regex(regex_pattern: str, text: str) -> bool:
 
 
 def _has_brackets(content_type: str) -> bool:
+    """
+    Evaluate whether a compositional content type in a protocol specification is valid has corresponding brackets.
+
+    :param content_type: an 'set' content type.
+    :return: Boolean result
+    """
     for compositional_type in SPECIFICATION_COMPOSITIONAL_TYPES:
         if content_type.startswith(compositional_type):
             content_type = content_type[len(compositional_type) :]
-            return content_type[0] == "[" and content_type[len(content_type) - 1] == "]"
+            if len(content_type) < 2:
+                return False
+            else:
+                return (
+                    content_type[0] == "["
+                    and content_type[len(content_type) - 1] == "]"
+                )
     raise SyntaxError("Content type must be a compositional type!")
 
 
 def _is_valid_ct(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'ct' content type in a protocol specification is valid.
+
+    :param content_type: a 'ct' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
-    return _is_valid_regex(CT_CONTENT_REGEX_PATTERN, content_type)
+    return _is_valid_regex(CT_CONTENT_TYPE_REGEX_PATTERN, content_type)
 
 
 def _is_valid_pt(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'pt' content type in a protocol specification is valid.
+
+    :param content_type: a 'pt' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
     return content_type in SPECIFICATION_PRIMITIVE_TYPES
 
 
 def _is_valid_set(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'set' content type in a protocol specification is valid.
+
+    :param content_type: a 'set' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:set"):
+        return False
+
+    if not _has_matched_brackets(content_type):
         return False
 
     if not _has_brackets(content_type):
@@ -104,9 +138,18 @@ def _is_valid_set(content_type: str) -> bool:
 
 
 def _is_valid_list(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'list' content type in a protocol specification is valid.
+
+    :param content_type: a 'list' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:list"):
+        return False
+
+    if not _has_matched_brackets(content_type):
         return False
 
     if not _has_brackets(content_type):
@@ -121,9 +164,18 @@ def _is_valid_list(content_type: str) -> bool:
 
 
 def _is_valid_dict(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'dict' content type in a protocol specification is valid.
+
+    :param content_type: a 'dict' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:dict"):
+        return False
+
+    if not _has_matched_brackets(content_type):
         return False
 
     if not _has_brackets(content_type):
@@ -139,15 +191,33 @@ def _is_valid_dict(content_type: str) -> bool:
 
 
 def _is_valid_union(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a 'union' content type in a protocol specification is valid.
+
+    :param content_type: an 'union' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:union"):
+        return False
+
+    if not _has_matched_brackets(content_type):
         return False
 
     if not _has_brackets(content_type):
         return False
 
     sub_types = _get_sub_types_of_compositional_types(content_type)
+    # check there are at least two subtypes in the union
+    if len(sub_types) < 2:
+        return False
+
+    # check there are no duplicate subtypes in the union
+    sub_types_set = set(sub_types)
+    if len(sub_types) != len(sub_types_set):
+        return False
+
     for sub_type in sub_types:
         if not (
             _is_valid_ct(sub_type)
@@ -162,9 +232,18 @@ def _is_valid_union(content_type: str) -> bool:
 
 
 def _is_valid_optional(content_type: str) -> bool:
+    """
+    Evaluate whether the format of an 'optional' content type in a protocol specification is valid.
+
+    :param content_type: an 'optional' content type.
+    :return: Boolean result
+    """
     content_type = content_type.strip()
 
     if not content_type.startswith("pt:optional"):
+        return False
+
+    if not _has_matched_brackets(content_type):
         return False
 
     if not _has_brackets(content_type):
@@ -186,6 +265,12 @@ def _is_valid_optional(content_type: str) -> bool:
 
 
 def _is_valid_content_type_format(content_type: str) -> bool:
+    """
+    Evaluate whether the format of a content type in a protocol specification is valid.
+
+    :param content_type: a content type.
+    :return: Boolean result
+    """
     return (
         _is_valid_ct(content_type)
         or _is_valid_pt(content_type)
@@ -232,7 +317,7 @@ def _validate_content_name(content_name: str, performative: str) -> Tuple[bool, 
 
     :return: Boolean result, and associated message.
     """
-    if not _is_valid_regex(PERFORMATIVE_REGEX_PATTERN, content_name):
+    if not _is_valid_regex(CONTENT_NAME_REGEX_PATTERN, content_name):
         return (
             False,
             "Invalid name for content '{}' of performative '{}'. Content names must match the following regular expression: {} ".format(
@@ -295,6 +380,14 @@ def _validate_speech_acts_section(
     """
     custom_types_set = set()
     performatives_set = set()
+
+    if len(protocol_specification.speech_acts.read_all()) == 0:
+        return (
+            False,
+            "Speech-acts cannot be empty!",
+            None,
+            None,
+        )
 
     for (
         performative,
@@ -397,6 +490,12 @@ def _validate_initiation(
 
     :return: Boolean result, and associated message.
     """
+    if len(initiation) == 0 or initiation is None:
+        return (
+            False,
+            "At least one initial performative for this dialogue must be specified.",
+        )
+
     for performative in initiation:
         if performative not in performatives_set:
             return (
@@ -454,6 +553,12 @@ def _validate_termination(
 
     :return: Boolean result, and associated message.
     """
+    if len(termination) == 0 or termination is None:
+        return (
+            False,
+            "At least one terminal performative for this dialogue must be specified.",
+        )
+
     for performative in termination:
         if performative not in performatives_set:
             return (
@@ -473,6 +578,14 @@ def _validate_roles(roles: Set[str]) -> Tuple[bool, str]:
     :param roles: Set of roles of a dialogue.
     :return: Boolean result, and associated message.
     """
+    if not 1 <= len(roles) <= 2:
+        return (
+            False,
+            "There must be either 1 or 2 roles defined in this dialogue. Found {}".format(
+                len(roles)
+            ),
+        )
+
     for role in roles:
         if not _is_valid_regex(ROLE_REGEX_PATTERN, role):
             return (

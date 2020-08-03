@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains t_protocol's message definition."""
+"""This module contains t_protocol_no_ct's message definition."""
 
 import logging
 from enum import Enum
@@ -26,24 +26,19 @@ from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
-
-logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
+logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol_no_ct.message")
 
 DEFAULT_BODY_SIZE = 4
 
 
-class TProtocolMessage(Message):
+class TProtocolNoCtMessage(Message):
     """A protocol for testing purposes."""
 
-    protocol_id = ProtocolId("fetchai", "t_protocol", "0.1.0")
-
-    DataModel = CustomDataModel
+    protocol_id = ProtocolId("fetchai", "t_protocol_no_ct", "0.1.0")
 
     class Performative(Enum):
-        """Performatives for the t_protocol protocol."""
+        """Performatives for the t_protocol_no_ct protocol."""
 
-        PERFORMATIVE_CT = "performative_ct"
         PERFORMATIVE_EMPTY_CONTENTS = "performative_empty_contents"
         PERFORMATIVE_MT = "performative_mt"
         PERFORMATIVE_O = "performative_o"
@@ -64,7 +59,7 @@ class TProtocolMessage(Message):
         **kwargs,
     ):
         """
-        Initialise an instance of TProtocolMessage.
+        Initialise an instance of TProtocolNoCtMessage.
 
         :param message_id: the message id.
         :param dialogue_reference: the dialogue reference.
@@ -75,11 +70,10 @@ class TProtocolMessage(Message):
             dialogue_reference=dialogue_reference,
             message_id=message_id,
             target=target,
-            performative=TProtocolMessage.Performative(performative),
+            performative=TProtocolNoCtMessage.Performative(performative),
             **kwargs,
         )
         self._performatives = {
-            "performative_ct",
             "performative_empty_contents",
             "performative_mt",
             "performative_o",
@@ -109,7 +103,7 @@ class TProtocolMessage(Message):
     def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
-        return cast(TProtocolMessage.Performative, self.get("performative"))
+        return cast(TProtocolNoCtMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
@@ -128,12 +122,6 @@ class TProtocolMessage(Message):
         """Get the 'content_bytes' content from the message."""
         assert self.is_set("content_bytes"), "'content_bytes' content is not set."
         return cast(bytes, self.get("content_bytes"))
-
-    @property
-    def content_ct(self) -> CustomDataModel:
-        """Get the 'content_ct' content from the message."""
-        assert self.is_set("content_ct"), "'content_ct' content is not set."
-        return cast(CustomDataModel, self.get("content_ct"))
 
     @property
     def content_dict_bool_bool(self) -> Dict[bool, bool]:
@@ -309,11 +297,6 @@ class TProtocolMessage(Message):
         return cast(Optional[bool], self.get("content_o_bool"))
 
     @property
-    def content_o_ct(self) -> Optional[CustomDataModel]:
-        """Get the 'content_o_ct' content from the message."""
-        return cast(Optional[CustomDataModel], self.get("content_o_ct"))
-
-    @property
     def content_o_dict_str_int(self) -> Optional[Dict[str, int]]:
         """Get the 'content_o_dict_str_int' content from the message."""
         return cast(Optional[Dict[str, int]], self.get("content_o_dict_str_int"))
@@ -372,21 +355,12 @@ class TProtocolMessage(Message):
     def content_union_1(
         self,
     ) -> Union[
-        CustomDataModel,
-        bytes,
-        int,
-        float,
-        bool,
-        str,
-        FrozenSet[int],
-        Tuple[bool, ...],
-        Dict[str, int],
+        bytes, int, float, bool, str, FrozenSet[int], Tuple[bool, ...], Dict[str, int]
     ]:
         """Get the 'content_union_1' content from the message."""
         assert self.is_set("content_union_1"), "'content_union_1' content is not set."
         return cast(
             Union[
-                CustomDataModel,
                 bytes,
                 int,
                 float,
@@ -431,7 +405,7 @@ class TProtocolMessage(Message):
         )
 
     def _is_consistent(self) -> bool:
-        """Check that the message follows the t_protocol protocol."""
+        """Check that the message follows the t_protocol_no_ct protocol."""
         try:
             assert (
                 type(self.dialogue_reference) == tuple
@@ -462,7 +436,7 @@ class TProtocolMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             assert (
-                type(self.performative) == TProtocolMessage.Performative
+                type(self.performative) == TProtocolNoCtMessage.Performative
             ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                 self.valid_performatives, self.performative
             )
@@ -470,14 +444,7 @@ class TProtocolMessage(Message):
             # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
-            if self.performative == TProtocolMessage.Performative.PERFORMATIVE_CT:
-                expected_nb_of_contents = 1
-                assert (
-                    type(self.content_ct) == CustomDataModel
-                ), "Invalid type for content 'content_ct'. Expected 'DataModel'. Found '{}'.".format(
-                    type(self.content_ct)
-                )
-            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PT:
+            if self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_PT:
                 expected_nb_of_contents = 5
                 assert (
                     type(self.content_bytes) == bytes
@@ -504,7 +471,9 @@ class TProtocolMessage(Message):
                 ), "Invalid type for content 'content_str'. Expected 'str'. Found '{}'.".format(
                     type(self.content_str)
                 )
-            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PCT:
+            elif (
+                self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_PCT
+            ):
                 expected_nb_of_contents = 10
                 assert (
                     type(self.content_set_bytes) == frozenset
@@ -586,7 +555,9 @@ class TProtocolMessage(Message):
                 assert all(
                     type(element) == str for element in self.content_list_str
                 ), "Invalid type for tuple elements in content 'content_list_str'. Expected 'str'."
-            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PMT:
+            elif (
+                self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_PMT
+            ):
                 expected_nb_of_contents = 15
                 assert (
                     type(self.content_dict_int_bytes) == dict
@@ -873,11 +844,10 @@ class TProtocolMessage(Message):
                     ), "Invalid type for dictionary values in content 'content_dict_str_str'. Expected 'str'. Found '{}'.".format(
                         type(value_of_content_dict_str_str)
                     )
-            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_MT:
+            elif self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_MT:
                 expected_nb_of_contents = 2
                 assert (
-                    type(self.content_union_1) == CustomDataModel
-                    or type(self.content_union_1) == bool
+                    type(self.content_union_1) == bool
                     or type(self.content_union_1) == bytes
                     or type(self.content_union_1) == dict
                     or type(self.content_union_1) == float
@@ -885,7 +855,7 @@ class TProtocolMessage(Message):
                     or type(self.content_union_1) == int
                     or type(self.content_union_1) == str
                     or type(self.content_union_1) == tuple
-                ), "Invalid type for content 'content_union_1'. Expected either of '['DataModel', 'bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
+                ), "Invalid type for content 'content_union_1'. Expected either of '['bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
                     type(self.content_union_1)
                 )
                 if type(self.content_union_1) == frozenset:
@@ -947,16 +917,8 @@ class TProtocolMessage(Message):
                                 and type(value_of_content_union_2) == int
                             )
                         ), "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'bool','bytes' or 'int','float' or 'str','int'."
-            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_O:
+            elif self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_O:
                 expected_nb_of_contents = 0
-                if self.is_set("content_o_ct"):
-                    expected_nb_of_contents += 1
-                    content_o_ct = cast(CustomDataModel, self.content_o_ct)
-                    assert (
-                        type(content_o_ct) == CustomDataModel
-                    ), "Invalid type for content 'content_o_ct'. Expected 'DataModel'. Found '{}'.".format(
-                        type(content_o_ct)
-                    )
                 if self.is_set("content_o_bool"):
                     expected_nb_of_contents += 1
                     content_o_bool = cast(bool, self.content_o_bool)
@@ -1015,7 +977,7 @@ class TProtocolMessage(Message):
                         )
             elif (
                 self.performative
-                == TProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS
+                == TProtocolNoCtMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS
             ):
                 expected_nb_of_contents = 0
 
