@@ -47,15 +47,15 @@ class TaskTestCase(TestCase):
         with self.assertRaises(ValueError):
             obj()
 
-    @mock.patch("aea.skills.tasks.logger.debug")
-    def test_call_exception_while_executing(self, debug_mock):
+    def test_call_exception_while_executing(self):
         """Test call obj exception raised while executing."""
         obj = Task()
-        obj.setup = mock.Mock()
-        obj.execute = _raise_exception
-        obj.teardown = mock.Mock()
-        obj()
-        debug_mock.assert_called_once()
+        with mock.patch.object(obj.logger, "debug") as debug_mock:
+            obj.setup = mock.Mock()
+            obj.execute = _raise_exception
+            obj.teardown = mock.Mock()
+            obj()
+            debug_mock.assert_called_once()
 
     def test_is_executed_positive(self):
         """Test is_executed property positive result."""
@@ -93,31 +93,31 @@ class TaskManagerTestCase(TestCase):
         obj = TaskManager()
         obj.nb_workers
 
-    @mock.patch("aea.skills.tasks.logger.debug")
-    def test_stop_already_stopped(self, debug_mock):
+    def test_stop_already_stopped(self):
         """Test stop method already stopped."""
         obj = TaskManager()
-        obj.stop()
-        debug_mock.assert_called_once()
+        with mock.patch.object(obj.logger, "debug") as debug_mock:
+            obj.stop()
+            debug_mock.assert_called_once()
 
-    @mock.patch("aea.skills.tasks.logger.debug")
-    def test_start_already_started(self, debug_mock):
+    def test_start_already_started(self):
         """Test start method already started."""
         obj = TaskManager()
-        obj._stopped = False
-        obj.start()
-        debug_mock.assert_called_once()
-        obj.stop()
+        with mock.patch.object(obj.logger, "debug") as debug_mock:
+            obj._stopped = False
+            obj.start()
+            debug_mock.assert_called_once()
+            obj.stop()
 
-    @mock.patch("aea.skills.tasks.logger.debug")
-    def test_start_lazy_pool_start(self, debug_mock):
+    def test_start_lazy_pool_start(self):
         """Test start method with lazy pool start."""
         obj = TaskManager(is_lazy_pool_start=False)
-        obj.start()
-        obj._stopped = True
-        obj.start()
-        debug_mock.assert_called_with("Pool was already started!")
-        obj.start()
+        with mock.patch.object(obj.logger, "debug") as debug_mock:
+            obj.start()
+            obj._stopped = True
+            obj.start()
+            debug_mock.assert_called_with("Pool was already started!")
+            obj.start()
 
     def test_enqueue_task_stopped(self):
         """Test enqueue_task method manager stopped."""

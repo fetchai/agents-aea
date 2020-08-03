@@ -50,7 +50,7 @@ config:
 ```
 ``` yaml
 default_routing:
-  ? "fetchai/oef_search:0.3.0"
+  ? "fetchai/oef_search:0.4.0"
   : "fetchai/oef:0.7.0"
 ```
 ``` yaml

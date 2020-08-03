@@ -34,7 +34,7 @@ from aea.configurations.base import (
 )
 from aea.protocols.generator.base import ProtocolGenerator
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import ROOT_DIR, skip_test_windows
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )
@@ -49,6 +49,7 @@ logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
 
+@skip_test_windows
 class TestCompareLatestGeneratorOutputWithTestProtocol:
     """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
 
@@ -113,7 +114,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         proto_file_original = Path(
             PATH_TO_T_PROTOCOL, "{}.proto".format(T_PROTOCOL_NAME),
         )
-        assert filecmp.cmp(proto_file_generated, proto_file_original)
+        assert filecmp.cmp(proto_file_generated, proto_file_original, shallow=False)
 
         # compare _pb2.py
         # ToDo Fails in CI. Investigate!
@@ -135,6 +136,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
             pass
 
 
+@skip_test_windows
 class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
     """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
 
@@ -155,6 +157,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
             - protocol.yaml files are consequently not compared either because the different
               custom_types.py files makes their IPFS hashes different.
         """
+
         protocol_name = "t_protocol_no_ct"
         path_to_protocol_specification_with_no_custom_types = os.path.join(
             ROOT_DIR, "tests", "data", "sample_specification_no_custom_types.yaml"

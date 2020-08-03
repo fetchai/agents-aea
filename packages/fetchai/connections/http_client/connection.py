@@ -144,7 +144,7 @@ class HTTPClientAsyncChannel:
         )
 
         if not dialogue:
-            logger.warning(
+            self.logger.warning(
                 "Could not create dialogue for message={}".format(request_http_message)
             )
             return
@@ -317,7 +317,7 @@ class HTTPClientAsyncChannel:
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",
-            protocol_id=PublicId.from_str("fetchai/http:0.3.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
             context=context,
             message=http_message,
         )

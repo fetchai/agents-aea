@@ -15,7 +15,7 @@ aea create aries_alice
 cd aries_alice
 ```
 ``` bash
-aea add skill fetchai/aries_alice:0.3.0
+aea add skill fetchai/aries_alice:0.4.0
 ```
 ``` bash
 aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_host 127.0.0.1

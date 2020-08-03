@@ -162,7 +162,7 @@ cd aries_alice
 Add the `aries_alice` skill:
 
 ``` bash
-aea add skill fetchai/aries_alice:0.3.0
+aea add skill fetchai/aries_alice:0.4.0
 ```
 
 You now need to configure this skill to ensure `admin_host` and `admin_port` values in the skill's configuration file `alice/vendor/fetchai/skills/aries_alice/skill.yaml` match with the values you noted above for **Alice_ACA**.

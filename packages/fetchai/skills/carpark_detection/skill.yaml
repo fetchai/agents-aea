@@ -8,18 +8,18 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
   behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
-  database.py: QmVUoN2cuAE54UPvSBRFArdGmVzoSuEjrJXiVkGcfwHrvb
+  database.py: QmZqLyAQiZUaNEhf5t34BGwoLzYVcszwwR69HeDDwqR9uV
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   handlers.py: QmbkmEP9K4Qu2MsRtnkdx3PGNbSW46qi48bCHVCUJHpcQF
-  strategy.py: QmUJsWA9GYHxn5cmuXUQTkc9oCLJNJtWbRDJdRy2Yp3pQk
+  strategy.py: QmTZsbPKAhuLJKRC8uan6xYcaniyPJ1MzcRyjJP7UpKDzn
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
 protocols:
-- fetchai/default:0.3.0
-- fetchai/fipa:0.4.0
+- fetchai/default:0.4.0
+- fetchai/fipa:0.5.0
 - fetchai/ledger_api:0.2.0
-- fetchai/oef_search:0.3.0
+- fetchai/oef_search:0.4.0
 skills:
 - fetchai/generic_seller:0.9.0
 behaviours:

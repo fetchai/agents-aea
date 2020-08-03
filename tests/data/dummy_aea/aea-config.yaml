@@ -11,11 +11,11 @@ connections:
 contracts:
 - fetchai/erc1155:0.7.0
 protocols:
-- fetchai/default:0.3.0
-- fetchai/fipa:0.4.0
+- fetchai/default:0.4.0
+- fetchai/fipa:0.5.0
 skills:
 - dummy_author/dummy:0.1.0
-- fetchai/error:0.3.0
+- fetchai/error:0.4.0
 default_connection: fetchai/local:0.5.0
 default_ledger: cosmos
 logging_config:

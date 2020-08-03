@@ -6,7 +6,7 @@ Check out the <a href="../cli-commands">CLI guide</a> on details how to add a co
 ## Register your agent and its services
 
 ### Register agent location
-To register your agent's location, you have to send a message in the `fetchai/oef_search:0.3.0` protocol to the SOEF connection.
+To register your agent's location, you have to send a message in the `fetchai/oef_search:0.4.0` protocol to the SOEF connection.
 
 First, define a data model for location data:
 ``` python

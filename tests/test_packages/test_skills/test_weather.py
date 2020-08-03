@@ -49,7 +49,7 @@ class TestWeatherSkills(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
         # prepare agent one (weather station)
@@ -200,7 +200,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
         # add packages for agent one

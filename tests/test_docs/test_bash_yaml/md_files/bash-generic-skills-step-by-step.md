@@ -86,10 +86,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.3.0
-- fetchai/fipa:0.4.0
+- fetchai/default:0.4.0
+- fetchai/fipa:0.5.0
 - fetchai/ledger_api:0.2.0
-- fetchai/oef_search:0.3.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   service_registration:
@@ -154,10 +154,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.3.0
-- fetchai/fipa:0.4.0
+- fetchai/default:0.4.0
+- fetchai/fipa:0.5.0
 - fetchai/ledger_api:0.2.0
-- fetchai/oef_search:0.3.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   search:

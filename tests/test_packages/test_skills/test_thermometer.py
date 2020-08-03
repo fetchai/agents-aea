@@ -49,7 +49,7 @@ class TestThermometerSkill(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
         # add packages for agent one and run it
@@ -206,7 +206,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
         # add packages for agent one and run it

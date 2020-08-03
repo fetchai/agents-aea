@@ -39,7 +39,7 @@ REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
 PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.5.0")
 
-logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
 RequestId = str
 
@@ -54,6 +54,7 @@ class WebhookChannel:
         webhook_port: int,
         webhook_url_path: str,
         connection_id: PublicId,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a webhook channel.
@@ -122,7 +123,7 @@ class WebhookChannel:
             await self.runner.cleanup()
             await self.app.shutdown()
             await self.app.cleanup()
-            logger.info("Webhook app is shutdown.")
+            self.logger.info("Webhook app is shutdown.")
             self.is_stopped = True
 
     async def _receive_webhook(self, request: web.Request) -> web.Response:
@@ -207,6 +208,7 @@ class WebhookConnection(Connection):
             webhook_port=webhook_port,
             webhook_url_path=webhook_url_path,
             connection_id=self.connection_id,
+            logger=self.logger,
         )
 
     async def connect(self) -> None:
