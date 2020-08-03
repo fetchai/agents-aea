@@ -4,7 +4,7 @@
 
 **Author**: fetchai
 
-**Version**: 0.1.0
+**Version**: 0.2.0
 
 **Short Description**: A protocol for communication between skills and decision maker.
 
@@ -20,7 +20,7 @@ This is a protocol for communication between a skill and a decision maker.
 ---
 name: signing
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
