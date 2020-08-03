@@ -42,7 +42,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = ProtocolId("fetchai", "oef_search", "0.3.0")
+    protocol_id = ProtocolId.from_str("fetchai/oef_search:0.4.0")
 
     Description = CustomDescription
 

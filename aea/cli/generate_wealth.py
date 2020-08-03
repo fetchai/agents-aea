@@ -20,14 +20,14 @@
 """Implementation of the 'aea generate_wealth' subcommand."""
 
 import time
-from typing import cast
+from typing import Dict, Optional, cast
 
 import click
 
-from aea.configurations.base import AgentConfig
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import try_get_balance, verify_or_create_private_keys
+from aea.configurations.base import AgentConfig
 from aea.crypto.helpers import try_generate_testnet_wealth
 from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
 from aea.crypto.wallet import Wallet
@@ -53,7 +53,9 @@ def generate_wealth(click_context, sync, type_):
     _try_generate_wealth(click_context, type_, sync)
 
 
-def _try_generate_wealth(click_context: click.core.Context, type_: str, sync: bool) -> None:
+def _try_generate_wealth(
+    click_context: click.core.Context, type_: str, sync: bool
+) -> None:
     """
     Try generate wealth for the provided network identifier.
 
@@ -68,12 +70,12 @@ def _try_generate_wealth(click_context: click.core.Context, type_: str, sync: bo
     private_key_paths = {
         config_pair[0]: config_pair[1]
         for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
+    }  # type: Dict[str, Optional[str]]
     wallet = Wallet(private_key_paths)
     try:
         address = wallet.addresses[type_]
         faucet_api_cls = make_faucet_api_cls(type_)
-        testnet = faucet_api_cls.testnet_name
+        testnet = faucet_api_cls.network_name
         click.echo(
             "Requesting funds for address {} on test network '{}'".format(
                 address, testnet
@@ -87,7 +89,7 @@ def _try_generate_wealth(click_context: click.core.Context, type_: str, sync: bo
         raise click.ClickException(str(e))
 
 
-def _wait_funds_release(agent_config: AgentConfig, wallet: Wallet, type_: str) -> bool:
+def _wait_funds_release(agent_config: AgentConfig, wallet: Wallet, type_: str) -> None:
     """
     Wait for the funds to be released.
 
