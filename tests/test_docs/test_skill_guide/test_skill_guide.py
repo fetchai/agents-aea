@@ -34,7 +34,6 @@ from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
-    FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
@@ -129,16 +128,18 @@ class TestBuildSkill(AEATestCaseMany):
         # update fingerprint
         self.fingerprint_item("skill", skill_id)
 
-        # add funded key
+        # add keys
         self.generate_private_key(COSMOS)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
-        self.replace_private_key_in_file(
-            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
-        )
+
+        # fund key
+        self.generate_wealth(COSMOS)
+
+        # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
