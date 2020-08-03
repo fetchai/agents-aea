@@ -310,7 +310,7 @@ agent_config_files = [
 protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_1, "sample.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
-    # ToDo add the non-custom-type version of sample_specification as well
+    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
 
 
