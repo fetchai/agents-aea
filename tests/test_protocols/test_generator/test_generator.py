@@ -99,12 +99,16 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         # compare serialization.py
         serialization_file_generated = Path(self.t, T_PROTOCOL_NAME, "serialization.py")
         serialization_file_original = Path(PATH_TO_T_PROTOCOL, "serialization.py",)
-        assert filecmp.cmp(serialization_file_generated, serialization_file_original, shallow=False)
+        assert filecmp.cmp(
+            serialization_file_generated, serialization_file_original, shallow=False
+        )
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, T_PROTOCOL_NAME, "dialogues.py")
         dialogue_file_original = Path(PATH_TO_T_PROTOCOL, "dialogues.py",)
-        assert filecmp.cmp(dialogue_file_generated, dialogue_file_original, shallow=False)
+        assert filecmp.cmp(
+            dialogue_file_generated, dialogue_file_original, shallow=False
+        )
 
         # compare .proto
         proto_file_generated = Path(
@@ -192,12 +196,16 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         # compare serialization.py
         serialization_file_generated = Path(self.t, protocol_name, "serialization.py")
         serialization_file_original = Path(path_to_protocol, "serialization.py",)
-        assert filecmp.cmp(serialization_file_generated, serialization_file_original, shallow=False)
+        assert filecmp.cmp(
+            serialization_file_generated, serialization_file_original, shallow=False
+        )
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, protocol_name, "dialogues.py")
         dialogue_file_original = Path(path_to_protocol, "dialogues.py",)
-        assert filecmp.cmp(dialogue_file_generated, dialogue_file_original, shallow=False)
+        assert filecmp.cmp(
+            dialogue_file_generated, dialogue_file_original, shallow=False
+        )
 
         # compare .proto
         proto_file_generated = Path(
