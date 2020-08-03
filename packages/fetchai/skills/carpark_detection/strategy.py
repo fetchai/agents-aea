@@ -52,7 +52,7 @@ class Strategy(GenericStrategy):
         if not os.path.isdir(db_dir):
             raise ValueError("Database directory does not exist!")
 
-        self.db = DetectionDatabase(db_dir, False)
+        self.db = DetectionDatabase(db_dir, False, logger=self.context.logger)
         super().__init__(**kwargs)
         self._update_service_data()
 

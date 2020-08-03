@@ -338,14 +338,16 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
-    def __init__(self, configuration: ProtocolConfig, message_class: Type[Message]):
+    def __init__(
+        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs
+    ):
         """
         Initialize the protocol manager.
 
         :param configuration: the protocol configurations.
-        :param serializer: the serializer.
+        :param message_class: the message class.
         """
-        super().__init__(configuration)
+        super().__init__(configuration, **kwargs)
 
         self._message_class = message_class
 
@@ -355,7 +357,7 @@ class Protocol(Component):
         return self._message_class.serializer
 
     @classmethod
-    def from_dir(cls, directory: str) -> "Protocol":
+    def from_dir(cls, directory: str, **kwargs) -> "Protocol":
         """
         Load the protocol from a directory.
 
@@ -367,10 +369,10 @@ class Protocol(Component):
             ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Protocol.from_config(configuration)
+        return Protocol.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ProtocolConfig) -> "Protocol":
+    def from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol":
         """
         Load the protocol from configuration.
 
@@ -411,4 +413,4 @@ class Protocol(Component):
         serialize_class = serializer_classes[0][1]
         message_class.serializer = serialize_class
 
-        return Protocol(configuration, message_class)
+        return Protocol(configuration, message_class, **kwargs)

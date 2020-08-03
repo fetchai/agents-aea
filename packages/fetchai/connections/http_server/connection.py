@@ -67,7 +67,7 @@ NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
 
-logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
 PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.6.0")
@@ -210,7 +210,10 @@ class APISpec:
     """API Spec class to verify a request against an OpenAPI/Swagger spec."""
 
     def __init__(
-        self, api_spec_path: Optional[str] = None, server: Optional[str] = None
+        self,
+        api_spec_path: Optional[str] = None,
+        server: Optional[str] = None,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize the API spec.
@@ -218,6 +221,7 @@ class APISpec:
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
         """
         self._validator = None  # type: Optional[RequestValidator]
+        self.logger = logger
         if api_spec_path is not None:
             try:
                 api_spec_dict = read_yaml_file(api_spec_path)
@@ -226,11 +230,11 @@ class APISpec:
                 api_spec = create_spec(api_spec_dict)
                 self._validator = RequestValidator(api_spec)
             except OpenAPIValidationError as e:  # pragma: nocover
-                logger.error(
+                self.logger.error(
                     f"API specification YAML source file not correctly formatted: {str(e)}"
                 )
             except Exception:
-                logger.exception(
+                self.logger.exception(
                     "API specification YAML source file not correctly formatted."
                 )
                 raise
@@ -243,13 +247,13 @@ class APISpec:
         :return: whether or not the request conforms with the API spec
         """
         if self._validator is None:
-            logger.debug("Skipping API verification!")
+            self.logger.debug("Skipping API verification!")
             return True
 
         try:
             validate_request(self._validator, request)
         except Exception:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception("APISpec verify error")
+            self.logger.exception("APISpec verify error")
             return False
         return True
 
@@ -331,6 +335,7 @@ class HTTPChannel(BaseAsyncChannel):
         connection_id: PublicId,
         restricted_to_protocols: Set[PublicId],
         timeout_window: float = 5.0,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a channel and process the initial API specification from the file path (if given).
@@ -349,7 +354,7 @@ class HTTPChannel(BaseAsyncChannel):
         self.server_address = "http://{}:{}".format(self.host, self.port)
         self.restricted_to_protocols = restricted_to_protocols
 
-        self._api_spec = APISpec(api_spec_path, self.server_address)
+        self._api_spec = APISpec(api_spec_path, self.server_address, logger)
         self.timeout_window = timeout_window
         self.http_server: Optional[web.TCPSite] = None
         self.pending_requests: Dict[RequestId, Future] = {}
@@ -424,7 +429,7 @@ class HTTPChannel(BaseAsyncChannel):
         except asyncio.TimeoutError:
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
         except BaseException:  # pragma: nocover # pylint: disable=broad-except
-            logger.exception("Error during handling incoming request")
+            self.logger.exception("Error during handling incoming request")
             return Response(
                 status=SERVER_ERROR, reason="Server Error", text=format_exc()
             )
@@ -517,6 +522,7 @@ class HTTPServerConnection(Connection):
             api_spec_path,
             connection_id=self.connection_id,
             restricted_to_protocols=self.restricted_to_protocols,
+            logger=self.logger,
         )
 
     async def connect(self) -> None:
@@ -526,7 +532,6 @@ class HTTPServerConnection(Connection):
         :return: None
         """
         if not self.connection_status.is_connected:
-            self.channel.logger = self.logger
             await self.channel.connect(loop=self.loop)
             self.connection_status.is_connected = not self.channel.is_stopped
 
