@@ -1,3 +1,22 @@
+# State Update Protocol
+
+**Name:** state_update
+
+**Author**: fetchai
+
+**Version**: 0.1.0
+
+**Short Description**: A protocol for state updates to the decision maker state.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for updating the state of a decision maker.
+
+## Specification
+
+```yaml
 ---
 name: state_update
 author: fetchai
@@ -28,3 +47,6 @@ termination: [apply]
 roles: {skill, decision_maker}
 end_states: [successful]
 ...
+```
+
+## Links

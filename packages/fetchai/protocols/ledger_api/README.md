@@ -1,3 +1,22 @@
+# Ledger API Protocol
+
+**Name:** ledger_api
+
+**Author**: fetchai
+
+**Version**: 0.2.0
+
+**Short Description**: A protocol for ledger APIs' requests and responses.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for interacting with ledger APIs.
+
+## Specification
+
+```yaml
 ---
 name: ledger_api
 author: fetchai
@@ -57,3 +76,6 @@ termination: [balance, transaction_receipt]
 roles: {agent, ledger}
 end_states: [successful]
 ...
+```
+
+## Links
