@@ -34,7 +34,7 @@ from aea.configurations.base import (
 )
 from aea.protocols.generator.base import ProtocolGenerator
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import ROOT_DIR, skip_test_windows
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )
@@ -49,6 +49,7 @@ logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
 
+@skip_test_windows
 class TestCompareLatestGeneratorOutputWithTestProtocol:
     """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
 
@@ -89,26 +90,22 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         # compare __init__.py
         init_file_generated = Path(self.t, T_PROTOCOL_NAME, "__init__.py")
         init_file_original = Path(PATH_TO_T_PROTOCOL, "__init__.py",)
-        assert filecmp.cmp(init_file_generated, init_file_original, shallow=False)
+        assert filecmp.cmp(init_file_generated, init_file_original)
 
         # compare message.py
         message_file_generated = Path(self.t, T_PROTOCOL_NAME, "message.py")
         message_file_original = Path(PATH_TO_T_PROTOCOL, "message.py",)
-        assert filecmp.cmp(message_file_generated, message_file_original, shallow=False)
+        assert filecmp.cmp(message_file_generated, message_file_original)
 
         # compare serialization.py
         serialization_file_generated = Path(self.t, T_PROTOCOL_NAME, "serialization.py")
         serialization_file_original = Path(PATH_TO_T_PROTOCOL, "serialization.py",)
-        assert filecmp.cmp(
-            serialization_file_generated, serialization_file_original, shallow=False
-        )
+        assert filecmp.cmp(serialization_file_generated, serialization_file_original)
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, T_PROTOCOL_NAME, "dialogues.py")
         dialogue_file_original = Path(PATH_TO_T_PROTOCOL, "dialogues.py",)
-        assert filecmp.cmp(
-            dialogue_file_generated, dialogue_file_original, shallow=False
-        )
+        assert filecmp.cmp(dialogue_file_generated, dialogue_file_original)
 
         # compare .proto
         proto_file_generated = Path(
@@ -139,6 +136,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
             pass
 
 
+@skip_test_windows
 class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
     """Test that the "t_protocol" test protocol matches with the latest generator output based on its specification."""
 
@@ -159,6 +157,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
             - protocol.yaml files are consequently not compared either because the different
               custom_types.py files makes their IPFS hashes different.
         """
+
         protocol_name = "t_protocol_no_ct"
         path_to_protocol_specification_with_no_custom_types = os.path.join(
             ROOT_DIR, "tests", "data", "sample_specification_no_custom_types.yaml"
@@ -186,33 +185,29 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         # compare __init__.py
         init_file_generated = Path(self.t, protocol_name, "__init__.py")
         init_file_original = Path(path_to_protocol, "__init__.py",)
-        assert filecmp.cmp(init_file_generated, init_file_original, shallow=False)
+        assert filecmp.cmp(init_file_generated, init_file_original)
 
         # compare message.py
         message_file_generated = Path(self.t, protocol_name, "message.py")
         message_file_original = Path(path_to_protocol, "message.py",)
-        assert filecmp.cmp(message_file_generated, message_file_original, shallow=False)
+        assert filecmp.cmp(message_file_generated, message_file_original)
 
         # compare serialization.py
         serialization_file_generated = Path(self.t, protocol_name, "serialization.py")
         serialization_file_original = Path(path_to_protocol, "serialization.py",)
-        assert filecmp.cmp(
-            serialization_file_generated, serialization_file_original, shallow=False
-        )
+        assert filecmp.cmp(serialization_file_generated, serialization_file_original)
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, protocol_name, "dialogues.py")
         dialogue_file_original = Path(path_to_protocol, "dialogues.py",)
-        assert filecmp.cmp(
-            dialogue_file_generated, dialogue_file_original, shallow=False
-        )
+        assert filecmp.cmp(dialogue_file_generated, dialogue_file_original)
 
         # compare .proto
         proto_file_generated = Path(
             self.t, protocol_name, "{}.proto".format(protocol_name)
         )
         proto_file_original = Path(path_to_protocol, "{}.proto".format(protocol_name),)
-        assert filecmp.cmp(proto_file_generated, proto_file_original, shallow=False)
+        assert filecmp.cmp(proto_file_generated, proto_file_original)
 
         # compare _pb2.py
         # ToDo Fails in CI. Investigate!
