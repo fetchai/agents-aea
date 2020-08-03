@@ -45,7 +45,7 @@ def get_wealth(click_context, type_):
     click.echo(wealth)
 
 
-def _try_get_wealth(click_context, type_):
+def _try_get_wealth(click_context: click.core.Context, type_: str):
     ctx = cast(Context, click_context.obj)
     verify_or_create_private_keys(ctx=ctx)
     private_key_paths = {

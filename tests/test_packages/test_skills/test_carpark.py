@@ -101,9 +101,10 @@ class TestCarPark(AEATestCaseMany):
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
-        self.replace_private_key_in_file(
-            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
-        )
+        # self.generate_wealth(COSMOS)
+        # self.replace_private_key_in_file(
+        #     FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        # )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
@@ -260,9 +261,10 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
-        self.replace_private_key_in_file(
-            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
-        )
+        self.generate_wealth(COSMOS)
+        # self.replace_private_key_in_file(
+        #     FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        # )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
