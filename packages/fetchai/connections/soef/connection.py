@@ -213,9 +213,6 @@ class SOEFChannel:
         self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
-<<<<<<< HEAD
-=======
-
         self._find_around_me_queue: Optional[asyncio.Queue] = None
         self._find_around_me_processor_task: Optional[asyncio.Task] = None
 
@@ -240,7 +237,6 @@ class SOEFChannel:
                 )
             finally:
                 logger.debug("_find_around_me_processor exited")
->>>>>>> develop
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:

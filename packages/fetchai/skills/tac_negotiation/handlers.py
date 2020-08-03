@@ -34,6 +34,7 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import (
+    DefaultDialogues,
     FipaDialogue,
     FipaDialogues,
     OefSearchDialogue,
@@ -109,16 +110,18 @@ class FipaNegotiationHandler(Handler):
         self.context.logger.info(
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
+        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
             performative=DefaultMessage.Performative.ERROR,
+            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
         default_msg.counterparty = fipa_msg.counterparty
+        assert (
+            default_dialogues.update(default_msg) is not None
+        ), "DefaultDialogue not constructed."
         self.context.outbox.put_message(message=default_msg)
 
     def _on_cfp(self, cfp: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
