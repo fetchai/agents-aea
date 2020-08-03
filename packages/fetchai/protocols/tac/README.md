@@ -1,3 +1,22 @@
+# TAC Protocol
+
+**Name:** tac
+
+**Author**: fetchai
+
+**Version**: 0.4.0
+
+**Short Description**: The tac protocol implements the messages an AEA needs to participate in a Trading Agent Competition (TAC).
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for participating in a Trading Agent Competition (TAC). 
+
+## Specification
+
+```yaml
 ---
 name: tac
 author: fetchai
@@ -71,3 +90,8 @@ termination: [cancelled, tac_error]
 roles: {participant, controller}
 end_states: [successful, failed]
 ...
+```
+
+## Links
+
+* <a href="https://docs.fetch.ai/aea/tac-skills/" target=_blank>TAC skill in the AEA framework</a>
