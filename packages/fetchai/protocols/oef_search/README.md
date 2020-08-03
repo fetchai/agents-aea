@@ -1,3 +1,23 @@
+# OEF Search Protocol
+
+**Name:** oef_search
+
+**Author**: fetchai
+
+**Version**: 0.4.0
+
+**Short Description**: A protocol for interacting with an OEF search service.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for interacting with an OEF search service. 
+It allows for registering of agents and services, and searching of agents and services using a query language.
+
+## Specification
+
+```yaml
 ---
 name: oef_search
 author: fetchai
@@ -51,3 +71,6 @@ termination: [success, error, search_result]
 roles: {agent, oef_node}
 end_states: [successful, failed]
 ...
+```
+
+## Links
