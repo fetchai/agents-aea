@@ -6,9 +6,9 @@ description: The HTTP_client connection that wraps a web-based client connecting
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
+  README.md: QmQmmM5CU1jh5abqbQqKEW7f51jWAzo1eKMiWyfTZYedGX
   __init__.py: QmPdKAks8A6XKAgZiopJzPZYXJumTeUqChd8UorqmLQQPU
   connection.py: QmXHqLj683ip83fwPaG7WenpqKwdSFoxHzoL7fL9SmWiCn
-  readme.md: QmNRvQXWiJaTFpaJaFSgqrHE5J6b6eRVYCtPqZ6Z4X3FoV
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/http:0.3.0

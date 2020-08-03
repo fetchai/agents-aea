@@ -13,4 +13,4 @@ Next, ensure that the connection is properly configured by setting:
 - `local_uri` to the local ip address and port number that the node should use, in format `${ip}:${port}`
 - `public_uri` to the external ip address and port number allocated for the node, can be the same as `local_uri` if running locally
 - `entry_peers` to a list of multiaddresses of already deployed nodes to join their network, should be empty for genesis node
-- `delegate_uri` to the ip address and port number for the delegate service, leave empty to disable the service 
+- `delegate_uri` to the ip address and port number for the delegate service, leave empty to disable the service
