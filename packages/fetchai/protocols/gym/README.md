@@ -1,3 +1,22 @@
+# Gym Protocol
+
+**Name:** gym
+
+**Author**: fetchai
+
+**Version**: 0.3.0
+
+**Short Description**: A protocol for interacting with a gym connection.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for interacting with a gym connection.
+
+## Specification
+
+```yaml
 ---
 name: gym
 author: fetchai
@@ -36,3 +55,8 @@ termination: [close]
 roles: {agent, environment}
 end_states: [successful]
 ...
+```
+
+## Links
+
+* <a href="https://gym.openai.com" target=_blank>OpenAI Gym</a>

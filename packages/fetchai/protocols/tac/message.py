@@ -203,10 +203,10 @@ class TacMessage(Message):
         return cast(str, self.get("ledger_id"))
 
     @property
-    def nonce(self) -> int:
+    def nonce(self) -> str:
         """Get the 'nonce' content from the message."""
         assert self.is_set("nonce"), "'nonce' content is not set."
-        return cast(int, self.get("nonce"))
+        return cast(str, self.get("nonce"))
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
@@ -377,8 +377,8 @@ class TacMessage(Message):
                         type(value_of_quantities_by_good_id)
                     )
                 assert (
-                    type(self.nonce) == int
-                ), "Invalid type for content 'nonce'. Expected 'int'. Found '{}'.".format(
+                    type(self.nonce) == str
+                ), "Invalid type for content 'nonce'. Expected 'str'. Found '{}'.".format(
                     type(self.nonce)
                 )
                 assert (

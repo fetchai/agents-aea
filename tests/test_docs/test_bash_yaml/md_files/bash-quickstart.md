@@ -41,7 +41,7 @@ v0.5.2
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.7.0
+aea fetch fetchai/my_first_aea:0.8.0
 cd my_first_aea
 ```
 ``` bash
@@ -61,7 +61,7 @@ recipient_aea,sender_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.6.0
+aea run --connections fetchai/stub:0.7.0
 ```
 ``` bash
     _     _____     _

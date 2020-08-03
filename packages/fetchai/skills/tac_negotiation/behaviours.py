@@ -104,7 +104,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
+        oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
+        assert oef_search_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
@@ -133,7 +134,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             service_description=description,
         )
         oef_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_msg)
+        oef_dialogue = oef_search_dialogues.update(oef_msg)
+        assert oef_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_msg)
 
     def _unregister_service(self) -> None:
@@ -158,7 +160,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             service_description=description,
         )
         oef_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_msg)
+        oef_dialogue = oef_search_dialogues.update(oef_msg)
+        assert oef_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_msg)
 
     def _unregister_agent(self) -> None:
@@ -178,7 +181,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
+        oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
+        assert oef_search_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")
 

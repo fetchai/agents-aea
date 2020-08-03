@@ -1,3 +1,22 @@
+# Contract API Protocol
+
+**Name:** contract_api
+
+**Author**: fetchai
+
+**Version**: 0.2.0
+
+**Short Description**: A protocol for contract APIs' requests and responses.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for contract APIs' requests and responses.
+
+## Specification
+
+```yaml
 ---
 name: contract_api
 author: fetchai
@@ -65,3 +84,6 @@ termination: [state, raw_transaction, raw_message]
 roles: {agent, ledger}
 end_states: [successful, failed]
 ...
+```
+
+## Links

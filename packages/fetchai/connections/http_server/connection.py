@@ -70,7 +70,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.6.0")
 
 
 def headers_to_string(headers: Dict):
