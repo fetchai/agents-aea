@@ -93,16 +93,16 @@ class TestHTTPClientConnect:
     async def test_connection(self):
         """Test the connect functionality of the http client connection."""
         await self.http_client_connection.connect()
-        assert self.http_client_connection.connection_status.is_connected is True
+        assert self.http_client_connection.is_connected is True
 
     @pytest.mark.asyncio
     async def test_disconnect(self):
         """Test the disconnect functionality of the http client connection."""
         await self.http_client_connection.connect()
-        assert self.http_client_connection.connection_status.is_connected is True
+        assert self.http_client_connection.is_connected is True
 
         await self.http_client_connection.disconnect()
-        assert self.http_client_connection.connection_status.is_connected is False
+        assert self.http_client_connection.is_connected is False
 
     @pytest.mark.asyncio
     async def test_http_send_error(self):

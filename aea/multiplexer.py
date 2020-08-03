@@ -25,7 +25,7 @@ from concurrent.futures._base import CancelledError
 from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection, ConnectionStatus
+from aea.connections.base import Connection, ConnectionStates, ConnectionStatus
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
@@ -158,7 +158,7 @@ class AsyncMultiplexer(WithLogger):
     @property
     def is_connected(self) -> bool:
         """Check whether the multiplexer is processing envelopes."""
-        return all(c.connection_status.is_connected for c in self._connections)
+        return all(c.is_connected for c in self._connections)
 
     @property
     def default_routing(self) -> Dict[PublicId, PublicId]:
@@ -235,7 +235,7 @@ class AsyncMultiplexer(WithLogger):
         for connection in [
             c
             for c in self.connections
-            if c.connection_status.is_connected or c.connection_status.is_connecting
+            if c.state in (ConnectionStates.connecting, ConnectionStates.connected)
         ]:
             await connection.disconnect()
         self.logger.debug("Multiplexer stopped.")
@@ -268,7 +268,7 @@ class AsyncMultiplexer(WithLogger):
         """
         connection = self._id_to_connection[connection_id]
         self.logger.debug("Processing connection {}".format(connection.connection_id))
-        if connection.connection_status.is_connected:
+        if connection.is_connected:
             self.logger.debug(
                 "Connection {} already established.".format(connection.connection_id)
             )
@@ -303,7 +303,7 @@ class AsyncMultiplexer(WithLogger):
         """
         connection = self._id_to_connection[connection_id]
         self.logger.debug("Processing connection {}".format(connection.connection_id))
-        if not connection.connection_status.is_connected:
+        if not connection.is_connected:
             self.logger.debug(
                 "Connection {} already disconnected.".format(connection.connection_id)
             )
@@ -365,7 +365,7 @@ class AsyncMultiplexer(WithLogger):
 
                     # reinstantiate receiving task, but only if the connection is still up.
                     connection = task_to_connection.pop(task)
-                    if connection.connection_status.is_connected:
+                    if connection.is_connected:
                         new_task = asyncio.ensure_future(connection.receive())
                         task_to_connection[new_task] = connection
 

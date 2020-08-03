@@ -34,7 +34,7 @@ from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 import requests
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
@@ -994,15 +994,15 @@ class SOEFConnection(Connection):
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
-        if self.connection_status.is_connected:  # pragma: no cover
+        if self.is_connected:  # pragma: nocover
             return
+
+        self._state.set(ConnectionStates.connecting)
         try:
-            self.connection_status.is_connecting = True
             await self.channel.connect()
-            self.connection_status.is_connecting = False
-            self.connection_status.is_connected = True
+            self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:  # pragma: no cover
-            self.connection_status.is_connected = False
+            self._state.set(ConnectionStates.disconnected)
             raise e
 
     @property
@@ -1016,13 +1016,12 @@ class SOEFConnection(Connection):
 
         :return: None
         """
-        assert (
-            self.connection_status.is_connected or self.connection_status.is_connecting
-        ), "Call connect before disconnect."
+        if self.is_disconnected:  # pragma: nocover
+            return
         assert self.in_queue is not None
+        self._state.set(ConnectionStates.disconnecting)
         await self.channel.disconnect()
-        self.connection_status.is_connected = False
-        self.connection_status.is_connecting = False
+        self._state.set(ConnectionStates.disconnected)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -1052,5 +1051,5 @@ class SOEFConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        if self.connection_status.is_connected:
+        if self.is_connected:
             await self.channel.send(envelope)

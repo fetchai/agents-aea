@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Optional, Set, cast
 from fetch.p2p.api.http_calls import HTTPCalls
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
@@ -174,12 +174,15 @@ class PeerToPeerClientConnection(Connection):
 
         :return: None
         """
-        if not self.connection_status.is_connected:
-            self.channel.logger = self.logger
-            self.connection_status.is_connected = True
-            self.channel.in_queue = asyncio.Queue()
-            self.channel.loop = self.loop
-            self.channel.connect()
+        if self.is_connected:
+            return
+        self._state.set(ConnectionStates.connecting)
+        self.channel.logger = self.logger
+        self.channel.logger = self.logger
+        self.channel.in_queue = asyncio.Queue()
+        self.channel.loop = self.loop
+        self.channel.connect()
+        self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
         """
@@ -187,9 +190,11 @@ class PeerToPeerClientConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:
-            self.connection_status.is_connected = False
-            self.channel.disconnect()
+        if self.is_disconnected:
+            return
+        self._state.set(ConnectionStates.disconnecting)
+        self.channel.disconnect()
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -198,7 +203,7 @@ class PeerToPeerClientConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
@@ -210,7 +215,7 @@ class PeerToPeerClientConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover

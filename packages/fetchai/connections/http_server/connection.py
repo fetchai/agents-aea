@@ -55,7 +55,7 @@ from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
 )
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
@@ -531,9 +531,13 @@ class HTTPServerConnection(Connection):
 
         :return: None
         """
-        if not self.connection_status.is_connected:
-            await self.channel.connect(loop=self.loop)
-            self.connection_status.is_connected = not self.channel.is_stopped
+        if self.is_connected:
+            return
+        self._state.set(ConnectionStates.connecting)
+        self.channel.logger = self.logger
+        await self.channel.connect(loop=self.loop)
+        if not self.channel.is_stopped:
+            self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
         """
@@ -541,9 +545,11 @@ class HTTPServerConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:
-            self.connection_status.is_connected = False
-            await self.channel.disconnect()
+        if self.is_disconnected:
+            return
+        self._state.set(ConnectionStates.disconnecting)
+        await self.channel.disconnect()
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -552,7 +558,7 @@ class HTTPServerConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
@@ -564,7 +570,7 @@ class HTTPServerConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
