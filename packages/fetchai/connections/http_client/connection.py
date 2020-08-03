@@ -144,7 +144,7 @@ class HTTPClientAsyncChannel:
         )
 
         if not dialogue:
-            logger.warning(
+            self.logger.warning(
                 "Could not create dialogue for message={}".format(request_http_message)
             )
             return

@@ -36,6 +36,7 @@ from packages.fetchai.connections.http_client.connection import HTTPClientConnec
 from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
+from tests.common.mocks import AnyStringWith
 from tests.conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     get_host,
@@ -304,7 +305,7 @@ class TestHTTPClientConnect:
         await self.http_client_connection.disconnect()
 
     @pytest.mark.asyncio
-    async def test_http_dialogue_construct_fail(self, caplog):
+    async def test_http_dialogue_construct_fail(self):
         """Test dialogue not properly constructed."""
         await self.http_client_connection.connect()
 
@@ -327,8 +328,10 @@ class TestHTTPClientConnect:
             protocol_id=http_message.protocol_id,
             message=http_message,
         )
-        with caplog.at_level(
-            logging.DEBUG, "aea.packages.fetchai.connections.http_client"
-        ):
+        with patch.object(
+            self.http_client_connection.channel.logger, "warning"
+        ) as mock_logger:
             await self.http_client_connection.channel._http_request_task(envelope)
-            assert "Could not create dialogue for message=" in caplog.text
+            mock_logger.assert_any_call(
+                AnyStringWith("Could not create dialogue for message=")
+            )
