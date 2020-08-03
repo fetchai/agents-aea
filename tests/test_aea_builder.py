@@ -100,7 +100,7 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.6.0' of type 'connection' cannot be added. "
+        "Package 'fetchai/oef:0.7.0' of type 'connection' cannot be added. "
         "Missing dependencies: ['(protocol, fetchai/oef_search:0.3.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):

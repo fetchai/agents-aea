@@ -19,6 +19,7 @@
 
 """This module contains base classes for the ledger API connection."""
 import asyncio
+import copy
 import logging
 from abc import ABC, abstractmethod
 from asyncio import Task
@@ -35,7 +36,7 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.2.0")
+CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.3.0")
 
 
 class RequestDispatcher(ABC):
@@ -107,10 +108,12 @@ class RequestDispatcher(ABC):
         :return: an awaitable.
         """
         assert isinstance(envelope.message, Message)
-        message = envelope.message
+        message_original = envelope.message
+        message = copy.copy(message_original)
         ledger_id = self.get_ledger_id(message)
         api = self.ledger_api_registry.make(ledger_id, **self.api_config(ledger_id))
         message.is_incoming = True
+        message.counterparty = message_original.sender
         dialogue = self.dialogues.update(message)
         assert dialogue is not None, "No dialogue created."
         performative = message.performative

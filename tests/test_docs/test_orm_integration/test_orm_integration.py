@@ -126,7 +126,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.2.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
             "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
@@ -135,12 +135,12 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/thermometer:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/thermometer:0.8.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.7.0")
+        self.eject_item("skill", "fetchai/thermometer:0.8.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.force_set_config(
             "skills.thermometer.models", seller_skill_config_replacement["models"],
@@ -175,8 +175,8 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)

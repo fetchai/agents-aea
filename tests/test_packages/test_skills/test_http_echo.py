@@ -36,9 +36,9 @@ class TestHttpEchoSkill(AEATestCaseEmpty):
     @skip_test_windows
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("connection", "fetchai/http_server:0.5.0")
+        self.add_item("connection", "fetchai/http_server:0.6.0")
         self.add_item("skill", "fetchai/http_echo:0.4.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.6.0")
         self.set_config(
             "vendor.fetchai.connections.http_server.config.api_spec_path", API_SPEC_PATH
         )

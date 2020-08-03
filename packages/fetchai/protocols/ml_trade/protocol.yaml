@@ -5,6 +5,7 @@ description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
+  README.md: QmYJugydev8Wvv1bc4QtPJYZWapZyvby7xBf6BKjPBWqEg
   __init__.py: QmXZMVdsBXUJxLZvwwhWBx58xfxMSyoGxdYp5Aeqmzqhzt
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
   dialogues.py: QmZFztFu4LxHdsJZpSHizELFStHtz2ZGfQBx9cnP7gHHWf

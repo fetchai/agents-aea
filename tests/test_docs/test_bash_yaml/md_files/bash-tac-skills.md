@@ -8,7 +8,7 @@ aea create tac_controller
 cd tac_controller
 aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.2.0
+aea add connection fetchai/ledger:0.3.0
 aea add skill fetchai/tac_control:0.4.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
@@ -28,7 +28,7 @@ aea create tac_participant_two
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.2.0
+aea add connection fetchai/ledger:0.3.0
 aea add skill fetchai/tac_participation:0.5.0
 aea add skill fetchai/tac_negotiation:0.6.0
 aea install
@@ -39,7 +39,7 @@ aea config set agent.default_ledger cosmos
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.2.0
+aea add connection fetchai/ledger:0.3.0
 aea add skill fetchai/tac_participation:0.5.0
 aea add skill fetchai/tac_negotiation:0.6.0
 aea install

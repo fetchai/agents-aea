@@ -1,3 +1,22 @@
+# Default Protocol
+
+**Name:** default
+
+**Author**: fetchai
+
+**Version**: 0.3.0
+
+**Short Description**: A protocol for exchanging any bytes message.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for two agents exchanging any bytes messages.
+
+## Specification
+
+```yaml
 ---
 name: default
 author: fetchai
@@ -33,3 +52,6 @@ termination: [bytes, error]
 roles: {agent}
 end_states: [successful, failed]
 ...
+```
+
+## Links

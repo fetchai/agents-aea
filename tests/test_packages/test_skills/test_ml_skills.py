@@ -37,6 +37,15 @@ from tests.conftest import (
 )
 
 
+def _check_tensorflow_installed():
+    try:
+        import tensorflow  # noqa
+
+        return True
+    except ImportError:
+        return False
+
+
 @pytest.mark.integration
 class TestMLSkills(AEATestCaseMany):
     """Test that ml skills work."""
@@ -45,8 +54,7 @@ class TestMLSkills(AEATestCaseMany):
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
     @pytest.mark.skipif(
-        sys.version_info >= (3, 8),
-        reason="cannot run on 3.8 as tensorflow not installable",
+        _check_tensorflow_installed(), reason="This test requires Tensorflow.",
     )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
@@ -55,7 +63,7 @@ class TestMLSkills(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.2.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
             "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
@@ -64,8 +72,8 @@ class TestMLSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.8.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -90,8 +98,8 @@ class TestMLSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_train:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.8.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -212,7 +220,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.2.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
             "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
@@ -221,8 +229,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.8.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
@@ -250,8 +258,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_train:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.8.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()

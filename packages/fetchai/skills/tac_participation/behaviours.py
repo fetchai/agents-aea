@@ -123,7 +123,7 @@ class TransactionProcessBehaviour(TickerBehaviour):
         game = cast(Game, self.context.game)
         tac_dialogue = game.tac_dialogue
         transactions = cast(
-            Dict[str, Dict[str, Any]], self.context.shared_state["transactions"]
+            Dict[str, Dict[str, Any]], self.context.shared_state.get("transactions", {})
         )
         for tx_id, tx_content in transactions.items():
             self.context.logger.info(
@@ -139,15 +139,16 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
                 message_id=last_msg.message_id + 1,
                 target=last_msg.message_id,
-                tx_id=tx_id,
-                tx_sender_addr=terms.sender_address,
-                tx_counterparty_addr=terms.counterparty_address,
+                transaction_id=tx_id,
+                ledger_id=terms.ledger_id,
+                sender_address=terms.sender_address,
+                counterparty_address=terms.counterparty_address,
                 amount_by_currency_id=terms.amount_by_currency_id,
-                is_sender_payable_tx_fee=terms.is_sender_payable_tx_fee,
+                fee_by_currency_id=terms.fee_by_currency_id,
                 quantities_by_good_id=terms.quantities_by_good_id,
-                tx_sender_signature=sender_signature,
-                tx_counterparty_signature=counterparty_signature,
-                tx_nonce=terms.nonce,
+                sender_signature=sender_signature,
+                counterparty_signature=counterparty_signature,
+                nonce=terms.nonce,
             )
             msg.counterparty = game.conf.controller_addr
             tac_dialogue.update(msg)

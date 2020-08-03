@@ -63,7 +63,9 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
+        BaseOefSearchDialogues.__init__(
+            self, self.context.agent_address + "_" + str(self.context.skill_id)
+        )
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
@@ -105,7 +107,9 @@ class StateUpdateDialogues(Model, BaseStateUpdateDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseStateUpdateDialogues.__init__(self, self.context.agent_address)
+        BaseStateUpdateDialogues.__init__(
+            self, self.context.agent_address + "_" + str(self.context.skill_id)
+        )
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
