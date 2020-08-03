@@ -7,6 +7,7 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
+  README.md: QmPvrvhRUQEt2hruwoY73xwwdNdQyssBuxK9XNACSjvQRS
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   aea/api.go: QmW5fUpVZmV3pxgoakm3RvsvCGC6FwT2XprcqXHM8rBXP5
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
@@ -24,7 +25,6 @@ fingerprint:
   go.mod: QmacqAAxC3dkydmfbEyVWVkMDmZECTWKZcBoPyRSnheQzD
   go.sum: Qmbu57aSPSqanJ1xHNmMHAqLL8nvCV61URknizsKJDvenG
   libp2p_node.go: QmZQoa9RGdVkcE8Hu9kVAdSh3jRUveScDhG84UkSY6N3vz
-  readme.md: QmbP5qRewace9JkAxtxynCce6ZKD3sXasRdNdDgV9cxSsh
   utils/utils.go: QmUsNceCQKYfaLqJN8YhTkPoB7aD2ahn6gvFG1iHKeimax
 fingerprint_ignore_patterns: []
 protocols: []

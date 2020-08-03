@@ -1,6 +1,6 @@
 agent_name: gym_aea
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: The gym aea demos the interaction between a skill containing a RL agent
   and a gym connection.
 license: Apache-2.0
@@ -8,16 +8,16 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.4.0
-- fetchai/stub:0.6.0
+- fetchai/gym:0.5.0
+- fetchai/stub:0.7.0
 contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/gym:0.3.0
 skills:
 - fetchai/error:0.3.0
-- fetchai/gym:0.4.0
-default_connection: fetchai/gym:0.4.0
+- fetchai/gym:0.5.0
+default_connection: fetchai/gym:0.5.0
 default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false

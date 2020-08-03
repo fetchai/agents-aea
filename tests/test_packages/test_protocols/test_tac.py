@@ -97,7 +97,7 @@ def test_tac_serialization():
         amount_by_currency_id={"FET": -10},
         fee_by_currency_id={"FET": 1},
         quantities_by_good_id={"123": 0, "1234": 10},
-        nonce=1,
+        nonce="1",
         sender_signature="some_signature",
         counterparty_signature="some_other_signature",
     )

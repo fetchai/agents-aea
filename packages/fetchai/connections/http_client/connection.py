@@ -44,7 +44,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.6.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 

@@ -37,7 +37,7 @@ message TacMessage{
         map<string, int32> amount_by_currency_id = 5;
         map<string, int32> fee_by_currency_id = 6;
         map<string, int32> quantities_by_good_id = 7;
-        int32 nonce = 8;
+        string nonce = 8;
         string sender_signature = 9;
         string counterparty_signature = 10;
     }
