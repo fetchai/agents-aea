@@ -206,7 +206,8 @@ MAX_FLAKY_RERUNS_ETH = 1
 MAX_FLAKY_RERUNS_INTEGRATION = 0
 
 FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
-PROTOCOL_SPECS_PREF = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
+PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
+PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
 contract_config_files = [
     os.path.join(ROOT_DIR, "aea", "contracts", "scaffold", CONTRACT_YAML),
@@ -307,18 +308,9 @@ agent_config_files = [
 ]
 
 protocol_specification_files = [
-    os.path.join(PROTOCOL_SPECS_PREF, "contract_api.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "default.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "fipa.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "gym.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "http.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "ledger_api.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "ml_trade.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "oef_search.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "sample.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "signing.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "state_update.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF, "tac.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF_1, "sample.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
+    # ToDo add the non-custom-type version of sample_specification as well
 ]
 
 
