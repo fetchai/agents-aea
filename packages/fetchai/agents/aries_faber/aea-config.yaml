@@ -25,10 +25,7 @@ default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1
-private_key_paths:
-  cosmos: cosmos_private_key.txt
-  ethereum: eth_private_key.txt
-  fetchai: fet_private_key.txt
+private_key_paths: {}
 registry_path: ../packages
 default_routing:
-  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
