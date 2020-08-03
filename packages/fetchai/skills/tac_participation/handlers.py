@@ -21,10 +21,8 @@
 
 from typing import Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId
 from aea.mail.base import Address
 from aea.protocols.base import Message
-from aea.protocols.signing.message import SigningMessage
 from aea.protocols.state_update.message import StateUpdateMessage
 from aea.skills.base import Handler
 
@@ -33,15 +31,15 @@ from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_participation.dialogues import (
     OefSearchDialogue,
     OefSearchDialogues,
-    SigningDialogue,
-    SigningDialogues,
+    StateUpdateDialogue,
+    StateUpdateDialogues,
     TacDialogue,
     TacDialogues,
 )
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 
 
-class OEFSearchHandler(Handler):
+class OefSearchHandler(Handler):
     """This class handles oef messages."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
@@ -97,8 +95,8 @@ class OEFSearchHandler(Handler):
         :param msg: the message
         """
         self.context.logger.warning(
-            "[{}]: received invalid oef_search message={}, unidentified dialogue.".format(
-                self.context.agent_name, oef_search_msg
+            "received invalid oef_search message={}, unidentified dialogue.".format(
+                oef_search_msg
             )
         )
 
@@ -113,10 +111,8 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: Received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
-                self.context.agent_name,
-                oef_search_msg.dialogue_reference,
-                oef_search_msg.oef_error_operation,
+            "received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
+                oef_search_msg.dialogue_reference, oef_search_msg.oef_error_operation,
             )
         )
 
@@ -131,10 +127,8 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         self.context.logger.debug(
-            "[{}]: on search result: dialogue_reference={} agents={}".format(
-                self.context.agent_name,
-                oef_search_msg.dialogue_reference,
-                oef_search_msg.agents,
+            "on search result: dialogue_reference={} agents={}".format(
+                oef_search_msg.dialogue_reference, oef_search_msg.agents,
             )
         )
         self._on_controller_search_result(oef_search_msg.agents)
@@ -150,10 +144,8 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: cannot handle oef_search message of performative={} in dialogue={}.".format(
-                self.context.agent_name,
-                oef_search_msg.performative,
-                oef_search_dialogue,
+            "cannot handle oef_search message of performative={} in dialogue={}.".format(
+                oef_search_msg.performative, oef_search_dialogue,
             )
         )
 
@@ -170,30 +162,18 @@ class OEFSearchHandler(Handler):
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.PRE_GAME.value:
             self.context.logger.debug(
-                "[{}]: Ignoring controller search result, the agent is already competing.".format(
-                    self.context.agent_name
-                )
+                "ignoring controller search result, the agent is already competing."
             )
             return
 
         if len(agent_addresses) == 0:
-            self.context.logger.info(
-                "[{}]: Couldn't find the TAC controller. Retrying...".format(
-                    self.context.agent_name
-                )
-            )
+            self.context.logger.info("couldn't find the TAC controller. Retrying...")
         elif len(agent_addresses) > 1:
             self.context.logger.warning(
-                "[{}]: Found more than one TAC controller. Retrying...".format(
-                    self.context.agent_name
-                )
+                "found more than one TAC controller. Retrying..."
             )
         else:
-            self.context.logger.info(
-                "[{}]: Found the TAC controller. Registering...".format(
-                    self.context.agent_name
-                )
-            )
+            self.context.logger.info("found the TAC controller. Registering...")
             controller_addr = agent_addresses[0]
             self._register_to_tac(controller_addr)
 
@@ -208,13 +188,18 @@ class OEFSearchHandler(Handler):
         game = cast(Game, self.context.game)
         game.update_expected_controller_addr(controller_addr)
         game.update_game_phase(Phase.GAME_REGISTRATION)
+        tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         tac_msg = TacMessage(
             performative=TacMessage.Performative.REGISTER,
+            dialogue_reference=tac_dialogues.new_self_initiated_dialogue_reference(),
             agent_name=self.context.agent_name,
         )
         tac_msg.counterparty = controller_addr
+        tac_dialogue = cast(Optional[TacDialogue], tac_dialogues.update(tac_msg))
+        assert tac_dialogue is not None, "TacDialogue not created."
+        game.tac_dialogue = tac_dialogue
         self.context.outbox.put_message(message=tac_msg)
-        self.context.behaviours.tac.is_active = False
+        self.context.behaviours.tac_search.is_active = False
 
 
 class TacHandler(Handler):
@@ -249,35 +234,21 @@ class TacHandler(Handler):
         # handle message
         game = cast(Game, self.context.game)
         self.context.logger.debug(
-            "[{}]: Handling controller response. performative={}".format(
-                self.context.agent_name, tac_msg.performative
-            )
+            "handling controller response. performative={}".format(tac_msg.performative)
         )
-        if message.counterparty != game.expected_controller_addr:
+        if tac_msg.counterparty != game.expected_controller_addr:
             raise ValueError(
                 "The sender of the message is not the controller agent we registered with."
             )
 
         if tac_msg.performative == TacMessage.Performative.TAC_ERROR:
             self._on_tac_error(tac_msg, tac_dialogue)
-        elif game.phase.value == Phase.PRE_GAME.value:
-            raise ValueError(
-                "We do not expect a controller agent message in the pre game phase."
-            )
-        elif game.phase.value == Phase.GAME_REGISTRATION.value:
-            if tac_msg.performative == TacMessage.Performative.GAME_DATA:
-                self._on_start(tac_msg, tac_dialogue)
-            elif tac_msg.performative == TacMessage.Performative.CANCELLED:
-                self._on_cancelled(tac_msg, tac_dialogue)
-        elif game.phase.value == Phase.GAME.value:
-            if tac_msg.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
-                self._on_transaction_confirmed(tac_msg, tac_dialogue)
-            elif tac_msg.performative == TacMessage.Performative.CANCELLED:
-                self._on_cancelled(tac_msg, tac_dialogue)
-        elif game.phase.value == Phase.POST_GAME.value:
-            raise ValueError(
-                "We do not expect a controller agent message in the post game phase."
-            )
+        elif tac_msg.performative == TacMessage.Performative.GAME_DATA:
+            self._on_start(tac_msg, tac_dialogue)
+        elif tac_msg.performative == TacMessage.Performative.CANCELLED:
+            self._on_cancelled(tac_msg, tac_dialogue)
+        elif tac_msg.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
+            self._on_transaction_confirmed(tac_msg, tac_dialogue)
         else:
             self._handle_invalid(tac_msg, tac_dialogue)
 
@@ -296,9 +267,7 @@ class TacHandler(Handler):
         :param tac_msg: the message
         """
         self.context.logger.warning(
-            "[{}]: received invalid tac message={}, unidentified dialogue.".format(
-                self.context.agent_name, tac_msg
-            )
+            "received invalid tac message={}, unidentified dialogue.".format(tac_msg)
         )
 
     def _on_tac_error(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
@@ -311,8 +280,8 @@ class TacHandler(Handler):
         """
         error_code = tac_msg.error_code
         self.context.logger.debug(
-            "[{}]: Received error from the controller. error_msg={}".format(
-                self.context.agent_name, TacMessage.ErrorCode.to_msg(error_code.value)
+            "received error from the controller. error_msg={}".format(
+                TacMessage.ErrorCode.to_msg(error_code.value)
             )
         )
         if error_code == TacMessage.ErrorCode.TRANSACTION_NOT_VALID:
@@ -323,9 +292,7 @@ class TacHandler(Handler):
                 else "NO_TX_ID"
             )
             self.context.logger.warning(
-                "[{}]: Received error on transaction id: {}".format(
-                    self.context.agent_name, transaction_id[-10:]
-                )
+                "received error on transaction id: {}".format(transaction_id[-10:])
             )
 
     def _on_start(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
@@ -336,10 +303,17 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
-        self.context.logger.info(
-            "[{}]: Received start event from the controller. Starting to compete...".format(
-                self.context.agent_name
+        game = cast(Game, self.context.game)
+        if game.phase.value != Phase.GAME_REGISTRATION.value:
+            self.context.logger.warning(
+                "we do not expect a start message in game phase={}".format(
+                    game.phase.value
+                )
             )
+            return
+
+        self.context.logger.info(
+            "received start event from the controller. Starting to compete..."
         )
         game = cast(Game, self.context.game)
         game.init(tac_msg, tac_msg.counterparty)
@@ -354,18 +328,12 @@ class TacHandler(Handler):
                 game.contract_address = contract_address
                 self.context.shared_state["erc1155_contract_address"] = contract_address
                 self.context.logger.info(
-                    "[{}]: Received a contract address: {}".format(
-                        self.context.agent_name, contract_address
-                    )
+                    "received a contract address: {}".format(contract_address)
                 )
                 # TODO; verify on-chain matches off-chain wealth
                 self._update_ownership_and_preferences(tac_msg, tac_dialogue)
             else:
-                self.context.logger.warning(
-                    "[{}]: Did not receive a contract address!".format(
-                        self.context.agent_name
-                    )
-                )
+                self.context.logger.warning("did not receive a contract address!")
         else:
             self._update_ownership_and_preferences(tac_msg, tac_dialogue)
 
@@ -379,14 +347,26 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        state_update_dialogues = cast(
+            StateUpdateDialogues, self.context.state_update_dialogues
+        )
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
+            dialogue_reference=state_update_dialogues.new_self_initiated_dialogue_reference(),
             amount_by_currency_id=tac_msg.amount_by_currency_id,
             quantities_by_good_id=tac_msg.quantities_by_good_id,
             exchange_params_by_currency_id=tac_msg.exchange_params_by_currency_id,
             utility_params_by_good_id=tac_msg.utility_params_by_good_id,
-            tx_fee=tac_msg.tx_fee,
         )
+        self.context.shared_state["fee_by_currency_id"] = tac_msg.fee_by_currency_id
+        state_update_msg.counterparty = "decision_maker"
+        state_update_dialogue = cast(
+            Optional[StateUpdateDialogue],
+            state_update_dialogues.update(state_update_msg),
+        )
+        assert state_update_dialogue is not None, "StateUpdateDialogue not created."
+        game = cast(Game, self.context.game)
+        game.state_update_dialogue = state_update_dialogue
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
     def _on_cancelled(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
@@ -397,11 +377,16 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
-        self.context.logger.info(
-            "[{}]: Received cancellation from the controller.".format(
-                self.context.agent_name
+        game = cast(Game, self.context.game)
+        if game.phase.value not in [Phase.GAME_REGISTRATION.value, Phase.GAME.value]:
+            self.context.logger.warning(
+                "we do not expect a start message in game phase={}".format(
+                    game.phase.value
+                )
             )
-        )
+            return
+
+        self.context.logger.info("received cancellation from the controller.")
         game = cast(Game, self.context.game)
         game.update_game_phase(Phase.POST_GAME)
         self.context.is_active = False
@@ -417,20 +402,37 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
+        game = cast(Game, self.context.game)
+        if game.phase.value != Phase.GAME.value:
+            self.context.logger.warning(
+                "we do not expect a tranasaction in game phase={}".format(
+                    game.phase.value
+                )
+            )
+            return
+
         self.context.logger.info(
-            "[{}]: Received transaction confirmation from the controller: transaction_id={}".format(
-                self.context.agent_name, tac_msg.tx_id[-10:]
+            "received transaction confirmation from the controller: transaction_id={}".format(
+                tac_msg.transaction_id
             )
         )
+        state_update_dialogue = game.state_update_dialogue
+        last_msg = state_update_dialogue.last_message
+        assert last_msg is not None, "Could not retrieve last message."
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.APPLY,
+            dialogue_reference=state_update_dialogue.dialogue_label.dialogue_reference,
+            message_id=last_msg.message_id + 1,
+            target=last_msg.message_id,
             amount_by_currency_id=tac_msg.amount_by_currency_id,
             quantities_by_good_id=tac_msg.quantities_by_good_id,
         )
+        state_update_msg.counterparty = "decision_maker"
+        state_update_dialogue.update(state_update_msg)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
         if "confirmed_tx_ids" not in self.context.shared_state.keys():
             self.context.shared_state["confirmed_tx_ids"] = []
-        self.context.shared_state["confirmed_tx_ids"].append(tac_msg.tx_id)
+        self.context.shared_state["confirmed_tx_ids"].append(tac_msg.transaction_id)
 
     def _handle_invalid(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
         """
@@ -440,148 +442,8 @@ class TacHandler(Handler):
         :param tac_dialogue: the tac dialogue
         :return: None
         """
-        game = cast(Game, self.context.game)
         self.context.logger.warning(
-            "[{}]: cannot handle tac message of performative={} in dialogue={} during game_phase={}.".format(
-                self.context.agent_name, tac_msg.performative, tac_dialogue, game.phase,
-            )
-        )
-
-
-class SigningHandler(Handler):
-    """This class implements the transaction handler."""
-
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        pass
-
-    def handle(self, message: Message) -> None:
-        """
-        Dispatch message to relevant handler and respond.
-
-        :param message: the message
-        :return: None
-        """
-        signing_msg = cast(SigningMessage, message)
-
-        # recover dialogue
-        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        signing_dialogue = cast(
-            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-        )
-        if signing_dialogue is None:
-            self._handle_unidentified_dialogue(signing_msg)
-            return
-
-        # handle message
-        if signing_msg.performative is SigningMessage.Performative.SIGNED_TRANSACTION:
-            self._handle_signed_transaction(signing_msg, signing_dialogue)
-        elif signing_msg.performative is SigningMessage.Performative.ERROR:
-            self._handle_error(signing_msg, signing_dialogue)
-        else:
-            self._handle_invalid(signing_msg, signing_dialogue)
-
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-        pass
-
-    def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
-        """
-        Handle an unidentified dialogue.
-
-        :param msg: the message
-        """
-        self.context.logger.info(
-            "[{}]: received invalid signing message={}, unidentified dialogue.".format(
-                self.context.agent_name, signing_msg
-            )
-        )
-
-    def _handle_signed_transaction(
-        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param signing_msg: the signing message
-        :param signing_dialogue: the dialogue
-        :return: None
-        """
-        # TODO: Need to modify here and add the contract option in case we are using one.
-        self.context.logger.info(
-            "[{}]: transaction confirmed by decision maker, sending to controller.".format(
-                self.context.agent_name
-            )
-        )
-        game = cast(Game, self.context.game)
-        tx_counterparty_signature = cast(
-            str, signing_msg.skill_callback_info.get("tx_counterparty_signature")
-        )
-        tx_counterparty_id = cast(
-            str, signing_msg.skill_callback_info.get("tx_counterparty_id")
-        )
-        tx_id = cast(str, signing_msg.skill_callback_info.get("tx_id"))
-        if (tx_counterparty_signature is not None) and (tx_counterparty_id is not None):
-            # tx_id = tx_message.tx_id + "_" + tx_counterparty_id
-            msg = TacMessage(
-                performative=TacMessage.Performative.TRANSACTION,
-                tx_id=tx_id,
-                tx_sender_addr=signing_msg.terms.sender_address,
-                tx_counterparty_addr=signing_msg.terms.counterparty_address,
-                amount_by_currency_id=signing_msg.terms.amount_by_currency_id,
-                is_sender_payable_tx_fee=signing_msg.terms.is_sender_payable_tx_fee,
-                quantities_by_good_id=signing_msg.terms.quantities_by_good_id,
-                tx_sender_signature=signing_msg.signed_transaction.body,
-                tx_counterparty_signature=tx_counterparty_signature,
-                tx_nonce=signing_msg.terms.nonce,
-            )
-            msg.counterparty = game.conf.controller_addr
-            self.context.outbox.put_message(message=msg)
-        else:
-            self.context.logger.warning(
-                "[{}]: transaction has no counterparty id or signature!".format(
-                    self.context.agent_name
-                )
-            )
-
-    def _handle_error(
-        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param signing_msg: the signing message
-        :param signing_dialogue: the dialogue
-        :return: None
-        """
-        self.context.logger.info(
-            "[{}]: transaction signing was not successful. Error_code={} in dialogue={}".format(
-                self.context.agent_name, signing_msg.error_code, signing_dialogue
-            )
-        )
-
-    def _handle_invalid(
-        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
-    ) -> None:
-        """
-        Handle an oef search message.
-
-        :param signing_msg: the signing message
-        :param signing_dialogue: the dialogue
-        :return: None
-        """
-        self.context.logger.warning(
-            "[{}]: cannot handle signing message of performative={} in dialogue={}.".format(
-                self.context.agent_name, signing_msg.performative, signing_dialogue
+            "cannot handle tac message of performative={} in dialogue={}.".format(
+                tac_msg.performative, tac_dialogue
             )
         )

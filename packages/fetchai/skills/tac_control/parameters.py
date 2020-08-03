@@ -20,9 +20,13 @@
 """This package contains a class representing the game parameters."""
 
 import datetime
-from typing import Set
+from typing import Dict, Set
 
+from aea.helpers.search.models import Location
 from aea.skills.base import Model
+
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SERVICE_DATA = {"key": "tac", "value": "v1"}
 
 
 class Parameters(Model):
@@ -45,22 +49,38 @@ class Parameters(Model):
         self._competition_timeout = kwargs.pop("competition_timeout", 20)  # type: int
         self._inactivity_timeout = kwargs.pop("inactivity_timeout", 10)  # type: int
         self._whitelist = set(kwargs.pop("whitelist", []))  # type: Set[str]
-        self._version_id = kwargs.pop("version_id", "v1")  # type: str
+        self._location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        assert (
+            len(self._service_data) == 2
+            and "key" in self._service_data
+            and "value" in self._service_data
+        ), "service_data must contain keys `key` and `value`"
+        self._version_id = self._service_data["value"]  # type: str
+
+        self._agent_location = {
+            "location": Location(
+                self._location["longitude"], self._location["latitude"]
+            )
+        }
+        self._set_service_data = self._service_data
+        self._remove_service_data = {"key": self._service_data["key"]}
+        self._simple_service_data = {
+            self._service_data["key"]: self._service_data["value"]
+        }
+
         super().__init__(**kwargs)
         now = datetime.datetime.now()
         if now > self.registration_start_time:
             self.context.logger.warning(
-                "[{}]: TAC registration start time {} is in the past!".format(
-                    self.context.agent_name, self.registration_start_time
+                "TAC registration start time {} is in the past!".format(
+                    self.registration_start_time
                 )
             )
         else:
             self.context.logger.info(
-                "[{}]: TAC registation start time: {}, and start time: {}, and end time: {}".format(
-                    self.context.agent_name,
-                    self.registration_start_time,
-                    self.start_time,
-                    self.end_time,
+                "TAC registation start time: {}, and start time: {}, and end time: {}".format(
+                    self.registration_start_time, self.start_time, self.end_time,
                 )
             )
 
@@ -128,3 +148,23 @@ class Parameters(Model):
     def version_id(self) -> str:
         """Version id."""
         return self._version_id
+
+    @property
+    def agent_location(self) -> Dict[str, Location]:
+        """Get the agent location."""
+        return self._agent_location
+
+    @property
+    def set_service_data(self) -> Dict[str, str]:
+        """Get the set service data."""
+        return self._set_service_data
+
+    @property
+    def remove_service_data(self) -> Dict[str, str]:
+        """Get the remove service data."""
+        return self._remove_service_data
+
+    @property
+    def simple_service_data(self) -> Dict[str, str]:
+        """Get the simple service data."""
+        return self._simple_service_data

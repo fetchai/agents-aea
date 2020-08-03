@@ -56,7 +56,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.6.0")
 
 NOT_SPECIFIED = object()
 
@@ -165,6 +165,7 @@ class SOEFChannel:
     DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
 
     PING_PERIOD = 30 * 60  # 30 minutes
+    FIND_AROUND_ME_REQUEST_DELAY = 2  # seconds
 
     def __init__(
         self,
@@ -203,8 +204,6 @@ class SOEFChannel:
         self.excluded_protocols = excluded_protocols
         self.restricted_to_protocols = restricted_to_protocols
         self.oef_search_dialogues = OefSearchDialogues()
-        self.oef_msg_id = 0
-        self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
 
         self.declared_name = uuid4().hex
         self.unique_page_address = None  # type: Optional[str]
@@ -214,6 +213,30 @@ class SOEFChannel:
         self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
+        self._find_around_me_queue: Optional[asyncio.Queue] = None
+        self._find_around_me_processor_task: Optional[asyncio.Task] = None
+
+    async def _find_around_me_processor(self) -> None:
+        """Process find me around requests in background task."""
+        while self._find_around_me_queue is not None:
+            try:
+                task = await self._find_around_me_queue.get()
+                oef_message, oef_search_dialogue, radius, params = task
+                await self._find_around_me_handle_requet(
+                    oef_message, oef_search_dialogue, radius, params
+                )
+                await asyncio.sleep(self.FIND_AROUND_ME_REQUEST_DELAY)
+            except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                return
+            except Exception:  # pylint: disable=broad-except  # pragma: nocover
+                logger.exception("Exception occoured in  _find_around_me_processor")
+                await self._send_error_response(
+                    oef_message,
+                    oef_search_dialogue,
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
+                )
+            finally:
+                logger.debug("_find_around_me_processor exited")
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -338,13 +361,13 @@ class SOEFChannel:
         assert isinstance(envelope.message, OefSearchMessage), ValueError(
             "Message not of type OefSearchMessage"
         )
-        oef_message = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.deepcopy(
-            oef_message
+        oef_message_orig = cast(OefSearchMessage, envelope.message)
+        oef_message = copy.copy(
+            oef_message_orig
         )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
         oef_message.is_incoming = True  # TODO: fix; should be done by framework
         oef_message.counterparty = (
-            envelope.sender
+            oef_message_orig.sender
         )  # TODO: fix; should be done by framework
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
@@ -388,7 +411,7 @@ class SOEFChannel:
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
-        except (asyncio.CancelledError, ConcurrentCancelledError):
+        except (asyncio.CancelledError, ConcurrentCancelledError):  # pragma: nocover
             pass
         except Exception:  # pylint: disable=broad-except # pragma: nocover
             logger.exception("Exception during envelope processing")
@@ -700,10 +723,7 @@ class SOEFChannel:
             message_id=oef_search_message.message_id + 1,
         )
         message.counterparty = oef_search_message.counterparty
-        oef_search_dialogue.update(message)
-        message = copy.deepcopy(
-            message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        assert oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.counterparty,
             sender=SOEFConnection.connection_id.latest,
@@ -730,7 +750,7 @@ class SOEFChannel:
         }  # type: Dict[str, Callable]
         data_model_name = service_description.data_model.name
 
-        if data_model_name not in data_model_handlers:
+        if data_model_name not in data_model_handlers:  # pragma: nocover
             raise SOEFException.error(
                 f'Data model name: {data_model_name} is not supported. Valid models are: {", ".join(data_model_handlers.keys())}'
             )
@@ -771,7 +791,11 @@ class SOEFChannel:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
         self.in_queue = asyncio.Queue()
+        self._find_around_me_queue = asyncio.Queue()
         self._executor_pool = ThreadPoolExecutor(max_workers=10)
+        self._find_around_me_processor_task = self._loop.create_task(
+            self._find_around_me_processor()
+        )
 
     async def disconnect(self) -> None:
         """
@@ -783,7 +807,14 @@ class SOEFChannel:
 
         assert self.in_queue, ValueError("Queue is not set, use connect first!")
         await self._unregister_agent()
+
+        if self._find_around_me_processor_task:
+            if not self._find_around_me_processor_task.done():
+                self._find_around_me_processor_task.cancel()
+            await self._find_around_me_processor_task
+
         await self.in_queue.put(None)
+        self._find_around_me_queue = None
 
     async def search_services(
         self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -823,9 +854,32 @@ class SOEFChannel:
         if self.agent_location is None or self.agent_location != service_location:
             # we update the location to match the query.
             await self._set_location(service_location)  # pragma: nocover
+
         await self._find_around_me(oef_message, oef_search_dialogue, radius, params)
 
     async def _find_around_me(
+        self,
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+        radius: float,
+        params: Dict[str, List[str]],
+    ) -> None:
+        """
+        Add find agent task to queue to process in dedictated loop respectful to timeouts.
+
+        :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
+        :param radius: the radius in which to search
+        :param params: the parameters for the query
+        :return: None
+        """
+        if not self._find_around_me_queue:
+            raise ValueError("SOEFChannel not started.")  # pragma: nocover
+        await self._find_around_me_queue.put(
+            (oef_message, oef_search_dialogue, radius, params)
+        )
+
+    async def _find_around_me_handle_requet(
         self,
         oef_message: OefSearchMessage,
         oef_search_dialogue: OefSearchDialogue,
@@ -876,10 +930,7 @@ class SOEFChannel:
             message_id=oef_message.message_id + 1,
         )
         message.counterparty = oef_message.counterparty
-        oef_search_dialogue.update(message)
-        message = copy.deepcopy(
-            message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        assert oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.counterparty,
             sender=SOEFConnection.connection_id.latest,

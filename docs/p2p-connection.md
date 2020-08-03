@@ -67,7 +67,7 @@ Then extend the `aea-config.yaml` of each project as follows:
 ``` yaml
 default_routing:
   ? "fetchai/oef_search:0.3.0"
-  : "fetchai/oef:0.6.0"
+  : "fetchai/oef:0.7.0"
 ```
 ### Run OEF
 
@@ -80,7 +80,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Run the weather station first:
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.6.0,fetchai/oef:0.6.0"
+aea run --connections "fetchai/p2p_libp2p:0.6.0,fetchai/oef:0.7.0"
 ```
 The weather station will form the genesis node. Wait until you see the lines:
 ``` bash
@@ -118,7 +118,7 @@ Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses dis
 
 Now run the weather client:
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.6.0,fetchai/oef:0.6.0"
+aea run --connections "fetchai/p2p_libp2p:0.6.0,fetchai/oef:0.7.0"
 ```
 
 ## Deployed agent communication network

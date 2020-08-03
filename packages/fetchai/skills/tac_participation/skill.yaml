@@ -1,35 +1,36 @@
 name: tac_participation
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: The tac participation skill implements the logic for an AEA to participate
   in the TAC.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
-  behaviours.py: QmbTf28S46E5w1ytYAcRCZnrVxZ8DcVYAWn1QdNnHvZVLL
-  dialogues.py: QmZadrW961YwRQuDveoSFSVA7NjVVh2ZuvmbyRke2EqseF
-  game.py: QmXiKRfkEAbKZ84nauAwQcXuAekU4hD7kMsqskgWBGopAU
-  handlers.py: QmerbCSEoSVUsVXeN8bwKq4iZk4db3sjsurtfNoGN9Gtfv
+  behaviours.py: QmZo3d94G3q5wd9DNMN3TdH2DqpKXxMyti7sRrgYt28hrM
+  dialogues.py: QmV9NMmkCoNS3itj3cgRuKi3bTCrmae4cQ3X1tTyXx25Bj
+  game.py: QmVudLRDif5sawxRMmTPzdVhABk1Q3sGNmctNgs2c1QqSJ
+  handlers.py: QmcBhfgj8NSyisXEFedyiHmNXgEGXqyvziAeRpbkPHgvjD
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.6.0
+- fetchai/erc1155:0.7.0
 protocols:
 - fetchai/oef_search:0.3.0
-- fetchai/tac:0.3.0
+- fetchai/tac:0.4.0
 skills: []
 behaviours:
-  tac:
+  tac_search:
     args:
       tick_interval: 5
     class_name: TacSearchBehaviour
+  transaction_processing:
+    args:
+      tick_interval: 2
+    class_name: TransactionProcessBehaviour
 handlers:
   oef:
     args: {}
     class_name: OefSearchHandler
-  signing:
-    args: {}
-    class_name: SigningHandler
   tac:
     args: {}
     class_name: TacHandler
@@ -39,13 +40,21 @@ models:
       expected_version_id: v1
       is_using_contract: false
       ledger_id: ethereum
+      location:
+        latitude: 0.127
+        longitude: 51.5194
+      search_query:
+        constraint_type: ==
+        search_key: tac
+        search_value: v1
+      search_radius: 5.0
     class_name: Game
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
-  signing_dialogues:
+  state_update_dialogues:
     args: {}
-    class_name: SigningDialogues
+    class_name: StateUpdateDialogues
   tac_dialogues:
     args: {}
     class_name: TacDialogues

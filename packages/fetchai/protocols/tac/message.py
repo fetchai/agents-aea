@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = ProtocolId("fetchai", "tac", "0.3.0")
+    protocol_id = ProtocolId("fetchai", "tac", "0.4.0")
 
     ErrorCode = CustomErrorCode
 
@@ -140,6 +140,22 @@ class TacMessage(Message):
         return cast(Dict[str, int], self.get("amount_by_currency_id"))
 
     @property
+    def counterparty_address(self) -> str:
+        """Get the 'counterparty_address' content from the message."""
+        assert self.is_set(
+            "counterparty_address"
+        ), "'counterparty_address' content is not set."
+        return cast(str, self.get("counterparty_address"))
+
+    @property
+    def counterparty_signature(self) -> str:
+        """Get the 'counterparty_signature' content from the message."""
+        assert self.is_set(
+            "counterparty_signature"
+        ), "'counterparty_signature' content is not set."
+        return cast(str, self.get("counterparty_signature"))
+
+    @property
     def currency_id_to_name(self) -> Dict[str, str]:
         """Get the 'currency_id_to_name' content from the message."""
         assert self.is_set(
@@ -162,6 +178,14 @@ class TacMessage(Message):
         return cast(Dict[str, float], self.get("exchange_params_by_currency_id"))
 
     @property
+    def fee_by_currency_id(self) -> Dict[str, int]:
+        """Get the 'fee_by_currency_id' content from the message."""
+        assert self.is_set(
+            "fee_by_currency_id"
+        ), "'fee_by_currency_id' content is not set."
+        return cast(Dict[str, int], self.get("fee_by_currency_id"))
+
+    @property
     def good_id_to_name(self) -> Dict[str, str]:
         """Get the 'good_id_to_name' content from the message."""
         assert self.is_set("good_id_to_name"), "'good_id_to_name' content is not set."
@@ -173,6 +197,18 @@ class TacMessage(Message):
         return cast(Optional[Dict[str, str]], self.get("info"))
 
     @property
+    def ledger_id(self) -> str:
+        """Get the 'ledger_id' content from the message."""
+        assert self.is_set("ledger_id"), "'ledger_id' content is not set."
+        return cast(str, self.get("ledger_id"))
+
+    @property
+    def nonce(self) -> str:
+        """Get the 'nonce' content from the message."""
+        assert self.is_set("nonce"), "'nonce' content is not set."
+        return cast(str, self.get("nonce"))
+
+    @property
     def quantities_by_good_id(self) -> Dict[str, int]:
         """Get the 'quantities_by_good_id' content from the message."""
         assert self.is_set(
@@ -181,66 +217,22 @@ class TacMessage(Message):
         return cast(Dict[str, int], self.get("quantities_by_good_id"))
 
     @property
-    def tx_counterparty_addr(self) -> str:
-        """Get the 'tx_counterparty_addr' content from the message."""
-        assert self.is_set(
-            "tx_counterparty_addr"
-        ), "'tx_counterparty_addr' content is not set."
-        return cast(str, self.get("tx_counterparty_addr"))
+    def sender_address(self) -> str:
+        """Get the 'sender_address' content from the message."""
+        assert self.is_set("sender_address"), "'sender_address' content is not set."
+        return cast(str, self.get("sender_address"))
 
     @property
-    def tx_counterparty_fee(self) -> int:
-        """Get the 'tx_counterparty_fee' content from the message."""
-        assert self.is_set(
-            "tx_counterparty_fee"
-        ), "'tx_counterparty_fee' content is not set."
-        return cast(int, self.get("tx_counterparty_fee"))
+    def sender_signature(self) -> str:
+        """Get the 'sender_signature' content from the message."""
+        assert self.is_set("sender_signature"), "'sender_signature' content is not set."
+        return cast(str, self.get("sender_signature"))
 
     @property
-    def tx_counterparty_signature(self) -> str:
-        """Get the 'tx_counterparty_signature' content from the message."""
-        assert self.is_set(
-            "tx_counterparty_signature"
-        ), "'tx_counterparty_signature' content is not set."
-        return cast(str, self.get("tx_counterparty_signature"))
-
-    @property
-    def tx_fee(self) -> int:
-        """Get the 'tx_fee' content from the message."""
-        assert self.is_set("tx_fee"), "'tx_fee' content is not set."
-        return cast(int, self.get("tx_fee"))
-
-    @property
-    def tx_id(self) -> str:
-        """Get the 'tx_id' content from the message."""
-        assert self.is_set("tx_id"), "'tx_id' content is not set."
-        return cast(str, self.get("tx_id"))
-
-    @property
-    def tx_nonce(self) -> int:
-        """Get the 'tx_nonce' content from the message."""
-        assert self.is_set("tx_nonce"), "'tx_nonce' content is not set."
-        return cast(int, self.get("tx_nonce"))
-
-    @property
-    def tx_sender_addr(self) -> str:
-        """Get the 'tx_sender_addr' content from the message."""
-        assert self.is_set("tx_sender_addr"), "'tx_sender_addr' content is not set."
-        return cast(str, self.get("tx_sender_addr"))
-
-    @property
-    def tx_sender_fee(self) -> int:
-        """Get the 'tx_sender_fee' content from the message."""
-        assert self.is_set("tx_sender_fee"), "'tx_sender_fee' content is not set."
-        return cast(int, self.get("tx_sender_fee"))
-
-    @property
-    def tx_sender_signature(self) -> str:
-        """Get the 'tx_sender_signature' content from the message."""
-        assert self.is_set(
-            "tx_sender_signature"
-        ), "'tx_sender_signature' content is not set."
-        return cast(str, self.get("tx_sender_signature"))
+    def transaction_id(self) -> str:
+        """Get the 'transaction_id' content from the message."""
+        assert self.is_set("transaction_id"), "'transaction_id' content is not set."
+        return cast(str, self.get("transaction_id"))
 
     @property
     def utility_params_by_good_id(self) -> Dict[str, float]:
@@ -308,19 +300,24 @@ class TacMessage(Message):
             elif self.performative == TacMessage.Performative.TRANSACTION:
                 expected_nb_of_contents = 10
                 assert (
-                    type(self.tx_id) == str
-                ), "Invalid type for content 'tx_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_id)
+                    type(self.transaction_id) == str
+                ), "Invalid type for content 'transaction_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.transaction_id)
                 )
                 assert (
-                    type(self.tx_sender_addr) == str
-                ), "Invalid type for content 'tx_sender_addr'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_sender_addr)
+                    type(self.ledger_id) == str
+                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.ledger_id)
                 )
                 assert (
-                    type(self.tx_counterparty_addr) == str
-                ), "Invalid type for content 'tx_counterparty_addr'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_counterparty_addr)
+                    type(self.sender_address) == str
+                ), "Invalid type for content 'sender_address'. Expected 'str'. Found '{}'.".format(
+                    type(self.sender_address)
+                )
+                assert (
+                    type(self.counterparty_address) == str
+                ), "Invalid type for content 'counterparty_address'. Expected 'str'. Found '{}'.".format(
+                    type(self.counterparty_address)
                 )
                 assert (
                     type(self.amount_by_currency_id) == dict
@@ -342,15 +339,24 @@ class TacMessage(Message):
                         type(value_of_amount_by_currency_id)
                     )
                 assert (
-                    type(self.tx_sender_fee) == int
-                ), "Invalid type for content 'tx_sender_fee'. Expected 'int'. Found '{}'.".format(
-                    type(self.tx_sender_fee)
+                    type(self.fee_by_currency_id) == dict
+                ), "Invalid type for content 'fee_by_currency_id'. Expected 'dict'. Found '{}'.".format(
+                    type(self.fee_by_currency_id)
                 )
-                assert (
-                    type(self.tx_counterparty_fee) == int
-                ), "Invalid type for content 'tx_counterparty_fee'. Expected 'int'. Found '{}'.".format(
-                    type(self.tx_counterparty_fee)
-                )
+                for (
+                    key_of_fee_by_currency_id,
+                    value_of_fee_by_currency_id,
+                ) in self.fee_by_currency_id.items():
+                    assert (
+                        type(key_of_fee_by_currency_id) == str
+                    ), "Invalid type for dictionary keys in content 'fee_by_currency_id'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_fee_by_currency_id)
+                    )
+                    assert (
+                        type(value_of_fee_by_currency_id) == int
+                    ), "Invalid type for dictionary values in content 'fee_by_currency_id'. Expected 'int'. Found '{}'.".format(
+                        type(value_of_fee_by_currency_id)
+                    )
                 assert (
                     type(self.quantities_by_good_id) == dict
                 ), "Invalid type for content 'quantities_by_good_id'. Expected 'dict'. Found '{}'.".format(
@@ -371,19 +377,19 @@ class TacMessage(Message):
                         type(value_of_quantities_by_good_id)
                     )
                 assert (
-                    type(self.tx_nonce) == int
-                ), "Invalid type for content 'tx_nonce'. Expected 'int'. Found '{}'.".format(
-                    type(self.tx_nonce)
+                    type(self.nonce) == str
+                ), "Invalid type for content 'nonce'. Expected 'str'. Found '{}'.".format(
+                    type(self.nonce)
                 )
                 assert (
-                    type(self.tx_sender_signature) == str
-                ), "Invalid type for content 'tx_sender_signature'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_sender_signature)
+                    type(self.sender_signature) == str
+                ), "Invalid type for content 'sender_signature'. Expected 'str'. Found '{}'.".format(
+                    type(self.sender_signature)
                 )
                 assert (
-                    type(self.tx_counterparty_signature) == str
-                ), "Invalid type for content 'tx_counterparty_signature'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_counterparty_signature)
+                    type(self.counterparty_signature) == str
+                ), "Invalid type for content 'counterparty_signature'. Expected 'str'. Found '{}'.".format(
+                    type(self.counterparty_signature)
                 )
             elif self.performative == TacMessage.Performative.CANCELLED:
                 expected_nb_of_contents = 0
@@ -466,10 +472,24 @@ class TacMessage(Message):
                         type(value_of_utility_params_by_good_id)
                     )
                 assert (
-                    type(self.tx_fee) == int
-                ), "Invalid type for content 'tx_fee'. Expected 'int'. Found '{}'.".format(
-                    type(self.tx_fee)
+                    type(self.fee_by_currency_id) == dict
+                ), "Invalid type for content 'fee_by_currency_id'. Expected 'dict'. Found '{}'.".format(
+                    type(self.fee_by_currency_id)
                 )
+                for (
+                    key_of_fee_by_currency_id,
+                    value_of_fee_by_currency_id,
+                ) in self.fee_by_currency_id.items():
+                    assert (
+                        type(key_of_fee_by_currency_id) == str
+                    ), "Invalid type for dictionary keys in content 'fee_by_currency_id'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_fee_by_currency_id)
+                    )
+                    assert (
+                        type(value_of_fee_by_currency_id) == int
+                    ), "Invalid type for dictionary values in content 'fee_by_currency_id'. Expected 'int'. Found '{}'.".format(
+                        type(value_of_fee_by_currency_id)
+                    )
                 assert (
                     type(self.agent_addr_to_name) == dict
                 ), "Invalid type for content 'agent_addr_to_name'. Expected 'dict'. Found '{}'.".format(
@@ -554,9 +574,9 @@ class TacMessage(Message):
             elif self.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
                 expected_nb_of_contents = 3
                 assert (
-                    type(self.tx_id) == str
-                ), "Invalid type for content 'tx_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_id)
+                    type(self.transaction_id) == str
+                ), "Invalid type for content 'transaction_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.transaction_id)
                 )
                 assert (
                     type(self.amount_by_currency_id) == dict

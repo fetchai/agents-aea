@@ -43,14 +43,14 @@ This step-by-step guide recreates two AEAs already developed by Fetch.ai. You ca
 ``` bash
 aea fetch fetchai/generic_seller:0.6.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.8.0
+aea eject skill fetchai/generic_seller:0.9.0
 cd ..
 ```
 
 ``` bash
 aea fetch fetchai/generic_buyer:0.6.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.7.0
+aea eject skill fetchai/generic_buyer:0.8.0
 cd ..
 ```
 
@@ -97,7 +97,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
@@ -316,7 +316,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
 
 
 class GenericFipaHandler(Handler):
@@ -1363,7 +1363,7 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 skills: []
 behaviours:
@@ -1470,7 +1470,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
 
 
 class GenericSearchBehaviour(TickerBehaviour):
@@ -1566,7 +1566,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
 
 
 class GenericFipaHandler(Handler):
@@ -2894,7 +2894,7 @@ contracts: []
 protocols:
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 skills: []
 behaviours:
@@ -3003,7 +3003,7 @@ aea add-key fetchai fet_private_key.txt
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
 ```
 
 #### Fund the buyer AEA
@@ -3019,10 +3019,10 @@ aea generate-wealth fetchai
 Run both AEAs from their respective terminals
 
 ``` bash 
-aea add connection fetchai/oef:0.6.0
-aea add connection fetchai/ledger:0.2.0
+aea add connection fetchai/oef:0.7.0
+aea add connection fetchai/ledger:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/oef:0.7.0
 aea run
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
@@ -3068,10 +3068,10 @@ Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and reques
 Run both AEAs from their respective terminals.
 
 ``` bash 
-aea add connection fetchai/oef:0.6.0
-aea add connection fetchai/ledger:0.2.0
+aea add connection fetchai/oef:0.7.0
+aea add connection fetchai/ledger:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/oef:0.7.0
 aea run
 ```
 

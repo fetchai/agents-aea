@@ -19,6 +19,7 @@
 
 """This module contains registries."""
 
+import copy
 import logging
 import queue
 from queue import Queue
@@ -165,15 +166,22 @@ class Filter:
         ]
         for skill_id in skill_callback_ids:
             handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-                signing_message.protocol_id, skill_id
+                signing_message.protocol_id,
+                skill_id,  # TODO: route based on component id specified on message
             )
             if handler is not None:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)
                 )
-                signing_message.counterparty = "decision_maker"  # TODO: temp fix
-                signing_message.is_incoming = True
-                handler.handle(cast(Message, signing_message))
+                # TODO: remove next three lines
+                copy_signing_message = copy.copy(
+                    signing_message
+                )  # we do a shallow copy as we only need the message object to be copied; not its referenced objects
+                copy_signing_message.counterparty = signing_message.sender
+                copy_signing_message.sender = signing_message.sender
+                # copy_signing_message.to = signing_message.to
+                copy_signing_message.is_incoming = True
+                handler.handle(cast(Message, copy_signing_message))
             else:
                 logger.warning(
                     "No internal handler fetched for skill_id={}".format(skill_id)

@@ -25,7 +25,7 @@ from aea.configurations.base import PublicId
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.helpers import COSMOS_PRIVATE_KEY_FILE
 
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.6.0")
+DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.7.0")
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.3.0")
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.3.0")
 DEFAULT_LEDGER = CosmosCrypto.identifier

@@ -28,12 +28,22 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
+    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_COSMOS_PRIVATE_KEY_1,
     MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
+
+
+def _check_tensorflow_installed():
+    try:
+        import tensorflow  # noqa
+
+        return True
+    except ImportError:
+        return False
 
 
 @pytest.mark.integration
@@ -44,8 +54,7 @@ class TestMLSkills(AEATestCaseMany):
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
     @pytest.mark.skipif(
-        sys.version_info >= (3, 8),
-        reason="cannot run on 3.8 as tensorflow not installable",
+        _check_tensorflow_installed(), reason="This test requires Tensorflow.",
     )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
@@ -54,17 +63,17 @@ class TestMLSkills(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.8.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -75,19 +84,22 @@ class TestMLSkills(AEATestCaseMany):
 
         # add non-funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_train:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.8.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -98,8 +110,11 @@ class TestMLSkills(AEATestCaseMany):
 
         # add funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )
@@ -205,17 +220,17 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
+            "fetchai/oef_search:0.3.0": "fetchai/soef:0.6.0",
         }
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.8.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
@@ -229,19 +244,22 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # add non-funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/ml_train:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.8.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
@@ -255,8 +273,11 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # add funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
             FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
         )

@@ -1,63 +1,69 @@
 name: tac_negotiation
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
-  behaviours.py: QmSgtvb4rD4RZ5H2zQQqPUwBzAeoR6ZBTJ1p33YqL5XjMe
-  dialogues.py: QmZe9PJncaWzJ4yn9b76Mm5R93VLNxGVd5ogUWhfp8Q6km
-  handlers.py: QmSdEvCaP9JnfQVcEpLvnzy6c8Uva24ifbGMkr2hFy5qFZ
-  helpers.py: QmXa3aD15jcv3NiEAcTjqrKNHv7U1ZQfES9siknL1kLtbV
-  registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
-  search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmQMSPqS3TZxhQoh6SUA8u2c5BNTxYGV95DSQc4neen6Ja
-  transactions.py: QmTCErZmswHAx6UXfPkrredRDKVnLYhyVEBtm5ppSJpZBf
+  behaviours.py: QmWYDj8QSx1qYCteS7nWXKJEsh7UChNrf45HJ7rQVdQhwY
+  dialogues.py: QmWXhnspH2NJjV5qh7wfnNUiMfe6FGhxjeJvdTV8YoWPPT
+  handlers.py: QmSm9wYxLYfRbeA5NwNwDz1Az5xPeR3ACyujYRvmotztEJ
+  helpers.py: QmUMCBgsZ5tB24twoWjfGibb1v5uDpUBxHPtzqZbzbvyL1
+  strategy.py: QmdrwXQVW49zkACzaFEbpyjX11fz7aC8riLxXamsvekR1v
+  transactions.py: QmZkb2GfiGHwSSQuMafEkGKF4GHiyNu6mQancZkTWS7D6F
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.6.0
+- fetchai/erc1155:0.7.0
 protocols:
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0
-skills: []
+skills:
+- fetchai/tac_participation:0.5.0
 behaviours:
   clean_up:
     args:
       tick_interval: 5.0
     class_name: TransactionCleanUpBehaviour
   tac_negotiation:
-    args: {}
+    args:
+      search_interval: 5.0
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
   fipa:
     args: {}
-    class_name: FIPANegotiationHandler
+    class_name: FipaNegotiationHandler
   oef:
     args: {}
-    class_name: OEFSearchHandler
-  transaction:
+    class_name: OefSearchHandler
+  signing:
     args: {}
-    class_name: TransactionHandler
+    class_name: SigningHandler
 models:
-  dialogues:
+  default_dialogues:
     args: {}
-    class_name: Dialogues
-  registration:
-    args:
-      update_interval: 5
-    class_name: Registration
-  search:
-    args:
-      search_interval: 5
-    class_name: Search
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
   strategy:
     args:
       is_contract_tx: false
       ledger_id: cosmos
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       register_as: both
       search_for: both
+      search_radius: 5.0
+      service_key: tac_service
     class_name: Strategy
   transactions:
     args:

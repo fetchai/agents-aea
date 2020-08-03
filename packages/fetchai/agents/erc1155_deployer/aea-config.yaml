@@ -7,17 +7,17 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.2.0
+- fetchai/ledger:0.3.0
 - fetchai/p2p_libp2p:0.6.0
-- fetchai/soef:0.5.0
-- fetchai/stub:0.6.0
+- fetchai/soef:0.6.0
+- fetchai/stub:0.7.0
 contracts:
-- fetchai/erc1155:0.6.0
+- fetchai/erc1155:0.7.0
 protocols:
-- fetchai/contract_api:0.1.0
+- fetchai/contract_api:0.2.0
 - fetchai/default:0.3.0
 - fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
+- fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.3.0
 - fetchai/signing:0.1.0
 skills:
@@ -31,6 +31,6 @@ logging_config:
 private_key_paths: {}
 registry_path: ../packages
 default_routing:
-  fetchai/contract_api:0.1.0: fetchai/ledger:0.2.0
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
-  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
+  fetchai/contract_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.6.0

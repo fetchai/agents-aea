@@ -16,10 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Extension to the Local Node."""
 
 import asyncio
+import copy
 import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
@@ -28,10 +28,14 @@ from typing import Dict, List, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection
-from aea.helpers.search.models import Description, Query
+from aea.helpers.search.models import Description
 from aea.mail.base import AEAConnectionError, Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue,
+    OefSearchDialogues,
+)
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.local")
@@ -41,8 +45,7 @@ MESSAGE_ID = 1
 RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
-DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.5.0")
 
 
 class LocalNode:
@@ -63,6 +66,8 @@ class LocalNode:
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
         self._receiving_loop_task = None  # type: Optional[asyncio.Task]
+        self.address: Optional[Address] = None
+        self._dialogues: Optional[OefSearchDialogues] = None
 
     def __enter__(self):
         """Start the local node."""
@@ -101,6 +106,10 @@ class LocalNode:
         q = self._in_queue  # type: asyncio.Queue
         self._out_queues[address] = writer
 
+        self.address = address
+        self._dialogues = OefSearchDialogues(
+            agent_address=str(OEFLocalConnection.connection_id)
+        )
         return q
 
     def start(self):
@@ -152,20 +161,24 @@ class LocalNode:
         assert isinstance(
             envelope.message, OefSearchMessage
         ), "Message not of type OefSearchMessage"
-        oef_message = cast(OefSearchMessage, envelope.message)
-        sender = envelope.sender
+        oef_message, dialogue = self._get_message_and_dialogue(envelope)
+
+        if dialogue is None:
+            logger.warning(
+                "Could not create dialogue for message={}".format(oef_message)
+            )
+            return
+
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
-            await self._register_service(sender, oef_message.service_description)
+            await self._register_service(
+                envelope.sender, oef_message.service_description
+            )
         elif (
             oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE
         ):
-            await self._unregister_service(
-                sender, oef_message.dialogue_reference, oef_message.service_description
-            )
+            await self._unregister_service(oef_message, dialogue)
         elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
-            await self._search_services(
-                sender, oef_message.dialogue_reference, oef_message.query
-            )
+            await self._search_services(oef_message, dialogue)
         else:
             # request not recognized
             pass
@@ -191,7 +204,7 @@ class LocalNode:
             )
             error_envelope = Envelope(
                 to=envelope.sender,
-                sender=DEFAULT_OEF,
+                sender=str(OEFLocalConnection.connection_id),
                 protocol_id=DefaultMessage.protocol_id,
                 message=msg,
             )
@@ -214,32 +227,32 @@ class LocalNode:
             self.services[address].append(service_description)
 
     async def _unregister_service(
-        self,
-        address: Address,
-        dialogue_reference: Tuple[str, str],
-        service_description: Description,
+        self, oef_search_msg: OefSearchMessage, dialogue: OefSearchDialogue,
     ) -> None:
         """
         Unregister a service agent.
 
-        :param address: the address of the service agent to be unregistered.
-        :param dialogue_reference: the dialogue_reference.
-        :param service_description: the description of the service agent to be unregistered.
+        :param oef_search_msg: the incoming message.
+        :param dialogue: the dialogue.
         :return: None
         """
+        service_description = oef_search_msg.service_description
+        address = oef_search_msg.sender
         async with self._lock:
             if address not in self.services:
                 msg = OefSearchMessage(
                     performative=OefSearchMessage.Performative.OEF_ERROR,
-                    dialogue_reference=(dialogue_reference[0], dialogue_reference[0]),
-                    target=RESPONSE_TARGET,
-                    message_id=RESPONSE_MESSAGE_ID,
+                    target=oef_search_msg.message_id,
+                    message_id=oef_search_msg.message_id + 1,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
+                    dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 )
+                msg.counterparty = oef_search_msg.sender
+                assert dialogue.update(msg)
                 envelope = Envelope(
-                    to=address,
-                    sender=DEFAULT_OEF,
-                    protocol_id=OefSearchMessage.protocol_id,
+                    to=msg.counterparty,
+                    sender=msg.sender,
+                    protocol_id=msg.protocol_id,
                     message=msg,
                 )
                 await self._send(envelope)
@@ -249,7 +262,7 @@ class LocalNode:
                     self.services.pop(address)
 
     async def _search_services(
-        self, address: Address, dialogue_reference: Tuple[str, str], query: Query
+        self, oef_search_msg: OefSearchMessage, dialogue: OefSearchDialogue,
     ) -> None:
         """
         Search the agents in the local Service Directory, and send back the result.
@@ -257,11 +270,11 @@ class LocalNode:
         This is actually a dummy search, it will return all the registered agents with the specified data model.
         If the data model is not specified, it will return all the agents.
 
-        :param address: the source of the search request.
-        :param dialogue_reference: the dialogue_reference.
-        :param query: the query that constitutes the search.
+        :param oef_search_msg: the message.
+        :param dialogue: the dialogue.
         :return: None
         """
+        query = oef_search_msg.query
         result = []  # type: List[str]
         if query.model is None:
             result = list(set(self.services.keys()))
@@ -273,18 +286,43 @@ class LocalNode:
 
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            dialogue_reference=(dialogue_reference[0], dialogue_reference[0]),
-            target=RESPONSE_TARGET,
-            message_id=RESPONSE_MESSAGE_ID,
+            target=oef_search_msg.message_id,
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            message_id=oef_search_msg.message_id + 1,
             agents=tuple(sorted(set(result))),
         )
+        msg.counterparty = oef_search_msg.sender
+        assert dialogue.update(msg)
+
         envelope = Envelope(
-            to=address,
-            sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
         await self._send(envelope)
+
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[OefSearchMessage, Optional[OefSearchDialogue]]:
+        """
+        Get a message copy and dialogue related to this message.
+
+        :param envelope: incoming envelope
+
+        :return: Tuple[MEssage, Optional[Dialogue]]
+        """
+        assert self._dialogues is not None, "Call connect before!"
+        message_orig = cast(OefSearchMessage, envelope.message)
+        message = copy.copy(
+            message_orig
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = (
+            message_orig.sender
+        )  # TODO: fix; should be done by framework
+        dialogue = cast(OefSearchDialogue, self._dialogues.update(message))
+        return message, dialogue
 
     async def _send(self, envelope: Envelope):
         """Send a message."""

@@ -12,13 +12,13 @@ aea_version: 0.5.2
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.6.0
+- fetchai/stub:0.7.0
 contracts: []
 protocols:
 - fetchai/default:0.3.0
 skills:
 - fetchai/error:0.3.0
-default_connection: fetchai/stub:0.6.0
+default_connection: fetchai/stub:0.7.0
 default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false

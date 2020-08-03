@@ -94,11 +94,7 @@ class TACBehaviour(SimpleBehaviour):
         """Send deploy contract tx msg to decision maker."""
         game = cast(Game, self.context.game)
         game.phase = Phase.CONTRACT_DEPLOYMENT_PROPOSAL
-        self.context.logger.info(
-            "[{}]: Sending deploy transaction to decision maker.".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("sending deploy transaction to decision maker.")
         # request deploy tx
         # contract.set_instance(ledger_api)
         # transaction_message = contract.get_deploy_transaction_msg(
@@ -131,16 +127,12 @@ class TACBehaviour(SimpleBehaviour):
             game.phase.value == Phase.GAME_REGISTRATION.value
             and parameters.registration_end_time < now < parameters.start_time
         ):
-            self.context.logger.info(
-                "[{}] Closing registration!".format(self.context.agent_name)
-            )
+            self.context.logger.info("closing registration!")
             if game.registration.nb_agents < parameters.min_nb_agents:
                 game.phase = Phase.CANCELLED_GAME
                 self.context.logger.info(
-                    "[{}]: Registered agents={}, minimum agents required={}".format(
-                        self.context.agent_name,
-                        game.registration.nb_agents,
-                        parameters.min_nb_agents,
+                    "registered agents={}, minimum agents required={}".format(
+                        game.registration.nb_agents, parameters.min_nb_agents,
                     )
                 )
                 self._end_tac(game, "cancelled")
@@ -190,9 +182,7 @@ class TACBehaviour(SimpleBehaviour):
         desc = Description(
             {"version": parameters.version_id}, data_model=CONTROLLER_DATAMODEL,
         )
-        self.context.logger.info(
-            "[{}]: Registering TAC data model".format(self.context.agent_name)
-        )
+        self.context.logger.info("registering TAC data model")
         oef_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             dialogue_reference=(str(self._oef_msg_id), ""),
@@ -202,8 +192,8 @@ class TACBehaviour(SimpleBehaviour):
         self.context.outbox.put_message(message=oef_msg)
         self._registered_desc = desc
         self.context.logger.info(
-            "[{}]: TAC open for registration until: {}".format(
-                self.context.agent_name, parameters.registration_end_time
+            "TAC open for registration until: {}".format(
+                parameters.registration_end_time
             )
         )
 
@@ -215,9 +205,7 @@ class TACBehaviour(SimpleBehaviour):
         """
         if self._registered_desc is not None:
             self._oef_msg_id += 1
-            self.context.logger.info(
-                "[{}]: Unregistering TAC data model".format(self.context.agent_name)
-            )
+            self.context.logger.info("unregistering TAC data model")
             oef_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
                 dialogue_reference=(str(self._oef_msg_id), ""),
@@ -231,11 +219,7 @@ class TACBehaviour(SimpleBehaviour):
         self, game: Game, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Send create items transaction to decision maker."""
-        self.context.logger.info(
-            "[{}]: Sending create_items transaction to decision maker.".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("sending create_items transaction to decision maker.")
         tx_msg = self._get_create_items_tx_msg(  # pylint: disable=assignment-from-none
             game.conf, ledger_api, contract
         )
@@ -245,11 +229,7 @@ class TACBehaviour(SimpleBehaviour):
         self, game: Game, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Send mint items transactions to decision maker."""
-        self.context.logger.info(
-            "[{}]: Sending mint_items transactions to decision maker.".format(
-                self.context.agent_name
-            )
-        )
+        self.context.logger.info("sending mint_items transactions to decision maker.")
         for agent_state in game.initial_agent_states.values():
             tx_msg = self._get_mint_goods_and_currency_tx_msg(  # pylint: disable=assignment-from-none
                 agent_state, ledger_api, contract
@@ -259,14 +239,10 @@ class TACBehaviour(SimpleBehaviour):
     def _start_tac(self, game: Game) -> None:
         """Create a game and send the game configuration to every registered agent."""
         self.context.logger.info(
-            "[{}]: Starting competition with configuration:\n{}".format(
-                self.context.agent_name, game.holdings_summary
-            )
+            "starting competition with configuration:\n{}".format(game.holdings_summary)
         )
         self.context.logger.info(
-            "[{}]: Computed theoretical equilibrium:\n{}".format(
-                self.context.agent_name, game.equilibrium_summary
-            )
+            "computed theoretical equilibrium:\n{}".format(game.equilibrium_summary)
         )
         for agent_address in game.conf.agent_addr_to_name.keys():
             agent_state = game.current_agent_states[agent_address]
@@ -284,23 +260,15 @@ class TACBehaviour(SimpleBehaviour):
                 info={"contract_address": game.conf.contract_address},
             )
             self.context.logger.debug(
-                "[{}]: sending game data to '{}'.".format(
-                    self.context.agent_name, agent_address
-                )
+                "sending game data to '{}'.".format(agent_address)
             )
-            self.context.logger.debug(
-                "[{}]: game data={}".format(self.context.agent_name, str(tac_msg))
-            )
+            self.context.logger.debug("game data={}".format(str(tac_msg)))
             tac_msg.counterparty = agent_address
             self.context.outbox.put_message(message=tac_msg)
 
     def _end_tac(self, game: Game, reason: str) -> None:
         """Notify agents that the TAC is cancelled."""
-        self.context.logger.info(
-            "[{}]: Notifying agents that TAC is {}.".format(
-                self.context.agent_name, reason
-            )
-        )
+        self.context.logger.info("notifying agents that TAC is {}.".format(reason))
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
             tac_msg.counterparty = agent_addr
@@ -309,14 +277,10 @@ class TACBehaviour(SimpleBehaviour):
     def _game_finished_summary(self, game: Game) -> None:
         """Provide summary of game stats."""
         self.context.logger.info(
-            "[{}]: Finished competition:\n{}".format(
-                self.context.agent_name, game.holdings_summary
-            )
+            "finished competition:\n{}".format(game.holdings_summary)
         )
         self.context.logger.info(
-            "[{}]: Computed equilibrium:\n{}".format(
-                self.context.agent_name, game.equilibrium_summary
-            )
+            "computed equilibrium:\n{}".format(game.equilibrium_summary)
         )
 
     def _get_create_items_tx_msg(  # pylint: disable=no-self-use
@@ -379,23 +343,19 @@ class ContractBehaviour(TickerBehaviour):
             )
             if tx_receipt is None:
                 self.context.logger.info(
-                    "[{}]: Cannot verify whether contract deployment was successful. Retrying...".format(
-                        self.context.agent_name
-                    )
+                    "cannot verify whether contract deployment was successful. Retrying..."
                 )
             elif tx_receipt.status != 1:
                 self.context.is_active = False
                 self.context.warning(
-                    "[{}]: The contract did not deployed successfully. Transaction hash: {}. Aborting!".format(
-                        self.context.agent_name, tx_receipt.transactionHash.hex()
+                    "the contract did not deployed successfully. Transaction hash: {}. Aborting!".format(
+                        tx_receipt.transactionHash.hex()
                     )
                 )
             else:
                 self.context.logger.info(
-                    "[{}]: The contract was successfully deployed. Contract address: {}. Transaction hash: {}".format(
-                        self.context.agent_name,
-                        tx_receipt.contractAddress,
-                        tx_receipt.transactionHash.hex(),
+                    "the contract was successfully deployed. Contract address: {}. Transaction hash: {}".format(
+                        tx_receipt.contractAddress, tx_receipt.transactionHash.hex(),
                     )
                 )
                 configuration = Configuration(parameters.version_id, parameters.tx_fee,)
@@ -414,21 +374,19 @@ class ContractBehaviour(TickerBehaviour):
             )
             if tx_receipt is None:
                 self.context.logger.info(
-                    "[{}]: Cannot verify whether token creation was successful. Retrying...".format(
-                        self.context.agent_name
-                    )
+                    "cannot verify whether token creation was successful. Retrying..."
                 )
             elif tx_receipt.status != 1:
                 self.context.is_active = False
                 self.context.warning(
-                    "[{}]: The token creation wasn't successful. Transaction hash: {}. Aborting!".format(
-                        self.context.agent_name, tx_receipt.transactionHash.hex()
+                    "the token creation wasn't successful. Transaction hash: {}. Aborting!".format(
+                        tx_receipt.transactionHash.hex()
                     )
                 )
             else:
                 self.context.logger.info(
-                    "[{}]: Successfully created the tokens. Transaction hash: {}".format(
-                        self.context.agent_name, tx_receipt.transactionHash.hex()
+                    "successfully created the tokens. Transaction hash: {}".format(
+                        tx_receipt.transactionHash.hex()
                     )
                 )
                 game.phase = Phase.TOKENS_CREATED
@@ -442,25 +400,21 @@ class ContractBehaviour(TickerBehaviour):
                 tx_receipt = ledger_api.get_transaction_receipt(tx_digest=tx_digest)
                 if tx_receipt is None:
                     self.context.logger.info(
-                        "[{}]: Cannot verify whether token minting for agent_addr={} was successful. Retrying...".format(
-                            self.context.agent_name, agent_addr
+                        "cannot verify whether token minting for agent_addr={} was successful. Retrying...".format(
+                            agent_addr
                         )
                     )
                 elif tx_receipt.status != 1:
                     self.context.is_active = False
                     self.context.logger.warning(
-                        "[{}]: The token minting for agent_addr={} wasn't successful. Transaction hash: {}. Aborting!".format(
-                            self.context.agent_name,
-                            agent_addr,
-                            tx_receipt.transactionHash.hex(),
+                        "the token minting for agent_addr={} wasn't successful. Transaction hash: {}. Aborting!".format(
+                            agent_addr, tx_receipt.transactionHash.hex(),
                         )
                     )
                 else:
                     self.context.logger.info(
-                        "[{}]: Successfully minted the tokens for agent_addr={}. Transaction hash: {}".format(
-                            self.context.agent_name,
-                            agent_addr,
-                            tx_receipt.transactionHash.hex(),
+                        "successfully minted the tokens for agent_addr={}. Transaction hash: {}".format(
+                            agent_addr, tx_receipt.transactionHash.hex(),
                         )
                     )
                     game.contract_manager.add_confirmed_mint_tokens_agents(agent_addr)

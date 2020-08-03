@@ -55,7 +55,7 @@ def _try_get_address(click_context, type_):
     :return: address.
     """
     ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys(ctx=ctx)
 
     private_key_paths = {
         config_pair[0]: config_pair[1]

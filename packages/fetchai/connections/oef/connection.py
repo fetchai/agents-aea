@@ -19,6 +19,7 @@
 """Extension to the OEF Python SDK."""
 
 import asyncio
+import copy
 import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -55,7 +56,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.7.0")
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -408,7 +409,9 @@ class OEFChannel(OEFAgent):
         assert isinstance(
             envelope.message, OefSearchMessage
         ), "Message not of type OefSearchMessage"
-        oef_message = cast(OefSearchMessage, envelope.message)
+        oef_message_original = cast(OefSearchMessage, envelope.message)
+        oef_message = copy.copy(oef_message_original)
+        oef_message.counterparty = oef_message_original.sender
         oef_message.is_incoming = True  # TODO: fix
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
@@ -439,7 +442,7 @@ class OEFChannel(OEFAgent):
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_services(self.oef_msg_id, oef_query)
         else:
-            raise ValueError("OEF request not recognized.")
+            raise ValueError("OEF request not recognized.")  # pragma: nocover
 
     def handle_failure(  # pylint: disable=no-self-use
         self, exception: Exception, conn

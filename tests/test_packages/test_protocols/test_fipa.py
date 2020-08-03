@@ -369,7 +369,9 @@ class TestDialogues:
     def test_create_self_initiated(self):
         """Test the self initialisation of a dialogue."""
         result = self.buyer_dialogues._create_self_initiated(
-            dialogue_opponent_addr=self.seller_addr, role=FipaDialogue.Role.SELLER,
+            dialogue_opponent_addr=self.seller_addr,
+            dialogue_reference=(str(0), ""),
+            role=FipaDialogue.Role.SELLER,
         )
         assert isinstance(result, FipaDialogue)
         assert result.role == FipaDialogue.Role.SELLER, "The role must be seller."

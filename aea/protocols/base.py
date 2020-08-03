@@ -65,6 +65,8 @@ class Message:
         :param body: the dictionary of values to hold.
         :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
+        self._to = None  # type: Optional[Address]
+        self._sender = None  # type: Optional[Address]
         self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
@@ -73,6 +75,49 @@ class Message:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
             logger.error(e)
+
+    @property
+    def has_sender(self) -> bool:
+        """Check if it has a sender."""
+        return self._sender is not None
+
+    @property
+    def sender(self) -> Address:
+        """
+        Get the sender of the message in Address form.
+
+        :return the address
+        """
+        assert self._sender is not None, "Sender must not be None."
+        return self._sender
+
+    @sender.setter
+    def sender(self, sender: Address) -> None:
+        """Set the sender of the message."""
+        # assert self._sender is None, "Sender already set."
+        self._sender = sender
+
+    @property
+    def has_to(self) -> bool:
+        """Check if it has a sender."""
+        return self._to is not None
+
+    @property
+    def to(self) -> Address:
+        """Get address of receiver."""
+        assert self._to is not None, "To must not be None."
+        return self._to
+
+    @to.setter
+    def to(self, to: Address) -> None:
+        """Set address of receiver."""
+        assert self._to is None, "To already set."
+        self._to = to
+
+    @property
+    def has_counterparty(self) -> bool:
+        """Check if the counterparty is set."""
+        return self._counterparty is not None
 
     @property
     def counterparty(self) -> Address:

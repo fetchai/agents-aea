@@ -391,7 +391,7 @@ This adds the protocol to our AEA and makes it available on the path `packages.f
 
 We also need to add the soef and p2p connections and install the AEA's dependencies:
 ``` bash
-aea add connection fetchai/soef:0.5.0
+aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/p2p_libp2p:0.6.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
@@ -400,7 +400,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 Finally, in the `aea-config.yaml` add the following lines:
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
+  fetchai/oef_search:0.3.0: fetchai/soef:0.6.0
 ```
 
 This will ensure that search requests are processed by the correct connection.
@@ -712,7 +712,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
 
 
 class OefSearchHandler(Handler):
