@@ -40,7 +40,7 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.5.0")
 
 
 class GymChannel:

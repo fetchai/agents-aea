@@ -15,7 +15,7 @@ fingerprint:
   transactions.py: QmZkb2GfiGHwSSQuMafEkGKF4GHiyNu6mQancZkTWS7D6F
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.6.0
+- fetchai/erc1155:0.7.0
 protocols:
 - fetchai/fipa:0.4.0
 - fetchai/oef_search:0.3.0

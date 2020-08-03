@@ -56,7 +56,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.7.0")
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):

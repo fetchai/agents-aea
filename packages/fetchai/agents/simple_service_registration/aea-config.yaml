@@ -9,7 +9,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/p2p_libp2p:0.6.0
 - fetchai/soef:0.6.0
-- fetchai/stub:0.6.0
+- fetchai/stub:0.7.0
 contracts: []
 protocols:
 - fetchai/default:0.3.0
@@ -17,7 +17,7 @@ protocols:
 - fetchai/oef_search:0.3.0
 skills:
 - fetchai/error:0.3.0
-- fetchai/simple_service_registration:0.5.0
+- fetchai/simple_service_registration:0.6.0
 default_connection: fetchai/p2p_libp2p:0.6.0
 default_ledger: cosmos
 logging_config:
