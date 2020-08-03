@@ -233,13 +233,10 @@ func IDFromFetchAIPublicKey(public_key string) (peer.ID, error) {
 // WriteBytesConn send bytes to `conn`
 func WriteBytesConn(conn net.Conn, data []byte) error {
 	size := uint32(len(data))
-	buf := make([]byte, 4)
+	buf := make([]byte, 4, 4+size)
 	binary.BigEndian.PutUint32(buf, size)
+	buf = append(buf, data...)
 	_, err := conn.Write(buf)
-	if err != nil {
-		return err
-	}
-	_, err = conn.Write(data)
 	return err
 }
 
