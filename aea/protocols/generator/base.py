@@ -628,10 +628,13 @@ class ProtocolGenerator:
         )
 
         # Class attributes
-        cls_str += self.indent + 'protocol_id = ProtocolId.from_str("{}/{}:{}")\n'.format(
-            self.protocol_specification.author,
-            self.protocol_specification.name,
-            self.protocol_specification.version,
+        cls_str += (
+            self.indent
+            + 'protocol_id = ProtocolId.from_str("{}/{}:{}")\n'.format(
+                self.protocol_specification.author,
+                self.protocol_specification.name,
+                self.protocol_specification.version,
+            )
         )
         for custom_type in self.spec.all_custom_types:
             cls_str += "\n"
@@ -1165,8 +1168,8 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Create an instance of {} dialogue.\n\n".format(
-                self.protocol_specification.name
-            )
+            self.protocol_specification.name
+        )
         cls_str += (
             self.indent + ":param dialogue_label: the identifier of the dialogue\n"
         )

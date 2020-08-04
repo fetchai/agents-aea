@@ -35,10 +35,6 @@ speech_acts:
     quantities_by_good_id: pt:dict[pt:str, pt:int]
 ...
 ---
-ct:StateUpdate: |
-  bytes state_update = 1;
-...
----
 initiation: [initialize]
 reply:
   initialize: [apply]

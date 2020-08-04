@@ -47,9 +47,7 @@ message OefSearchMessage{
         repeated string agents = 1;
     }
 
-    message Success_Performative{}
-
-    message Error_Performative{
+    message Oef_Error_Performative{
         OefErrorOperation oef_error_operation = 1;
     }
 
@@ -60,11 +58,10 @@ message OefSearchMessage{
     string dialogue_responder_reference = 3;
     int32 target = 4;
     oneof performative{
-        Error_Performative error = 5;
+        Oef_Error_Performative oef_error = 5;
         Register_Service_Performative register_service = 6;
         Search_Result_Performative search_result = 7;
         Search_Services_Performative search_services = 8;
-        Success_Performative success = 9;
-        Unregister_Service_Performative unregister_service = 10;
+        Unregister_Service_Performative unregister_service = 9;
     }
 }

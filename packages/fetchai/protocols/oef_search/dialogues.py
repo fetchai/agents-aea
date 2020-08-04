@@ -46,26 +46,24 @@ class OefSearchDialogue(Dialogue):
     )
     TERMINAL_PERFORMATIVES = frozenset(
         {
-            OefSearchMessage.Performative.SUCCESS,
-            OefSearchMessage.Performative.ERROR,
+            OefSearchMessage.Performative.OEF_ERROR,
             OefSearchMessage.Performative.SEARCH_RESULT,
         }
     )
     VALID_REPLIES = {
-        OefSearchMessage.Performative.ERROR: frozenset(),
+        OefSearchMessage.Performative.OEF_ERROR: frozenset(),
         OefSearchMessage.Performative.REGISTER_SERVICE: frozenset(
-            {OefSearchMessage.Performative.SUCCESS, OefSearchMessage.Performative.ERROR}
+            {OefSearchMessage.Performative.OEF_ERROR}
         ),
         OefSearchMessage.Performative.SEARCH_RESULT: frozenset(),
         OefSearchMessage.Performative.SEARCH_SERVICES: frozenset(
             {
                 OefSearchMessage.Performative.SEARCH_RESULT,
-                OefSearchMessage.Performative.ERROR,
+                OefSearchMessage.Performative.OEF_ERROR,
             }
         ),
-        OefSearchMessage.Performative.SUCCESS: frozenset(),
         OefSearchMessage.Performative.UNREGISTER_SERVICE: frozenset(
-            {OefSearchMessage.Performative.SUCCESS, OefSearchMessage.Performative.ERROR}
+            {OefSearchMessage.Performative.OEF_ERROR}
         ),
     }
 

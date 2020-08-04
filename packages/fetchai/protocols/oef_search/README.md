@@ -34,8 +34,7 @@ speech_acts:
     query: ct:Query
   search_result:
     agents: pt:list[pt:str]
-  success: {}
-  error:
+  oef_error:
     oef_error_operation: ct:OefErrorOperation
 ...
 ---
@@ -61,13 +60,13 @@ ct:OefErrorOperation: |
 ---
 initiation: [register_service, unregister_service, search_services]
 reply:
-  register_service: [success, error]
-  unregister_service: [success, error]
-  search_services: [search_result, error]
+  register_service: [oef_error]
+  unregister_service: [oef_error]
+  search_services: [search_result, oef_error]
   success: []
   search_result: []
-  error: []
-termination: [success, error, search_result]
+  oef_error: []
+termination: [oef_error, search_result]
 roles: {agent, oef_node}
 end_states: [successful, failed]
 ...
