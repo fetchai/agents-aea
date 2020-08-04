@@ -199,6 +199,14 @@ class IPFSDaemon:
         res = shutil.which("ipfs")
         if res is None:
             raise Exception("Please install IPFS first!")
+        process = subprocess.Popen(  # nosec
+            ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
+        )
+        output, err = process.communicate()
+        if b"0.4.23" not in output:
+            raise Exception(
+                "Please ensure you have version 0.4.23 of IPFS daemon installed."
+            )
         self.process = None  # type: Optional[subprocess.Popen]
 
     def __enter__(self):
@@ -449,7 +457,7 @@ def check_same_ipfs_hash(
     #     "Agent0",
     #     "dummy",
     # ]:
-    #     return True  # TODO: fix
+    #     return True  # packages with nested dirs or symlinks, kept for reference
     key, actual_hash, result_list = ipfs_hashing(client, configuration, package_type)
     expected_hash = all_expected_hashes[key]
     result = actual_hash == expected_hash
