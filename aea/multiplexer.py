@@ -25,7 +25,7 @@ from concurrent.futures._base import CancelledError
 from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection, ConnectionStates, ConnectionStatus
+from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
@@ -38,6 +38,19 @@ from aea.mail.base import (
     logger as default_logger,
 )
 from aea.protocols.base import Message
+
+
+# TODO refactoring: this should be an enum
+#      but beware of backward-compatibility.
+
+
+class ConnectionStatus:
+    """The connection status class."""
+
+    def __init__(self):
+        """Initialize the connection status."""
+        self.is_connected = False  # type: bool
+        self.is_connecting = False  # type: bool
 
 
 class AsyncMultiplexer(WithLogger):

@@ -55,17 +55,6 @@ class ConnectionStates(Enum):
     disconnected = "disconnected"
 
 
-# TODO refactoring: this should be an enum
-#      but beware of backward-compatibility.
-class ConnectionStatus:
-    """The connection status class."""
-
-    def __init__(self):
-        """Initialize the connection status."""
-        self.is_connected = False  # type: bool
-        self.is_connecting = False  # type: bool
-
-
 class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
