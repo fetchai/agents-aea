@@ -40,13 +40,12 @@ from aea.configurations.base import (
     SkillComponentConfiguration,
     SkillConfig,
 )
-from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.mail.base import Address
-from aea.multiplexer import OutBox
+from aea.multiplexer import ConnectionStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 

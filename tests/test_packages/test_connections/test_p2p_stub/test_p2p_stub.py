@@ -80,10 +80,10 @@ class Testp2pStubConnectionReception:
     async def test_send(self):
         """Test that the connection receives what has been enqueued in the input file."""
         await self.connection1.connect()
-        assert self.connection1.connection_status.is_connected
+        assert self.connection1.is_connected
 
         await self.connection2.connect()
-        assert self.connection2.connection_status.is_connected
+        assert self.connection2.is_connected
 
         envelope = make_test_envelope(to_="con2")
         await self.connection1.send(envelope)

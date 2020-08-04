@@ -214,19 +214,19 @@ class TestSoef:
 
     def test_connected(self):
         """Test connected==True."""
-        assert self.connection.connection_status.is_connected
+        assert self.connection.is_connected
 
     @pytest.mark.asyncio
     async def test_disconnected(self):
         """Test disconnect."""
-        assert self.connection.connection_status.is_connected
+        assert self.connection.is_connected
         with patch.object(
             self.connection.channel,
             "_request_text",
             make_async("<response><message>Goodbye!</message></response>"),
         ):
             await self.connection.disconnect()
-        assert not self.connection.connection_status.is_connected
+        assert not self.connection.is_connected
 
     @pytest.mark.asyncio
     async def test_register_service(self):

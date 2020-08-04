@@ -156,9 +156,9 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     connection_3 = _make_dummy_connection()
     multiplexer = Multiplexer([connection_1, connection_2, connection_3])
 
-    assert not connection_1.connection_status.is_connected
-    assert not connection_2.connection_status.is_connected
-    assert not connection_3.connection_status.is_connected
+    assert not connection_1.is_connected
+    assert not connection_2.is_connected
+    assert not connection_3.is_connected
 
     with unittest.mock.patch.object(connection_3, "connect", side_effect=Exception):
         with pytest.raises(
@@ -166,9 +166,9 @@ def test_multiplexer_connect_one_raises_error_many_connections():
         ):
             multiplexer.connect()
 
-    assert not connection_1.connection_status.is_connected
-    assert not connection_2.connection_status.is_connected
-    assert not connection_3.connection_status.is_connected
+    assert not connection_1.is_connected
+    assert not connection_2.is_connected
+    assert not connection_3.is_connected
 
     multiplexer.disconnect()
     try:
@@ -228,15 +228,15 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
         connection_3 = _make_dummy_connection()
         multiplexer = Multiplexer([connection_1, connection_2, connection_3])
 
-        assert not connection_1.connection_status.is_connected
-        assert not connection_2.connection_status.is_connected
-        assert not connection_3.connection_status.is_connected
+        assert not connection_1.is_connected
+        assert not connection_2.is_connected
+        assert not connection_3.is_connected
 
         multiplexer.connect()
 
-        assert connection_1.connection_status.is_connected
-        assert connection_2.connection_status.is_connected
-        assert connection_3.connection_status.is_connected
+        assert connection_1.is_connected
+        assert connection_2.is_connected
+        assert connection_3.is_connected
 
         with unittest.mock.patch.object(
             connection_3, "disconnect", side_effect=Exception
@@ -246,9 +246,9 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
             ):
                 multiplexer.disconnect()
 
-        assert not connection_1.connection_status.is_connected
-        assert not connection_2.connection_status.is_connected
-        assert connection_3.connection_status.is_connected
+        assert not connection_1.is_connected
+        assert not connection_2.is_connected
+        assert connection_3.is_connected
 
         # clean the test up.
         await connection_3.disconnect()

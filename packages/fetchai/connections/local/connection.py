@@ -27,7 +27,7 @@ from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.search.models import Description
 from aea.mail.base import AEAConnectionError, Address, Envelope
 from aea.protocols.default.message import DefaultMessage
@@ -372,24 +372,28 @@ class OEFLocalConnection(Connection):
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
         assert self._local_node is not None, "No local node set!"
-        if not self.connection_status.is_connected:
-            self._reader = Queue()
-            self._writer = await self._local_node.connect(self.address, self._reader)
-            self.connection_status.is_connected = True
+        if self.is_connected:
+            return
+        self._state.set(ConnectionStates.connecting)
+        self._reader = Queue()
+        self._writer = await self._local_node.connect(self.address, self._reader)
+        self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
         """Disconnect from the local OEF Node."""
         assert self._local_node is not None, "No local node set!"
-        if self.connection_status.is_connected:
-            assert self._reader is not None
-            await self._local_node.disconnect(self.address)
-            await self._reader.put(None)
-            self._reader, self._writer = None, None
-            self.connection_status.is_connected = False
+        if self.is_disconnected:
+            return
+        self._state.set(ConnectionStates.disconnecting)
+        assert self._reader is not None
+        await self._local_node.disconnect(self.address)
+        await self._reader.put(None)
+        self._reader, self._writer = None, None
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: Envelope):
         """Send a message."""
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise AEAConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )
@@ -401,7 +405,7 @@ class OEFLocalConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise AEAConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )
