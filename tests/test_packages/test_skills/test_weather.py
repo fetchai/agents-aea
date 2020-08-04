@@ -55,8 +55,8 @@ class TestWeatherSkills(AEATestCaseMany):
 
         # generate random location
         location = {
-            "latitude": round(uniform(-90, 90), 2),
-            "longitude": round(uniform(-180, 180), 2),
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
         # prepare agent one (weather station)
@@ -223,8 +223,8 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         # generate random location
         location = {
-            "latitude": round(uniform(-90, 90), 2),
-            "longitude": round(uniform(-180, 180), 2),
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
         # add packages for agent one

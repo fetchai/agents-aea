@@ -132,8 +132,8 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # generate random location
         location = {
-            "latitude": round(uniform(-90, 90), 2),
-            "longitude": round(uniform(-180, 180), 2),
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
         # Setup seller
@@ -177,7 +177,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         )
 
         # replace location
-        setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
+        setting_path = "skills.thermometer.models.strategy.args.location"
         self.force_set_config(setting_path, location)
 
         # Setup Buyer
