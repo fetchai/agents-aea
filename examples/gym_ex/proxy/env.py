@@ -159,7 +159,7 @@ class ProxyEnv(gym.Env):
         gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
         assert gym_dialogue is not None
         self._active_dialogue = gym_dialogue
-        self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
+        self._agent.outbox.put_message(message=gym_msg)
 
         # Wait (blocking!) for the response envelope from the environment
         in_envelope = self._queue.get(block=True, timeout=None)  # type: GymMessage
@@ -182,7 +182,7 @@ class ProxyEnv(gym.Env):
         )
         gym_msg.counterparty = self.gym_address
         assert self.active_dialogue.update(gym_msg)
-        self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
+        self._agent.outbox.put_message(message=gym_msg)
 
         self._disconnect()
 
@@ -228,7 +228,7 @@ class ProxyEnv(gym.Env):
         gym_msg.counterparty = self.gym_address
         assert self.active_dialogue.update(gym_msg)
         # Send the message via the proxy agent and to the environment
-        self._agent.outbox.put_message(message=gym_msg, sender=self._agent_address)
+        self._agent.outbox.put_message(message=gym_msg)
 
     def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> GymMessage:
 

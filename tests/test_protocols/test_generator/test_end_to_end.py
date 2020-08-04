@@ -35,12 +35,13 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.helpers import create_private_key
-from aea.mail.base import Envelope
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
 
 from tests.conftest import ROOT_DIR
+from tests.data.generator.t_protocol.dialogues import TProtocolDialogue
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )
@@ -117,10 +118,24 @@ class TestEndToEndGenerator(UseOef):
         aea_1 = builder_1.build(connection_ids=[PublicId.from_str("fetchai/oef:0.7.0")])
         aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.7.0")])
 
+        # dialogues
+        dialogue_label_1 = DialogueLabel(
+            (str(1), ""), aea_2.identity.address, aea_1.identity.address
+        )
+        aea_1_dialogue = TProtocolDialogue(
+            dialogue_label_1, aea_1.identity.address, TProtocolDialogue.Role.ROLE_1
+        )
+        dialogue_label_2 = DialogueLabel(
+            (str(1), str(1)), aea_1.identity.address, aea_1.identity.address
+        )
+        aea_2_dialogue = TProtocolDialogue(
+            dialogue_label_2, aea_2.identity.address, TProtocolDialogue.Role.ROLE_2
+        )
+
         # message 1
-        message = TProtocolMessage(
+        message_1 = TProtocolMessage(
             message_id=1,
-            dialogue_reference=(str(0), ""),
+            dialogue_reference=(str(1), ""),
             target=0,
             performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some bytes",
@@ -129,18 +144,13 @@ class TestEndToEndGenerator(UseOef):
             content_bool=True,
             content_str="some string",
         )
-        message.counterparty = aea_2.identity.address
-        envelope = Envelope(
-            to=aea_2.identity.address,
-            sender=aea_1.identity.address,
-            protocol_id=TProtocolMessage.protocol_id,
-            message=message,
-        )
+        message_1.counterparty = aea_2.identity.address
+        message_1.is_incoming = False
 
         # message 2
         message_2 = TProtocolMessage(
             message_id=2,
-            dialogue_reference=(str(0), ""),
+            dialogue_reference=(str(1), str(1)),
             target=1,
             performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some other bytes",
@@ -150,6 +160,7 @@ class TestEndToEndGenerator(UseOef):
             content_str="some other string",
         )
         message_2.counterparty = aea_1.identity.address
+        message_2.is_incoming = False
 
         # add handlers to AEA resources
         skill_context_1 = SkillContext(aea_1.context)
@@ -157,7 +168,9 @@ class TestEndToEndGenerator(UseOef):
         skill_context_1._skill = skill_1
 
         agent_1_handler = Agent1Handler(
-            skill_context=skill_context_1, name="fake_handler_1"
+            skill_context=skill_context_1,
+            name="fake_handler_1",
+            dialogue=aea_1_dialogue,
         )
         aea_1.resources._handler_registry.register(
             (
@@ -171,7 +184,10 @@ class TestEndToEndGenerator(UseOef):
         skill_context_2._skill = skill_2
 
         agent_2_handler = Agent2Handler(
-            message=message_2, skill_context=skill_context_2, name="fake_handler_2",
+            message=message_2,
+            dialogue=aea_2_dialogue,
+            skill_context=skill_context_2,
+            name="fake_handler_2",
         )
         aea_2.resources._handler_registry.register(
             (
@@ -188,41 +204,44 @@ class TestEndToEndGenerator(UseOef):
             t_1.start()
             t_2.start()
             time.sleep(1.0)
-            aea_1.outbox.put(envelope)
+            aea_1_dialogue.update(message_1)
+            aea_1.outbox.put_message(message_1)
             time.sleep(5.0)
             assert (
-                agent_2_handler.handled_message.message_id == message.message_id
+                agent_2_handler.handled_message.message_id == message_1.message_id
             ), "Message from Agent 1 to 2: message ids do not match"
             assert (
                 agent_2_handler.handled_message.dialogue_reference
-                == message.dialogue_reference
+                == message_1.dialogue_reference
             ), "Message from Agent 1 to 2: dialogue references do not match"
             assert (
                 agent_2_handler.handled_message.dialogue_reference[0]
-                == message.dialogue_reference[0]
+                == message_1.dialogue_reference[0]
             ), "Message from Agent 1 to 2: dialogue reference[0]s do not match"
             assert (
                 agent_2_handler.handled_message.dialogue_reference[1]
-                == message.dialogue_reference[1]
+                == message_1.dialogue_reference[1]
             ), "Message from Agent 1 to 2: dialogue reference[1]s do not match"
             assert (
-                agent_2_handler.handled_message.target == message.target
+                agent_2_handler.handled_message.target == message_1.target
             ), "Message from Agent 1 to 2: targets do not match"
             assert (
-                agent_2_handler.handled_message.performative == message.performative
+                agent_2_handler.handled_message.performative == message_1.performative
             ), "Message from Agent 1 to 2: performatives do not match"
             assert (
-                agent_2_handler.handled_message.content_bytes == message.content_bytes
+                agent_2_handler.handled_message.content_bytes == message_1.content_bytes
             ), "Message from Agent 1 to 2: content_bytes do not match"
             assert (
-                agent_2_handler.handled_message.content_int == message.content_int
+                agent_2_handler.handled_message.content_int == message_1.content_int
             ), "Message from Agent 1 to 2: content_int do not match"
-            # assert agent_2_handler.handled_message.content_float == message.content_float, "Message from Agent 1 to 2: content_float do not match"
+            # assert (
+            #     agent_2_handler.handled_message.content_float == message_1.content_float
+            # ), "Message from Agent 1 to 2: content_float do not match"
             assert (
-                agent_2_handler.handled_message.content_bool == message.content_bool
+                agent_2_handler.handled_message.content_bool == message_1.content_bool
             ), "Message from Agent 1 to 2: content_bool do not match"
             assert (
-                agent_2_handler.handled_message.content_str == message.content_str
+                agent_2_handler.handled_message.content_str == message_1.content_str
             ), "Message from Agent 1 to 2: content_str do not match"
 
             assert (
@@ -252,7 +271,9 @@ class TestEndToEndGenerator(UseOef):
             assert (
                 agent_1_handler.handled_message.content_int == message_2.content_int
             ), "Message from Agent 2 to 1: content_int do not match"
-            # assert agent_1_handler.handled_message.content_float == message_2.content_float, "Message from Agent 2 to 1: content_float do not match"
+            # assert (
+            #     agent_1_handler.handled_message.content_float == message_2.content_float
+            # ), "Message from Agent 2 to 1: content_float do not match"
             assert (
                 agent_1_handler.handled_message.content_bool == message_2.content_bool
             ), "Message from Agent 2 to 1: content_bool do not match"
@@ -281,11 +302,12 @@ class Agent1Handler(Handler):
 
     SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, **kwargs):
+    def __init__(self, dialogue: TProtocolDialogue, **kwargs):
         """Initialize the handler."""
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_message = None
+        self.handled_message = None  # type: Optional[Message]
+        self.dialogue = dialogue
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -298,6 +320,7 @@ class Agent1Handler(Handler):
         :param message: the message
         :return: None
         """
+        self.dialogue.update(message)
         self.handled_message = message
 
     def teardown(self) -> None:
@@ -313,13 +336,16 @@ class Agent2Handler(Handler):
 
     SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, message, **kwargs):
+    def __init__(
+        self, message: TProtocolMessage, dialogue: TProtocolDialogue, **kwargs
+    ):
         """Initialize the handler."""
         print("inside handler's initialisation method for agent 2")
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_message = None
+        self.handled_message = None  # type: Optional[Message]
         self.message_2 = message
+        self.dialogue = dialogue
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -332,14 +358,11 @@ class Agent2Handler(Handler):
         :param message: the message
         :return: None
         """
+        self.dialogue.update(message)
         self.handled_message = message
-        envelope = Envelope(
-            to=message.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=TProtocolMessage.protocol_id,
-            message=self.message_2,
-        )
-        self.context.outbox.put(envelope)
+        message.counterparty = self.dialogue.dialogue_label.dialogue_opponent_addr
+        self.dialogue.update(self.message_2)
+        self.context.outbox.put_message(self.message_2)
 
     def teardown(self) -> None:
         """

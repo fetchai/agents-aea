@@ -16,10 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests for aea/aea.py."""
 import os
 import tempfile
 from pathlib import Path
+from threading import Thread
+from time import sleep
 from unittest.mock import patch
 
 from aea import AEA_DIR
@@ -51,7 +54,7 @@ from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
-def test_initialise_aea():
+def test_setup_aea():
     """Tests the initialisation of the AEA."""
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
@@ -70,7 +73,7 @@ def test_initialise_aea():
     ), "Shared state must not be None after set"
     assert my_AEA.context.task_manager is not None
     assert my_AEA.context.identity is not None, "Identity must not be None after set."
-    my_AEA.stop()
+    my_AEA.teardown()
 
 
 def test_act():
@@ -112,6 +115,30 @@ def test_start_stop():
         agent.stop()
 
 
+def test_double_start():
+    """Tests the act function of the AEA."""
+    agent_name = "MyAgent"
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+    builder = AEABuilder()
+    builder.set_name(agent_name)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+    agent = builder.build()
+
+    with run_in_thread(agent.start, timeout=20):
+        try:
+            wait_for_condition(
+                lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
+            )
+
+            t = Thread(target=agent.start)
+            t.start()
+            sleep(1)
+            assert not t.is_alive()
+        finally:
+            agent.stop()
+
+
 def test_react():
     """Tests income messages."""
     with LocalNode() as node:
@@ -143,10 +170,11 @@ def test_react():
             content=b"hello",
         )
         msg.counterparty = agent.identity.address
+        msg.sender = agent.identity.address
         envelope = Envelope(
-            to=agent.identity.address,
-            sender=agent.identity.address,
-            protocol_id=DefaultMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
 
@@ -166,7 +194,6 @@ def test_react():
                 timeout=10,
                 error_msg="The message is not inside the handled_messages.",
             )
-            agent.stop()
 
 
 def test_handle():
@@ -200,9 +227,10 @@ def test_handle():
             content=b"hello",
         )
         msg.counterparty = aea.identity.address
+        msg.sender = aea.identity.address
         envelope = Envelope(
-            to=aea.identity.address,
-            sender=aea.identity.address,
+            to=msg.counterparty,
+            sender=msg.sender,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=msg,
         )
@@ -241,10 +269,11 @@ def test_handle():
                 target=0,
             )
             msg.counterparty = aea.identity.address
+            msg.sender = aea.identity.address
             envelope = Envelope(
-                to=aea.identity.address,
-                sender=aea.identity.address,
-                protocol_id=FipaMessage.protocol_id,
+                to=msg.counterparty,
+                sender=msg.sender,
+                protocol_id=msg.protocol_id,
                 message=msg,
             )
             # send envelope via localnode back to agent
@@ -284,10 +313,11 @@ def test_initialize_aea_programmatically():
             content=b"hello",
         )
         expected_message.counterparty = aea.identity.address
+        expected_message.sender = aea.identity.address
         envelope = Envelope(
-            to=aea.identity.address,
-            sender=aea.identity.address,
-            protocol_id=DefaultMessage.protocol_id,
+            to=expected_message.counterparty,
+            sender=expected_message.sender,
+            protocol_id=expected_message.protocol_id,
             message=expected_message,
         )
 
@@ -376,6 +406,7 @@ def test_initialize_aea_programmatically_build_resources():
                 content=b"hello",
             )
             expected_message.counterparty = agent_name
+            expected_message.sender = agent_name
 
             with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
                 wait_for_condition(

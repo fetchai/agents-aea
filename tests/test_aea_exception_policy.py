@@ -176,4 +176,5 @@ class TestAeaExceptionPolicy:
 
     def teardown(self) -> None:
         """Stop AEA if not stopped."""
+        self.aea.teardown()
         self.aea.stop()

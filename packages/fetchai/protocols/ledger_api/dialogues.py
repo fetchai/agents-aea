@@ -159,7 +159,7 @@ class LedgerApiDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> LedgerApiDialogue:
         """
-        Create an instance of {} dialogue.
+        Create an instance of ledger_api dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

@@ -156,7 +156,7 @@ class TProtocolNoCtDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> TProtocolNoCtDialogue:
         """
-        Create an instance of {} dialogue.
+        Create an instance of t_protocol_no_ct dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

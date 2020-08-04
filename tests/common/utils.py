@@ -86,6 +86,11 @@ class AeaTool:
         self.aea.start_setup()
         return self
 
+    def teardown(self) -> "AeaTool":
+        """Call AEA.teardown."""
+        self.aea.teardown()
+        return self
+
     def wait_outbox_empty(
         self, sleep: float = DEFAULT_SLEEP, timeout: float = DEFAULT_TIMEOUT
     ) -> "AeaTool":
@@ -264,6 +269,7 @@ def run_in_root_dir(fn) -> Callable:
 
 @contextmanager
 def run_in_thread(fn, timeout=10, on_exit=None, **kwargs):
+    """Run a function in contextmanager and test and awaits it completed."""
     thread = Thread(target=fn, **kwargs)
     thread.daemon = True
     thread.start()
@@ -278,6 +284,7 @@ def run_in_thread(fn, timeout=10, on_exit=None, **kwargs):
 
 
 def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout"):
+    """Wait for condition occures in selected timeout."""
     start_time = time.time()
 
     while not condition_checker():

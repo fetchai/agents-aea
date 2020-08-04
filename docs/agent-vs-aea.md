@@ -67,6 +67,8 @@ class MyAgent(Agent):
                 envelope.to = sender
                 envelope.sender = receiver
                 envelope.message = DefaultMessage.serializer.decode(envelope.message)
+                envelope.message.sender = receiver
+                envelope.message.counterparty = sender
                 print(
                     "Received envelope from {} with protocol_id={}".format(
                         sender, envelope.protocol_id
@@ -196,6 +198,8 @@ class MyAgent(Agent):
                 envelope.to = sender
                 envelope.sender = receiver
                 envelope.message = DefaultMessage.serializer.decode(envelope.message)
+                envelope.message.sender = receiver
+                envelope.message.counterparty = sender
                 print(
                     "Received envelope from {} with protocol_id={}".format(
                         sender, envelope.protocol_id
