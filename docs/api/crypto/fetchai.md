@@ -253,6 +253,24 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
+<a name="aea.crypto.fetchai.FetchAIHelper.get_hash"></a>
+#### get`_`hash
+
+```python
+ | @staticmethod
+ | get_hash(message: bytes) -> str
+```
+
+Get the hash of a message.
+
+**Arguments**:
+
+- `message`: the message to be hashed.
+
+**Returns**:
+
+the hash of the message.
+
 <a name="aea.crypto.fetchai.FetchAIApi"></a>
 ## FetchAIApi Objects
 

@@ -7,7 +7,7 @@ This module contains the implementation of an autonomous economic agent (AEA).
 ## AEA Objects
 
 ```python
-class AEA(Agent)
+class AEA(Agent,  WithLogger)
 ```
 
 This class implements an autonomous economic agent.

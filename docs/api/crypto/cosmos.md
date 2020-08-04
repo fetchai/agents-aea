@@ -103,6 +103,46 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
+<a name="aea.crypto.cosmos.CosmosCrypto.format_default_transaction"></a>
+#### format`_`default`_`transaction
+
+```python
+ | @staticmethod
+ | format_default_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any
+```
+
+Format default CosmosSDK transaction and add signature
+
+**Arguments**:
+
+- `transaction`: the transaction to be formatted
+- `signature`: the transaction signature
+- `base64_pbk`: the base64 formatted public key
+
+**Returns**:
+
+formatted transaction with signature
+
+<a name="aea.crypto.cosmos.CosmosCrypto.format_wasm_transaction"></a>
+#### format`_`wasm`_`transaction
+
+```python
+ | @staticmethod
+ | format_wasm_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any
+```
+
+Format CosmWasm transaction and add signature
+
+**Arguments**:
+
+- `transaction`: the transaction to be formatted
+- `signature`: the transaction signature
+- `base64_pbk`: the base64 formatted public key
+
+**Returns**:
+
+formatted transaction with signature
+
 <a name="aea.crypto.cosmos.CosmosCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
@@ -252,6 +292,24 @@ Recover the addresses from the hash.
 **Returns**:
 
 the recovered addresses
+
+<a name="aea.crypto.cosmos.CosmosHelper.get_hash"></a>
+#### get`_`hash
+
+```python
+ | @staticmethod
+ | get_hash(message: bytes) -> str
+```
+
+Get the hash of a message.
+
+**Arguments**:
+
+- `message`: the message to be hashed.
+
+**Returns**:
+
+the hash of the message.
 
 <a name="aea.crypto.cosmos.CosmosApi"></a>
 ## CosmosApi Objects

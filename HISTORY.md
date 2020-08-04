@@ -1,5 +1,27 @@
 # Release History
 
+## 0.5.3 (2020-08-05)
+
+- Adds support for re-starting agent after stopping it
+- Adds full test coverage for protocols generator
+- Adds support for dynamically adding handlers
+- Improves p2p connection startup reliability
+- Addresses p2p connection race condition with long running processes
+- Adds connection states in connections
+- Applies consistent logger usage throughout
+- Adds key rotation and randomised locations for integration tests
+- Adds request delays in SOEF connection to avoid request limits
+- Exposes runtime states on agent and removes agent liveness object
+- Adds readme files in protocols and connections
+- Improves edge case handling in dialogue models
+- Adds support for cosmwasm message signing
+- Adds test coverage for test tools
+- Adds dialogues models in all connections where required
+- Transitions erc1155 skills and simple search to SOEF and p2p
+- Adds full test coverage for skills modules
+- Multiple docs updates
+- Multiple additional tests and test stability fixes
+
 ## 0.5.2 (2020-07-21)
 
 - Transitions demos to agent-land test network, P2P and SOEF connections

@@ -37,10 +37,11 @@ Unset the current agent context.
 
 ```python
  | @classmethod
- | set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> None
+ | set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result
 ```
 
 Set a config.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -51,7 +52,7 @@ Run from agent's directory.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.force_set_config"></a>
 #### force`_`set`_`config
@@ -68,10 +69,11 @@ Force set config.
 
 ```python
  | @classmethod
- | disable_aea_logging(cls)
+ | disable_aea_logging(cls) -> None
 ```
 
 Disable AEA logging of specific agent.
+
 Run from agent's directory.
 
 **Returns**:
@@ -83,7 +85,7 @@ None
 
 ```python
  | @classmethod
- | run_cli_command(cls, *args: str, *, cwd: str = ".") -> None
+ | run_cli_command(cls, *args: str, *, cwd: str = ".") -> Result
 ```
 
 Run AEA CLI command.
@@ -99,7 +101,7 @@ Run AEA CLI command.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.start_subprocess"></a>
 #### start`_`subprocess
@@ -124,7 +126,7 @@ subprocess object.
 
 ```python
  | @classmethod
- | start_thread(cls, target: Callable, **kwargs) -> None
+ | start_thread(cls, target: Callable, **kwargs) -> Thread
 ```
 
 Start python Thread.
@@ -221,6 +223,7 @@ None
 ```
 
 Run agent as subprocess.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -240,6 +243,7 @@ subprocess object.
 ```
 
 Run interaction as subprocess.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -259,6 +263,7 @@ subprocess object.
 ```
 
 Terminate agent subprocesses.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -275,7 +280,7 @@ Run from agent's directory.
  | is_successfully_terminated(cls, *subprocesses: subprocess.Popen)
 ```
 
-Check if all subprocesses terminated successfully
+Check if all subprocesses terminated successfully.
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.initialize_aea"></a>
 #### initialize`_`aea
@@ -296,10 +301,11 @@ None
 
 ```python
  | @classmethod
- | add_item(cls, item_type: str, public_id: str, local: bool = True) -> None
+ | add_item(cls, item_type: str, public_id: str, local: bool = True) -> Result
 ```
 
 Add an item to the agent.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -310,17 +316,18 @@ Run from agent's directory.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.scaffold_item"></a>
 #### scaffold`_`item
 
 ```python
  | @classmethod
- | scaffold_item(cls, item_type: str, name: str) -> None
+ | scaffold_item(cls, item_type: str, name: str) -> Result
 ```
 
 Scaffold an item for the agent.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -330,17 +337,18 @@ Run from agent's directory.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.fingerprint_item"></a>
 #### fingerprint`_`item
 
 ```python
  | @classmethod
- | fingerprint_item(cls, item_type: str, public_id: str) -> None
+ | fingerprint_item(cls, item_type: str, public_id: str) -> Result
 ```
 
-Scaffold an item for the agent.
+Fingerprint an item for the agent.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -350,17 +358,18 @@ Run from agent's directory.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.eject_item"></a>
 #### eject`_`item
 
 ```python
  | @classmethod
- | eject_item(cls, item_type: str, public_id: str) -> None
+ | eject_item(cls, item_type: str, public_id: str) -> Result
 ```
 
 Eject an item in the agent.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -377,44 +386,48 @@ None
 
 ```python
  | @classmethod
- | run_install(cls)
+ | run_install(cls) -> Result
 ```
 
 Execute AEA CLI install command.
+
 Run from agent's directory.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.generate_private_key"></a>
 #### generate`_`private`_`key
 
 ```python
  | @classmethod
- | generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None
+ | generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_file: Optional[str] = None) -> Result
 ```
 
 Generate AEA private key with CLI command.
+
 Run from agent's directory.
 
 **Arguments**:
 
 - `ledger_api_id`: ledger API ID.
+- `private_key_file`: the private key file.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.add_private_key"></a>
 #### add`_`private`_`key
 
 ```python
  | @classmethod
- | add_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE, connection: bool = False) -> None
+ | add_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE, connection: bool = False) -> Result
 ```
 
 Add private key with CLI command.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -425,7 +438,7 @@ Run from agent's directory.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.replace_private_key_in_file"></a>
 #### replace`_`private`_`key`_`in`_`file
@@ -452,10 +465,11 @@ None
 
 ```python
  | @classmethod
- | generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> None
+ | generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> Result
 ```
 
 Generate wealth with CLI command.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -464,7 +478,7 @@ Run from agent's directory.
 
 **Returns**:
 
-None
+Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.get_wealth"></a>
 #### get`_`wealth
@@ -475,6 +489,7 @@ None
 ```
 
 Get wealth with CLI command.
+
 Run from agent's directory.
 
 **Arguments**:
@@ -551,6 +566,7 @@ Read an envelope from an agent, using the stub connection.
 ```
 
 Check if strings are present in process output.
+
 Read process stdout in thread and terminate when all strings are present
 or timeout expired.
 
