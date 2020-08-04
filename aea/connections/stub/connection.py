@@ -292,9 +292,10 @@ class StubConnection(Connection):
 
         In this type of connection there's no channel to disconnect.
         """
-        assert self.in_queue is not None, "Input queue not initialized."
         if self.is_disconnected:
             return
+
+        assert self.in_queue is not None, "Input queue not initialized."
 
         self._state.set(ConnectionStates.disconnecting)
         await self._stop_read_envelopes()

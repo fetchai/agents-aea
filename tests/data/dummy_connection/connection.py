@@ -24,7 +24,7 @@ from concurrent.futures._base import CancelledError
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -38,18 +38,18 @@ class DummyConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize."""
         super().__init__(**kwargs)
-        self.connection_status.is_connected = False
+        self._state.set(ConnectionStates.disconnected)
         self._queue = None
 
     async def connect(self, *args, **kwargs):
         """Connect."""
         self._queue = asyncio.Queue(loop=self.loop)
-        self.connection_status.is_connected = True
+        self._state.set(ConnectionStates.connected)
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
         await self._queue.put(None)
-        self.connection_status.is_connected = False
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope"):
         """Send an envelope."""

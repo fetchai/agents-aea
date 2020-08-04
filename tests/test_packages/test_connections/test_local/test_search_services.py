@@ -95,7 +95,7 @@ class TestNoValidDialogue:
         )
         self.multiplexer.put(envelope)
         with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.local"):
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
             assert "Could not create dialogue for message=" in caplog.text
 
     @classmethod
