@@ -86,6 +86,8 @@ jobs:
           tar xvfz go-ipfs.tar.gz
           sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
           ipfs init
+      - name: Pipenv lock
+        run: pipenv lock
       - name: Security Check
         run: tox -e bandit
       - name: Safety Check
