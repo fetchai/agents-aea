@@ -205,7 +205,7 @@ DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
 MAX_FLAKY_RERUNS = 3
 MAX_FLAKY_RERUNS_ETH = 1
-MAX_FLAKY_RERUNS_INTEGRATION = 0
+MAX_FLAKY_RERUNS_INTEGRATION = 1
 
 FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
 PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
