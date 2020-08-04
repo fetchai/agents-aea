@@ -711,34 +711,33 @@ class OutBox:
                 envelope.context,
             )
         )
-        assert isinstance(
-            envelope.message, Message
-        ), "Only Message type allowed in envelope message field when putting into outbox."
+        if not isinstance(envelope.message, Message):
+            raise ValueError(
+                "Only Message type allowed in envelope message field when putting into outbox."
+            )
         self._multiplexer.put(envelope)
 
     def put_message(
-        self,
-        message: Message,
-        sender: Optional[Address] = None,
-        context: Optional[EnvelopeContext] = None,
+        self, message: Message, context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
 
         This constructs an envelope with the input arguments.
 
-        :param sender: the sender of the envelope (optional field only necessary when the non-default address is used for sending).
         :param message: the message.
         :param context: the envelope context
         :return: None
         """
-        assert isinstance(message, Message), "Provided message not of type Message."
-        assert (
-            message.counterparty
-        ), "Provided message has message.counterparty not set."
+        if not isinstance(message, Message):
+            raise ValueError("Provided message not of type Message.")
+        if not message.has_counterparty:
+            raise ValueError("Provided message has message.counterparty not set.")
+        if not message.has_sender:
+            raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
             to=message.counterparty,
-            sender=sender or self._default_address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=context,

@@ -35,7 +35,7 @@ import aea
 from aea.configurations.base import PublicId
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
-from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer
+from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
@@ -489,23 +489,91 @@ async def test_inbox_outbox():
     connection_1 = _make_dummy_connection()
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
+    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg.counterparty = "to"
+    msg.sender = "sender"
+    context = EnvelopeContext(connection_id=connection_1.connection_id)
     envelope = Envelope(
-        to="",
-        sender="",
-        protocol_id=DefaultMessage.protocol_id,
-        message=b"",
-        context=EnvelopeContext(connection_id=connection_1.connection_id),
+        to="to",
+        sender="sender",
+        protocol_id=msg.protocol_id,
+        message=msg,
+        context=context,
     )
     try:
         await multiplexer.connect()
         inbox = InBox(multiplexer)
-        outbox = InBox(multiplexer)
+        outbox = OutBox(multiplexer, "default_address")
 
         assert inbox.empty()
         assert outbox.empty()
 
-        multiplexer.put(envelope)
-        await outbox.async_get()
+        outbox.put(envelope)
+        received = await inbox.async_get()
+        assert received == envelope
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        outbox.put_message(msg, context=context)
+        await inbox.async_wait()
+        received = inbox.get_nowait()
+        assert received == envelope
+
+    finally:
+        await multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_outbox_negative():
+    """Test InBox OutBox objects."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
+    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    context = EnvelopeContext(connection_id=connection_1.connection_id)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=msg.protocol_id,
+        message=b"",
+        context=context,
+    )
+
+    try:
+        await multiplexer.connect()
+        outbox = OutBox(multiplexer, "default_address")
+
+        assert outbox.empty()
+
+        with pytest.raises(ValueError) as execinfo:
+            outbox.put(envelope)
+        assert (
+            str(execinfo.value)
+            == "Only Message type allowed in envelope message field when putting into outbox."
+        )
+
+        assert outbox.empty()
+
+        with pytest.raises(ValueError) as execinfo:
+            outbox.put_message("")
+        assert str(execinfo.value) == "Provided message not of type Message."
+
+        assert outbox.empty()
+
+        with pytest.raises(ValueError) as execinfo:
+            outbox.put_message(msg)
+        assert (
+            str(execinfo.value) == "Provided message has message.counterparty not set."
+        )
+
+        assert outbox.empty()
+        msg.counterparty = "to"
+
+        with pytest.raises(ValueError) as execinfo:
+            outbox.put_message(msg)
+        assert str(execinfo.value) == "Provided message has message.sender not set."
+
     finally:
         await multiplexer.disconnect()
 
