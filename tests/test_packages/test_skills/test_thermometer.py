@@ -17,6 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the thermometer skills."""
+
+from random import uniform
+
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
@@ -51,6 +54,12 @@ class TestThermometerSkill(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),
+            "longitude": round(uniform(-180, 180), 2),
+        }
+
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -76,6 +85,10 @@ class TestThermometerSkill(AEATestCaseMany):
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+
+        # replace location
+        setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
+        self.force_set_config(setting_path, location)
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
@@ -103,6 +116,12 @@ class TestThermometerSkill(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.thermometer_client.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
@@ -207,6 +226,12 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),
+            "longitude": round(uniform(-180, 180), 2),
+        }
+
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -235,6 +260,10 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+
+        # replace location
+        setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
+        self.force_set_config(setting_path, location)
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
@@ -268,6 +297,12 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.thermometer_client.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # run AEAs
         self.set_agent_context(thermometer_aea_name)

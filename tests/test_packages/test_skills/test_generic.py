@@ -17,6 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
+
+from random import uniform
+
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
@@ -50,6 +53,12 @@ class TestGenericSkills(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),
+            "longitude": round(uniform(-180, 180), 2),
+        }
+
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -79,6 +88,12 @@ class TestGenericSkills(AEATestCaseMany):
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
         self.set_config(setting_path, False, "bool")
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -110,6 +125,12 @@ class TestGenericSkills(AEATestCaseMany):
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_buyer.is_abstract"
         self.set_config(setting_path, False, "bool")
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
@@ -207,6 +228,12 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),
+            "longitude": round(uniform(-180, 180), 2),
+        }
+
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -239,6 +266,12 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
         self.set_config(setting_path, False, "bool")
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -275,6 +308,12 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # run AEAs
         self.set_agent_context(seller_aea_name)

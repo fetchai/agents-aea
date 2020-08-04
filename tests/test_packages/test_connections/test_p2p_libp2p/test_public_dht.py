@@ -129,8 +129,8 @@ class TestLibp2pConnectionRelayNodeRestart:
         cls.multiplexer.connect()
 
     def test_connection_is_established(self):
-        assert self.relay.connection_status.is_connected is True
-        assert self.connection.connection_status.is_connected is True
+        assert self.relay.is_connected is True
+        assert self.connection.is_connected is True
 
     def test_envelope_routed_after_relay_restart(self):
         addr_1 = self.connection.address
