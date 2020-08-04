@@ -57,6 +57,13 @@ A handler can be registered in one way:
 
 - By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
 
+It is possible to register new handlers dynamically by enqueuing new
+`Handler` instances in the queue `context.new_handlers`, e.g. in a skill
+component we can write:
+
+``` python
+self.context.new_handlers.put(MyHandler(name="my_handler", skill_context=self.context))
+```
 
 ### `behaviours.py`
 
