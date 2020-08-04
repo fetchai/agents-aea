@@ -21,6 +21,7 @@
 
 import pytest
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
@@ -35,7 +36,7 @@ from aea.helpers.transaction.base import (
 
 def test_init_terms():
     """Test the terms object initialization."""
-    ledger_id = "some_ledger"
+    ledger_id = DEFAULT_LEDGER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": -10}
@@ -43,6 +44,7 @@ def test_init_terms():
     is_sender_payable_tx_fee = True
     nonce = "somestring"
     kwargs = {"key": "value"}
+    fee_by_currency_id = {}
     terms = Terms(
         ledger_id=ledger_id,
         sender_address=sender_addr,
@@ -53,6 +55,10 @@ def test_init_terms():
         nonce=nonce,
         **kwargs
     )
+    sender_hash = "9af02c24bdb18b73aad129291dc9eee008f9bcf62f5a6e91b5cb7427f146ca3b"
+    counterparty_hash = (
+        "174c1321c0eb4a49bf99d783b56f4fc30d0ee558106454c56d1c0fad295ccc79"
+    )
     assert terms.ledger_id == ledger_id
     assert terms.sender_address == sender_addr
     assert terms.counterparty_address == counterparty_addr
@@ -61,9 +67,23 @@ def test_init_terms():
     assert terms.is_sender_payable_tx_fee == is_sender_payable_tx_fee
     assert terms.nonce == nonce
     assert terms.kwargs == kwargs
-    assert (
-        str(terms)
-        == "Terms: ledger_id=some_ledger, sender_address=SenderAddress, counterparty_address=CounterpartyAddress, amount_by_currency_id={'FET': -10}, quantities_by_good_id={'good_1': 20}, is_sender_payable_tx_fee=True, nonce=somestring, fee_by_currency_id=None, kwargs={'key': 'value'}"
+    assert terms.fee_by_currency_id == fee_by_currency_id
+    assert terms.id == sender_hash
+    assert terms.sender_hash == sender_hash
+    assert terms.counterparty_hash == counterparty_hash
+    assert terms.currency_id == next(iter(amount_by_currency_id.keys()))
+    assert str(
+        terms
+    ) == "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee_by_currency_id={}, kwargs={}".format(
+        ledger_id,
+        sender_addr,
+        counterparty_addr,
+        amount_by_currency_id,
+        quantities_by_good_id,
+        is_sender_payable_tx_fee,
+        nonce,
+        fee_by_currency_id,
+        kwargs,
     )
     assert terms == terms
     with pytest.raises(AssertionError):
@@ -72,14 +92,14 @@ def test_init_terms():
 
 def test_init_terms_w_fee():
     """Test the terms object initialization with fee."""
-    ledger_id = "some_ledger"
+    ledger_id = DEFAULT_LEDGER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": -10}
     quantities_by_good_id = {"good_1": 20}
     is_sender_payable_tx_fee = True
     nonce = "somestring"
-    fee = {"FET": 1}
+    fee_by_currency_id = {"FET": 1}
     terms = Terms(
         ledger_id=ledger_id,
         sender_address=sender_addr,
@@ -88,17 +108,176 @@ def test_init_terms_w_fee():
         quantities_by_good_id=quantities_by_good_id,
         is_sender_payable_tx_fee=is_sender_payable_tx_fee,
         nonce=nonce,
-        fee_by_currency_id=fee,
+        fee_by_currency_id=fee_by_currency_id,
     )
     new_counterparty_address = "CounterpartyAddressNew"
     terms.counterparty_address = new_counterparty_address
     assert terms.counterparty_address == new_counterparty_address
-    assert terms.fee == fee["FET"]
-    assert terms.fee_by_currency_id == fee
+    assert terms.fee == next(iter(fee_by_currency_id.values()))
+    assert terms.fee_by_currency_id == fee_by_currency_id
+    assert terms.counterparty_payable_amount == 0
+    assert terms.sender_payable_amount == -next(iter(amount_by_currency_id.values()))
+    assert terms.sender_payable_amount_incl_fee == -next(
+        iter(amount_by_currency_id.values())
+    ) + next(iter(fee_by_currency_id.values()))
+    assert terms.sender_fee == next(iter(fee_by_currency_id.values()))
+    assert terms.counterparty_fee == 0
+
+
+def test_init_terms_w_fee_counterparty():
+    """Test the terms object initialization with fee."""
+    ledger_id = DEFAULT_LEDGER
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {"FET": 10}
+    quantities_by_good_id = {"good_1": -20}
+    is_sender_payable_tx_fee = False
+    nonce = "somestring"
+    fee_by_currency_id = {"FET": 1}
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address=sender_addr,
+        counterparty_address=counterparty_addr,
+        amount_by_currency_id=amount_by_currency_id,
+        quantities_by_good_id=quantities_by_good_id,
+        is_sender_payable_tx_fee=is_sender_payable_tx_fee,
+        nonce=nonce,
+        fee_by_currency_id=fee_by_currency_id,
+    )
+    new_counterparty_address = "CounterpartyAddressNew"
+    terms.counterparty_address = new_counterparty_address
+    assert terms.counterparty_address == new_counterparty_address
+    assert terms.fee == next(iter(fee_by_currency_id.values()))
+    assert terms.fee_by_currency_id == fee_by_currency_id
     assert terms.counterparty_payable_amount == next(
         iter(amount_by_currency_id.values())
     )
-    assert terms.sender_payable_amount == -next(iter(amount_by_currency_id.values()))
+    assert terms.counterparty_payable_amount_incl_fee == next(
+        iter(amount_by_currency_id.values())
+    ) + next(iter(fee_by_currency_id.values()))
+    assert terms.sender_payable_amount == 0
+    assert terms.sender_fee == 0
+    assert terms.counterparty_fee == next(iter(fee_by_currency_id.values()))
+
+
+def test_init_terms_strict_positive():
+    """Test the terms object initialization in strict mode."""
+    ledger_id = DEFAULT_LEDGER
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {"FET": -10}
+    quantities_by_good_id = {"good_1": 20}
+    is_sender_payable_tx_fee = True
+    nonce = "somestring"
+    assert Terms(
+        ledger_id=ledger_id,
+        sender_address=sender_addr,
+        counterparty_address=counterparty_addr,
+        amount_by_currency_id=amount_by_currency_id,
+        quantities_by_good_id=quantities_by_good_id,
+        is_sender_payable_tx_fee=is_sender_payable_tx_fee,
+        nonce=nonce,
+        is_strict=True,
+    )
+
+
+def test_init_terms_strict_negative():
+    """Test the terms object initialization in strict mode."""
+    ledger_id = DEFAULT_LEDGER
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {"FET": 10}
+    quantities_by_good_id = {"good_1": 20}
+    is_sender_payable_tx_fee = True
+    nonce = "somestring"
+    with pytest.raises(AssertionError):
+        Terms(
+            ledger_id=ledger_id,
+            sender_address=sender_addr,
+            counterparty_address=counterparty_addr,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+            is_sender_payable_tx_fee=is_sender_payable_tx_fee,
+            nonce=nonce,
+            is_strict=True,
+        )
+
+
+def test_init_terms_multiple_goods():
+    """Test the terms object initialization with multiple goods."""
+    ledger_id = DEFAULT_LEDGER
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {"FET": -10}
+    quantities_by_good_id = {"good_1": 20, "good_2": -10}
+    is_sender_payable_tx_fee = True
+    nonce = "somestring"
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address=sender_addr,
+        counterparty_address=counterparty_addr,
+        amount_by_currency_id=amount_by_currency_id,
+        quantities_by_good_id=quantities_by_good_id,
+        is_sender_payable_tx_fee=is_sender_payable_tx_fee,
+        nonce=nonce,
+    )
+    assert (
+        terms.id == "f81812773f5242d0cb52cfa82bc08bdba8d17b1e56e2cf02b3056749184e198c"
+    )
+
+
+def test_init_terms_no_amount_and_quantity():
+    """Test the terms object initialization with no amount."""
+    ledger_id = DEFAULT_LEDGER
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {}
+    quantities_by_good_id = {}
+    nonce = "somestring"
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address=sender_addr,
+        counterparty_address=counterparty_addr,
+        amount_by_currency_id=amount_by_currency_id,
+        quantities_by_good_id=quantities_by_good_id,
+        nonce=nonce,
+    )
+    new_counterparty_address = "CounterpartyAddressNew"
+    terms.counterparty_address = new_counterparty_address
+    assert terms.counterparty_address == new_counterparty_address
+    assert not terms.has_fee
+    assert terms.counterparty_payable_amount == 0
+    assert terms.counterparty_payable_amount_incl_fee == 0
+    assert terms.sender_payable_amount == 0
+    assert terms.sender_payable_amount_incl_fee == 0
+
+
+def test_terms_encode_decode():
+    """Test encoding and decoding of terms."""
+
+    class TermsProtobufObject:
+        terms_bytes = b""
+
+    ledger_id = DEFAULT_LEDGER
+    sender_addr = "SenderAddress"
+    counterparty_addr = "CounterpartyAddress"
+    amount_by_currency_id = {"FET": -10}
+    quantities_by_good_id = {"good_1": 20}
+    is_sender_payable_tx_fee = True
+    nonce = "somestring"
+    terms = Terms(
+        ledger_id=ledger_id,
+        sender_address=sender_addr,
+        counterparty_address=counterparty_addr,
+        amount_by_currency_id=amount_by_currency_id,
+        quantities_by_good_id=quantities_by_good_id,
+        is_sender_payable_tx_fee=is_sender_payable_tx_fee,
+        nonce=nonce,
+        is_strict=True,
+    )
+    Terms.encode(TermsProtobufObject, terms)
+    recovered_terms = Terms.decode(TermsProtobufObject)
+    assert terms == recovered_terms
 
 
 def test_init_raw_transaction():
@@ -110,6 +289,20 @@ def test_init_raw_transaction():
     assert rt.body == body
     assert str(rt) == "RawTransaction: ledger_id=some_ledger, body=body"
     assert rt == rt
+
+
+def test_raw_transaction_encode_decode():
+    """Test encoding and decoding of terms."""
+
+    class RawTransactionProtobufObject:
+        raw_transaction_bytes = b""
+
+    ledger_id = "some_ledger"
+    body = "body"
+    rt = RawTransaction(ledger_id, body)
+    RawTransaction.encode(RawTransactionProtobufObject, rt)
+    recovered_rt = RawTransaction.decode(RawTransactionProtobufObject)
+    assert rt == recovered_rt
 
 
 def test_init_raw_message():
@@ -127,6 +320,20 @@ def test_init_raw_message():
     assert rm == rm
 
 
+def test_raw_message_encode_decode():
+    """Test encoding and decoding of raw_message."""
+
+    class RawMessageProtobufObject:
+        raw_message_bytes = b""
+
+    ledger_id = "some_ledger"
+    body = "body"
+    rm = RawMessage(ledger_id, body)
+    RawMessage.encode(RawMessageProtobufObject, rm)
+    recovered_rm = RawMessage.decode(RawMessageProtobufObject)
+    assert rm == recovered_rm
+
+
 def test_init_signed_transaction():
     """Test the signed_transaction object initialization."""
     ledger_id = "some_ledger"
@@ -136,6 +343,20 @@ def test_init_signed_transaction():
     assert st.body == body
     assert str(st) == "SignedTransaction: ledger_id=some_ledger, body=body"
     assert st == st
+
+
+def test_signed_transaction_encode_decode():
+    """Test encoding and decoding of signed_transaction."""
+
+    class SignedTransactionProtobufObject:
+        signed_transaction_bytes = b""
+
+    ledger_id = "some_ledger"
+    body = "body"
+    st = SignedTransaction(ledger_id, body)
+    SignedTransaction.encode(SignedTransactionProtobufObject, st)
+    recovered_st = SignedTransaction.decode(SignedTransactionProtobufObject)
+    assert st == recovered_st
 
 
 def test_init_signed_message():
@@ -151,6 +372,20 @@ def test_init_signed_message():
         == "SignedMessage: ledger_id=some_ledger, body=body, is_deprecated_mode=False"
     )
     assert sm == sm
+
+
+def test_signed_message_encode_decode():
+    """Test encoding and decoding of signed_message."""
+
+    class SignedMessageProtobufObject:
+        signed_message_bytes = b""
+
+    ledger_id = "some_ledger"
+    body = "body"
+    sm = SignedMessage(ledger_id, body)
+    SignedMessage.encode(SignedMessageProtobufObject, sm)
+    recovered_sm = SignedMessage.decode(SignedMessageProtobufObject)
+    assert sm == recovered_sm
 
 
 def test_init_transaction_receipt():
@@ -169,6 +404,21 @@ def test_init_transaction_receipt():
     assert tr == tr
 
 
+def test_transaction_receipt_encode_decode():
+    """Test encoding and decoding of transaction_receipt."""
+
+    class TransactionReceiptProtobufObject:
+        transaction_receipt_bytes = b""
+
+    ledger_id = "some_ledger"
+    receipt = "receipt"
+    transaction = "transaction"
+    tr = TransactionReceipt(ledger_id, receipt, transaction)
+    TransactionReceipt.encode(TransactionReceiptProtobufObject, tr)
+    recovered_tr = TransactionReceipt.decode(TransactionReceiptProtobufObject)
+    assert tr == recovered_tr
+
+
 def test_init_state():
     """Test the state object initialization."""
     ledger_id = "some_ledger"
@@ -180,12 +430,40 @@ def test_init_state():
     assert state == state
 
 
+def test_state_encode_decode():
+    """Test encoding and decoding of state."""
+
+    class StateProtobufObject:
+        state_bytes = b""
+
+    ledger_id = "some_ledger"
+    body = "state"
+    state = State(ledger_id, body)
+    State.encode(StateProtobufObject, state)
+    recovered_state = State.decode(StateProtobufObject)
+    assert state == recovered_state
+
+
 def test_init_transaction_digest():
     """Test the transaction_digest object initialization."""
     ledger_id = "some_ledger"
-    body = "state"
+    body = "digest"
     td = TransactionDigest(ledger_id, body)
     assert td.ledger_id == ledger_id
     assert td.body == body
-    assert str(td) == "TransactionDigest: ledger_id=some_ledger, body=state"
+    assert str(td) == "TransactionDigest: ledger_id={}, body={}".format(ledger_id, body)
     assert td == td
+
+
+def test_transaction_digest_encode_decode():
+    """Test encoding and decoding of transaction_digest."""
+
+    class TransactionDigestProtobufObject:
+        transaction_digest_bytes = b""
+
+    ledger_id = "some_ledger"
+    body = "digest"
+    td = TransactionDigest(ledger_id, body)
+    TransactionDigest.encode(TransactionDigestProtobufObject, td)
+    recovered_td = TransactionDigest.decode(TransactionDigestProtobufObject)
+    assert td == recovered_td

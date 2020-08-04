@@ -1,7 +1,26 @@
+# ML Trade Protocol
+
+**Name:** ml_trade
+
+**Author**: fetchai
+
+**Version**: 0.4.0
+
+**Short Description**: A protocol for trading data for training and prediction purposes.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for trading data for training and prediction purposes.
+
+## Specification
+
+```yaml
 ---
 name: ml_trade
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -40,3 +59,6 @@ termination: [data]
 roles: {seller, buyer}
 end_states: [successful]
 ...
+```
+
+## Links

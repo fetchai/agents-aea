@@ -20,29 +20,27 @@
 """Implementation of the 'aea generate_wealth' subcommand."""
 
 import time
-from typing import cast
+from typing import Dict, Optional, cast
 
 import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import try_get_balance, verify_or_create_private_keys
-from aea.crypto.helpers import (
-    IDENTIFIER_TO_FAUCET_APIS,
-    TESTNETS,
-    try_generate_testnet_wealth,
-)
+from aea.configurations.base import AgentConfig
+from aea.crypto.helpers import try_generate_testnet_wealth
+from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
 from aea.crypto.wallet import Wallet
 
 
-FUNDS_RELEASE_TIMEOUT = 10
+FUNDS_RELEASE_TIMEOUT = 30
 
 
 @click.command()
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(list(IDENTIFIER_TO_FAUCET_APIS.keys())),
+    type=click.Choice(list(faucet_apis_registry.supported_ids)),
     required=True,
 )
 @click.option(
@@ -55,18 +53,29 @@ def generate_wealth(click_context, sync, type_):
     _try_generate_wealth(click_context, type_, sync)
 
 
-def _try_generate_wealth(click_context, type_, sync):
+def _try_generate_wealth(
+    click_context: click.core.Context, type_: str, sync: bool
+) -> None:
+    """
+    Try generate wealth for the provided network identifier.
+
+    :param click_context: the click context
+    :param type_: the network type
+    :param sync: whether to sync or not
+    :return: None
+    """
     ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys(ctx=ctx)
 
     private_key_paths = {
         config_pair[0]: config_pair[1]
         for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
+    }  # type: Dict[str, Optional[str]]
     wallet = Wallet(private_key_paths)
     try:
         address = wallet.addresses[type_]
-        testnet = TESTNETS[type_]
+        faucet_api_cls = make_faucet_api_cls(type_)
+        testnet = faucet_api_cls.network_name
         click.echo(
             "Requesting funds for address {} on test network '{}'".format(
                 address, testnet
@@ -80,10 +89,22 @@ def _try_generate_wealth(click_context, type_, sync):
         raise click.ClickException(str(e))
 
 
-def _wait_funds_release(agent_config, wallet, type_):
+def _wait_funds_release(agent_config: AgentConfig, wallet: Wallet, type_: str) -> None:
+    """
+    Wait for the funds to be released.
+
+    :param agent_config: the agent config
+    :param wallet: the wallet
+    :param type_: the network type
+    """
     start_balance = try_get_balance(agent_config, wallet, type_)
     end_time = time.time() + FUNDS_RELEASE_TIMEOUT
+    has_hit_timeout = True
     while time.time() < end_time:
-        if start_balance != try_get_balance(agent_config, wallet, type_):
+        current_balance = try_get_balance(agent_config, wallet, type_)
+        if start_balance != current_balance:
+            has_hit_timeout = False
             break  # pragma: no cover
         time.sleep(1)
+    if has_hit_timeout:
+        raise ValueError("Timeout hit. Syncing did not finish.")

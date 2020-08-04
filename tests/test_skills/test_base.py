@@ -143,16 +143,16 @@ class TestSkillContext:
         """Test 'new_behaviours_queue' property getter."""
         assert isinstance(self.skill_context.new_behaviours, Queue)
 
+    def test_new_handlers_queue(self):
+        """Test 'new_behaviours_queue' property getter."""
+        assert isinstance(self.skill_context.new_handlers, Queue)
+
     def test_search_service_address(self):
         """Test 'search_service_address' property getter."""
         assert (
             self.skill_context.search_service_address
             == self.my_aea.context.search_service_address
         )
-
-    def test_contracts(self):
-        """Test the 'contracts' property getter."""
-        assert isinstance(self.skill_context.contracts, SimpleNamespace)
 
     def test_namespace(self):
         """Test the 'namespace' property getter."""
@@ -182,7 +182,7 @@ class SkillContextTestCase(TestCase):
         obj._skill.config.public_id = "public_id"
         obj.skill_id
 
-    @mock.patch("aea.skills.base.logger.debug")
+    @mock.patch("aea.skills.base._default_logger.debug")
     @mock.patch("aea.skills.base.SkillContext.skill_id")
     def test_is_active_positive(self, skill_id_mock, debug_mock):
         """Test is_active setter positive result"""
@@ -275,15 +275,16 @@ class SkillComponentTestCase(TestCase):
         )
         component.config
 
-    @mock.patch("aea.skills.base.logger.warning")
-    def test_kwargs_not_empty(self, mock_logger_debug):
+    def test_kwargs_not_empty(self):
         """Test the case when there are some kwargs not-empty"""
         kwargs = dict(foo="bar")
         component_name = "component_name"
-        self.TestComponent(component_name, MagicMock(), **kwargs)
-        mock_logger_debug.assert_called_with(
-            f"The kwargs={kwargs} passed to {component_name} have not been set!"
-        )
+        skill_context = SkillContext()
+        with mock.patch.object(skill_context.logger, "warning") as mock_logger:
+            self.TestComponent(component_name, skill_context, **kwargs)
+            mock_logger.assert_any_call(
+                f"The kwargs={kwargs} passed to {component_name} have not been set!"
+            )
 
 
 def test_load_skill():
@@ -330,7 +331,7 @@ def test_behaviour_parse_module_missing_class():
         ROOT_DIR, "tests", "data", "dummy_skill", "behaviours.py"
     )
     with unittest.mock.patch.object(
-        aea.skills.base.logger, "warning"
+        aea.skills.base._default_logger, "warning"
     ) as mock_logger_warning:
         behaviours_by_id = Behaviour.parse_module(
             dummy_behaviours_path,
@@ -358,7 +359,7 @@ def test_handler_parse_module_missing_class():
     )
     dummy_handlers_path = Path(ROOT_DIR, "tests", "data", "dummy_skill", "handlers.py")
     with unittest.mock.patch.object(
-        aea.skills.base.logger, "warning"
+        aea.skills.base._default_logger, "warning"
     ) as mock_logger_warning:
         behaviours_by_id = Handler.parse_module(
             dummy_handlers_path,
@@ -386,7 +387,7 @@ def test_model_parse_module_missing_class():
     )
     dummy_models_path = Path(ROOT_DIR, "tests", "data", "dummy_skill")
     with unittest.mock.patch.object(
-        aea.skills.base.logger, "warning"
+        aea.skills.base._default_logger, "warning"
     ) as mock_logger_warning:
         models_by_id = Model.parse_module(
             dummy_models_path,
@@ -417,10 +418,14 @@ def test_check_duplicate_classes():
 def test_print_warning_message_for_non_declared_skill_components():
     """Test the helper function '_print_warning_message_for_non_declared_skill_components'."""
     with unittest.mock.patch.object(
-        aea.skills.base.logger, "warning"
+        aea.skills.base._default_logger, "warning"
     ) as mock_logger_warning:
         _print_warning_message_for_non_declared_skill_components(
-            {"unknown_class_1", "unknown_class_2"}, set(), "type", "path"
+            SkillContext(),
+            {"unknown_class_1", "unknown_class_2"},
+            set(),
+            "type",
+            "path",
         )
         mock_logger_warning.assert_any_call(
             "Class unknown_class_1 of type type found but not declared in the configuration file path."
@@ -455,10 +460,3 @@ class TestSkill:
         """Test the skill context getter."""
         context = self.skill.skill_context
         assert isinstance(context, SkillContext)
-
-    def test_inject_contracts(self):
-        """Test inject contracts."""
-        assert self.skill.contracts == {}
-        d = {"foo": MagicMock()}
-        self.skill.inject_contracts(d)
-        assert self.skill.contracts == d

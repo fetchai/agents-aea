@@ -31,7 +31,7 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
-    FUNDED_COSMOS_PRIVATE_KEY_1,
+    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
@@ -125,21 +125,21 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.1.0": "fetchai/ledger:0.2.0",
-            "fetchai/oef_search:0.3.0": "fetchai/soef:0.5.0",
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/thermometer:0.7.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/thermometer:0.8.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.7.0")
+        self.eject_item("skill", "fetchai/thermometer:0.8.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.force_set_config(
             "skills.thermometer.models", seller_skill_config_replacement["models"],
@@ -152,27 +152,30 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         seller_stategy_path = Path(
             seller_aea_name, "skills", "thermometer", "strategy.py",
         )
-        self.replace_file_content(seller_stategy_path, ORM_SELLER_STRATEGY_PATH)
+        self.replace_file_content(ORM_SELLER_STRATEGY_PATH, seller_stategy_path)
         self.fingerprint_item(
             "skill", "{}/thermometer:0.1.0".format(self.author),
         )
         self.run_install()
 
-        # add non-funded key
+        # add keys
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.5.0")
+        self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
-        self.add_item("connection", "fetchai/ledger:0.2.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.6.0")
+        self.add_item("connection", "fetchai/ledger:0.3.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.7.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
@@ -182,13 +185,18 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         )
         self.run_install()
 
-        # add funded key
+        # add keys
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
-        self.replace_private_key_in_file(
-            FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
+
+        # fund key
+        self.generate_wealth(COSMOS)
+
+        # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 

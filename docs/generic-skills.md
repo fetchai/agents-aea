@@ -72,9 +72,9 @@ The following steps create the seller from scratch:
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/p2p_libp2p:0.6.0
-aea add connection fetchai/soef:0.5.0
-aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/generic_seller:0.8.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/generic_seller:0.9.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
@@ -82,8 +82,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 In `my_seller_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
-  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 
 </p>
@@ -106,9 +106,9 @@ The following steps create the buyer from scratch:
 aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/p2p_libp2p:0.6.0
-aea add connection fetchai/soef:0.5.0
-aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/generic_buyer:0.7.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/generic_buyer:0.8.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
@@ -116,8 +116,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 In `my_buyer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
-  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 
 </p>

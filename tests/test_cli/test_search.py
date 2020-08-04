@@ -31,6 +31,7 @@ from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
+from aea.configurations.base import PublicId
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -184,6 +185,11 @@ class TestSearchAgentsLocal:
 
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        cls.cli_config_file = f"{cls.t}/cli_config.yaml"
+        cls.cli_config_patch = mock.patch(
+            "aea.cli.utils.config.CLI_CONFIG_PATH", cls.cli_config_file
+        )
+        cls.cli_config_patch.start()
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
@@ -233,6 +239,7 @@ class TestSearchAgentsLocal:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
+        cls.cli_config_patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -351,23 +358,30 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
+        public_id_echo = PublicId.from_str("fetchai/echo:0.4.0")
+        public_id_error = PublicId.from_str("fetchai/error:0.4.0")
         expected = (
             'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
-            "Public ID: fetchai/echo:0.3.0\n"
+            "Public ID: {}\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"
-            "Version: 0.3.0\n"
+            "Version: {}\n"
             "------------------------------\n"
             "------------------------------\n"
-            "Public ID: fetchai/error:0.3.0\n"
+            "Public ID: {}\n"
             "Name: error\n"
             "Description: The error skill implements basic error handling required by all AEAs.\n"
             "Author: fetchai\n"
-            "Version: 0.3.0\n"
+            "Version: {}\n"
             "------------------------------\n\n"
+        ).format(
+            str(public_id_echo),
+            str(public_id_echo.version),
+            str(public_id_error),
+            str(public_id_error.version),
         )
         assert self.result.output == expected
 
@@ -426,23 +440,30 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
+        public_id_echo = PublicId.from_str("fetchai/echo:0.4.0")
+        public_id_error = PublicId.from_str("fetchai/error:0.4.0")
         expected = (
             'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
-            "Public ID: fetchai/echo:0.3.0\n"
+            "Public ID: {}\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"
-            "Version: 0.3.0\n"
+            "Version: {}\n"
             "------------------------------\n"
             "------------------------------\n"
-            "Public ID: fetchai/error:0.3.0\n"
+            "Public ID: {}\n"
             "Name: error\n"
             "Description: The error skill implements basic error handling required by all AEAs.\n"
             "Author: fetchai\n"
-            "Version: 0.3.0\n"
+            "Version: {}\n"
             "------------------------------\n\n"
+        ).format(
+            str(public_id_echo),
+            str(public_id_echo.version),
+            str(public_id_error),
+            str(public_id_error.version),
         )
         assert self.result.output == expected
 

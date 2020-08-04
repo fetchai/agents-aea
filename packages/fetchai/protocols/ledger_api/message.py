@@ -48,7 +48,7 @@ DEFAULT_BODY_SIZE = 4
 class LedgerApiMessage(Message):
     """A protocol for ledger APIs requests and responses."""
 
-    protocol_id = ProtocolId("fetchai", "ledger_api", "0.1.0")
+    protocol_id = ProtocolId.from_str("fetchai/ledger_api:0.2.0")
 
     RawTransaction = CustomRawTransaction
 

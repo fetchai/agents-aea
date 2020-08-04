@@ -19,7 +19,7 @@
 """Logging helpers."""
 import logging
 from logging import Logger, LoggerAdapter
-from typing import Any, MutableMapping, Optional, Tuple, Union
+from typing import Any, MutableMapping, Optional, Tuple, cast
 
 
 class AgentLoggerAdapter(LoggerAdapter):
@@ -44,9 +44,7 @@ class WithLogger:
     """Interface to endow subclasses with a logger."""
 
     def __init__(
-        self,
-        logger: Optional[Union[Logger, LoggerAdapter]] = None,
-        default_logger_name: str = "aea",
+        self, logger: Optional[Logger] = None, default_logger_name: str = "aea",
     ):
         """
         Initialize the logger.
@@ -54,19 +52,19 @@ class WithLogger:
         :param logger: the logger object.
         :param default_logger_name: the default logger name, if a logger is not provided.
         """
-        self._logger = logger
+        self._logger: Optional[Logger] = logger
         self._default_logger_name = default_logger_name
 
     @property
-    def logger(self) -> Union[Logger, LoggerAdapter]:
+    def logger(self) -> Logger:
         """Get the component logger."""
         if self._logger is None:
             # if not set (e.g. programmatic instantiation)
             # return a default one with the default logger name.
             return logging.getLogger(self._default_logger_name)
-        return self._logger
+        return cast(Logger, self._logger)
 
     @logger.setter
-    def logger(self, logger: Union[Logger, LoggerAdapter]):
+    def logger(self, logger: Optional[Logger]):
         """Set the logger."""
         self._logger = logger

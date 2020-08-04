@@ -67,6 +67,8 @@ class MyAgent(Agent):
                 envelope.to = sender
                 envelope.sender = receiver
                 envelope.message = DefaultMessage.serializer.decode(envelope.message)
+                envelope.message.sender = receiver
+                envelope.message.counterparty = sender
                 print(
                     "Received envelope from {} with protocol_id={}".format(
                         sender, envelope.protocol_id
@@ -122,7 +124,7 @@ We use the input and output text files to send an envelope to our agent and rece
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             f.write(message_text)
@@ -196,6 +198,8 @@ class MyAgent(Agent):
                 envelope.to = sender
                 envelope.sender = receiver
                 envelope.message = DefaultMessage.serializer.decode(envelope.message)
+                envelope.message.sender = receiver
+                envelope.message.counterparty = sender
                 print(
                     "Received envelope from {} with protocol_id={}".format(
                         sender, envelope.protocol_id
@@ -241,7 +245,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             f.write(message_text)

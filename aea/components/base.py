@@ -42,6 +42,7 @@ class Component(ABC, WithLogger):
         self,
         configuration: Optional[ComponentConfiguration] = None,
         is_vendor: bool = False,
+        **kwargs
     ):
         """
         Initialize a package.
@@ -49,7 +50,7 @@ class Component(ABC, WithLogger):
         :param configuration: the package configuration.
         :param is_vendor: whether the package is vendorized.
         """
-        WithLogger.__init__(self)
+        WithLogger.__init__(self, **kwargs)
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor

@@ -44,9 +44,9 @@ class Kwargs:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         assert self._body is not None, "body must not be None"
-        assert isinstance(self._body, dict) and [
-            isinstance(key, str) for key in self._body.keys()
-        ]
+        assert isinstance(self._body, dict) and all(
+            [isinstance(key, str) for key in self._body.keys()]
+        )
 
     @property
     def body(self) -> Dict[str, Any]:
@@ -58,7 +58,7 @@ class Kwargs:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The protocol buffer object in the kwargs_protobuf_object argument must be matched with the instance of this class in the 'kwargs_object' argument.
+        The protocol buffer object in the kwargs_protobuf_object argument is matched with the instance of this class in the 'kwargs_object' argument.
 
         :param kwargs_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param kwargs_object: an instance of this class to be encoded in the protocol buffer object.
@@ -72,10 +72,10 @@ class Kwargs:
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
+        A new instance of this class is created that matches the protocol buffer object in the 'kwargs_protobuf_object' argument.
 
-        :param raw_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
+        :param kwargs_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'kwargs_protobuf_object' argument.
         """
         kwargs = pickle.loads(kwargs_protobuf_object.kwargs_bytes)  # nosec
         return kwargs

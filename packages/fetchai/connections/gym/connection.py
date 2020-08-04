@@ -20,11 +20,12 @@
 """Gym connector and gym channel."""
 
 import asyncio
+import copy
 import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Optional, Union, cast
+from typing import Optional, Tuple, Union, cast
 
 import gym
 
@@ -33,14 +34,13 @@ from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope
 
+from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
+
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-
-"""default 'to' field for Gym envelopes."""
-DEFAULT_GYM = "gym"
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.5.0")
 
 
 class GymChannel:
@@ -58,6 +58,28 @@ class GymChannel:
             self.THREAD_POOL_SIZE
         )
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = logger
+        self._dialogues = GymDialogues(str(PUBLIC_ID))
+
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[GymMessage, Optional[GymDialogue]]:
+        """
+        Get a message copy and dialogue related to this message.
+
+        :param envelope: incoming envelope
+
+        :return: Tuple[MEssage, Optional[Dialogue]]
+        """
+        orig_message = cast(GymMessage, envelope.message)
+        message = copy.copy(
+            orig_message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = (
+            orig_message.sender
+        )  # TODO: fix; should be done by framework
+        dialogue = cast(GymDialogue, self._dialogues.update(message))
+        return message, dialogue
 
     @property
     def queue(self) -> asyncio.Queue:
@@ -102,7 +124,14 @@ class GymChannel:
         assert isinstance(
             envelope.message, GymMessage
         ), "Message not of type GymMessage"
-        gym_message = cast(GymMessage, envelope.message)
+        gym_message, dialogue = self._get_message_and_dialogue(envelope)
+
+        if dialogue is None:
+            self.logger.warning(
+                "Could not create dialogue from message={}".format(gym_message)
+            )
+            return
+
         if gym_message.performative == GymMessage.Performative.ACT:
             action = gym_message.action.any
             step_id = gym_message.step_id
@@ -110,7 +139,6 @@ class GymChannel:
             observation, reward, done, info = await self._run_in_executor(
                 self.gym_env.step, action
             )
-
             msg = GymMessage(
                 performative=GymMessage.Performative.PERCEPT,
                 observation=GymMessage.AnyObject(observation),
@@ -118,18 +146,31 @@ class GymChannel:
                 done=done,
                 info=GymMessage.AnyObject(info),
                 step_id=step_id,
+                target=gym_message.message_id,
+                message_id=gym_message.message_id + 1,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             )
-            envelope = Envelope(
-                to=envelope.sender,
-                sender=DEFAULT_GYM,
-                protocol_id=GymMessage.protocol_id,
-                message=msg,
-            )
-            await self._send(envelope)
         elif gym_message.performative == GymMessage.Performative.RESET:
             await self._run_in_executor(self.gym_env.reset)
+            msg = GymMessage(
+                performative=GymMessage.Performative.STATUS,
+                content={"reset": "success"},
+                target=gym_message.message_id,
+                message_id=gym_message.message_id + 1,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            )
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
+            return
+        msg.counterparty = gym_message.counterparty
+        assert dialogue.update(msg), "Error during dialogue update."
+        envelope = Envelope(
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
+            message=msg,
+        )
+        await self._send(envelope)
 
     async def _send(self, envelope: Envelope) -> None:
         """Send a message.
@@ -137,7 +178,6 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        assert envelope.to == self.address, "Invalid destination address"
         await self.queue.put(envelope)
 
     async def disconnect(self) -> None:

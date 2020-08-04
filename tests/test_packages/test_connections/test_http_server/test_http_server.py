@@ -16,12 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests of the HTTP Server connection module."""
 import asyncio
+import copy
 import logging
 import os
 from traceback import print_exc
-from typing import cast
+from typing import Tuple, cast
 from unittest.mock import Mock, patch
 
 import aiohttp
@@ -38,8 +40,10 @@ from packages.fetchai.connections.http_server.connection import (
     HTTPServerConnection,
     Response,
 )
+from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
+from tests.common.mocks import RegexComparator
 from tests.conftest import (
     HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
@@ -77,13 +81,14 @@ class TestHTTPServer:
     def setup(self):
         """Initialise the test case."""
         self.identity = Identity("name", address="my_key")
+        self.agent_address = self.identity.address
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.api_spec_path = os.path.join(
             ROOT_DIR, "tests", "data", "petstore_sim.yaml"
         )
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.3.0")
+        self.protocol_id = PublicId.from_str("fetchai/http:0.4.0")
 
         self.configuration = ConnectionConfig(
             host=self.host,
@@ -97,6 +102,9 @@ class TestHTTPServer:
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.http_connection.connect())
+        self.connection_address = str(HTTPServerConnection.connection_id)
+        self._dialogues = HttpDialogues(self.connection_address)
+        self.original_timeout = self.http_connection.channel.RESPONSE_TIMEOUT
 
     @pytest.mark.asyncio
     async def test_http_connection_disconnect_channel(self):
@@ -104,24 +112,39 @@ class TestHTTPServer:
         await self.http_connection.channel.disconnect()
         assert self.http_connection.channel.is_stopped
 
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[HttpMessage, HttpDialogue]:
+        message = cast(HttpMessage, envelope.message)
+        message = copy.copy(
+            message
+        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        message.is_incoming = True  # TODO: fix; should be done by framework
+        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
+        dialogue = cast(HttpDialogue, self._dialogues.update(message))
+        assert dialogue is not None
+        return message, dialogue
+
     @pytest.mark.asyncio
     async def test_get_200(self):
         """Test send get request w/ 200 response."""
         request_task = self.loop.create_task(self.request("get", "/pets"))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
-        incoming_message = cast(HttpMessage, envelope.message)
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
         message = HttpMessage(
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("", ""),
-            target=incoming_message.message_id,
-            message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
             headers=incoming_message.headers,
+            message_id=incoming_message.message_id + 1,
+            target=incoming_message.message_id,
             status_code=200,
             status_text="Success",
             bodyy=b"Response body",
         )
+        message.counterparty = incoming_message.counterparty
+        assert dialogue.update(message)
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
@@ -140,15 +163,58 @@ class TestHTTPServer:
         )
 
     @pytest.mark.asyncio
-    async def test_bad_performative_get_server_error(self):
+    async def test_bad_performative_get_timeout_error(self):
         """Test send get request w/ 200 response."""
+        self.http_connection.channel.RESPONSE_TIMEOUT = 3
         request_task = self.loop.create_task(self.request("get", "/pets"))
-        envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
+        envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=10)
         assert envelope
-        incoming_message = cast(HttpMessage, envelope.message)
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
         message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
-            dialogue_reference=("", ""),
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            target=incoming_message.message_id,
+            message_id=incoming_message.message_id + 1,
+            method="post",
+            url="/pets",
+            version=incoming_message.version,
+            headers=incoming_message.headers,
+            bodyy=b"Request body",
+        )
+        message.counterparty = incoming_message.counterparty
+        assert not dialogue.update(message)
+        response_envelope = Envelope(
+            to=envelope.sender,
+            sender=envelope.to,
+            protocol_id=envelope.protocol_id,
+            context=envelope.context,
+            message=message,
+        )
+        with patch.object(self.http_connection.logger, "warning") as mock_logger:
+            await self.http_connection.send(response_envelope)
+            mock_logger.assert_any_call(
+                f"Could not create dialogue for message={message}"
+            )
+
+        response = await asyncio.wait_for(request_task, timeout=10)
+
+        assert (
+            response.status == 408
+            and response.reason == "Request Timeout"
+            and await response.text() == ""
+        )
+
+    @pytest.mark.asyncio
+    async def test_late_message_get_timeout_error(self):
+        """Test send get request w/ 200 response."""
+        self.http_connection.channel.RESPONSE_TIMEOUT = 1
+        request_task = self.loop.create_task(self.request("get", "/pets"))
+        envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=10)
+        assert envelope
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
+        message = HttpMessage(
+            performative=HttpMessage.Performative.RESPONSE,
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=incoming_message.message_id,
             message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
@@ -157,6 +223,8 @@ class TestHTTPServer:
             status_text="Success",
             bodyy=b"Response body",
         )
+        message.counterparty = incoming_message.counterparty
+        assert dialogue.update(message)
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
@@ -164,11 +232,22 @@ class TestHTTPServer:
             context=envelope.context,
             message=message,
         )
-        await self.http_connection.send(response_envelope)
+        await asyncio.sleep(1.5)
+        with patch.object(self.http_connection.logger, "warning") as mock_logger:
+            await self.http_connection.send(response_envelope)
+            mock_logger.assert_any_call(
+                RegexComparator(
+                    "Dropping message=.* for incomplete_dialogue_label=.* which has timed out."
+                )
+            )
 
-        response = await asyncio.wait_for(request_task, timeout=20,)
+        response = await asyncio.wait_for(request_task, timeout=10)
 
-        assert response.status == 500 and await response.text() == "Server error"
+        assert (
+            response.status == 408
+            and response.reason == "Request Timeout"
+            and await response.text() == ""
+        )
 
     @pytest.mark.asyncio
     async def test_post_201(self):
@@ -176,10 +255,10 @@ class TestHTTPServer:
         request_task = self.loop.create_task(self.request("post", "/pets",))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
-        incoming_message = cast(HttpMessage, envelope.message)
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("", ""),
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=incoming_message.message_id,
             message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
@@ -188,6 +267,8 @@ class TestHTTPServer:
             status_text="Created",
             bodyy=b"Response body",
         )
+        message.counterparty = incoming_message.counterparty
+        assert dialogue.update(message)
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
@@ -195,6 +276,7 @@ class TestHTTPServer:
             context=envelope.context,
             message=message,
         )
+
         await self.http_connection.send(response_envelope)
 
         response = await asyncio.wait_for(request_task, timeout=20,)
@@ -254,7 +336,6 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_send_connection_drop(self):
         """Test unexpected response."""
-        client_id = "to_key"
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
             dialogue_reference=("", ""),
@@ -266,10 +347,12 @@ class TestHTTPServer:
             status_text="Success",
             bodyy=b"",
         )
+        message.counterparty = "to_key"
+        message.sender = "from_key"
         envelope = Envelope(
-            to=client_id,
-            sender="from_key",
-            protocol_id=self.protocol_id,
+            to=message.counterparty,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
             message=message,
         )
         await self.http_connection.send(envelope)
@@ -300,10 +383,10 @@ class TestHTTPServer:
         request_task = self.loop.create_task(self.request("post", "/pets",))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
-        incoming_message = cast(HttpMessage, envelope.message)
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("", ""),
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=incoming_message.message_id,
             message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
@@ -312,6 +395,8 @@ class TestHTTPServer:
             status_text="Created",
             bodyy=b"Response body",
         )
+        message.counterparty = incoming_message.counterparty
+        assert dialogue.update(message)
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
@@ -320,7 +405,7 @@ class TestHTTPServer:
             message=message,
         )
 
-        with patch.object(Response, "from_envelope", side_effect=Exception("expected")):
+        with patch.object(Response, "from_message", side_effect=Exception("expected")):
             await self.http_connection.send(response_envelope)
             response = await asyncio.wait_for(request_task, timeout=20,)
 
@@ -358,6 +443,7 @@ class TestHTTPServer:
     def teardown(self):
         """Teardown the test case."""
         self.loop.run_until_complete(self.http_connection.disconnect())
+        self.http_connection.channel.RESPONSE_TIMEOUT = self.original_timeout
 
 
 def test_bad_api_spec():

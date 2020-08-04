@@ -23,10 +23,11 @@ import os
 import shutil
 import sqlite3
 import time
+from typing import Optional
 
 import skimage  # type: ignore
 
-logger = logging.getLogger(
+_logger = logging.getLogger(
     "aea.packages.fetchai.skills.carpark_detection.detection_database"
 )
 
@@ -34,7 +35,12 @@ logger = logging.getLogger(
 class DetectionDatabase:
     """Communicate between the database and the python objects."""
 
-    def __init__(self, temp_dir, create_if_not_present=True):
+    def __init__(
+        self,
+        temp_dir,
+        create_if_not_present=True,
+        logger: Optional[logging.Logger] = None,
+    ):
         """Initialise the Detection Database Communication class."""
         self.this_dir = os.path.dirname(__file__)
         self.temp_dir = temp_dir
@@ -54,6 +60,8 @@ class DetectionDatabase:
         if create_if_not_present:
             self.initialise_backend()
 
+        self.logger = logger if logger is not None else _logger
+
     def is_db_exits(self):
         """Return true if database exixts and is set up."""
         if not os.path.isfile(self.database_path):
@@ -65,7 +73,7 @@ class DetectionDatabase:
     def reset_database(self):
         """Reset the database and remove all data."""
         # If we need to reset the database, then remove the table and any stored images
-        logger.info("Database being reset.")
+        self.logger.info("Database being reset.")
 
         # Remove the actual database file
         if os.path.isfile(self.database_path):
@@ -76,14 +84,14 @@ class DetectionDatabase:
         shutil.rmtree(self.processed_image_dir)
 
         # Recreate them
-        logger.info("Initialising backend ...")
+        self.logger.info("Initialising backend ...")
         self.initialise_backend()
-        logger.info("Finished initialising backend!")
+        self.logger.info("Finished initialising backend!")
 
     def reset_mask(self):
         """Just reset the detection mask."""
         # If we need to reset the database, then remove the table and any stored images
-        logger.info("Mask being reset.")
+        self.logger.info("Mask being reset.")
 
         # Remove the actual database file
         if os.path.isfile(self.mask_image_path):
@@ -383,7 +391,7 @@ class DetectionDatabase:
             conn.commit()
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             if print_exceptions:
-                logger.warning("Exception in database: {}".format(e))
+                self.logger.warning("Exception in database: {}".format(e))
         finally:
             if conn is not None:
                 conn.close()

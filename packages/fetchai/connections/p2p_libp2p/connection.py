@@ -41,7 +41,7 @@ from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.mail.base import Address, Envelope
 
-logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
 
@@ -68,8 +68,8 @@ SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 async def _golang_module_build_async(
     path: str,
     log_file_desc: IO[str],
-    loop: Optional[asyncio.AbstractEventLoop] = None,
     timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+    logger: logging.Logger = _default_logger,
 ) -> int:
     """
     Builds go module located at `path`, downloads necessary dependencies
@@ -102,7 +102,11 @@ async def _golang_module_build_async(
 
 
 def _golang_module_run(
-    path: str, name: str, args: Sequence[str], log_file_desc: IO[str]
+    path: str,
+    name: str,
+    args: Sequence[str],
+    log_file_desc: IO[str],
+    logger: logging.Logger = _default_logger,
 ) -> subprocess.Popen:
     """
     Runs a built module located at `path`
@@ -222,19 +226,22 @@ class Libp2pNode:
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a p2p libp2p node.
 
+        :param agent_addr: the agent address.
         :param key: secp256k1 curve private key.
-        :param source: the source path
+        :param module_path: the module path.
         :param clargs: the command line arguments for the libp2p node
         :param uri: libp2p node ip address and port number in format ipaddress:port.
         :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
-        :param delegation_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
+        :param delegate_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
+        :param logger: the logger.
         """
 
         self.address = agent_addr
@@ -308,8 +315,10 @@ class Libp2pNode:
 
         # build the node
         # TOFIX(LR) fix async version
-        logger.info("Downloading golang dependencies. This may take a while...")
-        returncode = await _golang_module_build_async(self.source, self._log_file_desc)
+        self.logger.info("Downloading golang dependencies. This may take a while...")
+        returncode = await _golang_module_build_async(
+            self.source, self._log_file_desc, logger=self.logger
+        )
         with open(self.log_file, "r") as f:
             self.logger.debug(f.read())
         node_log = ""
@@ -405,7 +414,7 @@ class Libp2pNode:
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                logger.debug("Sleeping for {}...".format(self._connection_timeout))
+                self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
                 await asyncio.sleep(self._connection_timeout)
                 await self._connect()
                 return
@@ -429,8 +438,7 @@ class Libp2pNode:
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
         self.logger.info("My libp2p addresses: {}".format(self.multiaddrs))
 
-    @asyncio.coroutine
-    def write(self, data: bytes) -> None:
+    async def write(self, data: bytes) -> None:
         """
         Write to the writer stream.
 
@@ -587,8 +595,8 @@ class P2PLibp2pConnection(Connection):
                     "At least one Entry Peer should be provided when node can not be publically reachable"
                 )
             if delegate_uri is not None:  # pragma: no cover
-                logger.warning(
-                    "Ignoring Delegate Uri configurCouldn't connectation as node can not be publically reachable"
+                self.logger.warning(
+                    "Ignoring Delegate Uri configuration as node can not be publically reachable"
                 )
         else:
             # node will be run as a full NodeDHT
@@ -599,7 +607,7 @@ class P2PLibp2pConnection(Connection):
                 )
 
         # libp2p local node
-        logger.debug("Public key used by libp2p node: {}".format(key.public_key))
+        self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         temp_dir = tempfile.mkdtemp()
         self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
         shutil.copytree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
@@ -615,6 +623,7 @@ class P2PLibp2pConnection(Connection):
             entry_peers,
             log_file,
             env_file,
+            self.logger,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]

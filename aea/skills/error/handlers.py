@@ -82,6 +82,7 @@ class ErrorHandler(Handler):
             },
         )
         reply.counterparty = envelope.sender
+        reply.sender = self.context.agent_address
         self.context.outbox.put_message(message=reply)
 
     def send_decoding_error(self, envelope: Envelope) -> None:
@@ -107,6 +108,7 @@ class ErrorHandler(Handler):
             error_data={"envelope": encoded_envelope},
         )
         reply.counterparty = envelope.sender
+        reply.sender = self.context.agent_address
         self.context.outbox.put_message(message=reply)
 
     def send_unsupported_skill(self, envelope: Envelope) -> None:
@@ -139,4 +141,5 @@ class ErrorHandler(Handler):
             error_data={"envelope": encoded_envelope},
         )
         reply.counterparty = envelope.sender
+        reply.sender = self.context.agent_address
         self.context.outbox.put_message(message=reply)

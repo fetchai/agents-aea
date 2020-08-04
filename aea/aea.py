@@ -34,7 +34,7 @@ from aea.decision_maker.default import (
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
-from aea.helpers.logging import AgentLoggerAdapter
+from aea.helpers.logging import AgentLoggerAdapter, WithLogger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -45,10 +45,8 @@ from aea.skills.base import Behaviour, Handler, SkillComponent
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
 
-logger = logging.getLogger(__name__)
 
-
-class AEA(Agent):
+class AEA(Agent, WithLogger):
     """This class implements an autonomous economic agent."""
 
     RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
@@ -108,6 +106,10 @@ class AEA(Agent):
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
         )
+        aea_logger = AgentLoggerAdapter(
+            logger=logging.getLogger(__name__), agent_name=identity.name
+        )
+        WithLogger.__init__(self, logger=cast(logging.Logger, aea_logger))
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
@@ -256,14 +258,14 @@ class AEA(Agent):
         :param envelope: the envelope to handle.
         :return: None
         """
-        logger.debug("Handling envelope: {}".format(envelope))
+        self.logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
         # TODO specify error handler in config and make this work for different skill/protocol versions.
         error_handler = self._get_error_handler()
 
         if error_handler is None:
-            logger.warning("ErrorHandler not initialized. Stopping AEA!")
+            self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
             self.stop()
             return
         error_handler = cast(ErrorHandler, error_handler)
@@ -278,9 +280,11 @@ class AEA(Agent):
             else:
                 msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
+            msg.sender = envelope.sender
+            # msg.to = envelope.to
             msg.is_incoming = True
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
-            logger.warning("Decoding error. Exception: {}".format(str(e)))
+            self.logger.warning("Decoding error. Exception: {}".format(str(e)))
             error_handler.send_decoding_error(envelope)
             return
 
@@ -334,13 +338,13 @@ class AEA(Agent):
         """
         # docstyle: ignore
         def log_exception(e, fn, component):
-            logger.exception(f"<{e}> raised during `{fn}` call of `{component}`")
+            self.logger.exception(f"<{e}> raised during `{fn}` call of `{component}`")
 
         try:
             with ExecTimeoutThreadGuard(self._execution_timeout):
                 return fn(*(args or []), **(kwargs or {}))
         except TimeoutException:
-            logger.warning(
+            self.logger.warning(
                 "`{}` of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
                     fn, component, self._execution_timeout
                 )
@@ -383,8 +387,7 @@ class AEA(Agent):
 
         :return: None
         """
-        logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.liveness.stop()
+        self.logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.decision_maker.stop()
         self.task_manager.stop()
         self.resources.teardown()

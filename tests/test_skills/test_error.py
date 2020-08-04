@@ -169,10 +169,11 @@ class TestSkillError:
             performative=FipaMessage.Performative.ACCEPT,
         )
         msg.counterparty = self.address
+        msg.sender = self.address
         envelope = Envelope(
-            to=self.address,
-            sender=self.address,
-            protocol_id=DefaultMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
 

@@ -105,7 +105,7 @@ def _run_agent(
         agent.start()
     except KeyboardInterrupt:  # pragma: nocover
         logger.debug("_run_agent: keyboard interrupt")
-    except BaseException as e:
+    except BaseException as e:  # pragma: nocover
         logger.exception("exception in _run_agent")
         exc = AEAException(f"Raised {type(e)}({e})")
         exc.__traceback__ = e.__traceback__

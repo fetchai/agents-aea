@@ -80,7 +80,7 @@ class TestContractRegistry:
         cls.registry = AgentComponentRegistry()
         cls.registry.register(contract.component_id, cast(Contract, contract))
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.6.0"),
+            PublicId.from_str("fetchai/erc1155:0.7.0"),
         }
 
     def test_fetch_all(self):
@@ -91,14 +91,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.6.0")
+        contract_id = PublicId.from_str("fetchai/erc1155:0.7.0")
         contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.6.0")
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.7.0")
         component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
         contract_removed = self.registry.fetch(component_id)
         self.registry.unregister(contract_removed.component_id)
@@ -153,7 +153,7 @@ class TestProtocolRegistry:
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.4.0"),
+            PublicId.from_str("fetchai/fipa:0.5.0"),
         }
 
     def test_fetch_all(self):
@@ -244,7 +244,7 @@ class TestResources:
         cls.error_skill_public_id = DEFAULT_SKILL
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
-        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.6.0")
+        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.7.0")
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
@@ -390,24 +390,6 @@ class TestResources:
         with pytest.raises(ValueError):
             self.resources.add_component(a_component)
 
-    def test_inject_contracts_unknown_contract(self):
-        """Test inject contracts when there is a missing contract."""
-        public_id = PublicId.from_str("author/name:0.1.0")
-        mock_skill = MagicMock(**{"config.contracts": {public_id}})
-        with pytest.raises(
-            ValueError, match=f"Missing contract for contract id {public_id}"
-        ):
-            self.resources.inject_contracts(mock_skill)
-
-    def test_inject_contracts(self):
-        """Test inject contracts."""
-        with unittest.mock.patch.object(
-            self.resources._component_registry, "fetch", return_value=object()
-        ):
-            public_id = PublicId.from_str("author/name:0.1.0")
-            mock_skill = MagicMock(**{"config.contracts": {public_id}})
-            self.resources.inject_contracts(mock_skill)
-
     def test_register_behaviour_with_already_existing_skill_id(self):
         """Test that registering a behaviour with an already existing skill id behaves as expected."""
         # this should raise an error, since the 'dummy" skill already has a behaviour named "dummy"
@@ -535,11 +517,13 @@ class TestFilter:
         """Test that the internal messages are handled."""
         t = SigningMessage(
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
-            skill_callback_ids=[str(PublicId("dummy_author", "dummy", "0.1.0"))],
+            skill_callback_ids=(str(PublicId("dummy_author", "dummy", "0.1.0")),),
             skill_callback_info={},
-            crypto_id="ledger_id",
+            # crypto_id="ledger_id",
             signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
+        t.counterparty = "skill"
+        t.sender = "decision_maker"
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea._filter.handle_internal_messages()
 

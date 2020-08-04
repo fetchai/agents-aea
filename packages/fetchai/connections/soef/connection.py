@@ -22,6 +22,7 @@ import asyncio
 import copy
 import logging
 from asyncio import CancelledError
+from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from typing import Callable, Dict, List, Optional, Set, Union, cast
@@ -53,9 +54,9 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-logger = logging.getLogger("aea.packages.fetchai.connections.oef")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.6.0")
 
 NOT_SPECIFIED = object()
 
@@ -83,28 +84,36 @@ class ModelNames:
 
 
 class SOEFException(Exception):
-    """Soef chanlle expected  exception."""
+    """SOEF channel expected exception."""
 
     @classmethod
-    def warning(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def warning(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.warning(msg)
         return cls(msg)
 
     @classmethod
-    def debug(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def debug(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.debug(msg)
         return cls(msg)
 
     @classmethod
-    def error(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def error(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.error(msg)
         return cls(msg)
 
     @classmethod
-    def exception(cls, msg: str) -> "SOEFException":  # pragma: no cover
+    def exception(
+        cls, msg: str, logger: logging.Logger = _default_logger
+    ) -> "SOEFException":  # pragma: no cover
         """Construct exception and write log."""
         logger.exception(msg)
         return cls(msg)
@@ -164,6 +173,7 @@ class SOEFChannel:
     DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
 
     PING_PERIOD = 30 * 60  # 30 minutes
+    FIND_AROUND_ME_REQUEST_DELAY = 2  # seconds
 
     def __init__(
         self,
@@ -174,6 +184,7 @@ class SOEFChannel:
         excluded_protocols: Set[PublicId],
         restricted_to_protocols: Set[PublicId],
         chain_identifier: Optional[str] = None,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize.
@@ -202,8 +213,6 @@ class SOEFChannel:
         self.excluded_protocols = excluded_protocols
         self.restricted_to_protocols = restricted_to_protocols
         self.oef_search_dialogues = OefSearchDialogues()
-        self.oef_msg_id = 0
-        self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
 
         self.declared_name = uuid4().hex
         self.unique_page_address = None  # type: Optional[str]
@@ -213,6 +222,33 @@ class SOEFChannel:
         self.chain_identifier: str = chain_identifier or self.DEFAULT_CHAIN_IDENTIFIER
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._ping_periodic_task: Optional[asyncio.Task] = None
+        self._find_around_me_queue: Optional[asyncio.Queue] = None
+        self._find_around_me_processor_task: Optional[asyncio.Task] = None
+        self.logger = logger
+
+    async def _find_around_me_processor(self) -> None:
+        """Process find me around requests in background task."""
+        while self._find_around_me_queue is not None:
+            try:
+                task = await self._find_around_me_queue.get()
+                oef_message, oef_search_dialogue, radius, params = task
+                await self._find_around_me_handle_requet(
+                    oef_message, oef_search_dialogue, radius, params
+                )
+                await asyncio.sleep(self.FIND_AROUND_ME_REQUEST_DELAY)
+            except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                return
+            except Exception:  # pylint: disable=broad-except  # pragma: nocover
+                self.logger.exception(
+                    "Exception occoured in  _find_around_me_processor"
+                )
+                await self._send_error_response(
+                    oef_message,
+                    oef_search_dialogue,
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
+                )
+            finally:
+                self.logger.debug("_find_around_me_processor exited")
 
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
@@ -300,7 +336,7 @@ class SOEFChannel:
         )
 
         if is_in_excluded or not is_in_restricted:
-            logger.error(
+            self.logger.error(
                 "This envelope cannot be sent with the soef connection: protocol_id={}".format(
                     envelope.protocol_id
                 )
@@ -337,13 +373,13 @@ class SOEFChannel:
         assert isinstance(envelope.message, OefSearchMessage), ValueError(
             "Message not of type OefSearchMessage"
         )
-        oef_message = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.deepcopy(
-            oef_message
+        oef_message_orig = cast(OefSearchMessage, envelope.message)
+        oef_message = copy.copy(
+            oef_message_orig
         )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
         oef_message.is_incoming = True  # TODO: fix; should be done by framework
         oef_message.counterparty = (
-            envelope.sender
+            oef_message_orig.sender
         )  # TODO: fix; should be done by framework
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
@@ -387,8 +423,10 @@ class SOEFChannel:
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
+        except (asyncio.CancelledError, ConcurrentCancelledError):  # pragma: nocover
+            pass
         except Exception:  # pylint: disable=broad-except # pragma: nocover
-            logger.exception("Exception during envelope processing")
+            self.logger.exception("Exception during envelope processing")
             await self._send_error_response(
                 oef_message,
                 oef_search_dialogue,
@@ -454,7 +492,7 @@ class SOEFChannel:
                 except asyncio.CancelledError:  # pylint: disable=try-except-raise
                     raise
                 except Exception:  # pylint: disable=broad-except
-                    logger.exception("Error on periodic ping command!")
+                    self.logger.exception("Error on periodic ping command!")
                 await asyncio.sleep(period)
 
     async def _set_service_key_handler(self, service_description: Description) -> None:
@@ -484,7 +522,7 @@ class SOEFChannel:
         :return: response text
         """
         params = params or {}
-        logger.debug(f"Perform `{command}` with {params}")
+        self.logger.debug(f"Perform `{command}` with {params}")
         url = parse.urljoin(
             self.base_url, unique_page_address or self.unique_page_address
         )
@@ -498,7 +536,7 @@ class SOEFChannel:
                 el = root.find("./success")
                 assert el is not None, "No success element"
                 assert str(el.text).strip() == "1", "Success is not 1"
-            logger.debug(f"`{command}` SUCCESS!")
+            self.logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
             raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
@@ -633,7 +671,7 @@ class SOEFChannel:
 
         :return: None
         """
-        logger.debug("Applying to SOEF lobby with address={}".format(self.address))
+        self.logger.debug("Applying to SOEF lobby with address={}".format(self.address))
         url = parse.urljoin(self.base_url, "register")
         params = {
             "api_key": self.api_key,
@@ -643,11 +681,11 @@ class SOEFChannel:
         }
         response_text = await self._request_text("get", url=url, params=params)
         root = ET.fromstring(response_text)
-        logger.debug("Root tag: {}".format(root.tag))
+        self.logger.debug("Root tag: {}".format(root.tag))
         unique_page_address = ""
         unique_token = ""  # nosec
         for child in root:
-            logger.debug(
+            self.logger.debug(
                 "Child tag={}, child attrib={}, child text={}".format(
                     child.tag, child.attrib, child.text
                 )
@@ -660,7 +698,7 @@ class SOEFChannel:
             raise SOEFException.error(
                 "Agent registration error - page address or token not received"
             )
-        logger.debug("Registering agent")
+        self.logger.debug("Registering agent")
         params = {"token": unique_token}
         await self._generic_oef_command(
             "acknowledge", params, unique_page_address=unique_page_address
@@ -697,10 +735,7 @@ class SOEFChannel:
             message_id=oef_search_message.message_id + 1,
         )
         message.counterparty = oef_search_message.counterparty
-        oef_search_dialogue.update(message)
-        message = copy.deepcopy(
-            message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        assert oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.counterparty,
             sender=SOEFConnection.connection_id.latest,
@@ -727,7 +762,7 @@ class SOEFChannel:
         }  # type: Dict[str, Callable]
         data_model_name = service_description.data_model.name
 
-        if data_model_name not in data_model_handlers:
+        if data_model_name not in data_model_handlers:  # pragma: nocover
             raise SOEFException.error(
                 f'Data model name: {data_model_name} is not supported. Valid models are: {", ".join(data_model_handlers.keys())}'
             )
@@ -746,7 +781,7 @@ class SOEFChannel:
         """
         await self._stop_periodic_ping_task()
         if self.unique_page_address is None:  # pragma: nocover
-            logger.debug(
+            self.logger.debug(
                 "The service is not registered to the simple OEF. Cannot unregister."
             )
             return
@@ -768,7 +803,11 @@ class SOEFChannel:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
         self.in_queue = asyncio.Queue()
+        self._find_around_me_queue = asyncio.Queue()
         self._executor_pool = ThreadPoolExecutor(max_workers=10)
+        self._find_around_me_processor_task = self._loop.create_task(
+            self._find_around_me_processor()
+        )
 
     async def disconnect(self) -> None:
         """
@@ -780,7 +819,14 @@ class SOEFChannel:
 
         assert self.in_queue, ValueError("Queue is not set, use connect first!")
         await self._unregister_agent()
+
+        if self._find_around_me_processor_task:
+            if not self._find_around_me_processor_task.done():
+                self._find_around_me_processor_task.cancel()
+            await self._find_around_me_processor_task
+
         await self.in_queue.put(None)
+        self._find_around_me_queue = None
 
     async def search_services(
         self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -820,9 +866,32 @@ class SOEFChannel:
         if self.agent_location is None or self.agent_location != service_location:
             # we update the location to match the query.
             await self._set_location(service_location)  # pragma: nocover
+
         await self._find_around_me(oef_message, oef_search_dialogue, radius, params)
 
     async def _find_around_me(
+        self,
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+        radius: float,
+        params: Dict[str, List[str]],
+    ) -> None:
+        """
+        Add find agent task to queue to process in dedictated loop respectful to timeouts.
+
+        :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
+        :param radius: the radius in which to search
+        :param params: the parameters for the query
+        :return: None
+        """
+        if not self._find_around_me_queue:
+            raise ValueError("SOEFChannel not started.")  # pragma: nocover
+        await self._find_around_me_queue.put(
+            (oef_message, oef_search_dialogue, radius, params)
+        )
+
+    async def _find_around_me_handle_requet(
         self,
         oef_message: OefSearchMessage,
         oef_search_dialogue: OefSearchDialogue,
@@ -839,7 +908,7 @@ class SOEFChannel:
         :return: None
         """
         assert self.in_queue is not None, "Inqueue not set!"
-        logger.debug("Searching in radius={} of myself".format(radius))
+        self.logger.debug("Searching in radius={} of myself".format(radius))
 
         response_text = await self._generic_oef_command(
             "find_around_me", {"range_in_km": [str(radius)], **params}
@@ -873,10 +942,7 @@ class SOEFChannel:
             message_id=oef_message.message_id + 1,
         )
         message.counterparty = oef_message.counterparty
-        oef_search_dialogue.update(message)
-        message = copy.deepcopy(
-            message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
+        assert oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.counterparty,
             sender=SOEFConnection.connection_id.latest,
@@ -896,7 +962,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.3.0")
+                PublicId.from_str("fetchai/oef_search:0.4.0")
             ]
 
         super().__init__(**kwargs)

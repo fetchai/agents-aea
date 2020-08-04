@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 _ETHEREUM = "ethereum"
 GAS_ID = "gwei"
 ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
+TESTNET_NAME = "ropsten"
 DEFAULT_ADDRESS = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"
 DEFAULT_CHAIN_ID = 3
 DEFAULT_GAS_PRICE = "50"
@@ -244,6 +245,17 @@ class EthereumHelper(Helper):
             )
         return (address,)
 
+    @staticmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        digest = Web3.keccak(message).hex()
+        return digest
+
 
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""
@@ -419,6 +431,7 @@ class EthereumFaucetApi(FaucetApi):
     """Ethereum testnet faucet API."""
 
     identifier = _ETHEREUM
+    testnet_name = TESTNET_NAME
 
     def get_wealth(self, address: Address) -> None:
         """

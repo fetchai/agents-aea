@@ -340,7 +340,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.3.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -384,14 +384,14 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.3.0
+aea add protocol fetchai/oef_search:0.4.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the soef and p2p connections and install the AEA's dependencies:
 ``` bash
-aea add connection fetchai/soef:0.5.0
+aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/p2p_libp2p:0.6.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
@@ -400,7 +400,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 Finally, in the `aea-config.yaml` add the following lines:
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.3.0: fetchai/soef:0.5.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 
 This will ensure that search requests are processed by the correct connection.
@@ -712,7 +712,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
 
 
 class OefSearchHandler(Handler):
@@ -821,7 +821,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.3.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   service:

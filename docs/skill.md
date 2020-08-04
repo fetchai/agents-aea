@@ -57,6 +57,13 @@ A handler can be registered in one way:
 
 - By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
 
+It is possible to register new handlers dynamically by enqueuing new
+`Handler` instances in the queue `context.new_handlers`, e.g. in a skill
+component we can write:
+
+``` python
+self.context.new_handlers.put(MyHandler(name="my_handler", skill_context=self.context))
+```
 
 ### `behaviours.py`
 
@@ -255,7 +262,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.3.0
+- fetchai/default:0.4.0
 ```
 
 
@@ -268,7 +275,7 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `fetchai/default:0.3.0` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:0.4.0` protocol which provides error codes for the above.
 
 
 <br />
