@@ -294,7 +294,7 @@ func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 }
 
 // TestRoutingDHTPeerToDHTPeerFullConnectivity fully connected dht peers network
-func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
+func Skip__TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
 	peers := []*DHTPeer{}
 	rxs := []chan *aea.Envelope{}
 
@@ -988,7 +988,7 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 */
 
 // TestRoutingAlltoAll
-func TestRoutingAllToAll(t *testing.T) {
+func Skip__TestRoutingAllToAll(t *testing.T) {
 	rxs := []chan *aea.Envelope{}
 	send := []func(*aea.Envelope) error{}
 
