@@ -141,7 +141,14 @@ def generate_api_docs():
         save_to_file(path, text)
 
 
+def install(package: str):
+    return subprocess.check_call(  # nosec
+        [sys.executable, "-m", "pip", "install", package]
+    )
+
+
 if __name__ == "__main__":
+    install("pydoc-markdown==3.3.0")
     res = shutil.which("pydoc-markdown")
     if res is None:
         print("Please install pydoc-markdown first: `pip install pydoc-markdown`")
