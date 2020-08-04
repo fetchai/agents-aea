@@ -536,7 +536,9 @@ class HTTPServerConnection(Connection):
         self._state.set(ConnectionStates.connecting)
         self.channel.logger = self.logger
         await self.channel.connect(loop=self.loop)
-        if not self.channel.is_stopped:
+        if self.channel.is_stopped:
+            self._state.set(ConnectionStates.disconnected)
+        else:
             self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:

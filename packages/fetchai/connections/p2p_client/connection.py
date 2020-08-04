@@ -178,7 +178,6 @@ class PeerToPeerClientConnection(Connection):
             return
         self._state.set(ConnectionStates.connecting)
         self.channel.logger = self.logger
-        self.channel.logger = self.logger
         self.channel.in_queue = asyncio.Queue()
         self.channel.loop = self.loop
         self.channel.connect()
