@@ -25,7 +25,10 @@ import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import try_get_balance, verify_or_create_private_keys
+from aea.cli.utils.package_utils import (
+    try_get_balance,
+    verify_or_create_private_keys_ctx,
+)
 from aea.crypto.registries import ledger_apis_registry
 from aea.crypto.wallet import Wallet
 
@@ -47,7 +50,7 @@ def get_wealth(click_context, type_):
 
 def _try_get_wealth(click_context: click.core.Context, type_: str):
     ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx=ctx)
+    verify_or_create_private_keys_ctx(ctx=ctx)
     private_key_paths = {
         config_pair[0]: config_pair[1]
         for config_pair in ctx.agent_config.private_key_paths.read_all()

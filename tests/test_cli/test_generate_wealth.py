@@ -49,7 +49,7 @@ class GenerateWealthTestCase(TestCase):
     @mock.patch("aea.cli.generate_wealth.click.echo")
     @mock.patch("aea.cli.generate_wealth.try_generate_testnet_wealth")
     @mock.patch("aea.cli.generate_wealth._wait_funds_release")
-    @mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys")
+    @mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys_ctx")
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
@@ -57,7 +57,7 @@ class GenerateWealthTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys")
+@mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys_ctx")
 @mock.patch("aea.cli.generate_wealth._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
