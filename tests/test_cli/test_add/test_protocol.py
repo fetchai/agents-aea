@@ -478,7 +478,7 @@ class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_protocol_from_remote_registry_positive(self):
         """Test add protocol from Registry positive result."""
-        self.add_item("protocol", "fetchai/fipa:0.1.0", local=False)
+        self.add_item("protocol", "fetchai/fipa:0.4.0", local=False)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
         items_folders = os.listdir(items_path)
