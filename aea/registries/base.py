@@ -227,8 +227,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :return: None
         """
-        self._components_by_type = {}
-        self._registered_keys = set()
+        pass
 
 
 class ComponentRegistry(
