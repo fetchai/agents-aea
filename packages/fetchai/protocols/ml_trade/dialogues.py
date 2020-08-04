@@ -125,7 +125,7 @@ class MlTradeDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> MlTradeDialogue:
         """
-        Create an instance of fipa dialogue.
+        Create an instance of ml_trade dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for
