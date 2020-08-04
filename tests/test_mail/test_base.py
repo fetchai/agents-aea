@@ -175,6 +175,7 @@ def test_outbox_put():
         content=b"hello",
     )
     msg.counterparty = receiver_address
+    msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
     outbox = OutBox(multiplexer, agent_address)
@@ -204,6 +205,7 @@ def test_outbox_put_message():
         content=b"hello",
     )
     msg.counterparty = receiver_address
+    msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
     outbox = OutBox(multiplexer, agent_address)
