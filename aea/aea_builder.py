@@ -47,7 +47,6 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.cli.utils.package_utils import verify_or_create_private_keys
 from aea.components.base import Component
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -72,6 +71,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.loader import ConfigLoader
 from aea.contracts import contract_registry
+from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
@@ -1297,7 +1297,7 @@ class AEABuilder:
         aea_project_path = Path(aea_project_path)
         cls._try_to_load_agent_configuration_file(aea_project_path)
         verify_or_create_private_keys(
-            ctx=None, aea_project_path=aea_project_path, exit_on_error=False
+            aea_project_path=aea_project_path, exit_on_error=False
         )
         builder = AEABuilder(with_default_packages=False)
 
