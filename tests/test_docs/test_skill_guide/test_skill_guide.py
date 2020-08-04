@@ -22,6 +22,7 @@
 import filecmp
 import os
 from pathlib import Path
+from random import uniform
 
 import pytest
 
@@ -66,6 +67,12 @@ class TestBuildSkill(AEATestCaseMany):
         """Test that the resource folder contains scaffold handlers.py module."""
         self.initialize_aea(AUTHOR)
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
             "fetchai/simple_service_registration:0.9.0", simple_service_registration_aea
@@ -85,6 +92,10 @@ class TestBuildSkill(AEATestCaseMany):
         default_routing = {
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
+
+        # replace location
+        setting_path = "vendor.fetchai.skills.simple_service_registration.models.strategy.args.location"
+        self.force_set_config(setting_path, location)
 
         search_aea = "search_aea"
         self.create_agents(search_aea)
@@ -142,6 +153,12 @@ class TestBuildSkill(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = "vendor.fetchai.skills.{}.behaviours.my_search_behaviour.args.location".format(
+            skill_id
+        )
+        self.force_set_config(setting_path, location)
 
         # run agents
         self.set_agent_context(simple_service_registration_aea)

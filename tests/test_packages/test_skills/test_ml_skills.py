@@ -20,6 +20,7 @@
 """This test module contains the integration test for the weather skills."""
 
 import sys
+from random import uniform
 
 import pytest
 
@@ -66,6 +67,12 @@ class TestMLSkills(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -91,6 +98,12 @@ class TestMLSkills(AEATestCaseMany):
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.ml_data_provider.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
@@ -118,6 +131,10 @@ class TestMLSkills(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = "vendor.fetchai.skills.ml_train.models.strategy.args.location"
+        self.force_set_config(setting_path, location)
 
         self.set_agent_context(data_provider_aea_name)
         data_provider_aea_process = self.run_agent()
@@ -222,6 +239,12 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -250,6 +273,12 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.ml_data_provider.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
@@ -283,6 +312,10 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = "vendor.fetchai.skills.ml_train.models.strategy.args.location"
+        self.force_set_config(setting_path, location)
 
         self.set_agent_context(data_provider_aea_name)
         data_provider_aea_process = self.run_agent()

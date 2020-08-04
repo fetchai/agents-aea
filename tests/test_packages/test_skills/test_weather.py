@@ -17,8 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the weather skills."""
-import pytest
 
+from random import uniform
+
+import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
@@ -51,6 +53,12 @@ class TestWeatherSkills(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -77,6 +85,12 @@ class TestWeatherSkills(AEATestCaseMany):
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.weather_station.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
@@ -105,6 +119,12 @@ class TestWeatherSkills(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.weather_client.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # run agents
         self.set_agent_context(weather_station_aea_name)
@@ -201,6 +221,12 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
             "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
@@ -229,6 +255,12 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.weather_station.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
@@ -262,6 +294,12 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.weather_client.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         self.set_agent_context(weather_station_aea_name)
         weather_station_process = self.run_agent()

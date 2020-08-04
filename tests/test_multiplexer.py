@@ -371,13 +371,13 @@ def test_get_from_multiplexer_when_empty():
 
 #         multiplexer = Multiplexer([connection_1, connection_2])
 
-#         assert not connection_1.connection_status.is_connected
-#         assert not connection_2.connection_status.is_connected
+#         assert not connection_1.is_connected
+#         assert not connection_2.is_connected
 
 #         multiplexer.connect()
 
-#         assert connection_1.connection_status.is_connected
-#         assert connection_2.connection_status.is_connected
+#         assert connection_1.is_connected
+#         assert connection_2.is_connected
 #         message = DefaultMessage(
 #             dialogue_reference=("", ""),
 #             message_id=1,
