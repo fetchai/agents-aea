@@ -651,6 +651,30 @@ class TestHandlerRegistry:
         """Set up the tests."""
         cls.registry = HandlerRegistry()
 
+    def test_register_and_unregister_dynamically(self):
+        """Test register when protocol id is None."""
+        assert len(self.registry._dynamically_added) == 0
+        self.registry.register(
+            (PublicId.from_str("author/name:0.1.0"), "name"),
+            MagicMock(SUPPORTED_PROTOCOL="author/protocol:0.1.0"),
+            is_dynamically_added=True,
+        )
+        assert len(self.registry._dynamically_added) == 1
+        self.registry.unregister((PublicId.from_str("author/name:0.1.0"), "name"),)
+        assert len(self.registry._dynamically_added) == 0
+
+    def test_register_and_teardown_dynamically(self):
+        """Test register when protocol id is None."""
+        assert len(self.registry._dynamically_added) == 0
+        self.registry.register(
+            (PublicId.from_str("author/name:0.1.0"), "name"),
+            MagicMock(SUPPORTED_PROTOCOL="author/protocol:0.1.0"),
+            is_dynamically_added=True,
+        )
+        assert len(self.registry._dynamically_added) == 1
+        self.registry.teardown()
+        assert len(self.registry._dynamically_added) == 0
+
     def test_register_when_protocol_id_is_none(self):
         """Test register when protocol id is None."""
         with pytest.raises(

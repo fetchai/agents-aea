@@ -138,6 +138,7 @@ class Filter:
                     self.resources.behaviour_registry.register(
                         (skill.skill_context.skill_id, new_behaviour.name),
                         new_behaviour,
+                        is_dynamically_added=True,
                     )
                 except ValueError as e:
                     logger.warning(
@@ -151,7 +152,9 @@ class Filter:
                 new_handler = skill.skill_context.new_handlers.get()
                 try:
                     self.resources.handler_registry.register(
-                        (skill.skill_context.skill_id, new_handler.name), new_handler,
+                        (skill.skill_context.skill_id, new_handler.name),
+                        new_handler,
+                        is_dynamically_added=True,
                     )
                 except ValueError as e:
                     logger.warning(
