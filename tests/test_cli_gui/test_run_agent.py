@@ -33,12 +33,11 @@ from aea.cli.utils.context import Context
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
-from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, skip_test_windows
+from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS
 from tests.test_cli_gui.test_base import TempCWD, create_app
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@skip_test_windows
 def test_create_and_run_agent():
     """Test for running and agent, reading TTY and errors."""
     # Set up a temporary current working directory in which to make agents

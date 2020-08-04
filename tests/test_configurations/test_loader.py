@@ -32,21 +32,18 @@ from aea.configurations.base import PackageType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 from aea.protocols.generator.common import load_protocol_specification
 
-from tests.conftest import protocol_specification_files, skip_test_windows
+from tests.conftest import protocol_specification_files
 
 
-@pytest.mark.parametrize("system", ["nt", "posix"])
-@skip_test_windows
-def test_windows_uri_path(system):
-    """Test windows uri path."""
-    dir = Path("aea", "configurations").absolute()
-    with mock.patch.object(os, "name", system):
-        output = make_jsonschema_base_uri(dir)
+def test_windows_uri_path():
+    """Test uri path on running platform."""
+    path = Path("aea", "configurations").absolute()
+    output = make_jsonschema_base_uri(path)
 
-    if system == "nt":
-        assert output == f"file:///{'/'.join(dir.parts)}/"
+    if os.name == "nt":
+        assert output == f"file:///{'/'.join(path.parts)}/"
     else:
-        assert output == f"file:/{'/'.join(dir.parts)}/"
+        assert output == f"file:/{'/'.join(path.parts)}/"
 
 
 def test_config_loader_get_required_fields():
