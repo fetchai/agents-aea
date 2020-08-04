@@ -46,24 +46,26 @@ class OefSearchDialogue(Dialogue):
     )
     TERMINAL_PERFORMATIVES = frozenset(
         {
-            OefSearchMessage.Performative.OEF_ERROR,
+            OefSearchMessage.Performative.SUCCESS,
+            OefSearchMessage.Performative.ERROR,
             OefSearchMessage.Performative.SEARCH_RESULT,
         }
     )
     VALID_REPLIES = {
-        OefSearchMessage.Performative.OEF_ERROR: frozenset(),
+        OefSearchMessage.Performative.ERROR: frozenset(),
         OefSearchMessage.Performative.REGISTER_SERVICE: frozenset(
-            {OefSearchMessage.Performative.OEF_ERROR}
+            {OefSearchMessage.Performative.SUCCESS, OefSearchMessage.Performative.ERROR}
         ),
         OefSearchMessage.Performative.SEARCH_RESULT: frozenset(),
         OefSearchMessage.Performative.SEARCH_SERVICES: frozenset(
             {
                 OefSearchMessage.Performative.SEARCH_RESULT,
-                OefSearchMessage.Performative.OEF_ERROR,
+                OefSearchMessage.Performative.ERROR,
             }
         ),
+        OefSearchMessage.Performative.SUCCESS: frozenset(),
         OefSearchMessage.Performative.UNREGISTER_SERVICE: frozenset(
-            {OefSearchMessage.Performative.OEF_ERROR}
+            {OefSearchMessage.Performative.SUCCESS, OefSearchMessage.Performative.ERROR}
         ),
     }
 
@@ -145,7 +147,7 @@ class OefSearchDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> OefSearchDialogue:
         """
-        Create an instance of fipa dialogue.
+        Create an instance of oef_search dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

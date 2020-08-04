@@ -628,7 +628,7 @@ class ProtocolGenerator:
         )
 
         # Class attributes
-        cls_str += self.indent + 'protocol_id = ProtocolId("{}", "{}", "{}")\n'.format(
+        cls_str += self.indent + 'protocol_id = ProtocolId.from_str("{}/{}:{}")\n'.format(
             self.protocol_specification.author,
             self.protocol_specification.name,
             self.protocol_specification.version,
@@ -1164,7 +1164,9 @@ class ProtocolGenerator:
         )
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Create an instance of {} dialogue.\n\n"
+        cls_str += self.indent + "Create an instance of {} dialogue.\n\n".format(
+                self.protocol_specification.name
+            )
         cls_str += (
             self.indent + ":param dialogue_label: the identifier of the dialogue\n"
         )
@@ -1238,7 +1240,7 @@ class ProtocolGenerator:
             )
             cls_str += (
                 self.indent
-                + "The protocol buffer object in the {}_protobuf_object argument must be matched with the instance of this class in the '{}_object' argument.\n\n".format(
+                + "The protocol buffer object in the {}_protobuf_object argument is matched with the instance of this class in the '{}_object' argument.\n\n".format(
                     _camel_case_to_snake_case(custom_type),
                     _camel_case_to_snake_case(custom_type),
                 )
@@ -1275,7 +1277,7 @@ class ProtocolGenerator:
             )
             cls_str += (
                 self.indent
-                + "A new instance of this class must be created that matches the protocol buffer object in the '{}_protobuf_object' argument.\n\n".format(
+                + "A new instance of this class is created that matches the protocol buffer object in the '{}_protobuf_object' argument.\n\n".format(
                     _camel_case_to_snake_case(custom_type)
                 )
             )

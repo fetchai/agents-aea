@@ -53,10 +53,11 @@ class OefSearchMessage(Message):
     class Performative(Enum):
         """Performatives for the oef_search protocol."""
 
-        OEF_ERROR = "oef_error"
+        ERROR = "error"
         REGISTER_SERVICE = "register_service"
         SEARCH_RESULT = "search_result"
         SEARCH_SERVICES = "search_services"
+        SUCCESS = "success"
         UNREGISTER_SERVICE = "unregister_service"
 
         def __str__(self):
@@ -87,10 +88,11 @@ class OefSearchMessage(Message):
             **kwargs,
         )
         self._performatives = {
-            "oef_error",
+            "error",
             "register_service",
             "search_result",
             "search_services",
+            "success",
             "unregister_service",
         }
 
@@ -222,7 +224,9 @@ class OefSearchMessage(Message):
                 assert all(
                     type(element) == str for element in self.agents
                 ), "Invalid type for tuple elements in content 'agents'. Expected 'str'."
-            elif self.performative == OefSearchMessage.Performative.OEF_ERROR:
+            elif self.performative == OefSearchMessage.Performative.SUCCESS:
+                expected_nb_of_contents = 0
+            elif self.performative == OefSearchMessage.Performative.ERROR:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.oef_error_operation) == CustomOefErrorOperation

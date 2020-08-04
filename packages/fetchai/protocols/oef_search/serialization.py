@@ -71,13 +71,16 @@ class OefSearchSerializer(Serializer):
             agents = msg.agents
             performative.agents.extend(agents)
             oef_search_msg.search_result.CopyFrom(performative)
-        elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
-            performative = oef_search_pb2.OefSearchMessage.Oef_Error_Performative()  # type: ignore
+        elif performative_id == OefSearchMessage.Performative.SUCCESS:
+            performative = oef_search_pb2.OefSearchMessage.Success_Performative()  # type: ignore
+            oef_search_msg.success.CopyFrom(performative)
+        elif performative_id == OefSearchMessage.Performative.ERROR:
+            performative = oef_search_pb2.OefSearchMessage.Error_Performative()  # type: ignore
             oef_error_operation = msg.oef_error_operation
             OefErrorOperation.encode(
                 performative.oef_error_operation, oef_error_operation
             )
-            oef_search_msg.oef_error.CopyFrom(performative)
+            oef_search_msg.error.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -122,8 +125,10 @@ class OefSearchSerializer(Serializer):
             agents = oef_search_pb.search_result.agents
             agents_tuple = tuple(agents)
             performative_content["agents"] = agents_tuple
-        elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
-            pb2_oef_error_operation = oef_search_pb.oef_error.oef_error_operation
+        elif performative_id == OefSearchMessage.Performative.SUCCESS:
+            pass
+        elif performative_id == OefSearchMessage.Performative.ERROR:
+            pb2_oef_error_operation = oef_search_pb.error.oef_error_operation
             oef_error_operation = OefErrorOperation.decode(pb2_oef_error_operation)
             performative_content["oef_error_operation"] = oef_error_operation
         else:
