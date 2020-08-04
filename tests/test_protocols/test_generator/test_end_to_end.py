@@ -336,7 +336,9 @@ class Agent2Handler(Handler):
 
     SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, message: TProtocolMessage, dialogue: TProtocolDialogue, **kwargs):
+    def __init__(
+        self, message: TProtocolMessage, dialogue: TProtocolDialogue, **kwargs
+    ):
         """Initialize the handler."""
         print("inside handler's initialisation method for agent 2")
         super().__init__(**kwargs)
