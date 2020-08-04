@@ -141,7 +141,13 @@ def generate_api_docs():
         save_to_file(path, text)
 
 
-def install(package: str):
+def install(package: str) -> int:
+    """
+    Install a PyPI package by calling pip.
+
+    :param package: the package name and version specifier.
+    :return: the return code.
+    """
     return subprocess.check_call(  # nosec
         [sys.executable, "-m", "pip", "install", package]
     )
