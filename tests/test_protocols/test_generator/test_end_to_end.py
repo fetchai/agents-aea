@@ -35,16 +35,16 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.helpers import create_private_key
-from aea.helpers.dialogue.base import DialogueLabel, Dialogue
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
 
 from tests.conftest import ROOT_DIR
+from tests.data.generator.t_protocol.dialogues import TProtocolDialogue
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )
-from tests.data.generator.t_protocol.dialogues import TProtocolDialogue
 from tests.test_protocols.test_generator.common import PATH_TO_T_PROTOCOL
 
 logger = logging.getLogger("aea")
@@ -119,10 +119,18 @@ class TestEndToEndGenerator(UseOef):
         aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.7.0")])
 
         # dialogues
-        dialogue_label_1 = DialogueLabel((str(1), ""), aea_2.identity.address, aea_1.identity.address)
-        aea_1_dialogue = TProtocolDialogue(dialogue_label_1, aea_1.identity.address, TProtocolDialogue.Role.ROLE_1)
-        dialogue_label_2 = DialogueLabel((str(1), str(1)), aea_1.identity.address, aea_1.identity.address)
-        aea_2_dialogue = TProtocolDialogue(dialogue_label_2, aea_2.identity.address, TProtocolDialogue.Role.ROLE_2)
+        dialogue_label_1 = DialogueLabel(
+            (str(1), ""), aea_2.identity.address, aea_1.identity.address
+        )
+        aea_1_dialogue = TProtocolDialogue(
+            dialogue_label_1, aea_1.identity.address, TProtocolDialogue.Role.ROLE_1
+        )
+        dialogue_label_2 = DialogueLabel(
+            (str(1), str(1)), aea_1.identity.address, aea_1.identity.address
+        )
+        aea_2_dialogue = TProtocolDialogue(
+            dialogue_label_2, aea_2.identity.address, TProtocolDialogue.Role.ROLE_2
+        )
 
         # message 1
         message_1 = TProtocolMessage(
@@ -160,7 +168,9 @@ class TestEndToEndGenerator(UseOef):
         skill_context_1._skill = skill_1
 
         agent_1_handler = Agent1Handler(
-            skill_context=skill_context_1, name="fake_handler_1", dialogue=aea_1_dialogue
+            skill_context=skill_context_1,
+            name="fake_handler_1",
+            dialogue=aea_1_dialogue,
         )
         aea_1.resources._handler_registry.register(
             (
@@ -174,7 +184,10 @@ class TestEndToEndGenerator(UseOef):
         skill_context_2._skill = skill_2
 
         agent_2_handler = Agent2Handler(
-            message=message_2, dialogue=aea_2_dialogue, skill_context=skill_context_2, name="fake_handler_2",
+            message=message_2,
+            dialogue=aea_2_dialogue,
+            skill_context=skill_context_2,
+            name="fake_handler_2",
         )
         aea_2.resources._handler_registry.register(
             (
@@ -289,11 +302,11 @@ class Agent1Handler(Handler):
 
     SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, dialogue, **kwargs):
+    def __init__(self, dialogue: TProtocolDialogue, **kwargs):
         """Initialize the handler."""
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_message = None
+        self.handled_message = None  # type: Optional[Message]
         self.dialogue = dialogue
 
     def setup(self) -> None:
@@ -323,12 +336,12 @@ class Agent2Handler(Handler):
 
     SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, message, dialogue: Dialogue, **kwargs):
+    def __init__(self, message: TProtocolMessage, dialogue: TProtocolDialogue, **kwargs):
         """Initialize the handler."""
         print("inside handler's initialisation method for agent 2")
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_message = None
+        self.handled_message = None  # type: Optional[Message]
         self.message_2 = message
         self.dialogue = dialogue
 
