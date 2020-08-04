@@ -17,14 +17,15 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the agent module."""
 
+"""This module contains the tests of the agent module."""
+import asyncio
 from threading import Thread
 
 import pytest
 
-from aea.agent import Agent, AgentState, Identity, Liveness
-from aea.multiplexer import InBox, OutBox
+from aea.agent import Agent, Identity
+from aea.runtime import RuntimeStates
 
 from packages.fetchai.connections.local.connection import LocalNode
 
@@ -69,54 +70,28 @@ def test_run_agent():
         identity = Identity(agent_name, address=agent_address)
         oef_local_connection = _make_local_connection(agent_address, node)
         oef_local_connection._local_node = node
-        agent = DummyAgent(identity, [oef_local_connection],)
-        assert agent.name == identity.name
-        assert agent.tick == 0
-        assert (
-            agent.agent_state == AgentState.INITIATED
-        ), "Agent state must be 'initiated'"
-
-        agent.multiplexer.connect()
-        assert (
-            agent.agent_state == AgentState.CONNECTED
-        ), "Agent state must be 'connected'"
-
-        assert isinstance(agent.inbox, InBox)
-        assert isinstance(agent.outbox, OutBox)
-
-        agent.multiplexer.disconnect()
-
-        import asyncio
 
         agent = DummyAgent(
             identity, [oef_local_connection], loop=asyncio.new_event_loop()
         )
         agent_thread = Thread(target=agent.start)
+        assert agent.state == RuntimeStates.stopped
         agent_thread.start()
         try:
             wait_for_condition(
-                lambda: agent._main_loop and agent._main_loop.is_running,
+                lambda: agent.state == RuntimeStates.starting,
                 timeout=5,
-                error_msg="Agent loop not started!'",
+                error_msg="Agent state must be 'starting'",
             )
             wait_for_condition(
-                lambda: agent.agent_state == AgentState.RUNNING,
+                lambda: agent.state == RuntimeStates.running,
                 timeout=5,
                 error_msg="Agent state must be 'running'",
             )
         finally:
             agent.stop()
+            assert agent.state == RuntimeStates.stopped
             agent_thread.join()
-
-
-def test_liveness():
-    """Test liveness object states."""
-    liveness = Liveness()
-    assert liveness.is_stopped
-    liveness.start()
-    assert not liveness.is_stopped
-    liveness.stop()
-    assert liveness.is_stopped
 
 
 def test_runtime_modes():
