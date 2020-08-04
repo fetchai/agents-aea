@@ -9,7 +9,7 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   README.md: Qmc8eDQRX15bcJZr8J9ty9EZmXMZN8VUtufkkCm35LWU55
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmYJgUXMenadce3WhLqS8Uo8TgRLvHaXJBr61HeUUMtrmf
+  connection.py: QmPY3yzUkioLkPATZR6K44NwyxCxRXiGf7WHi5j9x5Zg9j
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PLibp2pClientConnection

@@ -33,7 +33,7 @@ import aiohttp
 from aiohttp.client_reqrep import ClientResponse
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Address, Envelope, EnvelopeContext
 
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
@@ -372,10 +372,12 @@ class HTTPClientConnection(Connection):
 
         :return: None
         """
-        if not self.connection_status.is_connected:
-            self.connection_status.is_connected = True
-            self.channel.logger = self.logger
-            await self.channel.connect(self._loop)
+        if self.is_connected:
+            return
+        self._state.set(ConnectionStates.connecting)
+        self.channel.logger = self.logger
+        await self.channel.connect(self._loop)
+        self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
         """
@@ -383,9 +385,11 @@ class HTTPClientConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:
-            self.connection_status.is_connected = False
-            await self.channel.disconnect()
+        if self.is_disconnected:
+            return
+        self._state.set(ConnectionStates.disconnecting)
+        await self.channel.disconnect()
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -394,7 +398,7 @@ class HTTPClientConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
@@ -406,7 +410,7 @@ class HTTPClientConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover

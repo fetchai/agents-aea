@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
 import copy
@@ -25,9 +26,10 @@ from typing import cast
 
 import pytest
 
-from aea.connections.base import ConnectionStatus
+
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.mail.base import Envelope
+from aea.multiplexer import ConnectionStatus
 
 from packages.fetchai.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,

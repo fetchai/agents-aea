@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains the tests for the base classes for the skills."""
 import unittest.mock
 from pathlib import Path
@@ -30,11 +31,11 @@ import pytest
 import aea
 from aea.aea import AEA
 from aea.configurations.base import PublicId, SkillComponentConfiguration
-from aea.connections.base import ConnectionStatus
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAException
 from aea.identity.base import Identity
+from aea.multiplexer import ConnectionStatus
 from aea.registries.resources import Resources
 from aea.skills.base import (
     Behaviour,

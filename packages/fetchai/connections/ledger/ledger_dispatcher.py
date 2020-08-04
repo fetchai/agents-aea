@@ -16,11 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of the ledger API request dispatcher."""
 import time
 from typing import cast
 
+from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
 from aea.helpers.dialogue.base import (
     Dialogue as BaseDialogue,
@@ -194,7 +194,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         while (
             not is_settled
             and attempts < self.MAX_ATTEMPTS
-            and self.connection_status.is_connected
+            and self.connection_state.get() == ConnectionStates.connected
         ):
             time.sleep(self.TIMEOUT)
             transaction_receipt = api.get_transaction_receipt(
@@ -207,7 +207,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         while (
             transaction is None
             and attempts < self.MAX_ATTEMPTS
-            and self.connection_status.is_connected
+            and self.connection_state.get() == ConnectionStates.connected
         ):
             time.sleep(self.TIMEOUT)
             transaction = api.get_transaction(message.transaction_digest.body)

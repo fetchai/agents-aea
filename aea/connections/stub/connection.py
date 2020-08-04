@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import AsyncIterable, IO, List, Optional
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.helpers import file_lock
 from aea.helpers.base import exception_log_and_reraise
 from aea.mail.base import Envelope
@@ -251,19 +251,19 @@ class StubConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
-        if self.connection_status.is_connected:
+        if self.is_connected:
             return
-        self._loop = asyncio.get_event_loop()
+
+        self._state.set(ConnectionStates.connecting)
+
         try:
-            # initialize the queue here because the queue
-            # must be initialized with the right event loop
-            # which is known only at connection time.
+            self._loop = asyncio.get_event_loop()
             self.in_queue = asyncio.Queue()
             self._read_envelopes_task = self._loop.create_task(self.read_envelopes())
-        finally:
-            self.connection_status.is_connected = False
-
-        self.connection_status.is_connected = True
+            self._state.set(ConnectionStates.connected)
+        except Exception:
+            self._state.set(ConnectionStates.disconnected)
+            raise
 
     async def _stop_read_envelopes(self) -> None:
         """
@@ -292,14 +292,16 @@ class StubConnection(Connection):
 
         In this type of connection there's no channel to disconnect.
         """
-        if not self.connection_status.is_connected:
+        if self.is_disconnected:
             return
 
         assert self.in_queue is not None, "Input queue not initialized."
+
+        self._state.set(ConnectionStates.disconnecting)
         await self._stop_read_envelopes()
         self._write_pool.shutdown(wait=False)
         self.in_queue.put_nowait(None)
-        self.connection_status.is_connected = False
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: Envelope) -> None:
         """

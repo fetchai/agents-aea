@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains the tests of the ledger API connection module."""
 import asyncio
 import copy
@@ -26,9 +28,10 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import ProtocolId
-from aea.connections.base import Connection, ConnectionStatus
+from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
+from aea.helpers.async_utils import AsyncState
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
@@ -285,7 +288,7 @@ async def test_new_message_wait_flag(ledger_apis_connection: LedgerConnection):
 @pytest.mark.asyncio
 async def test_no_balance():
     """Test no balance."""
-    dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
+    dispatcher = LedgerApiRequestDispatcher(AsyncState())
     mock_api = Mock()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
@@ -304,7 +307,7 @@ async def test_no_balance():
 @pytest.mark.asyncio
 async def test_no_raw_tx():
     """Test no raw tx returned."""
-    dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
+    dispatcher = LedgerApiRequestDispatcher(AsyncState())
     mock_api = Mock()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -332,8 +335,7 @@ async def test_no_raw_tx():
 @pytest.mark.asyncio
 async def test_attempts_get_transaction_receipt():
     """Test retry and sleep."""
-    dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
-    dispatcher.connection_status.is_connected = True
+    dispatcher = LedgerApiRequestDispatcher(AsyncState(ConnectionStates.connected))
     mock_api = Mock()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,

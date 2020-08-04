@@ -81,16 +81,16 @@ class TestWebhookConnection:
     async def test_connection(self):
         """Test the connect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
 
     @pytest.mark.asyncio
     async def test_disconnect(self):
         """Test the disconnect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
 
         await self.webhook_connection.disconnect()
-        assert self.webhook_connection.connection_status.is_connected is False
+        assert self.webhook_connection.is_connected is False
 
     def teardown(self):
         """Close connection after testing."""
@@ -104,7 +104,7 @@ class TestWebhookConnection:
     async def test_receive_post_ok(self):
         """Test the connect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
         payload = {"hello": "world"}
         call_task = self.loop.create_task(self.call_webhook("test_topic", json=payload))
         envelope = await asyncio.wait_for(self.webhook_connection.receive(), timeout=10)
@@ -125,7 +125,7 @@ class TestWebhookConnection:
     async def test_send(self):
         """Test the connect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
 
         http_message = HttpMessage(
             dialogue_reference=("", ""),

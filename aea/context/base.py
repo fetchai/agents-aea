@@ -24,10 +24,9 @@ from types import SimpleNamespace
 from typing import Any, Dict, Optional
 
 from aea.configurations.base import PublicId
-from aea.connections.base import ConnectionStatus
 from aea.identity.base import Identity
 from aea.mail.base import Address
-from aea.multiplexer import OutBox
+from aea.multiplexer import ConnectionStatus, OutBox
 from aea.skills.tasks import TaskManager
 
 
