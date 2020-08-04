@@ -34,7 +34,7 @@ DEFAULT_BODY_SIZE = 4
 class TProtocolNoCtMessage(Message):
     """A protocol for testing purposes."""
 
-    protocol_id = ProtocolId("fetchai", "t_protocol_no_ct", "0.1.0")
+    protocol_id = ProtocolId.from_str("fetchai/t_protocol_no_ct:0.1.0")
 
     class Performative(Enum):
         """Performatives for the t_protocol_no_ct protocol."""
