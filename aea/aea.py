@@ -388,7 +388,6 @@ class AEA(Agent, WithLogger):
         :return: None
         """
         self.logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.liveness.stop()
         self.decision_maker.stop()
         self.task_manager.stop()
         self.resources.teardown()

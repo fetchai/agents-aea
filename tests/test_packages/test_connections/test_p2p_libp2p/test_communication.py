@@ -58,16 +58,16 @@ class TestP2PLibp2pConnectionConnectDisconnect:
 
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect(self):
-        assert self.connection.connection_status.is_connected is False
+        assert self.connection.is_connected is False
         try:
             await self.connection.connect()
-            assert self.connection.connection_status.is_connected is True
+            assert self.connection.is_connected is True
         except Exception as e:
             await self.connection.disconnect()
             raise e
 
         await self.connection.disconnect()
-        assert self.connection.connection_status.is_connected is False
+        assert self.connection.is_connected is False
 
     @classmethod
     def teardown_class(cls):
@@ -109,8 +109,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.multiplexer2.connect()
 
     def test_connection_is_established(self):
-        assert self.connection1.connection_status.is_connected is True
-        assert self.connection2.connection_status.is_connected is True
+        assert self.connection1.is_connected is True
+        assert self.connection2.is_connected is True
 
     def test_envelope_routed(self):
         addr_1 = self.connection1.node.address
@@ -228,9 +228,9 @@ class TestP2PLibp2pConnectionRouting:
             muxer.connect()
 
     def test_connection_is_established(self):
-        assert self.connection_genesis.connection_status.is_connected is True
+        assert self.connection_genesis.is_connected is True
         for conn in self.connections:
-            assert conn.connection_status.is_connected is True
+            assert conn.is_connected is True
 
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]
@@ -317,9 +317,9 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         cls.multiplexer2.connect()
 
     def test_connection_is_established(self):
-        assert self.relay.connection_status.is_connected is True
-        assert self.connection1.connection_status.is_connected is True
-        assert self.connection2.connection_status.is_connected is True
+        assert self.relay.is_connected is True
+        assert self.connection1.is_connected is True
+        assert self.connection2.is_connected is True
 
     def test_envelope_routed(self):
         addr_1 = self.connection1.node.address
@@ -460,10 +460,10 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             muxer.connect()
 
     def test_connection_is_established(self):
-        assert self.connection_relay_1.connection_status.is_connected is True
-        assert self.connection_relay_2.connection_status.is_connected is True
+        assert self.connection_relay_1.is_connected is True
+        assert self.connection_relay_2.is_connected is True
         for conn in self.connections:
-            assert conn.connection_status.is_connected is True
+            assert conn.is_connected is True
 
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]

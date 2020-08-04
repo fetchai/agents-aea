@@ -31,6 +31,7 @@ from typing import (
     Any,
     Awaitable,
     Callable,
+    Container,
     List,
     Optional,
     Sequence,
@@ -63,30 +64,41 @@ def ensure_list(value: Any) -> List:
 class AsyncState:
     """Awaitable state."""
 
-    def __init__(self, initial_state: Any = None):
+    def __init__(
+        self, initial_state: Any = None, states_enum: Optional[Container[Any]] = None
+    ):
         """Init async state.
 
         :param initial_state: state to set on start.
+        :param states_enum: container of valid states if not provided state not checked on set.
         """
         self._state = initial_state
         self._watchers: Set[Future] = set()
-
-    @property
-    def state(self) -> Any:
-        """Return current state."""
-        return self.get()
-
-    @state.setter
-    def state(self, state: Any) -> None:
-        """Set state."""
-        self.set(state)
+        self._callbacks: List[Callable[[Any], None]] = []
+        self._states_enum = states_enum
 
     def set(self, state: Any) -> None:
         """Set state."""
+        if self._states_enum is not None and state not in self._states_enum:
+            raise ValueError(
+                f"Unsupported state: {state}. Valid states are {self._states_enum}"
+            )
+
         if self._state == state:  # pragma: no cover
             return
+
         self._state_changed(state)
         self._state = state
+
+    def add_callback(self, callback_fn: Callable[[Any], None]) -> None:
+        """
+        Add callback to track state changes.
+
+        :param callback_fn: callable object to be called on state changed.
+
+        :return: None
+        """
+        self._callbacks.append(callback_fn)
 
     def get(self) -> Any:
         """Get state."""
@@ -94,6 +106,12 @@ class AsyncState:
 
     def _state_changed(self, state: Any) -> None:
         """Fulfill watchers for state."""
+        for callback_fn in self._callbacks:
+            try:
+                callback_fn(state)
+            except Exception:  # pylint: disable=broad-except
+                logger.exception(f"Exception on calling {callback_fn}")
+
         for watcher in list(self._watchers):
             if state not in watcher._states:  # type: ignore # pylint: disable=protected-access  # pragma: nocover
                 continue

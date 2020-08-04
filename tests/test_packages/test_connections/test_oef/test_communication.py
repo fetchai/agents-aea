@@ -1135,11 +1135,11 @@ class TestSendWithOEF(UseOef):
         )
         oef_connection.loop = asyncio.get_event_loop()
 
-        assert not oef_connection.connection_status.is_connected
+        assert not oef_connection.is_connected
         await oef_connection.connect()
-        assert oef_connection.connection_status.is_connected
+        assert oef_connection.is_connected
         await oef_connection.connect()
-        assert oef_connection.connection_status.is_connected
+        assert oef_connection.is_connected
 
         await oef_connection.disconnect()
 

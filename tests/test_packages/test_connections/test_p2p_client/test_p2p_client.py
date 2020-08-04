@@ -82,7 +82,7 @@ class TestP2p:
             return_value={"status": "OK"},
         ):
             await self.p2p_client_connection.disconnect()
-            assert self.p2p_client_connection.connection_status.is_connected is False
+            assert self.p2p_client_connection.is_connected is False
 
 
 @pytest.mark.asyncio
@@ -117,7 +117,7 @@ async def test_p2p_receive():
             return_value={"status": "OK"},
         ):
             await p2p_connection.connect()
-            assert p2p_connection.connection_status.is_connected is True
+            assert p2p_connection.is_connected is True
 
     with mock.patch.object(
         fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=messages
@@ -132,7 +132,7 @@ async def test_p2p_receive():
     ):
         p2p_connection.channel._httpCall.get_messages = fake_get_messages_empty
         await p2p_connection.disconnect()
-        assert p2p_connection.connection_status.is_connected is False
+        assert p2p_connection.is_connected is False
 
 
 @pytest.mark.asyncio
@@ -162,7 +162,7 @@ async def test_p2p_send():
             return_value={"status": "OK"},
         ):
             await p2p_client_connection.connect()
-            assert p2p_client_connection.connection_status.is_connected is True
+            assert p2p_client_connection.is_connected is True
 
     with mock.patch.object(
         fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]
@@ -180,4 +180,4 @@ async def test_p2p_send():
         fetch.p2p.api.http_calls.HTTPCalls, "unregister", return_value={"status": "OK"},
     ):
         await p2p_client_connection.disconnect()
-        assert p2p_client_connection.connection_status.is_connected is False
+        assert p2p_client_connection.is_connected is False

@@ -141,10 +141,11 @@ class TestThreadLauncherMode:
             runner.stop()
 
     def test_run_agent_in_thread(self):
-        """Test agent started ans stopped in thread."""
+        """Test agent started and stopped in thread."""
         stop_event = Event()
         t = Thread(target=_run_agent, args=(self.agent_name_1, stop_event))
         t.start()
+        time.sleep(1)
         stop_event.set()
         t.join(10)
 

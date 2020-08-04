@@ -35,7 +35,7 @@ from typing import IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
@@ -392,8 +392,8 @@ class Libp2pNode:
         """
         if self._connection_attempts == 1:
             with open(self.log_file, "r") as f:
-                self.logger.debug("Couldn't connect to libp2p p2p process, logs:")
-                self.logger.debug(f.read())
+                self.logger.error("Couldn't connect to libp2p p2p process, logs:")
+                self.logger.error(f.read())
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
@@ -645,23 +645,22 @@ class P2PLibp2pConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:  # pragma: no cover
+        if self.is_connected:
             return
+        self._state.set(ConnectionStates.connecting)
         try:
             # start libp2p node
-            self.connection_status.is_connecting = True
+            self._state.set(ConnectionStates.connecting)
             self.node.logger = self.logger
             await self.node.start()
-            self.connection_status.is_connecting = False
-            self.connection_status.is_connected = True
-
             # starting receiving msgs
             self._in_queue = asyncio.Queue()
             self._receive_from_node_task = asyncio.ensure_future(
                 self._receive_from_node(), loop=self._loop
             )
+            self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:
-            self.connection_status.is_connected = False
+            self._state.set(ConnectionStates.disconnected)
             raise e
 
     async def disconnect(self) -> None:
@@ -670,11 +669,9 @@ class P2PLibp2pConnection(Connection):
 
         :return: None
         """
-        assert (
-            self.connection_status.is_connected or self.connection_status.is_connecting
-        ), "Call connect before disconnect."
-        self.connection_status.is_connected = False
-        self.connection_status.is_connecting = False
+        if self.is_disconnected:
+            return
+        self._state.set(ConnectionStates.disconnecting)
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
@@ -685,6 +682,7 @@ class P2PLibp2pConnection(Connection):
             self._in_queue.put_nowait(None)
         else:
             self.logger.debug("Called disconnect when input queue not initialized.")
+        self._state.set(ConnectionStates.disconnected)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -698,7 +696,7 @@ class P2PLibp2pConnection(Connection):
             if data is None:
                 self.logger.debug("Received None.")
                 self.node.stop()
-                self.connection_status.is_connected = False
+                self._state.set(ConnectionStates.disconnected)
                 return None
                 # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))

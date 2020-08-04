@@ -16,10 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests for aea/aea.py."""
 import os
 import tempfile
+import time
 from pathlib import Path
+from threading import Thread
 from unittest.mock import patch
 
 from aea import AEA_DIR
@@ -51,7 +54,7 @@ from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
-def test_initialise_aea():
+def test_setup_aea():
     """Tests the initialisation of the AEA."""
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder = AEABuilder()
@@ -70,7 +73,7 @@ def test_initialise_aea():
     ), "Shared state must not be None after set"
     assert my_AEA.context.task_manager is not None
     assert my_AEA.context.identity is not None, "Identity must not be None after set."
-    my_AEA.stop()
+    my_AEA.teardown()
 
 
 def test_act():
@@ -84,11 +87,8 @@ def test_act():
     agent = builder.build()
 
     with run_in_thread(agent.start, timeout=20):
-        wait_for_condition(
-            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
-        )
+        wait_for_condition(lambda: agent.is_running, timeout=10)
         behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
-        import time
 
         time.sleep(1)
         wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=10)
@@ -106,10 +106,30 @@ def test_start_stop():
     agent = builder.build()
 
     with run_in_thread(agent.start, timeout=20):
-        wait_for_condition(
-            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
-        )
+        wait_for_condition(lambda: agent.is_running, timeout=10)
         agent.stop()
+
+
+def test_double_start():
+    """Tests the act function of the AEA."""
+    agent_name = "MyAgent"
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+    builder = AEABuilder()
+    builder.set_name(agent_name)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+    agent = builder.build()
+
+    with run_in_thread(agent.start, timeout=20):
+        try:
+            wait_for_condition(lambda: agent.is_running, timeout=10)
+
+            t = Thread(target=agent.start)
+            t.start()
+            time.sleep(1)
+            assert not t.is_alive()
+        finally:
+            agent.stop()
 
 
 def test_react():
@@ -152,9 +172,7 @@ def test_react():
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
-            wait_for_condition(
-                lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
-            )
+            wait_for_condition(lambda: agent.is_running, timeout=10)
             agent.outbox.put(envelope)
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
@@ -167,7 +185,6 @@ def test_react():
                 timeout=10,
                 error_msg="The message is not inside the handled_messages.",
             )
-            agent.stop()
 
 
 def test_handle():
@@ -210,9 +227,7 @@ def test_handle():
         )
 
         with run_in_thread(aea.start, timeout=5):
-            wait_for_condition(
-                lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
-            )
+            wait_for_condition(lambda: aea.is_running, timeout=10)
             dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.handlers["dummy"]
 
@@ -296,9 +311,7 @@ def test_initialize_aea_programmatically():
         )
 
         with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
-            wait_for_condition(
-                lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
-            )
+            wait_for_condition(lambda: aea.is_running, timeout=10)
             aea.outbox.put(envelope)
 
             dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
@@ -383,9 +396,7 @@ def test_initialize_aea_programmatically_build_resources():
             expected_message.sender = agent_name
 
             with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
-                wait_for_condition(
-                    lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
-                )
+                wait_for_condition(lambda: aea.is_running, timeout=10)
                 aea.outbox.put(
                     Envelope(
                         to=agent_name,
@@ -453,9 +464,7 @@ def test_add_behaviour_dynamically():
         skill.skill_context.set_agent_context(agent.context)
 
     with run_in_thread(agent.start, timeout=5, on_exit=agent.stop):
-        wait_for_condition(
-            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
-        )
+        wait_for_condition(lambda: agent.is_running, timeout=10)
 
         dummy_skill_id = PublicId("dummy_author", "dummy", "0.1.0")
         dummy_skill = agent.resources.get_skill(dummy_skill_id)
@@ -571,3 +580,36 @@ class TestContextNamespace:
         for skill in self.agent.resources.get_all_skills():
             assert skill.skill_context.namespace.key1 == 1
             assert skill.skill_context.namespace.key2 == 2
+
+
+def test_start_stop_and_start_stop_again():
+    """Tests AEA can be started/stopped twice."""
+    agent_name = "MyAgent"
+    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+    builder = AEABuilder()
+    builder.set_name(agent_name)
+    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+    agent = builder.build()
+
+    with run_in_thread(agent.start, timeout=20):
+        wait_for_condition(lambda: agent.is_running, timeout=10)
+        behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
+
+        time.sleep(1)
+        wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=5)
+        agent.stop()
+        wait_for_condition(lambda: agent.is_stopped, timeout=10)
+
+    behaviour.nb_act_called = 0
+
+    time.sleep(2)
+    assert behaviour.nb_act_called == 0
+
+    with run_in_thread(agent.start, timeout=20):
+        wait_for_condition(lambda: agent.is_running, timeout=10)
+
+        time.sleep(1)
+        wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=5)
+        agent.stop()
+        wait_for_condition(lambda: agent.is_stopped, timeout=10)

@@ -21,53 +21,16 @@
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from enum import Enum
 from typing import Dict, List, Optional, Type
 
 from aea.agent_loop import BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import Connection
 from aea.identity.base import Identity
 from aea.multiplexer import InBox, Multiplexer, OutBox
-from aea.runtime import AsyncRuntime, BaseRuntime, ThreadedRuntime
+from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 
 logger = logging.getLogger(__name__)
-
-
-class AgentState(Enum):
-    """Enumeration for an agent state.
-
-    In particular, it can be one of the following states:
-
-    - AgentState.INITIATED: when the Agent object has been created.
-    - AgentState.CONNECTED: when the agent is connected.
-    - AgentState.RUNNING: when the agent is running.
-    """
-
-    INITIATED = "initiated"
-    CONNECTED = "connected"
-    RUNNING = "running"
-
-
-class Liveness:
-    """Determines the liveness of the agent."""
-
-    def __init__(self):
-        """Instantiate the liveness."""
-        self._is_stopped = True
-
-    @property
-    def is_stopped(self) -> bool:
-        """Check whether the liveness is stopped."""
-        return self._is_stopped
-
-    def start(self) -> None:
-        """Start the liveness."""
-        self._is_stopped = False
-
-    def stop(self) -> None:
-        """Stop the liveness."""
-        self._is_stopped = True
 
 
 class Agent(ABC):
@@ -111,7 +74,6 @@ class Agent(ABC):
         self._multiplexer = Multiplexer(self._connections, loop=loop)
         self._inbox = InBox(self._multiplexer)
         self._outbox = OutBox(self._multiplexer, identity.address)
-        self._liveness = Liveness()
         self._timeout = timeout
 
         self._tick = 0
@@ -186,11 +148,6 @@ class Agent(ABC):
         return self.identity.name
 
     @property
-    def liveness(self) -> Liveness:
-        """Get the liveness."""
-        return self._liveness
-
-    @property
     def tick(self) -> int:
         """
         Get the tick or agent loop count.
@@ -203,26 +160,6 @@ class Agent(ABC):
     def timeout(self) -> float:
         """Get the time in (fractions of) seconds to time out an agent between act and react."""
         return self._timeout
-
-    @property
-    def agent_state(self) -> AgentState:
-        """
-        Get the state of the agent.
-
-        :raises ValueError: if the state does not satisfy any of the foreseen conditions.
-        :return: None
-        """
-        if (
-            self.multiplexer is not None
-            and not self.multiplexer.connection_status.is_connected
-        ):
-            return AgentState.INITIATED
-        elif self.multiplexer.connection_status.is_connected and not self.is_running:
-            return AgentState.CONNECTED
-        elif self.multiplexer.connection_status.is_connected and self.is_running:
-            return AgentState.RUNNING
-        else:
-            raise ValueError("Agent state not recognized.")  # pragma: no cover
 
     @property
     def loop_mode(self) -> str:
@@ -240,7 +177,7 @@ class Agent(ABC):
         return self._runtime
 
     def setup_multiplexer(self) -> None:
-        """Set up the multiplexer"""
+        """Set up the multiplexer."""
         pass
 
     def start(self) -> None:
@@ -278,7 +215,6 @@ class Agent(ABC):
         """
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
-        self.liveness.start()
 
     def stop(self) -> None:
         """
@@ -333,3 +269,12 @@ class Agent(ABC):
 
         :return: None
         """
+
+    @property
+    def state(self) -> RuntimeStates:
+        """
+        Get state of the agent's runtime.
+
+        :return: RuntimeStates
+        """
+        return self._runtime.state

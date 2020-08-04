@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the HTTP Server connection module."""
+
 import asyncio
 import copy
 import logging
@@ -375,7 +376,7 @@ class TestHTTPServer:
             side_effect=Exception("expected"),
         ):
             await self.http_connection.connect()
-        assert not self.http_connection.connection_status.is_connected
+        assert not self.http_connection.is_connected
 
     @pytest.mark.asyncio
     async def test_server_error_on_send_response(self):

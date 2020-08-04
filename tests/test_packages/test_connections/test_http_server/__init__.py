@@ -16,5 +16,4 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the HTTP Server connection implementation."""

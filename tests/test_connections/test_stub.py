@@ -199,7 +199,7 @@ class TestStubConnectionSending:
 
     def test_connection_is_established(self):
         """Test the stub connection is established and then bad formatted messages."""
-        assert self.connection.connection_status.is_connected
+        assert self.connection.is_connected
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -287,9 +287,9 @@ async def test_disconnection_when_already_disconnected():
     output_file_path = d / "output_file.csv"
     connection = _make_stub_connection(input_file_path, output_file_path)
 
-    assert not connection.connection_status.is_connected
+    assert not connection.is_connected
     await connection.disconnect()
-    assert not connection.connection_status.is_connected
+    assert not connection.is_connected
 
 
 @pytest.mark.asyncio
@@ -302,11 +302,11 @@ async def test_connection_when_already_connected():
     output_file_path = d / "output_file.csv"
     connection = _make_stub_connection(input_file_path, output_file_path)
 
-    assert not connection.connection_status.is_connected
+    assert not connection.is_connected
     await connection.connect()
-    assert connection.connection_status.is_connected
+    assert connection.is_connected
     await connection.connect()
-    assert connection.connection_status.is_connected
+    assert connection.is_connected
 
     await connection.disconnect()
 
