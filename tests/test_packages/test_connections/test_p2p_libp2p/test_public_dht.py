@@ -70,7 +70,7 @@ class TestLibp2pConnectionRelayPublicDHT:
             self.log_files.append(connection.node.log_file)
             multiplexer.connect()
 
-            assert connection.connection_status.is_connected is True
+            assert connection.is_connected is True
             multiplexer.disconnect()
 
     @classmethod
