@@ -202,7 +202,7 @@ class IPFSDaemon:
         process = subprocess.Popen(  # nosec
             ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
-        output, err = process.communicate()
+        output, _ = process.communicate()
         if b"0.4.23" not in output:
             raise Exception(
                 "Please ensure you have version 0.4.23 of IPFS daemon installed."
