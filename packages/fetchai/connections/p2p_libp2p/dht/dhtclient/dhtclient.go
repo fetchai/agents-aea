@@ -182,10 +182,6 @@ func New(opts ...Option) (*DHTClient, error) {
 	return dhtClient, nil
 }
 
-func (dhtClient *DHTClient) reconnectToRelay() {
-
-}
-
 func (dhtClient *DHTClient) setupLogger() {
 	fields := map[string]string{
 		"package": "DHTClient",
