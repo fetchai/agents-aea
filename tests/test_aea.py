@@ -143,10 +143,11 @@ def test_react():
             content=b"hello",
         )
         msg.counterparty = agent.identity.address
+        msg.sender = agent.identity.address
         envelope = Envelope(
-            to=agent.identity.address,
-            sender=agent.identity.address,
-            protocol_id=DefaultMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
 
@@ -200,9 +201,10 @@ def test_handle():
             content=b"hello",
         )
         msg.counterparty = aea.identity.address
+        msg.sender = aea.identity.address
         envelope = Envelope(
-            to=aea.identity.address,
-            sender=aea.identity.address,
+            to=msg.counterparty,
+            sender=msg.sender,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=msg,
         )
@@ -241,10 +243,11 @@ def test_handle():
                 target=0,
             )
             msg.counterparty = aea.identity.address
+            msg.sender = aea.identity.address
             envelope = Envelope(
-                to=aea.identity.address,
-                sender=aea.identity.address,
-                protocol_id=FipaMessage.protocol_id,
+                to=msg.counterparty,
+                sender=msg.sender,
+                protocol_id=msg.protocol_id,
                 message=msg,
             )
             # send envelope via localnode back to agent
@@ -284,10 +287,11 @@ def test_initialize_aea_programmatically():
             content=b"hello",
         )
         expected_message.counterparty = aea.identity.address
+        expected_message.sender = aea.identity.address
         envelope = Envelope(
-            to=aea.identity.address,
-            sender=aea.identity.address,
-            protocol_id=DefaultMessage.protocol_id,
+            to=expected_message.counterparty,
+            sender=expected_message.sender,
+            protocol_id=expected_message.protocol_id,
             message=expected_message,
         )
 
@@ -376,6 +380,7 @@ def test_initialize_aea_programmatically_build_resources():
                 content=b"hello",
             )
             expected_message.counterparty = agent_name
+            expected_message.sender = agent_name
 
             with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
                 wait_for_condition(
