@@ -159,7 +159,7 @@ class TProtocolDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> TProtocolDialogue:
         """
-        Create an instance of {} dialogue.
+        Create an instance of t_protocol dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for
