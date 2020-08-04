@@ -178,6 +178,8 @@ NON_GENESIS_CONFIG = {
     "log_file": "libp2p_node.log",
     "public_uri": "127.0.0.1:9001",
 }
+PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
+PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
@@ -786,6 +788,7 @@ def _make_libp2p_connection(
     entry_peers: Optional[Sequence[MultiAddr]] = None,
     delegate_port: int = 11234,
     delegate_host: str = "127.0.0.1",
+    node_key_file: Optional[str] = None,
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
@@ -794,7 +797,7 @@ def _make_libp2p_connection(
     identity = Identity("", address=crypto.address)
     if relay and delegate:
         configuration = ConnectionConfig(
-            node_key_file=None,
+            node_key_file=node_key_file,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -804,7 +807,7 @@ def _make_libp2p_connection(
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
-            node_key_file=None,
+            node_key_file=node_key_file,
             local_uri="{}:{}".format(host, port),
             public_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
@@ -813,7 +816,7 @@ def _make_libp2p_connection(
         )
     else:
         configuration = ConnectionConfig(
-            node_key_file=None,
+            node_key_file=node_key_file,
             local_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
             log_file=log_file,
