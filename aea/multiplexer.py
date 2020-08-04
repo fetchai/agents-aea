@@ -715,17 +715,27 @@ class OutBox:
             raise ValueError(
                 "Only Message type allowed in envelope message field when putting into outbox."
             )
+        message = cast(Message, envelope.message)
+        if not message.has_counterparty:
+            raise ValueError("Provided message has message.counterparty not set.")
+        if not message.has_sender:
+            raise ValueError("Provided message has message.sender not set.")
         self._multiplexer.put(envelope)
 
     def put_message(
-        self, message: Message, context: Optional[EnvelopeContext] = None,
+        self,
+        message: Message,
+        context: Optional[EnvelopeContext] = None,
+        sender: Optional[str] = None,
     ) -> None:
         """
         Put a message in the outbox.
 
         This constructs an envelope with the input arguments.
 
-        :param message: the message.
+        "sender" is a deprecated kwarg and will be removed in the next version
+
+        :param message: the message
         :param context: the envelope context
         :return: None
         """
@@ -733,11 +743,11 @@ class OutBox:
             raise ValueError("Provided message not of type Message.")
         if not message.has_counterparty:
             raise ValueError("Provided message has message.counterparty not set.")
-        if not message.has_sender:
+        if not message.has_sender and sender is None:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
             to=message.counterparty,
-            sender=message.sender,
+            sender=sender or message.sender,  # TODO: remove "sender"
             protocol_id=message.protocol_id,
             message=message,
             context=context,
