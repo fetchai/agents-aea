@@ -172,5 +172,5 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        lines.insert(157, f"    strategy.args['location'] = {location}")
+        lines.insert(157, f"    strategy.config['location'] = {location}")
         file.write_text("\n".join(lines))
