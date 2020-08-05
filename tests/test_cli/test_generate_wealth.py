@@ -87,7 +87,7 @@ class GenerateWealthCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestWealthCommands(AEATestCaseMany):
+class TestWealthCommandsPositive(AEATestCaseMany):
     """Test case for CLI wealth commands."""
 
     @pytest.mark.integration
@@ -104,6 +104,12 @@ class TestWealthCommands(AEATestCaseMany):
 
         self.generate_wealth()
 
+
+class TestWealthCommandsNegative(AEATestCaseMany):
+    """Test case for CLI wealth commands, negative case."""
+
+    @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_wealth_commands_negative(self):
         """Test wealth commands."""
         agent_name = "test_aea"
