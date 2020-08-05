@@ -29,6 +29,18 @@
   <a href="">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
   </a>
+  <a href="https://img.shields.io/badge/lint-flake8-blueviolet">
+    <img alt="flake8" src="https://img.shields.io/badge/lint-flake8-blueviolet" >
+  </a>
+  <a href="https://github.com/psf/black">
+    <img alt="Black" src="https://img.shields.io/badge/code%20style-black-black">
+  </a>
+  <a href="https://github.com/python/mypy">
+    <img alt="mypy" src="https://img.shields.io/badge/static%20check-mypy-blue">
+  </a>
+  <a href="https://github.com/PyCQA/bandit">
+    <img alt="mypy" src="https://img.shields.io/badge/security-bandit-lightgrey">
+  </a>
 </p>
 
 <p align="center">
