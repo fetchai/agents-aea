@@ -110,16 +110,6 @@ Envelopes placed in the Outbox are processed by the Multiplexer.
 
 Get the agent name.
 
-<a name="aea.agent.Agent.liveness"></a>
-#### liveness
-
-```python
- | @property
- | liveness() -> Liveness
-```
-
-Get the liveness.
-
 <a name="aea.agent.Agent.tick"></a>
 #### tick
 
@@ -141,24 +131,6 @@ Each agent loop (one call to each one of act(), react(), update()) increments th
 ```
 
 Get the time in (fractions of) seconds to time out an agent between act and react.
-
-<a name="aea.agent.Agent.agent_state"></a>
-#### agent`_`state
-
-```python
- | @property
- | agent_state() -> AgentState
-```
-
-Get the state of the agent.
-
-**Raises**:
-
-- `ValueError`: if the state does not satisfy any of the foreseen conditions.
-
-**Returns**:
-
-None
 
 <a name="aea.agent.Agent.loop_mode"></a>
 #### loop`_`mode
@@ -197,7 +169,7 @@ Get the runtime.
  | setup_multiplexer() -> None
 ```
 
-Set up the multiplexer
+Set up the multiplexer.
 
 <a name="aea.agent.Agent.start"></a>
 #### start
@@ -330,3 +302,18 @@ Tear down the agent.
 **Returns**:
 
 None
+
+<a name="aea.agent.Agent.state"></a>
+#### state
+
+```python
+ | @property
+ | state() -> RuntimeStates
+```
+
+Get state of the agent's runtime.
+
+**Returns**:
+
+RuntimeStates
+

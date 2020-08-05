@@ -56,6 +56,16 @@ Get the crypto objects (key pair).
 
 Get the crypto addresses.
 
+<a name="aea.crypto.wallet.CryptoStore.private_keys"></a>
+#### private`_`keys
+
+```python
+ | @property
+ | private_keys() -> Dict[str, str]
+```
+
+Get the crypto addresses.
+
 <a name="aea.crypto.wallet.Wallet"></a>
 ## Wallet Objects
 
@@ -110,6 +120,16 @@ Get the crypto objects (key pair).
 ```python
  | @property
  | addresses() -> Dict[str, str]
+```
+
+Get the crypto addresses.
+
+<a name="aea.crypto.wallet.Wallet.private_keys"></a>
+#### private`_`keys
+
+```python
+ | @property
+ | private_keys() -> Dict[str, str]
 ```
 
 Get the crypto addresses.

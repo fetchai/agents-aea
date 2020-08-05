@@ -25,7 +25,7 @@ Awaitable state.
 #### `__`init`__`
 
 ```python
- | __init__(initial_state: Any = None)
+ | __init__(initial_state: Any = None, states_enum: Optional[Container[Any]] = None)
 ```
 
 Init async state.
@@ -33,26 +33,7 @@ Init async state.
 **Arguments**:
 
 - `initial_state`: state to set on start.
-
-<a name="aea.helpers.async_utils.AsyncState.state"></a>
-#### state
-
-```python
- | @property
- | state() -> Any
-```
-
-Return current state.
-
-<a name="aea.helpers.async_utils.AsyncState.state"></a>
-#### state
-
-```python
- | @state.setter
- | state(state: Any) -> None
-```
-
-Set state.
+- `states_enum`: container of valid states if not provided state not checked on set.
 
 <a name="aea.helpers.async_utils.AsyncState.set"></a>
 #### set
@@ -62,6 +43,23 @@ Set state.
 ```
 
 Set state.
+
+<a name="aea.helpers.async_utils.AsyncState.add_callback"></a>
+#### add`_`callback
+
+```python
+ | add_callback(callback_fn: Callable[[Any], None]) -> None
+```
+
+Add callback to track state changes.
+
+**Arguments**:
+
+- `callback_fn`: callable object to be called on state changed.
+
+**Returns**:
+
+None
 
 <a name="aea.helpers.async_utils.AsyncState.get"></a>
 #### get
@@ -198,17 +196,6 @@ Wait for coroutine execution result.
 ```
 
 Cancel coroutine task execution in a target loop.
-
-<a name="aea.helpers.async_utils.AnotherThreadTask.future_cancel"></a>
-#### future`_`cancel
-
-```python
- | future_cancel() -> None
-```
-
-Cancel task waiting future.
-
-In this case future result will raise CanclledError not waiting for real task exit.
 
 <a name="aea.helpers.async_utils.AnotherThreadTask.done"></a>
 #### done

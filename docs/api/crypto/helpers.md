@@ -3,6 +3,19 @@
 
 Module wrapping the helpers of public and private key cryptography.
 
+<a name="aea.crypto.helpers.verify_or_create_private_keys"></a>
+#### verify`_`or`_`create`_`private`_`keys
+
+```python
+verify_or_create_private_keys(aea_project_path: Path, exit_on_error: bool = True) -> AgentConfig
+```
+
+Verify or create private keys.
+
+**Arguments**:
+
+- `ctx`: Context
+
 <a name="aea.crypto.helpers.try_validate_private_key_path"></a>
 #### try`_`validate`_`private`_`key`_`path
 
@@ -26,7 +39,7 @@ None
 #### create`_`private`_`key
 
 ```python
-create_private_key(ledger_id: str, private_key_file: Optional[str] = None) -> None
+create_private_key(ledger_id: str, private_key_file: str) -> None
 ```
 
 Create a private key for the specified ledger identifier.
@@ -34,6 +47,7 @@ Create a private key for the specified ledger identifier.
 **Arguments**:
 
 - `ledger_id`: the ledger identifier.
+- `private_key_file`: the private key file.
 
 **Returns**:
 

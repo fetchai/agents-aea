@@ -123,6 +123,15 @@ Return the JSON representation.
 
 Get dialogue label from json.
 
+<a name="aea.helpers.dialogue.base.DialogueLabel.get_incomplete_version"></a>
+#### get`_`incomplete`_`version
+
+```python
+ | get_incomplete_version() -> "DialogueLabel"
+```
+
+Get the incomplete version of the label.
+
 <a name="aea.helpers.dialogue.base.DialogueLabel.__str__"></a>
 #### `__`str`__`
 
@@ -131,6 +140,16 @@ Get dialogue label from json.
 ```
 
 Get the string representation.
+
+<a name="aea.helpers.dialogue.base.DialogueLabel.from_str"></a>
+#### from`_`str
+
+```python
+ | @classmethod
+ | from_str(cls, obj: str) -> "DialogueLabel"
+```
+
+Get the dialogue label from string representation.
 
 <a name="aea.helpers.dialogue.base.Dialogue"></a>
 ## Dialogue Objects
@@ -298,6 +317,34 @@ Get the dialogue label.
 
 The dialogue label
 
+<a name="aea.helpers.dialogue.base.Dialogue.incomplete_dialogue_label"></a>
+#### incomplete`_`dialogue`_`label
+
+```python
+ | @property
+ | incomplete_dialogue_label() -> DialogueLabel
+```
+
+Get the dialogue label.
+
+**Returns**:
+
+The incomplete dialogue label
+
+<a name="aea.helpers.dialogue.base.Dialogue.dialogue_labels"></a>
+#### dialogue`_`labels
+
+```python
+ | @property
+ | dialogue_labels() -> Set[DialogueLabel]
+```
+
+Get the dialogue labels (incomplete and complete, if it exists)
+
+**Returns**:
+
+the dialogue labels
+
 <a name="aea.helpers.dialogue.base.Dialogue.agent_address"></a>
 #### agent`_`address
 
@@ -464,7 +511,7 @@ True if empty, False otherwise
  | update(message: Message) -> bool
 ```
 
-Extend the list of incoming/outgoing messages with 'message', if 'message' is valid.
+Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
 
 **Arguments**:
 
@@ -473,6 +520,40 @@ Extend the list of incoming/outgoing messages with 'message', if 'message' is va
 **Returns**:
 
 True if message successfully added, false otherwise
+
+<a name="aea.helpers.dialogue.base.Dialogue.ensure_counterparty"></a>
+#### ensure`_`counterparty
+
+```python
+ | ensure_counterparty(message: Message) -> None
+```
+
+Ensure the counterparty is set (set if not) correctly.
+
+**Arguments**:
+
+- `message`: a message
+
+**Returns**:
+
+None
+
+<a name="aea.helpers.dialogue.base.Dialogue.is_belonging_to_dialogue"></a>
+#### is`_`belonging`_`to`_`dialogue
+
+```python
+ | is_belonging_to_dialogue(message: Message) -> bool
+```
+
+Check if the message is belonging to the dialogue.
+
+**Arguments**:
+
+- `message`: the message
+
+**Returns**:
+
+Ture if message is part of the dialogue, False otherwise
 
 <a name="aea.helpers.dialogue.base.Dialogue.reply"></a>
 #### reply
@@ -752,6 +833,20 @@ Retrieve the dialogue 'message' belongs to.
 **Returns**:
 
 the dialogue, or None in case such a dialogue does not exist
+
+<a name="aea.helpers.dialogue.base.Dialogues.get_latest_label"></a>
+#### get`_`latest`_`label
+
+```python
+ | get_latest_label(dialogue_label: DialogueLabel) -> DialogueLabel
+```
+
+Retrieve the latest dialogue label if present otherwise return same label.
+
+**Arguments**:
+
+- `dialogue_label`: the dialogue label
+:return dialogue_label: the dialogue label
 
 <a name="aea.helpers.dialogue.base.Dialogues.get_dialogue_from_label"></a>
 #### get`_`dialogue`_`from`_`label

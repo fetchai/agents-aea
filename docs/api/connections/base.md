@@ -3,23 +3,14 @@
 
 The base connection package.
 
-<a name="aea.connections.base.ConnectionStatus"></a>
-## ConnectionStatus Objects
+<a name="aea.connections.base.ConnectionStates"></a>
+## ConnectionStates Objects
 
 ```python
-class ConnectionStatus()
+class ConnectionStates(Enum)
 ```
 
-The connection status class.
-
-<a name="aea.connections.base.ConnectionStatus.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__()
-```
-
-Initialize the connection status.
+Connection states enum.
 
 <a name="aea.connections.base.Connection"></a>
 ## Connection Objects
@@ -34,7 +25,7 @@ Abstract definition of a connection.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ConnectionConfig, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None)
+ | __init__(configuration: ConnectionConfig, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs)
 ```
 
 Initialize the connection.
@@ -148,12 +139,12 @@ Get the ids of the protocols this connection is restricted to.
 
 Get the ids of the excluded protocols for this connection.
 
-<a name="aea.connections.base.Connection.connection_status"></a>
-#### connection`_`status
+<a name="aea.connections.base.Connection.state"></a>
+#### state
 
 ```python
  | @property
- | connection_status() -> ConnectionStatus
+ | state() -> ConnectionStates
 ```
 
 Get the connection status.
@@ -215,7 +206,7 @@ the received envelope, or None if an error occurred.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, identity: Identity, crypto_store: CryptoStore) -> "Connection"
+ | from_dir(cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs) -> "Connection"
 ```
 
 Load the connection from a directory.
@@ -235,7 +226,7 @@ the connection object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore) -> "Connection"
+ | from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, **kwargs) -> "Connection"
 ```
 
 Load a connection from a configuration.
@@ -249,4 +240,24 @@ Load a connection from a configuration.
 **Returns**:
 
 an instance of the concrete connection class.
+
+<a name="aea.connections.base.Connection.is_connected"></a>
+#### is`_`connected
+
+```python
+ | @property
+ | is_connected() -> bool
+```
+
+Return is connected state.
+
+<a name="aea.connections.base.Connection.is_disconnected"></a>
+#### is`_`disconnected
+
+```python
+ | @property
+ | is_disconnected() -> bool
+```
+
+Return is disconnected state.
 

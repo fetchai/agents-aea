@@ -154,9 +154,8 @@ def install(package: str) -> int:
 
 
 if __name__ == "__main__":
-    install("pydoc-markdown==3.3.0")
     res = shutil.which("pydoc-markdown")
     if res is None:
-        print("Please install pydoc-markdown first: `pip install pydoc-markdown`")
+        install("pydoc-markdown==3.3.0")
         sys.exit(1)
     generate_api_docs()

@@ -155,8 +155,8 @@ class TestBuildSkill(AEATestCaseMany):
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
-        setting_path = "vendor.fetchai.skills.{}.behaviours.my_search_behaviour.args.location".format(
-            skill_id
+        setting_path = "skills.{}.behaviours.my_search_behaviour.args.location".format(
+            skill_name
         )
         self.force_set_config(setting_path, location)
 

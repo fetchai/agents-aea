@@ -281,23 +281,6 @@ Add a skill to the set of resources.
 
 None
 
-<a name="aea.registries.resources.Resources.inject_contracts"></a>
-#### inject`_`contracts
-
-```python
- | inject_contracts(skill: Skill) -> None
-```
-
-Inject contracts into a skill context.
-
-**Arguments**:
-
-- `skill`: a skill
-
-**Returns**:
-
-None
-
 <a name="aea.registries.resources.Resources.get_skill"></a>
 #### get`_`skill
 

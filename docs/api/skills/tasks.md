@@ -7,7 +7,7 @@ This module contains the classes for tasks.
 ## Task Objects
 
 ```python
-class Task()
+class Task(WithLogger)
 ```
 
 This class implements an abstract task.
@@ -70,11 +70,10 @@ Get the result.
 #### setup
 
 ```python
- | @abstractmethod
  | setup() -> None
 ```
 
-Implement the behaviour setup.
+Implement the task setup.
 
 **Returns**:
 
@@ -98,11 +97,10 @@ None
 #### teardown
 
 ```python
- | @abstractmethod
  | teardown() -> None
 ```
 
-Implement the behaviour teardown.
+Implement the task teardown.
 
 **Returns**:
 
@@ -137,7 +135,7 @@ A Task manager.
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = 1, is_lazy_pool_start: bool = True)
+ | __init__(nb_workers: int = 1, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None)
 ```
 
 Initialize the task manager.

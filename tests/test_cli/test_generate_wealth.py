@@ -27,7 +27,12 @@ from aea.cli.generate_wealth import _try_generate_wealth, _wait_funds_release
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
+from tests.conftest import (
+    CLI_LOG_OPTION,
+    CliRunner,
+    FETCHAI,
+    MAX_FLAKY_RERUNS_INTEGRATION,
+)
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -85,6 +90,8 @@ class GenerateWealthCommandTestCase(TestCase):
 class TestWealthCommands(AEATestCaseMany):
     """Test case for CLI wealth commands."""
 
+    @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_wealth_commands(self):
         """Test wealth commands."""
         agent_name = "test_aea"
@@ -96,6 +103,16 @@ class TestWealthCommands(AEATestCaseMany):
         self.add_private_key()
 
         self.generate_wealth()
+
+    def test_wealth_commands_negative(self):
+        """Test wealth commands."""
+        agent_name = "test_aea"
+        self.create_agents(agent_name)
+
+        self.set_agent_context(agent_name)
+
+        self.generate_private_key()
+        self.add_private_key()
 
         settings = {"unsupported_crypto": "path"}
         self.force_set_config("agent.private_key_paths", settings)
