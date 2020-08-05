@@ -1,16 +1,39 @@
-# AEA Framework
+<h1 align="center">
+    <b>AEA Framework</b>
+</h1>
 
-[![PyPI](https://img.shields.io/pypi/v/aea)](https://pypi.org/project/aea/)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aea)
-![PyPI - Wheel](https://img.shields.io/pypi/wheel/aea)
-[![](https://img.shields.io/pypi/l/aea)](https://github.com/fetchai/agents-aea/blob/master/LICENSE)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/aea)
-[![](https://img.shields.io/badge/slack-fetchai-black.svg)](https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY)
+<p align="center">
+  <a href="https://pypi.org/project/aea/">
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/aea">
+  </a>
+  <a href="https://pypi.org/project/aea/">
+    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/aea">
+  </a>
+  <a>
+    <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
+  </a>
+  <a href="https://github.com/fetchai/agents-aea/blob/master/LICENSE">
+    <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
+  </a>
+  <a href="https://pypi.org/project/aea/">
+    <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
+  </a>
+  <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY">
+    <img alt="Slack" src="https://img.shields.io/badge/slack-fetchai-black.svg">
+  </a>
+</p>
+<p align="center">
+  <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
+    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master">
+  </a>
+  <a href="">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
+  </a>
+</p>
 
-![AEA framework sanity checks and tests](https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master)
-![Codecov](https://img.shields.io/codecov/c/github/fetchai/agents-aea)
-
+<p align="center">
 A framework for autonomous economic agent (AEA) development
+</p>
 
 <p align="center">
   <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
