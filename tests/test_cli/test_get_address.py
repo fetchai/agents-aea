@@ -31,7 +31,7 @@ class GetAddressTestCase(TestCase):
     """Test case for _get_address method."""
 
     @mock.patch("aea.cli.get_address.Wallet")
-    @mock.patch("aea.cli.get_address.verify_or_create_private_keys")
+    @mock.patch("aea.cli.get_address.verify_or_create_private_keys_ctx")
     def test__get_address_positive(self, *mocks):
         """Test for _get_address method positive result."""
         ctx = ContextMock()
@@ -39,7 +39,7 @@ class GetAddressTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.get_address.verify_or_create_private_keys")
+@mock.patch("aea.cli.get_address.verify_or_create_private_keys_ctx")
 @mock.patch("aea.cli.get_address._try_get_address")
 @mock.patch("aea.cli.get_address.click.echo")
 class GetAddressCommandTestCase(TestCase):

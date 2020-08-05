@@ -59,26 +59,26 @@ class TacSerializer(Serializer):
             tac_msg.unregister.CopyFrom(performative)
         elif performative_id == TacMessage.Performative.TRANSACTION:
             performative = tac_pb2.TacMessage.Transaction_Performative()  # type: ignore
-            tx_id = msg.tx_id
-            performative.tx_id = tx_id
-            tx_sender_addr = msg.tx_sender_addr
-            performative.tx_sender_addr = tx_sender_addr
-            tx_counterparty_addr = msg.tx_counterparty_addr
-            performative.tx_counterparty_addr = tx_counterparty_addr
+            transaction_id = msg.transaction_id
+            performative.transaction_id = transaction_id
+            ledger_id = msg.ledger_id
+            performative.ledger_id = ledger_id
+            sender_address = msg.sender_address
+            performative.sender_address = sender_address
+            counterparty_address = msg.counterparty_address
+            performative.counterparty_address = counterparty_address
             amount_by_currency_id = msg.amount_by_currency_id
             performative.amount_by_currency_id.update(amount_by_currency_id)
-            tx_sender_fee = msg.tx_sender_fee
-            performative.tx_sender_fee = tx_sender_fee
-            tx_counterparty_fee = msg.tx_counterparty_fee
-            performative.tx_counterparty_fee = tx_counterparty_fee
+            fee_by_currency_id = msg.fee_by_currency_id
+            performative.fee_by_currency_id.update(fee_by_currency_id)
             quantities_by_good_id = msg.quantities_by_good_id
             performative.quantities_by_good_id.update(quantities_by_good_id)
-            tx_nonce = msg.tx_nonce
-            performative.tx_nonce = tx_nonce
-            tx_sender_signature = msg.tx_sender_signature
-            performative.tx_sender_signature = tx_sender_signature
-            tx_counterparty_signature = msg.tx_counterparty_signature
-            performative.tx_counterparty_signature = tx_counterparty_signature
+            nonce = msg.nonce
+            performative.nonce = nonce
+            sender_signature = msg.sender_signature
+            performative.sender_signature = sender_signature
+            counterparty_signature = msg.counterparty_signature
+            performative.counterparty_signature = counterparty_signature
             tac_msg.transaction.CopyFrom(performative)
         elif performative_id == TacMessage.Performative.CANCELLED:
             performative = tac_pb2.TacMessage.Cancelled_Performative()  # type: ignore
@@ -95,8 +95,8 @@ class TacSerializer(Serializer):
             performative.quantities_by_good_id.update(quantities_by_good_id)
             utility_params_by_good_id = msg.utility_params_by_good_id
             performative.utility_params_by_good_id.update(utility_params_by_good_id)
-            tx_fee = msg.tx_fee
-            performative.tx_fee = tx_fee
+            fee_by_currency_id = msg.fee_by_currency_id
+            performative.fee_by_currency_id.update(fee_by_currency_id)
             agent_addr_to_name = msg.agent_addr_to_name
             performative.agent_addr_to_name.update(agent_addr_to_name)
             currency_id_to_name = msg.currency_id_to_name
@@ -112,8 +112,8 @@ class TacSerializer(Serializer):
             tac_msg.game_data.CopyFrom(performative)
         elif performative_id == TacMessage.Performative.TRANSACTION_CONFIRMATION:
             performative = tac_pb2.TacMessage.Transaction_Confirmation_Performative()  # type: ignore
-            tx_id = msg.tx_id
-            performative.tx_id = tx_id
+            transaction_id = msg.transaction_id
+            performative.transaction_id = transaction_id
             amount_by_currency_id = msg.amount_by_currency_id
             performative.amount_by_currency_id.update(amount_by_currency_id)
             quantities_by_good_id = msg.quantities_by_good_id
@@ -160,30 +160,29 @@ class TacSerializer(Serializer):
         elif performative_id == TacMessage.Performative.UNREGISTER:
             pass
         elif performative_id == TacMessage.Performative.TRANSACTION:
-            tx_id = tac_pb.transaction.tx_id
-            performative_content["tx_id"] = tx_id
-            tx_sender_addr = tac_pb.transaction.tx_sender_addr
-            performative_content["tx_sender_addr"] = tx_sender_addr
-            tx_counterparty_addr = tac_pb.transaction.tx_counterparty_addr
-            performative_content["tx_counterparty_addr"] = tx_counterparty_addr
+            transaction_id = tac_pb.transaction.transaction_id
+            performative_content["transaction_id"] = transaction_id
+            ledger_id = tac_pb.transaction.ledger_id
+            performative_content["ledger_id"] = ledger_id
+            sender_address = tac_pb.transaction.sender_address
+            performative_content["sender_address"] = sender_address
+            counterparty_address = tac_pb.transaction.counterparty_address
+            performative_content["counterparty_address"] = counterparty_address
             amount_by_currency_id = tac_pb.transaction.amount_by_currency_id
             amount_by_currency_id_dict = dict(amount_by_currency_id)
             performative_content["amount_by_currency_id"] = amount_by_currency_id_dict
-            tx_sender_fee = tac_pb.transaction.tx_sender_fee
-            performative_content["tx_sender_fee"] = tx_sender_fee
-            tx_counterparty_fee = tac_pb.transaction.tx_counterparty_fee
-            performative_content["tx_counterparty_fee"] = tx_counterparty_fee
+            fee_by_currency_id = tac_pb.transaction.fee_by_currency_id
+            fee_by_currency_id_dict = dict(fee_by_currency_id)
+            performative_content["fee_by_currency_id"] = fee_by_currency_id_dict
             quantities_by_good_id = tac_pb.transaction.quantities_by_good_id
             quantities_by_good_id_dict = dict(quantities_by_good_id)
             performative_content["quantities_by_good_id"] = quantities_by_good_id_dict
-            tx_nonce = tac_pb.transaction.tx_nonce
-            performative_content["tx_nonce"] = tx_nonce
-            tx_sender_signature = tac_pb.transaction.tx_sender_signature
-            performative_content["tx_sender_signature"] = tx_sender_signature
-            tx_counterparty_signature = tac_pb.transaction.tx_counterparty_signature
-            performative_content[
-                "tx_counterparty_signature"
-            ] = tx_counterparty_signature
+            nonce = tac_pb.transaction.nonce
+            performative_content["nonce"] = nonce
+            sender_signature = tac_pb.transaction.sender_signature
+            performative_content["sender_signature"] = sender_signature
+            counterparty_signature = tac_pb.transaction.counterparty_signature
+            performative_content["counterparty_signature"] = counterparty_signature
         elif performative_id == TacMessage.Performative.CANCELLED:
             pass
         elif performative_id == TacMessage.Performative.GAME_DATA:
@@ -205,8 +204,9 @@ class TacSerializer(Serializer):
             performative_content[
                 "utility_params_by_good_id"
             ] = utility_params_by_good_id_dict
-            tx_fee = tac_pb.game_data.tx_fee
-            performative_content["tx_fee"] = tx_fee
+            fee_by_currency_id = tac_pb.game_data.fee_by_currency_id
+            fee_by_currency_id_dict = dict(fee_by_currency_id)
+            performative_content["fee_by_currency_id"] = fee_by_currency_id_dict
             agent_addr_to_name = tac_pb.game_data.agent_addr_to_name
             agent_addr_to_name_dict = dict(agent_addr_to_name)
             performative_content["agent_addr_to_name"] = agent_addr_to_name_dict
@@ -223,8 +223,8 @@ class TacSerializer(Serializer):
                 info_dict = dict(info)
                 performative_content["info"] = info_dict
         elif performative_id == TacMessage.Performative.TRANSACTION_CONFIRMATION:
-            tx_id = tac_pb.transaction_confirmation.tx_id
-            performative_content["tx_id"] = tx_id
+            transaction_id = tac_pb.transaction_confirmation.transaction_id
+            performative_content["transaction_id"] = transaction_id
             amount_by_currency_id = (
                 tac_pb.transaction_confirmation.amount_by_currency_id
             )

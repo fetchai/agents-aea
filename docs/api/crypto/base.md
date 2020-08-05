@@ -291,6 +291,25 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
+<a name="aea.crypto.base.Helper.get_hash"></a>
+#### get`_`hash
+
+```python
+ | @staticmethod
+ | @abstractmethod
+ | get_hash(message: bytes) -> str
+```
+
+Get the hash of a message.
+
+**Arguments**:
+
+- `message`: the message to be hashed.
+
+**Returns**:
+
+the hash of the message.
+
 <a name="aea.crypto.base.LedgerApi"></a>
 ## LedgerApi Objects
 

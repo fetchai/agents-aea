@@ -24,7 +24,7 @@ from concurrent.futures._base import CancelledError
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -38,18 +38,18 @@ class DummyConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize."""
         super().__init__(**kwargs)
-        self.connection_status.is_connected = False
+        self._state.set(ConnectionStates.disconnected)
         self._queue = None
 
     async def connect(self, *args, **kwargs):
         """Connect."""
         self._queue = asyncio.Queue(loop=self.loop)
-        self.connection_status.is_connected = True
+        self._state.set(ConnectionStates.connected)
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
         await self._queue.put(None)
-        self.connection_status.is_connected = False
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope"):
         """Send an envelope."""
@@ -77,16 +77,20 @@ class DummyConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+        cls,
+        configuration: ConnectionConfig,
+        identity: Identity,
+        crypto_store: CryptoStore,
+        **kwargs
     ) -> "Connection":
         """
         Get the dummy connection from the connection configuration.
 
         :param configuration: the connection configuration.
         :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
+        :param crypto_store: object to access the connection crypto objects.
         :return: the connection object
         """
         return DummyConnection(
-            configuration=configuration, identity=identity, cryptos=cryptos
+            configuration=configuration, identity=identity, crypto_store=crypto_store
         )

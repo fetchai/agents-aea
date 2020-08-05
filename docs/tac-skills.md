@@ -94,21 +94,13 @@ There is an equivalent diagram for seller AEAs set up to search for buyers and t
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF search and communication node
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for the following demo.
-
 ## Demo instructions:
 
 ### Create TAC controller AEA
 
 In the root directory, fetch the controller AEA:
 ``` bash
-aea fetch fetchai/tac_controller:0.5.0
+aea fetch fetchai/tac_controller:0.6.0
 cd tac_controller
 aea install
 ```
@@ -120,11 +112,13 @@ The following steps create the controller from scratch:
 ``` bash
 aea create tac_controller
 cd tac_controller
-aea add connection fetchai/oef:0.6.0
-aea add skill fetchai/tac_control:0.3.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/tac_control:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
-aea config set agent.default_ledger ethereum
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_ledger cosmos
 ```
 
 </p>
@@ -134,8 +128,8 @@ aea config set agent.default_ledger ethereum
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.6.0 --alias tac_participant_one
-aea fetch fetchai/tac_participant:0.6.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.7.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.7.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
 ```
@@ -152,27 +146,40 @@ aea create tac_participant_two
 Build participant one:
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.6.0
-aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/tac_participation:0.5.0
+aea add skill fetchai/tac_negotiation:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
-aea config set agent.default_ledger ethereum
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_ledger cosmos
 ```
 
 Then, build participant two:
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.6.0
-aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/tac_participation:0.5.0
+aea add skill fetchai/tac_negotiation:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
-aea config set agent.default_ledger ethereum
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_ledger cosmos
 ```
 
 </p>
 </details>
+
+### Add keys for all AEAs
+
+Create the private key for the AEA for Fetch.ai `AgentLand`:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
+```
 
 ### Update the game parameters in the controller
 
@@ -182,6 +189,38 @@ Navigate to the tac controller project, then use the command line to get and set
 aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
 ```
+
+### Update the connection params
+
+Briefly run the controller AEA:
+
+``` bash
+aea run
+```
+
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
+Then, update the configuration of the weather client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11002
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9002
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9002
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
 
 ### Run the AEAs
 
@@ -259,7 +298,7 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef_search:0.3.0', 'fetchai/fipa:0.4.0']
+protocols: ['fetchai/oef_search:0.4.0', 'fetchai/fipa:0.5.0']
 ```
 
 Above, you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements register and search behaviour of an AEA for the `tac_negotiation` skill.

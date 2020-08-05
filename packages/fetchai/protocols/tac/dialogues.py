@@ -146,7 +146,7 @@ class TacDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> TacDialogue:
         """
-        Create an instance of fipa dialogue.
+        Create an instance of tac dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

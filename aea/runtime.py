@@ -25,7 +25,7 @@ from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from contextlib import suppress
 from enum import Enum
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, cast
 
 from aea.agent_loop import AsyncState
 from aea.helpers.async_utils import ensure_loop
@@ -41,12 +41,11 @@ logger = logging.getLogger(__name__)
 class RuntimeStates(Enum):
     """Runtime states."""
 
-    initial = "not_started"
     starting = "starting"
-    started = "started"
-    loop_stopped = "loop_stopped"
+    running = "running"
     stopping = "stopping"
     stopped = "stopped"
+    error = "error"
 
 
 class BaseRuntime(ABC):
@@ -66,17 +65,33 @@ class BaseRuntime(ABC):
         self._loop = ensure_loop(
             loop
         )  # TODO: decide who constructs loop: agent, runtime, multiplexer.
-        self._state: AsyncState = AsyncState(RuntimeStates.initial)
+        self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
+        self._state.add_callback(self._log_runtime_state)
+        self._was_started = False
+
+    def _log_runtime_state(self, state) -> None:
+        logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
 
     def start(self) -> None:
         """Start agent using runtime."""
-        if self._state.get() is RuntimeStates.started:  # pragma: nocover
-            logger.error("[{}]: Runtime already started".format(self._agent.name))
+        if self._state.get() is not RuntimeStates.stopped:
+            logger.error(
+                "[{}]: Runtime is not stopped. Please stop it and start after.".format(
+                    self._agent.name
+                )
+            )
             return
+        self._was_started = True
         self._start()
 
     def stop(self) -> None:
         """Stop agent and runtime."""
+        if self._state.get() in (RuntimeStates.stopped, RuntimeStates.stopping):
+            logger.error(
+                "[{}]: Runtime is already stopped or stopping.".format(self._agent.name)
+            )
+            return
+
         logger.debug("[{}]: Runtime stopping...".format(self._agent.name))
         self._teardown()
         self._stop()
@@ -100,12 +115,12 @@ class BaseRuntime(ABC):
     @property
     def is_running(self) -> bool:
         """Get running state of the runtime."""
-        return self._state.get() == RuntimeStates.started
+        return self._state.get() == RuntimeStates.running
 
     @property
     def is_stopped(self) -> bool:
         """Get stopped state of the runtime."""
-        return self._state.get() in [RuntimeStates.stopped, RuntimeStates.initial]
+        return self._state.get() in [RuntimeStates.stopped]
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
@@ -115,6 +130,15 @@ class BaseRuntime(ABC):
         """
         self._loop = loop
         asyncio.set_event_loop(self._loop)
+
+    @property
+    def state(self) -> RuntimeStates:
+        """
+        Get runtime state.
+
+        :return: RuntimeStates
+        """
+        return cast(RuntimeStates, self._state.get())
 
 
 class AsyncRuntime(BaseRuntime):
@@ -156,28 +180,24 @@ class AsyncRuntime(BaseRuntime):
         """
         self.set_loop(self._loop)
 
-        self._state.set(RuntimeStates.started)
-
         logger.debug(f"Start runtime event loop {self._loop}: {id(self._loop)}")
         self._task = self._loop.create_task(self.run_runtime())
 
         try:
             self._loop.run_until_complete(self._task)
-            self._state.set(RuntimeStates.loop_stopped)
             logger.debug("Runtime loop stopped!")
         except Exception:
             logger.exception("Exception raised during runtime processing")
+            self._state.set(RuntimeStates.error)
             raise
         finally:
             self._stopping_task = None
 
     async def run_runtime(self) -> None:
         """Run agent and starts multiplexer."""
+        self._state.set(RuntimeStates.starting)
         try:
-            self._state.set(RuntimeStates.starting)
-            self._agent.setup_multiplexer()
             await self._start_multiplexer()
-            self._agent.start_setup()
             await self._start_agent_loop()
         except Exception:
             logger.exception("AsyncRuntime exception during run:")
@@ -192,12 +212,14 @@ class AsyncRuntime(BaseRuntime):
 
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""
+        self._agent.setup_multiplexer()
         await AsyncMultiplexer.connect(self._agent.multiplexer)
 
     async def _start_agent_loop(self) -> None:
         """Start agent main loop asynchronous way."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
-        self._state.set(RuntimeStates.started)
+        self._agent.start_setup()
+        self._state.set(RuntimeStates.running)
         await self._agent.main_loop.run_loop()
 
     async def _stop_runtime(self) -> None:
@@ -214,7 +236,10 @@ class AsyncRuntime(BaseRuntime):
 
             async with self._async_stop_lock:
 
-                if self._state.get() is not RuntimeStates.started:
+                if self._state.get() in (
+                    RuntimeStates.stopped,
+                    RuntimeStates.stopping,
+                ):  # pragma: nocover
                     return
 
                 self._state.set(RuntimeStates.stopping)
@@ -276,10 +301,15 @@ class ThreadedRuntime(BaseRuntime):
         """Start aget's main loop."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         try:
-            self._state.set(RuntimeStates.started)
+            self._state.set(RuntimeStates.running)
             self._agent.main_loop.start()
-        finally:
-            self._state.set(RuntimeStates.loop_stopped)
+            logger.debug("[{}]: Runtime stopped".format(self._agent.name))
+        except KeyboardInterrupt:
+            raise
+        except BaseException:  # pragma: nocover
+            logger.exception("Runtime exception during stop:")
+            self._state.set(RuntimeStates.error)
+            raise
 
     def _stop(self) -> None:
         """Implement runtime stop function here."""

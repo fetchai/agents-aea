@@ -20,7 +20,6 @@
 """This module contains the tests for the TCP connection communication."""
 
 import asyncio
-import logging
 import struct
 import unittest.mock
 
@@ -64,9 +63,9 @@ class TestTCPCommunication:
         cls.client_1_multiplexer = Multiplexer([cls.client_conn_1])
         cls.client_2_multiplexer = Multiplexer([cls.client_conn_2])
 
-        assert not cls.server_conn.connection_status.is_connected
-        assert not cls.client_conn_1.connection_status.is_connected
-        assert not cls.client_conn_2.connection_status.is_connected
+        assert not cls.server_conn.is_connected
+        assert not cls.client_conn_1.is_connected
+        assert not cls.client_conn_2.is_connected
 
         cls.server_multiplexer.connect()
         cls.client_1_multiplexer.connect()
@@ -74,9 +73,9 @@ class TestTCPCommunication:
 
     def test_is_connected(self):
         """Test that the connection status are connected."""
-        assert self.server_conn.connection_status.is_connected
-        assert self.client_conn_1.connection_status.is_connected
-        assert self.client_conn_2.connection_status.is_connected
+        assert self.server_conn.is_connected
+        assert self.client_conn_1.is_connected
+        assert self.client_conn_2.is_connected
 
     def test_communication_client_server(self):
         """Test that envelopes can be sent from a client to a server."""
@@ -156,7 +155,7 @@ class TestTCPClientConnection:
     """Test TCP Client code."""
 
     @pytest.mark.asyncio
-    async def test_receive_cancelled(self, caplog):
+    async def test_receive_cancelled(self):
         """Test that cancelling a receive task works correctly."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
@@ -165,21 +164,21 @@ class TestTCPClientConnection:
         await tcp_server.connect()
         await tcp_client.connect()
 
-        with caplog.at_level(
-            logging.DEBUG, "aea.packages.fetchai.connections.tcp.tcp_client"
-        ):
+        with unittest.mock.patch.object(tcp_client.logger, "debug") as mock_logger:
             task = asyncio.ensure_future(tcp_client.receive())
             await asyncio.sleep(0.1)
             task.cancel()
             await asyncio.sleep(0.1)
-            assert "[{}] Read cancelled.".format("address_client") in caplog.text
+            mock_logger.assert_called_with(
+                "[{}] Read cancelled.".format("address_client")
+            )
             assert task.result() is None
 
         await tcp_client.disconnect()
         await tcp_server.disconnect()
 
     @pytest.mark.asyncio
-    async def test_receive_raises_struct_error(self, caplog):
+    async def test_receive_raises_struct_error(self):
         """Test the case when a receive raises a struct error."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
@@ -188,15 +187,13 @@ class TestTCPClientConnection:
         await tcp_server.connect()
         await tcp_client.connect()
 
-        with caplog.at_level(
-            logging.DEBUG, "aea.packages.fetchai.connections.tcp.tcp_client"
-        ):
+        with unittest.mock.patch.object(tcp_client.logger, "debug") as mock_logger:
             with unittest.mock.patch.object(
                 tcp_client, "_recv", side_effect=struct.error
             ):
                 task = asyncio.ensure_future(tcp_client.receive())
                 await asyncio.sleep(0.1)
-                assert "Struct error: " in caplog.text
+                mock_logger.assert_called_with("Struct error: ")
                 assert task.result() is None
 
         await tcp_client.disconnect()
@@ -228,7 +225,7 @@ class TestTCPServerConnection:
     """Test TCP Server code."""
 
     @pytest.mark.asyncio
-    async def test_receive_raises_exception(self, caplog):
+    async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
@@ -237,15 +234,16 @@ class TestTCPServerConnection:
         await tcp_server.connect()
         await tcp_client.connect()
         await asyncio.sleep(0.1)
-        with caplog.at_level(
-            logging.DEBUG, "aea.packages.fetchai.connections.tcp.tcp_server"
-        ):
+
+        with unittest.mock.patch.object(tcp_server.logger, "error") as mock_logger:
             with unittest.mock.patch(
                 "asyncio.wait", side_effect=Exception("generic exception")
             ):
                 result = await tcp_server.receive()
                 assert result is None
-                assert "Error in the receiving loop: generic exception" in caplog.text
+                mock_logger.assert_any_call(
+                    "Error in the receiving loop: generic exception"
+                )
 
         await tcp_client.disconnect()
         await tcp_server.disconnect()

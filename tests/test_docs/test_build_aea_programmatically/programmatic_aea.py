@@ -36,7 +36,7 @@ OUTPUT_FILE = "output_file"
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -96,7 +96,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = (
-            "my_aea,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
+            "my_aea,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)

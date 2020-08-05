@@ -3,7 +3,7 @@ This demo discusses the options we have to connect a front-end to the AEA. The f
 <img src="../assets/http-integration.png" alt="How to connect frontend to your AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 ## Case 1
-The first option we have is to create a `Connection` that will handle the incoming requests from the rest API. In this scenario, the rest API communicates with the AEA and requests are handled by the `HTTP Server` Connection package. The rest API should send CRUD requests to the `HTTP Server` Connection (`fetchai/http_server:0.5.0`) which translates these into Envelopes to be consumed by the correct skill.
+The first option we have is to create a `Connection` that will handle the incoming requests from the rest API. In this scenario, the rest API communicates with the AEA and requests are handled by the `HTTP Server` Connection package. The rest API should send CRUD requests to the `HTTP Server` Connection (`fetchai/http_server:0.6.0`) which translates these into Envelopes to be consumed by the correct skill.
 
 ## Case 2
-The other option we have is to create a stand-alone `Multiplexer` with an `OEF` connection (`fetchai/oef:0.6.0`). In this scenario, the front-end needs to incorporate a Multiplexer with an `OEF` Connection. Then the [OEF communication node](../oef-ledger) can be used to send Envelopes from the AEA to the front-end.
+The other option we have is to create a stand-alone `Multiplexer` with a `P2P` connection (`fetchai/p2p_libp2p:0.6.0`). In this scenario, the front-end needs to incorporate a Multiplexer with an `P2P` Connection. Then the [Agent Communication Network](../acn) can be used to send Envelopes from the AEA to the front-end.

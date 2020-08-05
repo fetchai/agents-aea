@@ -14,13 +14,13 @@ cd my_aea
 Add the http server connection package
 
 ``` bash
-aea add connection fetchai/http_server:0.5.0
+aea add connection fetchai/http_server:0.6.0
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.5.0
+aea config set agent.default_connection fetchai/http_server:0.6.0
 ```
 
 Modify the `api_spec_path`:
@@ -83,8 +83,7 @@ class HttpHandler(Handler):
         http_msg = cast(HttpMessage, message)
         if http_msg.performative == HttpMessage.Performative.REQUEST:
             self.context.logger.info(
-                "[{}] received http request with method={}, url={} and body={}".format(
-                    self.context.agent_name,
+                "received http request with method={}, url={} and body={}".format(
                     http_msg.method,
                     http_msg.url,
                     http_msg.bodyy,
@@ -96,9 +95,7 @@ class HttpHandler(Handler):
                 self._handle_post(http_msg)
         else:
             self.context.logger.info(
-                "[{}] received response ({}) unexpectedly!".format(
-                    self.context.agent_name, http_msg
-                )
+                "received response ({}) unexpectedly!".format(http_msg)
             )
 
     def _handle_get(self, http_msg: HttpMessage) -> None:
@@ -120,7 +117,7 @@ class HttpHandler(Handler):
             bodyy=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
         )
         self.context.logger.info(
-            "[{}] responding with: {}".format(self.context.agent_name, http_response)
+            "responding with: {}".format(http_response)
         )
         http_response.counterparty = http_msg.counterparty
         self.context.outbox.put_message(message=http_response)
@@ -144,7 +141,7 @@ class HttpHandler(Handler):
             bodyy=b"",
         )
         self.context.logger.info(
-            "[{}] responding with: {}".format(self.context.agent_name, http_response)
+            "responding with: {}".format(http_response)
         )
         http_response.counterparty = http_msg.counterparty
         self.context.outbox.put_message(message=http_response)
@@ -169,7 +166,7 @@ handlers:
 
 Finally, we run the fingerprinter:
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.3.0
+aea fingerprint skill fetchai/http_echo:0.4.0
 ```
 Note, you will have to replace the author name with your author handle.
 

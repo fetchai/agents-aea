@@ -1,7 +1,26 @@
+# Fipa Protocol
+
+**Name:** fipa
+
+**Author**: fetchai
+
+**Version**: 0.5.0
+
+**Short Description**: A protocol for FIPA ACL.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for two agents to negotiate over a fixed set of resources.
+
+## Specification
+
+```yaml
 ---
 name: fipa
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -47,3 +66,8 @@ termination: [decline, match_accept, match_accept_w_inform, inform]
 roles: {seller, buyer}
 end_states: [successful, declined_cfp, declined_propose, declined_accept]
 ...
+```
+
+## Links
+
+* <a href="http://www.fipa.org" target=_blank>FIPA Foundation</a>

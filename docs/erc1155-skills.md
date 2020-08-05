@@ -19,14 +19,6 @@ with a one-step atomic swap functionality. That means the trade between the two 
   <p>This demo serves demonstrative purposes only. Since the AEA deploying the contract also has the ability to mint tokens, in reality the transfer of tokens from the AEA signing the transaction is worthless.</p>
 </div>
 
-### Launch an OEF node
-In a separate terminal, launch a local OEF node (for search and discovery).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for all the following demos.
-
 ## Demo
 
 ### Create the deployer AEA
@@ -34,7 +26,7 @@ Keep it running for all the following demos.
 Fetch the AEA that will deploy the contract.
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.9.0
+aea fetch fetchai/erc1155_deployer:0.10.0
 cd erc1155_deployer
 aea install
 ```
@@ -47,18 +39,20 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/oef:0.6.0
-aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/erc1155_deploy:0.9.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/erc1155_deploy:0.10.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
 
 Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.1.0: fetchai/ledger:0.2.0
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/contract_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 
 And change the default ledger:
@@ -76,12 +70,18 @@ aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 
+And one for the P2P connection:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt --connection
+```
+
 ### Create the client AEA
 
 In another terminal, fetch the AEA that will get some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.9.0
+aea fetch fetchai/erc1155_client:0.10.0
 cd erc1155_client
 aea install
 ```
@@ -94,18 +94,20 @@ Create the AEA that will get some tokens from the deployer.
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/oef:0.6.0
-aea add connection fetchai/ledger:0.2.0
-aea add skill fetchai/erc1155_client:0.8.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/erc1155_client:0.9.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
 
 Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.1.0: fetchai/ledger:0.2.0
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/contract_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 
 And change the default ledger:
@@ -121,6 +123,12 @@ Additionally, create the private key for the client AEA. Generate and add a key 
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
+```
+
+And one for the P2P connection:
+``` bash
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
 ### Fund the AEAs
@@ -141,6 +149,14 @@ aea get-wealth ethereum
   <p class="admonition-title">Note</p>
   <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
 </div>
+
+
+## Update SOEF configs for both AEAs
+
+To update the SOEF config, run in each AEA project:
+``` bash
+aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
+```
 
 ## Run the AEAs
 

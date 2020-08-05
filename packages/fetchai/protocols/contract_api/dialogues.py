@@ -161,7 +161,7 @@ class ContractApiDialogues(Dialogues, ABC):
         self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> ContractApiDialogue:
         """
-        Create an instance of fipa dialogue.
+        Create an instance of contract_api dialogue.
 
         :param dialogue_label: the identifier of the dialogue
         :param role: the role of the agent this dialogue is maintained for

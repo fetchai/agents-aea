@@ -44,8 +44,21 @@ message TProtocolMessage{
     }
 
     message Performative_Pmt_Performative{
-        map<bool, bytes> content_dict_bool_bytes = 1;
-        map<string, float> content_dict_str_float = 2;
+        map<int32, bytes> content_dict_int_bytes = 1;
+        map<int32, int32> content_dict_int_int = 2;
+        map<int32, float> content_dict_int_float = 3;
+        map<int32, bool> content_dict_int_bool = 4;
+        map<int32, string> content_dict_int_str = 5;
+        map<bool, bytes> content_dict_bool_bytes = 6;
+        map<bool, int32> content_dict_bool_int = 7;
+        map<bool, float> content_dict_bool_float = 8;
+        map<bool, bool> content_dict_bool_bool = 9;
+        map<bool, string> content_dict_bool_str = 10;
+        map<string, bytes> content_dict_str_bytes = 11;
+        map<string, int32> content_dict_str_int = 12;
+        map<string, float> content_dict_str_float = 13;
+        map<string, bool> content_dict_str_bool = 14;
+        map<string, string> content_dict_str_str = 15;
     }
 
     message Performative_Mt_Performative{
@@ -74,19 +87,12 @@ message TProtocolMessage{
         bool content_o_ct_is_set = 2;
         bool content_o_bool = 3;
         bool content_o_bool_is_set = 4;
-        repeated float content_o_set_float = 5;
-        bool content_o_set_float_is_set = 6;
+        repeated int32 content_o_set_int = 5;
+        bool content_o_set_int_is_set = 6;
         repeated bytes content_o_list_bytes = 7;
         bool content_o_list_bytes_is_set = 8;
         map<string, int32> content_o_dict_str_int = 9;
         bool content_o_dict_str_int_is_set = 10;
-        string content_o_union_type_str = 11;
-        map<string, int32> content_o_union_type_dict_of_str_int = 12;
-        repeated int32 content_o_union_type_set_of_int = 13;
-        repeated bytes content_o_union_type_set_of_bytes = 14;
-        repeated bool content_o_union_type_list_of_bool = 15;
-        map<string, float> content_o_union_type_dict_of_str_float = 16;
-        bool content_o_union_is_set = 17;
     }
 
     message Performative_Empty_Contents_Performative{}

@@ -21,7 +21,7 @@ The latter will be decentralized over time.
 
 ### Agent Communication Network (ACN)
 
-The agent communication network is a peer-to-peer communication network for agents. It allows agents, in particular AEAs, to send and receive envelopes between each other.
+The agent communication network is a <a href="../acn">peer-to-peer communication network for agents</a>. It allows agents, in particular AEAs, to send and receive envelopes between each other.
 
 The implementation builds on the open-source <a href="https://libp2p.io/" target="_blank">libp2p</a> library. A distributed hash table is used by all participating peers to maintain a mapping between agents' cryptographic addresses and their network addresses.
 
@@ -33,9 +33,7 @@ A <a href="../simple-oef">`simple OEF search node`</a> allows agents to search a
 
 For two agents to be able to find each other, at least one must register themselves and the other must query the `simple OEF search node` for it. Detailed documentation is provided <a href="../simple-oef">`here`</a>.
 
-### Deprecated alternative (for local development only)
-
-<details><summary>Click here for a local development alternative.</summary>
+<!-- <details><summary>Click here for a local development alternative (deprecated).</summary>
 <p>
 
 For local development, you can use an `OEF search and communication node`. This node consists of two parts. A `search node` part enables agents to register their services and search and discover other agents' services. A `communication node` part enables agents to communicate with each other.
@@ -54,12 +52,36 @@ When it is live you will see the sentence 'A thing of beauty is a joy forever...
 
 To view the `OEF search and communication node` logs for debugging, navigate to `data/oef-logs`.
 
-To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.6.0`).
+To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.7.0`).
 
 If you experience any problems launching the `OEF search and communication node` then consult [this](https://docs.google.com/document/d/1x_hFwEIXHlr_JCkuIv-izxSz0tN-7kSmSc-g32ImL1U/edit?usp=sharing) guide.
 
+### Installing docker
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>For the purpose of the quickstart only, you can skip installation of docker.</p>
+</div>
+
+At some point, you will need [Docker](https://www.docker.com/) installed on your machine
+(e.g. to run an [OEF search and communication node](../oef-ledger)).
+
+### Download the scripts and examples directories
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>For the purpose of the quickstart only, you can skip downloading the scripts and examples directories.</p>
+</div>
+
+Download folders containing examples and scripts:
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+```
+You can install the `svn` command with (`brew install subversion` or `sudo apt-get install subversion`).
+
 </p>
-</details>
+</details> -->
 
 ## Ledgers
 
@@ -72,3 +94,5 @@ The Python version of the AEA Framework currently integrates with three ledgers:
 - [Fetch.ai ledger](https://docs.fetch.ai/ledger/)
 - [Ethereum ledger](https://ethereum.org/build/)
 - [Cosmos ledger](https://cosmos.network/sdk)
+
+However, the framework makes it straightforward for further ledgers to be added by any developer.

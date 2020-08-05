@@ -21,6 +21,7 @@
 """This test module contains the tests for the OEF communication using an OEF."""
 
 import asyncio
+import copy
 import logging
 import sys
 import time
@@ -67,8 +68,6 @@ from tests.conftest import (
     FETCHAI_ADDRESS_TWO,
     _make_oef_connection,
 )
-
-DEFAULT_OEF = "default_oef"
 
 logger = logging.getLogger(__name__)
 
@@ -179,11 +178,12 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=search_query_empty_model,
             )
-            oef_search_request.counterparty = DEFAULT_OEF
+            oef_search_request.counterparty = str(self.connection.connection_id)
             sending_dialogue = self.oef_search_dialogues.update(oef_search_request)
+            assert sending_dialogue is not None
             self.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(self.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
@@ -191,7 +191,10 @@ class TestOEF(UseOef):
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response = envelope.message
+            oef_search_response_original = envelope.message
+            oef_search_response = copy.copy(oef_search_response_original)
+            oef_search_response.is_incoming = True
+            oef_search_response.counterparty = oef_search_response_original.sender
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -215,11 +218,12 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=search_query,
             )
-            oef_search_request.counterparty = DEFAULT_OEF
+            oef_search_request.counterparty = str(self.connection.connection_id)
             sending_dialogue = self.oef_search_dialogues.update(oef_search_request)
+            assert sending_dialogue is not None
             self.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(self.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
@@ -227,7 +231,10 @@ class TestOEF(UseOef):
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response = envelope.message
+            oef_search_response_original = envelope.message
+            oef_search_response = copy.copy(oef_search_response_original)
+            oef_search_response.is_incoming = True
+            oef_search_response.counterparty = oef_search_response_original.sender
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -258,18 +265,22 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=search_query,
             )
-            oef_search_request.counterparty = DEFAULT_OEF
+            oef_search_request.counterparty = str(self.connection.connection_id)
             sending_dialogue = self.oef_search_dialogues.update(oef_search_request)
+            assert sending_dialogue is not None
             self.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(self.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
                 )
             )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response = envelope.message
+            oef_search_response_original = envelope.message
+            oef_search_response = copy.copy(oef_search_response_original)
+            oef_search_response.is_incoming = True
+            oef_search_response.counterparty = oef_search_response_original.sender
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -308,14 +319,14 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 service_description=desc,
             )
-            oef_search_registration.counterparty = DEFAULT_OEF
+            oef_search_registration.counterparty = str(self.connection.connection_id)
             sending_dialogue_1 = self.oef_search_dialogues.update(
                 oef_search_registration
             )
             assert sending_dialogue_1 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(self.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_registration,
@@ -330,18 +341,22 @@ class TestOEF(UseOef):
                     [Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel
                 ),
             )
-            oef_search_request.counterparty = DEFAULT_OEF
+            oef_search_request.counterparty = str(self.connection.connection_id)
             sending_dialogue_2 = self.oef_search_dialogues.update(oef_search_request)
+            assert sending_dialogue_2 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(self.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
                 )
             )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response = envelope.message
+            oef_search_response_original = envelope.message
+            oef_search_response = copy.copy(oef_search_response_original)
+            oef_search_response.is_incoming = True
+            oef_search_response.counterparty = oef_search_response_original.sender
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -385,14 +400,14 @@ class TestOEF(UseOef):
                 dialogue_reference=cls.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 service_description=cls.desc,
             )
-            oef_search_registration.counterparty = DEFAULT_OEF
+            oef_search_registration.counterparty = str(cls.connection.connection_id)
             sending_dialogue_1 = cls.oef_search_dialogues.update(
                 oef_search_registration
             )
             assert sending_dialogue_1 is not None
             cls.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(cls.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_registration,
@@ -409,18 +424,22 @@ class TestOEF(UseOef):
                     model=cls.foo_datamodel,
                 ),
             )
-            oef_search_request.counterparty = DEFAULT_OEF
+            oef_search_request.counterparty = str(cls.connection.connection_id)
             sending_dialogue_2 = cls.oef_search_dialogues.update(oef_search_request)
+            assert sending_dialogue_2 is not None
             cls.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(cls.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
                 )
             )
             envelope = cls.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response = envelope.message
+            oef_search_response_original = envelope.message
+            oef_search_response = copy.copy(oef_search_response_original)
+            oef_search_response.is_incoming = True
+            oef_search_response.counterparty = oef_search_response_original.sender
             oef_search_dialogue = cls.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -444,14 +463,14 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 service_description=self.desc,
             )
-            oef_search_deregistration.counterparty = DEFAULT_OEF
+            oef_search_deregistration.counterparty = str(self.connection.connection_id)
             sending_dialogue_1 = self.oef_search_dialogues.update(
                 oef_search_deregistration
             )
             assert sending_dialogue_1 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(self.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_deregistration,
@@ -468,11 +487,12 @@ class TestOEF(UseOef):
                     model=self.foo_datamodel,
                 ),
             )
-            oef_search_request.counterparty = DEFAULT_OEF
+            oef_search_request.counterparty = str(self.connection.connection_id)
             sending_dialogue_2 = self.oef_search_dialogues.update(oef_search_request)
+            assert sending_dialogue_2 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=DEFAULT_OEF,
+                    to=str(self.connection.connection_id),
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
@@ -480,7 +500,10 @@ class TestOEF(UseOef):
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response = envelope.message
+            oef_search_response_original = envelope.message
+            oef_search_response = copy.copy(oef_search_response_original)
+            oef_search_response.is_incoming = True
+            oef_search_response.counterparty = oef_search_response_original.sender
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -840,7 +863,7 @@ class TestFIPA(UseOef):
     def test_send(self):
         """Test the send method."""
         envelope = Envelope(
-            to=DEFAULT_OEF,
+            to=str(self.connection1.connection_id),
             sender="me",
             protocol_id=DefaultMessage.protocol_id,
             message=b"Hello",
@@ -1009,7 +1032,7 @@ class TestSendWithOEF(UseOef):
     """Test other usecases with OEF."""
 
     @pytest.mark.asyncio
-    async def test_send_oef_message(self, pytestconfig):
+    async def test_send_oef_message(self, pytestconfig, caplog):
         """Test the send oef message."""
         oef_connection = _make_oef_connection(
             address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
@@ -1022,16 +1045,17 @@ class TestSendWithOEF(UseOef):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
         )
-        msg.counterparty = DEFAULT_OEF
+        msg.counterparty = str(oef_connection.connection_id)
         sending_dialogue = oef_search_dialogues.update(msg)
         envelope = Envelope(
-            to=DEFAULT_OEF,
+            to=str(oef_connection.connection_id),
             sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
         )
-        with pytest.raises(ValueError):
+        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
             await oef_connection.send(envelope)
+            assert "Could not create dialogue for message=" in caplog.text
 
         data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
         query = Query(
@@ -1044,17 +1068,20 @@ class TestSendWithOEF(UseOef):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        msg.counterparty = DEFAULT_OEF
+        msg.counterparty = str(oef_connection.connection_id)
         sending_dialogue = oef_search_dialogues.update(msg)
         envelope = Envelope(
-            to=DEFAULT_OEF,
+            to=str(oef_connection.connection_id),
             sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
         )
         await oef_connection.send(envelope)
         envelope = await oef_connection.receive()
-        search_result = envelope.message
+        search_result_original = envelope.message
+        search_result = copy.copy(search_result_original)
+        search_result.counterparty = search_result_original.sender
+        search_result.is_incoming = True
         response_dialogue = oef_search_dialogues.update(search_result)
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
         assert sending_dialogue == response_dialogue
@@ -1108,11 +1135,11 @@ class TestSendWithOEF(UseOef):
         )
         oef_connection.loop = asyncio.get_event_loop()
 
-        assert not oef_connection.connection_status.is_connected
+        assert not oef_connection.is_connected
         await oef_connection.connect()
-        assert oef_connection.connection_status.is_connected
+        assert oef_connection.is_connected
         await oef_connection.connect()
-        assert oef_connection.connection_status.is_connected
+        assert oef_connection.is_connected
 
         await oef_connection.disconnect()
 
@@ -1121,7 +1148,7 @@ class TestSendWithOEF(UseOef):
 @pytest.mark.skipif(
     sys.version_info < (3, 7), reason="Python version < 3.7 not supported by the OEF."
 )
-async def test_cannot_connect_to_oef(caplog):
+async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
     oef_connection = _make_oef_connection(
         address=FETCHAI_ADDRESS_ONE,
@@ -1129,13 +1156,15 @@ async def test_cannot_connect_to_oef(caplog):
         oef_port=61234,  # use addr instead of hostname to avoid name resolution
     )
 
-    with caplog.at_level(logging.DEBUG, logger="aea.packages.fetchai.connections.oef"):
+    with mock.patch.object(oef_connection.logger, "warning") as mock_logger:
 
         task = asyncio.ensure_future(
             oef_connection.connect(), loop=asyncio.get_event_loop()
         )
         await asyncio.sleep(3.0)
-        assert "Cannot connect to OEFChannel. Retrying in 5 seconds..." in caplog.text
+        mock_logger.assert_any_call(
+            "Cannot connect to OEFChannel. Retrying in 5 seconds..."
+        )
 
         await cancel_and_wait(task)
         await oef_connection.disconnect()

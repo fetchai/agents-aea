@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """The base connection package."""
 import inspect
 import logging
 import re
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
+from enum import Enum
 from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
@@ -34,6 +34,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.async_utils import AsyncState
 from aea.helpers.base import load_aea_package, load_module
 from aea.identity.base import Identity
 
@@ -45,15 +46,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# TODO refactoring: this should be an enum
-#      but beware of backward-compatibility.
-class ConnectionStatus:
-    """The connection status class."""
+class ConnectionStates(Enum):
+    """Connection states enum."""
 
-    def __init__(self):
-        """Initialize the connection status."""
-        self.is_connected = False  # type: bool
-        self.is_connecting = False  # type: bool
+    connected = "connected"
+    connecting = "connecting"
+    disconnecting = "disconnecting"
+    disconnected = "disconnected"
 
 
 class Connection(Component, ABC):
@@ -68,6 +67,7 @@ class Connection(Component, ABC):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
+        **kwargs
     ):
         """
         Initialize the connection.
@@ -82,12 +82,12 @@ class Connection(Component, ABC):
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         assert configuration is not None, "The configuration must be provided."
-        super().__init__(configuration)
+        super().__init__(configuration, **kwargs)
         assert (
             super().public_id == self.connection_id
         ), "Connection ids in configuration and class not matching."
         self._loop: Optional[AbstractEventLoop] = None
-        self._connection_status = ConnectionStatus()
+        self._state = AsyncState(ConnectionStates.disconnected)
 
         self._identity = identity
         self._crypto_store = crypto_store
@@ -164,9 +164,9 @@ class Connection(Component, ABC):
             return self.configuration.excluded_protocols
 
     @property
-    def connection_status(self) -> ConnectionStatus:
+    def state(self) -> ConnectionStates:
         """Get the connection status."""
-        return self._connection_status
+        return self._state.get()
 
     @abstractmethod
     async def connect(self):
@@ -195,7 +195,7 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_dir(
-        cls, directory: str, identity: Identity, crypto_store: CryptoStore
+        cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs
     ) -> "Connection":
         """
         Load the connection from a directory.
@@ -210,7 +210,7 @@ class Connection(Component, ABC):
             ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Connection.from_config(configuration, identity, crypto_store)
+        return Connection.from_config(configuration, identity, crypto_store, **kwargs)
 
     @classmethod
     def from_config(
@@ -218,6 +218,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
+        **kwargs
     ) -> "Connection":
         """
         Load a connection from a configuration.
@@ -249,5 +250,18 @@ class Connection(Component, ABC):
             connection_class_name
         )
         return connection_class(
-            configuration=configuration, identity=identity, crypto_store=crypto_store
+            configuration=configuration,
+            identity=identity,
+            crypto_store=crypto_store,
+            **kwargs
         )
+
+    @property
+    def is_connected(self) -> bool:
+        """Return is connected state."""
+        return self.state == ConnectionStates.connected
+
+    @property
+    def is_disconnected(self) -> bool:
+        """Return is disconnected state."""
+        return self.state == ConnectionStates.disconnected

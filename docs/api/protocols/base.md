@@ -44,6 +44,78 @@ Initialize a Message object.
 - `body`: the dictionary of values to hold.
 - `kwargs`: any additional value to add to the body. It will overwrite the body values.
 
+<a name="aea.protocols.base.Message.has_sender"></a>
+#### has`_`sender
+
+```python
+ | @property
+ | has_sender() -> bool
+```
+
+Check if it has a sender.
+
+<a name="aea.protocols.base.Message.sender"></a>
+#### sender
+
+```python
+ | @property
+ | sender() -> Address
+```
+
+Get the sender of the message in Address form.
+
+:return the address
+
+<a name="aea.protocols.base.Message.sender"></a>
+#### sender
+
+```python
+ | @sender.setter
+ | sender(sender: Address) -> None
+```
+
+Set the sender of the message.
+
+<a name="aea.protocols.base.Message.has_to"></a>
+#### has`_`to
+
+```python
+ | @property
+ | has_to() -> bool
+```
+
+Check if it has a sender.
+
+<a name="aea.protocols.base.Message.to"></a>
+#### to
+
+```python
+ | @property
+ | to() -> Address
+```
+
+Get address of receiver.
+
+<a name="aea.protocols.base.Message.to"></a>
+#### to
+
+```python
+ | @to.setter
+ | to(to: Address) -> None
+```
+
+Set address of receiver.
+
+<a name="aea.protocols.base.Message.has_counterparty"></a>
+#### has`_`counterparty
+
+```python
+ | @property
+ | has_counterparty() -> bool
+```
+
+Check if the counterparty is set.
+
 <a name="aea.protocols.base.Message.counterparty"></a>
 #### counterparty
 
@@ -390,7 +462,7 @@ It includes a serializer to encode/decode a message.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ProtocolConfig, message_class: Type[Message])
+ | __init__(configuration: ProtocolConfig, message_class: Type[Message], **kwargs)
 ```
 
 Initialize the protocol manager.
@@ -398,7 +470,7 @@ Initialize the protocol manager.
 **Arguments**:
 
 - `configuration`: the protocol configurations.
-- `serializer`: the serializer.
+- `message_class`: the message class.
 
 <a name="aea.protocols.base.Protocol.serializer"></a>
 #### serializer
@@ -415,7 +487,7 @@ Get the serializer.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str) -> "Protocol"
+ | from_dir(cls, directory: str, **kwargs) -> "Protocol"
 ```
 
 Load the protocol from a directory.
@@ -433,7 +505,7 @@ the protocol object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ProtocolConfig) -> "Protocol"
+ | from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol"
 ```
 
 Load the protocol from configuration.

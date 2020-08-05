@@ -32,7 +32,7 @@ from packages.fetchai.skills.erc1155_client.dialogues import (
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.2.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
 
 
 class SearchBehaviour(TickerBehaviour):
@@ -69,7 +69,7 @@ class SearchBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching:
-            query = strategy.get_service_query()
+            query = strategy.get_location_and_service_query()
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )

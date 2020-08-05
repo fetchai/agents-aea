@@ -20,7 +20,6 @@
 """This module contains the p2p libp2p connection."""
 
 import asyncio
-import distutils
 import errno
 import logging
 import os
@@ -29,19 +28,20 @@ import struct
 import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
+from pathlib import Path
 from random import randint
 from threading import Thread
 from typing import IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.mail.base import Address, Envelope
 
-logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
 
@@ -58,7 +58,7 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.6.0")
 
 MultiAddr = str
 
@@ -68,8 +68,8 @@ SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 async def _golang_module_build_async(
     path: str,
     log_file_desc: IO[str],
-    loop: Optional[asyncio.AbstractEventLoop] = None,
     timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+    logger: logging.Logger = _default_logger,
 ) -> int:
     """
     Builds go module located at `path`, downloads necessary dependencies
@@ -102,7 +102,11 @@ async def _golang_module_build_async(
 
 
 def _golang_module_run(
-    path: str, name: str, args: Sequence[str], log_file_desc: IO[str]
+    path: str,
+    name: str,
+    args: Sequence[str],
+    log_file_desc: IO[str],
+    logger: logging.Logger = _default_logger,
 ) -> subprocess.Popen:
     """
     Runs a built module located at `path`
@@ -222,19 +226,22 @@ class Libp2pNode:
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a p2p libp2p node.
 
+        :param agent_addr: the agent address.
         :param key: secp256k1 curve private key.
-        :param source: the source path
+        :param module_path: the module path.
         :param clargs: the command line arguments for the libp2p node
         :param uri: libp2p node ip address and port number in format ipaddress:port.
         :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
-        :param delegation_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
+        :param delegate_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
+        :param logger: the logger.
         """
 
         self.address = agent_addr
@@ -308,8 +315,10 @@ class Libp2pNode:
 
         # build the node
         # TOFIX(LR) fix async version
-        logger.info("Downloading golang dependencies. This may take a while...")
-        returncode = await _golang_module_build_async(self.source, self._log_file_desc)
+        self.logger.info("Downloading golang dependencies. This may take a while...")
+        returncode = await _golang_module_build_async(
+            self.source, self._log_file_desc, logger=self.logger
+        )
         with open(self.log_file, "r") as f:
             self.logger.debug(f.read())
         node_log = ""
@@ -383,8 +392,9 @@ class Libp2pNode:
         """
         if self._connection_attempts == 1:
             with open(self.log_file, "r") as f:
-                self.logger.debug("Couldn't connect to libp2p p2p process, logs:")
-                self.logger.debug(f.read())
+                self.logger.error("Couldn't connect to libp2p p2p process, logs:")
+                self.logger.error(f.read())
+            self.stop()
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
@@ -405,7 +415,7 @@ class Libp2pNode:
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                logger.debug("Sleeping for {}...".format(self._connection_timeout))
+                self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
                 await asyncio.sleep(self._connection_timeout)
                 await self._connect()
                 return
@@ -429,8 +439,7 @@ class Libp2pNode:
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
         self.logger.info("My libp2p addresses: {}".format(self.multiaddrs))
 
-    @asyncio.coroutine
-    def write(self, data: bytes) -> None:
+    async def write(self, data: bytes) -> None:
         """
         Write to the writer stream.
 
@@ -587,7 +596,7 @@ class P2PLibp2pConnection(Connection):
                     "At least one Entry Peer should be provided when node can not be publically reachable"
                 )
             if delegate_uri is not None:  # pragma: no cover
-                logger.warning(
+                self.logger.warning(
                     "Ignoring Delegate Uri configuration as node can not be publically reachable"
                 )
         else:
@@ -599,9 +608,10 @@ class P2PLibp2pConnection(Connection):
                 )
 
         # libp2p local node
-        logger.debug("Public key used by libp2p node: {}".format(key.public_key))
-        self.libp2p_workdir = tempfile.mkdtemp()
-        distutils.dir_util.copy_tree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
+        self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
+        temp_dir = tempfile.mkdtemp()
+        self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
+        shutil.copytree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
 
         self.node = Libp2pNode(
             self.address,
@@ -614,6 +624,7 @@ class P2PLibp2pConnection(Connection):
             entry_peers,
             log_file,
             env_file,
+            self.logger,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
@@ -635,23 +646,22 @@ class P2PLibp2pConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:  # pragma: no cover
+        if self.is_connected:
             return
+        self._state.set(ConnectionStates.connecting)
         try:
             # start libp2p node
-            self.connection_status.is_connecting = True
+            self._state.set(ConnectionStates.connecting)
             self.node.logger = self.logger
             await self.node.start()
-            self.connection_status.is_connecting = False
-            self.connection_status.is_connected = True
-
             # starting receiving msgs
             self._in_queue = asyncio.Queue()
             self._receive_from_node_task = asyncio.ensure_future(
                 self._receive_from_node(), loop=self._loop
             )
+            self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:
-            self.connection_status.is_connected = False
+            self._state.set(ConnectionStates.disconnected)
             raise e
 
     async def disconnect(self) -> None:
@@ -660,21 +670,20 @@ class P2PLibp2pConnection(Connection):
 
         :return: None
         """
-        assert (
-            self.connection_status.is_connected or self.connection_status.is_connecting
-        ), "Call connect before disconnect."
-        self.connection_status.is_connected = False
-        self.connection_status.is_connecting = False
+        if self.is_disconnected:
+            return
+        self._state.set(ConnectionStates.disconnecting)
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
         self.node.stop()
         if self.libp2p_workdir is not None:
-            distutils.dir_util.remove_tree(self.libp2p_workdir)
+            shutil.rmtree(Path(self.libp2p_workdir).parent)
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
             self.logger.debug("Called disconnect when input queue not initialized.")
+        self._state.set(ConnectionStates.disconnected)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -688,7 +697,7 @@ class P2PLibp2pConnection(Connection):
             if data is None:
                 self.logger.debug("Received None.")
                 self.node.stop()
-                self.connection_status.is_connected = False
+                self._state.set(ConnectionStates.disconnected)
                 return None
                 # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))

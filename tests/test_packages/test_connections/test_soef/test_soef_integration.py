@@ -66,7 +66,7 @@ def test_soef():
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.3.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.4.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
@@ -95,7 +95,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -121,7 +121,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -143,7 +143,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -166,9 +166,9 @@ def test_soef():
         message.counterparty = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
-        envelope = Envelope(
+        search_envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -177,19 +177,41 @@ def test_soef():
                 radius, agent_location.latitude, agent_location.longitude,
             )
         )
-        multiplexer.put(envelope)
+        multiplexer.put(search_envelope)
         wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
 
         # check for search results
         envelope = multiplexer.get()
-        message = envelope.message
-        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(message.agents) >= 0
-        message = copy.deepcopy(message)
+        orig_message = envelope.message
+        assert orig_message.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert len(orig_message.agents) >= 0
+        message = copy.copy(orig_message)
         message.is_incoming = True  # TODO: fix
-        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        message.counterparty = orig_message.sender  # TODO; fix
         receiving_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
+
+        # double send to check issue with too many requests
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+            query=closeness_query,
+        )
+        message.counterparty = SOEFConnection.connection_id.latest
+        sending_dialogue = oef_search_dialogues.update(message)
+        assert sending_dialogue is not None
+        search_envelope = Envelope(
+            to=message.counterparty,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
+        multiplexer.put(search_envelope)
+        wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
+        # check for search results
+        envelope = multiplexer.get()
+        message = envelope.message
+        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
 
         # find agents near me with filter
         radius = 0.1
@@ -221,7 +243,7 @@ def test_soef():
         assert sending_dialogue is not None
         envelope = Envelope(
             to=message.counterparty,
-            sender=crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -235,12 +257,12 @@ def test_soef():
         wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
 
         envelope = multiplexer.get()
-        message = envelope.message
-        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(message.agents) >= 0
-        message = copy.deepcopy(message)
+        orig_message = envelope.message
+        assert orig_message.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert len(orig_message.agents) >= 0
+        message = copy.copy(orig_message)
         message.is_incoming = True  # TODO: fix
-        message.counterparty = SOEFConnection.connection_id.latest  # TODO; fix
+        message.counterparty = orig_message.sender  # TODO; fix
         receiving_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 

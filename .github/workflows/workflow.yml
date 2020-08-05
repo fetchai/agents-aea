@@ -32,10 +32,12 @@ jobs:
       run: |
         tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
 
-  sync_aea_loop_integrational_tests:
+  all_integrational_tests:
     continue-on-error: True
     runs-on: ubuntu-latest
+
     timeout-minutes: 40
+
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -52,10 +54,12 @@ jobs:
         pip install pipenv
         pip install tox
         sudo apt-get install -y protobuf-compiler
-    - name: Integrational tests and coverage
+    - name: Sync AEA loop integrational tests and coverage
       run: |
         tox -e py3.8 -- --aea-loop sync -m 'integration and not unstable and not ledger'
-  
+    - name: Async Integration tests
+      run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
+
   common_checks:
     runs-on: ubuntu-latest
     continue-on-error: True
@@ -82,6 +86,8 @@ jobs:
           tar xvfz go-ipfs.tar.gz
           sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
           ipfs init
+      - name: Pipenv lock
+        run: pipenv lock
       - name: Security Check
         run: tox -e bandit
       - name: Safety Check
@@ -110,27 +116,6 @@ jobs:
         run: tox -e package_dependencies_checks
       - name: Generate Documentation
         run: tox -e docs
-
-  integration_checks:
-    continue-on-error: True
-    runs-on: ubuntu-latest
-
-    timeout-minutes: 40
-
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@master
-        with:
-          python-version: 3.7
-      - name: Install dependencies (ubuntu-latest)
-        run: |
-          sudo apt-get update --fix-missing
-          sudo apt-get autoremove
-          sudo apt-get autoclean
-          pip install pipenv
-          pip install tox
-      - name: Integration tests
-        run: tox -e py3.7 -- -m 'integration and not unstable and not ledger'
 
   integration_checks_ledger:
     continue-on-error: True

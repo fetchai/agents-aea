@@ -6,14 +6,14 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmbjcWHRhRiYMqZbgeGkEGVYi8hQ1HnYM8pBYugGKx9YnK
-  connection.py: QmXriASvrroCAKRteP9wUdhAUxH1iZgVTAriGY6ApL3iJc
+  connection.py: QmYn4mpVJTjKUUU9sCDGQHsTzYPeK4mTjwEHepHQddMMjs
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: DummyConnection
 config: {}
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/default:0.3.0
+- fetchai/default:0.4.0
 dependencies:
   dep1:
     version: ==1.0.0

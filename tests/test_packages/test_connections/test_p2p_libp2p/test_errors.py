@@ -113,9 +113,10 @@ class TestP2PLibp2pConnectionFailureGolangRun:
     def test_timeout(self):
         self.connection.node._connection_timeout = 0
         self.connection.node._connection_attempts = 2
+        muxer = Multiplexer([self.connection])
         with pytest.raises(Exception):
-            muxer = Multiplexer([self.connection])
             muxer.connect()
+        muxer.disconnect()
 
     @classmethod
     def teardown_class(cls):

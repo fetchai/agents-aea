@@ -65,6 +65,8 @@ class Message:
         :param body: the dictionary of values to hold.
         :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
+        self._to = None  # type: Optional[Address]
+        self._sender = None  # type: Optional[Address]
         self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
@@ -73,6 +75,49 @@ class Message:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
             logger.error(e)
+
+    @property
+    def has_sender(self) -> bool:
+        """Check if it has a sender."""
+        return self._sender is not None
+
+    @property
+    def sender(self) -> Address:
+        """
+        Get the sender of the message in Address form.
+
+        :return the address
+        """
+        assert self._sender is not None, "Sender must not be None."
+        return self._sender
+
+    @sender.setter
+    def sender(self, sender: Address) -> None:
+        """Set the sender of the message."""
+        # assert self._sender is None, "Sender already set."
+        self._sender = sender
+
+    @property
+    def has_to(self) -> bool:
+        """Check if it has a sender."""
+        return self._to is not None
+
+    @property
+    def to(self) -> Address:
+        """Get address of receiver."""
+        assert self._to is not None, "To must not be None."
+        return self._to
+
+    @to.setter
+    def to(self, to: Address) -> None:
+        """Set address of receiver."""
+        assert self._to is None, "To already set."
+        self._to = to
+
+    @property
+    def has_counterparty(self) -> bool:
+        """Check if the counterparty is set."""
+        return self._counterparty is not None
 
     @property
     def counterparty(self) -> Address:
@@ -293,14 +338,16 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
-    def __init__(self, configuration: ProtocolConfig, message_class: Type[Message]):
+    def __init__(
+        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs
+    ):
         """
         Initialize the protocol manager.
 
         :param configuration: the protocol configurations.
-        :param serializer: the serializer.
+        :param message_class: the message class.
         """
-        super().__init__(configuration)
+        super().__init__(configuration, **kwargs)
 
         self._message_class = message_class
 
@@ -310,7 +357,7 @@ class Protocol(Component):
         return self._message_class.serializer
 
     @classmethod
-    def from_dir(cls, directory: str) -> "Protocol":
+    def from_dir(cls, directory: str, **kwargs) -> "Protocol":
         """
         Load the protocol from a directory.
 
@@ -322,10 +369,10 @@ class Protocol(Component):
             ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Protocol.from_config(configuration)
+        return Protocol.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ProtocolConfig) -> "Protocol":
+    def from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol":
         """
         Load the protocol from configuration.
 
@@ -366,4 +413,4 @@ class Protocol(Component):
         serialize_class = serializer_classes[0][1]
         message_class.serializer = serialize_class
 
-        return Protocol(configuration, message_class)
+        return Protocol(configuration, message_class, **kwargs)

@@ -66,6 +66,13 @@ def test_sign_and_recover_message():
     ), "Failed to recover the correct address."
 
 
+def test_get_hash():
+    """Test the get hash functionality."""
+    expected_hash = "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+    hash_ = CosmosApi.get_hash(message=b"hello")
+    assert expected_hash == hash_
+
+
 def test_dump_positive():
     """Test dump."""
     account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
@@ -169,3 +176,97 @@ def test_get_wealth_positive(caplog):
         cc = CosmosCrypto()
         cosmos_faucet_api.get_wealth(cc.address)
         assert "Wealth generated" in caplog.text
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_format_default():
+    """Test if default CosmosSDK transaction is correctly formated."""
+    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    cc2 = CosmosCrypto()
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+
+    amount = 10000
+
+    transfer_transaction = cosmos_api.get_transfer_transaction(
+        sender_address=account.address,
+        destination_address=cc2.address,
+        amount=amount,
+        tx_fee=1000,
+        tx_nonce="something",
+    )
+
+    signed_transaction = cc2.sign_transaction(transfer_transaction)
+
+    assert "tx" in signed_transaction
+    assert "signatures" in signed_transaction["tx"]
+    assert len(signed_transaction["tx"]["signatures"]) == 1
+
+    assert "pub_key" in signed_transaction["tx"]["signatures"][0]
+    assert "value" in signed_transaction["tx"]["signatures"][0]["pub_key"]
+    base64_pbk = signed_transaction["tx"]["signatures"][0]["pub_key"]["value"]
+
+    assert "signature" in signed_transaction["tx"]["signatures"][0]
+    signature = signed_transaction["tx"]["signatures"][0]["signature"]
+
+    default_formated_transaction = cc2.format_default_transaction(
+        transfer_transaction, signature, base64_pbk
+    )
+
+    # Compare default formatted transaction with signed transaction
+    assert signed_transaction == default_formated_transaction
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_format_cosmwasm():
+    """Test if CosmWasm transaction is correctly formated."""
+    cc2 = CosmosCrypto()
+
+    # Dummy CosmWasm transaction
+    wasm_transaction = {
+        "account_number": "8",
+        "chain_id": "agent-land",
+        "fee": {"amount": [], "gas": "200000"},
+        "memo": "",
+        "msgs": [
+            {
+                "type": "wasm/execute",
+                "value": {
+                    "sender": "cosmos14xjnl2mwwfz6pztpwzj6s89npxr0e3lhxl52nv",
+                    "contract": "cosmos1xzlgeyuuyqje79ma6vllregprkmgwgav5zshcm",
+                    "msg": {
+                        "create_single": {
+                            "item_owner": "cosmos1fz0dcvvqv5at6dl39804jy92lnndf3d5saalx6",
+                            "id": "1234",
+                            "path": "SOME_URI",
+                        }
+                    },
+                    "sent_funds": [],
+                },
+            }
+        ],
+        "sequence": "25",
+    }
+
+    signed_transaction = cc2.sign_transaction(wasm_transaction)
+
+    assert "value" in signed_transaction
+    assert "signatures" in signed_transaction["value"]
+    assert len(signed_transaction["value"]["signatures"]) == 1
+
+    assert "pub_key" in signed_transaction["value"]["signatures"][0]
+    assert "value" in signed_transaction["value"]["signatures"][0]["pub_key"]
+    base64_pbk = signed_transaction["value"]["signatures"][0]["pub_key"]["value"]
+
+    assert "signature" in signed_transaction["value"]["signatures"][0]
+    signature = signed_transaction["value"]["signatures"][0]["signature"]
+
+    wasm_formated_transaction = cc2.format_wasm_transaction(
+        wasm_transaction, signature, base64_pbk
+    )
+
+    # Compare Wasm formatted transaction with signed transaction
+    assert signed_transaction == wasm_formated_transaction

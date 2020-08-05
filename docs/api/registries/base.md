@@ -26,7 +26,7 @@ Initialize the registry.
 
 ```python
  | @abstractmethod
- | register(item_id: ItemId, item: Item) -> None
+ | register(item_id: ItemId, item: Item, is_dynamically_added: bool = False) -> None
 ```
 
 Register an item.
@@ -35,6 +35,7 @@ Register an item.
 
 - `item_id`: the public id of the item.
 - `item`: the item.
+- `is_dynamicall_added`: whether or not the item is dynamicall added.
 
 **Returns**:
 
@@ -146,7 +147,7 @@ None
 #### register
 
 ```python
- | register(component_id: ComponentId, component: Component) -> None
+ | register(component_id: ComponentId, component: Component, is_dynamically_added: bool = False) -> None
 ```
 
 Register a component.
@@ -155,6 +156,7 @@ Register a component.
 
 - `component_id`: the id of the component.
 - `component`: the component object.
+- `is_dynamicall_added`: whether or not the item is dynamicall added.
 
 <a name="aea.registries.base.AgentComponentRegistry.unregister"></a>
 #### unregister
@@ -264,7 +266,7 @@ None
 #### register
 
 ```python
- | register(item_id: Tuple[SkillId, str], item: SkillComponentType) -> None
+ | register(item_id: Tuple[SkillId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
 ```
 
 Register a item.
@@ -273,6 +275,7 @@ Register a item.
 
 - `item_id`: a pair (skill id, item name).
 - `item`: the item to register.
+- `is_dynamicall_added`: whether or not the item is dynamicall added.
 
 **Returns**:
 
@@ -393,7 +396,7 @@ None
 #### register
 
 ```python
- | register(item_id: Tuple[SkillId, str], item: Handler) -> None
+ | register(item_id: Tuple[SkillId, str], item: Handler, is_dynamically_added: bool = False) -> None
 ```
 
 Register a handler.
@@ -402,6 +405,7 @@ Register a handler.
 
 - `item_id`: the item id.
 - `item`: the handler.
+- `is_dynamicall_added`: whether or not the item is dynamicall added.
 
 **Returns**:
 

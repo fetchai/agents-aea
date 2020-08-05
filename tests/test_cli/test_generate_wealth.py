@@ -27,7 +27,12 @@ from aea.cli.generate_wealth import _try_generate_wealth, _wait_funds_release
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
+from tests.conftest import (
+    CLI_LOG_OPTION,
+    CliRunner,
+    FETCHAI,
+    MAX_FLAKY_RERUNS_INTEGRATION,
+)
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -38,26 +43,26 @@ class WaitFundsReleaseTestCase(TestCase):
 
     def test__wait_funds_release_positive(self, try_get_balance_mock):
         """Test for _wait_funds_release method positive result."""
-        _wait_funds_release("agent_config", "wallet", "type_")
+        with pytest.raises(ValueError):
+            _wait_funds_release("agent_config", "wallet", "type_")
 
 
 class GenerateWealthTestCase(TestCase):
     """Test case for _generate_wealth method."""
 
     @mock.patch("aea.cli.generate_wealth.Wallet")
-    @mock.patch("aea.cli.generate_wealth.TESTNETS", {"type": "value"})
     @mock.patch("aea.cli.generate_wealth.click.echo")
     @mock.patch("aea.cli.generate_wealth.try_generate_testnet_wealth")
     @mock.patch("aea.cli.generate_wealth._wait_funds_release")
-    @mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys")
+    @mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys_ctx")
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
-        _try_generate_wealth(ctx, "type", True)
+        _try_generate_wealth(ctx, "cosmos", True)
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys")
+@mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys_ctx")
 @mock.patch("aea.cli.generate_wealth._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
@@ -82,9 +87,11 @@ class GenerateWealthCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestWealthCommands(AEATestCaseMany):
+class TestWealthCommandsPositive(AEATestCaseMany):
     """Test case for CLI wealth commands."""
 
+    @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_wealth_commands(self):
         """Test wealth commands."""
         agent_name = "test_aea"
@@ -96,6 +103,20 @@ class TestWealthCommands(AEATestCaseMany):
         self.add_private_key()
 
         self.generate_wealth()
+
+
+class TestWealthCommandsNegative(AEATestCaseMany):
+    """Test case for CLI wealth commands, negative case."""
+
+    def test_wealth_commands_negative(self):
+        """Test wealth commands."""
+        agent_name = "test_aea"
+        self.create_agents(agent_name)
+
+        self.set_agent_context(agent_name)
+
+        self.generate_private_key()
+        self.add_private_key()
 
         settings = {"unsupported_crypto": "path"}
         self.force_set_config("agent.private_key_paths", settings)

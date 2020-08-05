@@ -3,67 +3,6 @@
 
 This module contains the implementation of a generic agent.
 
-<a name="aea.agent.AgentState"></a>
-## AgentState Objects
-
-```python
-class AgentState(Enum)
-```
-
-Enumeration for an agent state.
-
-In particular, it can be one of the following states:
-
-- AgentState.INITIATED: when the Agent object has been created.
-- AgentState.CONNECTED: when the agent is connected.
-- AgentState.RUNNING: when the agent is running.
-
-<a name="aea.agent.Liveness"></a>
-## Liveness Objects
-
-```python
-class Liveness()
-```
-
-Determines the liveness of the agent.
-
-<a name="aea.agent.Liveness.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__()
-```
-
-Instantiate the liveness.
-
-<a name="aea.agent.Liveness.is_stopped"></a>
-#### is`_`stopped
-
-```python
- | @property
- | is_stopped() -> bool
-```
-
-Check whether the liveness is stopped.
-
-<a name="aea.agent.Liveness.start"></a>
-#### start
-
-```python
- | start() -> None
-```
-
-Start the liveness.
-
-<a name="aea.agent.Liveness.stop"></a>
-#### stop
-
-```python
- | stop() -> None
-```
-
-Stop the liveness.
-
 <a name="aea.agent.Agent"></a>
 ## Agent Objects
 
@@ -171,16 +110,6 @@ Envelopes placed in the Outbox are processed by the Multiplexer.
 
 Get the agent name.
 
-<a name="aea.agent.Agent.liveness"></a>
-#### liveness
-
-```python
- | @property
- | liveness() -> Liveness
-```
-
-Get the liveness.
-
 <a name="aea.agent.Agent.tick"></a>
 #### tick
 
@@ -202,24 +131,6 @@ Each agent loop (one call to each one of act(), react(), update()) increments th
 ```
 
 Get the time in (fractions of) seconds to time out an agent between act and react.
-
-<a name="aea.agent.Agent.agent_state"></a>
-#### agent`_`state
-
-```python
- | @property
- | agent_state() -> AgentState
-```
-
-Get the state of the agent.
-
-**Raises**:
-
-- `ValueError`: if the state does not satisfy any of the foreseen conditions.
-
-**Returns**:
-
-None
 
 <a name="aea.agent.Agent.loop_mode"></a>
 #### loop`_`mode
@@ -258,7 +169,7 @@ Get the runtime.
  | setup_multiplexer() -> None
 ```
 
-Set up the multiplexer
+Set up the multiplexer.
 
 <a name="aea.agent.Agent.start"></a>
 #### start
@@ -391,4 +302,18 @@ Tear down the agent.
 **Returns**:
 
 None
+
+<a name="aea.agent.Agent.state"></a>
+#### state
+
+```python
+ | @property
+ | state() -> RuntimeStates
+```
+
+Get state of the agent's runtime.
+
+**Returns**:
+
+RuntimeStates
 

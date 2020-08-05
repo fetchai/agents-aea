@@ -19,6 +19,7 @@
 
 """This module contains registries."""
 
+import copy
 import logging
 import queue
 from queue import Queue
@@ -100,8 +101,9 @@ class Filter:
         :return: None
         """
         self._handle_decision_maker_out_queue()
-        # get new behaviours from the agent skills
+        # get new behaviours and handlers from the agent skills
         self._handle_new_behaviours()
+        self._handle_new_handlers()
 
     def _handle_decision_maker_out_queue(self) -> None:
         """Process descision maker's messages."""
@@ -136,10 +138,27 @@ class Filter:
                     self.resources.behaviour_registry.register(
                         (skill.skill_context.skill_id, new_behaviour.name),
                         new_behaviour,
+                        is_dynamically_added=True,
                     )
                 except ValueError as e:
                     logger.warning(
                         "Error when trying to add a new behaviour: {}".format(str(e))
+                    )
+
+    def _handle_new_handlers(self) -> None:
+        """Register new handlers added to skills."""
+        for skill in self.resources.get_all_skills():
+            while not skill.skill_context.new_handlers.empty():
+                new_handler = skill.skill_context.new_handlers.get()
+                try:
+                    self.resources.handler_registry.register(
+                        (skill.skill_context.skill_id, new_handler.name),
+                        new_handler,
+                        is_dynamically_added=True,
+                    )
+                except ValueError as e:
+                    logger.warning(
+                        "Error when trying to add a new handler: {}".format(str(e))
                     )
 
     def _handle_signing_message(self, signing_message: SigningMessage):
@@ -150,15 +169,22 @@ class Filter:
         ]
         for skill_id in skill_callback_ids:
             handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-                signing_message.protocol_id, skill_id
+                signing_message.protocol_id,
+                skill_id,  # TODO: route based on component id specified on message
             )
             if handler is not None:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)
                 )
-                signing_message.counterparty = "decision_maker"  # TODO: temp fix
-                signing_message.is_incoming = True
-                handler.handle(cast(Message, signing_message))
+                # TODO: remove next three lines
+                copy_signing_message = copy.copy(
+                    signing_message
+                )  # we do a shallow copy as we only need the message object to be copied; not its referenced objects
+                copy_signing_message.counterparty = signing_message.sender
+                copy_signing_message.sender = signing_message.sender
+                # copy_signing_message.to = signing_message.to
+                copy_signing_message.is_incoming = True
+                handler.handle(cast(Message, copy_signing_message))
             else:
                 logger.warning(
                     "No internal handler fetched for skill_id={}".format(skill_id)

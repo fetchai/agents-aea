@@ -21,13 +21,15 @@
 
 import logging
 import os
+import unittest.mock
 from threading import Thread
 
 from aea.aea import AEA
+from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, EnvelopeContext, URI
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
@@ -167,10 +169,11 @@ class TestSkillError:
             performative=FipaMessage.Performative.ACCEPT,
         )
         msg.counterparty = self.address
+        msg.sender = self.address
         envelope = Envelope(
-            to=self.address,
-            sender=self.address,
-            protocol_id=DefaultMessage.protocol_id,
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
 
@@ -182,6 +185,26 @@ class TestSkillError:
         msg = envelope.message
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL
+
+    def test_error_unsupported_skill_when_skill_id_is_none(self):
+        """Test the 'send_unsupported_skill' when the skill id in the envelope is None."""
+        skill_id = PublicId.from_str("author/skill:0.1.0")
+        protocol_id = PublicId.from_str("author/name:0.1.0")
+        envelope = Envelope(
+            to="",
+            sender="",
+            protocol_id=protocol_id,
+            message=b"",
+            context=EnvelopeContext(uri=URI(skill_id.to_uri_path)),
+        )
+        with unittest.mock.patch.object(self.skill_context.outbox, "put_message"):
+            with unittest.mock.patch.object(
+                self.skill_context._logger, "warning"
+            ) as mock_logger_warning:
+                self.my_error_handler.send_unsupported_skill(envelope)
+                mock_logger_warning.assert_called_with(
+                    f"Cannot handle envelope: no active handler registered for the protocol_id='{protocol_id}' and skill_id='{skill_id}'."
+                )
 
     def teardown(self):
         """Teardown method."""

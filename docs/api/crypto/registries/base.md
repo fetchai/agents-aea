@@ -128,6 +128,19 @@ Instantiate an instance of the item object with appropriate arguments.
 
 an item
 
+<a name="aea.crypto.registries.base.ItemSpec.get_class"></a>
+#### get`_`class
+
+```python
+ | get_class() -> Type[ItemType]
+```
+
+Get the class of the item with class variables instantiated.
+
+**Returns**:
+
+an item class
+
 <a name="aea.crypto.registries.base.Registry"></a>
 ## Registry Objects
 
@@ -202,6 +215,32 @@ the make can then find the identifier.
 **Returns**:
 
 the new item instance.
+
+<a name="aea.crypto.registries.base.Registry.make_cls"></a>
+#### make`_`cls
+
+```python
+ | make_cls(id_: Union[ItemId, str], module: Optional[str] = None) -> Type[ItemType]
+```
+
+Load a class of the associated type item id.
+
+**Arguments**:
+
+- `id_`: the id of the item class. Make sure it has been registered earlier
+before calling this function.
+- `module`: dotted path to a module.
+whether a module should be loaded before creating the object.
+this argument is useful when the item might not be registered
+beforehand, and loading the specified module will make the registration.
+E.g. suppose the call to 'register' for a custom object
+is located in some_package/__init__.py. By providing module="some_package",
+the call to 'register' in such module gets triggered and
+the make can then find the identifier.
+
+**Returns**:
+
+the new item class.
 
 <a name="aea.crypto.registries.base.Registry.has_spec"></a>
 #### has`_`spec

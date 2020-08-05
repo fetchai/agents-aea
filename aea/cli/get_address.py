@@ -25,7 +25,7 @@ import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import verify_or_create_private_keys
+from aea.cli.utils.package_utils import verify_or_create_private_keys_ctx
 from aea.crypto.registries import crypto_registry
 from aea.crypto.wallet import Wallet
 
@@ -55,7 +55,7 @@ def _try_get_address(click_context, type_):
     :return: address.
     """
     ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys_ctx(ctx=ctx)
 
     private_key_paths = {
         config_pair[0]: config_pair[1]

@@ -49,10 +49,12 @@ class TestSkillDocs:
         assert block["text"].strip() == expected
         assert block["info"].strip() == "python"
 
+    # TODO add tests for new_handlers queue
+
     def test_hello_world_behaviour(self):
         """Test the code in the 'behaviours.py' section."""
         # here, we test the definition of a custom class
-        offset = 1
+        offset = 2
         block = self.code_blocks[offset]
         text = block["text"]
 
@@ -85,7 +87,7 @@ class TestSkillDocs:
     def test_task(self):
         """Test the code blocks of the 'tasks.py' section."""
         # test code of task definition
-        offset = 4
+        offset = 5
         block = self.code_blocks[offset]
         locals_dict = compile_and_exec(block["text"])
 

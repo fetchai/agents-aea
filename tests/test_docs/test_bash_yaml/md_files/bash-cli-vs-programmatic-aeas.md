@@ -2,7 +2,7 @@
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 ``` bash
-aea fetch fetchai/weather_station:0.8.0
+aea fetch fetchai/weather_station:0.9.0
 cd weather_station
 ```
 ``` bash

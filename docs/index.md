@@ -18,7 +18,7 @@ Autonomous Economic Agents are digital entities that run complex dynamic decisio
 
 AEAs are not:
 
-* just any agents: AEAs have an express purpose to generate economic value.
+* just any agents: AEAs have an express purpose to generate economic value in a multi-stakeholder environment.
 * APIs or sensors which do not have agency.
 * smart contracts which do not display any proactiveness and are purely reactive to external requests (=contract calls). 
 * artificial general intelligence (AGI): AEAs can have a very narrow goal directed focus involving some economic gain and implemented via simple conditional logic.

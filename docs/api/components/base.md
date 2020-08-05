@@ -16,7 +16,7 @@ Abstract class for an agent component.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False)
+ | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs)
 ```
 
 Initialize a package.

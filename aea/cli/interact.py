@@ -134,7 +134,7 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
         performative_str = "bytes"
         performative = DefaultMessage.Performative(performative_str)
         click.echo(
-            "Provide message of protocol fetchai/default:0.3.0 for performative {}:".format(
+            "Provide message of protocol fetchai/default:0.4.0 for performative {}:".format(
                 performative_str
             )
         )
@@ -150,10 +150,12 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
         else:
             message = message_escaped  # pragma: no cover
         msg = DefaultMessage(performative=performative, content=message)
+        msg.counterparty = agent_name
+        msg.sender = sender
         envelope = Envelope(
-            to=agent_name,
-            sender=sender,
-            protocol_id=DefaultMessage.protocol_id,  # PublicId.from_str(protocol_id),
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
     except InterruptInputException:

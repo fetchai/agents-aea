@@ -25,12 +25,12 @@ from asyncio import CancelledError, StreamReader, StreamWriter
 from typing import Optional
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
-PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.6.0")
 
 
 class TCPConnection(Connection, ABC):
@@ -75,16 +75,17 @@ class TCPConnection(Connection, ABC):
         :return: A queue or None.
         :raises ConnectionError: if a problem occurred during the connection.
         """
-        if self.connection_status.is_connected:
+        if self.is_connected:  # pragma: nocover
             self.logger.warning("Connection already set up.")
             return
 
+        self._state.set(ConnectionStates.connecting)
         try:
             await self.setup()
-            self.connection_status.is_connected = True
+            self._state.set(ConnectionStates.connected)
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             self.logger.error(str(e))
-            self.connection_status.is_connected = False
+            self._state.set(ConnectionStates.disconnected)
 
     async def disconnect(self) -> None:
         """
@@ -92,17 +93,19 @@ class TCPConnection(Connection, ABC):
 
         :return: None.
         """
-        if not self.connection_status.is_connected:
+
+        if self.is_disconnected:  # pragma: nocover
             self.logger.warning("Connection already disconnected.")
             return
 
+        self._state.set(ConnectionStates.disconnecting)
         await self.teardown()
-        self.connection_status.is_connected = False
+        self._state.set(ConnectionStates.disconnected)
 
     async def _recv(self, reader: StreamReader) -> Optional[bytes]:
         """Receive bytes."""
         data = await reader.read(len(struct.pack("I", 0)))
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             return None
         nbytes = struct.unpack("I", data)[0]
         nbytes_read = 0

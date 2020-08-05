@@ -431,10 +431,10 @@ Class to represent the terms of a multi-currency & multi-token ledger transactio
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, sender_address: Address, counterparty_address: Address, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int], is_sender_payable_tx_fee: bool, nonce: str, fee_by_currency_id: Optional[Dict[str, int]] = None, **kwargs, ,)
+ | __init__(ledger_id: str, sender_address: Address, counterparty_address: Address, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int], nonce: str, is_sender_payable_tx_fee: bool = True, fee_by_currency_id: Optional[Dict[str, int]] = None, is_strict: bool = False, **kwargs, ,)
 ```
 
-Instantiate terms.
+Instantiate terms of a transaction.
 
 **Arguments**:
 
@@ -446,6 +446,37 @@ Instantiate terms.
 - `is_sender_payable_tx_fee`: whether the sender or counterparty pays the tx fee.
 - `nonce`: nonce to be included in transaction to discriminate otherwise identical transactions.
 - `fee_by_currency_id`: the fee associated with the transaction.
+- `is_strict`: whether or not terms must have quantities and amounts of opposite signs.
+
+<a name="aea.helpers.transaction.base.Terms.id"></a>
+#### id
+
+```python
+ | @property
+ | id() -> str
+```
+
+Get hash of the terms.
+
+<a name="aea.helpers.transaction.base.Terms.sender_hash"></a>
+#### sender`_`hash
+
+```python
+ | @property
+ | sender_hash() -> str
+```
+
+Get the sender hash.
+
+<a name="aea.helpers.transaction.base.Terms.counterparty_hash"></a>
+#### counterparty`_`hash
+
+```python
+ | @property
+ | counterparty_hash() -> str
+```
+
+Get the sender hash.
 
 <a name="aea.helpers.transaction.base.Terms.ledger_id"></a>
 #### ledger`_`id
@@ -497,6 +528,46 @@ Set the counterparty address.
 
 Get the amount by currency id.
 
+<a name="aea.helpers.transaction.base.Terms.is_sender_payable_tx_fee"></a>
+#### is`_`sender`_`payable`_`tx`_`fee
+
+```python
+ | @property
+ | is_sender_payable_tx_fee() -> bool
+```
+
+Bool indicating whether the tx fee is paid by sender or counterparty.
+
+<a name="aea.helpers.transaction.base.Terms.is_single_currency"></a>
+#### is`_`single`_`currency
+
+```python
+ | @property
+ | is_single_currency() -> bool
+```
+
+Check whether a single currency is used for payment.
+
+<a name="aea.helpers.transaction.base.Terms.is_empty_currency"></a>
+#### is`_`empty`_`currency
+
+```python
+ | @property
+ | is_empty_currency() -> bool
+```
+
+Check whether a single currency is used for payment.
+
+<a name="aea.helpers.transaction.base.Terms.currency_id"></a>
+#### currency`_`id
+
+```python
+ | @property
+ | currency_id() -> str
+```
+
+Get the amount the sender must pay.
+
 <a name="aea.helpers.transaction.base.Terms.sender_payable_amount"></a>
 #### sender`_`payable`_`amount
 
@@ -507,12 +578,32 @@ Get the amount by currency id.
 
 Get the amount the sender must pay.
 
+<a name="aea.helpers.transaction.base.Terms.sender_payable_amount_incl_fee"></a>
+#### sender`_`payable`_`amount`_`incl`_`fee
+
+```python
+ | @property
+ | sender_payable_amount_incl_fee() -> int
+```
+
+Get the amount the sender must pay inclusive fee.
+
 <a name="aea.helpers.transaction.base.Terms.counterparty_payable_amount"></a>
 #### counterparty`_`payable`_`amount
 
 ```python
  | @property
  | counterparty_payable_amount() -> int
+```
+
+Get the amount the counterparty must pay.
+
+<a name="aea.helpers.transaction.base.Terms.counterparty_payable_amount_incl_fee"></a>
+#### counterparty`_`payable`_`amount`_`incl`_`fee
+
+```python
+ | @property
+ | counterparty_payable_amount_incl_fee() -> int
 ```
 
 Get the amount the counterparty must pay.
@@ -527,15 +618,35 @@ Get the amount the counterparty must pay.
 
 Get the quantities by good id.
 
-<a name="aea.helpers.transaction.base.Terms.is_sender_payable_tx_fee"></a>
-#### is`_`sender`_`payable`_`tx`_`fee
+<a name="aea.helpers.transaction.base.Terms.good_ids"></a>
+#### good`_`ids
 
 ```python
  | @property
- | is_sender_payable_tx_fee() -> bool
+ | good_ids() -> List[str]
 ```
 
-Bool indicating whether the tx fee is paid by sender or counterparty.
+Get the (ordered) good ids.
+
+<a name="aea.helpers.transaction.base.Terms.sender_supplied_quantities"></a>
+#### sender`_`supplied`_`quantities
+
+```python
+ | @property
+ | sender_supplied_quantities() -> List[int]
+```
+
+Get the (ordered) quantities supplied by the sender.
+
+<a name="aea.helpers.transaction.base.Terms.counterparty_supplied_quantities"></a>
+#### counterparty`_`supplied`_`quantities
+
+```python
+ | @property
+ | counterparty_supplied_quantities() -> List[int]
+```
+
+Get the (ordered) quantities supplied by the counterparty.
 
 <a name="aea.helpers.transaction.base.Terms.nonce"></a>
 #### nonce
@@ -567,6 +678,26 @@ Check if fee is set.
 
 Get the fee.
 
+<a name="aea.helpers.transaction.base.Terms.sender_fee"></a>
+#### sender`_`fee
+
+```python
+ | @property
+ | sender_fee() -> int
+```
+
+Get the sender fee.
+
+<a name="aea.helpers.transaction.base.Terms.counterparty_fee"></a>
+#### counterparty`_`fee
+
+```python
+ | @property
+ | counterparty_fee() -> int
+```
+
+Get the counterparty fee.
+
 <a name="aea.helpers.transaction.base.Terms.fee_by_currency_id"></a>
 #### fee`_`by`_`currency`_`id
 
@@ -586,6 +717,31 @@ Get fee by currency.
 ```
 
 Get the kwargs.
+
+<a name="aea.helpers.transaction.base.Terms.get_hash"></a>
+#### get`_`hash
+
+```python
+ | @staticmethod
+ | get_hash(ledger_id: str, sender_address: str, counterparty_address: str, good_ids: List[str], sender_supplied_quantities: List[int], counterparty_supplied_quantities: List[int], sender_payable_amount: int, counterparty_payable_amount: int, nonce: str) -> str
+```
+
+Generate a hash from transaction information.
+
+**Arguments**:
+
+- `sender_addr`: the sender address
+- `counterparty_addr`: the counterparty address
+- `good_ids`: the list of good ids
+- `sender_supplied_quantities`: the quantities supplied by the sender (must all be positive)
+- `counterparty_supplied_quantities`: the quantities supplied by the counterparty (must all be positive)
+- `sender_payable_amount`: the amount payable by the sender
+- `counterparty_payable_amount`: the amount payable by the counterparty
+- `tx_nonce`: the nonce of the transaction
+
+**Returns**:
+
+the hash
 
 <a name="aea.helpers.transaction.base.Terms.encode"></a>
 #### encode

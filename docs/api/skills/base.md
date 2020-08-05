@@ -29,7 +29,7 @@ Initialize a skill context.
 
 ```python
  | @property
- | logger() -> Union[Logger, LoggerAdapter]
+ | logger() -> Logger
 ```
 
 Get the logger.
@@ -98,7 +98,7 @@ Set the status of the skill (active/not active).
 
 ```python
  | @property
- | new_behaviours() -> Queue
+ | new_behaviours() -> "Queue[Behaviour]"
 ```
 
 Queue for the new behaviours.
@@ -107,6 +107,21 @@ This queue can be used to send messages to the framework
 to request the registration of a behaviour.
 
 :return the queue of new behaviours.
+
+<a name="aea.skills.base.SkillContext.new_handlers"></a>
+#### new`_`handlers
+
+```python
+ | @property
+ | new_handlers() -> "Queue[Handler]"
+```
+
+Queue for the new handlers.
+
+This queue can be used to send messages to the framework
+to request the registration of a handler.
+
+:return the queue of new handlers.
 
 <a name="aea.skills.base.SkillContext.agent_addresses"></a>
 #### agent`_`addresses
@@ -217,16 +232,6 @@ Get handlers of the skill.
 ```
 
 Get behaviours of the skill.
-
-<a name="aea.skills.base.SkillContext.contracts"></a>
-#### contracts
-
-```python
- | @property
- | contracts() -> SimpleNamespace
-```
-
-Get contracts the skill has access to.
 
 <a name="aea.skills.base.SkillContext.namespace"></a>
 #### namespace
@@ -573,25 +578,6 @@ Initialize a skill.
 - `behaviours`: dictionary of behaviours.
 - `models`: dictionary of models.
 
-<a name="aea.skills.base.Skill.contracts"></a>
-#### contracts
-
-```python
- | @property
- | contracts() -> Dict[str, Contract]
-```
-
-Get the contracts associated with the skill.
-
-<a name="aea.skills.base.Skill.inject_contracts"></a>
-#### inject`_`contracts
-
-```python
- | inject_contracts(contracts: Dict[str, Contract]) -> None
-```
-
-Add the contracts to the skill.
-
 <a name="aea.skills.base.Skill.skill_context"></a>
 #### skill`_`context
 
@@ -637,7 +623,7 @@ Get the handlers.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill"
+ | from_dir(cls, directory: str, agent_context: AgentContext, **kwargs) -> "Skill"
 ```
 
 Load the skill from a directory.
@@ -656,7 +642,7 @@ the skill object.
 
 ```python
  | @property
- | logger() -> Union[Logger, LoggerAdapter]
+ | logger() -> Logger
 ```
 
 Get the logger.
@@ -679,7 +665,7 @@ Set the logger.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: SkillConfig, agent_context: AgentContext) -> "Skill"
+ | from_config(cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs) -> "Skill"
 ```
 
 Load the skill from configuration.

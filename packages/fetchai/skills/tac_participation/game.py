@@ -21,13 +21,25 @@
 from enum import Enum
 from typing import Dict, List, Optional
 
-from aea.helpers.search.models import Constraint, ConstraintType, Query
+from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TacMessage
+from packages.fetchai.skills.tac_participation.dialogues import (
+    StateUpdateDialogue,
+    TacDialogue,
+)
 
 DEFAULT_LEDGER_ID = "ethereum"
+
+DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SEARCH_QUERY = {
+    "search_key": "tac",
+    "search_value": "v1",
+    "constraint_type": "==",
+}
+DEFAULT_SEARCH_RADIUS = 5.0
 
 
 class Phase(Enum):
@@ -46,7 +58,7 @@ class Configuration:
     def __init__(
         self,
         version_id: str,
-        tx_fee: int,
+        fee_by_currency_id: Dict[str, int],
         agent_addr_to_name: Dict[Address, str],
         good_id_to_name: Dict[str, str],
         controller_addr: Address,
@@ -55,7 +67,7 @@ class Configuration:
         Instantiate a game configuration.
 
         :param version_id: the version of the game.
-        :param tx_fee: the fee for a transaction.
+        :param fee_by_currency_id: the fee for a transaction by currency id.
         :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
         :param good_id_to_name: a dictionary mapping good ids to good names (as strings).
         :param controller_addr: the address of the controller
@@ -63,7 +75,7 @@ class Configuration:
         self._version_id = version_id
         self._nb_agents = len(agent_addr_to_name)
         self._nb_goods = len(good_id_to_name)
-        self._tx_fee = tx_fee
+        self._fee_by_currency_id = fee_by_currency_id
         self._agent_addr_to_name = agent_addr_to_name
         self._good_id_to_name = good_id_to_name
         self._controller_addr = controller_addr
@@ -88,7 +100,14 @@ class Configuration:
     @property
     def tx_fee(self) -> int:
         """Transaction fee for the TAC instance."""
-        return self._tx_fee
+        assert len(self._fee_by_currency_id) == 1, "More than one currency id present!"
+        value = next(iter(self._fee_by_currency_id.values()))
+        return value
+
+    @property
+    def fee_by_currency_id(self) -> Dict[str, int]:
+        """Transaction fee for the TAC instance."""
+        return self._fee_by_currency_id
 
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
@@ -133,7 +152,9 @@ class Configuration:
         :raises: AssertionError: if some constraint is not satisfied.
         """
         assert self.version_id is not None, "A version id must be set."
-        assert self.tx_fee >= 0, "Tx fee must be non-negative."
+        assert (
+            len(self.fee_by_currency_id) == 1 and self.tx_fee >= 0
+        ), "Tx fee must be non-negative."
         assert self.nb_agents > 1, "Must have at least two agents."
         assert self.nb_goods > 1, "Must have at least two goods."
         assert (
@@ -159,12 +180,20 @@ class Game(Model):
         self._expected_controller_addr = kwargs.pop(
             "expected_controller_addr", None
         )  # type: Optional[str]
+
+        self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._conf = None  # type: Optional[Configuration]
         self._contract_address = None  # type: Optional[str]
+        self._tac_dialogue = None  # type: Optional[TacDialogue]
+        self._state_update_dialogue = None  # type: Optional[StateUpdateDialogue]
 
     @property
     def ledger_id(self) -> str:
@@ -197,6 +226,30 @@ class Game(Model):
         """Set the contract address."""
         assert self._contract_address is None, "Contract address already set!"
         self._contract_address = contract_address
+
+    @property
+    def tac_dialogue(self) -> TacDialogue:
+        """Retrieve the tac dialogue."""
+        assert self._tac_dialogue is not None, "TacDialogue not set!"
+        return self._tac_dialogue
+
+    @tac_dialogue.setter
+    def tac_dialogue(self, tac_dialogue: TacDialogue) -> None:
+        """Set the tac dialogue."""
+        assert self._tac_dialogue is None, "TacDialogue already set!"
+        self._tac_dialogue = tac_dialogue
+
+    @property
+    def state_update_dialogue(self) -> StateUpdateDialogue:
+        """Retrieve the state_update dialogue."""
+        assert self._state_update_dialogue is not None, "StateUpdateDialogue not set!"
+        return self._state_update_dialogue
+
+    @state_update_dialogue.setter
+    def state_update_dialogue(self, state_update_dialogue: StateUpdateDialogue) -> None:
+        """Set the state_update dialogue."""
+        assert self._state_update_dialogue is None, "StateUpdateDialogue already set!"
+        self._state_update_dialogue = state_update_dialogue
 
     @property
     def expected_controller_addr(self) -> Address:
@@ -232,7 +285,7 @@ class Game(Model):
         ), "TacMessage for unexpected game."
         self._conf = Configuration(
             tac_message.version_id,
-            tac_message.tx_fee,
+            tac_message.fee_by_currency_id,
             tac_message.agent_addr_to_name,
             tac_message.good_id_to_name,
             controller_addr,
@@ -247,9 +300,7 @@ class Game(Model):
         :return: None
         """
         self.context.logger.warning(
-            "[{}]: TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.".format(
-                self.context.agent_name
-            )
+            "TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it."
         )
         self._expected_controller_addr = controller_addr
 
@@ -267,7 +318,15 @@ class Game(Model):
 
         :return: the query
         """
-        query = Query(
-            [Constraint("version", ConstraintType("==", self.expected_version_id))]
+        close_to_my_service = Constraint(
+            "location", ConstraintType("distance", (self._agent_location, self._radius))
         )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
         return query

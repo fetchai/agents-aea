@@ -20,7 +20,7 @@
 import asyncio
 from typing import Optional
 
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
 
 
@@ -37,7 +37,7 @@ class FakeConnection(Connection):
         Connection.__init__(self, *args, **kwargs)
         self.num = num
         self.envelope = envelope
-        self.connection_status.is_connected = True
+        self._state.set(ConnectionStates.connected)
 
     async def connect(self) -> None:
         """
@@ -52,7 +52,7 @@ class FakeConnection(Connection):
 
         :return: None
         """
-        self.connection_status.is_connected = False
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: Envelope) -> None:
         """

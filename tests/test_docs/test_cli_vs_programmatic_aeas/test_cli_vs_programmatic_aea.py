@@ -21,6 +21,8 @@
 
 import os
 import shutil
+from pathlib import Path
+from random import uniform
 
 import pytest
 
@@ -29,9 +31,12 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE,
+    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     CUR_PATH,
+    MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     ROOT_DIR,
+    wait_for_localhost_ports_to_close,
 )
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
@@ -51,12 +56,13 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     @pytest.mark.integration
     def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.8.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.9.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -67,11 +73,23 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
 
         # add non-funded key
         self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE, connection=True)
-        self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+        )
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+        setting_path = (
+            "vendor.fetchai.skills.weather_station.models.strategy.args.location"
+        )
+        self.force_set_config(setting_path, location)
 
         weather_station_process = self.run_agent()
 
@@ -93,6 +111,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         src_file_path = os.path.join(ROOT_DIR, "tests", PY_FILE)
         dst_file_path = os.path.join(ROOT_DIR, self.t, DEST)
         shutil.copyfile(src_file_path, dst_file_path)
+        self._inject_location(location, dst_file_path)
         weather_client_process = self.start_subprocess(DEST, cwd=self.t)
 
         check_strings = (
@@ -147,3 +166,18 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+        wait_for_localhost_ports_to_close([9000, 9001])
+
+    def _inject_location(self, location, dst_file_path):
+        """Inject location into the weather client strategy."""
+        file = Path(dst_file_path)
+        lines = file.read_text().splitlines()
+        lines.insert(
+            157,
+            "    from packages.fetchai.skills.generic_buyer.strategy import Location",
+        )
+        lines.insert(
+            158,
+            f"    strategy._agent_location = Location({location['longitude']}, {location['latitude']})",
+        )
+        file.write_text("\n".join(lines))

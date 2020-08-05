@@ -95,14 +95,14 @@ class ProtocolGenerator:
         self,
         path_to_protocol_specification: str,
         output_path: str = ".",
-        path_to_protocol_package: Optional[str] = None,
+        dotted_path_to_protocol_package: Optional[str] = None,
     ) -> None:
         """
         Instantiate a protocol generator.
 
         :param path_to_protocol_specification: path to protocol specification file
         :param output_path: the path to the location in which the protocol module is to be generated.
-        :param path_to_protocol_package: the path to the protocol package
+        :param dotted_path_to_protocol_package: the path to the protocol package
 
         :return: None
         """
@@ -128,9 +128,9 @@ class ProtocolGenerator:
         self.path_to_generated_protocol_package = os.path.join(
             output_path, self.protocol_specification.name
         )
-        self.path_to_protocol_package = (
-            path_to_protocol_package + self.protocol_specification.name
-            if path_to_protocol_package is not None
+        self.dotted_path_to_protocol_package = (
+            dotted_path_to_protocol_package + self.protocol_specification.name
+            if dotted_path_to_protocol_package is not None
             else "{}.{}.protocols.{}".format(
                 PATH_TO_PACKAGES,
                 self.protocol_specification.author,
@@ -211,7 +211,7 @@ class ProtocolGenerator:
         else:
             for custom_class in self.spec.all_custom_types:
                 import_str += "from {}.custom_types import {} as Custom{}\n".format(
-                    self.path_to_protocol_package, custom_class, custom_class,
+                    self.dotted_path_to_protocol_package, custom_class, custom_class,
                 )
             import_str = import_str[:-1]
         return import_str
@@ -628,10 +628,13 @@ class ProtocolGenerator:
         )
 
         # Class attributes
-        cls_str += self.indent + 'protocol_id = ProtocolId("{}", "{}", "{}")\n'.format(
-            self.protocol_specification.author,
-            self.protocol_specification.name,
-            self.protocol_specification.version,
+        cls_str += (
+            self.indent
+            + 'protocol_id = ProtocolId.from_str("{}/{}:{}")\n'.format(
+                self.protocol_specification.author,
+                self.protocol_specification.name,
+                self.protocol_specification.version,
+            )
         )
         for custom_type in self.spec.all_custom_types:
             cls_str += "\n"
@@ -989,7 +992,8 @@ class ProtocolGenerator:
         cls_str += self.indent + "from aea.mail.base import Address\n"
         cls_str += self.indent + "from aea.protocols.base import Message\n\n"
         cls_str += self.indent + "from {}.message import {}Message\n".format(
-            self.path_to_protocol_package, self.protocol_specification_in_camel_case,
+            self.dotted_path_to_protocol_package,
+            self.protocol_specification_in_camel_case,
         )
 
         # Class Header
@@ -1163,7 +1167,9 @@ class ProtocolGenerator:
         )
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Create an instance of {} dialogue.\n\n"
+        cls_str += self.indent + "Create an instance of {} dialogue.\n\n".format(
+            self.protocol_specification.name
+        )
         cls_str += (
             self.indent + ":param dialogue_label: the identifier of the dialogue\n"
         )
@@ -1203,9 +1209,6 @@ class ProtocolGenerator:
         # Module docstring
         cls_str += '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n'
 
-        if len(self.spec.all_custom_types) == 0:
-            return cls_str
-
         # class code per custom type
         for custom_type in self.spec.all_custom_types:
             cls_str += self.indent + "\n\nclass {}:\n".format(custom_type)
@@ -1240,7 +1243,7 @@ class ProtocolGenerator:
             )
             cls_str += (
                 self.indent
-                + "The protocol buffer object in the {}_protobuf_object argument must be matched with the instance of this class in the '{}_object' argument.\n\n".format(
+                + "The protocol buffer object in the {}_protobuf_object argument is matched with the instance of this class in the '{}_object' argument.\n\n".format(
                     _camel_case_to_snake_case(custom_type),
                     _camel_case_to_snake_case(custom_type),
                 )
@@ -1277,7 +1280,7 @@ class ProtocolGenerator:
             )
             cls_str += (
                 self.indent
-                + "A new instance of this class must be created that matches the protocol buffer object in the '{}_protobuf_object' argument.\n\n".format(
+                + "A new instance of this class is created that matches the protocol buffer object in the '{}_protobuf_object' argument.\n\n".format(
                     _camel_case_to_snake_case(custom_type)
                 )
             )
@@ -1529,17 +1532,18 @@ class ProtocolGenerator:
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += self.indent + "from {} import (\n    {}_pb2,\n)\n".format(
-            self.path_to_protocol_package, self.protocol_specification.name,
+            self.dotted_path_to_protocol_package, self.protocol_specification.name,
         )
         for custom_type in self.spec.all_custom_types:
             cls_str += (
                 self.indent
                 + "from {}.custom_types import (\n    {},\n)\n".format(
-                    self.path_to_protocol_package, custom_type,
+                    self.dotted_path_to_protocol_package, custom_type,
                 )
             )
         cls_str += self.indent + "from {}.message import (\n    {}Message,\n)\n".format(
-            self.path_to_protocol_package, self.protocol_specification_in_camel_case,
+            self.dotted_path_to_protocol_package,
+            self.protocol_specification_in_camel_case,
         )
 
         # Class Header
@@ -1921,14 +1925,12 @@ class ProtocolGenerator:
         init_str += '"""This module contains the support resources for the {} protocol."""\n\n'.format(
             self.protocol_specification.name
         )
-        init_str += "from packages.{}.protocols.{}.message import {}Message\n".format(
-            self.protocol_specification.author,
-            self.protocol_specification.name,
+        init_str += "from {}.message import {}Message\n".format(
+            self.dotted_path_to_protocol_package,
             self.protocol_specification_in_camel_case,
         )
-        init_str += "from packages.{}.protocols.{}.serialization import {}Serializer\n\n".format(
-            self.protocol_specification.author,
-            self.protocol_specification.name,
+        init_str += "from {}.serialization import {}Serializer\n".format(
+            self.dotted_path_to_protocol_package,
             self.protocol_specification_in_camel_case,
         )
         init_str += "{}Message.serializer = {}Serializer\n".format(

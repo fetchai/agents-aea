@@ -29,13 +29,13 @@ from typing import List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.5.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -156,13 +156,15 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:  # pragma: no cover
+        if self.is_connected:  # pragma: nocover
             return
+
+        self._state.set(ConnectionStates.connecting)
+
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
         try:
             # connect libp2p client
-            self.connection_status.is_connecting = True
 
             # connect the tcp socket
             self._reader, self._writer = await asyncio.open_connection(
@@ -174,9 +176,6 @@ class P2PLibp2pClientConnection(Connection):
             # send agent address to node
             await self._setup_connection()
 
-            self.connection_status.is_connecting = False
-            self.connection_status.is_connected = True
-
             self.logger.info(
                 "Successfully connected to libp2p node {}".format(str(self.node_uri))
             )
@@ -186,8 +185,9 @@ class P2PLibp2pClientConnection(Connection):
             self._process_messages_task = asyncio.ensure_future(
                 self._process_messages(), loop=self._loop
             )
+            self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:
-            self.connection_status.is_connected = False
+            self._state.set(ConnectionStates.disconnected)
             raise e
 
     async def _setup_connection(self):
@@ -200,15 +200,11 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
-        assert (
-            self.connection_status.is_connected or self.connection_status.is_connecting
-        ), "Call connect before disconnect."
-        self.connection_status.is_connected = False
-        self.connection_status.is_connecting = False
-
+        if self.is_disconnected:  # pragma: nocover
+            return
         assert self._process_messages_task is not None
         assert self._writer is not None
-
+        self._state.set(ConnectionStates.disconnecting)
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
             # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
@@ -225,6 +221,7 @@ class P2PLibp2pClientConnection(Connection):
             self._in_queue.put_nowait(None)
         else:  # pragma: no cover
             self.logger.debug("Called disconnect when input queue not initialized.")
+        self._state.set(ConnectionStates.disconnected)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -237,10 +234,7 @@ class P2PLibp2pClientConnection(Connection):
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
-                if (
-                    self._connection_status.is_connected
-                    or self._connection_status.is_connecting
-                ):
+                if not self.is_disconnected:
                     await self.disconnect()
                 return None
                 # TOFIX(LR) attempt restarting the node?

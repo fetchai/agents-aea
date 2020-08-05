@@ -32,7 +32,7 @@ OUTPUT_FILE = "output_file"
 We need a private key to populate the AEA's wallet.
 ``` python
     # Create a private key
-    create_private_key(CosmosCrypto.identifier)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 ```
 
 ## Clearing the input and output files
@@ -46,7 +46,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.3.0` protocol, the `fetchai/stub:0.6.0` connection and the `fetchai/error:0.3.0` skill.
+We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.4.0` protocol, the `fetchai/stub:0.7.0` connection and the `fetchai/error:0.4.0` skill.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -120,7 +120,7 @@ We use the input and output text files to send an envelope to our AEA and receiv
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = (
-            "my_aea,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
+            "my_aea,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
@@ -147,8 +147,8 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello
-    output message: other_agent,my_aea,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello
+    input message: my_aea,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello
+    output message: other_agent,my_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello
 
 
 ## Entire code listing
@@ -175,7 +175,7 @@ OUTPUT_FILE = "output_file"
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -235,7 +235,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = (
-            "my_aea,other_agent,fetchai/default:0.3.0,\x08\x01*\x07\n\x05hello,"
+            "my_aea,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)

@@ -16,20 +16,22 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains the tests of the ledger API connection module."""
 import asyncio
+import copy
 import logging
-from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
 
 from aea.configurations.base import ProtocolId
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.connections.base import Connection, ConnectionStatus
+from aea.connections.base import Connection, ConnectionStates
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
-from aea.crypto.wallet import CryptoStore
+from aea.helpers.async_utils import AsyncState
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
@@ -37,17 +39,14 @@ from aea.helpers.transaction.base import (
     TransactionDigest,
     TransactionReceipt,
 )
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
-from packages.fetchai.connections.ledger.contract_dispatcher import ContractApiDialogues
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
-    LedgerApiDialogues,
     LedgerApiRequestDispatcher,
 )
+from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogues
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-
 
 from tests.conftest import (
     COSMOS,
@@ -60,7 +59,6 @@ from tests.conftest import (
     FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
-    ROOT_DIR,
 )
 
 logger = logging.getLogger(__name__)
@@ -76,22 +74,6 @@ ledger_ids = pytest.mark.parametrize(
 )
 
 
-@pytest.fixture()
-async def ledger_apis_connection(request):
-    """Make a connection."""
-    crypto = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("name", crypto.address)
-    crypto_store = CryptoStore()
-    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
-    connection = Connection.from_dir(
-        directory, identity=identity, crypto_store=crypto_store
-    )
-    connection = cast(Connection, connection)
-    await connection.connect()
-    yield connection
-    await connection.disconnect()
-
-
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
@@ -102,7 +84,7 @@ async def test_get_balance(
     """Test get balance."""
     import aea  # noqa # to load registries
 
-    ledger_api_dialogues = LedgerApiDialogues()
+    ledger_api_dialogues = LedgerApiDialogues(address)
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
@@ -126,7 +108,10 @@ async def test_get_balance(
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_msg = copy.copy(response_msg_orig)
+    response_msg.is_incoming = True
+    response_msg.counterparty = response_msg_orig.sender
     response_dialogue = ledger_api_dialogues.update(response_msg)
     assert response_dialogue == ledger_api_dialogue
     assert response_msg.performative == LedgerApiMessage.Performative.BALANCE
@@ -144,7 +129,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     crypto1 = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     crypto2 = make_crypto(ETHEREUM)
-    ledger_api_dialogues = LedgerApiDialogues()
+    ledger_api_dialogues = LedgerApiDialogues(crypto1.address)
 
     amount = 40000
     fee = 30000
@@ -179,7 +164,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_message = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_message = copy.copy(response_msg_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_msg_orig.sender
     assert (
         response_message.performative == LedgerApiMessage.Performative.RAW_TRANSACTION
     )
@@ -188,18 +176,11 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert type(response_message.raw_transaction) == RawTransaction
     assert response_message.raw_transaction.ledger_id == request.terms.ledger_id
 
-    # raw_tx = api.get_transfer_transaction(
-    #     sender_address=crypto1.address,
-    #     destination_address=crypto2.address,
-    #     amount=amount,
-    #     tx_fee=fee,
-    #     tx_nonce="",
-    #     chain_id=3,
-    # )
-
     signed_transaction = crypto1.sign_transaction(response_message.raw_transaction.body)
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+        message_id=response_message.message_id + 1,
+        target=response_message.message_id,
         dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
         signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
     )
@@ -217,7 +198,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_message = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_message = copy.copy(response_msg_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_msg_orig.sender
     assert (
         response_message.performative != LedgerApiMessage.Performative.ERROR
     ), f"Received error: {response_message.message}"
@@ -238,6 +222,8 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     request = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
         dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
+        message_id=response_message.message_id + 1,
+        target=response_message.message_id,
         transaction_digest=response_message.transaction_digest,
     )
     request.counterparty = str(ledger_apis_connection.connection_id)
@@ -254,7 +240,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_message = cast(LedgerApiMessage, response.message)
+    response_msg_orig = cast(LedgerApiMessage, response.message)
+    response_message = copy.copy(response_msg_orig)
+    response_message.is_incoming = True
+    response_message.counterparty = response_msg_orig.sender
     assert (
         response_message.performative
         == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
@@ -268,18 +257,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         response_message.transaction_receipt.ledger_id
         == request.transaction_digest.ledger_id
     )
-
-    # # check that the transaction is settled (to update nonce!)
-    # is_settled = False
-    # attempts = 0
-    # while not is_settled and attempts < 60:
-    #     attempts += 1
-    #     tx_receipt = api.get_transaction_receipt(
-    #         response_message.transaction_digest.body
-    #     )
-    #     is_settled = api.is_transaction_settled(tx_receipt)
-    #     await asyncio.sleep(4.0)
-    # assert is_settled, "Transaction not settled."
+    assert LedgerApis.is_transaction_settled(
+        response_message.transaction_receipt.ledger_id,
+        response_message.transaction_receipt.receipt,
+    ), "Transaction not settled."
 
 
 @pytest.mark.asyncio
@@ -307,17 +288,16 @@ async def test_new_message_wait_flag(ledger_apis_connection: LedgerConnection):
 @pytest.mark.asyncio
 async def test_no_balance():
     """Test no balance."""
-    dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
+    dispatcher = LedgerApiRequestDispatcher(AsyncState())
     mock_api = Mock()
-    contract_api_dialogues = ContractApiDialogues()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
-        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
         address="test",
     )
     message.counterparty = "test"
-    dialogue = contract_api_dialogues.update(message)
+    dialogue = dispatcher.dialogues.update(message)
     mock_api.get_balance.return_value = None
     msg = dispatcher.get_balance(mock_api, message, dialogue)
 
@@ -327,12 +307,11 @@ async def test_no_balance():
 @pytest.mark.asyncio
 async def test_no_raw_tx():
     """Test no raw tx returned."""
-    dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
+    dispatcher = LedgerApiRequestDispatcher(AsyncState())
     mock_api = Mock()
-    contract_api_dialogues = ContractApiDialogues()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
             ledger_id=ETHEREUM,
             sender_address="1111",
@@ -346,7 +325,7 @@ async def test_no_raw_tx():
         ),
     )
     message.counterparty = "test"
-    dialogue = contract_api_dialogues.update(message)
+    dialogue = dispatcher.dialogues.update(message)
     mock_api.get_transfer_transaction.return_value = None
     msg = dispatcher.get_raw_transaction(mock_api, message, dialogue)
 
@@ -356,17 +335,16 @@ async def test_no_raw_tx():
 @pytest.mark.asyncio
 async def test_attempts_get_transaction_receipt():
     """Test retry and sleep."""
-    dispatcher = LedgerApiRequestDispatcher(ConnectionStatus())
-    dispatcher.connection_status.is_connected = True
+    dispatcher = LedgerApiRequestDispatcher(AsyncState(ConnectionStates.connected))
     mock_api = Mock()
-    contract_api_dialogues = ContractApiDialogues()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-        dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
+        dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         transaction_digest=TransactionDigest("asdad", "sdfdsf"),
     )
     message.counterparty = "test"
-    dialogue = contract_api_dialogues.update(message)
+    dialogue = dispatcher.dialogues.update(message)
+    assert dialogue is not None
     mock_api.get_transaction.return_value = None
     mock_api.is_transaction_settled.return_value = True
     with patch.object(dispatcher, "MAX_ATTEMPTS", 2):

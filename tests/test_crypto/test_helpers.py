@@ -21,6 +21,7 @@
 
 import logging
 import os
+from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -34,9 +35,16 @@ from aea.crypto.helpers import (
     create_private_key,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
+    verify_or_create_private_keys,
 )
 
-from tests.conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_PATH, FETCHAI_PRIVATE_KEY_PATH
+from tests.conftest import (
+    COSMOS_PRIVATE_KEY_FILE,
+    CUR_PATH,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    FETCHAI_PRIVATE_KEY_PATH,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -129,9 +137,15 @@ class TestHelperFile:
     @patch("builtins.open", mock_open())
     def test__create_ethereum_private_key_positive(self, *mocks):
         """Test _create_ethereum_private_key positive result."""
-        create_private_key(EthereumCrypto.identifier)
+        create_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
 
     @patch("builtins.open", mock_open())
     def test__create_cosmos_private_key_positive(self, *mocks):
         """Test _create_cosmos_private_key positive result."""
-        create_private_key(CosmosCrypto.identifier)
+        create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+
+    @patch("aea.crypto.helpers.create_private_key")
+    @patch("aea.crypto.helpers.try_validate_private_key_path")
+    def test_verify_or_create_private_keys(self, *mocks):
+        """Test _create_ethereum_private_key positive result."""
+        verify_or_create_private_keys(Path(os.path.join(CUR_PATH, "data", "dummy_aea")))

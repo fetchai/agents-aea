@@ -23,7 +23,7 @@ from asyncio import Task
 from collections import deque
 from typing import Deque, Dict, List, Optional, cast
 
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
@@ -68,24 +68,43 @@ class LedgerConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
+
+        if self.is_connected:  # pragma: nocover
+            return
+
+        self._state.set(ConnectionStates.connecting)
+
         self._ledger_dispatcher = LedgerApiRequestDispatcher(
-            self.connection_status, loop=self.loop, api_configs=self.api_configs
+            self._state,
+            loop=self.loop,
+            api_configs=self.api_configs,
+            logger=self.logger,
         )
         self._contract_dispatcher = ContractApiRequestDispatcher(
-            self.connection_status, loop=self.loop, api_configs=self.api_configs
+            self._state,
+            loop=self.loop,
+            api_configs=self.api_configs,
+            logger=self.logger,
         )
         self._event_new_receiving_task = asyncio.Event(loop=self.loop)
-        self.connection_status.is_connected = True
+
+        self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
         """Tear down the connection."""
-        self.connection_status.is_connected = False
+        if self.is_disconnected:  # pragma: nocover
+            return
+
+        self._state.set(ConnectionStates.disconnecting)
+
         for task in self.receiving_tasks:
             if not task.cancelled():  # pragma: nocover
                 task.cancel()
         self._ledger_dispatcher = None
         self._contract_dispatcher = None
         self._event_new_receiving_task = None
+
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope") -> None:
         """

@@ -632,3 +632,21 @@ Construct the builder from an AEA project.
 
 an AEABuilder.
 
+<a name="aea.aea_builder.make_logger"></a>
+#### make`_`logger
+
+```python
+make_logger(configuration: ComponentConfiguration, agent_name: str) -> Optional[logging.Logger]
+```
+
+Make the logger for a component.
+
+**Arguments**:
+
+- `configuration`: the component configuration
+- `agent_name`: the agent name
+
+**Returns**:
+
+the logger.
+

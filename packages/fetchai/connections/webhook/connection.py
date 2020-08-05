@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Webhook connection and channel."""
 
 import asyncio
@@ -28,18 +27,19 @@ from typing import Optional, Union, cast
 from aiohttp import web  # type: ignore
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
+from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.5.0")
 
-logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
 RequestId = str
 
@@ -54,6 +54,7 @@ class WebhookChannel:
         webhook_port: int,
         webhook_url_path: str,
         connection_id: PublicId,
+        logger: logging.Logger = _default_logger,
     ):
         """
         Initialize a webhook channel.
@@ -80,6 +81,7 @@ class WebhookChannel:
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self.logger = logger
         self.logger.info("Initialised a webhook channel")
+        self._dialogues = HttpDialogues(str(WebhookConnection.connection_id))
 
     async def connect(self) -> None:
         """
@@ -121,7 +123,7 @@ class WebhookChannel:
             await self.runner.cleanup()
             await self.app.shutdown()
             await self.app.cleanup()
-            logger.info("Webhook app is shutdown.")
+            self.logger.info("Webhook app is shutdown.")
             self.is_stopped = True
 
     async def _receive_webhook(self, request: web.Request) -> web.Response:
@@ -145,7 +147,7 @@ class WebhookChannel:
 
         :param envelope: the envelope
         """
-        logger.warning(
+        self.logger.warning(
             "Dropping envelope={} as sending via the webhook is not possible!".format(
                 envelope
             )
@@ -169,11 +171,15 @@ class WebhookChannel:
             version=version,
             headers=json.dumps(dict(request.headers)),
             bodyy=payload_bytes if payload_bytes is not None else b"",
+            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
         )
+        http_message.counterparty = self.agent_address
+        http_dialogue = self._dialogues.update(http_message)
+        assert http_dialogue is not None, "Could not create dialogue."
         envelope = Envelope(
-            to=self.agent_address,
-            sender=request.remote,
-            protocol_id=PublicId.from_str("fetchai/http:0.3.0"),
+            to=http_message.counterparty,
+            sender=http_message.sender,
+            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )
@@ -202,6 +208,7 @@ class WebhookConnection(Connection):
             webhook_port=webhook_port,
             webhook_url_path=webhook_url_path,
             connection_id=self.connection_id,
+            logger=self.logger,
         )
 
     async def connect(self) -> None:
@@ -210,11 +217,14 @@ class WebhookConnection(Connection):
 
         :return: None
         """
-        if not self.connection_status.is_connected:
-            self.connection_status.is_connected = True
-            self.channel.logger = self.logger
-            self.channel.in_queue = asyncio.Queue()
-            await self.channel.connect()
+        if self.is_connected:  # pragma: nocover
+            return
+
+        self._state.set(ConnectionStates.connecting)
+        self.channel.logger = self.logger
+        self.channel.in_queue = asyncio.Queue()
+        await self.channel.connect()
+        self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
         """
@@ -222,9 +232,12 @@ class WebhookConnection(Connection):
 
         :return: None
         """
-        if self.connection_status.is_connected:
-            self.connection_status.is_connected = False
-            await self.channel.disconnect()
+        if self.is_disconnected:  # pragma: nocover
+            return
+
+        self._state.set(ConnectionStates.disconnecting)
+        await self.channel.disconnect()
+        self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -233,7 +246,7 @@ class WebhookConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
@@ -246,7 +259,7 @@ class WebhookConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.connection_status.is_connected:
+        if not self.is_connected:
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover

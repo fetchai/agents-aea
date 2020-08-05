@@ -137,11 +137,11 @@ class TestStubConnectionReception:
 
     def test_reception_c(self):
         """Test that the connection receives what has been enqueued in the input file."""
-        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.3.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
+        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.4.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
         expected_envelope = Envelope(
             to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
             sender="default_oef",
-            protocol_id=PublicId.from_str("fetchai/oef_search:0.3.0"),
+            protocol_id=PublicId.from_str("fetchai/oef_search:0.4.0"),
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
@@ -199,7 +199,7 @@ class TestStubConnectionSending:
 
     def test_connection_is_established(self):
         """Test the stub connection is established and then bad formatted messages."""
-        assert self.connection.connection_status.is_connected
+        assert self.connection.is_connected
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -287,9 +287,9 @@ async def test_disconnection_when_already_disconnected():
     output_file_path = d / "output_file.csv"
     connection = _make_stub_connection(input_file_path, output_file_path)
 
-    assert not connection.connection_status.is_connected
+    assert not connection.is_connected
     await connection.disconnect()
-    assert not connection.connection_status.is_connected
+    assert not connection.is_connected
 
 
 @pytest.mark.asyncio
@@ -302,11 +302,11 @@ async def test_connection_when_already_connected():
     output_file_path = d / "output_file.csv"
     connection = _make_stub_connection(input_file_path, output_file_path)
 
-    assert not connection.connection_status.is_connected
+    assert not connection.is_connected
     await connection.connect()
-    assert connection.connection_status.is_connected
+    assert connection.is_connected
     await connection.connect()
-    assert connection.connection_status.is_connected
+    assert connection.is_connected
 
     await connection.disconnect()
 

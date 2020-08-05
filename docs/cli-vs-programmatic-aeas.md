@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.8.0
+aea fetch fetchai/weather_station:0.9.0
 cd weather_station
 ```
 
@@ -92,6 +92,7 @@ SOEF_PORT = 9002
 ENTRY_PEER_ADDRESS = (
     "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"
 )
+COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
@@ -100,22 +101,25 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
 
     # Set up the wallet, identity and (empty) resources
     wallet = Wallet(
         private_key_paths={CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE},
-        connection_private_key_paths={CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE},
+        connection_private_key_paths={
+            CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_CONNECTION
+        },
     )
     identity = Identity("my_aea", address=wallet.addresses.get(CosmosCrypto.identifier))
     resources = Resources()
 
     # specify the default routing for some protocols
     default_routing = {
-        PublicId.from_str("fetchai/ledger_api:0.1.0"): LedgerConnection.connection_id,
-        PublicId.from_str("fetchai/oef_search:0.3.0"): SOEFConnection.connection_id,
+        PublicId.from_str("fetchai/ledger_api:0.2.0"): LedgerConnection.connection_id,
+        PublicId.from_str("fetchai/oef_search:0.4.0"): SOEFConnection.connection_id,
     }
-    default_connection = SOEFConnection.connection_id
+    default_connection = P2PLibp2pConnection.connection_id
 
     # create the AEA
     my_aea = AEA(
@@ -180,13 +184,8 @@ def run():
         api_key=API_KEY,
         soef_addr=SOEF_ADDR,
         soef_port=SOEF_PORT,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.3.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.4.0")},
         connection_id=SOEFConnection.connection_id,
-        delegate_uri="127.0.0.1:11001",
-        entry_peers=[ENTRY_PEER_ADDRESS],
-        local_uri="127.0.0.1:9001",
-        log_file="libp2p_node.log",
-        public_uri="127.0.0.1:9001",
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)
     resources.add_connection(soef_connection)

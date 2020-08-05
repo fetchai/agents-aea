@@ -95,21 +95,13 @@ There is an equivalent diagram for seller AEAs set up to search for buyers and t
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF search and communication node
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-Keep it running for the following demo.
-
 ## Demo instructions:
 
 ### Create TAC controller AEA
 
 In the root directory, fetch the controller AEA:
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.6.0
+aea fetch fetchai/tac_controller_contract:0.7.0
 cd tac_controller_contract
 aea install
 ```
@@ -121,10 +113,12 @@ The following steps create the controller from scratch:
 ``` bash
 aea create tac_controller_contract
 cd tac_controller_contract
-aea add connection fetchai/oef:0.6.0
-aea add skill fetchai/tac_control_contract:0.4.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/tac_control_contract:0.5.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea config set agent.default_ledger ethereum
 ```
 
@@ -160,12 +154,12 @@ aea get-wealth ethereum
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.6.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.7.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 cd ..
-aea fetch fetchai/tac_participant:0.6.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.7.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
@@ -184,11 +178,13 @@ aea create tac_participant_two
 Build participant one:
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.6.0
-aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/tac_participation:0.5.0
+aea add skill fetchai/tac_negotiation:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
@@ -197,11 +193,13 @@ aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_con
 Then, build participant two:
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.6.0
-aea add skill fetchai/tac_participation:0.4.0
-aea add skill fetchai/tac_negotiation:0.5.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add skill fetchai/tac_participation:0.5.0
+aea add skill fetchai/tac_negotiation:0.6.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool

@@ -1,30 +1,56 @@
 name: aries_alice
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
-  handlers.py: Qmf27rceAx3bwYjm1UXTXHnXratBPz9JwmLb5emqpruqyi
+  behaviours.py: QmZ1hadywhjNUxw56R3r5ZoiZwvoK6EyzGPVHRVtRYXaQ4
+  dialogues.py: QmdPR5nNYj4JJdR9Stfis97M8XfP2pi2KqsVsApUzhD9hH
+  handlers.py: QmVVjSsPPSLTH6gTDSYKqtFn13YdVfhnL9fJnqKEJ6j92M
+  strategy.py: QmPXzDbERHva7wu3yL787JBVWVPxb1RR4VHR16S8GEaJg5
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.3.0
-- fetchai/http:0.3.0
+- fetchai/default:0.4.0
+- fetchai/http:0.4.0
 skills: []
-behaviours: {}
+behaviours:
+  alice:
+    args:
+      admin_host: 127.0.0.1
+      admin_port: 8031
+      services_interval: 20
+    class_name: AliceBehaviour
 handlers:
-  aries_demo_default:
+  default:
+    args: {}
+    class_name: AliceDefaultHandler
+  http:
+    args: {}
+    class_name: AliceHttpHandler
+  oef_search:
+    args: {}
+    class_name: AliceOefSearchHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  strategy:
     args:
-      admin_host: 127.0.0.1
-      admin_port: 8031
-    class_name: DefaultHandler
-  aries_demo_http:
-    args:
-      admin_host: 127.0.0.1
-      admin_port: 8031
-    class_name: HttpHandler
-models: {}
+      location:
+        latitude: 0.127
+        longitude: 51.5194
+      service_data:
+        key: intro_service
+        value: intro_alice
+    class_name: AliceStrategy
 dependencies: {}

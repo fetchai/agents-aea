@@ -141,9 +141,21 @@ def generate_api_docs():
         save_to_file(path, text)
 
 
+def install(package: str) -> int:
+    """
+    Install a PyPI package by calling pip.
+
+    :param package: the package name and version specifier.
+    :return: the return code.
+    """
+    return subprocess.check_call(  # nosec
+        [sys.executable, "-m", "pip", "install", package]
+    )
+
+
 if __name__ == "__main__":
     res = shutil.which("pydoc-markdown")
     if res is None:
-        print("Please install pydoc-markdown first: `pip install pydoc-markdown`")
+        install("pydoc-markdown==3.3.0")
         sys.exit(1)
     generate_api_docs()

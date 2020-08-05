@@ -19,6 +19,7 @@
 """Extension to the OEF Python SDK."""
 
 import asyncio
+import copy
 import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -31,7 +32,7 @@ from oef.core import AsyncioCore
 from oef.messages import CFP_TYPES, PROPOSE_TYPES
 
 from aea.configurations.base import PublicId
-from aea.connections.base import Connection
+from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.mail.base import Address, Envelope
@@ -55,7 +56,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.7.0")
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -387,7 +388,7 @@ class OEFChannel(OEFAgent):
                 )
                 raise ValueError("Cannot send message.")
 
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.3.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.4.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -408,7 +409,9 @@ class OEFChannel(OEFAgent):
         assert isinstance(
             envelope.message, OefSearchMessage
         ), "Message not of type OefSearchMessage"
-        oef_message = cast(OefSearchMessage, envelope.message)
+        oef_message_original = cast(OefSearchMessage, envelope.message)
+        oef_message = copy.copy(oef_message_original)
+        oef_message.counterparty = oef_message_original.sender
         oef_message.is_incoming = True  # TODO: fix
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
@@ -439,7 +442,7 @@ class OEFChannel(OEFAgent):
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_services(self.oef_msg_id, oef_query)
         else:
-            raise ValueError("OEF request not recognized.")
+            raise ValueError("OEF request not recognized.")  # pragma: nocover
 
     def handle_failure(  # pylint: disable=no-self-use
         self, exception: Exception, conn
@@ -539,20 +542,19 @@ class OEFConnection(Connection):
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
-        if self.connection_status.is_connected:
+        if self.is_connected:
             return
+        self._state.set(ConnectionStates.connecting)
         try:
             self.channel.aea_logger = self.logger
-            self.connection_status.is_connecting = True
             self._loop = asyncio.get_event_loop()
             await self.channel.connect()
-            self.connection_status.is_connecting = False
-            self.connection_status.is_connected = True
             self._connection_check_task = self._loop.create_task(
                 self._connection_check()
             )
+            self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:  # pragma: no cover
-            self.connection_status.is_connected = False
+            self._state.set(ConnectionStates.disconnected)
             raise e
 
     async def _connection_check(self) -> None:
@@ -563,16 +565,15 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        while self.connection_status.is_connected:
+        while self.is_connected:
             await asyncio.sleep(2.0)
             if not self.channel.get_state() == "connected":  # pragma: no cover
-                self.connection_status.is_connected = False
-                self.connection_status.is_connecting = True
+                self._state.set(ConnectionStates.connecting)
                 self.logger.warning(
                     "Lost connection to OEFChannel. Retrying to connect soon ..."
                 )
                 await self.channel.connect()
-                self.connection_status.is_connected = True
+                self._state.set(ConnectionStates.connected)
                 self.logger.warning(
                     "Successfully re-established connection to OEFChannel."
                 )
@@ -583,15 +584,15 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        assert (
-            self.connection_status.is_connected or self.connection_status.is_connecting
-        ), "Call connect before disconnect."
-        self.connection_status.is_connected = False
-        self.connection_status.is_connecting = False
+        if self.is_disconnected:
+            return
+        self._state.set(ConnectionStates.disconnecting)
         if self._connection_check_task is not None:
             self._connection_check_task.cancel()
             self._connection_check_task = None
         await self.channel.disconnect()
+
+        self._state.set(ConnectionStates.disconnected)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -620,5 +621,5 @@ class OEFConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        if self.connection_status.is_connected:
+        if self.is_connected:
             self.channel.send(envelope)

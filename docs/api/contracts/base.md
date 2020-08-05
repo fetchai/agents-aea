@@ -16,7 +16,7 @@ Abstract definition of a contract.
 #### `__`init`__`
 
 ```python
- | __init__(contract_config: ContractConfig)
+ | __init__(contract_config: ContractConfig, **kwargs)
 ```
 
 Initialize the contract.
@@ -70,7 +70,7 @@ the contract instance
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str) -> "Contract"
+ | from_dir(cls, directory: str, **kwargs) -> "Contract"
 ```
 
 Load the protocol from a directory.
@@ -88,7 +88,7 @@ the contract object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ContractConfig) -> "Contract"
+ | from_config(cls, configuration: ContractConfig, **kwargs) -> "Contract"
 ```
 
 Load contract from configuration.
@@ -100,4 +100,92 @@ Load contract from configuration.
 **Returns**:
 
 the contract object.
+
+<a name="aea.contracts.base.Contract.get_deploy_transaction"></a>
+#### get`_`deploy`_`transaction
+
+```python
+ | @classmethod
+ | get_deploy_transaction(cls, ledger_api: LedgerApi, **kwargs) -> bytes
+```
+
+Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
+
+Implement this method in the sub class if you want
+to handle the contract requests manually.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `kwargs`: keyword arguments.
+
+**Returns**:
+
+the bytes representing the state.
+
+<a name="aea.contracts.base.Contract.get_raw_transaction"></a>
+#### get`_`raw`_`transaction
+
+```python
+ | @classmethod
+ | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes
+```
+
+Handler method for the 'GET_RAW_TRANSACTION' requests.
+
+Implement this method in the sub class if you want
+to handle the contract requests manually.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `contract_address`: the contract address.
+
+**Returns**:
+
+the bytes representing the state.
+
+<a name="aea.contracts.base.Contract.get_raw_message"></a>
+#### get`_`raw`_`message
+
+```python
+ | @classmethod
+ | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes
+```
+
+Handler method for the 'GET_RAW_MESSAGE' requests.
+
+Implement this method in the sub class if you want
+to handle the contract requests manually.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `contract_address`: the contract address.
+
+**Returns**:
+
+the bytes representing the state.
+
+<a name="aea.contracts.base.Contract.get_state"></a>
+#### get`_`state
+
+```python
+ | @classmethod
+ | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes
+```
+
+Handler method for the 'GET_STATE' requests.
+
+Implement this method in the sub class if you want
+to handle the contract requests manually.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `contract_address`: the contract address.
+
+**Returns**:
+
+the bytes representing the state.
 

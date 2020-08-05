@@ -52,8 +52,8 @@ class Strategy(GenericStrategy):
         if not os.path.isdir(db_dir):
             raise ValueError("Database directory does not exist!")
 
-        self.db = DetectionDatabase(db_dir, False)
         super().__init__(**kwargs)
+        self.db = DetectionDatabase(db_dir, False, logger=self.context.logger)
         self._update_service_data()
 
     def collect_from_data_source(self) -> Dict[str, str]:

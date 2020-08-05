@@ -90,6 +90,20 @@ Set event loop to be used.
 
 - `loop`: event loop to use.
 
+<a name="aea.runtime.BaseRuntime.state"></a>
+#### state
+
+```python
+ | @property
+ | state() -> RuntimeStates
+```
+
+Get runtime state.
+
+**Returns**:
+
+RuntimeStates
+
 <a name="aea.runtime.AsyncRuntime"></a>
 ## AsyncRuntime Objects
 

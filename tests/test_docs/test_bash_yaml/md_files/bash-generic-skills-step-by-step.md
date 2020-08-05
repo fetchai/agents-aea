@@ -5,15 +5,15 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.5.0
+aea fetch fetchai/generic_seller:0.6.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.8.0
+aea eject skill fetchai/generic_seller:0.9.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.5.0
+aea fetch fetchai/generic_buyer:0.6.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.7.0
+aea eject skill fetchai/generic_buyer:0.8.0
 cd ..
 ```
 ``` bash
@@ -47,10 +47,11 @@ aea add-key fetchai fet_private_key.txt
 aea generate-wealth fetchai
 ```
 ``` bash 
-aea add connection fetchai/oef:0.6.0
-aea add connection fetchai/ledger:0.2.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea run
 ```
 ``` bash
@@ -58,10 +59,11 @@ aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 ``` bash 
-aea add connection fetchai/oef:0.6.0
-aea add connection fetchai/ledger:0.2.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea run
 ```
 ``` bash 
@@ -86,10 +88,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.3.0
-- fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
-- fetchai/oef_search:0.3.0
+- fetchai/default:0.4.0
+- fetchai/fipa:0.5.0
+- fetchai/ledger_api:0.2.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   service_registration:
@@ -154,10 +156,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.3.0
-- fetchai/fipa:0.4.0
-- fetchai/ledger_api:0.1.0
-- fetchai/oef_search:0.3.0
+- fetchai/default:0.4.0
+- fetchai/fipa:0.5.0
+- fetchai/ledger_api:0.2.0
+- fetchai/oef_search:0.4.0
 skills: []
 behaviours:
   search:
@@ -218,7 +220,7 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.1.0: fetchai/ledger:0.2.0
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
 ```
 ``` yaml
 currency_id: 'ETH'

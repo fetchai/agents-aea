@@ -27,14 +27,13 @@ from typing import Any, Callable, Dict, Optional, Sequence, cast
 
 from aea.helpers.logging import WithLogger
 
-logger = logging.getLogger(__name__)
 
-
-class Task:
+class Task(WithLogger):
     """This class implements an abstract task."""
 
     def __init__(self, **kwargs):
         """Initialize a task."""
+        super().__init__(**kwargs)
         self._is_executed = False
         # this is where we store the result.
         self._result = None
@@ -57,7 +56,7 @@ class Task:
             self._result = self.execute(*args, **kwargs)
             return self
         except Exception as e:  # pylint: disable=broad-except
-            logger.debug(
+            self.logger.debug(
                 "Got exception of type {} with message '{}' while executing task.".format(
                     type(e), str(e)
                 )
@@ -83,10 +82,9 @@ class Task:
             raise ValueError("Task not executed yet.")
         return self._result
 
-    @abstractmethod
     def setup(self) -> None:
         """
-        Implement the behaviour setup.
+        Implement the task setup.
 
         :return: None
         """
@@ -99,10 +97,9 @@ class Task:
         :return: None
         """
 
-    @abstractmethod
     def teardown(self) -> None:
         """
-        Implement the behaviour teardown.
+        Implement the task teardown.
 
         :return: None
         """
@@ -125,7 +122,12 @@ def init_worker() -> None:
 class TaskManager(WithLogger):
     """A Task manager."""
 
-    def __init__(self, nb_workers: int = 1, is_lazy_pool_start: bool = True):
+    def __init__(
+        self,
+        nb_workers: int = 1,
+        is_lazy_pool_start: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ):
         """
         Initialize the task manager.
 
@@ -240,7 +242,7 @@ class TaskManager(WithLogger):
         :return: None
         """
         if self._pool:
-            self.logger.debug("Pool was already started!.")
+            self.logger.debug("Pool was already started!")
             return
         self._pool = Pool(self._nb_workers, initializer=init_worker)
 

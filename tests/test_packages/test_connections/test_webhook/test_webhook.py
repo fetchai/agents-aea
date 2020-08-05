@@ -19,10 +19,12 @@
 """Tests for the webhook connection and channel."""
 
 import asyncio
+import copy
 import json
 import logging
 from traceback import print_exc
 from typing import cast
+from unittest.mock import patch
 
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse
@@ -35,8 +37,10 @@ from aea.mail.base import Envelope
 
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection
+from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
+from tests.common.mocks import RegexComparator
 from tests.conftest import (
     get_host,
     get_unused_tcp_port,
@@ -67,6 +71,7 @@ class TestWebhookConnection:
             configuration=configuration, identity=self.identity,
         )
         self.webhook_connection.loop = self.loop
+        self.dialogues = HttpDialogues(self.identity.address)
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
@@ -76,16 +81,16 @@ class TestWebhookConnection:
     async def test_connection(self):
         """Test the connect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
 
     @pytest.mark.asyncio
     async def test_disconnect(self):
         """Test the disconnect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
 
         await self.webhook_connection.disconnect()
-        assert self.webhook_connection.connection_status.is_connected is False
+        assert self.webhook_connection.is_connected is False
 
     def teardown(self):
         """Close connection after testing."""
@@ -99,14 +104,19 @@ class TestWebhookConnection:
     async def test_receive_post_ok(self):
         """Test the connect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
         payload = {"hello": "world"}
         call_task = self.loop.create_task(self.call_webhook("test_topic", json=payload))
         envelope = await asyncio.wait_for(self.webhook_connection.receive(), timeout=10)
 
         assert envelope
 
-        message = cast(HttpMessage, envelope.message)
+        orig_message = cast(HttpMessage, envelope.message)
+        message = copy.copy(orig_message)
+        message.counterparty = orig_message.sender
+        message.is_incoming = True
+        dialogue = self.dialogues.update(message)
+        assert dialogue is not None
         assert message.method.upper() == "POST"
         assert message.bodyy.decode("utf-8") == json.dumps(payload)
         await call_task
@@ -115,7 +125,7 @@ class TestWebhookConnection:
     async def test_send(self):
         """Test the connect functionality of the webhook connection."""
         await self.webhook_connection.connect()
-        assert self.webhook_connection.connection_status.is_connected is True
+        assert self.webhook_connection.is_connected is True
 
         http_message = HttpMessage(
             dialogue_reference=("", ""),
@@ -131,10 +141,17 @@ class TestWebhookConnection:
         envelope = Envelope(
             to="addr",
             sender="my_id",
-            protocol_id=PublicId.from_str("fetchai/http:0.3.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
             message=http_message,
         )
-        await self.webhook_connection.send(envelope)
+        with patch.object(self.webhook_connection.logger, "warning") as mock_logger:
+            await self.webhook_connection.send(envelope)
+            await asyncio.sleep(0.01)
+            mock_logger.assert_any_call(
+                RegexComparator(
+                    "Dropping envelope=.* as sending via the webhook is not possible!"
+                )
+            )
 
     async def call_webhook(self, topic: str, **kwargs) -> ClientResponse:
         """

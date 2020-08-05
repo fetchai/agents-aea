@@ -19,11 +19,12 @@
 
 """This package contains a tac search behaviour."""
 
-from typing import cast
+from typing import Any, Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_participation.dialogues import OefSearchDialogues
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 
@@ -80,7 +81,75 @@ class TacSearchBehaviour(TickerBehaviour):
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
-            "[{}]: Searching for TAC, search_id={}".format(
-                self.context.agent_name, oef_search_msg.dialogue_reference
-            )
+            "searching for TAC, search_id={}".format(oef_search_msg.dialogue_reference)
         )
+
+
+class TransactionProcessBehaviour(TickerBehaviour):
+    """This class implements the processing of the transactions class."""
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def act(self) -> None:
+        """
+        Implement the task execution.
+
+        :return: None
+        """
+        game = cast(Game, self.context.game)
+        if game.phase.value == Phase.GAME.value:
+            self._process_transactions()
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        pass
+
+    def _process_transactions(self) -> None:
+        """
+        Process transactions.
+
+        :return: None
+        """
+        game = cast(Game, self.context.game)
+        tac_dialogue = game.tac_dialogue
+        transactions = cast(
+            Dict[str, Dict[str, Any]], self.context.shared_state.get("transactions", {})
+        )
+        for tx_id, tx_content in transactions.items():
+            self.context.logger.info(
+                "sending transaction {} to controller.".format(tx_id)
+            )
+            last_msg = tac_dialogue.last_message
+            assert last_msg is not None, "No last message available."
+            terms = tx_content["terms"]
+            sender_signature = tx_content["sender_signature"]
+            counterparty_signature = tx_content["counterparty_signature"]
+            msg = TacMessage(
+                performative=TacMessage.Performative.TRANSACTION,
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
+                message_id=last_msg.message_id + 1,
+                target=last_msg.message_id,
+                transaction_id=tx_id,
+                ledger_id=terms.ledger_id,
+                sender_address=terms.sender_address,
+                counterparty_address=terms.counterparty_address,
+                amount_by_currency_id=terms.amount_by_currency_id,
+                fee_by_currency_id=terms.fee_by_currency_id,
+                quantities_by_good_id=terms.quantities_by_good_id,
+                sender_signature=sender_signature,
+                counterparty_signature=counterparty_signature,
+                nonce=terms.nonce,
+            )
+            msg.counterparty = game.conf.controller_addr
+            tac_dialogue.update(msg)
+            self.context.outbox.put_message(message=msg)

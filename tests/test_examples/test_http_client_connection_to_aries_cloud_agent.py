@@ -113,7 +113,7 @@ class TestAEAToACA:
 
         # Request messages
         request_http_message = HttpMessage(
-            dialogue_reference=("", ""),
+            dialogue_reference=("1", ""),
             target=0,
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
@@ -136,7 +136,7 @@ class TestAEAToACA:
         try:
             # connect to ACA
             await http_client_connection.connect()
-            assert http_client_connection.connection_status.is_connected is True
+            assert http_client_connection.is_connected is True
 
             # send request to ACA
             await http_client_connection.send(envelope=request_envelope)
@@ -162,7 +162,7 @@ class TestAEAToACA:
         finally:
             # disconnect from ACA
             await http_client_connection.disconnect()
-            assert http_client_connection.connection_status.is_connected is False
+            assert http_client_connection.is_connected is False
 
     @pytest.mark.asyncio
     async def test_end_to_end_aea_aca(self):

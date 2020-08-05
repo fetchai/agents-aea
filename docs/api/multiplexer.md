@@ -3,6 +3,24 @@
 
 Module for the multiplexer class and related classes.
 
+<a name="aea.multiplexer.ConnectionStatus"></a>
+## ConnectionStatus Objects
+
+```python
+class ConnectionStatus()
+```
+
+The connection status class.
+
+<a name="aea.multiplexer.ConnectionStatus.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__()
+```
+
+Initialize the connection status.
+
 <a name="aea.multiplexer.AsyncMultiplexer"></a>
 ## AsyncMultiplexer Objects
 
@@ -484,17 +502,18 @@ None
 #### put`_`message
 
 ```python
- | put_message(message: Message, sender: Optional[Address] = None, context: Optional[EnvelopeContext] = None) -> None
+ | put_message(message: Message, context: Optional[EnvelopeContext] = None, sender: Optional[str] = None) -> None
 ```
 
 Put a message in the outbox.
 
 This constructs an envelope with the input arguments.
 
+"sender" is a deprecated kwarg and will be removed in the next version
+
 **Arguments**:
 
-- `sender`: the sender of the envelope (optional field only necessary when the non-default address is used for sending).
-- `message`: the message.
+- `message`: the message
 - `context`: the envelope context
 
 **Returns**:

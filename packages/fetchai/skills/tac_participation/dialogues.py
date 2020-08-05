@@ -31,8 +31,12 @@ This module contains the classes required for dialogue management.
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.base import Message
-from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.state_update.dialogues import (
+    StateUpdateDialogue as BaseStateUpdateDialogue,
+)
+from aea.protocols.state_update.dialogues import (
+    StateUpdateDialogues as BaseStateUpdateDialogues,
+)
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -59,7 +63,9 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
+        BaseOefSearchDialogues.__init__(
+            self, self.context.agent_address + "_" + str(self.context.skill_id)
+        )
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
@@ -87,11 +93,11 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         return dialogue
 
 
-SigningDialogue = BaseSigningDialogue
+StateUpdateDialogue = BaseStateUpdateDialogue
 
 
-class SigningDialogues(Model, BaseSigningDialogues):
-    """This class keeps track of all oef_search dialogues."""
+class StateUpdateDialogues(Model, BaseStateUpdateDialogues):
+    """This class keeps track of all state_update dialogues."""
 
     def __init__(self, **kwargs) -> None:
         """
@@ -101,7 +107,9 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseSigningDialogues.__init__(self, self.context.agent_address)
+        BaseStateUpdateDialogues.__init__(
+            self, self.context.agent_address + "_" + str(self.context.skill_id)
+        )
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
@@ -110,11 +118,11 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        return BaseSigningDialogue.Role.SKILL
+        return BaseStateUpdateDialogue.Role.SKILL
 
     def create_dialogue(
         self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> SigningDialogue:
+    ) -> StateUpdateDialogue:
         """
         Create an instance of fipa dialogue.
 
@@ -123,7 +131,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         :return: the created dialogue
         """
-        dialogue = SigningDialogue(
+        dialogue = StateUpdateDialogue(
             dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue

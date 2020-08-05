@@ -1,7 +1,26 @@
+# Signing Protocol
+
+**Name:** signing
+
+**Author**: fetchai
+
+**Version**: 0.2.0
+
+**Short Description**: A protocol for communication between skills and decision maker.
+
+**License**: Apache-2.0
+
+## Description
+
+This is a protocol for communication between a skill and a decision maker.
+
+## Specification
+
+```yaml
 ---
 name: signing
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -59,3 +78,6 @@ termination: [signed_transaction, signed_message, error]
 roles: {skill, decision_maker}
 end_states: [successful, failed]
 ...
+```
+
+## Links
