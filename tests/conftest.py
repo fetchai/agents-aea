@@ -46,7 +46,6 @@ import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.cli.utils.config import _init_cli_config
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -657,12 +656,6 @@ def network_node(
         logger.info("Stopping the OEF node...")
         c.stop()
         c.remove()
-
-
-@pytest.fixture(scope="session", autouse=True)
-def reset_aea_cli_config() -> None:
-    """Reset the cli config for each test."""
-    _init_cli_config()
 
 
 def get_unused_tcp_port():
