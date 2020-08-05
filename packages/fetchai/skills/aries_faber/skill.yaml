@@ -6,25 +6,48 @@ description: The aries_faber skill implements the faber player in the aries clou
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
-  behaviours.py: QmUErSz1FXfsX7VyQU9YcxteS3j7CpDBAELz4yGEdzdEw1
-  handlers.py: Qma2xG1pf5o19uumuQuThEEuWutBpMUbKgdPCb1VVxQAvu
+  __init__.py: QmNPVQ6UajvJodqTLWbLvQZkKCfrNn1nYPrQXai3xdj6F7
+  behaviours.py: QmRh5cVZHXzatgDNC16L3eB1L4jr4Qtmb9E3m23Y9CLXWt
+  dialogues.py: QmP9VtJL3tJWcKU5VTPN7ZcUiPw6oDpCq8La7ZtewcwrUE
+  handlers.py: QmU77Fef51oJP7bsDyTPY1sbmhY8Dk6McZAsHgCv3Fgm3C
+  strategy.py: QmWySg1wmunzCjCGkR6qSUFN9RKYX7ejFX8GxyKmNBvDQH
 fingerprint_ignore_patterns: []
 contracts: []
 protocols: []
 skills: []
 behaviours:
-  aries_demo_faber:
+  faber:
     args:
       admin_host: 127.0.0.1
       admin_port: 8021
+      services_interval: 20
     class_name: FaberBehaviour
 handlers:
-  aries_demo_http:
+  http:
+    args: {}
+    class_name: FaberHTTPHandler
+  oef_search:
+    args: {}
+    class_name: FaberOefSearchHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  strategy:
     args:
-      admin_host: 127.0.0.1
-      admin_port: 8021
-      alice_id: alice_identity_address
-    class_name: HTTPHandler
-models: {}
+      location:
+        latitude: 0.127
+        longitude: 51.5194
+      search_query:
+        constraint_type: ==
+        search_key: intro_service
+        search_value: intro_alice
+      search_radius: 5.0
+    class_name: FaberStrategy
 dependencies: {}
