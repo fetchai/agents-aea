@@ -47,10 +47,11 @@ aea add-key fetchai fet_private_key.txt
 aea generate-wealth fetchai
 ```
 ``` bash 
-aea add connection fetchai/oef:0.7.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea run
 ```
 ``` bash
@@ -58,10 +59,11 @@ aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 ``` bash 
-aea add connection fetchai/oef:0.7.0
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea run
 ```
 ``` bash 
