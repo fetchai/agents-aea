@@ -28,4 +28,5 @@ logging_config:
 private_key_paths: {}
 registry_path: ../packages
 default_routing:
+  fetchai/http:0.4.0: fetchai/http_client:0.6.0
   fetchai/oef_search:0.4.0: fetchai/soef:0.6.0

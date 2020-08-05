@@ -35,6 +35,7 @@ from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
 
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
+HTTP_COUNTERPARTY = "HTTP Server"
 
 DEFAULT_SEARCH_INTERVAL = 5.0
 
@@ -98,15 +99,12 @@ class FaberBehaviour(TickerBehaviour):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        request_http_message.counterparty = self.admin_url
-        # import pdb;pdb.set_trace()
+        request_http_message.counterparty = HTTP_COUNTERPARTY
         http_dialogue = http_dialogues.update(request_http_message)
-        if http_dialogue is not None:
-            self.context.outbox.put_message(message=request_http_message)
-        else:
-            self.context.logger.exception(
-                "faber -> behaviour -> admin_get(): something went wrong when sending a HTTP message."
-            )
+        assert (
+            http_dialogue is not None
+        ), "faber -> behaviour -> admin_get(): something went wrong when sending a HTTP message."
+        self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
         """
@@ -135,14 +133,12 @@ class FaberBehaviour(TickerBehaviour):
                 query=query,
             )
             oef_search_msg.counterparty = self.context.search_service_address
-            dialogue = oef_search_dialogues.update(oef_search_msg)
-            if dialogue is not None:
-                self.context.outbox.put_message(message=oef_search_msg)
-                self.context.logger.info("Searching for Alice on SOEF...")
-            else:
-                self.context.logger.exception(
-                    "faber -> behaviour -> act(): something went wrong when searching for Alice on SOEF."
-                )
+            oef_dialogue = oef_search_dialogues.update(oef_search_msg)
+            assert (
+                oef_dialogue is not None
+            ), "faber -> behaviour -> act(): something went wrong when searching for Alice on SOEF."
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("Searching for Alice on SOEF...")
 
     def teardown(self) -> None:
         """

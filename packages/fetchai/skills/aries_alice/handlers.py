@@ -43,6 +43,7 @@ from packages.fetchai.skills.aries_alice.dialogues import (
 )
 
 ADMIN_COMMAND_RECEIVE_INVITE = "/connections/receive-invitation"
+HTTP_COUNTERPARTY = "HTTP Server"
 
 
 class AliceDefaultHandler(Handler):
@@ -73,17 +74,15 @@ class AliceDefaultHandler(Handler):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        request_http_message.counterparty = self.admin_url
+        request_http_message.counterparty = HTTP_COUNTERPARTY
         http_dialogue = http_dialogues.update(request_http_message)
-        if http_dialogue is not None:
-            self.context.outbox.put_message(
-                message=request_http_message,
-                context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
-            )
-        else:
-            self.context.logger.exception(
-                "something went wrong when sending a HTTP message."
-            )
+        assert (
+            http_dialogue is not None
+        ), "alice -> default_handler -> _admin_post(): something went wrong when sending a HTTP message."
+        self.context.outbox.put_message(
+            message=request_http_message,
+            context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
+        )
 
     def setup(self) -> None:
         """
@@ -110,7 +109,7 @@ class AliceDefaultHandler(Handler):
             )
             if http_dialogue is None:
                 self.context.logger.exception(
-                    "something went wrong when adding the incoming HTTP response message to the dialogue."
+                    "alice -> default_handler -> handle(): something went wrong when adding the incoming HTTP response message to the dialogue."
                 )
                 return
             content_bytes = message.content
@@ -165,7 +164,7 @@ class AliceHttpHandler(Handler):
             http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
             if http_dialogue is None:
                 self.context.logger.exception(
-                    "something went wrong when adding the incoming HTTP webhook request message to the dialogue."
+                    "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue."
                 )
                 return
             content_bytes = message.bodyy
@@ -182,7 +181,7 @@ class AliceHttpHandler(Handler):
             http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
             if http_dialogue is None:
                 self.context.logger.exception(
-                    "something went wrong when adding the incoming HTTP response message to the dialogue."
+                    "alice -> http_handler -> handle() -> RESPONSE: something went wrong when adding the incoming HTTP response message to the dialogue."
                 )
                 return
             content_bytes = message.bodyy

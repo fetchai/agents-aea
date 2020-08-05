@@ -46,6 +46,7 @@ SUPPORT_REVOCATION = False
 
 ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
 ADMIN_COMMAND_STATUS = "/status"
+HTTP_COUNTERPARTY = "HTTP Server"
 
 
 class FaberHTTPHandler(Handler):
@@ -84,14 +85,12 @@ class FaberHTTPHandler(Handler):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        request_http_message.counterparty = self.admin_url
+        request_http_message.counterparty = HTTP_COUNTERPARTY
         http_dialogue = http_dialogues.update(request_http_message)
-        if http_dialogue is not None:
-            self.context.outbox.put_message(message=request_http_message)
-        else:
-            self.context.logger.exception(
-                "something went wrong when sending a HTTP message."
-            )
+        assert (
+            http_dialogue is not None
+        ), "faber -> http_handler -> _admin_post(): something went wrong when sending a HTTP message."
+        self.context.outbox.put_message(message=request_http_message)
 
     def _send_message(self, content: Dict) -> None:
         # message & envelope
@@ -103,14 +102,11 @@ class FaberHTTPHandler(Handler):
         )
         message.counterparty = self.alice_address
         context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
-
         default_dialogue = default_dialogues.update(message)
-        if default_dialogue is not None:
-            self.context.outbox.put_message(message=message, context=context)
-        else:
-            self.context.logger.exception(
-                "something went wrong when sending a default message."
-            )
+        assert (
+            default_dialogue is not None
+        ), "faber -> http_handler -> _send_message(): something went wrong when sending a default message."
+        self.context.outbox.put_message(message=message, context=context)
 
     def setup(self) -> None:
         """
@@ -165,6 +161,7 @@ class FaberHTTPHandler(Handler):
             http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
             if http_dialogue is None:
                 self.context.logger.exception(
+                    "faber -> http_handler -> handle() -> REQUEST: "
                     "something went wrong when adding the incoming HTTP webhook request message to the dialogue."
                 )
                 return
