@@ -24,13 +24,14 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     _make_libp2p_connection,
+    get_unused_tcp_port,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
     skip_test_windows,
 )
 
-DEFAULT_PORT = 10234
-DEFAULT_DELEGATE_PORT = 11234
+DEFAULT_PORT = get_unused_tcp_port()
+DEFAULT_DELEGATE_PORT = get_unused_tcp_port()
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
 

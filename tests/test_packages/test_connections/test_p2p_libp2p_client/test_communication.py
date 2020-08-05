@@ -35,13 +35,14 @@ from packages.fetchai.connections.p2p_libp2p_client.connection import Uri
 from tests.conftest import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
+    get_unused_tcp_port,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
     skip_test_windows,
 )
 
-DEFAULT_PORT = 10234
-DEFAULT_DELEGATE_PORT = 11234
+DEFAULT_PORT = get_unused_tcp_port()
+DEFAULT_DELEGATE_PORT = get_unused_tcp_port()
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
 
@@ -63,17 +64,17 @@ class TestLibp2pClientConnectionConnectDisconnect:
 
     @pytest.mark.asyncio
     async def test_libp2pclientconnection_connect_disconnect(self):
-        assert self.connection.is_connected is False
+        assert self.connection.connection_status.is_connected is False
         try:
             await self.connection_node.connect()
             await self.connection.connect()
-            assert self.connection.is_connected is True
+            assert self.connection.connection_status.is_connected is True
         except Exception as e:
             await self.connection.disconnect()
             raise e
 
         await self.connection.disconnect()
-        assert self.connection.is_connected is False
+        assert self.connection.connection_status.is_connected is False
         await self.connection_node.disconnect()
 
     @classmethod
@@ -115,8 +116,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         cls.multiplexer_client_2.connect()
 
     def test_connection_is_established(self):
-        assert self.connection_client_1.is_connected is True
-        assert self.connection_client_2.is_connected is True
+        assert self.connection_client_1.connection_status.is_connected is True
+        assert self.connection_client_2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
         addr_1 = self.connection_client_1.address
@@ -276,10 +277,10 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         cls.multiplexer_client_2.connect()
 
     def test_connection_is_established(self):
-        assert self.connection_node_1.is_connected is True
-        assert self.connection_node_2.is_connected is True
-        assert self.connection_client_1.is_connected is True
-        assert self.connection_client_2.is_connected is True
+        assert self.connection_node_1.connection_status.is_connected is True
+        assert self.connection_node_2.connection_status.is_connected is True
+        assert self.connection_client_1.connection_status.is_connected is True
+        assert self.connection_client_2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
         addr_1 = self.connection_client_1.address
@@ -447,7 +448,7 @@ class TestLibp2pClientConnectionRouting:
 
     def test_connection_is_established(self):
         for conn in self.connections:
-            assert conn.is_connected is True
+            assert conn.connection_status.is_connected is True
 
     def test_star_routing_connectivity(self):
         msg = DefaultMessage(

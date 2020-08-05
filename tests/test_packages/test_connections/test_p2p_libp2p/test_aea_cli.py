@@ -23,10 +23,10 @@ import os
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import libp2p_log_on_failure, skip_test_windows
+from tests.conftest import get_unused_tcp_port, libp2p_log_on_failure, skip_test_windows
 
-DEFAULT_PORT = 10234
-DEFAULT_DELEGATE_PORT = 11234
+DEFAULT_PORT = get_unused_tcp_port()
+DEFAULT_DELEGATE_PORT = get_unused_tcp_port()
 DEFAULT_NET_SIZE = 4
 
 LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb

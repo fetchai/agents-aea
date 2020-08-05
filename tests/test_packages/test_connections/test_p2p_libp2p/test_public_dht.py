@@ -37,12 +37,13 @@ from tests.conftest import (
     PUBLIC_DHT_P2P_MADDR_1,
     PUBLIC_DHT_P2P_MADDR_2,
     _make_libp2p_connection,
+    get_unused_tcp_port,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
     skip_test_windows,
 )
 
-DEFAULT_PORT = 10234
+DEFAULT_PORT = get_unused_tcp_port()
 
 
 @skip_test_windows

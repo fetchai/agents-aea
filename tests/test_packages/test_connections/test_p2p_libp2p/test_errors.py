@@ -42,10 +42,11 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 from tests.conftest import (
     COSMOS,
     _make_libp2p_connection,
+    get_unused_tcp_port,
     skip_test_windows,
 )
 
-DEFAULT_PORT = 10234
+DEFAULT_PORT = get_unused_tcp_port()
 DEFAULT_NET_SIZE = 4
 
 
