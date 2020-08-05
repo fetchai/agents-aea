@@ -24,6 +24,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from aea import AEA_DIR
 from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.mail.base import Envelope
@@ -142,3 +144,44 @@ class TestProtocolFromDir:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestMessageAttributes:
+    """Test some message attributes."""
+
+    def test_performative(self):
+        """Test message performative."""
+
+        class SomePerformative(Message.Performative):
+            value = "value"
+
+        message = Message(performative=SomePerformative.value)
+        assert message.performative == SomePerformative.value
+        assert str(message.performative) == "value"
+
+    def test_to(self):
+        """Test the 'to' attribute getter and setter."""
+        message = Message()
+        with pytest.raises(AssertionError, match="To must not be None."):
+            message.to
+
+        message.to = "to"
+        assert message.to == "to"
+
+        with pytest.raises(AssertionError, match="To already set."):
+            message.to = "to"
+
+    def test_dialogue_reference(self):
+        """Test the 'dialogue_reference' attribute."""
+        message = Message(dialogue_reference=("x", "y"))
+        assert message.dialogue_reference == ("x", "y")
+
+    def test_message_id(self):
+        """Test the 'message_id' attribute."""
+        message = Message(message_id=1)
+        assert message.message_id == 1
+
+    def test_target(self):
+        """Test the 'target' attribute."""
+        message = Message(target=1)
+        assert message.target == 1
