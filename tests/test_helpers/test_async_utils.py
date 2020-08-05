@@ -66,6 +66,43 @@ async def test_async_state():
 
 
 @pytest.mark.asyncio
+async def test_asyncstate_with_list_of_valid_states():
+    """Test various cases for AsyncState."""
+    states = [1, 2, 3]
+    state = AsyncState(1, states)
+
+    state.set(2)
+    assert state.get() == 2
+
+    with pytest.raises(ValueError):
+        state.set("anything")
+
+    assert state.get() == 2
+
+
+@pytest.mark.asyncio
+async def test_asyncstate_callback():
+    """Test various cases for AsyncState.callback."""
+    state = AsyncState()
+
+    called = False
+
+    def callback_err(state):
+        raise Exception("expected")
+
+    def callback(state):
+        nonlocal called
+        called = True
+
+    state.add_callback(callback_err)
+    state.add_callback(callback)
+
+    state.set(2)
+    assert state.get() == 2
+    assert called
+
+
+@pytest.mark.asyncio
 async def test_periodic_caller_start_stop():
     """Test start stop calls for PeriodicCaller."""
     called = 0
