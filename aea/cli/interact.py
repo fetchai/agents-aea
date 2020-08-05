@@ -150,10 +150,12 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
         else:
             message = message_escaped  # pragma: no cover
         msg = DefaultMessage(performative=performative, content=message)
+        msg.counterparty = agent_name
+        msg.sender = sender
         envelope = Envelope(
-            to=agent_name,
-            sender=sender,
-            protocol_id=DefaultMessage.protocol_id,  # PublicId.from_str(protocol_id),
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,  # PublicId.from_str(protocol_id),
             message=msg,
         )
     except InterruptInputException:
