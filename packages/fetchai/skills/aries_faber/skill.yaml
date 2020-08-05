@@ -7,9 +7,9 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmNPVQ6UajvJodqTLWbLvQZkKCfrNn1nYPrQXai3xdj6F7
-  behaviours.py: QmcZ7mEEk6fGHdUkprD7hBFStLREUmtWiy6zLiFCiXuaYR
-  dialogues.py: QmaYTdk3NDhNjgeb6WhVdE6QLFbAmnhipnpJpZGCtochMQ
-  handlers.py: QmP6PvN47wo5QcjkqkrrjMThaQEfka5BfHqK3sJHw3eNmY
+  behaviours.py: QmdtneNbViMxcnMfFkYDStvLnfYVznsxozWaA74kBqSDAr
+  dialogues.py: QmP9VtJL3tJWcKU5VTPN7ZcUiPw6oDpCq8La7ZtewcwrUE
+  handlers.py: QmRE5KvhQBEBSgx89oDVVUAwVa9Ew8rmtxoxQbXL6kKypW
   strategy.py: QmWySg1wmunzCjCGkR6qSUFN9RKYX7ejFX8GxyKmNBvDQH
 fingerprint_ignore_patterns: []
 contracts: []
@@ -30,6 +30,12 @@ handlers:
     args: {}
     class_name: FaberOefSearchHandler
 models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues

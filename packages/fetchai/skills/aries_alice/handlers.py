@@ -34,6 +34,10 @@ from packages.fetchai.connections.http_client.connection import (
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_alice.dialogues import (
+    DefaultDialogue,
+    DefaultDialogues,
+    HttpDialogue,
+    HttpDialogues,
     OefSearchDialogue,
     OefSearchDialogues,
 )
@@ -59,7 +63,9 @@ class AliceDefaultHandler(Handler):
 
     def _admin_post(self, path: str, content: Dict = None):
         # Request message & envelope
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
         request_http_message = HttpMessage(
+            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="POST",
             url=self.admin_url + path,
@@ -68,10 +74,16 @@ class AliceDefaultHandler(Handler):
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         request_http_message.counterparty = self.admin_url
-        self.context.outbox.put_message(
-            message=request_http_message,
-            context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
-        )
+        http_dialogue = http_dialogues.update(request_http_message)
+        if http_dialogue is not None:
+            self.context.outbox.put_message(
+                message=request_http_message,
+                context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
+            )
+        else:
+            self.context.logger.exception(
+                "something went wrong when sending a HTTP message."
+            )
 
     def setup(self) -> None:
         """
@@ -89,8 +101,18 @@ class AliceDefaultHandler(Handler):
         :return: None
         """
         message = cast(DefaultMessage, message)
+        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
+
         self.handled_message = message
         if message.performative == DefaultMessage.Performative.BYTES:
+            http_dialogue = cast(
+                Optional[DefaultDialogue], default_dialogues.update(message)
+            )
+            if http_dialogue is None:
+                self.context.logger.exception(
+                    "something went wrong when adding the incoming HTTP response message to the dialogue."
+                )
+                return
             content_bytes = message.content
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
@@ -136,8 +158,16 @@ class AliceHttpHandler(Handler):
         :return: None
         """
         message = cast(HttpMessage, message)
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+
         self.handled_message = message
         if message.performative == HttpMessage.Performative.REQUEST:  # webhook
+            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
+            if http_dialogue is None:
+                self.context.logger.exception(
+                    "something went wrong when adding the incoming HTTP webhook request message to the dialogue."
+                )
+                return
             content_bytes = message.bodyy
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
@@ -149,6 +179,12 @@ class AliceHttpHandler(Handler):
         elif (
             message.performative == HttpMessage.Performative.RESPONSE
         ):  # response to http_client request
+            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
+            if http_dialogue is None:
+                self.context.logger.exception(
+                    "something went wrong when adding the incoming HTTP response message to the dialogue."
+                )
+                return
             content_bytes = message.bodyy
             content = content_bytes.decode("utf-8")
             if "Error" in content:

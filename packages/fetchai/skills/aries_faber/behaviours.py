@@ -27,7 +27,10 @@ from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.aries_faber.dialogues import OefSearchDialogues
+from packages.fetchai.skills.aries_faber.dialogues import (
+    HttpDialogues,
+    OefSearchDialogues,
+)
 from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
 
 DEFAULT_ADMIN_HOST = "127.0.0.1"
@@ -84,7 +87,10 @@ class FaberBehaviour(TickerBehaviour):
         :return: None
         """
         # Request message & envelope
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+
         request_http_message = HttpMessage(
+            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="GET",
             url=self.admin_url + path,
@@ -93,7 +99,14 @@ class FaberBehaviour(TickerBehaviour):
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         request_http_message.counterparty = self.admin_url
-        self.context.outbox.put_message(message=request_http_message)
+        # import pdb;pdb.set_trace()
+        http_dialogue = http_dialogues.update(request_http_message)
+        if http_dialogue is not None:
+            self.context.outbox.put_message(message=request_http_message)
+        else:
+            self.context.logger.exception(
+                "faber -> behaviour -> admin_get(): something went wrong when sending a HTTP message."
+            )
 
     def setup(self) -> None:
         """
@@ -122,9 +135,14 @@ class FaberBehaviour(TickerBehaviour):
                 query=query,
             )
             oef_search_msg.counterparty = self.context.search_service_address
-            oef_search_dialogues.update(oef_search_msg)
-            self.context.outbox.put_message(message=oef_search_msg)
-            self.context.logger.info("Searching for Alice on SOEF...")
+            dialogue = oef_search_dialogues.update(oef_search_msg)
+            if dialogue is not None:
+                self.context.outbox.put_message(message=oef_search_msg)
+                self.context.logger.info("Searching for Alice on SOEF...")
+            else:
+                self.context.logger.exception(
+                    "faber -> behaviour -> act(): something went wrong when searching for Alice on SOEF."
+                )
 
     def teardown(self) -> None:
         """

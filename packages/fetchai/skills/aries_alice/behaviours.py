@@ -105,9 +105,14 @@ class AliceBehaviour(TickerBehaviour):
             service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering Alice on SOEF.")
+        dialogue = oef_search_dialogues.update(oef_search_msg)
+        if dialogue is not None:
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("registering Alice on SOEF.")
+        else:
+            self.context.logger.exception(
+                "something went wrong when registering Alice on SOEF."
+            )
 
     def _register_service(self) -> None:
         """
@@ -131,7 +136,9 @@ class AliceBehaviour(TickerBehaviour):
             self.context.outbox.put_message(message=oef_search_msg)
             self.context.logger.info("registering Alice service on SOEF.")
         else:
-            self.context.logger.info("something went wrong when registering Alice service on SOEF.")
+            self.context.logger.exception(
+                "something went wrong when registering Alice service on SOEF."
+            )
 
     def _unregister_service(self) -> None:
         """
@@ -150,9 +157,14 @@ class AliceBehaviour(TickerBehaviour):
             service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("unregistering service from SOEF.")
+        dialogue = oef_search_dialogues.update(oef_search_msg)
+        if dialogue is not None:
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("unregistering service from SOEF.")
+        else:
+            self.context.logger.exception(
+                "something went wrong when unregistering Alice service on SOEF."
+            )
 
     def _unregister_agent(self) -> None:
         """
@@ -171,6 +183,11 @@ class AliceBehaviour(TickerBehaviour):
             service_description=description,
         )
         oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("unregistering agent from SOEF.")
+        dialogue = oef_search_dialogues.update(oef_search_msg)
+        if dialogue is not None:
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("unregistering agent from SOEF.")
+        else:
+            self.context.logger.exception(
+                "something went wrong when unregistering Alice on SOEF."
+            )

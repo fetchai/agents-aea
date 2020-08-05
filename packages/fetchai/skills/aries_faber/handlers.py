@@ -34,6 +34,9 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_faber.dialogues import (
+    DefaultDialogues,
+    HttpDialogue,
+    HttpDialogues,
     OefSearchDialogue,
     OefSearchDialogues,
 )
@@ -71,7 +74,9 @@ class FaberHTTPHandler(Handler):
 
     def _admin_post(self, path: str, content: Dict = None) -> None:
         # Request message & envelope
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
         request_http_message = HttpMessage(
+            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="POST",
             url=self.admin_url + path,
@@ -80,17 +85,32 @@ class FaberHTTPHandler(Handler):
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         request_http_message.counterparty = self.admin_url
-        self.context.outbox.put_message(message=request_http_message)
+        http_dialogue = http_dialogues.update(request_http_message)
+        if http_dialogue is not None:
+            self.context.outbox.put_message(message=request_http_message)
+        else:
+            self.context.logger.exception(
+                "something went wrong when sending a HTTP message."
+            )
 
     def _send_message(self, content: Dict) -> None:
         # message & envelope
+        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         message = DefaultMessage(
+            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             performative=DefaultMessage.Performative.BYTES,
             content=json.dumps(content).encode("utf-8"),
         )
         message.counterparty = self.alice_address
         context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
-        self.context.outbox.put_message(message=message, context=context)
+
+        default_dialogue = default_dialogues.update(message)
+        if default_dialogue is not None:
+            self.context.outbox.put_message(message=message, context=context)
+        else:
+            self.context.logger.exception(
+                "something went wrong when sending a default message."
+            )
 
     def setup(self) -> None:
         """
@@ -108,11 +128,21 @@ class FaberHTTPHandler(Handler):
         :return: None
         """
         message = cast(HttpMessage, message)
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+
         self.handled_message = message
         if (
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200
         ):  # response to http request
+            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
+            if http_dialogue is None:
+                self.context.logger.exception(
+                    "faber -> http_handler -> handle() -> RESPONSE: "
+                    "something went wrong when adding the incoming HTTP response message to the dialogue."
+                )
+                return
+
             content_bytes = message.bodyy  # type: ignore
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
@@ -132,6 +162,12 @@ class FaberHTTPHandler(Handler):
         elif (
             message.performative == HttpMessage.Performative.REQUEST
         ):  # webhook request
+            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
+            if http_dialogue is None:
+                self.context.logger.exception(
+                    "something went wrong when adding the incoming HTTP webhook request message to the dialogue."
+                )
+                return
             content_bytes = message.bodyy
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
