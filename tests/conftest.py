@@ -781,7 +781,7 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
 
 
 def _make_libp2p_connection(
-    port: int = 10234,
+    port: int = get_unused_tcp_port(),
     host: str = "127.0.0.1",
     relay: bool = True,
     delegate: bool = False,
