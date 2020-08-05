@@ -104,7 +104,7 @@ message DefaultMessage{
 </li>
 <li> It is recommended that it processes `Envelopes` asynchronously. Note, the specification regarding the processing of messages does not impose any particular implementation choice/constraint; for example, the AEA can process envelopes either synchronously and asynchronously. However, due to the high level of activity that an AEA might be subject to, other AEAs expect a certain minimum level of responsiveness and reactivity of an AEA's implementation, especially in the case of many concurrent dialogues with other peers. That could imply the need for asynchronous programming to make the AEA's implementation scalable.
 </li>
-<li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key.
+<li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the eliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1">SECP256k1</a>).
 </li>
 <li> It SHOULD implement handling of errors using the `default` protocol. The protobuf schema is given above.
 </li>

@@ -86,3 +86,7 @@ By default, envelopes of a given protocol get routed to all skills which have a 
 
 The `URI` in the `EnvelopeContext` can be used to route envelopes of a given protocol to a specific skill. The `URI` path needs to be set to the skill's `public_id.to_uri_path`.
 </details>
+
+<details><summary>Why does the AEA framework use its own package registry?</summary>
+AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library and therefore not suitable for distribution via <a href='https://pypi.org/'>PyPI</a>.
+</details>

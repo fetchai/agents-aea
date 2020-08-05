@@ -82,7 +82,10 @@ nav:
         - Ledger & Crypto APIs: 'ledger-integration.md'
         - Message routing: 'message-routing.md'
         - Configurations: 'config.md'
+      - Agent Communication:
+        - Agent Communication Network: 'acn.md'
       - Search & Discovery:
+        - Simple OEF: 'simple-oef.md'
         - Defining Data Models: 'defining-data-models.md'
         - The Query Language: 'query-language.md'
         - SOEF Connection: 'simple-oef-usage.md'
@@ -182,7 +185,6 @@ nav:
           - Task: 'api/skills/tasks.md'
         - Test Tools: 'api/test_tools/generic.md'
     - Q&A: 'questions-and-answers.md'
-  - Simple OEF: 'simple-oef.md'
 
 plugins:
     - markdownmermaid
