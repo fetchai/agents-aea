@@ -174,4 +174,3 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         lines = file.read_text().splitlines()
         lines.insert(157, f"    strategy.args['location'] = {location}")
         file.write_text("\n".join(lines))
-
