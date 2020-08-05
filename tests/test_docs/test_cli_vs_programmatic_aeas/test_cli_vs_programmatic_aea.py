@@ -174,7 +174,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         lines = file.read_text().splitlines()
         lines.insert(
             157,
-            f"    from packages.fetchai.skills.generic_buyer.strategy import Location",
+            "    from packages.fetchai.skills.generic_buyer.strategy import Location",
         )
         lines.insert(
             158,

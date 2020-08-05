@@ -87,7 +87,7 @@ class GenerateWealthCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestWealthCommands(AEATestCaseMany):
+class TestWealthCommandsPositive(AEATestCaseMany):
     """Test case for CLI wealth commands."""
 
     @pytest.mark.integration
@@ -103,6 +103,10 @@ class TestWealthCommands(AEATestCaseMany):
         self.add_private_key()
 
         self.generate_wealth()
+
+
+class TestWealthCommandsNegative(AEATestCaseMany):
+    """Test case for CLI wealth commands, negative case."""
 
     def test_wealth_commands_negative(self):
         """Test wealth commands."""

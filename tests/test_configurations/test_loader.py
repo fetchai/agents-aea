@@ -88,6 +88,24 @@ def test_load_protocol_specification_only_first_part():
         load_protocol_specification("foo")
 
 
+def test_load_protocol_specification_two_parts():
+    """Test 'load_protocol_specification' with two parts."""
+    valid_protocol_specification = dict(
+        name="name",
+        author="author",
+        version="0.1.0",
+        license="",
+        aea_version="0.1.0",
+        speech_acts={"example": {}},
+    )
+    with mock.patch.object(
+        yaml,
+        "safe_load_all",
+        return_value=[valid_protocol_specification, valid_protocol_specification],
+    ), mock.patch("builtins.open"), mock.patch("jsonschema.Draft4Validator.validate"):
+        load_protocol_specification("foo")
+
+
 def test_load_protocol_specification_too_many_parts():
     """Test 'load_protocol_specification' with more than three parts."""
     with pytest.raises(
