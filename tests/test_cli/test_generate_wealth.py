@@ -108,8 +108,6 @@ class TestWealthCommandsPositive(AEATestCaseMany):
 class TestWealthCommandsNegative(AEATestCaseMany):
     """Test case for CLI wealth commands, negative case."""
 
-    @pytest.mark.integration
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_wealth_commands_negative(self):
         """Test wealth commands."""
         agent_name = "test_aea"
