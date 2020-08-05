@@ -155,7 +155,7 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
         envelope = Envelope(
             to=msg.counterparty,
             sender=msg.sender,
-            protocol_id=msg.protocol_id,  # PublicId.from_str(protocol_id),
+            protocol_id=msg.protocol_id,
             message=msg,
         )
     except InterruptInputException:
