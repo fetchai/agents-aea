@@ -145,10 +145,13 @@ class PublicIdParameterTestCase(TestCase):
 @mock.patch("aea.cli.utils.config.os.path.dirname", return_value="dir-name")
 @mock.patch("aea.cli.utils.config.os.path.exists", return_value=False)
 @mock.patch("aea.cli.utils.config.os.makedirs")
+@mock.patch("builtins.open")
 class InitConfigFolderTestCase(TestCase):
     """Test case for _init_cli_config method."""
 
-    def test_init_cli_config_positive(self, makedirs_mock, exists_mock, dirname_mock):
+    def test_init_cli_config_positive(
+        self, open_mock, makedirs_mock, exists_mock, dirname_mock
+    ):
         """Test for _init_cli_config method positive result."""
         _init_cli_config()
         dirname_mock.assert_called_once()
