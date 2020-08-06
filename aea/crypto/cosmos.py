@@ -20,14 +20,15 @@
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
 
 import base64
-import gzip
 import hashlib
 import json
 import logging
+import os
 import subprocess
+import tempfile
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, Tuple
+from typing import Any, BinaryIO, Dict, Optional, Tuple
 
 from bech32 import bech32_encode, convertbits
 
@@ -386,16 +387,17 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_wasm_deploy_transaction(  # pylint: disable=arguments-differ
+    def get_deploy_transaction(
         self,
-        sender_address: Address,
-        filename: str,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
-    ) -> Optional[Any]:
+        **kwargs,
+    ) -> Dict[str, Any]:
         """
-        Submit a CosmWasm bytecode deployment transaction to the ledger.
+        Create a CosmWasm bytecode deployment transaction.
 
         :param sender_address: the sender address of the message initiator.
         :param filename: the path to wasm bytecode file.
@@ -406,12 +408,8 @@ class CosmosApi(LedgerApi, CosmosHelper):
         """
         chain_id = chain_id if chain_id is not None else self.chain_id
         account_number, sequence = self._try_get_account_number_and_sequence(
-            sender_address
+            deployer_address
         )
-
-        # Load bytecode from file, gzip compress it and base64 encode
-        with open(filename, "rb") as f:
-            encoded_code = base64.b64encode(gzip.compress(f.read(), 6))
 
         tx = {
             "account_number": str(account_number),
@@ -422,8 +420,8 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 {
                     "type": "wasm/store-code",
                     "value": {
-                        "sender": sender_address,
-                        "wasm_byte_code": str(encoded_code.decode()),
+                        "sender": deployer_address,
+                        "wasm_byte_code": contract_interface["wasm_byte_code"],
                         "source": "",
                         "builder": "",
                     },
@@ -447,7 +445,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         chain_id: Optional[str] = None,
     ) -> Optional[Any]:
         """
-        Submit a CosmWasm InitMsg transaction to the ledger.
+        Create a CosmWasm InitMsg transaction.
 
         :param sender_address: the sender address of the message initiator.
         :param amount: Contract's initial funds amount
@@ -497,7 +495,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         chain_id: Optional[str] = None,
     ) -> Optional[Any]:
         """
-        Submit a CosmWasm HandleMsg transaction to the ledger.
+        Create a CosmWasm HandleMsg transaction.
 
         :param sender_address: the sender address of the message initiator.
         :param contract_address: the address of the smart contract.
@@ -552,7 +550,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
             json.dumps(query_msg),
         ]
 
-        stdout, stderr = subprocess.Popen(
+        stdout, _ = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         ).communicate()
 
@@ -633,25 +631,6 @@ class CosmosApi(LedgerApi, CosmosHelper):
             )
         return result
 
-    def send_signed_cosmwasm_transaction(
-        self, signed_tx: Any, signed_tx_filename: str = "tx.signed"
-    ) -> str:
-        with open(signed_tx_filename, "w") as f:
-            f.write(json.dumps(signed_tx))
-
-        command = [
-            "wasmcli",
-            "tx",
-            "broadcast",
-            signed_tx_filename,
-        ]
-
-        stdout, stderr = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        ).communicate()
-
-        return stdout.decode("ascii")
-
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
@@ -659,7 +638,10 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        tx_digest = self._try_send_signed_transaction(tx_signed)
+        if False:  # pylint: disable=using-constant-test #  TODO: add the condition
+            tx_digest = self._try_send_signed_cosmwasm_transaction(tx_signed)
+        else:
+            tx_digest = self._try_send_signed_transaction(tx_signed)
         return tx_digest
 
     @try_decorator(
@@ -677,6 +659,32 @@ class CosmosApi(LedgerApi, CosmosHelper):
         response = requests.post(url=url, json=tx_signed)
         if response.status_code == 200:
             tx_digest = response.json()["txhash"]
+        return tx_digest
+
+    @try_decorator(
+        "Encountered exception when trying to send cosmwasm tx: {}",
+        logger_method=logger.warning,
+    )
+    @staticmethod
+    def _try_send_signed_cosmwasm_transaction(
+        signed_tx: Any, signed_tx_filename: str = "tx.signed"
+    ) -> str:
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(os.path.join(tmpdirname, signed_tx_filename), "w") as f:
+                f.write(json.dumps(signed_tx))
+
+            command = [
+                "wasmcli",
+                "tx",
+                "broadcast",
+                signed_tx_filename,
+            ]
+
+            stdout, _ = subprocess.Popen(
+                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            ).communicate()
+
+        tx_digest = stdout.decode("ascii")
         return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
@@ -717,6 +725,22 @@ class CosmosApi(LedgerApi, CosmosHelper):
         # Cosmos does not distinguis between transaction receipt and transaction
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
         return tx_receipt
+
+    def get_contract_instance(
+        self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
+    ) -> Any:
+        """
+        Get the instance of a contract.
+
+        :param contract_interface: the contract interface.
+        :param contract_address: the contract address.
+        :return: the contract instance
+        """
+        pass
+
+
+class CosmWasmCLIWrapper:
+    """Wrapper of the CosmWasm CLI."""
 
 
 class CosmosFaucetApi(FaucetApi):

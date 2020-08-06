@@ -9,5 +9,5 @@ fingerprint:
   contract.py: QmUJVRPZ8UV1WvuW6qHjgWGf77LrHeX7UNMBHbpgD2x4Di
 fingerprint_ignore_patterns: []
 class_name: MyScaffoldContract
-path_to_contract_interface: ''
+path_to_contract_interface: {}
 dependencies: {}

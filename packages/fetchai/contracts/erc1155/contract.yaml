@@ -15,7 +15,9 @@ fingerprint:
   migrations/2_deploy_contracts.js: QmeLraUZBgtJK5KAhsf4Bb5S9amcYugfMJsjbhZgfmEfuP
 fingerprint_ignore_patterns: []
 class_name: ERC1155Contract
-path_to_contract_interface: build/erc1155.json
+path_to_contract_interface:
+  ethereum: build/erc1155.json
+  cosmos: ''
 dependencies:
   vyper:
     version: ==0.1.0b12

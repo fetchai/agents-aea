@@ -21,9 +21,8 @@
 import inspect
 import logging
 import re
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -38,7 +37,7 @@ from aea.helpers.base import load_aea_package, load_module
 logger = logging.getLogger(__name__)
 
 
-class Contract(Component, ABC):
+class Contract(Component):
     """Abstract definition of a contract."""
 
     contract_interface: Any = None
@@ -62,18 +61,21 @@ class Contract(Component, ABC):
         assert self._configuration is not None, "Configuration not set."
         return cast(ContractConfig, super().configuration)
 
-    @classmethod
-    @abstractmethod
-    def get_instance(
-        cls, ledger_api: LedgerApi, contract_address: Optional[str] = None
-    ) -> Any:
-        """
-        Get the instance.
+    # @classmethod
+    # def get_instance(
+    #     cls, ledger_api: LedgerApi, contract_address: Optional[str] = None
+    # ) -> Any:
+    #     """
+    #     Get the instance.
 
-        :param ledger_api: the ledger api we are using.
-        :param contract_address: the contract address.
-        :return: the contract instance
-        """
+    #     :param ledger_api: the ledger api we are using.
+    #     :param contract_address: the contract address.
+    #     :return: the contract instance
+    #     """
+    #     instance = ledger_api.get_contract_instance(
+    #         cls.contract_interface, contract_address
+    #     )
+    #     return instance
 
     @classmethod
     def from_dir(cls, directory: str, **kwargs) -> "Contract":

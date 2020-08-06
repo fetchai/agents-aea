@@ -40,7 +40,13 @@
       "$ref": "definitions.json#/definitions/description"
     },
     "path_to_contract_interface": {
-      "type": "string"
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "definitions.json#/definitions/contract_interface_path"
+        }
+      }
     },
     "class_name": {
       "type": "string"

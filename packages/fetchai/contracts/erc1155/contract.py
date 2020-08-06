@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 
 from vyper.utils import keccak256
 
-from aea.contracts.ethereum import Contract
+from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.mail.base import Address
 
@@ -69,34 +69,18 @@ class ERC1155Contract(Contract):
 
     @classmethod
     def get_deploy_transaction(  # type: ignore
-        cls,
-        ledger_api: LedgerApi,
-        deployer_address: Address,
-        value: int = 0,
-        gas: int = 0,
+        cls, ledger_api: LedgerApi, deployer_address: Address, **kwargs,
     ) -> Dict[str, Any]:
         """
         Get the transaction to deploy the smart contract.
 
         :param ledger_api: the ledger API
         :param deployer_address: The address that will deploy the contract.
-        :param value: value to send to contract (ETH in Wei)
-        :param gas: the gas to be used
         :returns tx: the transaction dictionary.
         """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api)
-        data = instance.constructor().__dict__.get("data_in_transaction")
-        tx = {
-            "from": deployer_address,  # only 'from' address, don't insert 'to' address!
-            "value": value,  # transfer as part of deployment
-            "gas": gas,
-            "gasPrice": ledger_api.api.eth.gasPrice,
-            "nonce": nonce,
-            "data": data,
-        }
-        tx = cls._try_estimate_gas(ledger_api, tx)
+        tx = ledger_api.get_deploy_transaction(
+            cls.contract_interface, deployer_address, **kwargs
+        )
         return tx
 
     @classmethod
@@ -122,7 +106,9 @@ class ERC1155Contract(Contract):
         """
         # create the transaction dict
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         tx = instance.functions.createBatch(
             deployer_address, token_ids
         ).buildTransaction(
@@ -158,7 +144,9 @@ class ERC1155Contract(Contract):
         """
         # create the transaction dict
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         tx = instance.functions.createSingle(
             deployer_address, token_id, data
         ).buildTransaction(
@@ -199,7 +187,9 @@ class ERC1155Contract(Contract):
         cls.validate_mint_quantities(token_ids, mint_quantities)
         # create the transaction dict
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         tx = instance.functions.mintBatch(
             recipient_address, token_ids, mint_quantities, data
         ).buildTransaction(
@@ -270,7 +260,9 @@ class ERC1155Contract(Contract):
         """
         # create the transaction dict
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         tx = instance.functions.mint(
             recipient_address, token_id, mint_quantity, data
         ).buildTransaction(
@@ -300,7 +292,9 @@ class ERC1155Contract(Contract):
         :param token_id: the token id
         :return: the balance in a dictionary
         """
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         balance = instance.functions.balanceOf(agent_address, token_id).call()
         result = {token_id: balance}
         return {"balance": result}
@@ -340,7 +334,9 @@ class ERC1155Contract(Contract):
         """
         # create the transaction dict
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         value_eth_wei = ledger_api.api.toWei(value, "ether")
         tx = instance.functions.trade(
             from_address,
@@ -381,7 +377,9 @@ class ERC1155Contract(Contract):
         :param token_id: the token id
         :return: the balances
         """
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         balances = instance.functions.balanceOfBatch(
             [agent_address] * 10, token_ids
         ).call()
@@ -422,7 +420,9 @@ class ERC1155Contract(Contract):
         :return: a ledger transaction object
         """
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         value_eth_wei = ledger_api.api.toWei(value, "ether")
         tx = instance.functions.tradeBatch(
             from_address,
@@ -472,7 +472,9 @@ class ERC1155Contract(Contract):
         :param ledger_api: the ledger API
         :return: the transaction hash in a dict
         """
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         from_address_hash = instance.functions.getAddress(from_address).call()
         to_address_hash = instance.functions.getAddress(to_address).call()
         value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -562,7 +564,9 @@ class ERC1155Contract(Contract):
         :param trade_nonce: the trade nonce
         :return: the transaction hash in a dict
         """
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         from_address_hash = instance.functions.getAddress(from_address).call()
         to_address_hash = instance.functions.getAddress(to_address).call()
         value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -653,7 +657,9 @@ class ERC1155Contract(Contract):
         :param agent_address: the address to use
         :return: the generated trade nonce
         """
-        instance = cls.get_instance(ledger_api, contract_address)
+        instance = ledger_api.get_contract_instance(
+            cls.contract_interface, contract_address
+        )
         trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
         while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
             trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
@@ -675,6 +681,6 @@ class ERC1155Contract(Contract):
             tx["gas"] = gas_estimate
         except Exception as e:  # pylint: disable=broad-except
             logger.debug(
-                "[ERC1155Contract]: Error when trying to estimate gas: {}".format(e)
+                "[ERC1155Contract]: error when trying to estimate gas: {}".format(e)
             )
         return tx
