@@ -304,6 +304,8 @@ class ThreadedRuntime(BaseRuntime):
             self._state.set(RuntimeStates.running)
             self._agent.main_loop.start()
             logger.debug("[{}]: Runtime stopped".format(self._agent.name))
+        except KeyboardInterrupt:
+            raise
         except BaseException:  # pragma: nocover
             logger.exception("Runtime exception during stop:")
             self._state.set(RuntimeStates.error)
