@@ -736,7 +736,8 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param contract_address: the contract address.
         :return: the contract instance
         """
-        pass
+        # Instance object not available for cosmwasm
+        return None
 
 
 class CosmWasmCLIWrapper:

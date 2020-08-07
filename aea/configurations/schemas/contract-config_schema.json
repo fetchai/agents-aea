@@ -39,7 +39,7 @@
     "description": {
       "$ref": "definitions.json#/definitions/description"
     },
-    "path_to_contract_interface": {
+    "contract_interface_paths": {
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {

@@ -19,10 +19,7 @@
 
 """This module contains utilities for building an AEA."""
 
-import base64
-import gzip
 import itertools
-import json
 import logging
 import logging.config
 import os
@@ -1369,35 +1366,13 @@ class AEABuilder:
                 continue
             logger.debug(f"Registering contract {configuration.public_id}")
 
-            paths = {}  # type: Dict[str, str]
-            for identifier, path in configuration.path_to_contract_interface:
-                paths[identifier] = Path(configuration.directory, path)
-
-            # TODO: encapsulate below block in ledger helper methods or ledger apis
-            contract_interfaces = {}  # type: Dict[str, str]
-            for identifier, path in paths.items():
-                if identifier == "ethereum":
-                    with open(path, "r") as interface_file:
-                        contract_interface = json.load(interface_file)
-                        contract_interfaces[identifier] = contract_interface
-                elif identifier == "cosmos":
-                    with open(path, "rb") as interface_file:
-                        # Load bytecode from file, gzip compress it and base64 encode
-                        contract_interface = {
-                            "wasm_byte_code": str(
-                                base64.b64encode(
-                                    gzip.compress(interface_file.read(), 6).decode()
-                                )
-                            )
-                        }
-                        contract_interfaces[identifier] = contract_interface
-                else:
-                    ValueError("Identifier {} is not supported for contracts.")
             try:
                 contract_registry.register(
                     id_=str(configuration.public_id),
                     entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-                    class_kwargs={"contract_interface": contract_interfaces},
+                    class_kwargs={
+                        "contract_interface": configuration.contract_interfaces
+                    },
                     contract_config=configuration,  # TODO: resolve configuration being applied globally
                 )
             except AEAException as e:  # pragma: nocover

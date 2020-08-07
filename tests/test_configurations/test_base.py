@@ -129,6 +129,20 @@ class TestContractConfig:
         actual_json = actual_config.json
         assert expected_json == actual_json
 
+    @pytest.mark.parametrize("contract_path", contract_config_files)
+    def test_contract_interfaces_getter(self, contract_path):
+        """Test the '_get_contract_interfaces' method and 'contract_interfaces' property work correctly."""
+        f = open(contract_path)
+        original_json = yaml.safe_load(f)
+
+        config = ContractConfig.from_json(original_json)
+        config.directory = Path(contract_path).parent
+        assert config.contract_interfaces != {}
+        assert (
+            "cosmos" in config.contract_interfaces
+            and "ethereum" in config.contract_interfaces
+        )
+
 
 class TestConnectionConfig:
     """Test the connection configuration class."""
