@@ -19,8 +19,11 @@
 
 """This package contains the handlers for the aries_alice skill."""
 
+import base64
+import binascii
 import json
 from typing import Dict, Optional, cast
+from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import EnvelopeContext
@@ -84,6 +87,38 @@ class AliceDefaultHandler(Handler):
             context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
         )
 
+    def handle_received_invite(self, invite_detail: Dict):
+        for details in invite_detail:
+            try:
+                url = urlparse(details)
+                query = url.query
+                if query and "c_i=" in query:
+                    pos = query.index("c_i=") + 4
+                    b64_invite = query[pos:]
+                else:
+                    b64_invite = details
+            except ValueError:
+                b64_invite = details
+
+            if b64_invite:
+                try:
+                    padlen = 4 - len(b64_invite) % 4
+                    if padlen <= 2:
+                        b64_invite += "=" * padlen
+                    invite_json = base64.urlsafe_b64decode(b64_invite)
+                    details = invite_json.decode("utf-8")
+                except binascii.Error:
+                    pass
+                except UnicodeDecodeError:
+                    pass
+
+            if details:
+                try:
+                    json.loads(details)
+                    return details
+                except json.JSONDecodeError as e:
+                    self.context.logger.error("Invalid invitation:", str(e))
+
     def setup(self) -> None:
         """
         Implement the setup.
@@ -116,7 +151,8 @@ class AliceDefaultHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
             if "@type" in content:
-                self._admin_post(ADMIN_COMMAND_RECEIVE_INVITE, content)
+                details = self.handle_received_invite(content)
+                self._admin_post(ADMIN_COMMAND_RECEIVE_INVITE, details)
 
     def teardown(self) -> None:
         """

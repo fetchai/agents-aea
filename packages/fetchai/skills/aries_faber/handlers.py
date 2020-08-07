@@ -20,6 +20,7 @@
 """This package contains the handlers for the faber_alice skill."""
 
 import json
+import random
 from typing import Dict, Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -47,6 +48,8 @@ SUPPORT_REVOCATION = False
 ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
 ADMIN_COMMAND_STATUS = "/status"
 HTTP_COUNTERPARTY = "HTTP Server"
+FABER_ACA_IDENTITY = "Faber_ACA"
+LEDGER_URL = "http://127.0.0.1:9000"
 
 
 class FaberHTTPHandler(Handler):
@@ -58,9 +61,19 @@ class FaberHTTPHandler(Handler):
         """Initialize the handler."""
         super().__init__(**kwargs)
 
+        # ACA stuff
+        self.aca_identity = FABER_ACA_IDENTITY
+        rand_name = str(random.randint(100_000, 999_999))
+        self.seed = ("my_seed_000000000000000000000000" + rand_name)[-32:]
+        self.did = None  # type: Optional[str]
+        self.schema_id = None  # type: Optional[str]
+        self.credential_definition_id = None  # type: Optional[str]
+
+        # Helpers
         self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Alice = False
 
+        # AEA stuff
         self.handled_message = None
 
     @property
@@ -92,6 +105,25 @@ class FaberHTTPHandler(Handler):
         ), "faber -> http_handler -> _admin_post(): something went wrong when sending a HTTP message."
         self.context.outbox.put_message(message=request_http_message)
 
+    def _post(self, url: str, path: str, content: Dict = None) -> None:
+        # Request message & envelope
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        request_http_message = HttpMessage(
+            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
+            performative=HttpMessage.Performative.REQUEST,
+            method="POST",
+            url=url + path,
+            headers="",
+            version="",
+            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
+        )
+        request_http_message.counterparty = HTTP_COUNTERPARTY
+        http_dialogue = http_dialogues.update(request_http_message)
+        assert (
+            http_dialogue is not None
+        ), "faber -> http_handler -> _post(): something went wrong when sending a HTTP message."
+        self.context.outbox.put_message(message=request_http_message)
+
     def _send_message(self, content: Dict) -> None:
         # message & envelope
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
@@ -107,6 +139,33 @@ class FaberHTTPHandler(Handler):
             default_dialogue is not None
         ), "faber -> http_handler -> _send_message(): something went wrong when sending a default message."
         self.context.outbox.put_message(message=message, context=context)
+
+    def register_did(self):
+        self.context.logger.info("Registering Faber_ACA with seed " + str(self.seed))
+        data = {"alias": self.aca_identity, "seed": self.seed, "role": "TRUST_ANCHOR"}
+        self._post(LEDGER_URL, "/register", content=data)
+
+    def register_schema(self, schema_name, version, schema_attrs):
+        # Create a schema
+        schema_body = {
+            "schema_name": schema_name,
+            "schema_version": version,
+            "attributes": schema_attrs,
+        }
+        # import pdb;pdb.set_trace() # debug point.
+        # The following call wasn't responded. Probably because of missing options for the running ACAs.
+        # They were not connected to the ledger (missing pointer to genesis file)
+        self._admin_post("/schemas", schema_body)
+
+    def register_creddef(self, schema_id):
+        # Create a cred def for the schema
+        credential_definition_body = {
+            "schema_id": schema_id,
+            "support_revocation": SUPPORT_REVOCATION
+        }
+        self._admin_post(
+            "/credential-definitions", credential_definition_body
+        )
 
     def setup(self) -> None:
         """
@@ -143,6 +202,20 @@ class FaberHTTPHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
             if "version" in content:  # response to /status
+                self.register_did()
+            elif "did" in content:
+                self.did = content["did"]
+                self.context.logger.info("Got DID: " + self.did)
+                self.register_schema(
+                    schema_name="degree schema",
+                    version="0.0.1",
+                    schema_attrs=["name", "date", "degree", "age", "timestamp"],
+                )
+            elif "schema_id" in content:
+                self.schema_id = content["schema_id"]
+                self.register_creddef(self.schema_id)
+            elif "credential_definition_id" in content:
+                self.credential_definition_id = content["credential_definition_id"]
                 self._admin_post(ADMIN_COMMAND_CREATE_INVITATION)
             elif "connection_id" in content:
                 connection = content
