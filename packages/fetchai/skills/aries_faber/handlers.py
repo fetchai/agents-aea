@@ -63,7 +63,7 @@ class FaberHTTPHandler(Handler):
 
         # ACA stuff
         self.aca_identity = FABER_ACA_IDENTITY
-        rand_name = str(random.randint(100_000, 999_999))
+        rand_name = str(random.randint(100_000, 999_999))  # nosec
         # my_name = "137001"
         # use my_name to manually use the same seed in this demo and when starting up the accompanying ACA
         # use rand_name to not use any seed when starting up the accompanying ACA
