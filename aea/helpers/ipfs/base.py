@@ -40,7 +40,7 @@ def _dos2unix(file_content: bytes) -> bytes:
     :param file_content: teh content of the file.
     :return the same content but with the line terminator
     """
-    return re.sub(b"\r$", b"", file_content, flags=re.M)
+    return re.sub(b"\r\n$", b"\n", file_content, flags=re.M)
 
 
 class IPFSHashOnly:
