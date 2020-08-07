@@ -224,7 +224,27 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
         raise ValueError("Other platforms not supported.")
 
 
-def send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None:
+def win_popen_kwargs() -> dict:
+    """
+    Return kwargs to start a process in windows with new process group.
+
+    Help to handle ctrl c properly.
+    Return empty dict if platform is not win32
+    """
+    kwargs: dict = {}
+
+    if sys.platform == "win32":  # pragma: nocover
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        kwargs["startupinfo"] = startupinfo
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+    return kwargs
+
+
+def send_control_c(
+    process: subprocess.Popen, kill_group: bool = False
+) -> None:  # pragma: nocover # cause platform dependent
     """
     Send ctrl-C crossplatform to terminate a subprocess.
 

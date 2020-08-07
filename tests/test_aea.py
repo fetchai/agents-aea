@@ -87,11 +87,11 @@ def test_act():
     agent = builder.build()
 
     with run_in_thread(agent.start, timeout=20):
-        wait_for_condition(lambda: agent.is_running, timeout=10)
+        wait_for_condition(lambda: agent.is_running, timeout=20)
         behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
 
         time.sleep(1)
-        wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=10)
+        wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=20)
         agent.stop()
 
 
@@ -106,7 +106,7 @@ def test_start_stop():
     agent = builder.build()
 
     with run_in_thread(agent.start, timeout=20):
-        wait_for_condition(lambda: agent.is_running, timeout=10)
+        wait_for_condition(lambda: agent.is_running, timeout=20)
         agent.stop()
 
 
@@ -122,7 +122,7 @@ def test_double_start():
 
     with run_in_thread(agent.start, timeout=20):
         try:
-            wait_for_condition(lambda: agent.is_running, timeout=10)
+            wait_for_condition(lambda: agent.is_running, timeout=20)
 
             t = Thread(target=agent.start)
             t.start()
@@ -172,7 +172,7 @@ def test_react():
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
-            wait_for_condition(lambda: agent.is_running, timeout=10)
+            wait_for_condition(lambda: agent.is_running, timeout=20)
             agent.outbox.put(envelope)
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
@@ -181,8 +181,8 @@ def test_react():
             )
             assert handler is not None, "Handler is not set."
             wait_for_condition(
-                lambda: msg in handler.handled_messages,
-                timeout=10,
+                lambda: len(handler.handled_messages) > 0,
+                timeout=20,
                 error_msg="The message is not inside the handled_messages.",
             )
 

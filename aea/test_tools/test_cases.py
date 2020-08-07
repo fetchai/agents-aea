@@ -48,7 +48,7 @@ from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
-from aea.helpers.base import cd, send_control_c
+from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -180,7 +180,7 @@ class BaseAEATestCase(ABC):
         :return: subprocess object.
         """
         kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
-
+        kwargs.update(win_popen_kwargs())
         if sys.platform == "win32":  # pragma: nocover
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -669,6 +669,10 @@ class BaseAEATestCase(ABC):
     @classmethod
     def send_envelope_to_agent(cls, envelope: Envelope, agent: str):
         """Send an envelope to an agent, using the stub connection."""
+        # check added cause sometimes fails on win with permission error
+        dir_path = Path(cls.t / agent)
+        assert dir_path.exists()
+        assert dir_path.is_dir()
         write_envelope_to_file(envelope, str(cls.t / agent / DEFAULT_INPUT_FILE_NAME))
 
     @classmethod

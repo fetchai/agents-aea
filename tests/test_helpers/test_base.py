@@ -43,6 +43,7 @@ from aea.helpers.base import (
     retry_decorator,
     send_control_c,
     try_decorator,
+    win_popen_kwargs,
     yaml_dump,
     yaml_load,
 )
@@ -214,7 +215,8 @@ def test_send_control_c():
     # Can't test process group id kill directly,
     # because o/w pytest would be stopped.
     process = Popen(  # nosec
-        ["timeout" if platform.system() == "Windows" else "sleep", "5"]
+        ["timeout" if platform.system() == "Windows" else "sleep", "5"],
+        **win_popen_kwargs()
     )
     time.sleep(0.001)
     send_control_c(process)

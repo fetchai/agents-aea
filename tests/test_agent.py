@@ -80,12 +80,12 @@ def test_run_agent():
         try:
             wait_for_condition(
                 lambda: agent.state == RuntimeStates.starting,
-                timeout=5,
+                timeout=10,
                 error_msg="Agent state must be 'starting'",
             )
             wait_for_condition(
                 lambda: agent.state == RuntimeStates.running,
-                timeout=5,
+                timeout=10,
                 error_msg="Agent state must be 'running'",
             )
         finally:
