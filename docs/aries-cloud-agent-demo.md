@@ -28,6 +28,10 @@ The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining
 
         faea->>faca: Request status?
         faca->>faea: status
+        faea->>faca: Register schema
+        faca->>faea: schema_id
+        faea->>faca: Register credential definition
+        faca->>faea: credential_definition_id
         faea->>faca: create-invitation
         faca->>faea: connection inc. invitation
         faea->>aaea: invitation detail
@@ -60,6 +64,11 @@ The following lists the sequence of interactions between the four agents:
  * **Faber_AEA**: searches the SOEF and finds **Alice_AEA**.
  * **Faber_AEA**: tests its connection to **Faber_ACA**.
  * **Faber_ACA**: responds to **Faber_AEA**.
+ * **Faber_AEA**: registers a DID on the ledger.
+ * **Faber_AEA**: request **Faber_ACA** to register a schema on the ledger.
+ * **Faber_ACA**: responds by sending back the `schema_id`.
+ * **Faber_AEA**: request **Faber_ACA** to register a credential definition on the ledger.
+ * **Faber_ACA**: responds by sending back the `credential_definition_id`.
  * **Faber_AEA**: requests **Faber_ACA** to create an invitation.
  * **Faber_ACA**: responds by sending back the `connection` detail, which contains an `invitation` field.
  * **Faber_AEA**: sends the `invitation` detail to **Alice_AEA**.
@@ -90,7 +99,7 @@ At this point, the two ACAs are connected to each other.
 
 ### Dependencies
 
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start. 
 
 Install Aries cloud-agents (for more info see <a href="https://github.com/hyperledger/aries-cloudagent-python#install" target=_blank>here</a>) if you do not have it on your machine:
 
@@ -98,9 +107,27 @@ Install Aries cloud-agents (for more info see <a href="https://github.com/hyperl
 pip install aries-cloudagent
 ```
 
+This demo has been successfully tested with aca-py version 0.4.5.
+
+This demo requires an instance of von network running in docker locally (for more info see <a href="https://github.com/bcgov/von-network#running-the-network-locally" target=_blank>here</a>)
+
+This demo has been successfully tested with the von-network git repository pulled on 07 Aug 2020. 
+
 ### Terminals
 
-Open four terminals. Each terminal will be used to run one of the four agents in this demo.
+Open five terminals. The first terminal is used to run an instance of von-network locally in docker. The other four terminals will be used to run each of the four agents in this demo.
+
+## VON Network
+
+In the first terminal move to the `von-network` directory and run an instance of `von-network` locally in docker.
+
+This <a href="https://github.com/bcgov/von-network#running-the-network-locally" target=_blank>tutorial</a> has information on starting (and stopping) the network locally.
+
+``` bash
+./manage build
+./manage start --logs
+``` 
+Once the ledger is running, you can see the ledger by going to the web server running on port 9000. On localhost, that means going to <a href="http://localhost:9000" target=_blank>http://localhost:9000</a>.  
 
 ## Alice and Faber ACAs
 
@@ -202,6 +229,21 @@ Next, make sure the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
 aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webhooks/topic/{topic}/
 ```
 
+#### Configure the `p2p_libp2p` connection:
+
+(configuration file: `vendor/fetchai/connections/p2p_libp2p/connection.yaml`)
+
+Replace the `config` section with the following (note the changes in the URIs):
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:7000
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:7000
+```
+
 ### Install the Dependencies and Run Alice_AEA:
 
 Now install all the dependencies:
@@ -283,9 +325,9 @@ Replace the `config` section with the following (note the changes in the URIs):
 config:
   delegate_uri: 127.0.0.1:11001
   entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9001
+  local_uri: 127.0.0.1:7001
   log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
+  public_uri: 127.0.0.1:7001
 ```
 
 where `SOME_ADDRESS` is **Alice_AEA's p2p address** as displayed in the third terminal.

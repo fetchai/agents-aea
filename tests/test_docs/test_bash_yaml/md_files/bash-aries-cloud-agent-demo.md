@@ -2,6 +2,10 @@
 pip install aries-cloudagent
 ```
 ``` bash
+./manage build
+./manage start --logs
+``` 
+``` bash
 aca-py start --help
 ```
 ``` bash
