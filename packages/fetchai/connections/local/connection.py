@@ -62,7 +62,7 @@ class LocalNode:
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._lock = asyncio.Lock()
         self._loop = loop if loop is not None else asyncio.new_event_loop()
-        self._thread = Thread(target=self._run_loop)
+        self._thread = Thread(target=self._run_loop, daemon=True)
 
         self._in_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
@@ -277,33 +277,34 @@ class LocalNode:
         :param dialogue: the dialogue.
         :return: None
         """
-        query = oef_search_msg.query
-        result = []  # type: List[str]
-        if query.model is None:
-            result = list(set(self.services.keys()))
-        else:
-            for agent_address, descriptions in self.services.items():
-                for description in descriptions:
-                    if description.data_model == query.model:
-                        result.append(agent_address)
+        async with self._lock:
+            query = oef_search_msg.query
+            result = []  # type: List[str]
+            if query.model is None:
+                result = list(set(self.services.keys()))
+            else:
+                for agent_address, descriptions in self.services.items():
+                    for description in descriptions:
+                        if description.data_model == query.model:
+                            result.append(agent_address)
 
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            target=oef_search_msg.message_id,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            message_id=oef_search_msg.message_id + 1,
-            agents=tuple(sorted(set(result))),
-        )
-        msg.counterparty = oef_search_msg.sender
-        assert dialogue.update(msg)
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.SEARCH_RESULT,
+                target=oef_search_msg.message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                message_id=oef_search_msg.message_id + 1,
+                agents=tuple(sorted(set(result))),
+            )
+            msg.counterparty = oef_search_msg.sender
+            assert dialogue.update(msg)
 
-        envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
-        )
-        await self._send(envelope)
+            envelope = Envelope(
+                to=msg.counterparty,
+                sender=msg.sender,
+                protocol_id=msg.protocol_id,
+                message=msg,
+            )
+            await self._send(envelope)
 
     def _get_message_and_dialogue(
         self, envelope: Envelope

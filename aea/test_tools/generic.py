@@ -47,7 +47,7 @@ def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
     encoded_envelope = encoded_envelope_str.encode("utf-8")
     with open(Path(file_path), "ab+") as f:
         f.write(encoded_envelope)
-        f.flush()
+        # flushed by close in context manager
 
 
 def read_envelope_from_file(file_path: str):

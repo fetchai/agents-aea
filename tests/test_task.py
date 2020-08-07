@@ -50,7 +50,7 @@ class MyTask(Task):
 class TestTaskManager:
     """Test the features of the task manager."""
 
-    WAIT_TIMEOUT = 10.0
+    WAIT_TIMEOUT = 20.0
 
     def _return_a_constant(self, a: int, b: int = 10):
         return a + b

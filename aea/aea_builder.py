@@ -766,13 +766,17 @@ class AEABuilder:
         :return: the identity
         """
         assert self._name is not None, "You must set the name of the agent."
+
+        if not wallet.addresses:
+            raise ValueError("wallet has no addresses")
+
         if len(wallet.addresses) > 1:
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
                 default_address_key=self._default_ledger,
             )
-        else:  # pragma: no cover
+        else:
             identity = Identity(
                 self._name,
                 address=wallet.addresses[self._default_ledger],

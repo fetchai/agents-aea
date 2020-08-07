@@ -510,3 +510,21 @@ def test_find_import_order():
                 Path(os.path.join(CUR_PATH, "data", "dummy_aea")),
                 True,
             )
+
+
+def test__build_identity_from_wallet():
+    """Test AEABuilder._build_identity_from_wallet."""
+    builder = AEABuilder()
+    builder.set_name("aea_1")
+    builder.add_private_key("fetchai")
+
+    wallet = Mock()
+    wallet.addresses = {}
+    with pytest.raises(ValueError):
+        builder._build_identity_from_wallet(wallet)
+
+    wallet.addresses = {builder._default_ledger: "addr1"}
+    builder._build_identity_from_wallet(wallet)
+
+    wallet.addresses = {builder._default_ledger: "addr1", "fetchai": "addr2"}
+    builder._build_identity_from_wallet(wallet)
