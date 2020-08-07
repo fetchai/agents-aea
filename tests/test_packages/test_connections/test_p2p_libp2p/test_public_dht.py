@@ -348,6 +348,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
         super(TestLibp2pConnectionPublicDHTRelayAEACli, cls).teardown_class()
 
 
+@skip_test_windows
 # @pytest.mark.integration
 class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
     """Test that public DHT's delegate service is working properly, using aea cli"""
