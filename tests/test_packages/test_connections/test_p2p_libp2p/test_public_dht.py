@@ -74,10 +74,14 @@ class TestLibp2pConnectionPublicDHTRelay:
             self.log_files.append(connection.node.log_file)
             multiplexer.connect()
 
-            assert (
-                connection.is_connected is True
-            ), "Couldn't connect to public node {}".format(maddr)
-            multiplexer.disconnect()
+            try:
+                assert (
+                    connection.is_connected is True
+                ), "Couldn't connect to public node {}".format(maddr)
+            except:
+                raise
+            finally:
+                multiplexer.disconnect()
 
     def test_communication_direct(self):
         for maddr in PUBLIC_DHT_MADDRS:
@@ -115,16 +119,19 @@ class TestLibp2pConnectionPublicDHTRelay:
             multiplexer1.put(envelope)
             delivered_envelope = multiplexer2.get(block=True, timeout=20)
 
-            assert delivered_envelope is not None
-            assert delivered_envelope.to == envelope.to
-            assert delivered_envelope.sender == envelope.sender
-            assert delivered_envelope.protocol_id == envelope.protocol_id
-            assert delivered_envelope.message != envelope.message
-            msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-            assert envelope.message == msg
-
-            multiplexer1.disconnect()
-            multiplexer2.disconnect()
+            try:
+                assert delivered_envelope is not None
+                assert delivered_envelope.to == envelope.to
+                assert delivered_envelope.sender == envelope.sender
+                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert delivered_envelope.message != envelope.message
+                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                assert envelope.message == msg
+            except:
+                raise
+            finally:
+                multiplexer1.disconnect()
+                multiplexer2.disconnect()
 
     def test_communication_indirect(self):
         assert len(PUBLIC_DHT_MADDRS) > 1, "Test requires at least 2 public dht node"
@@ -168,15 +175,19 @@ class TestLibp2pConnectionPublicDHTRelay:
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=20)
 
-                assert delivered_envelope is not None
-                assert delivered_envelope.to == envelope.to
-                assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
-                assert delivered_envelope.message != envelope.message
-                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-                assert envelope.message == msg
-
-                multiplexer2.disconnect()
+                try:
+                    assert delivered_envelope is not None
+                    assert delivered_envelope.to == envelope.to
+                    assert delivered_envelope.sender == envelope.sender
+                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert delivered_envelope.message != envelope.message
+                    msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                    assert envelope.message == msg
+                except:
+                    multiplexer1.disconnect()
+                    raise
+                finally:
+                    multiplexer2.disconnect()
 
             multiplexer1.disconnect()
 
@@ -200,10 +211,14 @@ class TestLibp2pConnectionPublicDHTDelegate:
             multiplexer = Multiplexer([connection])
             multiplexer.connect()
 
-            assert (
-                connection.is_connected is True
-            ), "Couldn't connect to public node {}".format(uri)
-            multiplexer.disconnect()
+            try:
+                assert (
+                    connection.is_connected is True
+                ), "Couldn't connect to public node {}".format(uri)
+            except:
+                raise
+            finally:
+                multiplexer.disconnect()
 
     def test_communication_direct(self):
         for uri in PUBLIC_DHT_DELEGATE_URIS:
@@ -235,16 +250,19 @@ class TestLibp2pConnectionPublicDHTDelegate:
             multiplexer1.put(envelope)
             delivered_envelope = multiplexer2.get(block=True, timeout=20)
 
-            assert delivered_envelope is not None
-            assert delivered_envelope.to == envelope.to
-            assert delivered_envelope.sender == envelope.sender
-            assert delivered_envelope.protocol_id == envelope.protocol_id
-            assert delivered_envelope.message != envelope.message
-            msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-            assert envelope.message == msg
-
-            multiplexer1.disconnect()
-            multiplexer2.disconnect()
+            try:
+                assert delivered_envelope is not None
+                assert delivered_envelope.to == envelope.to
+                assert delivered_envelope.sender == envelope.sender
+                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert delivered_envelope.message != envelope.message
+                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                assert envelope.message == msg
+            except:
+                raise
+            finally:
+                multiplexer1.disconnect()
+                multiplexer2.disconnect()
 
     def test_communication_indirect(self):
         assert (
@@ -288,15 +306,19 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=20)
 
-                assert delivered_envelope is not None
-                assert delivered_envelope.to == envelope.to
-                assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
-                assert delivered_envelope.message != envelope.message
-                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-                assert envelope.message == msg
-
-                multiplexer2.disconnect()
+                try:
+                    assert delivered_envelope is not None
+                    assert delivered_envelope.to == envelope.to
+                    assert delivered_envelope.sender == envelope.sender
+                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert delivered_envelope.message != envelope.message
+                    msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                    assert envelope.message == msg
+                except:
+                    multiplexer1.disconnect()
+                    raise
+                finally:
+                    multiplexer2.disconnect()
 
             multiplexer1.disconnect()
 
