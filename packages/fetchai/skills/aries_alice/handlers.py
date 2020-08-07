@@ -87,7 +87,7 @@ class AliceDefaultHandler(Handler):
             context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
         )
 
-    def handle_received_invite(self, invite_detail: Dict):
+    def _handle_received_invite(self, invite_detail: Dict):
         for details in invite_detail:
             try:
                 url = urlparse(details)
@@ -151,7 +151,7 @@ class AliceDefaultHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
             if "@type" in content:
-                details = self.handle_received_invite(content)
+                details = self._handle_received_invite(content)
                 self._admin_post(ADMIN_COMMAND_RECEIVE_INVITE, details)
 
     def teardown(self) -> None:

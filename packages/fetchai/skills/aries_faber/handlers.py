@@ -64,6 +64,9 @@ class FaberHTTPHandler(Handler):
         # ACA stuff
         self.aca_identity = FABER_ACA_IDENTITY
         rand_name = str(random.randint(100_000, 999_999))
+        # my_name = "137001"
+        # use my_name to manually use the same seed in this demo and when starting up the accompanying ACA
+        # use rand_name to not use any seed when starting up the accompanying ACA
         self.seed = ("my_seed_000000000000000000000000" + rand_name)[-32:]
         self.did = None  # type: Optional[str]
         self.schema_id = None  # type: Optional[str]
@@ -105,14 +108,14 @@ class FaberHTTPHandler(Handler):
         ), "faber -> http_handler -> _admin_post(): something went wrong when sending a HTTP message."
         self.context.outbox.put_message(message=request_http_message)
 
-    def _post(self, url: str, path: str, content: Dict = None) -> None:
+    def _post(self, path: str, content: Dict = None) -> None:
         # Request message & envelope
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
         request_http_message = HttpMessage(
             dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="POST",
-            url=url + path,
+            url=LEDGER_URL + path,
             headers="",
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
@@ -140,32 +143,31 @@ class FaberHTTPHandler(Handler):
         ), "faber -> http_handler -> _send_message(): something went wrong when sending a default message."
         self.context.outbox.put_message(message=message, context=context)
 
-    def register_did(self):
+    def _register_did(self):
         self.context.logger.info("Registering Faber_ACA with seed " + str(self.seed))
         data = {"alias": self.aca_identity, "seed": self.seed, "role": "TRUST_ANCHOR"}
-        self._post(LEDGER_URL, "/register", content=data)
+        self._post("/register", content=data)
 
-    def register_schema(self, schema_name, version, schema_attrs):
+    def _register_schema(self, schema_name, version, schema_attrs):
         # Create a schema
         schema_body = {
             "schema_name": schema_name,
             "schema_version": version,
             "attributes": schema_attrs,
         }
-        # import pdb;pdb.set_trace() # debug point.
-        # The following call wasn't responded. Probably because of missing options for the running ACAs.
-        # They were not connected to the ledger (missing pointer to genesis file)
+        self.context.logger.info("Registering schema " + str(schema_body))
+        # ToDo debug point
+        # The following call isn't responded to. This is most probably because of missing options when running the accompanying ACA.
+        # THe accompanying ACA is not properly connected to the von network ledger (missing pointer to genesis file/wallet type)
         self._admin_post("/schemas", schema_body)
 
-    def register_creddef(self, schema_id):
+    def _register_creddef(self, schema_id):
         # Create a cred def for the schema
         credential_definition_body = {
             "schema_id": schema_id,
-            "support_revocation": SUPPORT_REVOCATION
+            "support_revocation": SUPPORT_REVOCATION,
         }
-        self._admin_post(
-            "/credential-definitions", credential_definition_body
-        )
+        self._admin_post("/credential-definitions", credential_definition_body)
 
     def setup(self) -> None:
         """
@@ -202,18 +204,21 @@ class FaberHTTPHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
             if "version" in content:  # response to /status
-                self.register_did()
+                self._register_did()
             elif "did" in content:
                 self.did = content["did"]
-                self.context.logger.info("Got DID: " + self.did)
-                self.register_schema(
+                if self.did is not None:
+                    self.context.logger.info("Got DID: " + self.did)
+                else:
+                    self.context.logger.info("DID is None")
+                self._register_schema(
                     schema_name="degree schema",
                     version="0.0.1",
                     schema_attrs=["name", "date", "degree", "age", "timestamp"],
                 )
             elif "schema_id" in content:
                 self.schema_id = content["schema_id"]
-                self.register_creddef(self.schema_id)
+                self._register_creddef(self.schema_id)
             elif "credential_definition_id" in content:
                 self.credential_definition_id = content["credential_definition_id"]
                 self._admin_post(ADMIN_COMMAND_CREATE_INVITATION)
