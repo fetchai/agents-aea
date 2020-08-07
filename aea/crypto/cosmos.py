@@ -432,12 +432,13 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
         return tx
 
-    def get_wasm_init_transaction(  # pylint: disable=arguments-differ
+    def get_init_transaction(
         self,
-        sender_address: Address,
-        amount: int,
+        deployer_address: Address,
         code_id: int,
         init_msg: Any,
+        tx_fee: int,
+        amount: int,
         gas: int = 80000,
         denom: Optional[str] = None,
         label: str = "",
@@ -447,7 +448,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         """
         Create a CosmWasm InitMsg transaction.
 
-        :param sender_address: the sender address of the message initiator.
+        :param deployer_address: the deployer address of the message initiator.
         :param amount: Contract's initial funds amount
         :param code_id: the ID of contract bytecode.
         :param init_msg: the InitMsg containing parameters for contract constructor.
@@ -461,18 +462,21 @@ class CosmosApi(LedgerApi, CosmosHelper):
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
         account_number, sequence = self._try_get_account_number_and_sequence(
-            sender_address
+            deployer_address
         )
         tx = {
             "account_number": str(account_number),
             "chain_id": chain_id,
-            "fee": {"amount": [], "gas": str(gas)},
+            "fee": {
+                "amount": [{"denom": denom, "amount": str(tx_fee)}],
+                "gas": str(gas),
+            },
             "memo": memo,
             "msgs": [
                 {
                     "type": "wasm/instantiate",
                     "value": {
-                        "sender": sender_address,
+                        "sender": deployer_address,
                         "code_id": str(code_id),
                         "label": label,
                         "init_msg": init_msg,
@@ -638,11 +642,18 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        if False:  # pylint: disable=using-constant-test #  TODO: add the condition
+        if self.is_cosmwasm_transaction(tx_signed):
             tx_digest = self._try_send_signed_cosmwasm_transaction(tx_signed)
         else:
             tx_digest = self._try_send_signed_transaction(tx_signed)
         return tx_digest
+
+    @staticmethod
+    def is_cosmwasm_transaction(tx_signed: Any) -> bool:
+        """Check whether it is a cosmwasm tx."""
+        _type = tx_signed["tx"]["msg"][0]["type"]
+        result = _type in ["wasm/store-code", "wasm/instantiate", "wasm/execute"]
+        return result
 
     @try_decorator(
         "Encountered exception when trying to send tx: {}", logger_method=logger.warning

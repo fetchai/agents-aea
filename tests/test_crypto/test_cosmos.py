@@ -270,3 +270,74 @@ def test_format_cosmwasm():
 
     # Compare Wasm formatted transaction with signed transaction
     assert signed_transaction == wasm_formated_transaction
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_deploy_transaction_cosmwasm():
+    """Test the get deploy transaction method."""
+    cc2 = CosmosCrypto()
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+
+    contract_interface = {"wasm_byte_code": b""}
+    deployer_address = cc2.address
+    deploy_transaction = cosmos_api.get_deploy_transaction(
+        contract_interface, deployer_address
+    )
+
+    assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
+    assert "account_number" in deploy_transaction
+    assert "chain_id" in deploy_transaction
+    assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
+        "amount": [],
+        "gas": "80000",
+    }
+    assert "memo" in deploy_transaction
+    assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
+    msg = deploy_transaction["msgs"][0]
+    assert "type" in msg and msg["type"] == "wasm/store-code"
+    assert (
+        "value" in msg
+        and msg["value"]["sender"] == deployer_address
+        and msg["value"]["wasm_byte_code"] == contract_interface["wasm_byte_code"]
+    )
+    assert "sequence" in deploy_transaction
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_init_transaction_cosmwasm():
+    """Test the get deploy transaction method."""
+    cc2 = CosmosCrypto()
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    init_msg = "init_msg"
+    code_id = 1
+    deployer_address = cc2.address
+    tx_fee = 1
+    amount = 10
+    deploy_transaction = cosmos_api.get_init_transaction(
+        deployer_address, code_id, init_msg, tx_fee, amount
+    )
+
+    assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
+    assert "account_number" in deploy_transaction
+    assert "chain_id" in deploy_transaction
+    assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
+        "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
+        "gas": "80000",
+    }
+    assert "memo" in deploy_transaction
+    assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
+    msg = deploy_transaction["msgs"][0]
+    assert "type" in msg and msg["type"] == "wasm/instantiate"
+    assert (
+        "value" in msg
+        and msg["value"]["sender"] == deployer_address
+        and msg["value"]["code_id"] == str(code_id)
+        and msg["value"]["label"] == ""
+        and msg["value"]["init_msg"] == init_msg
+        and msg["value"]["init_funds"] == [{"denom": "atestfet", "amount": str(amount)}]
+    )
+    assert "sequence" in deploy_transaction
