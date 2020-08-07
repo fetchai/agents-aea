@@ -180,6 +180,8 @@ NON_GENESIS_CONFIG = {
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
 PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
+PUBLIC_DHT_DELEGATE_URI_1 = "agents-p2p-dht.sandbox.fetch-ai.com:11000"
+PUBLIC_DHT_DELEGATE_URI_2 = "agents-p2p-dht.sandbox.fetch-ai.com:11001"
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
@@ -826,13 +828,19 @@ def _make_libp2p_connection(
 
 
 def _make_libp2p_client_connection(
-    node_port: int = 11234, node_host: str = "127.0.0.1"
+    node_port: int = 11234, node_host: str = "127.0.0.1", uri: Optional[str] = None,
 ) -> P2PLibp2pClientConnection:
     crypto = make_crypto(COSMOS)
     identity = Identity("", address=crypto.address)
     configuration = ConnectionConfig(
         client_key_file=None,
-        nodes=[{"uri": "{}:{}".format(node_host, node_port)}],
+        nodes=[
+            {
+                "uri": str(uri)
+                if uri is not None
+                else "{}:{}".format(node_host, node_port)
+            }
+        ],
         connection_id=P2PLibp2pClientConnection.connection_id,
     )
     return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
