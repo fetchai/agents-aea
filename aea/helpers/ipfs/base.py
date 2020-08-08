@@ -43,6 +43,27 @@ def _dos2unix(file_content: bytes) -> bytes:
     return re.sub(b"\r\n$", b"\n", file_content, flags=re.M)
 
 
+def _is_text(file_path) -> bool:
+    """Check if a file can be read as text or not."""
+    try:
+        with open(file_path, "r") as f:
+            f.read()
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
+def _read(file_path) -> bytes:
+    """Read a file, replacing Windows line endings if it is a text file."""
+    is_text = _is_text(file_path)
+    with open(file_path, "rb") as file:
+        file_b = file.read()
+        if is_text:
+            file_b = _dos2unix(file_b)
+
+    return file_b
+
+
 class IPFSHashOnly:
     """A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon."""
 
@@ -52,8 +73,7 @@ class IPFSHashOnly:
 
         :param file_path: the file path
         """
-        with open(file_path, "rb") as file:
-            file_b = _dos2unix(file.read())
+        file_b = _read(file_path)
         file_pb = self._pb_serialize_file(file_b)
         ipfs_hash = self._generate_multihash(file_pb)
         return ipfs_hash

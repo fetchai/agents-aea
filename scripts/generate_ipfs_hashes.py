@@ -151,9 +151,9 @@ def ipfs_hashing(
     # hash again to get outer hash (this time all files):
     # TODO we still need to ignore some files
     #      use ignore patterns somehow
-    # ignore_patterns = configuration.fingerprint_ignore_patterns]
+    # ignore_patterns = configuration.fingerprint_ignore_patterns
     assert configuration.directory is not None
-    result_list = client.add(configuration.directory)
+    result_list = client.add(configuration.directory, recursive=True)
     key = os.path.join(
         configuration.author, package_type.to_plural(), configuration.directory.name,
     )
