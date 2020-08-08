@@ -23,15 +23,22 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from typing import List, Tuple, Type
+from unittest.mock import MagicMock
 
 import pytest
 
 from aea import AEA_DIR
 from aea.configurations.constants import DEFAULT_PROTOCOL
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.mail.base import Envelope
 from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
+from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
+
+
+DIALOGUE_CLASSES: List[Tuple[Type, Type]] = [(DefaultDialogue, DefaultDialogues)]
 
 
 class TestMessageProperties:
@@ -185,3 +192,24 @@ class TestMessageAttributes:
         """Test the 'target' attribute."""
         message = Message(target=1)
         assert message.target == 1
+
+
+@pytest.mark.parametrize("dialogue_classes", DIALOGUE_CLASSES)
+def test_dialogue(dialogue_classes):
+    """Test dialogue initialization."""
+    dialogue_class, _ = dialogue_classes
+    dialogue = dialogue_class(DialogueLabel(("x", "y"), "opponent_addr", "starer_addr"))
+    assert dialogue.is_valid(MagicMock())
+
+
+@pytest.mark.parametrize("dialogues_classes", DIALOGUE_CLASSES)
+def test_default_dialogues(dialogues_classes):
+    """Test default dialogues initialization."""
+    dialogue_class, dialogues_class = dialogues_classes
+    dialogues = dialogues_class("agent_address")
+
+    dialogue = dialogues.create_dialogue(
+        DialogueLabel(("x", "y"), "opponent_addr", "starter_addr"),
+        dialogue_class.Role.AGENT,
+    )
+    assert isinstance(dialogue, dialogue_class)

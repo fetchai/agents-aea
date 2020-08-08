@@ -22,13 +22,11 @@
 # import base64
 # import json
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 import aea
-from aea.helpers.dialogue.base import DialogueLabel
-from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 
 
@@ -108,25 +106,6 @@ def test_check_consistency_raises_exception_when_type_not_recognized():
     # mock the __eq__ method such that any kind of matching is going to fail.
     with mock.patch.object(DefaultMessage.Performative, "__eq__", return_value=False):
         assert not message._is_consistent()
-
-
-def test_default_dialogue():
-    """Test default dialogue initialization."""
-    dialogue = DefaultDialogue(
-        DialogueLabel(("x", "y"), "opponent_addr", "starer_addr")
-    )
-    assert dialogue.is_valid(MagicMock())
-
-
-def test_default_dialogues():
-    """Test default dialogues initialization."""
-    dialogues = DefaultDialogues("agent_address")
-
-    dialogue = dialogues.create_dialogue(
-        DialogueLabel(("x", "y"), "opponent_addr", "starter_addr"),
-        DefaultDialogue.Role.AGENT,
-    )
-    assert isinstance(dialogue, DefaultDialogue)
 
 
 def test_default_valid_performatives():
