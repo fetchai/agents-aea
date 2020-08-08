@@ -34,11 +34,15 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.mail.base import Envelope
 from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
 from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
+from aea.protocols.signing.dialogues import SigningDialogue, SigningDialogues
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 
-DIALOGUE_CLASSES: List[Tuple[Type, Type]] = [(DefaultDialogue, DefaultDialogues)]
+DIALOGUE_CLASSES: List[Tuple[Type, Type]] = [
+    (DefaultDialogue, DefaultDialogues),
+    (SigningDialogue, SigningDialogues),
+]
 
 
 class TestMessageProperties:
@@ -210,6 +214,6 @@ def test_default_dialogues(dialogues_classes):
 
     dialogue = dialogues.create_dialogue(
         DialogueLabel(("x", "y"), "opponent_addr", "starter_addr"),
-        dialogue_class.Role.AGENT,
+        next(iter(dialogue_class.Role)),
     )
     assert isinstance(dialogue, dialogue_class)
