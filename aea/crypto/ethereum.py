@@ -494,7 +494,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             gas_estimate = self.api.eth.estimateGas(transaction=tx)
             logger.debug("gas estimate: {}".format(gas_estimate))
             tx["gas"] = gas_estimate
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
             logger.debug("Error when trying to estimate gas: {}".format(e))
         return tx
 
