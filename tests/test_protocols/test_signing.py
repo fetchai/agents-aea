@@ -113,3 +113,20 @@ class TestSigningMessage:
             terms=self.terms,
         )
         assert not tx_msg._is_consistent()
+
+
+def test_serialization():
+    """Test serialization."""
+    skill_callback_ids = (str(PublicId("author", "a_skill", "0.1.0")),)
+    skill_callback_info = {"some_string": "some_string"}
+    tx_msg = SigningMessage(
+        performative=SigningMessage.Performative.ERROR,
+        message_id=2,
+        target=1,
+        skill_callback_ids=skill_callback_ids,
+        skill_callback_info=skill_callback_info,
+        error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+    )
+    encoded_tx_bytes = tx_msg.serializer.encode(tx_msg)
+    actual_tx_msg = tx_msg.serializer.decode(encoded_tx_bytes)
+    assert tx_msg == actual_tx_msg
