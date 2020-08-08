@@ -48,7 +48,7 @@ from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
-from aea.helpers.base import cd, sigint_crossplatform
+from aea.helpers.base import cd, send_control_c
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -179,11 +179,16 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        process = subprocess.Popen(  # nosec
-            [sys.executable, *args],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-            cwd=cwd,
+        kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
+
+        if sys.platform == "win32":  # pragma: nocover
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            kwargs["startupinfo"] = startupinfo
+            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+        process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
+            [sys.executable, *args], **kwargs,
         )
         cls.subprocesses.append(process)
         return process
@@ -273,7 +278,13 @@ class BaseAEATestCase(ABC):
                 if content2[key] == value:
                     content1.pop(key)
                     content2.pop(key)
-            allowed_diff_keys = ["aea_version", "author", "description", "version"]
+            allowed_diff_keys = [
+                "aea_version",
+                "author",
+                "description",
+                "version",
+                "registry_path",
+            ]
             result = all([key in allowed_diff_keys for key in content1.keys()])
             result = result and all(
                 [key in allowed_diff_keys for key in content2.keys()]
@@ -380,7 +391,9 @@ class BaseAEATestCase(ABC):
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
         for process in subprocesses:
-            sigint_crossplatform(process)
+            process.poll()
+            if process.returncode is None:  # stop only pending processes
+                send_control_c(process)
         for process in subprocesses:
             process.wait(timeout=timeout)
 
@@ -491,7 +504,7 @@ class BaseAEATestCase(ABC):
         :return: Result
         """
         cli_args = ["generate-key", ledger_api_id]
-        if private_key_file is not None:
+        if private_key_file is not None:  # pragma: nocover
             cli_args.append(private_key_file)
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 

@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the aries_alice skill."""
+"""This module contains the implementation of the aries_faber skill."""

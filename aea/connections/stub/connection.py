@@ -261,7 +261,7 @@ class StubConnection(Connection):
             self.in_queue = asyncio.Queue()
             self._read_envelopes_task = self._loop.create_task(self.read_envelopes())
             self._state.set(ConnectionStates.connected)
-        except Exception:
+        except Exception:  # pragma: no cover
             self._state.set(ConnectionStates.disconnected)
             raise
 

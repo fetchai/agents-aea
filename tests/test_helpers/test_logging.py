@@ -18,20 +18,21 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helpers/logging module."""
 import logging
+from unittest.mock import patch
 
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger
 
 
-def test_agent_logger_adapter(caplog):
+def test_agent_logger_adapter():
     """Test the agent logger adapter."""
     logger = logging.getLogger("some.logger")
     logger = AgentLoggerAdapter(logger, agent_name="some_agent")
-    with caplog.at_level(logging.DEBUG, logger="some.logger"):
+    with patch.object(logger.logger, "log") as mock_logger:
         logger.debug("Some log message.")
-        assert "[some_agent] Some log message." in caplog.text
+        mock_logger.assert_any_call(logging.DEBUG, "[some_agent] Some log message.")
 
 
-def test_with_logger_default_logger_name(caplog):
+def test_with_logger_default_logger_name():
     """Test the WithLogger interface, default logger name."""
 
     class SomeClass(WithLogger):
@@ -40,12 +41,12 @@ def test_with_logger_default_logger_name(caplog):
     x = SomeClass()
     assert isinstance(x.logger, logging.Logger)
 
-    with caplog.at_level(logging.DEBUG, logger="aea"):
+    with patch.object(x.logger, "debug") as mock_logger:
         x.logger.debug("Some log message.")
-        assert "Some log message." in caplog.text
+        mock_logger.assert_any_call("Some log message.")
 
 
-def test_with_logger_custom_logger_name(caplog):
+def test_with_logger_custom_logger_name():
     """Test the WithLogger interface, custom logger name."""
 
     class SomeClass(WithLogger):
@@ -54,12 +55,12 @@ def test_with_logger_custom_logger_name(caplog):
     x = SomeClass(default_logger_name="some.logger")
     assert isinstance(x.logger, logging.Logger)
 
-    with caplog.at_level(logging.DEBUG, logger="some.logger"):
+    with patch.object(x.logger, "debug") as mock_logger:
         x.logger.debug("Some log message.")
-        assert "Some log message." in caplog.text
+        mock_logger.assert_any_call("Some log message.")
 
 
-def test_with_logger_custom_logger(caplog):
+def test_with_logger_custom_logger():
     """Test the WithLogger interface, custom logger."""
 
     class SomeClass(WithLogger):
@@ -69,9 +70,9 @@ def test_with_logger_custom_logger(caplog):
     x = SomeClass(logger=logger)
     assert isinstance(x.logger, logging.Logger)
 
-    with caplog.at_level(logging.DEBUG, logger="some.logger"):
+    with patch.object(x.logger, "debug") as mock_logger:
         x.logger.debug("Some log message.")
-        assert "Some log message." in caplog.text
+        mock_logger.assert_any_call("Some log message.")
 
 
 def test_with_logger_setter():

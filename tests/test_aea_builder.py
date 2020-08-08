@@ -51,14 +51,12 @@ from tests.conftest import (
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
-    skip_test_windows,
 )
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
 
 
-@skip_test_windows
 def test_default_timeout_for_agent():
     """Tests agents loop sleep timeout set by AEABuilder.DEFAULT_AGENT_LOOP_TIMEOUT."""
     agent_name = "MyAgent"

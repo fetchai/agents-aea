@@ -17,10 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the search feature of the local OEF node."""
-import asyncio
 import copy
-import logging
 import time
+import unittest.mock
 from typing import Optional, cast
 
 import pytest
@@ -46,6 +45,8 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.mocks import AnyStringWith
+from tests.common.utils import wait_for_condition
 from tests.conftest import MAX_FLAKY_RERUNS, _make_local_connection
 
 
@@ -59,15 +60,14 @@ class TestNoValidDialogue:
         cls.node.start()
 
         cls.address_1 = "address_1"
-        cls.multiplexer = Multiplexer(
-            [_make_local_connection(cls.address_1, cls.node,)]
-        )
+        cls.connection = _make_local_connection(cls.address_1, cls.node,)
+        cls.multiplexer = Multiplexer([cls.connection])
 
         cls.multiplexer.connect()
         cls.dialogues = OefSearchDialogues(cls.address_1)
 
     @pytest.mark.asyncio
-    async def test_wrong_dialogue(self, caplog):
+    async def test_wrong_dialogue(self):
         """Test that at the beginning, the search request returns an empty search result."""
         query = Query(
             constraints=[Constraint("foo", ConstraintType("==", 1))], model=None
@@ -93,10 +93,15 @@ class TestNoValidDialogue:
             protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
-        self.multiplexer.put(envelope)
-        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.local"):
-            await asyncio.sleep(0.1)
-            assert "Could not create dialogue for message=" in caplog.text
+        with unittest.mock.patch.object(
+            self.node, "_handle_oef_message", side_effect=self.node._handle_oef_message
+        ) as mock_handle:
+            with unittest.mock.patch.object(self.node.logger, "warning") as mock_logger:
+                self.multiplexer.put(envelope)
+                wait_for_condition(lambda: mock_handle.called, timeout=1.0)
+                mock_logger.assert_any_call(
+                    AnyStringWith("Could not create dialogue for message=")
+                )
 
     @classmethod
     def teardown_class(cls):

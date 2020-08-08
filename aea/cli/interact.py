@@ -79,7 +79,7 @@ def _run_interaction_channel():
 
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
-    except Exception as e:  # pylint: disable=broad-except # pragma: no cover
+    except BaseException as e:  # pylint: disable=broad-except # pragma: no cover
         click.echo(e)
     finally:
         multiplexer.disconnect()
@@ -150,16 +150,18 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
         else:
             message = message_escaped  # pragma: no cover
         msg = DefaultMessage(performative=performative, content=message)
+        msg.counterparty = agent_name
+        msg.sender = sender
         envelope = Envelope(
-            to=agent_name,
-            sender=sender,
-            protocol_id=DefaultMessage.protocol_id,  # PublicId.from_str(protocol_id),
+            to=msg.counterparty,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
         )
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")
     except KeyboardInterrupt as e:
         raise e
-    except Exception as e:  # pylint: disable=broad-except # pragma: no cover
+    except BaseException as e:  # pylint: disable=broad-except # pragma: no cover
         click.echo(e)
     return envelope

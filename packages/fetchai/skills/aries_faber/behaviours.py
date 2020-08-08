@@ -20,31 +20,66 @@
 """This package contains the behaviour for the aries_faber skill."""
 
 import json
-from typing import Dict
+from typing import Dict, cast
 
-from aea.skills.behaviours import OneShotBehaviour
+from aea.mail.base import Address
+from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.aries_faber.dialogues import (
+    HttpDialogues,
+    OefSearchDialogues,
+)
+from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
 
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
+HTTP_COUNTERPARTY = "HTTP Server"
 
-ADMIN_COMMAND_STATUS = "/status"
+DEFAULT_SEARCH_INTERVAL = 5.0
 
 
-class FaberBehaviour(OneShotBehaviour):
+class FaberBehaviour(TickerBehaviour):
     """This class represents the behaviour of faber."""
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        self.admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
-        self.admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
+        self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
+        self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
+        self._admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
+        self._alice_address = ""
 
-        super().__init__(**kwargs)
+        search_interval = cast(
+            float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
+        )
+        super().__init__(tick_interval=search_interval, **kwargs)
 
-        self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
+    @property
+    def admin_host(self) -> str:
+        """Get the admin host."""
+        return self._admin_host
 
-    def _admin_get(self, path: str, content: Dict = None) -> None:
+    @property
+    def admin_port(self) -> str:
+        """Get the admin port."""
+        return self._admin_port
+
+    @property
+    def admin_url(self) -> str:
+        """Get the admin URL."""
+        return self._admin_url
+
+    @property
+    def alice_address(self) -> Address:
+        """Get Alice's address."""
+        return self._alice_address
+
+    @alice_address.setter
+    def alice_address(self, address: Address) -> None:
+        self._alice_address = address
+
+    def admin_get(self, path: str, content: Dict = None) -> None:
         """
         Get from admin.
 
@@ -53,7 +88,10 @@ class FaberBehaviour(OneShotBehaviour):
         :return: None
         """
         # Request message & envelope
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+
         request_http_message = HttpMessage(
+            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
             method="GET",
             url=self.admin_url + path,
@@ -61,7 +99,11 @@ class FaberBehaviour(OneShotBehaviour):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        request_http_message.counterparty = self.admin_url
+        request_http_message.counterparty = HTTP_COUNTERPARTY
+        http_dialogue = http_dialogues.update(request_http_message)
+        assert (
+            http_dialogue is not None
+        ), "faber -> behaviour -> admin_get(): something went wrong when sending a HTTP message."
         self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
@@ -70,7 +112,8 @@ class FaberBehaviour(OneShotBehaviour):
 
         :return: None
         """
-        pass
+        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy.is_searching = True
 
     def act(self) -> None:
         """
@@ -78,7 +121,24 @@ class FaberBehaviour(OneShotBehaviour):
 
         :return: None
         """
-        self._admin_get(ADMIN_COMMAND_STATUS)
+        strategy = cast(FaberStrategy, self.context.strategy)
+        if strategy.is_searching:
+            query = strategy.get_location_and_service_query()
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+                query=query,
+            )
+            oef_search_msg.counterparty = self.context.search_service_address
+            oef_dialogue = oef_search_dialogues.update(oef_search_msg)
+            assert (
+                oef_dialogue is not None
+            ), "faber -> behaviour -> act(): something went wrong when searching for Alice on SOEF."
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("Searching for Alice on SOEF...")
 
     def teardown(self) -> None:
         """

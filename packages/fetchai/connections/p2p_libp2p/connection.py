@@ -394,6 +394,7 @@ class Libp2pNode:
             with open(self.log_file, "r") as f:
                 self.logger.error("Couldn't connect to libp2p p2p process, logs:")
                 self.logger.error(f.read())
+            self.stop()
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
