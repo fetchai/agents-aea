@@ -68,7 +68,7 @@ class TestGymExt:
             assert process.returncode == 0, "Test failed"
         finally:
             process.terminate()
-            process.wait()
+            process.wait_to_complete(5)
 
     @classmethod
     def teardown_class(cls):

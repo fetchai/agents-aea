@@ -30,14 +30,13 @@ from aea.cli.interact import (
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import MAX_FLAKY_RERUNS, skip_test_windows
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 class TestInteractCommand(AEATestCaseMany):
     """Test that interact command work."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    @skip_test_windows
     def test_interact_command_positive(self):
         """Run interaction."""
         agent_name = "test_iteraction_agent"

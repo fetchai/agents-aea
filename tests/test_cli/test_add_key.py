@@ -183,7 +183,6 @@ class TestAddManyKeys:
             cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE,
         )
 
-    # @skip_test_windows(is_class_test=True)
     def test_add_many_keys(self, pytestconfig):
         """Test that the keys are added correctly."""
 

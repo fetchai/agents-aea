@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Miscellaneous helpers."""
 
 import builtins
@@ -23,6 +24,7 @@ import contextlib
 import importlib.util
 import logging
 import os
+import platform
 import re
 import signal
 import subprocess  # nosec
@@ -220,6 +222,23 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
         process.send_signal(signal.CTRL_C_EVENT)  # pylint: disable=no-member
     else:
         raise ValueError("Other platforms not supported.")
+
+
+def send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None:
+    """
+    Send ctrl-C crossplatform to terminate a subprocess.
+
+    :param process: the process to send the signal to.
+
+    :return: None
+    """
+    if platform.system() == "Windows":
+        os.kill(process.pid, signal.CTRL_C_EVENT)  # pylint: disable=no-member
+    elif kill_group:
+        pgid = os.getpgid(process.pid)
+        os.killpg(pgid, signal.SIGINT)
+    else:
+        os.kill(process.pid, signal.SIGINT)
 
 
 class RegexConstrainedString(UserString):
