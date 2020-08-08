@@ -24,7 +24,7 @@ import hashlib
 import json
 import logging
 import os
-import subprocess
+import subprocess  # nosec
 import tempfile
 import time
 from pathlib import Path
@@ -562,7 +562,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 signed_tx_filename,
             ]
 
-            stdout, _ = subprocess.Popen(
+            stdout, _ = subprocess.Popen(  # nosec
                 command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             ).communicate()
 
@@ -593,7 +593,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
             json.dumps(query_msg),
         ]
 
-        stdout, _ = subprocess.Popen(
+        stdout, _ = subprocess.Popen(  # nosec
             command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         ).communicate()
 
