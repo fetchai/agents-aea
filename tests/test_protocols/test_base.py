@@ -35,6 +35,10 @@ from aea.mail.base import Envelope
 from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
 from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.signing.dialogues import SigningDialogue, SigningDialogues
+from aea.protocols.state_update.dialogues import (
+    StateUpdateDialogue,
+    StateUpdateDialogues,
+)
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
@@ -42,6 +46,7 @@ from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 DIALOGUE_CLASSES: List[Tuple[Type, Type]] = [
     (DefaultDialogue, DefaultDialogues),
     (SigningDialogue, SigningDialogues),
+    (StateUpdateDialogue, StateUpdateDialogues),
 ]
 
 
