@@ -6,9 +6,12 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmWbNjFh6E5V4n2qBwyZyXZdmmHvcZSVnwKrcM34MAE56S
-  build/some.json: QmYaGXvpHsMRPE2iX8XPUFqRGtecPS7ZL2sQbV837KxekD
-  contract.py: QmWUCKRsEsDZRQEWv8zMDuNBo9UF3mmwfrSkPgnRUzr4Gc
+  build/some.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
+  build/some.wasm: Qmc9gthbdwRSywinTHKjRVQdFzrKTxUuLDx2ryNfQp1xqf
+  contract.py: QmYBTVD7kwvrzMTfkHdzTUPsg24o1qJfQ7wR5WhKAx9xUY
 fingerprint_ignore_patterns: []
 class_name: DummyContract
-path_to_contract_interface: build/some.json
+contract_interface_paths:
+  cosmos: build/some.wasm
+  ethereum: build/some.json
 dependencies: {}

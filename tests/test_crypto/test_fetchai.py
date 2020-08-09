@@ -182,3 +182,23 @@ def test_get_wealth_positive(caplog):
         assert (
             "Message: Transfer pending" in caplog.text
         ), f"Cannot find message in output: {caplog.text}"
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_contract_instance():
+    """Test the get contract instance method."""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    with pytest.raises(NotImplementedError):
+        fetchai_api.get_contract_instance("interface")
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_deploy_transaction():
+    """Test the get deploy transaction method."""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    with pytest.raises(NotImplementedError):
+        fetchai_api.get_deploy_transaction("interface", "deployer")
