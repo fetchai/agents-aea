@@ -18,6 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for transaction."""
+from unittest.mock import patch
+
+import pytest
 
 from aea.protocols.state_update.message import StateUpdateMessage
 
@@ -31,14 +34,12 @@ class TestStateUpdateMessage:
         good_endowment = {"a_good": 2}
         exchange_params = {"FET": 10.0}
         utility_params = {"a_good": 20.0}
-        tx_fee = 10
         assert StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
             amount_by_currency_id=currency_endowment,
             quantities_by_good_id=good_endowment,
             exchange_params_by_currency_id=exchange_params,
             utility_params_by_good_id=utility_params,
-            tx_fee=tx_fee,
         )
         currency_change = {"FET": 10}
         good_change = {"a_good": 1}
@@ -66,3 +67,69 @@ class TestStateUpdateMessage:
             tx_fee=tx_fee,
         )
         assert not stum._is_consistent()
+
+
+class TestSerialization:
+    """Test state update message serialization."""
+
+    def test_serialization_initialize(self):
+        """Test serialization of initialize message."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"a_good": 2}
+        exchange_params = {"FET": 10.0}
+        utility_params = {"a_good": 20.0}
+        msg = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.INITIALIZE,
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+            exchange_params_by_currency_id=exchange_params,
+            utility_params_by_good_id=utility_params,
+        )
+        encoded_msg = msg.serializer.encode(msg)
+        decoded_msg = msg.serializer.decode(encoded_msg)
+        assert msg == decoded_msg
+
+    def test_serialization_apply(self):
+        """Test serialization of apply message."""
+        currency_change = {"FET": 10}
+        good_change = {"a_good": 1}
+        msg = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.APPLY,
+            amount_by_currency_id=currency_change,
+            quantities_by_good_id=good_change,
+        )
+        assert msg._is_consistent()
+        assert len(msg.valid_performatives) == 2
+        encoded_msg = msg.serializer.encode(msg)
+        decoded_msg = msg.serializer.decode(encoded_msg)
+        assert msg == decoded_msg
+
+
+def test_serialization_negative():
+    """Test serialization when performative is not recognized."""
+    currency_change = {"FET": 10}
+    good_change = {"a_good": 1}
+    msg = StateUpdateMessage(
+        performative=StateUpdateMessage.Performative.APPLY,
+        amount_by_currency_id=currency_change,
+        quantities_by_good_id=good_change,
+    )
+
+    with patch.object(StateUpdateMessage.Performative, "__eq__", return_value=False):
+        with pytest.raises(
+            ValueError, match=f"Performative not valid: {msg.performative}"
+        ):
+            msg.serializer.encode(msg)
+
+    encoded_tx_bytes = msg.serializer.encode(msg)
+    with patch.object(StateUpdateMessage.Performative, "__eq__", return_value=False):
+        with pytest.raises(
+            ValueError, match=f"Performative not valid: {msg.performative}"
+        ):
+            msg.serializer.decode(encoded_tx_bytes)
+
+
+def test_performative_str():
+    """Test performative __str__."""
+    assert str(StateUpdateMessage.Performative.INITIALIZE) == "initialize"
+    assert str(StateUpdateMessage.Performative.APPLY) == "apply"
