@@ -39,6 +39,15 @@
     "description": {
       "$ref": "definitions.json#/definitions/description"
     },
+    "contract_interface_paths": {
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "definitions.json#/definitions/contract_interface_path"
+        }
+      }
+    },
     "path_to_contract_interface": {
       "type": "string"
     },

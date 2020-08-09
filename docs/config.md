@@ -88,7 +88,7 @@ fingerprint:                                    # Fingerprint of package compone
   contract.py: QmXvjkD7ZVEJDJspEz5YApe5bRUxvZHNi8vfyeVHPyQD5G
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 class_name: MyScaffoldContract                  # The class name of the class implementing the contract interface.
-path_to_contract_interface: ''                  # The path to the contract interface.
+contract_interface_paths: {}                    # The paths to the contract interfaces (one for each ledger identifier).
 config:                                         # A dictionary containing the kwargs for the contract instantiation.
   foo: bar
 dependencies: {}                                # The python dependencies the package relies on.

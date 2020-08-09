@@ -34,6 +34,7 @@ from eth_keys import keys
 import requests
 
 from web3 import HTTPProvider, Web3
+from web3.contract import Contract as EthereumContract
 
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.helpers.base import try_decorator
@@ -424,6 +425,77 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx, if found
         """
         tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
+        return tx
+
+    def get_contract_instance(
+        self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
+    ) -> Any:
+        """
+        Get the instance of a contract.
+
+        :param contract_interface: the contract interface.
+        :param contract_address: the contract address.
+        :return: the contract instance
+        """
+        if contract_address is None:
+            instance = self.api.eth.contract(
+                abi=contract_interface["abi"], bytecode=contract_interface["bytecode"],
+            )
+        else:
+            instance = self.api.eth.contract(
+                address=contract_address,
+                abi=contract_interface["abi"],
+                bytecode=contract_interface["bytecode"],
+            )
+        instance = cast(EthereumContract, instance)
+        return instance
+
+    def get_deploy_transaction(
+        self,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
+        value: int = 0,
+        gas: int = 0,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """
+        Get the transaction to deploy the smart contract.
+
+        :param contract_interface: the contract interface.
+        :param deployer_address: The address that will deploy the contract.
+        :param value: value to send to contract (ETH in Wei)
+        :param gas: the gas to be used
+        :returns tx: the transaction dictionary.
+        """
+        # create the transaction dict
+        nonce = self.api.eth.getTransactionCount(deployer_address)
+        instance = self.get_contract_instance(contract_interface)
+        data = instance.constructor().__dict__.get("data_in_transaction")
+        tx = {
+            "from": deployer_address,  # only 'from' address, don't insert 'to' address!
+            "value": value,  # transfer as part of deployment
+            "gas": gas,
+            "gasPrice": self.api.eth.gasPrice,
+            "nonce": nonce,
+            "data": data,
+        }
+        tx = self.try_estimate_gas(tx)
+        return tx
+
+    def try_estimate_gas(self, tx: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Attempts to update the transaction with a gas estimate.
+
+        :param tx: the transaction
+        :return: the transaction (potentially updated)
+        """
+        try:
+            # try estimate the gas and update the transaction dict
+            gas_estimate = self.api.eth.estimateGas(transaction=tx)
+            logger.debug("gas estimate: {}".format(gas_estimate))
+            tx["gas"] = gas_estimate
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
+            logger.debug("Error when trying to estimate gas: {}".format(e))
         return tx
 
 

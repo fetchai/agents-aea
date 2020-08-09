@@ -21,9 +21,8 @@
 import inspect
 import logging
 import re
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, Dict, Optional, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -38,7 +37,7 @@ from aea.helpers.base import load_aea_package, load_module
 logger = logging.getLogger(__name__)
 
 
-class Contract(Component, ABC):
+class Contract(Component):
     """Abstract definition of a contract."""
 
     contract_interface: Any = None
@@ -63,7 +62,6 @@ class Contract(Component, ABC):
         return cast(ContractConfig, super().configuration)
 
     @classmethod
-    @abstractmethod
     def get_instance(
         cls, ledger_api: LedgerApi, contract_address: Optional[str] = None
     ) -> Any:
@@ -74,6 +72,11 @@ class Contract(Component, ABC):
         :param contract_address: the contract address.
         :return: the contract instance
         """
+        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        instance = ledger_api.get_contract_instance(
+            contract_interface, contract_address
+        )
+        return instance
 
     @classmethod
     def from_dir(cls, directory: str, **kwargs) -> "Contract":
@@ -116,14 +119,15 @@ class Contract(Component, ABC):
             contract_class_name
         )
 
-        # path = Path(directory, configuration.path_to_contract_interface)
-        # with open(path, "r") as interface_file:
-        #     contract_interface = json.load(interface_file)
+        # TODO: load interfaces here
+        # contract_interface = configuration.contract_interfaces
 
         return contract_class(configuration, **kwargs)
 
     @classmethod
-    def get_deploy_transaction(cls, ledger_api: LedgerApi, **kwargs) -> bytes:
+    def get_deploy_transaction(
+        cls, ledger_api: LedgerApi, deployer_address: str, **kwargs
+    ) -> Dict[str, Any]:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
 
@@ -131,15 +135,20 @@ class Contract(Component, ABC):
         to handle the contract requests manually.
 
         :param ledger_api: the ledger apis.
+        :param deployer_address: The address that will deploy the contract.
         :param kwargs: keyword arguments.
-        :return: the bytes representing the state.
+        :return: the tx
         """
-        raise NotImplementedError
+        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        tx = ledger_api.get_deploy_transaction(
+            contract_interface, deployer_address, **kwargs
+        )
+        return tx
 
     @classmethod
     def get_raw_transaction(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> bytes:
+    ) -> Dict[str, Any]:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
 
@@ -148,14 +157,14 @@ class Contract(Component, ABC):
 
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
-        :return: the bytes representing the state.
+        :return: the tx
         """
         raise NotImplementedError
 
     @classmethod
     def get_raw_message(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> bytes:
+    ) -> Dict[str, Any]:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
@@ -164,12 +173,14 @@ class Contract(Component, ABC):
 
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
-        :return: the bytes representing the state.
+        :return: the tx
         """
         raise NotImplementedError
 
     @classmethod
-    def get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes:
+    def get_state(
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
+    ) -> Dict[str, Any]:
         """
         Handler method for the 'GET_STATE' requests.
 
@@ -178,6 +189,6 @@ class Contract(Component, ABC):
 
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
-        :return: the bytes representing the state.
+        :return: the tx
         """
         raise NotImplementedError

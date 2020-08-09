@@ -20,7 +20,6 @@
 """Conftest module for Pytest."""
 import asyncio
 import inspect
-import json
 import logging
 import os
 import platform
@@ -212,7 +211,7 @@ PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specificati
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
 contract_config_files = [
-    os.path.join(ROOT_DIR, "aea", "contracts", "scaffold", CONTRACT_YAML),
+    os.path.join(ROOT_DIR, "tests", "data", "dummy_contract", CONTRACT_YAML),
 ]
 
 protocol_config_files = [
@@ -1001,15 +1000,10 @@ def erc1155_contract():
     if str(configuration.public_id) not in contract_registry.specs:
         # load contract into sys modules
         Contract.from_config(configuration)
-
-        path = Path(configuration.directory, configuration.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            contract_interface = json.load(interface_file)
-
         contract_registry.register(
             id_=str(configuration.public_id),
             entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-            class_kwargs={"contract_interface": contract_interface},
+            class_kwargs={"contract_interface": configuration.contract_interfaces},
             contract_config=configuration,
         )
 

@@ -22,23 +22,23 @@
 from typing import Optional
 
 from aea.crypto.base import Crypto
-from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
+from aea.crypto.cosmos import CosmosApi, CosmosCrypto
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.crypto.registries.base import ItemId, Registry
 
-FETCHAI = FetchAICrypto.identifier
+COSMOS = CosmosCrypto.identifier
 
 
-def test_make_crypto_fetchai_positive():
+def test_make_crypto_cosmos_positive():
     """Test make_crypto for fetchai."""
-    crypto = make_crypto(FETCHAI)
-    assert isinstance(crypto, FetchAICrypto)
+    crypto = make_crypto(COSMOS)
+    assert isinstance(crypto, CosmosCrypto)
 
 
-def test_make_ledger_api_fetchai_positive():
+def test_make_ledger_api_cosmos_positive():
     """Test make_crypto for fetchai."""
-    ledger_api = make_ledger_api(FETCHAI, **{"network": "testnet"})
-    assert isinstance(ledger_api, FetchAIApi)
+    ledger_api = make_ledger_api(COSMOS, **{"network": "testnet"})
+    assert isinstance(ledger_api, CosmosApi)
 
 
 class Something:
@@ -73,12 +73,12 @@ def test_register_make_with_class_kwargs():
 
 def test_itemid():
     """Test the idemid object."""
-    item_id = ItemId(FETCHAI)
-    assert item_id.name == FETCHAI
+    item_id = ItemId(COSMOS)
+    assert item_id.name == COSMOS
 
 
 def test_registry():
     """Test the registry object."""
     registry = Registry[Crypto]()
-    item_id = ItemId(FETCHAI)
+    item_id = ItemId(COSMOS)
     assert not registry.has_spec(item_id), "Registry should be empty"

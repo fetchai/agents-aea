@@ -19,7 +19,7 @@
 
 """This module contains the scaffold contract definition."""
 
-from aea.contracts.ethereum import Contract
+from aea.contracts.base import Contract
 
 
 class MyScaffoldContract(Contract):
