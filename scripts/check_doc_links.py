@@ -27,12 +27,19 @@ from typing import Pattern, Set
 
 import requests
 
-LINK_PATTERN_MD = re.compile("[([^]]+)](s*([^]]+)s*)")
-LINK_PATTERN = re.compile('(?<=<a href=")[^"]*')
-IMAGE_PATTERN = re.compile('<img[^>]+src="([^">]+)"')
+LINK_PATTERN_MD = re.compile(r"\[([^]]+)]\(\s*([^]]+)\s*\)")
+LINK_PATTERN = re.compile(r'(?<=<a href=")[^"]*')
+IMAGE_PATTERN = re.compile(r'<img[^>]+src="([^">]+)"')
 RELATIVE_PATH_STR = "../"
 RELATIVE_PATH_STR_LEN = len(RELATIVE_PATH_STR)
 INDEX_FILE_PATH = Path("docs/index.md")
+
+WHITELIST_URL_TO_CODE = {
+    "http://soef.fetch.ai:9002": 405,
+    "https://golang.org/dl/": 403,
+    "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
+    "https://colab.research.google.com": 403,
+}
 
 
 def is_url_reachable(url: str) -> bool:
@@ -46,7 +53,12 @@ def is_url_reachable(url: str) -> bool:
         return True
     try:
         response = requests.head(url)
-        return response.status_code in [200, 403, 405]
+        if response.status_code == 200:
+            return True
+        elif response.status_code in [403, 405]:
+            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405]
+        else:
+            return False
     except Exception as e:  # pylint: disable=broad-except
         print(e)
         return False
