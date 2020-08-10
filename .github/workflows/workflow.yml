@@ -119,7 +119,7 @@ jobs:
     continue-on-error: True
     runs-on: ubuntu-latest
 
-    timeout-minutes: 50
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@master
