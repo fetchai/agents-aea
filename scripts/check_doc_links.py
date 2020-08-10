@@ -45,8 +45,6 @@ def is_url_reachable(url: str) -> bool:
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
         return True
     try:
-        # if url == "https://www.python.org/dev/peps/pep-0440/":
-        #     import pdb; pdb.set_trace()
         response = requests.head(url)
         return response.status_code in [200, 403, 405]
     except Exception as e:  # pylint: disable=broad-except
