@@ -93,21 +93,20 @@ def test_connect_twice_with_loop(caplog):
     thread_loop = Thread(target=running_loop.run_forever)
     thread_loop.start()
 
+    multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop)
     try:
-        multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop)
 
-        with caplog.at_level(logging.DEBUG):
-            assert not multiplexer.connection_status.is_connected
-            multiplexer.connect()
-            assert multiplexer.connection_status.is_connected
-            multiplexer.connect()
-            assert multiplexer.connection_status.is_connected
+        caplog.set_level(logging.DEBUG)
+        assert not multiplexer.connection_status.is_connected
+        multiplexer.connect()
+        assert multiplexer.connection_status.is_connected
+        multiplexer.connect()
+        assert multiplexer.connection_status.is_connected
 
-            assert "Multiplexer already connected." in caplog.text
-
-            multiplexer.disconnect()
-            running_loop.call_soon_threadsafe(running_loop.stop)
+        assert "Multiplexer already connected." in caplog.text
     finally:
+        multiplexer.disconnect()
+        running_loop.call_soon_threadsafe(running_loop.stop)
         thread_loop.join()
 
 
@@ -122,7 +121,7 @@ async def test_connect_twice_a_single_connection(caplog):
         await multiplexer._connect_one(connection.connection_id)
         await multiplexer._connect_one(connection.connection_id)
         assert "Connection fetchai/dummy:0.1.0 already established." in caplog.text
-        await multiplexer._disconnect_one(connection.connection_id)
+    await multiplexer._disconnect_one(connection.connection_id)
 
 
 def test_multiplexer_connect_all_raises_error():
