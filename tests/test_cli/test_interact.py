@@ -17,7 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains tests for iteract command."""
-
+import signal
+import time
 from unittest import TestCase, mock
 
 import pytest
@@ -28,9 +29,9 @@ from aea.cli.interact import (
     _try_construct_envelope,
 )
 from aea.mail.base import Envelope
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
-from tests.conftest import MAX_FLAKY_RERUNS
+from tests.conftest import MAX_FLAKY_RERUNS, skip_test_windows
 
 
 class TestInteractCommand(AEATestCaseMany):
@@ -187,3 +188,63 @@ class ProcessEnvelopesTestCase(TestCase):
 
         with self.assertRaises(AssertionError):
             _process_envelopes(agent_name, identity_stub, inbox, outbox)
+
+
+class TestInteractEcho(AEATestCaseEmpty):
+    """Test 'aea interact' with the echo skill."""
+
+    @skip_test_windows
+    @pytest.mark.integration
+    def test_interact(self):
+        """Test the 'aea interact' command with the echo skill."""
+        self.add_item("skill", "fetchai/echo:0.4.0")
+        self.run_agent("--connections", "fetchai/stub:0.7.0")
+        process = self.run_interaction()
+
+        time.sleep(0.5)
+
+        # send first message
+        process.stdin.write(b"hello\n")
+        process.stdin.flush()
+        time.sleep(1.0)
+
+        # read incoming messages
+        process.stdin.write(b"\n")
+        process.stdin.flush()
+        time.sleep(0.5)
+
+        # read another message - should return nothing
+        process.stdin.write(b"\n")
+        process.stdin.flush()
+        time.sleep(0.5)
+
+        process.send_signal(signal.SIGINT)
+        time.sleep(0.5)
+
+        expected_output = [
+            "Starting AEA interaction channel...",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Sending envelope:",
+            f"to: {self.agent_name}",
+            f"sender: {self.agent_name}_interact",
+            "protocol_id: fetchai/default:0.4.0",
+            "message: Message(dialogue_reference=('', '') message_id=1 target=0 performative=bytes content=b'hello')",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Interrupting input, checking inbox ...",
+            "Received envelope:",
+            f"to: {self.agent_name}_interact",
+            f"sender: {self.agent_name}",
+            "protocol_id: fetchai/default:0.4.0",
+            "message: Message(dialogue_reference=('', '') message_id=1 target=0 performative=bytes content=b'hello')",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Interrupting input, checking inbox ...",
+            "Received no new envelope!",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Interaction interrupted!",
+        ]
+        missing = self.missing_from_output(
+            process, expected_output, timeout=10, is_terminating=False
+        )
+        assert len(missing) == 0, "Strings {} didn't appear in agent output.".format(
+            missing
+        )
