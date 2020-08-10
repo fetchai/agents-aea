@@ -201,22 +201,22 @@ class TestInteractEcho(AEATestCaseEmpty):
         self.run_agent("--connections", "fetchai/stub:0.7.0")
         process = self.run_interaction()
 
-        time.sleep(0.5)
+        time.sleep(1.0)
 
         # send first message
         process.stdin.write(b"hello\n")
         process.stdin.flush()
-        time.sleep(1.0)
+        time.sleep(3.0)
 
         # read incoming messages
         process.stdin.write(b"\n")
         process.stdin.flush()
-        time.sleep(0.5)
+        time.sleep(1.0)
 
         # read another message - should return nothing
         process.stdin.write(b"\n")
         process.stdin.flush()
-        time.sleep(0.5)
+        time.sleep(1.0)
 
         process.send_signal(signal.SIGINT)
         time.sleep(0.5)
