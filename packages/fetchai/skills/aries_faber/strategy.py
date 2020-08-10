@@ -25,8 +25,26 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
+from aea.mail.base import Address
 from aea.skills.base import Model
 
+# Default Config
+DEFAULT_ADMIN_HOST = "127.0.0.1"
+DEFAULT_ADMIN_PORT = 8021
+DEFAULT_LEDGER_URL = "http://127.0.0.1:9000"
+
+# Commands
+ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
+ADMIN_COMMAND_STATUS = "/status"
+ADMIN_COMMAND_SCEHMAS = "/schemas"
+ADMIN_COMMAND_CREDDEF = "/credential-definitions"
+LEDGER_COMMAND_REGISTER_DID = "/register"
+
+# Convenience
+FABER_ACA_IDENTITY = "Faber_ACA"
+HTTP_COUNTERPARTY = "HTTP Server"
+
+# Search
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "intro_service",
@@ -45,6 +63,16 @@ class FaberStrategy(Model):
 
         :return: None
         """
+        # config
+        self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
+        self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
+        self._ledger_url = kwargs.pop("ledger_url", DEFAULT_LEDGER_URL)
+
+        # derived config
+        self._admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
+        self._alice_aea_address = ""
+
+        # Search
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = Location(location["longitude"], location["latitude"])
@@ -52,6 +80,35 @@ class FaberStrategy(Model):
 
         super().__init__(**kwargs)
         self._is_searching = False
+
+    @property
+    def admin_host(self) -> str:
+        """Get the admin host."""
+        return self._admin_host
+
+    @property
+    def admin_port(self) -> str:
+        """Get the admin port."""
+        return self._admin_port
+
+    @property
+    def ledger_url(self) -> str:
+        """Get the ledger URL."""
+        return self._ledger_url
+
+    @property
+    def admin_url(self) -> str:
+        """Get the admin URL."""
+        return self._admin_url
+
+    @property
+    def alice_aea_address(self) -> Address:
+        """Get Alice's address."""
+        return self._alice_aea_address
+
+    @alice_aea_address.setter
+    def alice_aea_address(self, address: Address) -> None:
+        self._alice_aea_address = address
 
     @property
     def is_searching(self) -> bool:

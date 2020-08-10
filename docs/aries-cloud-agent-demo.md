@@ -111,7 +111,7 @@ This demo has been successfully tested with aca-py version 0.4.5.
 
 This demo requires an instance of von network running in docker locally (for more info see <a href="https://github.com/bcgov/von-network#running-the-network-locally" target=_blank>here</a>)
 
-This demo has been successfully tested with the von-network git repository pulled on 07 Aug 2020. 
+This demo has been successfully tested with the von-network git repository pulled on 07 Aug 2020 (commit number `ad1f84f64d4f4c106a81462f5fbff496c5fbf10e`). 
 
 ### Terminals
 
@@ -207,10 +207,10 @@ aea add skill fetchai/aries_alice:0.4.0
 Ensure `admin_host` and `admin_port` values match with the values you noted above for **Alice_ACA**. You can use the framework's handy `config` <a href="../cli-commands">CLI command</a> to set these values:
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_alice.behaviours.alice.args.admin_host 127.0.0.1
+aea config set vendor.fetchai.skills.aries_alice.models.strategy.args.admin_host 127.0.0.1
 ```
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_alice.behaviours.alice.args.admin_port 8031
+aea config set --type int vendor.fetchai.skills.aries_alice.models.strategy.args.admin_port 8031
 ```
 
 #### Configure the `webhook` connection:
@@ -233,12 +233,12 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 
 (configuration file: `vendor/fetchai/connections/p2p_libp2p/connection.yaml`)
 
-Replace the `config` section with the following (note the changes in the URIs):
+Replace the `config` section with the following (note the changes in the URI ports):
 
 ``` yaml
 config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
+  delegate_uri: 127.0.0.1:11000
+  entry_peers: []
   local_uri: 127.0.0.1:7000
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:7000
@@ -292,11 +292,11 @@ aea add skill fetchai/aries_faber:0.3.0
 Ensure `admin_host` and `admin_port` values match with those you noted above for **Faber_ACA**.
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_faber.behaviours.faber.args.admin_host 127.0.0.1
+aea config set vendor.fetchai.skills.aries_faber.models.strategy.args.admin_host 127.0.0.1
 ```
 
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_faber.behaviours.faber.args.admin_port 8021
+aea config set --type int vendor.fetchai.skills.aries_faber.models.strategy.args.admin_port 8021
 ```
 
 #### Configure the `webhook` connection:
@@ -319,7 +319,7 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 
 (configuration file: `vendor/fetchai/connections/p2p_libp2p/connection.yaml`)
 
-Replace the `config` section with the following (note the changes in the URIs):
+Replace the `config` section with the following (note the changes in the URI ports):
 
 ``` yaml
 config:

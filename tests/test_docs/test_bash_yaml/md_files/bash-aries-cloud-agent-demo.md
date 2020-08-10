@@ -28,10 +28,10 @@ aea add connection fetchai/webhook:0.5.0
 aea add skill fetchai/aries_alice:0.4.0
 ```
 ``` bash
-aea config set vendor.fetchai.skills.aries_alice.behaviours.alice.args.admin_host 127.0.0.1
+aea config set vendor.fetchai.skills.aries_alice.models.strategy.args.admin_host 127.0.0.1
 ```
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_alice.behaviours.alice.args.admin_port 8031
+aea config set --type int vendor.fetchai.skills.aries_alice.models.strategy.args.admin_port 8031
 ```
 ``` bash
 aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8032
@@ -41,8 +41,8 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 ```
 ``` yaml
 config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
+  delegate_uri: 127.0.0.1:11000
+  entry_peers: []
   local_uri: 127.0.0.1:7000
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:7000
@@ -67,10 +67,10 @@ aea add connection fetchai/webhook:0.5.0
 aea add skill fetchai/aries_faber:0.3.0
 ```
 ``` bash
-aea config set vendor.fetchai.skills.aries_faber.behaviours.faber.args.admin_host 127.0.0.1
+aea config set vendor.fetchai.skills.aries_faber.models.strategy.args.admin_host 127.0.0.1
 ```
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_faber.behaviours.faber.args.admin_port 8021
+aea config set --type int vendor.fetchai.skills.aries_faber.models.strategy.args.admin_port 8021
 ```
 ``` bash
 aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8022

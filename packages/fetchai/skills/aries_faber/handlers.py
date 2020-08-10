@@ -24,7 +24,7 @@ import random
 from typing import Dict, Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import Address, EnvelopeContext
+from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -41,15 +41,17 @@ from packages.fetchai.skills.aries_faber.dialogues import (
     OefSearchDialogue,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
+from packages.fetchai.skills.aries_faber.strategy import (
+    ADMIN_COMMAND_CREATE_INVITATION,
+    ADMIN_COMMAND_CREDDEF,
+    ADMIN_COMMAND_SCEHMAS,
+    ADMIN_COMMAND_STATUS,
+    FABER_ACA_IDENTITY,
+    FaberStrategy,
+    LEDGER_COMMAND_REGISTER_DID,
+)
 
 SUPPORT_REVOCATION = False
-
-ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
-ADMIN_COMMAND_STATUS = "/status"
-HTTP_COUNTERPARTY = "HTTP Server"
-FABER_ACA_IDENTITY = "Faber_ACA"
-LEDGER_URL = "http://127.0.0.1:9000"
 
 
 class FaberHTTPHandler(Handler):
@@ -62,7 +64,7 @@ class FaberHTTPHandler(Handler):
         super().__init__(**kwargs)
 
         # ACA stuff
-        self.aca_identity = FABER_ACA_IDENTITY
+        self.faber_identity = FABER_ACA_IDENTITY
         rand_name = str(random.randint(100_000, 999_999))  # nosec
         # my_name = "137001"
         # use my_name to manually use the same seed in this demo and when starting up the accompanying ACA
@@ -79,77 +81,61 @@ class FaberHTTPHandler(Handler):
         # AEA stuff
         self.handled_message = None
 
-    @property
-    def admin_url(self) -> str:
-        """Get the admin URL."""
-        return self.context.behaviours.faber.admin_url
+    def _send_default_message(self, content: Dict) -> None:
+        """
+        Send a default message to Alice.
 
-    @property
-    def alice_address(self) -> Address:
-        """Get Alice's address."""
-        return self.context.behaviours.faber.alice_address
-
-    def _admin_post(self, path: str, content: Dict = None) -> None:
-        # Request message & envelope
-        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
-        request_http_message = HttpMessage(
-            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
-            performative=HttpMessage.Performative.REQUEST,
-            method="POST",
-            url=self.admin_url + path,
-            headers="",
-            version="",
-            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
-        )
-        request_http_message.counterparty = HTTP_COUNTERPARTY
-        http_dialogue = http_dialogues.update(request_http_message)
-        assert (
-            http_dialogue is not None
-        ), "faber -> http_handler -> _admin_post(): something went wrong when sending a HTTP message."
-        self.context.outbox.put_message(message=request_http_message)
-
-    def _post(self, path: str, content: Dict = None) -> None:
-        # Request message & envelope
-        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
-        request_http_message = HttpMessage(
-            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
-            performative=HttpMessage.Performative.REQUEST,
-            method="POST",
-            url=LEDGER_URL + path,
-            headers="",
-            version="",
-            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
-        )
-        request_http_message.counterparty = HTTP_COUNTERPARTY
-        http_dialogue = http_dialogues.update(request_http_message)
-        assert (
-            http_dialogue is not None
-        ), "faber -> http_handler -> _post(): something went wrong when sending a HTTP message."
-        self.context.outbox.put_message(message=request_http_message)
-
-    def _send_message(self, content: Dict) -> None:
-        # message & envelope
+        :param content: the content of the message.
+        :return: None
+        """
+        # context
+        strategy = cast(FaberStrategy, self.context.strategy)
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
+
+        # default message
         message = DefaultMessage(
             dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             performative=DefaultMessage.Performative.BYTES,
             content=json.dumps(content).encode("utf-8"),
         )
-        message.counterparty = self.alice_address
-        context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
+        message.counterparty = strategy.alice_aea_address
+
+        # default dialogue
         default_dialogue = default_dialogues.update(message)
         assert (
             default_dialogue is not None
-        ), "faber -> http_handler -> _send_message(): something went wrong when sending a default message."
+        ), "faber -> http_handler -> _send_default_message(): something went wrong when sending a default message."
+
+        # send
+        context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
         self.context.outbox.put_message(message=message, context=context)
 
-    def _register_did(self):
-        self.context.logger.info("Registering Faber_ACA with seed " + str(self.seed))
-        data = {"alias": self.aca_identity, "seed": self.seed, "role": "TRUST_ANCHOR"}
-        self._post("/register", content=data)
+    def _register_did(self) -> None:
+        """
+        Register DID on the ledger.
 
-    def _register_schema(self, schema_name, version, schema_attrs):
-        # Create a schema
+        :return: None
+        """
+        strategy = cast(FaberStrategy, self.context.strategy)
+        self.context.logger.info("Registering Faber_ACA with seed " + str(self.seed))
+        data = {"alias": self.faber_identity, "seed": self.seed, "role": "TRUST_ANCHOR"}
+        self.context.behaviours.faber.send_http_request_message(
+            method="POST",
+            url=strategy.ledger_url + LEDGER_COMMAND_REGISTER_DID,
+            content=data,
+        )
+
+    def _register_schema(self, schema_name, version, schema_attrs) -> None:
+        """
+        Register schema definition.
+
+        :param schema_name: the name of the schema
+        :param version: the version of the schema
+        :param schema_attrs: the attributes of the schema
+
+        :return: None
+        """
+        strategy = cast(FaberStrategy, self.context.strategy)
         schema_body = {
             "schema_name": schema_name,
             "schema_version": version,
@@ -159,15 +145,29 @@ class FaberHTTPHandler(Handler):
         # ToDo debug point
         # The following call isn't responded to. This is most probably because of missing options when running the accompanying ACA.
         # THe accompanying ACA is not properly connected to the von network ledger (missing pointer to genesis file/wallet type)
-        self._admin_post("/schemas", schema_body)
+        self.context.behaviours.faber.send_http_request_message(
+            method="POST",
+            url=strategy.admin_url + ADMIN_COMMAND_SCEHMAS,
+            content=schema_body,
+        )
 
-    def _register_creddef(self, schema_id):
-        # Create a cred def for the schema
+    def _register_creddef(self, schema_id) -> None:
+        """
+        Register credential definition.
+
+        :param schema_id: the id of the schema definition registered on the ledger
+        :return: None
+        """
+        strategy = cast(FaberStrategy, self.context.strategy)
         credential_definition_body = {
             "schema_id": schema_id,
             "support_revocation": SUPPORT_REVOCATION,
         }
-        self._admin_post("/credential-definitions", credential_definition_body)
+        self.context.behaviours.faber.send_http_request_message(
+            method="POST",
+            url=strategy.admin_url + ADMIN_COMMAND_CREDDEF,
+            content=credential_definition_body,
+        )
 
     def setup(self) -> None:
         """
@@ -186,6 +186,7 @@ class FaberHTTPHandler(Handler):
         """
         message = cast(HttpMessage, message)
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        strategy = cast(FaberStrategy, self.context.strategy)
 
         self.handled_message = message
         if (
@@ -221,7 +222,10 @@ class FaberHTTPHandler(Handler):
                 self._register_creddef(self.schema_id)
             elif "credential_definition_id" in content:
                 self.credential_definition_id = content["credential_definition_id"]
-                self._admin_post(ADMIN_COMMAND_CREATE_INVITATION)
+                self.context.behaviours.faber.send_http_request_message(
+                    method="POST",
+                    url=strategy.admin_url + ADMIN_COMMAND_CREATE_INVITATION,
+                )
             elif "connection_id" in content:
                 connection = content
                 self.connection_id = content["connection_id"]
@@ -232,7 +236,7 @@ class FaberHTTPHandler(Handler):
                 self.context.logger.info(
                     "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection..."
                 )
-                self._send_message(invitation)
+                self._send_default_message(invitation)
         elif (
             message.performative == HttpMessage.Performative.REQUEST
         ):  # webhook request
@@ -360,10 +364,12 @@ class FaberOefSearchHandler(Handler):
         strategy.is_searching = False  # stopping search
 
         # set alice address
-        self.context.behaviours.faber.alice_address = oef_search_msg.agents[0]
+        strategy.alice_aea_address = oef_search_msg.agents[0]
 
         # check ACA is running
-        self.context.behaviours.faber.admin_get(ADMIN_COMMAND_STATUS)
+        self.context.behaviours.faber.send_http_request_message(
+            "GET", strategy.admin_url + ADMIN_COMMAND_STATUS
+        )
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
