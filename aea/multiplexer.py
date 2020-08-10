@@ -70,7 +70,6 @@ class AsyncMultiplexer(WithLogger):
             This information is used for envelopes which don't specify any routing context.
             If connections is None, this parameter is ignored.
         :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
-        :param agent_name: the name of the agent that owns the multiplexer, for logging purposes.
         """
         super().__init__(default_logger)
         self._connections: List[Connection] = []

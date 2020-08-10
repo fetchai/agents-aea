@@ -291,3 +291,12 @@ def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout"):
         time.sleep(0.0001)
         if time.time() > start_time + timeout:
             raise TimeoutError(error_msg)
+
+
+def is_message_in_caplog(expected, caplog, timeout=2, error_msg="Timeout") -> bool:
+    """Wait for a message in caplog."""
+    try:
+        wait_for_condition(lambda: expected in caplog.text, timeout=timeout, error_msg=error_msg)
+    except TimeoutError:
+        return False
+    return expected in caplog.text

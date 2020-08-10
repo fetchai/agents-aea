@@ -22,7 +22,6 @@ import asyncio
 import logging
 import shutil
 import tempfile
-import time
 import unittest.mock
 from pathlib import Path
 from threading import Thread
@@ -38,6 +37,7 @@ from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
+from .common.utils import is_message_in_caplog
 
 from .conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
@@ -58,9 +58,9 @@ async def test_receiving_loop_terminated(caplog):
     with caplog.at_level(logging.DEBUG):
         multiplexer.connection_status.is_connected = False
         await multiplexer._receiving_loop()
-        assert "Receiving loop terminated." in caplog.text
-        multiplexer.connection_status.is_connected = True
-        multiplexer.disconnect()
+    assert "Receiving loop terminated." in caplog.text
+    multiplexer.connection_status.is_connected = True
+    multiplexer.disconnect()
 
 
 def test_connect_twice():
@@ -96,14 +96,13 @@ def test_connect_twice_with_loop(caplog):
     multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop)
     try:
 
-        caplog.set_level(logging.DEBUG)
-        assert not multiplexer.connection_status.is_connected
-        multiplexer.connect()
-        assert multiplexer.connection_status.is_connected
-        multiplexer.connect()
-        assert multiplexer.connection_status.is_connected
-
-        assert "Multiplexer already connected." in caplog.text
+        with caplog.at_level(logging.DEBUG):
+            assert not multiplexer.connection_status.is_connected
+            multiplexer.connect()
+            assert multiplexer.connection_status.is_connected
+            multiplexer.connect()
+            assert multiplexer.connection_status.is_connected
+            assert is_message_in_caplog("Multiplexer already connected.", caplog)
     finally:
         multiplexer.disconnect()
         running_loop.call_soon_threadsafe(running_loop.stop)
@@ -182,7 +181,7 @@ async def test_disconnect_twice_a_single_connection(caplog):
 
     with caplog.at_level(logging.DEBUG):
         await multiplexer._disconnect_one(connection.connection_id)
-        assert "Connection fetchai/dummy:0.1.0 already disconnected." in caplog.text
+    assert "Connection fetchai/dummy:0.1.0 already disconnected." in caplog.text
 
 
 def test_multiplexer_disconnect_all_raises_error():
@@ -200,7 +199,7 @@ def test_multiplexer_disconnect_all_raises_error():
         ):
             multiplexer.disconnect()
 
-    # # do the true disconnection - for clean the test up
+    # do the true disconnection - for clean the test up
     assert multiplexer.connection_status.is_connected
     multiplexer.disconnect()
     assert not multiplexer.connection_status.is_connected
@@ -249,7 +248,7 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
         try:
             shutil.rmtree(tmpdir)
         except OSError as e:
-            logger.warning("Couldn't delete {}".format(tmpdir))
+            logger.warning(f"Couldn't delete {tmpdir}")
             logger.exception(e)
 
 
@@ -260,9 +259,9 @@ async def test_sending_loop_does_not_start_if_multiplexer_not_connected(caplog):
 
     with caplog.at_level(logging.DEBUG):
         await multiplexer._send_loop()
-        assert (
-            "Sending loop not started. The multiplexer is not connected." in caplog.text
-        )
+    assert (
+        "Sending loop not started. The multiplexer is not connected." in caplog.text
+    )
 
 
 @pytest.mark.asyncio
@@ -272,26 +271,21 @@ async def test_sending_loop_cancelled(caplog):
 
     with caplog.at_level(logging.DEBUG):
         multiplexer.connect()
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(1.0)
         multiplexer.disconnect()
-        assert "Sending loop cancelled." in caplog.text
+        assert is_message_in_caplog("Sending loop cancelled.", caplog)
 
 
 @pytest.mark.asyncio
-async def test_receiving_loop_raises_exception():
+async def test_receiving_loop_raises_exception(caplog):
     """Test the case when an error occurs when a receive is started."""
     connection = _make_dummy_connection()
     multiplexer = Multiplexer([connection])
 
     with unittest.mock.patch("asyncio.wait", side_effect=Exception("a weird error.")):
-        with unittest.mock.patch.object(
-            aea.mail.base.logger, "error"
-        ) as mock_logger_error:
+        with caplog.at_level(logging.ERROR):
             multiplexer.connect()
-            time.sleep(0.1)
-            mock_logger_error.assert_called_with(
-                "Error in the receiving loop: a weird error.", exc_info=True
-            )
+            assert is_message_in_caplog("Error in the receiving loop: a weird error.", caplog)
 
     multiplexer.disconnect()
 
@@ -334,8 +328,9 @@ def test_send_envelope_error_is_logged_by_send_loop(caplog):
 
     with caplog.at_level(logging.ERROR):
         multiplexer.put(envelope)
-        time.sleep(0.1)
-        assert f"No connection registered with id: {fake_connection_id}." in caplog.text
+
+    expected = f"No connection registered with id: {fake_connection_id}."
+    assert is_message_in_caplog(expected, caplog)
 
     multiplexer.disconnect()
 
@@ -423,11 +418,8 @@ def test_send_message_no_supported_protocol(caplog):
                 message=b"some bytes",
             )
             multiplexer.put(envelope)
-            time.sleep(0.5)
-            assert (
-                f"Connection {connection_1.connection_id} cannot handle protocol {protocol_id}. Cannot send the envelope."
-                in caplog.text
-            )
+            expected = f"Connection {connection_1.connection_id} cannot handle protocol {protocol_id}. Cannot send the envelope."
+            assert is_message_in_caplog(expected, caplog)
 
         multiplexer.disconnect()
 
@@ -600,4 +592,4 @@ async def test_default_route_applied(caplog):
         finally:
             await multiplexer.disconnect()
 
-            assert "Using default routing:" in caplog.text
+    assert "Using default routing:" in caplog.text
