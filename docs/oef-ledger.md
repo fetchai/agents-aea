@@ -1,7 +1,7 @@
 
 The Open Economic Framework (OEF) and Decentralized Ledger Technologies (DLTs) allow AEAs to create value through their interaction with other AEAs. The following diagram illustrates the relation of AEAs to the OEF and DLTs.
 
-<center>![The AEA, OEF, and Ledger systems](assets/oef-ledger.png)</center>
+<img src="../assets/oef-ledger.png" alt="The AEA, OEF, and Ledger systems" class="center">
 
 ## Open Economic Framework (OEF)
 
@@ -54,7 +54,7 @@ To view the `OEF search and communication node` logs for debugging, navigate to 
 
 To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.7.0`).
 
-If you experience any problems launching the `OEF search and communication node` then consult [this](https://docs.google.com/document/d/1x_hFwEIXHlr_JCkuIv-izxSz0tN-7kSmSc-g32ImL1U/edit?usp=sharing) guide.
+If you experience any problems launching the `OEF search and communication node` then consult <a href="https://docs.google.com/document/d/1x_hFwEIXHlr_JCkuIv-izxSz0tN-7kSmSc-g32ImL1U/edit?usp=sharing">this</a> guide.
 
 ### Installing docker
 
@@ -63,8 +63,8 @@ If you experience any problems launching the `OEF search and communication node`
   <p>For the purpose of the quickstart only, you can skip installation of docker.</p>
 </div>
 
-At some point, you will need [Docker](https://www.docker.com/) installed on your machine
-(e.g. to run an [OEF search and communication node](../oef-ledger)).
+At some point, you will need <a href="https://www.docker.com/">Docker</a> installed on your machine
+(e.g. to run an <a href="../oef-ledger">OEF search and communication node</a>.
 
 ### Download the scripts and examples directories
 
@@ -91,8 +91,8 @@ Whilst a ledger can, in principle, also be used to store structured data - for i
 
 The Python version of the AEA Framework currently integrates with three ledgers:
 
-- [Fetch.ai ledger](https://docs.fetch.ai/ledger/)
-- [Ethereum ledger](https://ethereum.org/build/)
-- [Cosmos ledger](https://cosmos.network/sdk)
+- <a href="https://docs.fetch.ai/ledger/">Fetch.ai ledger</a>
+- <a href="https://ethereum.org/en/build/">Ethereum ledger</a>
+- <a href="https://cosmos.network/sdk">Cosmos ledger</a>
 
 However, the framework makes it straightforward for further ledgers to be added by any developer.

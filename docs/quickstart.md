@@ -22,7 +22,7 @@ cd my_aea_projects/
 
 We highly recommend using a virtual environment to ensure consistency across dependencies.
 
-Check that you have [`pipenv`](https://github.com/pypa/pipenv).
+Check that you have <a href="https://github.com/pypa/pipenv">`pipenv`</a>.
 
 ``` bash
 which pipenv
@@ -38,7 +38,7 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 
 ## Installation
 
-The following installs the entire AEA package which also includes a [command-line interface (CLI)](../cli-commands).
+The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>.
 
 ``` bash
 pip install aea[all]
@@ -107,7 +107,7 @@ aea fetch fetchai/my_first_aea:0.8.0
 cd my_first_aea
 ```
 
-To learn more about the folder structure of an AEA project read on [here](../package-imports).
+To learn more about the folder structure of an AEA project read on <a href="../package-imports/">here</a>.
 
 <details><summary>Alternatively: step by step install</summary>
 

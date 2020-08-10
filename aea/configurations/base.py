@@ -90,7 +90,7 @@ These fields will be forwarded to the 'pip' command.
 Dependencies = Dict[str, Dependency]
 """
 A dictionary from package name to dependency data structure (see above).
-The package name must satisfy [the constraints on Python packages names](https://www.python.org/dev/peps/pep-0426/#name).
+The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426/#name">the constraints on Python packages names</a>.
 
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.

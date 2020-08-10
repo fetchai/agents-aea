@@ -306,11 +306,11 @@ aea run
 
 You should see **Faber_AEA** running and showing logs of its activities. For example:
 
-<center>![Aries demo: Faber terminal](assets/aries-demo-faber.png)</center>
+<img src="../assets/aries-demo-faber.png" alt="Aries demo: Faber terminal" class="center">
 
 Looking now at **Alice_AEA** terminal, you should also see more activity by **Alice_AEA** after **Faber_AEA** was started. For example:
 
-<center>![Aries demo: Alice terminal](assets/aries-demo-alice.png)</center>
+<img src="../assets/aries-demo-alice.png" alt="Aries demo: Alice terminal" class="center">
 
 The last error line in **Alice_AEA**'s terminal is caused due to the absence of an Indy ledger instance. In the next update to this demo, this will be resolved.
 
@@ -331,4 +331,4 @@ In the next update to this demo, the remaining interactions between AEAs and ACA
 
 * An instance of Indy ledger must be installed and running. See <a href="https://github.com/bcgov/von-network#running-the-network-locally" target=_blank>here</a> for more detail.
 * The commands for running the ACAs need to be adjusted. Additional options relating to a wallet (wallet-name, type, key, storage-type, config, creds) need to be fed to the ACAs as well as the ledger's genesis file so the ACAs can connect to the ledger.
-* The remaining interactions between the AEAs and ACAs as described <a href="./#discussion">here</a> need to be implemented.
+* The remaining interactions between the AEAs and ACAs as described <a href="../aries-cloud-agent-demo/#discussion">here</a> need to be implemented.

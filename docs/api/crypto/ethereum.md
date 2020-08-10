@@ -386,6 +386,58 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
+<a name="aea.crypto.ethereum.EthereumApi.get_contract_instance"></a>
+#### get`_`contract`_`instance
+
+```python
+ | get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
+```
+
+Get the instance of a contract.
+
+**Arguments**:
+
+- `contract_interface`: the contract interface.
+- `contract_address`: the contract address.
+
+**Returns**:
+
+the contract instance
+
+<a name="aea.crypto.ethereum.EthereumApi.get_deploy_transaction"></a>
+#### get`_`deploy`_`transaction
+
+```python
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, **kwargs, ,) -> Dict[str, Any]
+```
+
+Get the transaction to deploy the smart contract.
+
+**Arguments**:
+
+- `contract_interface`: the contract interface.
+- `deployer_address`: The address that will deploy the contract.
+- `value`: value to send to contract (ETH in Wei)
+- `gas`: the gas to be used
+:returns tx: the transaction dictionary.
+
+<a name="aea.crypto.ethereum.EthereumApi.try_estimate_gas"></a>
+#### try`_`estimate`_`gas
+
+```python
+ | try_estimate_gas(tx: Dict[str, Any]) -> Dict[str, Any]
+```
+
+Attempts to update the transaction with a gas estimate.
+
+**Arguments**:
+
+- `tx`: the transaction
+
+**Returns**:
+
+the transaction (potentially updated)
+
 <a name="aea.crypto.ethereum.EthereumFaucetApi"></a>
 ## EthereumFaucetApi Objects
 

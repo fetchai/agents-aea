@@ -348,11 +348,124 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
+<a name="aea.crypto.cosmos.CosmosApi.get_deploy_transaction"></a>
+#### get`_`deploy`_`transaction
+
+```python
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, tx_fee: int = 0, gas: int = 80000, denom: Optional[str] = None, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Dict[str, Any]
+```
+
+Create a CosmWasm bytecode deployment transaction.
+
+**Arguments**:
+
+- `sender_address`: the sender address of the message initiator.
+- `filename`: the path to wasm bytecode file.
+- `gas`: Maximum amount of gas to be used on executing command.
+- `memo`: Any string comment.
+- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+
+**Returns**:
+
+the unsigned CosmWasm contract deploy message
+
+<a name="aea.crypto.cosmos.CosmosApi.get_init_transaction"></a>
+#### get`_`init`_`transaction
+
+```python
+ | get_init_transaction(deployer_address: Address, code_id: int, init_msg: Any, amount: int, tx_fee: int, gas: int = 80000, denom: Optional[str] = None, label: str = "", memo: str = "", chain_id: Optional[str] = None) -> Optional[Any]
+```
+
+Create a CosmWasm InitMsg transaction.
+
+**Arguments**:
+
+- `deployer_address`: the deployer address of the message initiator.
+- `amount`: Contract's initial funds amount
+- `code_id`: the ID of contract bytecode.
+- `init_msg`: the InitMsg containing parameters for contract constructor.
+- `gas`: Maximum amount of gas to be used on executing command.
+- `denom`: the name of the denomination of the contract funds
+- `label`: the label name of the contract
+- `memo`: Any string comment.
+- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+
+**Returns**:
+
+the unsigned CosmWasm InitMsg
+
+<a name="aea.crypto.cosmos.CosmosApi.get_handle_transaction"></a>
+#### get`_`handle`_`transaction
+
+```python
+ | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None) -> Optional[Any]
+```
+
+Create a CosmWasm HandleMsg transaction.
+
+**Arguments**:
+
+- `sender_address`: the sender address of the message initiator.
+- `contract_address`: the address of the smart contract.
+- `handle_msg`: HandleMsg in JSON format.
+- `gas`: Maximum amount of gas to be used on executing command.
+- `memo`: Any string comment.
+- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+
+**Returns**:
+
+the unsigned CosmWasm HandleMsg
+
+<a name="aea.crypto.cosmos.CosmosApi.try_execute_wasm_transaction"></a>
+#### try`_`execute`_`wasm`_`transaction
+
+```python
+ | @staticmethod
+ | @try_decorator(
+ |         "Encountered exception when trying to execute wasm transaction: {}",
+ |         logger_method=logger.warning,
+ |     )
+ | try_execute_wasm_transaction(tx_signed: Any, signed_tx_filename: str = "tx.signed") -> Optional[str]
+```
+
+Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
+
+**Arguments**:
+
+- `tx_signed`: the signed transaction.
+
+**Returns**:
+
+the transaction digest
+
+<a name="aea.crypto.cosmos.CosmosApi.try_execute_wasm_query"></a>
+#### try`_`execute`_`wasm`_`query
+
+```python
+ | @staticmethod
+ | @try_decorator(
+ |         "Encountered exception when trying to execute wasm query: {}",
+ |         logger_method=logger.warning,
+ |     )
+ | try_execute_wasm_query(contract_address: Address, query_msg: Any) -> Optional[str]
+```
+
+Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
+
+**Arguments**:
+
+- `contract_address`: the address of the smart contract.
+- `query_msg`: QueryMsg in JSON format.
+
+**Returns**:
+
+the message receipt
+
 <a name="aea.crypto.cosmos.CosmosApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, account_number: int = 0, sequence: int = 0, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Optional[Any]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Optional[Any]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -364,7 +477,10 @@ Submit a transfer transaction to the ledger.
 - `amount`: the amount of wealth to be transferred.
 - `tx_fee`: the transaction fee.
 - `tx_nonce`: verifies the authenticity of the tx
-- `chain_id`: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
+- `denom`: the denomination of tx fee and amount
+- `gas`: the gas used.
+- `memo`: memo to include in tx.
+- `chain_id`: the chain ID of the transaction.
 
 **Returns**:
 
@@ -386,6 +502,26 @@ Send a signed transaction and wait for confirmation.
 **Returns**:
 
 tx_digest, if present
+
+<a name="aea.crypto.cosmos.CosmosApi.is_cosmwasm_transaction"></a>
+#### is`_`cosmwasm`_`transaction
+
+```python
+ | @staticmethod
+ | is_cosmwasm_transaction(tx_signed: Any) -> bool
+```
+
+Check whether it is a cosmwasm tx.
+
+<a name="aea.crypto.cosmos.CosmosApi.is_transfer_transaction"></a>
+#### is`_`transfer`_`transaction
+
+```python
+ | @staticmethod
+ | is_transfer_transaction(tx_signed: Any) -> bool
+```
+
+Check whether it is a transfer tx.
 
 <a name="aea.crypto.cosmos.CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
@@ -420,6 +556,33 @@ Get the transaction for a transaction digest.
 **Returns**:
 
 the tx, if present
+
+<a name="aea.crypto.cosmos.CosmosApi.get_contract_instance"></a>
+#### get`_`contract`_`instance
+
+```python
+ | get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
+```
+
+Get the instance of a contract.
+
+**Arguments**:
+
+- `contract_interface`: the contract interface.
+- `contract_address`: the contract address.
+
+**Returns**:
+
+the contract instance
+
+<a name="aea.crypto.cosmos.CosmWasmCLIWrapper"></a>
+## CosmWasmCLIWrapper Objects
+
+```python
+class CosmWasmCLIWrapper()
+```
+
+Wrapper of the CosmWasm CLI.
 
 <a name="aea.crypto.cosmos.CosmosFaucetApi"></a>
 ## CosmosFaucetApi Objects

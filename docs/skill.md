@@ -21,7 +21,7 @@ The framework provides one default skill, called `error`. Additional skills can 
 
 Skills are `horizontally layered`, that is they run independently of each other. They also cannot access each other's state.
 
-Two skills can communicate with each other in two ways. The skill context provides access via `self.context.shared_state` to a key-value store which allows skills to share state. A skill can also define as a callback another skill in [a message to the decision maker](../decision-maker-transaction).
+Two skills can communicate with each other in two ways. The skill context provides access via `self.context.shared_state` to a key-value store which allows skills to share state. A skill can also define as a callback another skill in <a href="../decision-maker-transaction">a message to the decision maker</a>.
 
 ## Context
 
@@ -55,7 +55,7 @@ There can be none, one or more `Handler` class per skill.
 
 A handler can be registered in one way:
 
-- By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
+- By declaring it in the skill configuration file `skill.yaml` (see <a href="../skill/#skill-config">below</a>).
 
 It is possible to register new handlers dynamically by enqueuing new
 `Handler` instances in the queue `context.new_handlers`, e.g. in a skill
@@ -75,7 +75,7 @@ There can be one or more `Behaviour` classes per skill. The developer must creat
 
 A behaviour can be registered in two ways:
 
-- By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
+- By declaring it in the skill configuration file `skill.yaml` (see <a href="../skill/#skill-config">below</a>)
 - In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
 
 The framework supports different types of behaviours:
@@ -144,7 +144,7 @@ There can be one or more `Task` classes per skill. The developer subclasses abst
 
 * `execute(self)`: is how the framework calls a `Task`. 
 
-The `Task` class implements the [functor pattern](https://en.wikipedia.org/wiki/Function_object).
+The `Task` class implements the <a href="https://en.wikipedia.org/wiki/Function_object">functor pattern</a>.
 An instance of the `Task` class can be invoked as if it 
 were an ordinary function. Once completed, it will store the
 result in the property `result`. Raises error if the task has not been executed yet,
