@@ -3,6 +3,142 @@
 
 This module contains utilities for building an AEA.
 
+<a name="aea.aea_builder._DependenciesManager"></a>
+## `_`DependenciesManager Objects
+
+```python
+class _DependenciesManager()
+```
+
+Class to manage dependencies of agent packages.
+
+<a name="aea.aea_builder._DependenciesManager.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__()
+```
+
+Initialize the dependency graph.
+
+<a name="aea.aea_builder._DependenciesManager.all_dependencies"></a>
+#### all`_`dependencies
+
+```python
+ | @property
+ | all_dependencies() -> Set[ComponentId]
+```
+
+Get all dependencies.
+
+<a name="aea.aea_builder._DependenciesManager.dependencies_highest_version"></a>
+#### dependencies`_`highest`_`version
+
+```python
+ | @property
+ | dependencies_highest_version() -> Set[ComponentId]
+```
+
+Get the dependencies with highest version.
+
+<a name="aea.aea_builder._DependenciesManager.get_components_by_type"></a>
+#### get`_`components`_`by`_`type
+
+```python
+ | get_components_by_type(component_type: ComponentType) -> Dict[ComponentId, ComponentConfiguration]
+```
+
+Get the components by type.
+
+<a name="aea.aea_builder._DependenciesManager.protocols"></a>
+#### protocols
+
+```python
+ | @property
+ | protocols() -> Dict[ComponentId, ProtocolConfig]
+```
+
+Get the protocols.
+
+<a name="aea.aea_builder._DependenciesManager.connections"></a>
+#### connections
+
+```python
+ | @property
+ | connections() -> Dict[ComponentId, ConnectionConfig]
+```
+
+Get the connections.
+
+<a name="aea.aea_builder._DependenciesManager.skills"></a>
+#### skills
+
+```python
+ | @property
+ | skills() -> Dict[ComponentId, SkillConfig]
+```
+
+Get the skills.
+
+<a name="aea.aea_builder._DependenciesManager.contracts"></a>
+#### contracts
+
+```python
+ | @property
+ | contracts() -> Dict[ComponentId, ContractConfig]
+```
+
+Get the contracts.
+
+<a name="aea.aea_builder._DependenciesManager.add_component"></a>
+#### add`_`component
+
+```python
+ | add_component(configuration: ComponentConfiguration) -> None
+```
+
+Add a component to the dependency manager..
+
+**Arguments**:
+
+- `configuration`: the component configuration to add.
+
+**Returns**:
+
+None
+
+<a name="aea.aea_builder._DependenciesManager.remove_component"></a>
+#### remove`_`component
+
+```python
+ | remove_component(component_id: ComponentId)
+```
+
+Remove a component.
+
+:return None
+
+**Raises**:
+
+- `ValueError`: if some component depends on this package.
+
+<a name="aea.aea_builder._DependenciesManager.pypi_dependencies"></a>
+#### pypi`_`dependencies
+
+```python
+ | @property
+ | pypi_dependencies() -> Dependencies
+```
+
+Get all the PyPI dependencies.
+
+We currently consider only dependency that have the
+default PyPI index url and that specify only the
+version field.
+
+**Returns**:
+
+the merged PyPI dependencies
 
 <a name="aea.aea_builder.AEABuilder"></a>
 ## AEABuilder Objects

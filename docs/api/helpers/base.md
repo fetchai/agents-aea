@@ -126,6 +126,23 @@ However, a subprocess.Popen class has the method
 
 None
 
+<a name="aea.helpers.base.send_control_c"></a>
+#### send`_`control`_`c
+
+```python
+send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None
+```
+
+Send ctrl-C crossplatform to terminate a subprocess.
+
+**Arguments**:
+
+- `process`: the process to send the signal to.
+
+**Returns**:
+
+None
+
 <a name="aea.helpers.base.RegexConstrainedString"></a>
 ## RegexConstrainedString Objects
 

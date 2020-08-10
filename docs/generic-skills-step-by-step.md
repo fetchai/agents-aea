@@ -14,9 +14,9 @@ To follow this tutorial to completion you will need:
  
  - AEA Framework
 	
-The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the [OEF search and communication node](../oef-ledger) and will identify itself as a seller of that data.
+The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the <a href="../oef-ledger">OEF search and communication node</a> and will identify itself as a seller of that data.
 
-If you simply want to follow the software part of the guide then you only require the dependencies listed in the <a href="#dependencies">Dependencies</a> section.
+If you simply want to follow the software part of the guide then you only require the dependencies listed in the <a href="../generic-skills-step-by-step/#dependencies">Dependencies</a> section.
 
 ### Setup the environment (Optional)
 
@@ -236,15 +236,15 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering agent from SOEF.")
 ```
 
-This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the [OEF search node](../oef-ledger) at regular tick intervals (here 30 seconds). By registering, the AEA becomes discoverable to possible clients.
+This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the <a href="../oef-ledger">OEF search node</a> at regular tick intervals (here 30 seconds). By registering, the AEA becomes discoverable to possible clients.
 
-The act method unregisters and registers the AEA to the [OEF search node](../oef-ledger) on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
+The act method unregisters and registers the AEA to the <a href="../oef-ledger">OEF search node</a> on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
 
 At setup we are checking if we have a positive account balance for the AEA's address on the configured ledger.
 
 ### Step 3: Create the handler
 
-So far, we have tasked the AEA with sending register/unregister requests to the [OEF search node](../oef-ledger). However, we have at present no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or messages sent from any other AEA.
+So far, we have tasked the AEA with sending register/unregister requests to the <a href="../oef-ledger">OEF search node</a>. However, we have at present no way of handling the responses sent to the AEA by the <a href="../oef-ledger">OEF search node</a> or messages sent from any other AEA.
 
 We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow, up to the agreement between a seller_AEA and a buyer_AEA.
 
@@ -364,7 +364,7 @@ class GenericFipaHandler(Handler):
         """
         pass
 ```
-The code above is logic for handling `FipaMessages` received by the `my_generic_seller` AEA. We use `FipaDialogues` (more on this below in <a href="#step-5-create-the-dialogues">this</a> section) to keep track of the dialogue state between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
+The code above is logic for handling `FipaMessages` received by the `my_generic_seller` AEA. We use `FipaDialogues` (more on this below in <a href="../generic-skills-step-by-step/#step-5-create-the-dialogues">this</a> section) to keep track of the dialogue state between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
 
 First, we check if the message is registered to an existing dialogue or if we have to create a new dialogue. The second part matches messages with their handler based on the message's performative. We are going to implement each case in a different function.
 
@@ -957,7 +957,7 @@ We initialise the strategy class. We are trying to read the strategy variables f
 possible we specified some default values.
 
 The following functions are related with 
-the [OEF search node](../oef-ledger) registration and we assume that the query matches the supply. Add them under the initialization of the class:
+the <a href="../oef-ledger">OEF search node</a> registration and we assume that the query matches the supply. Add them under the initialization of the class:
 
 ``` python
     @property
@@ -1532,11 +1532,11 @@ class GenericSearchBehaviour(TickerBehaviour):
         pass
 ```
 
-This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will search on  the[OEF search node](../oef-ledger) with a specific query at regular tick intervals. 
+This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will search on  the <a href="../oef-ledger">OEF search node</a> with a specific query at regular tick intervals. 
 
 ### Step 3: Create the handler
 
-So far, we have tasked the AEA with sending search queries to the [OEF search node](../oef-ledger). However, we have at present no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or messages sent by other agent.
+So far, we have tasked the AEA with sending search queries to the <a href="../oef-ledger">OEF search node</a>. However, we have at present no way of handling the responses sent to the AEA by the <a href="../oef-ledger">OEF search node</a> or messages sent by other agent.
 
 Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_generic_buyer/skills/generic_buyer/handlers.py`) and add the following code:
 
@@ -1845,9 +1845,9 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
 ```
 The main difference between the `generic_buyer` and the `generic_seller` skill `handlers.py` file is that in this one we create more than one handler.
 
-The reason is that we receive messages not only from the `my_generic_seller` AEA but also from the `DecisionMaker` and the [OEF search node](../oef-ledger). We need one handler for each type of protocol we use.
+The reason is that we receive messages not only from the `my_generic_seller` AEA but also from the `DecisionMaker` and the <a href="../oef-ledger">OEF search node</a>. We need one handler for each type of protocol we use.
 
-To handle the messages in the `oef_search` protocol used by the [OEF search node](../oef-ledger) we add the following code in the same file (`my_generic_buyer/skills/generic_buyer/handlers.py`):
+To handle the messages in the `oef_search` protocol used by the <a href="../oef-ledger">OEF search node</a> we add the following code in the same file (`my_generic_buyer/skills/generic_buyer/handlers.py`):
 
 ``` python 
 class GenericOefSearchHandler(Handler):
@@ -1976,7 +1976,7 @@ class GenericOefSearchHandler(Handler):
             )
         )
 ```
-When we receive a message from the [OEF search node](../oef-ledger) of a type `OefSearchMessage.Performative.SEARCH_RESULT`, we are passing the details to the relevant handler method. In the `_handle_search` function we are checking that the response contains some agents and we stop the search if it does. We pick our first agent and we send a `CFP` message.
+When we receive a message from the <a href="../oef-ledger">OEF search node</a> of a type `OefSearchMessage.Performative.SEARCH_RESULT`, we are passing the details to the relevant handler method. In the `_handle_search` function we are checking that the response contains some agents and we stop the search if it does. We pick our first agent and we send a `CFP` message.
 
 The last handler we need is the `MyTransactionHandler`. This handler will handle the internal messages that we receive from the `DecisionMaker`.
 
@@ -2977,12 +2977,12 @@ Under config locate:
 ``` yaml
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
-and replace it with your IP (the IP of the machine that runs the [OEF search and communication node](../oef-ledger) image.)
+and replace it with your IP (the IP of the machine that runs the <a href="../oef-ledger">OEF search and communication node</a> image.)
 
 </details> -->
 
 
-In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
+In a separate terminal, launch a local <a href="../oef-ledger">OEF search and communication node</a>.
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
@@ -3094,6 +3094,6 @@ You have completed the "Getting Started" series. Congratulations!
 
 ### Recommended
 
-We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="fetch-ai.slack.com">Slack</a>. Speak to you there!
+We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://fetch-ai.slack.com">Slack</a>. Speak to you there!
 
 <br />

@@ -177,7 +177,7 @@ models:
 dependencies:
   SQLAlchemy: {}
 ```
-The `data_model` and the `service_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `service_data` dictionary.
+The `data_model` and the `service_data` are used to register the service in the <a href="../oef-ledger">OEF search node</a> and make your agent discoverable. The name of each attribute must be a key in the `service_data` dictionary.
 
 In `my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) ensure you have matching data.
 

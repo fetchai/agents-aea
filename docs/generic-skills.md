@@ -175,7 +175,7 @@ models:
       unit_price: 10
     class_name: GenericStrategy
 ```
-The `data_model`, `data_model_name` and the `service_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
+The `data_model`, `data_model_name` and the `service_data` are used to register the service in the <a href="../oef-ledger">OEF search node</a> and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
 
 In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) defines the `search_query`, which has to match the `service_data` of the seller.
 
