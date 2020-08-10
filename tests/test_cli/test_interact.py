@@ -58,7 +58,8 @@ class TestInteractCommand(AEATestCaseMany):
             missing_strings
         )
 
-        self.terminate_agents(agent_process, interaction_process)
+        self.terminate_agents(interaction_process)
+        self.terminate_agents(agent_process)
         assert (
             self.is_successfully_terminated()
         ), "Agent {} wasn't successfully terminated.".format(agent_name)
