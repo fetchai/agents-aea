@@ -26,7 +26,6 @@ import time
 import unittest.mock
 from pathlib import Path
 from threading import Thread
-from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -51,17 +50,18 @@ from .conftest import (
 
 
 @pytest.mark.asyncio
-async def test_receiving_loop_terminated():
+async def test_receiving_loop_terminated(caplog):
     """Test that connecting twice the multiplexer behaves correctly."""
+    caplog.set_level(logging.DEBUG)
+
     multiplexer = Multiplexer([_make_dummy_connection()])
     multiplexer.connect()
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        multiplexer.connection_status.is_connected = False
-        await multiplexer._receiving_loop()
-        mock_logger_debug.assert_called_with("Receiving loop terminated.")
-        multiplexer.connection_status.is_connected = True
-        multiplexer.disconnect()
+    multiplexer.connection_status.is_connected = False
+    await multiplexer._receiving_loop()
+    assert "Receiving loop terminated." in caplog.text
+    multiplexer.connection_status.is_connected = True
+    multiplexer.disconnect()
 
 
 def test_connect_twice():
@@ -88,7 +88,7 @@ def test_disconnect_twice():
     multiplexer.disconnect()
 
 
-def test_connect_twice_with_loop():
+def test_connect_twice_with_loop(caplog):
     """Test that connecting twice the multiplexer behaves correctly."""
     running_loop = asyncio.new_event_loop()
     thread_loop = Thread(target=running_loop.run_forever)
@@ -97,16 +97,14 @@ def test_connect_twice_with_loop():
     try:
         multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop)
 
-        with unittest.mock.patch.object(
-            aea.mail.base.logger, "debug"
-        ) as mock_logger_debug:
+        with caplog.at_level(logging.DEBUG):
             assert not multiplexer.connection_status.is_connected
             multiplexer.connect()
             assert multiplexer.connection_status.is_connected
             multiplexer.connect()
             assert multiplexer.connection_status.is_connected
 
-            mock_logger_debug.assert_called_with("Multiplexer already connected.")
+            assert "Multiplexer already connected." in caplog.text
 
             multiplexer.disconnect()
             running_loop.call_soon_threadsafe(running_loop.stop)
@@ -115,19 +113,18 @@ def test_connect_twice_with_loop():
 
 
 @pytest.mark.asyncio
-async def test_connect_twice_a_single_connection():
+async def test_connect_twice_a_single_connection(caplog):
     """Test that connecting twice a single connection behaves correctly."""
+    caplog.set_level(logging.DEBUG)
+
     connection = _make_dummy_connection()
     multiplexer = Multiplexer([connection])
 
     assert not multiplexer.connection_status.is_connected
     await multiplexer._connect_one(connection.connection_id)
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        await multiplexer._connect_one(connection.connection_id)
-        mock_logger_debug.assert_called_with(
-            "Connection fetchai/dummy:0.1.0 already established."
-        )
-        await multiplexer._disconnect_one(connection.connection_id)
+    await multiplexer._connect_one(connection.connection_id)
+    assert "Connection fetchai/dummy:0.1.0 already established." in caplog.text
+    await multiplexer._disconnect_one(connection.connection_id)
 
 
 def test_multiplexer_connect_all_raises_error():
@@ -179,17 +176,16 @@ def test_multiplexer_connect_one_raises_error_many_connections():
 
 
 @pytest.mark.asyncio
-async def test_disconnect_twice_a_single_connection():
+async def test_disconnect_twice_a_single_connection(caplog):
     """Test that connecting twice a single connection behaves correctly."""
+    caplog.set_level(logging.DEBUG)
     connection = _make_dummy_connection()
     multiplexer = Multiplexer([_make_dummy_connection()])
 
     assert not multiplexer.connection_status.is_connected
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        await multiplexer._disconnect_one(connection.connection_id)
-        mock_logger_debug.assert_called_with(
-            "Connection fetchai/dummy:0.1.0 already disconnected."
-        )
+
+    await multiplexer._disconnect_one(connection.connection_id)
+    assert "Connection fetchai/dummy:0.1.0 already disconnected." in caplog.text
 
 
 def test_multiplexer_disconnect_all_raises_error():
@@ -261,27 +257,26 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
 
 
 @pytest.mark.asyncio
-async def test_sending_loop_does_not_start_if_multiplexer_not_connected():
+async def test_sending_loop_does_not_start_if_multiplexer_not_connected(caplog):
     """Test that the sending loop is stopped does not start if the multiplexer is not connected."""
+    caplog.set_level(logging.DEBUG)
+
     multiplexer = Multiplexer([_make_dummy_connection()])
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        await multiplexer._send_loop()
-        mock_logger_debug.assert_called_with(
-            "Sending loop not started. The multiplexer is not connected."
-        )
+    await multiplexer._send_loop()
+    assert "Sending loop not started. The multiplexer is not connected." in caplog.text
 
 
 @pytest.mark.asyncio
-async def test_sending_loop_cancelled():
+async def test_sending_loop_cancelled(caplog):
     """Test the case when the sending loop is cancelled."""
+    caplog.set_level(logging.DEBUG)
     multiplexer = Multiplexer([_make_dummy_connection()])
 
     multiplexer.connect()
     await asyncio.sleep(0.1)
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        multiplexer.disconnect()
-        mock_logger_debug.assert_any_call("Sending loop cancelled.")
+    multiplexer.disconnect()
+    assert "Sending loop cancelled." in caplog.text
 
 
 @pytest.mark.asyncio
@@ -324,7 +319,7 @@ async def test_send_envelope_with_non_registered_connection():
     multiplexer.disconnect()
 
 
-def test_send_envelope_error_is_logged_by_send_loop():
+def test_send_envelope_error_is_logged_by_send_loop(caplog):
     """Test that the AEAConnectionError in the '_send' method is logged by the '_send_loop'."""
     connection = _make_dummy_connection()
     multiplexer = Multiplexer([connection])
@@ -339,12 +334,10 @@ def test_send_envelope_error_is_logged_by_send_loop():
         context=EnvelopeContext(connection_id=fake_connection_id),
     )
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "error") as mock_logger_error:
+    with caplog.at_level(logging.ERROR):
         multiplexer.put(envelope)
         time.sleep(0.1)
-        mock_logger_error.assert_called_with(
-            "No connection registered with id: {}.".format(fake_connection_id)
-        )
+        assert f"No connection registered with id: {fake_connection_id}." in caplog.text
 
     multiplexer.disconnect()
 
@@ -408,7 +401,7 @@ def test_get_from_multiplexer_when_empty():
 #         multiplexer.disconnect()
 
 
-def test_send_message_no_supported_protocol():
+def test_send_message_no_supported_protocol(caplog):
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
         identity_1 = Identity("", address="address_1")
@@ -423,7 +416,7 @@ def test_send_message_no_supported_protocol():
 
         multiplexer.connect()
 
-        with mock.patch.object(aea.mail.base.logger, "warning") as mock_logger_warning:
+        with caplog.at_level(logging.WARNING):
             protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             envelope = Envelope(
                 to=identity_1.address,
@@ -433,10 +426,9 @@ def test_send_message_no_supported_protocol():
             )
             multiplexer.put(envelope)
             time.sleep(0.5)
-            mock_logger_warning.assert_called_with(
-                "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
-                    connection_1.connection_id, protocol_id
-                )
+            assert (
+                f"Connection {connection_1.connection_id} cannot handle protocol {protocol_id}. Cannot send the envelope."
+                in caplog.text
             )
 
         multiplexer.disconnect()
