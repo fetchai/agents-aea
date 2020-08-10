@@ -37,8 +37,8 @@ from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
-from .common.utils import is_message_in_caplog
 
+from .common.utils import is_message_in_caplog
 from .conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
@@ -259,9 +259,7 @@ async def test_sending_loop_does_not_start_if_multiplexer_not_connected(caplog):
 
     with caplog.at_level(logging.DEBUG):
         await multiplexer._send_loop()
-    assert (
-        "Sending loop not started. The multiplexer is not connected." in caplog.text
-    )
+    assert "Sending loop not started. The multiplexer is not connected." in caplog.text
 
 
 @pytest.mark.asyncio
@@ -285,7 +283,9 @@ async def test_receiving_loop_raises_exception(caplog):
     with unittest.mock.patch("asyncio.wait", side_effect=Exception("a weird error.")):
         with caplog.at_level(logging.ERROR):
             multiplexer.connect()
-            assert is_message_in_caplog("Error in the receiving loop: a weird error.", caplog)
+            assert is_message_in_caplog(
+                "Error in the receiving loop: a weird error.", caplog
+            )
 
     multiplexer.disconnect()
 

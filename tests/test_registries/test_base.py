@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/registries/base.py."""
+import logging
 import os
 import random
 import shutil
@@ -626,7 +627,7 @@ class TestComponentRegistry:
         ):
             self.registry.unregister_by_skill(PublicId.from_str("author/skill:0.1.0"))
 
-    def test_setup_with_inactive_skill(self):
+    def test_setup_with_inactive_skill(self, caplog):
         """Test setup with inactive skill."""
         mock_item = MagicMock(
             name="name", skill_id="skill", context=MagicMock(is_active=False)
@@ -634,12 +635,11 @@ class TestComponentRegistry:
         with unittest.mock.patch.object(
             self.registry, "fetch_all", return_value=[mock_item]
         ):
-            with unittest.mock.patch.object(
-                aea.registries.base.logger, "debug"
-            ) as mock_debug:
+            with caplog.at_level(logging.DEBUG, logger="aea.registries.base.logger"):
                 self.registry.setup()
-                mock_debug.assert_called_with(
+                assert (
                     f"Ignoring setup() of component {mock_item.name} of skill {mock_item.skill_id}, because the skill is not active."
+                    in caplog.text
                 )
 
 

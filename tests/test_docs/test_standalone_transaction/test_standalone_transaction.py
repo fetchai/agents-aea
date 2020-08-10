@@ -21,7 +21,6 @@
 
 import logging
 import os
-from unittest.mock import patch
 
 import pytest
 
@@ -30,10 +29,7 @@ from aea.test_tools.test_cases import BaseAEATestCase
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS_INTEGRATION, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
-from .standalone_transaction import (
-    logger,
-    run,
-)
+from .standalone_transaction import run
 
 MD_FILE = "docs/standalone-transaction.md"
 PY_FILE = "test_docs/test_standalone_transaction/standalone_transaction.py"
@@ -46,20 +42,9 @@ class TestStandaloneTransaction(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @classmethod
-    def _patch_logger(cls):
-
-        cls.patch_logger_info = patch.object(logger, "info")
-        cls.mocked_logger_info = cls.patch_logger_info.__enter__()
-
-    @classmethod
-    def _unpatch_logger(cls):
-        cls.mocked_logger_info.__exit__()
-
-    @classmethod
     def setup_class(cls):
         """Setup the test class."""
         BaseAEATestCase.setup_class()
-        cls._patch_logger()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)

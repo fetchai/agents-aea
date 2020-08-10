@@ -22,9 +22,9 @@ import asyncio
 import copy
 import json
 import logging
+import re
 from traceback import print_exc
 from typing import cast
-from unittest.mock import patch
 
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse
@@ -40,7 +40,6 @@ from packages.fetchai.connections.webhook.connection import WebhookConnection
 from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
-from tests.common.mocks import RegexComparator
 from tests.conftest import (
     get_host,
     get_unused_tcp_port,
@@ -122,7 +121,7 @@ class TestWebhookConnection:
         await call_task
 
     @pytest.mark.asyncio
-    async def test_send(self):
+    async def test_send(self, caplog):
         """Test the connect functionality of the webhook connection."""
         await self.webhook_connection.connect()
         assert self.webhook_connection.is_connected is True
@@ -144,13 +143,12 @@ class TestWebhookConnection:
             protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
             message=http_message,
         )
-        with patch.object(self.webhook_connection.logger, "warning") as mock_logger:
+        with caplog.at_level(logging.WARNING):
             await self.webhook_connection.send(envelope)
             await asyncio.sleep(0.01)
-            mock_logger.assert_any_call(
-                RegexComparator(
-                    "Dropping envelope=.* as sending via the webhook is not possible!"
-                )
+            assert re.search(
+                r"Dropping envelope=.* as sending via the webhook is not possible!",
+                caplog.text,
             )
 
     async def call_webhook(self, topic: str, **kwargs) -> ClientResponse:

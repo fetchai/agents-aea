@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the tasks module."""
-
+import logging
 from unittest import TestCase, mock
 from unittest.mock import Mock, patch
 
@@ -107,17 +107,17 @@ class TaskManagerTestCase(TestCase):
             obj._stopped = False
             obj.start()
             debug_mock.assert_called_once()
-            obj.stop()
+        obj.stop()
 
-    def test_start_lazy_pool_start(self):
+    def test_start_lazy_pool_start(self, caplog):
         """Test start method with lazy pool start."""
         obj = TaskManager(is_lazy_pool_start=False)
-        with mock.patch.object(obj.logger, "debug") as debug_mock:
+        with caplog.at_level(logging.DEBUG):
             obj.start()
             obj._stopped = True
             obj.start()
-            debug_mock.assert_called_with("Pool was already started!")
-            obj.start()
+            assert "Pool was already started!" in caplog.text
+        obj.stop()
 
     def test_enqueue_task_stopped(self):
         """Test enqueue_task method manager stopped."""
