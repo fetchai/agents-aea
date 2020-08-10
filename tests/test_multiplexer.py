@@ -52,16 +52,15 @@ from .conftest import (
 @pytest.mark.asyncio
 async def test_receiving_loop_terminated(caplog):
     """Test that connecting twice the multiplexer behaves correctly."""
-    caplog.set_level(logging.DEBUG)
-
     multiplexer = Multiplexer([_make_dummy_connection()])
     multiplexer.connect()
 
-    multiplexer.connection_status.is_connected = False
-    await multiplexer._receiving_loop()
-    assert "Receiving loop terminated." in caplog.text
-    multiplexer.connection_status.is_connected = True
-    multiplexer.disconnect()
+    with caplog.at_level(logging.DEBUG):
+        multiplexer.connection_status.is_connected = False
+        await multiplexer._receiving_loop()
+        assert "Receiving loop terminated." in caplog.text
+        multiplexer.connection_status.is_connected = True
+        multiplexer.disconnect()
 
 
 def test_connect_twice():
@@ -115,16 +114,15 @@ def test_connect_twice_with_loop(caplog):
 @pytest.mark.asyncio
 async def test_connect_twice_a_single_connection(caplog):
     """Test that connecting twice a single connection behaves correctly."""
-    caplog.set_level(logging.DEBUG)
-
     connection = _make_dummy_connection()
     multiplexer = Multiplexer([connection])
 
-    assert not multiplexer.connection_status.is_connected
-    await multiplexer._connect_one(connection.connection_id)
-    await multiplexer._connect_one(connection.connection_id)
-    assert "Connection fetchai/dummy:0.1.0 already established." in caplog.text
-    await multiplexer._disconnect_one(connection.connection_id)
+    with caplog.at_level(logging.DEBUG):
+        assert not multiplexer.connection_status.is_connected
+        await multiplexer._connect_one(connection.connection_id)
+        await multiplexer._connect_one(connection.connection_id)
+        assert "Connection fetchai/dummy:0.1.0 already established." in caplog.text
+        await multiplexer._disconnect_one(connection.connection_id)
 
 
 def test_multiplexer_connect_all_raises_error():
@@ -178,14 +176,14 @@ def test_multiplexer_connect_one_raises_error_many_connections():
 @pytest.mark.asyncio
 async def test_disconnect_twice_a_single_connection(caplog):
     """Test that connecting twice a single connection behaves correctly."""
-    caplog.set_level(logging.DEBUG)
     connection = _make_dummy_connection()
     multiplexer = Multiplexer([_make_dummy_connection()])
 
     assert not multiplexer.connection_status.is_connected
 
-    await multiplexer._disconnect_one(connection.connection_id)
-    assert "Connection fetchai/dummy:0.1.0 already disconnected." in caplog.text
+    with caplog.at_level(logging.DEBUG):
+        await multiplexer._disconnect_one(connection.connection_id)
+        assert "Connection fetchai/dummy:0.1.0 already disconnected." in caplog.text
 
 
 def test_multiplexer_disconnect_all_raises_error():
@@ -259,24 +257,25 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
 @pytest.mark.asyncio
 async def test_sending_loop_does_not_start_if_multiplexer_not_connected(caplog):
     """Test that the sending loop is stopped does not start if the multiplexer is not connected."""
-    caplog.set_level(logging.DEBUG)
-
     multiplexer = Multiplexer([_make_dummy_connection()])
 
-    await multiplexer._send_loop()
-    assert "Sending loop not started. The multiplexer is not connected." in caplog.text
+    with caplog.at_level(logging.DEBUG):
+        await multiplexer._send_loop()
+        assert (
+            "Sending loop not started. The multiplexer is not connected." in caplog.text
+        )
 
 
 @pytest.mark.asyncio
 async def test_sending_loop_cancelled(caplog):
     """Test the case when the sending loop is cancelled."""
-    caplog.set_level(logging.DEBUG)
     multiplexer = Multiplexer([_make_dummy_connection()])
 
-    multiplexer.connect()
-    await asyncio.sleep(0.1)
-    multiplexer.disconnect()
-    assert "Sending loop cancelled." in caplog.text
+    with caplog.at_level(logging.DEBUG):
+        multiplexer.connect()
+        await asyncio.sleep(0.1)
+        multiplexer.disconnect()
+        assert "Sending loop cancelled." in caplog.text
 
 
 @pytest.mark.asyncio
