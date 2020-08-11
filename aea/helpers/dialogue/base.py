@@ -454,25 +454,6 @@ class Dialogue(ABC):
                 self._outgoing_messages.extend([message])
         return is_extendable
 
-    # def ensure_to(self, message: Message) -> None:
-    #     """
-    #     Ensure the 'to' field is set (set if not) correctly.
-    #
-    #     :param message: a message
-    #     :return: None
-    #     """
-    #     to = None  # type: Optional[str]
-    #     try:
-    #         to = message.to
-    #     except AssertionError:
-    #         # assume message belongs to dialogue
-    #         message.to = self.dialogue_label.dialogue_opponent_addr
-    #
-    #     if to is not None:
-    #         assert (
-    #             message.to == self.dialogue_label.dialogue_opponent_addr
-    #         ), "The 'To' field in the message is different from the opponent in this dialogue."
-
     def is_belonging_to_dialogue(self, message: Message) -> bool:
         """
         Check if the message is belonging to the dialogue.
