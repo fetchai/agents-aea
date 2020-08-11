@@ -559,7 +559,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 "wasmcli",
                 "tx",
                 "broadcast",
-                signed_tx_filename,
+                os.path.join(tmpdirname, signed_tx_filename),
             ]
 
             stdout, _ = subprocess.Popen(  # nosec
@@ -735,7 +735,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
     def is_cosmwasm_transaction(tx_signed: Any) -> bool:
         """Check whether it is a cosmwasm tx."""
         try:
-            _type = tx_signed["tx"]["msg"][0]["type"]
+            _type = tx_signed["value"]["msg"][0]["type"]
             result = _type in ["wasm/store-code", "wasm/instantiate", "wasm/execute"]
         except KeyError:  # pragma: nocover
             result = False

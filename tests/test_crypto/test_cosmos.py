@@ -419,7 +419,7 @@ def test_try_execute_wasm_transaction():
 def test_send_signed_transaction_wasm_transaction():
     """Test the send_signed_transaction method for a wasm transaction."""
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
-    tx_signed = {"tx": {"msg": [{"type": "wasm/store-code"}]}}
+    tx_signed = {"value": {"msg": [{"type": "wasm/store-code"}]}}
     with mock.patch.object(
         cosmos_api, "try_execute_wasm_transaction", return_value="digest"
     ):
