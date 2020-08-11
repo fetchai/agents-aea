@@ -34,7 +34,7 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
 
@@ -179,7 +179,12 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
+        kwargs = dict(
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            env=os.environ.copy(),
+            cwd=cwd,
+        )
 
         if sys.platform == "win32":  # pragma: nocover
             startupinfo = subprocess.STARTUPINFO()
@@ -680,7 +685,7 @@ class BaseAEATestCase(ABC):
     def missing_from_output(
         cls,
         process: subprocess.Popen,
-        strings: Tuple[str],
+        strings: Sequence[str],
         timeout: int = DEFAULT_PROCESS_TIMEOUT,
         period: int = 1,
         is_terminating: bool = True,
