@@ -1,6 +1,6 @@
 name: erc1155_client
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 description: The erc1155 client interacts with the erc1155 deployer to conduct an
   atomic swap.
 license: Apache-2.0
@@ -9,11 +9,11 @@ fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
   behaviours.py: QmToJBBbG2z8FGwWEtxL7tZkXfWuSUDbesxiAsmxRQxmdj
   dialogues.py: QmXd6KC9se6qZWaAsoqJpRYNF6BvVPBd5KJBxSKq9xhLLh
-  handlers.py: QmZeKbEaYpStT2p5p9FzpQ3Yd3JZj1DrzfVL9tpTnG3BV4
+  handlers.py: QmVuy5wQKfVwjRFs2y9jQS6f1KTGumSGUb4UGQWFsNoQsQ
   strategy.py: QmNg87LgfLPoPyokFrmvrNghQD7JkWehRNAdRNyB3YogeN
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.7.0
+- fetchai/erc1155:0.8.0
 protocols:
 - fetchai/contract_api:0.2.0
 - fetchai/default:0.4.0
