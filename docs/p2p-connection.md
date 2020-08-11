@@ -68,6 +68,11 @@ config:
   log_file: libp2p_node.log
 ```
 
+## Configuring the `connection.yaml` entries:
+
+
+To learn more about how to configure your `fetchai/p2p_libp2p:0.6.0` connection consult the `README.md` supplied with the connection package.
+
 ## Running Go peer standalone
 
 You can run the peer node only, a Go process. Make sure you satisfy the <a href="../quickstart">system requirements</a>.
