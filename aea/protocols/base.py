@@ -67,7 +67,6 @@ class Message:
         """
         self._to = None  # type: Optional[Address]
         self._sender = None  # type: Optional[Address]
-        self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
         self._is_incoming = False
@@ -88,7 +87,7 @@ class Message:
 
         :return the address
         """
-        assert self._sender is not None, "Sender must not be None."
+        assert self.has_sender, "Message's 'Sender' field must be set."
         return self._sender
 
     @sender.setter
@@ -105,48 +104,14 @@ class Message:
     @property
     def to(self) -> Address:
         """Get address of receiver."""
-        assert self._to is not None, "To must not be None."
+        assert self.has_to, "Message's 'To' field must be set."
         return self._to
 
     @to.setter
     def to(self, to: Address) -> None:
         """Set address of receiver."""
-        assert self._to is None, "To already set."
+        assert not self.has_to, "To is already set."
         self._to = to
-
-    @property
-    def has_counterparty(self) -> bool:
-        """Check if the counterparty is set."""
-        return self._counterparty is not None
-
-    @property
-    def counterparty(self) -> Address:
-        """
-        Get the counterparty of the message in Address form.
-
-        :return the address
-        """
-        assert self._counterparty is not None, "Counterparty must not be None."
-        return self._counterparty
-
-    @counterparty.setter
-    def counterparty(self, counterparty: Address) -> None:
-        """Set the counterparty of the message."""
-        self._counterparty = counterparty
-
-    @property
-    def is_incoming(self) -> bool:
-        """
-        Get the is_incoming value of the message.
-
-        :return whether the message is incoming or is out going
-        """
-        return self._is_incoming
-
-    @is_incoming.setter
-    def is_incoming(self, is_incoming: bool) -> None:
-        """Set the is_incoming of the message."""
-        self._is_incoming = is_incoming
 
     @property
     def body(self) -> Dict:
@@ -222,7 +187,7 @@ class Message:
         return (
             isinstance(other, Message)
             and self.body == other.body
-            and self._counterparty == other._counterparty
+            and self._sender == other._sender
         )
 
     def __str__(self):

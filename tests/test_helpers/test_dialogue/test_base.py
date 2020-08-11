@@ -29,7 +29,6 @@ from aea.helpers.dialogue.base import Dialogues as BaseDialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.state_update.message import StateUpdateMessage
 
 
 class Dialogue(BaseDialogue):
@@ -64,8 +63,8 @@ class Dialogue(BaseDialogue):
         self,
         dialogue_label: DialogueLabel,
         message_class: Type[Message] = DefaultMessage,
-        agent_address: Optional[Address] = "agent 1",
-        role: Optional[BaseDialogue.Role] = Role.ROLE1,
+        agent_address: Address = "agent 1",
+        role: BaseDialogue.Role = Role.ROLE1,
     ) -> None:
         """
         Initialize a dialogue.
@@ -292,12 +291,12 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
         assert self.dialogue.last_outgoing_message == valid_initial_msg
 
-    def test_update_sets_missing_counterparty(self):
+    def test_update_sets_missing_sender(self):
         """Test the 'update' method sets the missing counterparty field of the input message."""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
@@ -306,12 +305,13 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
         assert self.dialogue.last_outgoing_message == valid_initial_msg
         assert (
-            self.dialogue.last_outgoing_message.counterparty
-            == self.dialogue.dialogue_label.dialogue_opponent_addr
+            self.dialogue.last_outgoing_message.sender
+            == self.dialogue.dialogue_label.dialogue_starter_addr
         )
 
     def test_update_negative_not_is_extendible(self):
@@ -323,59 +323,10 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        invalid_message_id.counterparty = self.opponent_address
+        invalid_message_id.to = self.opponent_address
 
         assert not self.dialogue.update(invalid_message_id)
         assert self.dialogue.last_outgoing_message is None
-
-    def test_update_self_initiated_dialogue_label_on_message_with_complete_reference_negative_not_second_message(
-        self,
-    ):
-        """Negative test for the '_update_self_initiated_dialogue_label_on_message_with_complete_reference' method: input message is not the second message in the dialogue."""
-        initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello",
-        )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg.is_incoming = False
-        dialogue = self.dialogue.update(initial_msg)
-        assert dialogue is not None
-
-        second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
-            message_id=2,
-            target=1,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello back",
-        )
-        second_msg.counterparty = self.opponent_address
-        second_msg.sender = self.agent_address
-        second_msg.is_incoming = True
-        dialogue = self.dialogue.update(second_msg)
-        assert dialogue is not None
-
-        third_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
-            message_id=3,
-            target=2,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello back 2",
-        )
-        third_msg.counterparty = self.opponent_address
-        third_msg.is_incoming = False
-
-        try:
-            self.dialogue._update_self_initiated_dialogue_label_on_message_with_complete_reference(
-                third_msg
-            )
-            result = True
-        except Exception:
-            result = False
-
-        assert not result
 
     def test_reply_positive(self):
         """Positive test for the 'reply' method."""
@@ -386,8 +337,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg.is_incoming = False
+        initial_msg.sender = self.agent_address
+        initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(initial_msg)
 
@@ -408,8 +359,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg.is_incoming = False
+        initial_msg.sender = self.agent_address
+        initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(initial_msg)
 
@@ -420,8 +371,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello There",
         )
-        invalid_initial_msg.counterparty = self.opponent_address
-        invalid_initial_msg.is_incoming = False
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
 
         try:
             self.dialogue.reply(
@@ -444,7 +395,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue._basic_rules(valid_initial_msg)
 
@@ -457,7 +409,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        invalid_initial_msg.counterparty = self.opponent_address
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
 
         assert not self.dialogue._basic_rules(invalid_initial_msg)
 
@@ -470,7 +423,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        invalid_initial_msg.counterparty = self.opponent_address
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
 
         assert not self.dialogue._basic_rules(invalid_initial_msg)
 
@@ -483,7 +437,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        invalid_initial_msg.counterparty = self.opponent_address
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
 
         assert not self.dialogue._basic_rules(invalid_initial_msg)
 
@@ -498,7 +453,8 @@ class TestDialogueBase:
             error_msg="some_error_message",
             error_data={"some_data": b"some_bytes"},
         )
-        invalid_initial_msg.counterparty = self.opponent_address
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
 
         assert not self.dialogue._basic_rules(invalid_initial_msg)
 
@@ -511,8 +467,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg._is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
@@ -523,7 +479,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        invalid_msg.counterparty = self.opponent_address
+        invalid_msg.sender = self.opponent_address
+        invalid_msg.to = self.agent_address
 
         assert not self.dialogue._basic_rules(invalid_msg)
 
@@ -536,8 +493,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg._is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
@@ -548,7 +505,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        invalid_msg.counterparty = self.opponent_address
+        valid_initial_msg.sender = self.opponent_address
+        invalid_msg.to = self.agent_address
 
         assert not self.dialogue._basic_rules(invalid_msg)
 
@@ -561,8 +519,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg._is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
@@ -573,23 +531,16 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        invalid_msg.counterparty = self.opponent_address
+        invalid_msg.sender = self.opponent_address
+        invalid_msg.to = self.agent_address
 
         assert not self.dialogue._basic_rules(invalid_msg)
 
     def test_basic_rules_negative_non_initial_message_invalid_performative(self):
         """Negative test for the '_basic_rules' method: input message is not the first message, and its performative is invalid."""
-        invalid_initial_msg = StateUpdateMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=0,
-            performative=StateUpdateMessage.Performative.APPLY,
-            amount_by_currency_id={},
-            quantities_by_good_id={},
+        pytest.skip(
+            "to test this, the test Dialogue model must be changed to have an invalid non-initial performative."
         )
-        invalid_initial_msg.counterparty = self.opponent_address
-
-        assert not self.dialogue.update(invalid_initial_msg)
 
     def test_additional_rules_positive(self):
         """Positive test for the '_additional_rules' method."""
@@ -600,8 +551,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg._is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
@@ -612,8 +563,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        valid_second_msg.counterparty = self.opponent_address
-        valid_second_msg._is_incoming = True
+        valid_second_msg.sender = self.opponent_address
+        valid_second_msg.to = self.agent_address
 
         assert self.dialogue.update(valid_second_msg)
 
@@ -624,8 +575,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
-        valid_third_msg.counterparty = self.opponent_address
-        valid_third_msg._is_incoming = False
+        valid_third_msg.sender = self.agent_address
+        valid_third_msg.to = self.opponent_address
 
         assert self.dialogue._additional_rules(valid_third_msg)
 
@@ -638,8 +589,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg.is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
@@ -650,8 +601,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        valid_second_msg.counterparty = self.opponent_address
-        valid_second_msg.is_incoming = True
+        valid_second_msg.sender = self.opponent_address
+        valid_second_msg.to = self.agent_address
 
         assert self.dialogue.update(valid_second_msg)
 
@@ -662,8 +613,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
-        invalid_third_msg.counterparty = self.opponent_address
-        invalid_third_msg._is_incoming = False
+        invalid_third_msg.sender = self.agent_address
+        invalid_third_msg.to = self.opponent_address
 
         assert not self.dialogue._additional_rules(invalid_third_msg)
 
@@ -676,13 +627,13 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg._is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
         new_label = DialogueLabel(
-            (str(1), str(1)), valid_initial_msg.counterparty, self.agent_address
+            (str(1), str(1)), valid_initial_msg.to, self.agent_address
         )
         self.dialogue.update_dialogue_label(new_label)
 
@@ -697,8 +648,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg.is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert not self.dialogue.update(valid_initial_msg)
 
@@ -712,8 +663,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg.is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
@@ -725,20 +676,19 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        valid_second_msg.counterparty = self.opponent_address
-        valid_second_msg.sender = self.agent_address
-        valid_second_msg.is_incoming = True
+        valid_second_msg.sender = self.opponent_address
+        valid_second_msg.to = self.agent_address
 
         assert self.dialogue.update(valid_second_msg)
 
         new_label = DialogueLabel(
-            complete_reference, valid_initial_msg.counterparty, self.agent_address
+            complete_reference, valid_initial_msg.to, self.agent_address
         )
         self.dialogue.update_dialogue_label(new_label)
         assert self.dialogue.dialogue_label == new_label
 
         new_label = DialogueLabel(
-            (str(1), str(2)), valid_initial_msg.counterparty, self.agent_address
+            (str(1), str(2)), valid_initial_msg.to, self.agent_address
         )
         with pytest.raises(AssertionError):
             self.dialogue.update_dialogue_label(new_label)
@@ -754,13 +704,13 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg._is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
 
         new_label = DialogueLabel(
-            (str(2), ""), valid_initial_msg.counterparty, self.agent_address
+            (str(2), ""), valid_initial_msg.to, self.agent_address
         )
         try:
             self.dialogue.update_dialogue_label(new_label)
@@ -790,8 +740,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg.is_incoming = False
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
 
         dialogue = self.dialogue.update(valid_initial_msg)
         assert dialogue is not None
@@ -803,9 +753,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        valid_second_msg.counterparty = self.opponent_address
-        valid_second_msg.sender = self.agent_address
-        valid_second_msg.is_incoming = True
+        valid_second_msg.sender = self.opponent_address
+        valid_second_msg.to = self.agent_address
 
         dialogue = self.dialogue.update(valid_second_msg)
         assert dialogue is not None
@@ -817,8 +766,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
-        valid_third_msg.counterparty = self.opponent_address
-        valid_third_msg._is_incoming = False
+        valid_third_msg.sender = self.agent_address
+        valid_third_msg.to = self.opponent_address
 
         assert self.dialogue.update(valid_third_msg)
 
@@ -837,9 +786,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        valid_initial_msg.counterparty = self.opponent_address
-        valid_initial_msg.sender = self.agent_address
-        valid_initial_msg.is_incoming = True
+        valid_initial_msg.sender = self.opponent_address
+        valid_initial_msg.to = self.agent_address
 
         assert self.dialogue_opponent_started.update(valid_initial_msg)
 
@@ -850,8 +798,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        valid_second_msg.counterparty = self.opponent_address
-        valid_second_msg._is_incoming = False
+        valid_second_msg.sender = self.agent_address
+        valid_second_msg.to = self.opponent_address
 
         assert self.dialogue_opponent_started.update(valid_second_msg)
 
@@ -862,9 +810,8 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
-        valid_third_msg.counterparty = self.opponent_address
-        valid_third_msg.sender = self.agent_address
-        valid_third_msg.is_incoming = True
+        valid_third_msg.sender = self.opponent_address
+        valid_third_msg.to = self.agent_address
 
         assert self.dialogue_opponent_started.update(valid_third_msg)
 
@@ -1016,7 +963,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        invalid_message_id.counterparty = self.opponent_address
+        invalid_message_id.sender = self.agent_address
+        invalid_message_id.to = self.opponent_address
 
         assert not self.dialogues.update(invalid_message_id)
 
@@ -1029,9 +977,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg.is_incoming = True
         initial_msg.sender = self.agent_address
+        initial_msg.to = self.opponent_address
 
         assert len(self.dialogues.dialogues) == 0
 
@@ -1054,8 +1001,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg._is_incoming = False
+        initial_msg.sender = self.agent_address
+        initial_msg.to = self.opponent_address
 
         assert len(self.dialogues.dialogues) == 0
 
@@ -1082,9 +1029,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        second_msg.counterparty = self.opponent_address
-        second_msg.is_incoming = True
-        second_msg.sender = self.agent_address
+        second_msg.sender = self.opponent_address
+        second_msg.to = self.agent_address
 
         assert len(self.dialogues.dialogues) == 1
 
@@ -1098,8 +1044,8 @@ class TestDialoguesBase:
         assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
         assert dialogue.last_message.content == b"Hello back"
 
-    def test_update_negative_new_dialogue_by_self_no_counterparty(self):
-        """Negative test for the 'update' method: the counterparty of the input message is not set."""
+    def test_update_positive_multiple_messages_by_self(self):
+        """Positive test for the 'update' method: multiple messages by self is sent to the dialogue."""
         initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -1107,7 +1053,35 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        initial_msg.is_incoming = False
+        initial_msg.sender = self.agent_address
+        initial_msg.to = self.opponent_address
+
+        dialogue = self.dialogues.update(initial_msg)
+
+        second_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        second_msg.sender = self.agent_address
+        second_msg.to = self.opponent_address
+
+        retrieved_dialogue = self.dialogues.update(second_msg)
+
+        assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
+
+    def test_update_negative_new_dialogue_by_self_no_to(self):
+        """Negative test for the 'update' method: the 'to' field of the input message is not set."""
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.sender = self.agent_address
 
         assert len(self.dialogues.dialogues) == 0
 
@@ -1116,8 +1090,8 @@ class TestDialoguesBase:
 
         assert len(self.dialogues.dialogues) == 0
 
-    def test_update_negative_new_dialogue_by_other_no_sender(self):
-        """Negative test for the 'update' method: the counterparty of the input message is not set."""
+    def test_update_negative_new_dialogue_by_self_no_sender(self):
+        """Negative test for the 'update' method: the 'sender' field of the input message is not set."""
         initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -1125,8 +1099,7 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg.is_incoming = True
+        initial_msg.to = self.opponent_address
 
         assert len(self.dialogues.dialogues) == 0
 
@@ -1148,9 +1121,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        second_msg.counterparty = self.opponent_address
-        second_msg.is_incoming = True
-        second_msg.sender = self.agent_address
+        second_msg.sender = self.opponent_address
+        second_msg.to = self.agent_address
 
         updated_dialogue = self.dialogues.update(second_msg)
 
@@ -1189,9 +1161,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        second_msg.counterparty = self.opponent_address
-        second_msg.is_incoming = True
-        second_msg.sender = self.agent_address
+        second_msg.sender = self.opponent_address
+        second_msg.to = self.agent_address
 
         self.dialogues._update_self_initiated_dialogue_label_on_message_with_complete_reference(
             second_msg
@@ -1216,9 +1187,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        second_msg.counterparty = self.opponent_address
-        second_msg.is_incoming = True
-        second_msg.sender = self.agent_address
+        second_msg.sender = self.opponent_address
+        second_msg.to = self.agent_address
 
         self.dialogues._update_self_initiated_dialogue_label_on_message_with_complete_reference(
             second_msg
@@ -1241,8 +1211,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        second_msg.counterparty = self.opponent_address
-        second_msg._is_incoming = True
+        second_msg.sender = self.opponent_address
+        second_msg.to = self.agent_address
 
         self.dialogues._update_self_initiated_dialogue_label_on_message_with_complete_reference(
             second_msg
@@ -1265,9 +1235,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg.is_incoming = True
-        initial_msg.sender = self.agent_address
+        initial_msg.sender = self.opponent_address
+        initial_msg.to = self.agent_address
 
         dialogue = self.dialogues.update(initial_msg)
 
@@ -1278,38 +1247,10 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        second_msg.counterparty = self.opponent_address
-        second_msg._is_incoming = False
+        second_msg.sender = self.agent_address
+        second_msg.to = self.opponent_address
 
         retrieved_dialogue = self.dialogues.get_dialogue(second_msg)
-
-        assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
-
-    def test_update_positive_3(self):
-        """Positive test for the 'get_dialogue' method: the dialogue is reference is incomplete and not a first message."""
-        initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello",
-        )
-        initial_msg.counterparty = self.opponent_address
-        initial_msg.is_incoming = False
-
-        dialogue = self.dialogues.update(initial_msg)
-
-        second_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=2,
-            target=1,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello back",
-        )
-        second_msg.counterparty = self.opponent_address
-        second_msg.is_incoming = False
-
-        retrieved_dialogue = self.dialogues.update(second_msg)
 
         assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
 
@@ -1326,9 +1267,9 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        second_msg.counterparty = self.opponent_address
-        second_msg.is_incoming = True
-        second_msg.sender = self.agent_address
+        second_msg.sender = self.opponent_address
+        second_msg.to = self.agent_address
+
         dialogue = self.dialogues.update(second_msg)
         assert dialogue is not None
 
@@ -1339,8 +1280,8 @@ class TestDialoguesBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        third_msg.counterparty = self.opponent_address
-        third_msg.is_incoming = False
+        third_msg.sender = self.agent_address
+        third_msg.to = self.opponent_address
 
         retrieved_dialogue = self.dialogues.get_dialogue(third_msg)
 

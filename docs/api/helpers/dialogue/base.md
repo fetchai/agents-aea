@@ -521,11 +521,11 @@ Extend the list of incoming/outgoing messages with 'message', if 'message' belon
 
 True if message successfully added, false otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.ensure_counterparty"></a>
+<a name="aea.helpers.dialogue.base.Dialogue.ensure_to"></a>
 #### ensure`_`counterparty
 
 ```python
- | ensure_counterparty(message: Message) -> None
+ | ensure_to(message: Message) -> None
 ```
 
 Ensure the counterparty is set (set if not) correctly.

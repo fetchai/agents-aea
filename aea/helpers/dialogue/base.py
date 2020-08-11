@@ -248,9 +248,9 @@ class Dialogue(ABC):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        message_class: Optional[Type[Message]] = None,
-        agent_address: Optional[Address] = None,
-        role: Optional[Role] = None,
+        message_class: Type[Message],
+        agent_address: Address,
+        role: Role,
         rules: Optional[Rules] = None,
     ) -> None:
         """
@@ -277,8 +277,7 @@ class Dialogue(ABC):
         self._incoming_messages = []  # type: List[Message]
         self._rules = rules
 
-        if message_class is not None:
-            assert issubclass(message_class, Message)
+        assert issubclass(message_class, Message)
         self._message_class = message_class
 
     @property
@@ -441,40 +440,38 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
-        if not message.is_incoming:
+        if not message.has_sender:
             message.sender = self.agent_address
-
-        self.ensure_counterparty(message)
 
         if not self.is_belonging_to_dialogue(message):
             return False
 
         is_extendable = self.is_valid_next_message(message)
         if is_extendable:
-            if message.is_incoming:
+            if message.sender != self.agent_address:
                 self._incoming_messages.extend([message])
             else:
                 self._outgoing_messages.extend([message])
         return is_extendable
 
-    def ensure_counterparty(self, message: Message) -> None:
-        """
-        Ensure the counterparty is set (set if not) correctly.
-
-        :param message: a message
-        :return: None
-        """
-        counterparty = None  # type: Optional[str]
-        try:
-            counterparty = message.counterparty
-        except AssertionError:
-            # assume message belongs to dialogue
-            message.counterparty = self.dialogue_label.dialogue_opponent_addr
-
-        if counterparty is not None:
-            assert (
-                message.counterparty == self.dialogue_label.dialogue_opponent_addr
-            ), "The counterparty specified in the message is different from the opponent in this dialogue."
+    # def ensure_to(self, message: Message) -> None:
+    #     """
+    #     Ensure the 'to' field is set (set if not) correctly.
+    #
+    #     :param message: a message
+    #     :return: None
+    #     """
+    #     to = None  # type: Optional[str]
+    #     try:
+    #         to = message.to
+    #     except AssertionError:
+    #         # assume message belongs to dialogue
+    #         message.to = self.dialogue_label.dialogue_opponent_addr
+    #
+    #     if to is not None:
+    #         assert (
+    #             message.to == self.dialogue_label.dialogue_opponent_addr
+    #         ), "The 'To' field in the message is different from the opponent in this dialogue."
 
     def is_belonging_to_dialogue(self, message: Message) -> bool:
         """
@@ -484,16 +481,42 @@ class Dialogue(ABC):
         :return: Ture if message is part of the dialogue, False otherwise
         """
         if self.is_self_initiated:
-            self_initiated_dialogue_label = DialogueLabel(
-                (message.dialogue_reference[0], Dialogue.OPPONENT_STARTER_REFERENCE),
-                message.counterparty,
-                self.agent_address,
-            )
+            if message.sender == self.agent_address:
+                self_initiated_dialogue_label = DialogueLabel(
+                    (
+                        message.dialogue_reference[0],
+                        Dialogue.OPPONENT_STARTER_REFERENCE,
+                    ),
+                    message.to,
+                    self.agent_address,
+                )
+            elif message.to == self.agent_address:
+                self_initiated_dialogue_label = DialogueLabel(
+                    (
+                        message.dialogue_reference[0],
+                        Dialogue.OPPONENT_STARTER_REFERENCE,
+                    ),
+                    message.sender,
+                    self.agent_address,
+                )
+            else:
+                raise SyntaxError(
+                    "neither 'to' nor 'sender' match the agent's address in this dialogue."
+                )
             result = self_initiated_dialogue_label in self.dialogue_labels
         else:
-            other_initiated_dialogue_label = DialogueLabel(
-                message.dialogue_reference, message.counterparty, message.counterparty
-            )
+            if message.sender == self.agent_address:
+                other_initiated_dialogue_label = DialogueLabel(
+                    message.dialogue_reference, message.to, message.to
+                )
+            elif message.to == self.agent_address:
+                other_initiated_dialogue_label = DialogueLabel(
+                    message.dialogue_reference, message.sender, message.sender
+                )
+            else:
+                raise SyntaxError(
+                    "neither 'to' nor 'sender' match the agent's address in this dialogue."
+                )
             result = other_initiated_dialogue_label in self.dialogue_labels
         return result
 
@@ -519,7 +542,7 @@ class Dialogue(ABC):
             performative=performative,
             **kwargs,
         )
-        reply.counterparty = self.dialogue_label.dialogue_opponent_addr
+        reply.to = self.dialogue_label.dialogue_opponent_addr
         result = self.update(reply)
 
         if result:
@@ -717,9 +740,9 @@ class Dialogues(ABC):
         self,
         agent_address: Address,
         end_states: FrozenSet[Dialogue.EndState],
-        message_class: Optional[Type[Message]] = None,
-        dialogue_class: Optional[Type[Dialogue]] = None,
-        role_from_first_message: Optional[Callable[[Message], Dialogue.Role]] = None,
+        message_class: Type[Message],
+        dialogue_class: Type[Dialogue],
+        role_from_first_message: Callable[[Message], Dialogue.Role],
     ) -> None:
         """
         Initialize dialogues.
@@ -736,20 +759,13 @@ class Dialogues(ABC):
         self._dialogue_nonce = 0
         self._dialogue_stats = DialogueStats(end_states)
 
-        if message_class is not None:
-            assert issubclass(message_class, Message)
+        assert issubclass(message_class, Message)
         self._message_class = message_class
 
-        if dialogue_class is not None:
-            assert issubclass(dialogue_class, Dialogue)
+        assert issubclass(dialogue_class, Dialogue)
         self._dialogue_class = dialogue_class
 
-        if role_from_first_message is not None:
-            self._role_from_first_message = role_from_first_message
-        else:
-            self._role_from_first_message = (
-                self.role_from_first_message
-            )  # pragma: no cover
+        self._role_from_first_message = role_from_first_message
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
@@ -802,7 +818,7 @@ class Dialogues(ABC):
             performative=performative,
             **kwargs,
         )
-        initial_message.counterparty = counterparty
+        initial_message.to = counterparty
 
         dialogue = self._create_self_initiated(
             dialogue_opponent_addr=counterparty,
@@ -834,12 +850,12 @@ class Dialogues(ABC):
         """
         dialogue_reference = message.dialogue_reference
 
-        if not message.has_counterparty:
+        if not message.has_to:
+            raise ValueError("The message's 'to' field is not set {}".format(message))
+        if not message.has_sender:
             raise ValueError(
-                "The message counterparty field is not set {}".format(message)
+                "The message's 'sender' field is not set {}".format(message)
             )
-        if message.is_incoming and not message.has_sender:
-            raise ValueError("The message sender field is not set {}".format(message))
 
         is_invalid_label = (
             dialogue_reference[0] == Dialogue.OPPONENT_STARTER_REFERENCE
@@ -858,15 +874,19 @@ class Dialogues(ABC):
         )
         if is_invalid_label:
             dialogue = None  # type: Optional[Dialogue]
-        elif is_new_dialogue and message.is_incoming:  # new dialogue by other
+        elif (
+            is_new_dialogue and message.sender != self.agent_address
+        ):  # new dialogue by other
             dialogue = self._create_opponent_initiated(
-                dialogue_opponent_addr=message.counterparty,
+                dialogue_opponent_addr=message.sender,
                 dialogue_reference=dialogue_reference,
                 role=self._role_from_first_message(message),
             )
-        elif is_new_dialogue and not message.is_incoming:  # new dialogue by self
+        elif (
+            is_new_dialogue and message.sender == self.agent_address
+        ):  # new dialogue by self
             dialogue = self._create_self_initiated(
-                dialogue_opponent_addr=message.counterparty,
+                dialogue_opponent_addr=message.to,
                 dialogue_reference=dialogue_reference,
                 role=self._role_from_first_message(message),
             )
@@ -908,7 +928,7 @@ class Dialogues(ABC):
             Dialogue.OPPONENT_STARTER_REFERENCE,
         )
         self_initiated_dialogue_label = DialogueLabel(
-            self_initiated_dialogue_reference, message.counterparty, self.agent_address,
+            self_initiated_dialogue_reference, message.sender, self.agent_address,
         )
 
         if self_initiated_dialogue_label in self.dialogues:
@@ -938,15 +958,24 @@ class Dialogues(ABC):
         :param message: a message
         :return: the dialogue, or None in case such a dialogue does not exist
         """
-        dialogue_reference = message.dialogue_reference
-        counterparty = message.counterparty
-
-        self_initiated_dialogue_label = DialogueLabel(
-            dialogue_reference, counterparty, self.agent_address
-        )
-        other_initiated_dialogue_label = DialogueLabel(
-            dialogue_reference, counterparty, counterparty
-        )
+        if message.sender == self.agent_address:
+            self_initiated_dialogue_label = DialogueLabel(
+                message.dialogue_reference, message.to, self.agent_address
+            )
+            other_initiated_dialogue_label = DialogueLabel(
+                message.dialogue_reference, message.to, message.to
+            )
+        elif message.to == self.agent_address:
+            self_initiated_dialogue_label = DialogueLabel(
+                message.dialogue_reference, message.sender, self.agent_address
+            )
+            other_initiated_dialogue_label = DialogueLabel(
+                message.dialogue_reference, message.sender, message.sender
+            )
+        else:
+            raise SyntaxError(
+                "neither 'to' nor 'sender' match the agent's address in this dialogue."
+            )
 
         self_initiated_dialogue_label = self.get_latest_label(
             self_initiated_dialogue_label
@@ -1076,45 +1105,14 @@ class Dialogues(ABC):
         assert (
             dialogue_label not in self.dialogues
         ), "Dialogue label already present in dialogues."
-        if self._message_class is not None and self._dialogue_class is not None:
-            dialogue = self._dialogue_class(
-                dialogue_label=dialogue_label,
-                message_class=self._message_class,
-                agent_address=self.agent_address,
-                role=role,
-            )
-        else:
-            # TODO: remove this approach
-            dialogue = self.create_dialogue(
-                dialogue_label=dialogue_label, role=role,
-            )  # pragma: no cover
+        dialogue = self._dialogue_class(
+            dialogue_label=dialogue_label,
+            message_class=self._message_class,
+            agent_address=self.agent_address,
+            role=role,
+        )
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
-
-    @abstractmethod
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> Dialogue:
-        """
-        THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN THE NEXT VERSION. USE THE NEW CONSTRUCTOR ARGUMENTS INSTEAD.
-
-        Create a dialogue instance.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> Dialogue.Role:
-        """
-        Infer the role of the agent from an incoming or outgoing first message.
-
-        :param message: an incoming/outgoing first message
-        :return: the agent's role
-        """
-        pass  # pragma: no cover
 
     def _next_dialogue_nonce(self) -> int:
         """
