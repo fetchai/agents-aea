@@ -165,6 +165,7 @@ def _try_construct_envelope(
             content=message,
         )
         msg.counterparty = agent_name
+        msg.to = agent_name
         msg.sender = sender
         dialogues.update(msg)
         envelope = Envelope(

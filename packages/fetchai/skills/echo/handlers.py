@@ -85,8 +85,9 @@ class EchoHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"default_message": message.encode()},
         )
+        reply.to = message.sender
         reply.counterparty = message.sender
-        dialogues.update(message)
+        dialogues.update(reply)
         self.context.outbox.put_message(message=reply)
 
     def _handle_error(self, message: DefaultMessage, dialogue: DefaultDialogue) -> None:
@@ -120,6 +121,7 @@ class EchoHandler(Handler):
             target=message.message_id,
             content=message.content,
         )
+        reply.to = message.sender
         reply.counterparty = message.sender
         dialogue.update(reply)
         self.context.outbox.put_message(message=reply)
