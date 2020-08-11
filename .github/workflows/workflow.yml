@@ -8,61 +8,11 @@ on:
   pull_request:
 
 jobs:
-  sync_aea_loop_unit_tests:
-    continue-on-error: True
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: 3.8
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
-    - name: Install dependencies (ubuntu-latest)
-      run: |
-        sudo apt-get update --fix-missing
-        sudo apt-get autoremove
-        sudo apt-get autoclean
-        pip install tox
-        sudo apt-get install -y protobuf-compiler
-    - name: Unit tests and coverage
-      run: |
-        tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
-
-  all_integrational_tests:
-    continue-on-error: True
-    runs-on: ubuntu-latest
-
-    timeout-minutes: 50
-
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: 3.8
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
-    - name: Install dependencies (ubuntu-latest)
-      run: |
-        sudo apt-get update --fix-missing
-        sudo apt-get autoremove
-        sudo apt-get autoclean
-        pip install tox
-        sudo apt-get install -y protobuf-compiler
-    - name: Sync AEA loop integrational tests and coverage
-      run: |
-        tox -e py3.8 -- --aea-loop sync -m 'integration and not unstable and not ledger'
-    - name: Async Integration tests
-      run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
 
   common_checks:
-    runs-on: ubuntu-latest
     continue-on-error: True
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
@@ -115,17 +65,40 @@ jobs:
       - name: Generate Documentation
         run: tox -e docs
 
+  integration_checks:
+    continue-on-error: True
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Sync AEA loop integrational tests and coverage
+      run: |
+        tox -e py3.8 -- --aea-loop sync -m 'integration and not unstable and not ledger'
+    - name: Async Integration tests
+      run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
+
   integration_checks_ledger:
     continue-on-error: True
     runs-on: ubuntu-latest
-
     timeout-minutes: 30
-
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.7
+          python-version: 3.8
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -133,22 +106,19 @@ jobs:
           sudo apt-get autoclean
           pip install tox
       - name: Integration tests
-        run: tox -e py3.7 -- -m 'integration and not unstable and ledger'
+        run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
         continue-on-error: true
       - name: Force green exit
         run: exit 0
 
   platform_checks:
+    continue-on-error: True
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8]
-
-    continue-on-error: True
-
     timeout-minutes: 30
-
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -182,18 +152,38 @@ jobs:
     - name: Unit tests and coverage
       run: |
         tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
-        
+
+  platform_checks_sync_aea_loop:
+    continue-on-error: True
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Unit tests and coverage
+      run: |
+        tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
+
   golang_checks:
+    continue-on-error: false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: [3.6]
-
-    continue-on-error: false
-
     timeout-minutes: 30
-
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -207,15 +197,15 @@ jobs:
       working-directory: ./packages/fetchai/connections/p2p_libp2p
       run: go test -p 1 -timeout 0 -count 1 -v ./...
 
-  all_tests:
+  coverage_checks:
+    continue-on-error: True
     needs:
-    - sync_aea_loop_unit_tests
-    - all_integrational_tests
+    - integration_checks
     - integration_checks_ledger
     - platform_checks
-    continue-on-error: True
+    - platform_checks_sync_aea_loop
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 40
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -232,7 +222,7 @@ jobs:
         pip install tox
         sudo apt-get install -y protobuf-compiler
     - name: Run all tests
-      run: tox -e py3.7
+      run: tox -e py3.7 -- --ignore=test_docs --ignore=test_examples --ignore=test_packages/test_contracts --ignore=test_packages/test_protocols --ignore=test_packages/test_skills
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

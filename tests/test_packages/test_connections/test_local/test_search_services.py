@@ -576,7 +576,6 @@ class TestFilteredSearchResult:
         )
         cls.multiplexer1.put(envelope)
 
-    @pytest.mark.flaky(reruns=0)  # TODO: check reasons!. quite unstable test
     def test_filtered_search_result(self):
         """Test that the search result contains only the entries matching the query."""
         query = Query(constraints=[], model=self.data_model_barfoo)
