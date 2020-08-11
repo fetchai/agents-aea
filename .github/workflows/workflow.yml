@@ -25,7 +25,6 @@ jobs:
         sudo apt-get update --fix-missing
         sudo apt-get autoremove
         sudo apt-get autoclean
-        pip install pipenv
         pip install tox
         sudo apt-get install -y protobuf-compiler
     - name: Unit tests and coverage
@@ -36,7 +35,7 @@ jobs:
     continue-on-error: True
     runs-on: ubuntu-latest
 
-    timeout-minutes: 40
+    timeout-minutes: 50
 
     steps:
     - uses: actions/checkout@master
@@ -51,7 +50,6 @@ jobs:
         sudo apt-get update --fix-missing
         sudo apt-get autoremove
         sudo apt-get autoclean
-        pip install pipenv
         pip install tox
         sudo apt-get install -y protobuf-compiler
     - name: Sync AEA loop integrational tests and coverage
@@ -121,7 +119,7 @@ jobs:
     continue-on-error: True
     runs-on: ubuntu-latest
 
-    timeout-minutes: 40
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@master
@@ -133,7 +131,6 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install pipenv
           pip install tox
       - name: Integration tests
         run: tox -e py3.7 -- -m 'integration and not unstable and ledger'
@@ -166,7 +163,6 @@ jobs:
         sudo apt-get update --fix-missing
         sudo apt-get autoremove
         sudo apt-get autoclean
-        pip install pipenv
         pip install tox
         sudo apt-get install -y protobuf-compiler
     # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
@@ -174,13 +170,11 @@ jobs:
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
-        pip install pipenv
         pip install tox
         brew install protobuf
     - if: matrix.os == 'windows-latest'
       name: Install dependencies (windows-latest)
       run: |
-        pip install pipenv
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
         choco install protoc
@@ -188,16 +182,6 @@ jobs:
     - name: Unit tests and coverage
       run: |
         tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
-    # optionally, for all tests, remove 'not unstable' to run unstable tests as well
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        yml: ./codecov.yml
-        fail_ci_if_error: false
         
   golang_checks:
     runs-on: ${{ matrix.os }}
@@ -222,3 +206,39 @@ jobs:
       name: Golang unit tests
       working-directory: ./packages/fetchai/connections/p2p_libp2p
       run: go test -p 1 -timeout 0 -count 1 -v ./...
+
+  all_tests:
+    needs:
+    - sync_aea_loop_unit_tests
+    - all_integrational_tests
+    - integration_checks_ledger
+    - platform_checks
+    continue-on-error: True
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.7
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Run all tests
+      run: tox -e py3.7
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        yml: ./codecov.yml
+        fail_ci_if_error: false
