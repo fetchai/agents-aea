@@ -13,7 +13,7 @@ aea create my_aea && cd my_aea
 aea scaffold skill my_search
 ```
 
-In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the <a href="../oef-ledger">OEF search node</a> and process the resulting response.
+In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the <a href="../simple-oef">SOEF search node</a> and process the resulting response.
 
 ## Step 2: Develop a Behaviour
 
@@ -392,9 +392,9 @@ This adds the protocol to our AEA and makes it available on the path `packages.f
 We also need to add the soef and p2p connections and install the AEA's dependencies:
 ``` bash
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 Finally, in the `aea-config.yaml` add the following lines:
@@ -409,7 +409,7 @@ This will ensure that search requests are processed by the correct connection.
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.9.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.10.0 && cd simple_service_registration
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.

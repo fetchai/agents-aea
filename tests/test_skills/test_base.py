@@ -30,12 +30,13 @@ import pytest
 
 import aea
 from aea.aea import AEA
-from aea.configurations.base import PublicId, SkillComponentConfiguration
+from aea.configurations.base import PublicId, SkillComponentConfiguration, SkillConfig
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAException
 from aea.identity.base import Identity
 from aea.multiplexer import ConnectionStatus
+from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.skills.base import (
     Behaviour,
@@ -461,3 +462,69 @@ class TestSkill:
         """Test the skill context getter."""
         context = self.skill.skill_context
         assert isinstance(context, SkillContext)
+
+
+class TestSkillProgrammatic:
+    """Test skill attributes."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        skill_context = SkillContext()
+        skill_config = SkillConfig(
+            name="simple_skill", author="fetchai", version="0.1.0"
+        )
+
+        class MyHandler(Handler):
+            def setup(self):
+                pass
+
+            def handle(self, message: Message):
+                pass
+
+            def teardown(self):
+                pass
+
+        class MyBehaviour(Behaviour):
+            def setup(self):
+                pass
+
+            def act(self):
+                pass
+
+            def teardown(self):
+                pass
+
+        cls.handler_name = "some_handler"
+        cls.handler = MyHandler(skill_context=skill_context, name=cls.handler_name)
+        cls.model_name = "some_model"
+        cls.model = Model(skill_context=skill_context, name=cls.model_name)
+        cls.behaviour_name = "some_behaviour"
+        cls.behaviour = MyBehaviour(
+            skill_context=skill_context, name=cls.behaviour_name
+        )
+        cls.skill = Skill(
+            skill_config,
+            skill_context,
+            handlers={cls.handler.name: cls.handler},
+            models={cls.model.name: cls.model},
+            behaviours={cls.behaviour.name: cls.behaviour},
+        )
+
+    def test_behaviours(self):
+        """Test the behaviours getter on skill context."""
+        assert (
+            getattr(self.skill.skill_context.behaviours, self.behaviour_name, None)
+            == self.behaviour
+        )
+
+    def test_handlers(self):
+        """Test the handlers getter on skill context."""
+        assert (
+            getattr(self.skill.skill_context.handlers, self.handler_name, None)
+            == self.handler
+        )
+
+    def test_models(self):
+        """Test the handlers getter on skill context."""
+        assert getattr(self.skill.skill_context, self.model_name, None) == self.model

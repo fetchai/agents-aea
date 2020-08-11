@@ -279,7 +279,7 @@ jobs:
     - platform_checks
     - platform_checks_sync_aea_loop
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master

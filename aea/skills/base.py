@@ -650,6 +650,14 @@ class Skill(Component):
         self._models = {} if models is None else models  # type: Dict[str, Model]
 
         self._skill_context._skill = self
+        self._set_models_on_context()
+
+    def _set_models_on_context(self) -> None:
+        """Set the models on the skill context."""
+        if self._models != {}:
+            for model_id, model_instance in self._models.items():
+                if getattr(self._skill_context, model_id, None) is None:
+                    setattr(self._skill_context, model_id, model_instance)
 
     @property
     def skill_context(self) -> SkillContext:

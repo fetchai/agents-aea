@@ -52,7 +52,7 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
         performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
     )
@@ -99,7 +99,7 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         contract_address=contract_address,
         callable="get_create_batch_transaction",
         kwargs=ContractApiMessage.Kwargs(
@@ -150,7 +150,7 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
         performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         contract_address=contract_address,
         callable="get_hash_single",
         kwargs=ContractApiMessage.Kwargs(
@@ -208,7 +208,7 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
         performative=ContractApiMessage.Performative.GET_STATE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         contract_address=contract_address,
         callable="get_balance",
         kwargs=ContractApiMessage.Kwargs(
@@ -259,7 +259,7 @@ async def test_run_async():
         performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         contract_address="test addr",
         callable="get_create_batch_transaction",
         kwargs=ContractApiMessage.Kwargs(
@@ -306,7 +306,7 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
         performative=ContractApiMessage.Performative.GET_STATE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         contract_address=contract_address,
         callable="get_balance",
         kwargs=ContractApiMessage.Kwargs(
@@ -361,7 +361,7 @@ async def test_callable_wrong_number_of_arguments_apis(
         performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({}),
     )
@@ -417,7 +417,7 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
         performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({}),
     )
@@ -456,7 +456,7 @@ async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
         performative=ContractApiMessage.Performative.GET_STATE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         contract_address=contract_address,
         callable="get_balance",
         kwargs=ContractApiMessage.Kwargs(
@@ -504,7 +504,7 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         performative=ContractApiMessage.Performative.GET_STATE,
         dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ETHEREUM,
-        contract_id="fetchai/erc1155:0.7.0",
+        contract_id="fetchai/erc1155:0.8.0",
         contract_address=contract_address,
         callable="unknown_callable",
         kwargs=ContractApiMessage.Kwargs(
