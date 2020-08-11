@@ -8,7 +8,7 @@ fingerprint:
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
   behaviours.py: QmXARXRvJkpzuqnYNhJhv42Sk6J4KzRW2AKvC6FJWLU9JL
   dialogues.py: QmW4ePqYD7E5Y5eXaNvooKCtHn36VNP5Eh2XiiNnro591x
-  handlers.py: QmQboz43ehKuVWFbMmxHBqi7EwKuPH4CBuVaAi5D8ABg7m
+  handlers.py: QmQGvQpuiWB7QeM1ZCiu36UxianHrrHQyRtEVjx6sJEByV
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
