@@ -13,7 +13,7 @@ aea create my_aea && cd my_aea
 aea scaffold skill my_search
 ```
 
-In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the <a href="../oef-ledger">OEF search node</a> and process the resulting response.
+In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the <a href="../simple-oef">SOEF search node</a> and process the resulting response.
 
 ## Step 2: Develop a Behaviour
 

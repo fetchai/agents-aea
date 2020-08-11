@@ -175,6 +175,11 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
                     "Image path={} in file={} not found!".format(img_path, str(file))
                 )
             return
+        elif result.startswith("https") or result.startswith("http"):
+            if not is_url_reachable(result):
+                raise ValueError(
+                    "Could not reach url={} in file={}!".format(result, str(file))
+                )
         else:
             raise ValueError("Image path={} in file={} not `.png`!")
 
