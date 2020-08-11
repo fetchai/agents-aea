@@ -39,7 +39,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseDefaultDialogues.__init__(self, self.context.agent_address)
+        BaseDefaultDialogues.__init__(self, self.context.agent_name)
 
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
@@ -62,6 +62,8 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :return: the created dialogue
         """
         dialogue = DefaultDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+            dialogue_label=dialogue_label,
+            agent_address=self.context.agent_name,
+            role=role,
         )
         return dialogue

@@ -86,7 +86,6 @@ class EchoHandler(Handler):
             error_data={"default_message": message.encode()},
         )
         reply.counterparty = message.sender
-        reply.sender = self.context.agent_name
         dialogues.update(message)
         self.context.outbox.put_message(message=reply)
 
@@ -115,7 +114,6 @@ class EchoHandler(Handler):
             "Echo Handler: message={}, sender={}".format(message, message.counterparty)
         )
         message.counterparty = message.sender
-        message.sender = self.context.agent_name
         dialogue.update(message)
         self.context.outbox.put_message(message=message)
 
