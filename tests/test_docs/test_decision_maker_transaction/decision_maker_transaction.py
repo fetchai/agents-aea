@@ -26,25 +26,30 @@ from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ProtocolId, SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
+from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.helpers import create_private_key
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.dialogue.base import Dialogue, DialogueLabel
+from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
-from aea.skills.base import Handler, Skill, SkillContext
+from aea.protocols.signing.dialogues import SigningDialogue
+from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.signing.message import SigningMessage
+from aea.skills.base import Handler, Model, Skill, SkillContext
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
-FETCHAI_PRIVATE_KEY_FILE_1 = "fet_private_key_1.txt"
-FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
+COSMOS_PRIVATE_KEY_FILE_1 = "cosmos_private_key_1.txt"
+COSMOS_PRIVATE_KEY_FILE_2 = "cosmos_private_key_2.txt"
 
 
 def run():
     # Create a private key
     create_private_key(
-        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1
+        CosmosCrypto.identifier, private_key_file=COSMOS_PRIVATE_KEY_FILE_1
     )
 
     # Instantiate the builder and build the AEA
@@ -53,61 +58,75 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_1)
-
-    builder.add_ledger_api_config(FetchAICrypto.identifier, {"network": "testnet"})
+    builder.add_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE_1)
 
     # Create our AEA
     my_aea = builder.build()
 
-    # Generate some wealth for the default address
-    try_generate_testnet_wealth(FetchAICrypto.identifier, my_aea.identity.address)
-
     # add a simple skill with handler
     skill_context = SkillContext(my_aea.context)
     skill_config = SkillConfig(name="simple_skill", author="fetchai", version="0.1.0")
-    tx_handler = TransactionHandler(
-        skill_context=skill_context, name="transaction_handler"
+    signing_handler = SigningHandler(
+        skill_context=skill_context, name="signing_handler"
     )
+    signing_dialogues_model = SigningDialogues(
+        skill_context=skill_context, name="signing_dialogues"
+    )
+
     simple_skill = Skill(
-        skill_config, skill_context, handlers={tx_handler.name: tx_handler}
+        skill_config,
+        skill_context,
+        handlers={signing_handler.name: signing_handler},
+        models={signing_dialogues_model.name: signing_dialogues_model},
     )
     my_aea.resources.add_skill(simple_skill)
 
     # create a second identity
     create_private_key(
-        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
+        CosmosCrypto.identifier, private_key_file=COSMOS_PRIVATE_KEY_FILE_2
     )
 
-    counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
+    counterparty_wallet = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_2})
 
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
-        default_address_key=FetchAICrypto.identifier,
+        default_address_key=CosmosCrypto.identifier,
     )
 
-    # create tx message for decision maker to process
-    fetchai_ledger_api = my_aea.context.ledger_apis.apis[FetchAICrypto.identifier]
-    tx_nonce = fetchai_ledger_api.generate_tx_nonce(
-        my_aea.identity.address, counterparty_identity.address
+    # create signing message for decision maker to sign
+    terms = Terms(
+        ledger_id=CosmosCrypto.identifier,
+        sender_address=my_aea.identity.address,
+        counterparty_address=counterparty_identity.address,
+        amount_by_currency_id={"FET": -1},
+        quantities_by_good_id={"some_service": 1},
+        nonce="some_nonce",
+        fee_by_currency_id={"FET": 0},
     )
-
-    tx_msg = TransactionMessage(
-        performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[skill_config.public_id],
-        tx_id="transaction0",
-        tx_sender_addr=my_aea.identity.address,
-        tx_counterparty_addr=counterparty_identity.address,
-        tx_amount_by_currency_id={"FET": -1},
-        tx_sender_fee=1,
-        tx_counterparty_fee=0,
-        tx_quantities_by_good_id={},
-        ledger_id=FetchAICrypto.identifier,
-        info={"some_info_key": "some_info_value"},
-        tx_nonce=tx_nonce,
+    signing_dialogues = cast(SigningDialogues, skill_context.signing_dialogues)
+    stub_transaction = LedgerApis.get_transfer_transaction(
+        terms.ledger_id,
+        terms.sender_address,
+        terms.counterparty_address,
+        terms.sender_payable_amount,
+        terms.sender_fee,
+        terms.nonce,
     )
-    my_aea.context.decision_maker_message_queue.put_nowait(tx_msg)
+    signing_msg = SigningMessage(
+        performative=SigningMessage.Performative.SIGN_TRANSACTION,
+        dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
+        skill_callback_ids=(str(skill_context.skill_id),),
+        raw_transaction=RawTransaction(CosmosCrypto.identifier, stub_transaction),
+        terms=terms,
+        skill_callback_info={"some_info_key": "some_info_value"},
+    )
+    signing_msg.counterparty = "decision_maker"
+    signing_dialogue = cast(
+        Optional[SigningDialogue], signing_dialogues.update(signing_msg)
+    )
+    assert signing_dialogue is not None
+    my_aea.context.decision_maker_message_queue.put_nowait(signing_msg)
 
     # Set the AEA running in a different thread
     try:
@@ -115,8 +134,8 @@ def run():
         t = Thread(target=my_aea.start)
         t.start()
 
-        # Let it run long enough to interact with the weather station
-        time.sleep(20)
+        # Let it run long enough to interact with the decision maker
+        time.sleep(1)
     finally:
         # Shut down the AEA
         logger.info("STOPPING AEA NOW!")
@@ -124,10 +143,46 @@ def run():
         t.join()
 
 
-class TransactionHandler(Handler):
-    """Implement the transaction handler."""
+class SigningDialogues(Model, BaseSigningDialogues):
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+        BaseSigningDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> Dialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return SigningDialogue.Role.SKILL
+
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+    ) -> SigningDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = SigningDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue
+
+
+class SigningHandler(Handler):
+    """Implement the signing handler."""
+
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -140,17 +195,24 @@ class TransactionHandler(Handler):
         :param message: the message
         :return: None
         """
-        tx_msg_response = cast(TransactionMessage, message)
-        logger.info(tx_msg_response)
-        if (
-            tx_msg_response is not None
-            and tx_msg_response.performative
-            == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
-        ):
-            logger.info("Transaction was successful.")
-            logger.info(tx_msg_response.tx_digest)
+        signing_msg = cast(SigningMessage, message)
+
+        # recover dialogue
+        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+        signing_dialogue = cast(
+            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
+        )
+        if signing_dialogue is None:
+            self._handle_unidentified_dialogue(signing_msg)
+            return
+
+        # handle message
+        if signing_msg.performative is SigningMessage.Performative.SIGNED_TRANSACTION:
+            self._handle_signed_transaction(signing_msg, signing_dialogue)
+        elif signing_msg.performative is SigningMessage.Performative.ERROR:
+            self._handle_error(signing_msg, signing_dialogue)
         else:
-            logger.info("Transaction was not successful.")
+            self._handle_invalid(signing_msg, signing_dialogue)
 
     def teardown(self) -> None:
         """
@@ -159,6 +221,63 @@ class TransactionHandler(Handler):
         :return: None
         """
         pass
+
+    def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the message
+        """
+        self.context.logger.info(
+            "received invalid signing message={}, unidentified dialogue.".format(
+                signing_msg
+            )
+        )
+
+    def _handle_signed_transaction(
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+    ) -> None:
+        """
+        Handle a signing message.
+
+        :param signing_msg: the signing message
+        :param signing_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info("transaction signing was successful.")
+        logger.info(signing_msg.signed_transaction)
+
+    def _handle_error(
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param signing_msg: the signing message
+        :param signing_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "transaction signing was not successful. Error_code={} in dialogue={}".format(
+                signing_msg.error_code, signing_dialogue
+            )
+        )
+
+    def _handle_invalid(
+        self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param signing_msg: the signing message
+        :param signing_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.warning(
+            "cannot handle signing message of performative={} in dialogue={}.".format(
+                signing_msg.performative, signing_dialogue
+            )
+        )
 
 
 if __name__ == "__main__":
