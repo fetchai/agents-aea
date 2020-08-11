@@ -1039,7 +1039,7 @@ class Dialogues(ABC):
         )
         new_dialogue_reference = (
             dialogue_reference[0],
-            str(self._generate_dialogue_nonce()),
+            self._generate_dialogue_nonce(),
         )
         complete_dialogue_label = DialogueLabel(
             new_dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
