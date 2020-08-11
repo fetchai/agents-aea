@@ -12,7 +12,25 @@ jobs:
   common_checks_1:
     continue-on-error: False
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install pipenv
+      - name: Pipenv lock
+        run: pipenv lock
+
+  common_checks_2:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
@@ -26,10 +44,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install pipenv
           pip install tox
-      - name: Pipenv lock
-        run: pipenv lock
       - name: Security Check
         run: tox -e bandit
       - name: Safety Check
@@ -47,10 +62,10 @@ jobs:
           version: v1.28
           working-directory: packages/fetchai/connections/p2p_libp2p/
 
-  common_checks_2:
+  common_checks_3:
     continue-on-error: False
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
@@ -86,6 +101,7 @@ jobs:
     needs:
     - common_checks_1
     - common_checks_2
+    - common_checks_3
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -114,6 +130,7 @@ jobs:
     needs:
     - common_checks_1
     - common_checks_2
+    - common_checks_3
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -138,6 +155,7 @@ jobs:
     needs:
     - common_checks_1
     - common_checks_2
+    - common_checks_3
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -183,6 +201,7 @@ jobs:
     needs:
     - common_checks_1
     - common_checks_2
+    - common_checks_3
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -209,6 +228,7 @@ jobs:
     needs:
     - common_checks_1
     - common_checks_2
+    - common_checks_3
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
