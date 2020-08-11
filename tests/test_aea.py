@@ -738,10 +738,7 @@ class TestAeaExceptionPolicy:
         self.aea._skills_exception_policy = ExceptionPolicyEnum.stop_and_exit
         self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        with pytest.raises(
-            AEAException, match=r"AEA was terminated cause exception .*"
-        ):
-            self.aea.start()
+        self.aea.start()
 
         assert not self.aea.is_running
 
