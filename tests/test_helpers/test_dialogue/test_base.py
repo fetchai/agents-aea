@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the dialogue/base.py module."""
-
+import string
 from typing import Dict, FrozenSet, Optional, Type, cast
 
 import pytest
@@ -1405,6 +1405,9 @@ class TestDialoguesBase:
 
     def test_generate_dialogue_nonce(self):
         """Test the '_generate_dialogue_nonce' method."""
-        assert self.dialogues._dialogue_nonce == 0
-        assert self.dialogues._generate_dialogue_nonce() == 1
-        assert self.dialogues._dialogue_nonce == 1
+        nonce_1 = self.dialogues._generate_dialogue_nonce()
+        assert isinstance(nonce_1, str)
+        assert len(nonce_1) == 64
+        assert all(c in string.hexdigits for c in nonce_1)
+        nonce_2 = self.dialogues._generate_dialogue_nonce()
+        assert nonce_1 != nonce_2, "Nonces are equal."
