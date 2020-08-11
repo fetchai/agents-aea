@@ -97,7 +97,7 @@ cd erc1155_client
 aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/erc1155_client:0.11.0
+aea add skill fetchai/erc1155_client:0.10.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 ```
