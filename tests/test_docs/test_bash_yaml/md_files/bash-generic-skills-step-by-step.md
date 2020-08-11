@@ -5,13 +5,13 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.6.0
+aea fetch fetchai/generic_seller:0.7.0
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.9.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.6.0
+aea fetch fetchai/generic_buyer:0.7.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.8.0
 cd ..
@@ -48,22 +48,22 @@ aea add-key cosmos cosmos_private_key.txt --connection
 aea generate-wealth cosmos --sync
 ```
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
 aea add protocol fetchai/fipa:0.5.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea run
 ```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
 aea add protocol fetchai/fipa:0.5.0
 aea add protocol fetchai/signing:0.2.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 ``` bash
 aea run

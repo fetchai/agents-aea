@@ -41,14 +41,14 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.6.0
+aea fetch fetchai/generic_seller:0.7.0
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.9.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.6.0
+aea fetch fetchai/generic_buyer:0.7.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.8.0
 cd ..
@@ -3016,12 +3016,12 @@ aea generate-wealth cosmos --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
 aea add protocol fetchai/fipa:0.5.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea run
 ```
 
@@ -3032,13 +3032,13 @@ Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take 
 Add the remaining packages for the buyer AEA:
 
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
 aea add protocol fetchai/fipa:0.5.0
 aea add protocol fetchai/signing:0.2.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
