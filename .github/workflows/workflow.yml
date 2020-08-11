@@ -9,10 +9,10 @@ on:
 
 jobs:
 
-  common_checks:
-    continue-on-error: True
+  common_checks_1:
+    continue-on-error: False
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
@@ -28,24 +28,12 @@ jobs:
           sudo apt-get autoclean
           pip install pipenv
           pip install tox
-          # install IPFS
-          sudo apt-get install -y wget
-          wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_linux-amd64.tar.gz
-          tar xvfz go-ipfs.tar.gz
-          sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
-          ipfs init
       - name: Pipenv lock
         run: pipenv lock
       - name: Security Check
         run: tox -e bandit
       - name: Safety Check
         run: tox -e safety
-      - name: License Check
-        run: tox -e liccheck
-      - name: Copyright Check
-        run: tox -e copyright_check
-      - name: AEA Package Hashes Check
-        run: tox -e hash_check -- --timeout 20.0
       - name: Code style check
         run: |
           tox -e black-check
@@ -58,6 +46,34 @@ jobs:
         with:
           version: v1.28
           working-directory: packages/fetchai/connections/p2p_libp2p/
+
+  common_checks_2:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          # install IPFS
+          sudo apt-get install -y wget
+          wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_linux-amd64.tar.gz
+          tar xvfz go-ipfs.tar.gz
+          sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+          ipfs init
+      - name: License Check
+        run: tox -e liccheck
+      - name: Copyright Check
+        run: tox -e copyright_check
+      - name: AEA Package Hashes Check
+        run: tox -e hash_check -- --timeout 20.0
       - name: Check package versions in documentation
         run: tox -e package_version_checks
       - name: Check package dependencies
@@ -67,6 +83,9 @@ jobs:
 
   integration_checks:
     continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -92,6 +111,9 @@ jobs:
 
   integration_checks_ledger:
     continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -113,6 +135,9 @@ jobs:
 
   platform_checks:
     continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -155,6 +180,9 @@ jobs:
 
   platform_checks_sync_aea_loop:
     continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -178,6 +206,9 @@ jobs:
 
   golang_checks:
     continue-on-error: false
+    needs:
+    - common_checks_1
+    - common_checks_2
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
