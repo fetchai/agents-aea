@@ -140,7 +140,7 @@ jobs:
         sudo apt-get install -y protobuf-compiler
     - name: Sync AEA loop integrational tests and coverage
       run: |
-        tox -e py3.8 -- --aea-loop sync -m 'integration and not unstable and not ledger'
+        tox -e py3.8 -- --aea-loop sync -m 'sync'
     - name: Async Integration tests
       run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
 
