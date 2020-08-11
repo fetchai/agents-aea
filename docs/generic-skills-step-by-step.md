@@ -54,6 +54,14 @@ aea eject skill fetchai/generic_buyer:0.8.0
 cd ..
 ```
 
+## Simplification step
+
+To keep file paths consistent with the reference code, we suggest you initialize your local author as `fetchai` for the purpose of this demo only:
+
+``` bash
+aea init --reset --local --author fetchai
+```
+
 ## Generic Seller AEA
 
 ### Step 1: Create the AEA
@@ -70,17 +78,17 @@ aea scaffold skill generic_seller
 
 This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
 
+- `__init__.py`
 - `behaviours.py`
 - `handlers.py`
 - `my_model.py`
 - `skills.yaml`
-- `__init__.py`
 
 ### Step 2: Create the behaviour
 
 A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
 
-Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and add the following code:
+Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
 from typing import cast
@@ -236,11 +244,11 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering agent from SOEF.")
 ```
 
-This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the <a href="../simple-oef">SOEF search node</a> at regular tick intervals (here 30 seconds). By registering, the AEA becomes discoverable to possible clients.
+This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the <a href="../simple-oef">SOEF search node</a> at regular tick intervals (here 60 seconds). By registering, the AEA becomes discoverable to possible clients.
 
 The act method unregisters and registers the AEA to the <a href="../simple-oef">SOEF search node</a> on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
 
-At setup we are checking if we have a positive account balance for the AEA's address on the configured ledger.
+At setup we are sending a message to the ledger connection to check the account balance for the AEA's address on the configured ledger.
 
 ### Step 3: Create the handler
 
@@ -290,7 +298,7 @@ We have to specify the logic to negotiate with another AEA based on the strategy
 
 In the context of our generic use-case, the `my_generic_seller` AEA is the seller.
 
-Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_generic_seller/skills/generic_seller/handlers.py`) and add the following code:
+Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_generic_seller/skills/generic_seller/handlers.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
 from typing import Optional, cast
@@ -395,7 +403,7 @@ Below the unused `teardown` function, we continue by adding the following code:
 
 The above code handles an unidentified dialogue by responding to the sender with a `DefaultMessage` containing the appropriate error information. 
 
-The next code block handles the CFP message, paste the code below the `_handle_unidentified_dialogue` function:
+The next code block handles the `CFP` message, paste the code below the `_handle_unidentified_dialogue` function:
 
 ``` python
     def _handle_cfp(self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
@@ -448,7 +456,7 @@ The next code block handles the CFP message, paste the code below the `_handle_u
             self.context.outbox.put_message(message=decline_msg)
 ```
 
-The above code will respond with a `Proposal` to the buyer if the CFP matches the supplied services and our strategy otherwise it will respond with a `Decline` message. 
+The above code will respond with a `PROPOSE` message to the buyer if the CFP matches the supplied services and our strategy otherwise it will respond with a `DECLINE` message. 
 
 The next code-block  handles the decline message we receive from the buyer. Add the following code below the `_handle_cfp`function:
 
@@ -477,7 +485,7 @@ The next code-block  handles the decline message we receive from the buyer. Add 
 ```
 If we receive a decline message from the buyer we close the dialogue and terminate this conversation with the `my_generic_buyer`.
 
-Alternatively, we might receive an `Accept` message. In order to handle this option add the following code below the `_handle_decline` function:
+Alternatively, we might receive an `ACCEPT` message. In order to handle this option add the following code below the `_handle_decline` function:
 
 ``` python
     def _handle_accept(
@@ -863,10 +871,11 @@ class GenericOefSearchHandler(Handler):
         )
 ```
 
+The `GenericLedgerApiHandler` deals with `LedgerApiMessages` from the ledger connection. The `GenericOefSearchHandler` handles `OefSearchMessages` from the soef connection.
 
 ### Step 4: Create the strategy
 
-Next, we are going to create the strategy that we want our `my_generic_seller` AEA to follow. Rename the `my_model.py` file (`my_generic_seller/skills/generic_seller/my_model.py`) to `strategy.py` and copy and paste the following code: 
+Next, we are going to create the strategy that we want our `my_generic_seller` AEA to follow. Rename the `my_model.py` file (`my_generic_seller/skills/generic_seller/my_model.py`) to `strategy.py` and copy and paste the following code (replacing the stub code already present in the file):
 
 ``` python 
 import uuid
@@ -953,11 +962,9 @@ class GenericStrategy(Model):
         self._sale_quantity = len(data_for_sale)
 ```
 
-We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not 
-possible we specified some default values.
+We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not possible we specified some default values.
 
-The following functions are related with 
-the <a href="../simple-oef">SOEF search node</a> registration and we assume that the query matches the supply. Add them under the initialization of the class:
+The following properties and methods deal with different aspects of the strategy. Add them under the initialization of the class:
 
 ``` python
     @property
@@ -1070,7 +1077,7 @@ the <a href="../simple-oef">SOEF search node</a> registration and we assume that
         raise NotImplementedError
 ```
 
-Before the creation of the actual proposal, we have to check if the sale generates value for us or a loss. If it is a loss, we abort and warn the developer. The helper private function `_build_data_payload`, is where we read data from our sensor or in case we do not have a sensor generate a random number.
+Before the creation of the actual proposal, we have to check if the sale generates value for us or a loss. If it is a loss, we abort and warn the developer. The helper private function `collect_from_data_source`, is where we read data from our sensor or in case we do not have a sensor use some default data provided.
 
 ### Step 5: Create the dialogues
 
@@ -1336,9 +1343,9 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         return dialogue
 ```
 
-The `Dialogues` class stores dialogue with each `my_generic_buyer` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
+The `FipaDialogues` class stores dialogue with each `my_generic_buyer` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
 
-The `Dialogues` class extends `FipaDialogues`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `Dialogue` class extends `FipaDialogue`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
+The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
 
 ### Step 6: Update the YAML files
 
@@ -1347,17 +1354,17 @@ Since we made so many changes to our AEA we have to update the `skill.yaml` (at 
 ``` yaml
 name: generic_seller
 author: fetchai
-version: 0.8.0
+version: 0.1.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmZuzEpqCZjW1rAYT1PZXoYRPjCXxKNQ2ZEkL32WQhxtwf
-  dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
-  handlers.py: QmfFY8HGULapXzCHHLuwWhgADXvBw8NJvfX155pY3qWS1h
-  strategy.py: QmRVkBtcCUKXf68RAqnHAi6UWqcygesppUNzSm9oceYNHH
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
+  dialogues.py: QmRmoFp9xi1p1THVBYym9xEwW88KgkBHgz45LgrYbBecQw
+  handlers.py: QmT4nvKikWXfGAEdRS8Qn8w89Gbh5zPb4EDB6EwPVP2YDJ
+  strategy.py: QmP69kCtcovLD2Z7quESuNxVEyNuiZgqqbwozp6wAbvBCd
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -1419,7 +1426,7 @@ We must pay attention to the models and in particular the strategy’s variables
 Finally, we fingerprint our new skill:
 
 ``` bash
-aea fingerprint skill generic_seller
+aea fingerprint skill fetchai/generic_seller:0.1.0
 ```
 
 This will hash each file and save the hash in the fingerprint. This way, in the future we can easily track if any of the files have changed.
@@ -1429,7 +1436,7 @@ This will hash each file and save the hash in the fingerprint. This way, in the 
 
 ### Step 1: Create the AEA
 
-Create a new AEA by typing the following command in the terminal:
+In a new terminal, create a new AEA by typing the following command in the terminal:
 
 ``` bash
 aea create my_generic_buyer
@@ -1444,17 +1451,17 @@ aea scaffold skill generic_buyer
 
 This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_generic_buyer/skills/generic_buyer/`) and it must contain the following files:
 
+- `__init__.py`
 - `behaviours.py`
 - `handlers.py`
 - `my_model.py`
 - `skills.yaml`
-- `__init__.py`
 
 ### Step 2: Create the behaviour
 
 A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
 
-Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code:
+Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python 
 from typing import cast
@@ -1538,7 +1545,7 @@ This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour
 
 So far, we have tasked the AEA with sending search queries to the <a href="../simple-oef">SOEF search node</a>. However, we have at present no way of handling the responses sent to the AEA by the <a href="../simple-oef">SOEF search node</a> or messages sent by other agent.
 
-Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_generic_buyer/skills/generic_buyer/handlers.py`) and add the following code:
+Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_generic_buyer/skills/generic_buyer/handlers.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
 import pprint
@@ -1642,7 +1649,7 @@ You will see that we are following similar logic to the `generic_seller` when we
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 ```
-The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the `Proposal` that we receive from the `my_generic_seller` AEA: 
+The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the `PROPOSE` message that we receive from the `my_generic_seller` AEA: 
 
 ``` python
     def _handle_propose(
@@ -1792,7 +1799,7 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 )
             )
 ```
-The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a transaction message and we propose it to the `DecisionMaker` (more on the `DecisionMaker` <a href="../decision-maker">here</a>. The `DecisionMaker` then will check the transaction message. If it is acceptable (i.e. we have the funds, etc) it signs and sends the transaction to the specified ledger. Then it returns us the transaction digest.
+The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a `LedgerApiMessage` of performative `GET_RAW_TRANSACTION` and send it to the ledger connection. The ledger connection will construct a raw transaction for us, using the relevant ledger api.
 
 Lastly, we need to handle the `INFORM` message. This is the message that will have our data:
 
@@ -1978,7 +1985,7 @@ class GenericOefSearchHandler(Handler):
 ```
 When we receive a message from the <a href="../simple-oef">SOEF search node</a> of a type `OefSearchMessage.Performative.SEARCH_RESULT`, we are passing the details to the relevant handler method. In the `_handle_search` function we are checking that the response contains some agents and we stop the search if it does. We pick our first agent and we send a `CFP` message.
 
-The last handler we need is the `MyTransactionHandler`. This handler will handle the internal messages that we receive from the `DecisionMaker`.
+The last handlers we need are the `GenericSigningHandler` and the `GenericLedgerApiHandler`. This handler will handle the `SigningMessages` that we receive from the `DecisionMaker`. The `GenericLedgerApiHandler` will handle the `LedgerApiMessages` that we receive from the ledger connection.
 
 ``` python 
 class GenericSigningHandler(Handler):
@@ -2283,15 +2290,10 @@ class GenericLedgerApiHandler(Handler):
             )
         )
 ```
-Remember that we send a message to the `DecisionMaker` with a transaction proposal. Here, we handle the response from the `DecisionMaker`.
-
-If the message is of performative `SUCCESFUL_SETTLEMENT`, we generate the `INFORM` message for the `my_generic_seller` AEA to inform it that we completed the transaction and transferred the funds to the address that it sent us. We also pass along the transaction digest so the `my_generic_seller` AEA can verify the transaction.
-
-If the transaction was unsuccessful, the `DecisionMaker` will inform us that something went wrong and the transaction was not successful.
 
 ### Step 4: Create the strategy
 
-We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_generic_buyer/skills/generic_buyer/`) to `strategy.py` and paste the following code: 
+We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_generic_buyer/skills/generic_buyer/`) to `strategy.py` and paste the following code (replacing the stub code already present in the file): 
 
 ``` python
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -2357,7 +2359,7 @@ class GenericStrategy(Model):
         self._balance = 0
 ```
 
-We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two functions are related to the oef search service, add them under the initialization of the class:
+We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two methods are related to the oef search service, add them under the initialization of the class:
 
 ``` python
     @property
@@ -2868,7 +2870,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         return dialogue
 ```
 
-The dialogues class stores dialogue with each AEA so we can have access to previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
+The dialogues class stores dialogue with each AEA and other AEA components so we can have access to previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
 
 ### Step 6: Update the YAML files
 
@@ -2879,16 +2881,16 @@ First, we update the `skill.yaml`. Make sure that your `skill.yaml` matches with
 ``` yaml
 name: generic_buyer
 author: fetchai
-version: 0.7.0
+version: 0.1.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmUHgMCuvWYyAU382c7hUikNi6R6rfmH1toKUB1K2rcbXQ
-  dialogues.py: QmYMR28TDqE56GdUxP9LwerktaJrD9SBkGoeJsoLSMHpx6
-  handlers.py: QmYevHGuYJ8bsQUT22ZJcSx2aotUveNTLbdyEMMzCEMw7U
-  strategy.py: QmU2gH921MoxvVCCQhnEvcFNbDsgBojeHeTXDEY3ZBMC2A
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
+  dialogues.py: Qmf3McwyT5wMv3BzoN1L3ssqZzEq19LShEjQueiKqvADcX
+  handlers.py: QmQVmi3GnuYJ5VM4trYjUeJyFHVfrUeMGDsRmtNCuntKA8
+  strategy.py: QmQHQsjAsPiox5zMtMHhdhhhHt4rKq3cs3bqnwjgGSFp6n
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -2896,6 +2898,7 @@ protocols:
 - fetchai/fipa:0.5.0
 - fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.4.0
+- fetchai/signing:0.2.0
 skills: []
 behaviours:
   search:
@@ -2956,7 +2959,7 @@ We must pay attention to the models and the strategy’s variables. Here we can 
 Finally, we fingerprint our new skill:
 
 ``` bash
-aea fingerprint skill my_generic_buyer
+aea fingerprint skill fetchai/generic_buyer:0.1.0
 ```
 
 This will hash each file and save the hash in the fingerprint. This way, in the future we can easily track if any of the files have changed.
@@ -2981,98 +2984,82 @@ and replace it with your IP (the IP of the machine that runs the <a href="../oef
 
 </details> -->
 
+### Create private keys
 
-You can run the demo either on Fetch.ai ledger or Ethereum ledger.
-
-### Option 1: Fetch.ai ledger payment
-
-Create the private key for the buyer AEA.
+Create the private key for each AEA:
 
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
-#### Update the AEA configs
+### Update the AEA configs
 
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 
-#### Fund the buyer AEA
+### Fund the buyer AEA
 
 Create some wealth for your buyer on the Fetch.ai testnet. (It takes a while).
 
 ``` bash 
-aea generate-wealth fetchai
+aea generate-wealth cosmos --sync
 ```
 
-#### Run both AEAs
+### Run seller AEA
 
-Run both AEAs from their respective terminals
-
-``` bash 
-aea add connection fetchai/p2p_libp2p:0.6.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
-aea run
-```
-You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
-
-### Option 2: Ethereum ledger payment
-
-A demo to run the same scenario but with a true ledger transaction on the Ethereum Ropsten testnet. 
-This demo assumes the buyer trusts our AEA to send the temperature data upon successful payment.
-
-Create the private key for the `my_generic_buyer` AEA.
+Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-
-#### Update the skill configs
-
-In the skill `generic_seller` config (`my_generic_seller/skills/generic_seller/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
-
-``` yaml
-currency_id: 'ETH'
-ledger_id: 'ethereum'
-is_ledger_tx: True
-```
-
-In the `generic_buyer` skill config (`my_generic_buyer/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
-
-``` yaml
-max_buyer_tx_fee: 20000
-currency_id: 'ETH'
-ledger_id: 'ethereum'
-is_ledger_tx: True
-```
-
-#### Fund the generic buyer AEA
-
-Create some wealth for your buyer on the Ethereum Ropsten test net.
-Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and request some test ETH for the account your buyer AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_generic_buyer/eth_private_key.txt`.
-
-#### Run both AEAs
-
-Run both AEAs from their respective terminals.
-
-``` bash 
 aea add connection fetchai/p2p_libp2p:0.6.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
+aea add protocol fetchai/fipa:0.5.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
 aea run
 ```
 
-You will see that the AEAs negotiate and then transact using the Ethereum testnet.
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
+#### Run buyer AEA
+
+Add the remaining packages for the buyer AEA:
+
+``` bash 
+aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/soef:0.6.0
+aea add connection fetchai/ledger:0.3.0
+aea add protocol fetchai/fipa:0.5.0
+aea add protocol fetchai/signing:0.2.0
+aea install
+aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+```
+
+Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
+
+Then run the buyer AEA:
+``` bash
+aea run
+```
+
+You will see that the AEAs negotiate and then transact using the Agentland testnet.
 
 ## Delete the AEAs
 
