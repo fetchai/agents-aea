@@ -210,6 +210,7 @@ class TestGenericSkills(AEATestCaseMany):
         wait_for_localhost_ports_to_close([9000, 9001])
 
 
+@pytest.mark.sync
 @pytest.mark.integration
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
     """Test that generic skills work."""
