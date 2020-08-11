@@ -19,18 +19,17 @@
 
 """This package contains the handlers for the aries_alice skill."""
 
+import base64
+import binascii
 import json
 from typing import Dict, Optional, cast
+from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
-from packages.fetchai.connections.http_client.connection import (
-    PUBLIC_ID as HTTP_CLIENT_CONNECTION_PUBLIC_ID,
-)
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_alice.dialogues import (
@@ -41,9 +40,10 @@ from packages.fetchai.skills.aries_alice.dialogues import (
     OefSearchDialogue,
     OefSearchDialogues,
 )
-
-ADMIN_COMMAND_RECEIVE_INVITE = "/connections/receive-invitation"
-HTTP_COUNTERPARTY = "HTTP Server"
+from packages.fetchai.skills.aries_alice.strategy import (
+    ADMIN_COMMAND_RECEIVE_INVITE,
+    AliceStrategy,
+)
 
 
 class AliceDefaultHandler(Handler):
@@ -57,32 +57,46 @@ class AliceDefaultHandler(Handler):
 
         self.handled_message = None
 
-    @property
-    def admin_url(self) -> str:
-        """Get the admin URL."""
-        return self.context.behaviours.alice.admin_url
+    def _handle_received_invite(self, invite_detail: Dict[str, str]) -> Optional[str]:
+        """
+        Prepare an invitation detail received from Faber_AEA to be send to the Alice ACA.
 
-    def _admin_post(self, path: str, content: Dict = None):
-        # Request message & envelope
-        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
-        request_http_message = HttpMessage(
-            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
-            performative=HttpMessage.Performative.REQUEST,
-            method="POST",
-            url=self.admin_url + path,
-            headers="",
-            version="",
-            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
-        )
-        request_http_message.counterparty = HTTP_COUNTERPARTY
-        http_dialogue = http_dialogues.update(request_http_message)
-        assert (
-            http_dialogue is not None
-        ), "alice -> default_handler -> _admin_post(): something went wrong when sending a HTTP message."
-        self.context.outbox.put_message(
-            message=request_http_message,
-            context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
-        )
+        :param invite_detail: the invitation detail
+        :return: The prepared invitation detail
+        """
+        for details in invite_detail:
+            try:
+                url = urlparse(details)
+                query = url.query
+                if query and "c_i=" in query:
+                    pos = query.index("c_i=") + 4
+                    b64_invite = query[pos:]
+                else:
+                    b64_invite = details
+            except ValueError:
+                b64_invite = details
+
+            if b64_invite:
+                try:
+                    padlen = 4 - len(b64_invite) % 4
+                    if padlen <= 2:
+                        b64_invite += "=" * padlen
+                    invite_json = base64.urlsafe_b64decode(b64_invite)
+                    details = invite_json.decode("utf-8")
+                except binascii.Error as e:
+                    self.context.logger.error("Invalid invitation:", str(e))
+                except UnicodeDecodeError as e:
+                    self.context.logger.error("Invalid invitation:", str(e))
+
+            if details:
+                try:
+                    json.loads(details)
+                    return details
+                except json.JSONDecodeError as e:
+                    self.context.logger.error("Invalid invitation:", str(e))
+
+        self.context.logger.error("No details in the invitation detail:")
+        return None
 
     def setup(self) -> None:
         """
@@ -102,6 +116,8 @@ class AliceDefaultHandler(Handler):
         message = cast(DefaultMessage, message)
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
 
+        strategy = cast(AliceStrategy, self.context.strategy)
+
         self.handled_message = message
         if message.performative == DefaultMessage.Performative.BYTES:
             http_dialogue = cast(
@@ -116,7 +132,12 @@ class AliceDefaultHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
             if "@type" in content:
-                self._admin_post(ADMIN_COMMAND_RECEIVE_INVITE, content)
+                details = self._handle_received_invite(content)
+                self.context.behaviours.alice.send_http_request_message(
+                    method="POST",
+                    url=strategy.admin_url + ADMIN_COMMAND_RECEIVE_INVITE,
+                    content=details,
+                )
 
     def teardown(self) -> None:
         """
