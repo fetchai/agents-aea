@@ -53,7 +53,6 @@ jobs:
         run: |
           tox -e black-check
           tox -e flake8
-          tox -e pylint
       - name: Static type check
         run: tox -e mypy
       - name: Golang code style check
@@ -63,6 +62,25 @@ jobs:
           working-directory: packages/fetchai/connections/p2p_libp2p/
 
   common_checks_3:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+      - name: Pylint check
+        run: |
+          tox -e pylint
+
+  common_checks_4:
     continue-on-error: False
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -102,6 +120,7 @@ jobs:
     - common_checks_1
     - common_checks_2
     - common_checks_3
+    - common_checks_4
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -131,6 +150,7 @@ jobs:
     - common_checks_1
     - common_checks_2
     - common_checks_3
+    - common_checks_4
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -156,6 +176,7 @@ jobs:
     - common_checks_1
     - common_checks_2
     - common_checks_3
+    - common_checks_4
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -202,6 +223,7 @@ jobs:
     - common_checks_1
     - common_checks_2
     - common_checks_3
+    - common_checks_4
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -229,6 +251,7 @@ jobs:
     - common_checks_1
     - common_checks_2
     - common_checks_3
+    - common_checks_4
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
