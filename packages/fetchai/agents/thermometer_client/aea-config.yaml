@@ -20,7 +20,7 @@ protocols:
 skills:
 - fetchai/error:0.4.0
 - fetchai/generic_buyer:0.8.0
-- fetchai/thermometer_client:0.8.0
+- fetchai/thermometer_client:0.7.0
 default_connection: fetchai/p2p_libp2p:0.7.0
 default_ledger: cosmos
 logging_config:
