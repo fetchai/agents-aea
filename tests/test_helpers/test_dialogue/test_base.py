@@ -1403,8 +1403,8 @@ class TestDialoguesBase:
         assert not result
         assert len(self.dialogues.dialogues) == 0
 
-    def test_next_dialogue_nonce(self):
-        """Test the '_next_dialogue_nonce' method."""
+    def test_generate_dialogue_nonce(self):
+        """Test the '_generate_dialogue_nonce' method."""
         assert self.dialogues._dialogue_nonce == 0
-        assert self.dialogues._next_dialogue_nonce() == 1
+        assert self.dialogues._generate_dialogue_nonce() == 1
         assert self.dialogues._dialogue_nonce == 1
