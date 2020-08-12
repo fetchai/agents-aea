@@ -30,7 +30,7 @@ class TestEchoSkill(AEATestCaseEmpty):
 
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.4.0")
+        self.add_item("skill", "fetchai/echo:0.5.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)

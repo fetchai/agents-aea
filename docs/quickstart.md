@@ -103,7 +103,7 @@ The echo skill is a simple demo that introduces you to the main business logic c
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.8.0
+aea fetch fetchai/my_first_aea:0.9.0
 cd my_first_aea
 ```
 
@@ -123,9 +123,9 @@ cd my_first_aea
 <br>
 Second, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.4.0
+aea add skill fetchai/echo:0.5.0
 ```
-This copies the `fetchai/echo:0.4.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.4.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.5.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.5.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ## Usage of the stub connection

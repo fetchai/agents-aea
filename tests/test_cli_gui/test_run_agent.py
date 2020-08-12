@@ -63,7 +63,7 @@ def test_create_and_run_agent():
             response_add = app.post(
                 "api/agent/" + agent_id + "/connection",
                 content_type="application/json",
-                data=json.dumps("fetchai/local:0.5.0"),
+                data=json.dumps("fetchai/local:0.6.0"),
             )
             assert response_add.status_code == 201
 
