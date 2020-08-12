@@ -23,6 +23,8 @@ import os
 import shutil
 import tempfile
 
+import pytest
+
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
