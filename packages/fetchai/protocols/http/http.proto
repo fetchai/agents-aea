@@ -10,7 +10,8 @@ message HttpMessage{
         string url = 2;
         string version = 3;
         string headers = 4;
-        bytes bodyy = 5;
+        string bodyy = 5;
+        string query = 6;
     }
 
     message Response_Performative{
@@ -18,7 +19,7 @@ message HttpMessage{
         int32 status_code = 2;
         string status_text = 3;
         string headers = 4;
-        bytes bodyy = 5;
+        string bodyy = 5;
     }
 
 

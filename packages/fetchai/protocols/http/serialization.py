@@ -60,6 +60,8 @@ class HttpSerializer(Serializer):
             performative.headers = headers
             bodyy = msg.bodyy
             performative.bodyy = bodyy
+            query = msg.query
+            performative.query = query
             http_msg.request.CopyFrom(performative)
         elif performative_id == HttpMessage.Performative.RESPONSE:
             performative = http_pb2.HttpMessage.Response_Performative()  # type: ignore
@@ -111,6 +113,8 @@ class HttpSerializer(Serializer):
             performative_content["headers"] = headers
             bodyy = http_pb.request.bodyy
             performative_content["bodyy"] = bodyy
+            query = http_pb.request.query
+            performative_content["query"] = query
         elif performative_id == HttpMessage.Performative.RESPONSE:
             version = http_pb.response.version
             performative_content["version"] = version

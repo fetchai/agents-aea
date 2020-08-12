@@ -101,10 +101,10 @@ class HttpMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def bodyy(self) -> bytes:
+    def bodyy(self) -> str:
         """Get the 'bodyy' content from the message."""
         assert self.is_set("bodyy"), "'bodyy' content is not set."
-        return cast(bytes, self.get("bodyy"))
+        return cast(str, self.get("bodyy"))
 
     @property
     def headers(self) -> str:
@@ -117,6 +117,12 @@ class HttpMessage(Message):
         """Get the 'method' content from the message."""
         assert self.is_set("method"), "'method' content is not set."
         return cast(str, self.get("method"))
+
+    @property
+    def query(self) -> str:
+        """Get the 'query' content from the message."""
+        assert self.is_set("query"), "'query' content is not set."
+        return cast(str, self.get("query"))
 
     @property
     def status_code(self) -> int:
@@ -183,7 +189,7 @@ class HttpMessage(Message):
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == HttpMessage.Performative.REQUEST:
-                expected_nb_of_contents = 5
+                expected_nb_of_contents = 6
                 assert (
                     type(self.method) == str
                 ), "Invalid type for content 'method'. Expected 'str'. Found '{}'.".format(
@@ -205,9 +211,14 @@ class HttpMessage(Message):
                     type(self.headers)
                 )
                 assert (
-                    type(self.bodyy) == bytes
-                ), "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.bodyy) == str
+                ), "Invalid type for content 'bodyy'. Expected 'str'. Found '{}'.".format(
                     type(self.bodyy)
+                )
+                assert (
+                    type(self.query) == str
+                ), "Invalid type for content 'query'. Expected 'str'. Found '{}'.".format(
+                    type(self.query)
                 )
             elif self.performative == HttpMessage.Performative.RESPONSE:
                 expected_nb_of_contents = 5
@@ -232,8 +243,8 @@ class HttpMessage(Message):
                     type(self.headers)
                 )
                 assert (
-                    type(self.bodyy) == bytes
-                ), "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.bodyy) == str
+                ), "Invalid type for content 'bodyy'. Expected 'str'. Found '{}'.".format(
                     type(self.bodyy)
                 )
 

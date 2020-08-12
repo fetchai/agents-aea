@@ -22,6 +22,7 @@
 import asyncio
 import copy
 import email
+import json
 import logging
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
@@ -135,7 +136,7 @@ class Request(OpenAPIRequest):
             full_url_pattern=str(url),
             method=method,
             parameters=parameters,
-            body=body,
+            body=str(body),
             mimetype=mimetype,
         )
         return request
@@ -157,7 +158,10 @@ class Request(OpenAPIRequest):
             if self.parameters.query == {}
             else self.full_url_pattern + "?" + urlencode(self.parameters.query)
         )
+        print(url)
         uri = URI(self.full_url_pattern)
+        print(self.parameters.query)
+        print(self.parameters)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
         http_message = HttpMessage(
             dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
@@ -165,8 +169,9 @@ class Request(OpenAPIRequest):
             method=self.method,
             url=url,
             headers=self.parameters.header,
-            bodyy=self.body if self.body is not None else b"",
+            bodyy=self.body if self.body is not None else "",
             version="",
+            query=json.dumps(self.parameters.query)
         )
         http_message.counterparty = agent_address
         dialogue = cast(Optional[HttpDialogue], dialogues.update(http_message))
@@ -199,7 +204,7 @@ class Response(web.Response):
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
-                body=http_message.bodyy,
+                body=str(http_message.bodyy),
             )
         else:  # pragma: nocover
             response = cls(status=SERVER_ERROR, text="Server error")

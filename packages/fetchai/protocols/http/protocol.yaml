@@ -5,13 +5,12 @@ description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmP8ATR4x159fe1363orvdFj7JTJJHWmSdFEVVW62USGyC
   __init__.py: QmRWie4QPiFJE8nK4fFJ6prqoG3u36cPo7st5JUZAGpVWv
   dialogues.py: QmbhfvfdniejPAUT9dZD8AGv6vZNkVRRy9spi8aCU1kJb5
-  http.proto: QmdTUTvvxGxMxSTB67AXjMUSDLdsxBYiSuJNVxHuLKB1jS
-  http_pb2.py: QmYYKqdwiueq54EveL9WXn216FXLSQ6XGJJHoiJxwJjzHC
-  message.py: QmTMEru7pjE4RQXPbTcMm6fNSwyCu9xdpZvQapjqd22ypG
-  serialization.py: QmUgo5BtLYDyy7syHBd6brd8zAXivNR2UEiBckryCwg6hk
+  http.proto: Qme1FXPdrPotm5WHMQEjc8KTXrNwmGWDUSyFyfj2Quqnc6
+  http_pb2.py: QmaMV29tkJFxGmSjL7bhHSB2cXuUGVo8dfvA9ZEtGfnSwC
+  message.py: QmbFSSWjxz9Dx6n3tMXXycTuaAaKC8CePKN6pBWhfphHmT
+  serialization.py: QmX5aHhsoBTAZtgnyBEy24D4DdCg9iVmukSJDnHfXg9Q9L
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
