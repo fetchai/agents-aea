@@ -22,20 +22,20 @@
 import os
 import shutil
 import tempfile
-import time
 
 import pytest
 
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
+    PUBLIC_DHT_DELEGATE_URI_1,
+    PUBLIC_DHT_DELEGATE_URI_2,
     PUBLIC_DHT_P2P_MADDR_1,
     PUBLIC_DHT_P2P_MADDR_2,
+    _make_libp2p_client_connection,
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
@@ -43,13 +43,17 @@ from tests.conftest import (
 )
 
 DEFAULT_PORT = 10234
+PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
+PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
+AEA_DEFAULT_LAUNCH_TIMEOUT = 15
+AEA_LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb
 
 
 @skip_test_windows
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionRelayPublicDHT:
-    """Test that public dht is working properly"""
+class TestLibp2pConnectionPublicDHTRelay:
+    """Test that public DHT's relay service is working properly"""
 
     @classmethod
     def setup_class(cls):
@@ -60,9 +64,8 @@ class TestLibp2pConnectionRelayPublicDHT:
 
         cls.log_files = []
 
-    def test_reachable(self):
-        public_nodes_maddrs = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
-        for maddr in public_nodes_maddrs:
+    def test_connectivity(self):
+        for maddr in PUBLIC_DHT_MADDRS:
             connection = _make_libp2p_connection(
                 DEFAULT_PORT + 1, relay=False, entry_peers=[maddr]
             )
@@ -70,8 +73,122 @@ class TestLibp2pConnectionRelayPublicDHT:
             self.log_files.append(connection.node.log_file)
             multiplexer.connect()
 
-            assert connection.is_connected is True
-            multiplexer.disconnect()
+            try:
+                assert (
+                    connection.is_connected is True
+                ), "Couldn't connect to public node {}".format(maddr)
+            except Exception:
+                raise
+            finally:
+                multiplexer.disconnect()
+
+    def test_communication_direct(self):
+        for maddr in PUBLIC_DHT_MADDRS:
+            connection1 = _make_libp2p_connection(
+                DEFAULT_PORT + 1, relay=False, entry_peers=[maddr]
+            )
+            multiplexer1 = Multiplexer([connection1])
+            self.log_files.append(connection1.node.log_file)
+            multiplexer1.connect()
+
+            connection2 = _make_libp2p_connection(
+                DEFAULT_PORT + 2, relay=False, entry_peers=[maddr]
+            )
+            multiplexer2 = Multiplexer([connection2])
+            self.log_files.append(connection2.node.log_file)
+            multiplexer2.connect()
+
+            addr_1 = connection1.node.address
+            addr_2 = connection2.node.address
+
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            envelope = Envelope(
+                to=addr_2,
+                sender=addr_1,
+                protocol_id=DefaultMessage.protocol_id,
+                message=msg,
+            )
+
+            multiplexer1.put(envelope)
+            delivered_envelope = multiplexer2.get(block=True, timeout=20)
+
+            try:
+                assert delivered_envelope is not None
+                assert delivered_envelope.to == envelope.to
+                assert delivered_envelope.sender == envelope.sender
+                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert delivered_envelope.message != envelope.message
+                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                assert envelope.message == msg
+            except Exception:
+                raise
+            finally:
+                multiplexer1.disconnect()
+                multiplexer2.disconnect()
+
+    def test_communication_indirect(self):
+        assert len(PUBLIC_DHT_MADDRS) > 1, "Test requires at least 2 public dht node"
+
+        for i in range(len(PUBLIC_DHT_MADDRS)):
+            connection1 = _make_libp2p_connection(
+                DEFAULT_PORT + 1, relay=False, entry_peers=[PUBLIC_DHT_MADDRS[i]]
+            )
+            multiplexer1 = Multiplexer([connection1])
+            self.log_files.append(connection1.node.log_file)
+            multiplexer1.connect()
+            addr_1 = connection1.node.address
+
+            for j in range(len(PUBLIC_DHT_MADDRS)):
+                if j == i:
+                    continue
+
+                connection2 = _make_libp2p_connection(
+                    DEFAULT_PORT + 2, relay=False, entry_peers=[PUBLIC_DHT_MADDRS[j]],
+                )
+                multiplexer2 = Multiplexer([connection2])
+                self.log_files.append(connection2.node.log_file)
+                multiplexer2.connect()
+
+                addr_2 = connection2.node.address
+
+                msg = DefaultMessage(
+                    dialogue_reference=("", ""),
+                    message_id=1,
+                    target=0,
+                    performative=DefaultMessage.Performative.BYTES,
+                    content=b"hello",
+                )
+                envelope = Envelope(
+                    to=addr_2,
+                    sender=addr_1,
+                    protocol_id=DefaultMessage.protocol_id,
+                    message=msg,
+                )
+
+                multiplexer1.put(envelope)
+                delivered_envelope = multiplexer2.get(block=True, timeout=20)
+
+                try:
+                    assert delivered_envelope is not None
+                    assert delivered_envelope.to == envelope.to
+                    assert delivered_envelope.sender == envelope.sender
+                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert delivered_envelope.message != envelope.message
+                    msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                    assert envelope.message == msg
+                except Exception:
+                    multiplexer1.disconnect()
+                    raise
+                finally:
+                    multiplexer2.disconnect()
+
+            multiplexer1.disconnect()
 
     @classmethod
     def teardown_class(cls):
@@ -81,130 +198,201 @@ class TestLibp2pConnectionRelayPublicDHT:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+@pytest.mark.integration
+class TestLibp2pConnectionPublicDHTDelegate:
+    """Test that public DHT's delegate service is working properly"""
+
+    def test_connectivity(self):
+        for uri in PUBLIC_DHT_DELEGATE_URIS:
+            connection = _make_libp2p_client_connection(uri=uri)
+            multiplexer = Multiplexer([connection])
+            multiplexer.connect()
+
+            try:
+                assert (
+                    connection.is_connected is True
+                ), "Couldn't connect to public node {}".format(uri)
+            except Exception:
+                raise
+            finally:
+                multiplexer.disconnect()
+
+    def test_communication_direct(self):
+        for uri in PUBLIC_DHT_DELEGATE_URIS:
+            connection1 = _make_libp2p_client_connection(uri=uri)
+            multiplexer1 = Multiplexer([connection1])
+            multiplexer1.connect()
+
+            connection2 = _make_libp2p_client_connection(uri=uri)
+            multiplexer2 = Multiplexer([connection2])
+            multiplexer2.connect()
+
+            addr_1 = connection1.address
+            addr_2 = connection2.address
+
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            envelope = Envelope(
+                to=addr_2,
+                sender=addr_1,
+                protocol_id=DefaultMessage.protocol_id,
+                message=msg,
+            )
+
+            multiplexer1.put(envelope)
+            delivered_envelope = multiplexer2.get(block=True, timeout=20)
+
+            try:
+                assert delivered_envelope is not None
+                assert delivered_envelope.to == envelope.to
+                assert delivered_envelope.sender == envelope.sender
+                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert delivered_envelope.message != envelope.message
+                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                assert envelope.message == msg
+            except Exception:
+                raise
+            finally:
+                multiplexer1.disconnect()
+                multiplexer2.disconnect()
+
+    def test_communication_indirect(self):
+        assert (
+            len(PUBLIC_DHT_DELEGATE_URIS) > 1
+        ), "Test requires at least 2 public dht node"
+
+        for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
+            connection1 = _make_libp2p_client_connection(
+                uri=PUBLIC_DHT_DELEGATE_URIS[i]
+            )
+            multiplexer1 = Multiplexer([connection1])
+            multiplexer1.connect()
+
+            addr_1 = connection1.address
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+
+            for j in range(len(PUBLIC_DHT_DELEGATE_URIS)):
+                if j == i:
+                    continue
+
+                connection2 = _make_libp2p_client_connection(
+                    uri=PUBLIC_DHT_DELEGATE_URIS[j]
+                )
+                multiplexer2 = Multiplexer([connection2])
+                multiplexer2.connect()
+
+                addr_2 = connection2.address
+                envelope = Envelope(
+                    to=addr_2,
+                    sender=addr_1,
+                    protocol_id=DefaultMessage.protocol_id,
+                    message=msg,
+                )
+
+                multiplexer1.put(envelope)
+                delivered_envelope = multiplexer2.get(block=True, timeout=20)
+
+                try:
+                    assert delivered_envelope is not None
+                    assert delivered_envelope.to == envelope.to
+                    assert delivered_envelope.sender == envelope.sender
+                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert delivered_envelope.message != envelope.message
+                    msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                    assert envelope.message == msg
+                except Exception:
+                    multiplexer1.disconnect()
+                    raise
+                finally:
+                    multiplexer2.disconnect()
+
+            multiplexer1.disconnect()
 
 
 @skip_test_windows
-@libp2p_log_on_failure_all
-class TestLibp2pConnectionRelayNodeRestart:
-    """Test that connection will reliably route envelope to destination in case of relay node restart within timeout"""
+@pytest.mark.integration
+class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
+    """"Test that public DHT's relay service is working properly, using aea cli"""
 
-    @classmethod
     @libp2p_log_on_failure
-    def setup_class(cls):
-        """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+    def test_connectivity(self):
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
 
-        cls.log_files = []
-
-        cls.genesis = _make_libp2p_connection(DEFAULT_PORT + 1)
-
-        cls.multiplexer_genesis = Multiplexer([cls.genesis])
-        cls.log_files.append(cls.genesis.node.log_file)
-        cls.multiplexer_genesis.connect()
-
-        genesis_peer = cls.genesis.node.multiaddrs[0]
-
-        with open("node_key", "wb") as f:
-            make_crypto(DEFAULT_LEDGER).dump(f)
-            cls.relay_key_path = "node_key"
-
-        cls.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            entry_peers=[genesis_peer],
-            node_key_file=cls.relay_key_path,
+        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.set_config(
+            "{}.local_uri".format(config_path), "127.0.0.1:{}".format(DEFAULT_PORT)
         )
-        cls.multiplexer_relay = Multiplexer([cls.relay])
-        cls.log_files.append(cls.relay.node.log_file)
-        cls.multiplexer_relay.connect()
-
-        relay_peer = cls.relay.node.multiaddrs[0]
-
-        cls.connection = _make_libp2p_connection(
-            DEFAULT_PORT + 3, relay=False, entry_peers=[relay_peer]
-        )
-        cls.multiplexer = Multiplexer([cls.connection])
-        cls.log_files.append(cls.connection.node.log_file)
-        cls.multiplexer.connect()
-
-    def test_connection_is_established(self):
-        assert self.relay.is_connected is True
-        assert self.connection.is_connected is True
-
-    def test_envelope_routed_after_relay_restart(self):
-        addr_1 = self.connection.address
-        addr_2 = self.genesis.address
-
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+        self.force_set_config(
+            "{}.entry_peers".format(config_path), PUBLIC_DHT_MADDRS,
         )
 
-        self.multiplexer.put(envelope)
-        delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
+        # for logging
+        log_file = "libp2p_node_{}.log".format(self.agent_name)
+        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
+        self.set_config("{}.log_file".format(config_path), log_file)
+        self.log_files = [log_file]
 
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
-        assert delivered_envelope.message == envelope.message
+        process = self.run_agent()
 
-        self.multiplexer_relay.disconnect()
+        is_running = self.is_running(process, timeout=AEA_LIBP2P_LAUNCH_TIMEOUT)
+        assert is_running, "AEA not running within timeout!"
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"helloAfterRestart",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
-        )
+        check_strings = "My libp2p addresses: ["
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in agent output.".format(missing_strings)
 
-        self.multiplexer.put(envelope)
-        time.sleep(5)
-
-        TestLibp2pConnectionRelayNodeRestart.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            entry_peers=[self.genesis.node.multiaddrs[0]],
-            node_key_file=self.relay_key_path,
-        )
-        TestLibp2pConnectionRelayNodeRestart.multiplexer_relay = Multiplexer(
-            [self.relay]
-        )
-        self.multiplexer_relay.connect()
-
-        delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
-
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
-        assert delivered_envelope.message == envelope.message
+        self.terminate_agents(process)
+        assert self.is_successfully_terminated(
+            process
+        ), "AEA wasn't successfully terminated."
 
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        cls.multiplexer.disconnect()
-        cls.multiplexer_relay.disconnect()
-        cls.multiplexer_genesis.disconnect()
+        cls.terminate_agents()
+        super(TestLibp2pConnectionPublicDHTRelayAEACli, cls).teardown_class()
 
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+
+@skip_test_windows
+@pytest.mark.integration
+class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
+    """Test that public DHT's delegate service is working properly, using aea cli"""
+
+    def test_connectivity(self):
+        self.add_item("connection", "fetchai/p2p_libp2p_client:0.5.0")
+        config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
+        self.force_set_config(
+            "{}.nodes".format(config_path),
+            [{"uri": "{}".format(uri)} for uri in PUBLIC_DHT_DELEGATE_URIS],
+        )
+
+        process = self.run_agent()
+        is_running = self.is_running(process, timeout=AEA_DEFAULT_LAUNCH_TIMEOUT)
+        assert is_running, "AEA not running within timeout!"
+
+        self.terminate_agents(process)
+        assert self.is_successfully_terminated(
+            process
+        ), "AEA wasn't successfully terminated."
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.terminate_agents()
+        super(TestLibp2pConnectionPublicDHTDelegateAEACli, cls).teardown_class()
