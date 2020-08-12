@@ -147,7 +147,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
 ## Run the AEA

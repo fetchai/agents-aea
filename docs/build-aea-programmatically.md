@@ -120,7 +120,7 @@ We use the input and output text files to send an envelope to our AEA and receiv
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = (
-            b"my_aea,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
+            b"my_aea,other_agent,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             f.write(message_text)
@@ -235,7 +235,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
         message_text = (
-            b"my_aea,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
+            b"my_aea,other_agent,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             f.write(message_text)
