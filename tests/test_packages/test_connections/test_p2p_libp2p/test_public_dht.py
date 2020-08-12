@@ -48,7 +48,7 @@ AEA_LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb
 
 
 @skip_test_windows
-# TODO() Mark tests back as integration ones
+# TODO(LR) Mark tests back as integration ones
 # @pytest.mark.integration
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionPublicDHTRelay:
@@ -76,7 +76,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 assert (
                     connection.is_connected is True
                 ), "Couldn't connect to public node {}".format(maddr)
-            except:
+            except Exception:
                 raise
             finally:
                 multiplexer.disconnect()
@@ -125,7 +125,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 assert envelope.message == msg
-            except:
+            except Exception:
                 raise
             finally:
                 multiplexer1.disconnect()
@@ -181,7 +181,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                     assert envelope.message == msg
-                except:
+                except Exception:
                     multiplexer1.disconnect()
                     raise
                 finally:
@@ -213,7 +213,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 assert (
                     connection.is_connected is True
                 ), "Couldn't connect to public node {}".format(uri)
-            except:
+            except Exception:
                 raise
             finally:
                 multiplexer.disconnect()
@@ -256,7 +256,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 assert envelope.message == msg
-            except:
+            except Exception:
                 raise
             finally:
                 multiplexer1.disconnect()
@@ -312,7 +312,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                     assert envelope.message == msg
-                except:
+                except Exception:
                     multiplexer1.disconnect()
                     raise
                 finally:
