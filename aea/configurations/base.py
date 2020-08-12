@@ -18,6 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
+
+import base64
+import gzip
+import json
 import pprint
 import re
 from abc import ABC, abstractmethod
@@ -63,6 +67,7 @@ DEFAULT_LICENSE = "Apache-2.0"
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
     "*__pycache__/*",
+    "*__pycache__",
     "*.pyc",
     "aea-config.yaml",
     "protocol.yaml",
@@ -86,7 +91,7 @@ These fields will be forwarded to the 'pip' command.
 Dependencies = Dict[str, Dependency]
 """
 A dictionary from package name to dependency data structure (see above).
-The package name must satisfy [the constraints on Python packages names](https://www.python.org/dev/peps/pep-0426/#name).
+The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426/#name">the constraints on Python packages names</a>.
 
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
@@ -1673,7 +1678,7 @@ class ContractConfig(ComponentConfiguration):
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
-        path_to_contract_interface: str = "",
+        contract_interface_paths: Optional[Dict[str, str]] = None,
         class_name: str = "",
     ):
         """Initialize a protocol configuration object."""
@@ -1689,13 +1694,46 @@ class ContractConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.path_to_contract_interface = path_to_contract_interface
+        self.contract_interface_paths = (
+            contract_interface_paths if contract_interface_paths is not None else {}
+        )
         self.class_name = class_name
 
     @property
     def component_type(self) -> ComponentType:
         """Get the component type."""
         return ComponentType.CONTRACT
+
+    @property
+    def contract_interfaces(self) -> Dict[str, str]:
+        """Get the contract interfaces."""
+        return self._get_contract_interfaces()
+
+    def _get_contract_interfaces(self) -> Dict[str, str]:
+        """Get the contract interfaces."""
+        assert self.directory is not None, "Set directory before calling."
+        contract_interfaces = {}  # type: Dict[str, str]
+        for identifier, path in self.contract_interface_paths.items():
+            full_path = Path(self.directory, path)
+            if identifier == "ethereum":
+                with open(full_path, "r") as interface_file_ethereum:
+                    contract_interface = json.load(interface_file_ethereum)
+                    contract_interfaces[identifier] = contract_interface
+            elif identifier == "cosmos":
+                with open(full_path, "rb") as interface_file_cosmos:
+                    contract_interface = {
+                        "wasm_byte_code": str(
+                            base64.b64encode(
+                                gzip.compress(interface_file_cosmos.read(), 6)
+                            ).decode()
+                        )
+                    }
+                    contract_interfaces[identifier] = contract_interface
+            else:
+                ValueError(  # pragma: nocover
+                    "Identifier {} is not supported for contracts."
+                )
+        return contract_interfaces
 
     @property
     def json(self) -> Dict:
@@ -1711,7 +1749,7 @@ class ContractConfig(ComponentConfiguration):
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "class_name": self.class_name,
-                "path_to_contract_interface": self.path_to_contract_interface,
+                "contract_interface_paths": self.contract_interface_paths,
                 "dependencies": self.dependencies,
             }
         )
@@ -1732,8 +1770,8 @@ class ContractConfig(ComponentConfiguration):
             ),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
-            path_to_contract_interface=cast(
-                str, obj.get("path_to_contract_interface", "")
+            contract_interface_paths=cast(
+                Dict[str, str], obj.get("contract_interface_paths", {})
             ),
             class_name=obj.get("class_name", ""),
         )

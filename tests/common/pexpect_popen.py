@@ -19,13 +19,15 @@
 """Wrapper for Pexpect to use in tests."""
 import os
 import platform
+import signal
 import sys
 import time
-from signal import SIGINT, SIGTERM
 from typing import List, Optional, Union
 
-from pexpect.exceptions import TIMEOUT  # type: ignore
+from pexpect.exceptions import EOF, TIMEOUT  # type: ignore
 from pexpect.popen_spawn import PopenSpawn  # type: ignore
+
+from aea.helpers.base import send_control_c
 
 
 class PexpectWrapper(PopenSpawn):
@@ -41,11 +43,7 @@ class PexpectWrapper(PopenSpawn):
     def control_c(self) -> None:
         """Send control c to process started."""
         time.sleep(0.1)  # sometimes it's better to wait a bit
-        if platform.system() == "Windows":
-            self.kill(SIGINT)
-        else:
-            pgid = os.getpgid(self.proc.pid)
-            os.killpg(pgid, SIGINT)
+        send_control_c(self.proc, True)
 
     @property
     def returncode(self) -> Optional[Union[int, str]]:
@@ -107,7 +105,17 @@ class PexpectWrapper(PopenSpawn):
             idx = self.expect_exact(pattern_list, timeout - time_spent)
             pattern_list.pop(idx)
 
+    def wait_eof(self, timeout: float = 10) -> None:
+        """
+        Wait for EOF of the process.
+
+        :param timeout: timeout in seconds
+
+        :return: None
+        """
+        self.expect(EOF, timeout=timeout)
+
     def terminate(self, *args, **kwargs) -> None:
         """Terminate process."""
         if self.proc.poll() is None:
-            self.kill(SIGTERM)
+            self.kill(signal.SIGTERM)

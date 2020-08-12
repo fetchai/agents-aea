@@ -10,12 +10,12 @@ aea add protocol fetchai/oef_search:0.4.0
 ```
 ``` bash
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.9.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.10.0 && cd simple_service_registration
 ```
 ``` bash
 aea generate-key cosmos

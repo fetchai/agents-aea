@@ -109,7 +109,7 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/local:0.5.0"
+        cls.connection_id = "fetchai/local:0.6.0"
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

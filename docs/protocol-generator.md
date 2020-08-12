@@ -13,7 +13,7 @@ Then run
 aea generate protocol <path-to-protocol-specification>
 ```
 
-where `<path-to-protocol-specification>` is the path to a <a href="./#protocol-specification">protocol specification</a> file.
+where `<path-to-protocol-specification>` is the path to a <a href="../protocol-generator/#protocol-specification">protocol specification</a> file.
 
 If there are no errors, this command will generate the protocol and place it in your AEA project. The name of the protocol's directory will match the protocol name given in the specification. The author will match the registered author in the CLI. The generator currently produces the following files (assuming the name of the protocol in the specification is `sample`):
 
@@ -74,7 +74,7 @@ The allowed fields and what they represent are:
  * `author`: The creator of the protocol
  * `version`: The current version of the protocol
  * `license`: Licensing information
- * `aea_version`: The version(s) of the framework that support this protocol. The format is described <a href="https://www.python.org/dev/peps/pep-0440" target="_blank">here</a>.
+ * `aea_version`: The version(s) of the framework that support this protocol. The format is described <a href="https://www.python.org/dev/peps/pep-0440/" target="_blank">here</a>.
  * `description`: A short description of the protocol
 
 All of the above fields are mandatory and each is a key/value pair, where both key and value are yaml strings. 
@@ -85,7 +85,7 @@ A _performative_ defines the type of a message (e.g. propose, accept) and has a 
 
 The format of the `speech-act` is as follows: `speech-act` is a dictionary, where each key is a **unique** _performative_ (yaml string), and the value is a _content_ dictionary. If a performative does not have any content, then its content dictionary is empty, e.g. `accept`, `decline` and `match_accept` in the above specification.
 
-A content dictionary in turn is composed of key/value pairs, where each key is the name of a content (yaml string) and the value is its <a href="./#types">type</a> (yaml string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:DataModel`.
+A content dictionary in turn is composed of key/value pairs, where each key is the name of a content (yaml string) and the value is its <a href="../protocol-generator/#types">type</a> (yaml string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:DataModel`.
 
 #### Types
 

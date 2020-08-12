@@ -1,16 +1,16 @@
 name: aries_faber
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The aries_faber skill implements the faber player in the aries cloud
   agent demo
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmNPVQ6UajvJodqTLWbLvQZkKCfrNn1nYPrQXai3xdj6F7
-  behaviours.py: QmRh5cVZHXzatgDNC16L3eB1L4jr4Qtmb9E3m23Y9CLXWt
+  behaviours.py: QmY6E6mLk16M6STTcqnoJUa8JoWm5jN2CsdjELtgbdrLiP
   dialogues.py: QmP9VtJL3tJWcKU5VTPN7ZcUiPw6oDpCq8La7ZtewcwrUE
-  handlers.py: QmU77Fef51oJP7bsDyTPY1sbmhY8Dk6McZAsHgCv3Fgm3C
-  strategy.py: QmWySg1wmunzCjCGkR6qSUFN9RKYX7ejFX8GxyKmNBvDQH
+  handlers.py: QmVFxbxCAan91at9qL7ocf3ixAT9tYCE7HwckiHpydVupd
+  strategy.py: QmPbF153LjPQLNKbU4TCAGFc9ComY82LE3BG2SeQ2skyFD
 fingerprint_ignore_patterns: []
 contracts: []
 protocols: []
@@ -18,8 +18,6 @@ skills: []
 behaviours:
   faber:
     args:
-      admin_host: 127.0.0.1
-      admin_port: 8021
       services_interval: 20
     class_name: FaberBehaviour
 handlers:
@@ -41,6 +39,9 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
+      admin_host: 127.0.0.1
+      admin_port: 8021
+      ledger_url: http://127.0.0.1:9000
       location:
         latitude: 0.127
         longitude: 51.5194

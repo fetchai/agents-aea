@@ -18,6 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for transaction."""
+from unittest.mock import patch
+
+import pytest
 
 from aea.configurations.base import PublicId
 from aea.helpers.transaction.base import (
@@ -51,8 +54,8 @@ class TestSigningMessage:
         cls.skill_callback_ids = (str(PublicId("author", "a_skill", "0.1.0")),)
         cls.skill_callback_info = {"some_string": "some_string"}
 
-    def test_message_consistency(self):
-        """Test for an error in consistency of a message."""
+    def test_sign_transaction(self):
+        """Test for an error for a sign transaction message."""
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             skill_callback_ids=self.skill_callback_ids,
@@ -61,6 +64,12 @@ class TestSigningMessage:
             raw_transaction=RawTransaction(self.ledger_id, "transaction"),
         )
         assert tx_msg._is_consistent()
+        encoded_tx_msg = tx_msg.encode()
+        decoded_tx_msg = tx_msg.serializer.decode(encoded_tx_msg)
+        assert tx_msg == decoded_tx_msg
+
+    def test_sign_message(self):
+        """Test for an error for a sign transaction message."""
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             skill_callback_ids=self.skill_callback_ids,
@@ -69,6 +78,12 @@ class TestSigningMessage:
             raw_message=RawMessage(self.ledger_id, "message"),
         )
         assert tx_msg._is_consistent()
+        encoded_tx_msg = tx_msg.encode()
+        decoded_tx_msg = tx_msg.serializer.decode(encoded_tx_msg)
+        assert tx_msg == decoded_tx_msg
+
+    def test_signed_transaction(self):
+        """Test for an error for a signed transaction."""
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
             message_id=2,
@@ -78,6 +93,12 @@ class TestSigningMessage:
             signed_transaction=SignedTransaction(self.ledger_id, "signature"),
         )
         assert tx_msg._is_consistent()
+        encoded_tx_msg = tx_msg.encode()
+        decoded_tx_msg = tx_msg.serializer.decode(encoded_tx_msg)
+        assert tx_msg == decoded_tx_msg
+
+    def test_signed_message(self):
+        """Test for an error for a signed message."""
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGNED_MESSAGE,
             message_id=2,
@@ -87,6 +108,12 @@ class TestSigningMessage:
             signed_message=SignedMessage(self.ledger_id, "message"),
         )
         assert tx_msg._is_consistent()
+        encoded_tx_msg = tx_msg.encode()
+        decoded_tx_msg = tx_msg.serializer.decode(encoded_tx_msg)
+        assert tx_msg == decoded_tx_msg
+
+    def test_error_message(self):
+        """Test for an error for an error message."""
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.ERROR,
             message_id=2,
@@ -96,20 +123,41 @@ class TestSigningMessage:
             error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         )
         assert tx_msg._is_consistent()
+        encoded_tx_msg = tx_msg.encode()
+        decoded_tx_msg = tx_msg.serializer.decode(encoded_tx_msg)
+        assert tx_msg == decoded_tx_msg
         assert str(tx_msg.performative) == "error"
         assert len(tx_msg.valid_performatives) == 5
 
-    def test_message_inconsistency(self):
-        """Test for an error in consistency of a message."""
-        tx_msg = SigningMessage(
-            performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            skill_callback_ids=self.skill_callback_ids,
-            terms=self.terms,
-        )
-        assert not tx_msg._is_consistent()
-        tx_msg = SigningMessage(
-            performative=SigningMessage.Performative.SIGN_MESSAGE,
-            skill_callback_ids=self.skill_callback_ids,
-            terms=self.terms,
-        )
-        assert not tx_msg._is_consistent()
+
+def test_consistency_check_negative():
+    """Test the consistency check, negative case."""
+    tx_msg = SigningMessage(performative=SigningMessage.Performative.SIGN_TRANSACTION,)
+    assert not tx_msg._is_consistent()
+
+
+def test_serialization_negative():
+    """Test serialization when performative is not recognized."""
+    skill_callback_ids = (str(PublicId("author", "a_skill", "0.1.0")),)
+    skill_callback_info = {"some_string": "some_string"}
+    tx_msg = SigningMessage(
+        performative=SigningMessage.Performative.ERROR,
+        message_id=2,
+        target=1,
+        skill_callback_ids=skill_callback_ids,
+        skill_callback_info=skill_callback_info,
+        error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+    )
+
+    with patch.object(SigningMessage.Performative, "__eq__", return_value=False):
+        with pytest.raises(
+            ValueError, match=f"Performative not valid: {tx_msg.performative}"
+        ):
+            tx_msg.serializer.encode(tx_msg)
+
+    encoded_tx_bytes = tx_msg.serializer.encode(tx_msg)
+    with patch.object(SigningMessage.Performative, "__eq__", return_value=False):
+        with pytest.raises(
+            ValueError, match=f"Performative not valid: {tx_msg.performative}"
+        ):
+            tx_msg.serializer.decode(encoded_tx_bytes)

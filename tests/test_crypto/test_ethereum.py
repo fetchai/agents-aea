@@ -198,3 +198,39 @@ def test_get_wealth_positive(caplog):
         assert (
             "Response: " in caplog.text
         ), f"Cannot find message in output: {caplog.text}"
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_contract_instance():
+    """Test the get contract instance method."""
+    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    interface = {"abi": [], "bytecode": b""}
+    instance = ethereum_api.get_contract_instance(
+        contract_interface=interface, contract_address=contract_address,
+    )
+    assert str(type(instance)) == "<class 'web3._utils.datatypes.Contract'>"
+    instance = ethereum_api.get_contract_instance(contract_interface=interface,)
+    assert (
+        str(type(instance)) == "<class 'web3._utils.datatypes.PropertyCheckingFactory'>"
+    )
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_deploy_transaction():
+    """Test the get deploy transaction method."""
+    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    ec2 = EthereumCrypto()
+    interface = {"abi": [], "bytecode": b""}
+    deploy_tx = ethereum_api.get_deploy_transaction(
+        contract_interface=interface, deployer_address=ec2.address,
+    )
+    assert type(deploy_tx) == dict and len(deploy_tx) == 6
+    assert all(
+        key in ["from", "value", "gas", "gasPrice", "nonce", "data"]
+        for key in deploy_tx.keys()
+    )

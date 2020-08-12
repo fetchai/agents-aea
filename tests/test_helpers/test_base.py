@@ -20,12 +20,16 @@
 
 import io
 import os
+import platform
 import re
+import signal
+import time
 from collections import OrderedDict
 from pathlib import Path
+from subprocess import Popen  # nosec
+from unittest.mock import patch
 
 import pytest
-
 
 from aea.configurations.base import ConnectionConfig
 from aea.helpers.base import (
@@ -37,14 +41,16 @@ from aea.helpers.base import (
     load_module,
     locate,
     retry_decorator,
+    send_control_c,
     try_decorator,
+    win_popen_kwargs,
     yaml_dump,
     yaml_load,
 )
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
-from tests.conftest import CUR_PATH, ROOT_DIR
+from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 
 class TestHelpersBase:
@@ -188,3 +194,47 @@ def test_log_and_reraise():
             raise ValueError()
 
     assert log_msg == "oops"
+
+
+@skip_test_windows
+def test_send_control_c_group():
+    """Test send control c to process group."""
+    # Can't test process group id kill directly,
+    # because o/w pytest would be stopped.
+    process = Popen(["sleep", "1"])  # nosec
+    pgid = os.getpgid(process.pid)
+    time.sleep(0.1)
+    with patch("os.killpg") as mock_killpg:
+        send_control_c(process, kill_group=True)
+        process.communicate(timeout=3)
+        mock_killpg.assert_called_with(pgid, signal.SIGINT)
+
+
+def test_send_control_c():
+    """Test send control c to process."""
+    # Can't test process group id kill directly,
+    # because o/w pytest would be stopped.
+    process = Popen(  # nosec
+        ["timeout" if platform.system() == "Windows" else "sleep", "5"],
+        **win_popen_kwargs()
+    )
+    time.sleep(0.001)
+    send_control_c(process)
+    process.communicate(timeout=3)
+    assert process.returncode != 0
+
+
+@skip_test_windows
+def test_send_control_c_windows():
+    """Test send control c on Windows."""
+    process = Popen(  # nosec
+        ["timeout" if platform.system() == "Windows" else "sleep", "5"]
+    )
+    time.sleep(0.001)
+    pid = process.pid
+    with patch("aea.helpers.base.signal") as mock_signal:
+        mock_signal.CTRL_C_EVENT = "mock"
+        with patch("platform.system", return_value="Windows"):
+            with patch("os.kill") as mock_kill:
+                send_control_c(process)
+                mock_kill.assert_called_with(pid, mock_signal.CTRL_C_EVENT)

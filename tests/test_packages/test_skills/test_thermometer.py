@@ -62,9 +62,9 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
         self.add_item("skill", "fetchai/thermometer:0.8.0")
         setting_path = (
@@ -92,9 +92,9 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
         self.add_item("skill", "fetchai/thermometer_client:0.7.0")
         setting_path = (
@@ -234,9 +234,9 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
         self.add_item("skill", "fetchai/thermometer:0.8.0")
         setting_path = "agent.default_routing"
@@ -244,7 +244,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.7.0", thermometer_aea_name
+            "fetchai/thermometer_aea:0.8.0", thermometer_aea_name
         )
         assert (
             diff == []
@@ -267,9 +267,9 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
         self.add_item("skill", "fetchai/thermometer_client:0.7.0")
         setting_path = "agent.default_routing"
@@ -277,7 +277,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.7.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.8.0", thermometer_client_aea_name
         )
         assert (
             diff == []

@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for building an AEA."""
+
 import itertools
-import json
 import logging
 import logging.config
 import os
@@ -766,13 +766,17 @@ class AEABuilder:
         :return: the identity
         """
         assert self._name is not None, "You must set the name of the agent."
+
+        if not wallet.addresses:
+            raise ValueError("wallet has no addresses")
+
         if len(wallet.addresses) > 1:
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
                 default_address_key=self._default_ledger,
             )
-        else:  # pragma: no cover
+        else:
             identity = Identity(
                 self._name,
                 address=wallet.addresses[self._default_ledger],
@@ -1366,17 +1370,13 @@ class AEABuilder:
                 continue
             logger.debug(f"Registering contract {configuration.public_id}")
 
-            path = Path(
-                configuration.directory, configuration.path_to_contract_interface
-            )
-            with open(path, "r") as interface_file:
-                contract_interface = json.load(interface_file)
-
             try:
                 contract_registry.register(
                     id_=str(configuration.public_id),
                     entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-                    class_kwargs={"contract_interface": contract_interface},
+                    class_kwargs={
+                        "contract_interface": configuration.contract_interfaces
+                    },
                     contract_config=configuration,  # TODO: resolve configuration being applied globally
                 )
             except AEAException as e:  # pragma: nocover

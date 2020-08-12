@@ -18,23 +18,19 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the echo skill."""
-
 import time
 
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import skip_test_windows
-
 
 class TestEchoSkill(AEATestCaseEmpty):
     """Test that echo skill works."""
 
-    @skip_test_windows
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.4.0")
+        self.add_item("skill", "fetchai/echo:0.5.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)

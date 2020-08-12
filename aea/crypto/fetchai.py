@@ -24,7 +24,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, Tuple, cast
+from typing import Any, BinaryIO, Dict, Optional, Tuple, cast
 
 from ecdsa import SECP256k1, VerifyingKey
 from ecdsa.util import sigencode_string_canonize
@@ -372,6 +372,30 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
         :return: the tx, if found
         """
         return cast(TxContents, self._api.tx.contents(tx_digest))
+
+    def get_contract_instance(
+        self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
+    ) -> Any:
+        """
+        Get the instance of a contract.
+
+        :param contract_interface: the contract interface.
+        :param contract_address: the contract address.
+        :return: the contract instance
+        """
+        raise NotImplementedError
+
+    def get_deploy_transaction(
+        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs,
+    ) -> Dict[str, Any]:
+        """
+        Get the transaction to deploy the smart contract.
+
+        :param contract_interface: the contract interface.
+        :param deployer_address: The address that will deploy the contract.
+        :returns tx: the transaction dictionary.
+        """
+        raise NotImplementedError
 
 
 class FetchAIFaucetApi(FaucetApi):

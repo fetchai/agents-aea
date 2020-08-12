@@ -21,7 +21,6 @@
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import shutil
-import subprocess  # nosec
 import sys
 import tempfile
 import time
@@ -46,14 +45,9 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.exceptions import AEAPackageLoadingError
-from aea.helpers.base import sigint_crossplatform
 
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS, ROOT_DIR
-
-
-if sys.platform.startswith("win"):
-    pytest.skip("skipping tests on Windows", allow_module_level=True)
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -96,23 +90,23 @@ def test_run():
     assert result.exit_code == 0
 
     try:
-        process = subprocess.Popen(  # nosec
+        process = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "run"],
-            stdout=subprocess.PIPE,
             env=os.environ.copy(),
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
         )
 
-        time.sleep(10.0)
-        sigint_crossplatform(process)
-        process.wait(timeout=20)
+        process.expect("Start processing messages", timeout=10)
+        process.control_c()
+        process.wait_to_complete(10)
 
         assert process.returncode == 0
 
     finally:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
+        process.terminate()
+        process.wait_to_complete(10)
 
         os.chdir(cwd)
         try:
@@ -143,23 +137,23 @@ def test_run_with_default_connection():
     os.chdir(Path(t, agent_name))
 
     try:
-        process = subprocess.Popen(  # nosec
+        process = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "run"],
-            stdout=subprocess.PIPE,
             env=os.environ.copy(),
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
         )
 
-        time.sleep(10.0)
-        sigint_crossplatform(process)
-        process.wait(timeout=20)
+        process.expect("Start processing messages", timeout=10)
+        process.control_c()
+        process.wait_to_complete(10)
 
         assert process.returncode == 0
 
     finally:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
+        process.terminate()
+        process.wait_to_complete(10)
 
         os.chdir(cwd)
         try:

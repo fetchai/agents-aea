@@ -13,13 +13,13 @@ aea create my_aea && cd my_aea
 aea scaffold skill my_search
 ```
 
-In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the [OEF search node](../oef-ledger) and process the resulting response.
+In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the <a href="../simple-oef">SOEF search node</a> and process the resulting response.
 
 ## Step 2: Develop a Behaviour
 
 A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
 
-In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the [SOEF search node](../simple-oef) via the [P2P communication network](../oef-ledger).
+In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the <a href="../simple-oef">SOEF search node</a> via the <a href="../oef-ledger">P2P communication network</a>.
 
 ``` python
 from typing import cast
@@ -114,7 +114,7 @@ We place this code in `my_aea/skills/my_search/behaviours.py`.
 
 ## Step 3: Develop a Handler
 
-So far, we have tasked the AEA with sending search requests to the [SOEF search node](../simple-oef). However, we have no way of handling the responses sent to the AEA by the [SOEF search node](../simple-oef) at the moment. The AEA would simply respond to the [SOEF search node](../simple-oef) via the default `error` skill which sends all unrecognised envelopes back to the sender.
+So far, we have tasked the AEA with sending search requests to the <a href="../simple-oef">SOEF search node</a>. However, we have no way of handling the responses sent to the AEA by the <a href="../simple-oef">SOEF search node</a> at the moment. The AEA would simply respond to the <a href="../simple-oef">SOEF search node</a> via the default `error` skill which sends all unrecognised envelopes back to the sender.
 
 Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming search responses.
 
@@ -392,9 +392,9 @@ This adds the protocol to our AEA and makes it available on the path `packages.f
 We also need to add the soef and p2p connections and install the AEA's dependencies:
 ``` bash
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 Finally, in the `aea-config.yaml` add the following lines:
@@ -409,10 +409,10 @@ This will ensure that search requests are processed by the correct connection.
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.9.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.10.0 && cd simple_service_registration
 ```
 
-This AEA will simply register a location service on the [SOEF search node](../simple-oef) so we can search for it.
+This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
 
 We first create the private key for the service provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
@@ -878,7 +878,7 @@ We can then launch our AEA.
 aea run
 ```
 
-We can see that the AEA sends search requests to the [SOEF search node](../simple-oef) and receives search responses from the [SOEF search node](../simple-oef). The search response returns one or more agents (the service provider and potentially other agents which match the query).
+We can see that the AEA sends search requests to the <a href="../simple-oef">SOEF search node</a> and receives search responses from the <a href="../simple-oef">SOEF search node</a>. The search response returns one or more agents (the service provider and potentially other agents which match the query).
 
 We stop the AEA with `CTRL + C`.
 

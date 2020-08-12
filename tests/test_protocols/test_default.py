@@ -22,9 +22,11 @@
 # import base64
 # import json
 from unittest import mock
+from unittest.mock import patch
 
 import pytest
 
+import aea
 from aea.protocols.default.message import DefaultMessage
 
 
@@ -104,3 +106,57 @@ def test_check_consistency_raises_exception_when_type_not_recognized():
     # mock the __eq__ method such that any kind of matching is going to fail.
     with mock.patch.object(DefaultMessage.Performative, "__eq__", return_value=False):
         assert not message._is_consistent()
+
+
+def test_default_valid_performatives():
+    """Test 'valid_performatives' getter."""
+    msg = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"")
+    assert msg.valid_performatives == set(
+        map(lambda x: x.value, iter(DefaultMessage.Performative))
+    )
+
+
+def test_light_protocol_rule_3_target_0():
+    """Test that if message_id is not 1, target must be > 0"""
+    with patch.object(aea.protocols.default.message.logger, "error") as mock_logger:
+        message_id = 2
+        target = 0
+        DefaultMessage(
+            message_id=message_id,
+            target=target,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"",
+        )
+        mock_logger.assert_any_call(
+            f"Invalid 'target'. Expected an integer between 1 and {message_id - 1} inclusive. Found {target}."
+        )
+
+
+def test_light_protocol_rule_3_target_less_than_message_id():
+    """Test that if message_id is not 1, target must be > message_id"""
+    with patch.object(aea.protocols.default.message.logger, "error") as mock_logger:
+        message_id = 2
+        target = 2
+        DefaultMessage(
+            message_id=message_id,
+            target=target,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"",
+        )
+        mock_logger.assert_any_call(
+            f"Invalid 'target'. Expected an integer between 1 and {message_id - 1} inclusive. Found {target}."
+        )
+
+
+def test_serializer_performative_not_found():
+    """Test the serializer when the performative is not found."""
+    message = DefaultMessage(
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"",
+    )
+    message_bytes = message.serializer.encode(message)
+    with patch.object(DefaultMessage.Performative, "__eq__", return_value=False):
+        with pytest.raises(ValueError, match="Performative not valid: .*"):
+            message.serializer.decode(message_bytes)

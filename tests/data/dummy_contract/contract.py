@@ -19,7 +19,7 @@
 
 """This module contains a dummy contract for an AEA."""
 
-from aea.contracts.ethereum import Contract
+from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 

@@ -38,6 +38,9 @@
     "private_key_path": {
       "type": "string"
     },
+    "contract_interface_path": {
+      "type": "string"
+    },
     "license": {
       "type": "string"
     },

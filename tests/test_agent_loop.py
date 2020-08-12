@@ -17,10 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests of the implementation of an agent loop using asyncio."""
-
+import asyncio
 from queue import Empty
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type
 from unittest.mock import MagicMock
+
+import pytest
 
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
@@ -66,6 +68,25 @@ class CountBehaviour(TickerBehaviour):
 
     @classmethod
     def make(cls, tick_interval: int = 1) -> "CountBehaviour":
+        """Construct behaviour."""
+        return cls(
+            name="test", skill_context=SkillContext(), tick_interval=tick_interval
+        )
+
+
+class FailBehaviour(TickerBehaviour):
+    """Simple behaviour to raise an exception."""
+
+    def setup(self) -> None:
+        """Set up behaviour."""
+        pass
+
+    def act(self) -> None:
+        """Make an action."""
+        raise ValueError("expected!")
+
+    @classmethod
+    def make(cls, tick_interval: int = 1) -> "FailBehaviour":
         """Construct behaviour."""
         return cls(
             name="test", skill_context=SkillContext(), tick_interval=tick_interval
@@ -239,6 +260,33 @@ class TestAsyncAgentLoop:
                 timeout=agent_loop.NEW_BEHAVIOURS_PROCESS_SLEEP * 3,
             )
             agent_loop.stop()
+
+    @pytest.mark.asyncio
+    async def test_behaviour_exception(self):
+        """Test behaviour exception reraised properly."""
+        tick_interval = 0.1
+        behaviour = FailBehaviour.make(tick_interval)
+        agent = self.FAKE_AGENT_CLASS(behaviours=[behaviour])
+        loop = asyncio.get_event_loop()
+        agent_loop = self.AGENT_LOOP_CLASS(agent)
+        agent_loop.set_loop(loop)
+        loop_task = loop.create_task(agent_loop.run_loop())
+        await asyncio.sleep(tick_interval * 2)
+        loop_task.cancel()
+        await asyncio.sleep(tick_interval * 2)
+        with pytest.raises(ValueError, match="expected!"):
+            await loop_task
+
+    def test_stop(self):
+        """Test loop stoped."""
+        agent = self.FAKE_AGENT_CLASS()
+        loop = asyncio.get_event_loop()
+        agent_loop = self.AGENT_LOOP_CLASS(agent)
+        agent_loop.set_loop(loop)
+        loop_task = loop.create_task(agent_loop.run_loop())
+        agent_loop.stop()
+        loop.run_until_complete(asyncio.sleep(0.1))
+        assert loop_task.done()
 
 
 class TestSyncAgentLoop(TestAsyncAgentLoop):

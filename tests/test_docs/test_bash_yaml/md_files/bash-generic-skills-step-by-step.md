@@ -5,16 +5,19 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.6.0
+aea fetch fetchai/generic_seller:0.7.0
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.9.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.6.0
+aea fetch fetchai/generic_buyer:0.7.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.8.0
 cd ..
+```
+``` bash
+aea init --reset --local --author fetchai
 ```
 ``` bash
 aea create my_generic_seller
@@ -24,7 +27,7 @@ cd my_generic_seller
 aea scaffold skill generic_seller
 ```
 ``` bash
-aea fingerprint skill generic_seller
+aea fingerprint skill fetchai/generic_seller:0.1.0
 ```
 ``` bash
 aea create my_generic_buyer
@@ -34,36 +37,35 @@ cd my_generic_buyer
 aea scaffold skill generic_buyer
 ```
 ``` bash
-aea fingerprint skill my_generic_buyer
+aea fingerprint skill fetchai/generic_buyer:0.1.0
 ```
 ``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+aea add-key cosmos cosmos_private_key.txt --connection
 ```
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
+aea generate-wealth cosmos --sync
 ```
 ``` bash
-aea generate-wealth fetchai
-```
-``` bash 
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
+aea add protocol fetchai/fipa:0.5.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea run
 ```
-``` bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
+aea add protocol fetchai/fipa:0.5.0
+aea add protocol fetchai/signing:0.2.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+```
+``` bash
 aea run
 ```
 ``` bash 
@@ -74,17 +76,17 @@ aea delete my_generic_buyer
 ``` yaml
 name: generic_seller
 author: fetchai
-version: 0.8.0
+version: 0.1.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmZuzEpqCZjW1rAYT1PZXoYRPjCXxKNQ2ZEkL32WQhxtwf
-  dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
-  handlers.py: QmfFY8HGULapXzCHHLuwWhgADXvBw8NJvfX155pY3qWS1h
-  strategy.py: QmRVkBtcCUKXf68RAqnHAi6UWqcygesppUNzSm9oceYNHH
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
+  dialogues.py: QmRmoFp9xi1p1THVBYym9xEwW88KgkBHgz45LgrYbBecQw
+  handlers.py: QmT4nvKikWXfGAEdRS8Qn8w89Gbh5zPb4EDB6EwPVP2YDJ
+  strategy.py: QmP69kCtcovLD2Z7quESuNxVEyNuiZgqqbwozp6wAbvBCd
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -143,16 +145,16 @@ dependencies: {}
 ``` yaml
 name: generic_buyer
 author: fetchai
-version: 0.7.0
+version: 0.1.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmUHgMCuvWYyAU382c7hUikNi6R6rfmH1toKUB1K2rcbXQ
-  dialogues.py: QmYMR28TDqE56GdUxP9LwerktaJrD9SBkGoeJsoLSMHpx6
-  handlers.py: QmYevHGuYJ8bsQUT22ZJcSx2aotUveNTLbdyEMMzCEMw7U
-  strategy.py: QmU2gH921MoxvVCCQhnEvcFNbDsgBojeHeTXDEY3ZBMC2A
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
+  dialogues.py: Qmf3McwyT5wMv3BzoN1L3ssqZzEq19LShEjQueiKqvADcX
+  handlers.py: QmQVmi3GnuYJ5VM4trYjUeJyFHVfrUeMGDsRmtNCuntKA8
+  strategy.py: QmQHQsjAsPiox5zMtMHhdhhhHt4rKq3cs3bqnwjgGSFp6n
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -160,6 +162,7 @@ protocols:
 - fetchai/fipa:0.5.0
 - fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.4.0
+- fetchai/signing:0.2.0
 skills: []
 behaviours:
   search:
@@ -221,15 +224,13 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 ``` yaml
-currency_id: 'ETH'
-ledger_id: 'ethereum'
-is_ledger_tx: True
-```
-``` yaml
-max_buyer_tx_fee: 20000
-currency_id: 'ETH'
-ledger_id: 'ethereum'
-is_ledger_tx: True
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
 ```

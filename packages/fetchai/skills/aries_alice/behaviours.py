@@ -19,16 +19,25 @@
 
 """This package contains the behaviour of a generic seller AEA."""
 
-from typing import cast
+import json
+from typing import Dict, cast
 
+from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_CONNECTION_PUBLIC_ID,
+)
+from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.aries_alice.dialogues import OefSearchDialogues
-from packages.fetchai.skills.aries_alice.strategy import AliceStrategy
-
-DEFAULT_ADMIN_HOST = "127.0.0.1"
-DEFAULT_ADMIN_PORT = 8031
+from packages.fetchai.skills.aries_alice.dialogues import (
+    HttpDialogues,
+    OefSearchDialogues,
+)
+from packages.fetchai.skills.aries_alice.strategy import (
+    AliceStrategy,
+    HTTP_COUNTERPARTY,
+)
 
 DEFAULT_SERVICES_INTERVAL = 60.0
 
@@ -38,29 +47,50 @@ class AliceBehaviour(TickerBehaviour):
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
-        self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
-        self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
-        self._admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
 
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
 
-    @property
-    def admin_host(self) -> str:
-        """Get the admin host."""
-        return self._admin_host
+    def send_http_request_message(
+        self, method: str, url: str, content: Dict = None
+    ) -> None:
+        """
+        Send an http request message.
 
-    @property
-    def admin_port(self) -> str:
-        """Get the admin port."""
-        return self._admin_port
+        :param method: the http request method (i.e. 'GET' or 'POST').
+        :param url: the url to send the message to.
+        :param content: the payload.
 
-    @property
-    def admin_url(self) -> str:
-        """Get the admin URL."""
-        return self._admin_url
+        :return: None
+        """
+        # context
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+
+        # http request message
+        request_http_message = HttpMessage(
+            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
+            performative=HttpMessage.Performative.REQUEST,
+            method=method,
+            url=url,
+            headers="",
+            version="",
+            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
+        )
+        request_http_message.counterparty = HTTP_COUNTERPARTY
+
+        # http dialogue
+        http_dialogue = http_dialogues.update(request_http_message)
+        assert (
+            http_dialogue is not None
+        ), "alice -> behaviour -> send_http_request_message(): something went wrong when sending a HTTP message."
+
+        # send
+        self.context.outbox.put_message(
+            message=request_http_message,
+            context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
+        )
 
     def setup(self) -> None:
         """

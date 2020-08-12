@@ -562,7 +562,7 @@ Read an envelope from an agent, using the stub connection.
 
 ```python
  | @classmethod
- | missing_from_output(cls, process: subprocess.Popen, strings: Tuple[str], timeout: int = DEFAULT_PROCESS_TIMEOUT, period: int = 1, is_terminating: bool = True) -> List[str]
+ | missing_from_output(cls, process: subprocess.Popen, strings: Sequence[str], timeout: int = DEFAULT_PROCESS_TIMEOUT, period: int = 1, is_terminating: bool = True) -> List[str]
 ```
 
 Check if strings are present in process output.
