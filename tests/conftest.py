@@ -333,6 +333,15 @@ def skip_test_windows(fn: Callable) -> Callable:
     return action_for_platform("Windows", skip=True)(fn)
 
 
+def skip_test_macos(fn: Callable) -> Callable:
+    """
+    Decorate a pytest method to skip a test in a case we are on MacOS.
+
+    :return: decorated method.
+    """
+    return action_for_platform("Darwin", skip=True)(fn)
+
+
 def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     """
     Decorate a pytest class or method to skip on certain platform.

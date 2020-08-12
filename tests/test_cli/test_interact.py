@@ -31,7 +31,7 @@ from aea.cli.interact import (
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
-from tests.conftest import MAX_FLAKY_RERUNS, skip_test_windows
+from tests.conftest import MAX_FLAKY_RERUNS, skip_test_macos, skip_test_windows
 
 
 class TestInteractCommand(AEATestCaseMany):
@@ -194,6 +194,7 @@ class ProcessEnvelopesTestCase(TestCase):
 class TestInteractEcho(AEATestCaseEmpty):
     """Test 'aea interact' with the echo skill."""
 
+    @skip_test_macos
     @skip_test_windows
     @pytest.mark.integration
     def test_interact(self):
