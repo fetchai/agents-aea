@@ -27,6 +27,7 @@ import os
 import platform
 import re
 import signal
+import string
 import subprocess  # nosec
 import sys
 import time
@@ -375,3 +376,25 @@ def exception_log_and_reraise(log_method: Callable, message: str):
     except BaseException as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
         log_method(message.format(e))
         raise
+
+
+def is_hexadecimal(s: str) -> bool:
+    """
+    Check if a string is hexadecimal.
+
+    >>> is_hexadecimal("")
+    False
+
+    >>> is_hexadecimal("q")
+    False
+
+    >>> is_hexadecimal("123456789abcdef")
+    True
+
+    >>> is_hexadecimal("1234w")
+    False
+
+    :param s: the string to check.
+    :return True if the argument is hexadecimal; False otherwise.
+    """
+    return all(c in string.hexdigits for c in s) and len(s) > 0

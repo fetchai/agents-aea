@@ -31,6 +31,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
+from aea.helpers.base import is_hexadecimal
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
@@ -56,9 +57,63 @@ class DialogueLabel:
 
         :return: None
         """
+        # TODO make it an assert
+        if not self.is_dialogue_reference(dialogue_reference):
+            pass
         self._dialogue_reference = dialogue_reference
         self._dialogue_opponent_addr = dialogue_opponent_addr
         self._dialogue_starter_addr = dialogue_starter_addr
+
+    @staticmethod
+    def _is_reference(s: str):
+        """
+        Check if a string is a proper reference.
+
+        >>> DialogueLabel._is_reference("9a" * NONCE_BYTES_NB)
+        True
+        >>> DialogueLabel._is_reference(Dialogue.OPPONENT_STARTER_REFERENCE)
+        True
+        >>> DialogueLabel._is_reference("1234abcde")
+        False
+        >>> DialogueLabel._is_reference("p")
+        False
+
+        :param s: the string to test.
+        :return True if the string is a reference; False otherwise.
+        """
+        return s == Dialogue.OPPONENT_STARTER_REFERENCE or (
+            is_hexadecimal(s) and len(s) == NONCE_BYTES_NB * 2
+        )
+
+    @staticmethod
+    def is_dialogue_reference(ref: Tuple[str, str]) -> bool:
+        """
+        Check if a pair of string is a reference.
+
+        >>> DialogueLabel.is_dialogue_reference((Dialogue.OPPONENT_STARTER_REFERENCE, Dialogue.OPPONENT_STARTER_REFERENCE))
+        False
+        >>> DialogueLabel.is_dialogue_reference(("00" * NONCE_BYTES_NB, ""))
+        True
+        >>> DialogueLabel.is_dialogue_reference(("", "00" * NONCE_BYTES_NB))
+        True
+        >>> DialogueLabel.is_dialogue_reference(("00" * NONCE_BYTES_NB, "11" * NONCE_BYTES_NB))
+        True
+        >>> DialogueLabel.is_dialogue_reference(("00" * NONCE_BYTES_NB, "11" * NONCE_BYTES_NB))
+        False
+
+        :param ref: the dialogue reference.
+        :return True if the dialogue reference is valid; False otherwise.
+        """
+        first, second = ref
+
+        return (
+            (
+                first != Dialogue.OPPONENT_STARTER_REFERENCE
+                or second != Dialogue.OPPONENT_STARTER_REFERENCE
+            )
+            and DialogueLabel._is_reference(first)
+            and DialogueLabel._is_reference(second)
+        )
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:

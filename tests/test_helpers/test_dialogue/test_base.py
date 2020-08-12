@@ -18,18 +18,30 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the dialogue/base.py module."""
+import secrets
 import string
-from typing import Dict, FrozenSet, Optional, Type, cast
+from typing import Dict, FrozenSet, Optional, Tuple, Type, cast
 
 import pytest
 
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.base import is_hexadecimal
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue, NONCE_BYTES_NB
 from aea.helpers.dialogue.base import DialogueLabel, DialogueStats
 from aea.helpers.dialogue.base import Dialogues as BaseDialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.state_update.message import StateUpdateMessage
+
+
+def random_reference() -> str:
+    """Get a random reference."""
+    return secrets.token_hex(NONCE_BYTES_NB)
+
+
+def random_dialogue_reference() -> Tuple[str, str]:
+    """Get a random dialogue reference."""
+    return random_reference(), random_reference()
 
 
 class Dialogue(BaseDialogue):
@@ -155,6 +167,17 @@ class Dialogues(BaseDialogues):
         pass
 
 
+def test_is_dialogue_reference():
+    """Test the 'DialogueLabel.is_dialogue_reference' method."""
+    ref1, ref2 = random_reference(), random_reference()
+    assert not DialogueLabel.is_dialogue_reference(("", ""))
+    assert DialogueLabel.is_dialogue_reference((ref1, ""))
+    assert DialogueLabel.is_dialogue_reference(("", ref2))
+    assert DialogueLabel.is_dialogue_reference((ref1, ref2))
+    assert not DialogueLabel.is_dialogue_reference(("123456", "abcdef"))
+    assert not DialogueLabel.is_dialogue_reference(("123456", "abcdeq"))
+
+
 class TestDialogueLabel:
     """Test for DialogueLabel."""
 
@@ -163,16 +186,17 @@ class TestDialogueLabel:
         """Initialise the environment to test DialogueLabel."""
         cls.agent_address = "agent 1"
         cls.opponent_address = "agent 2"
+        cls.ref1 = random_reference()
         cls.dialogue_label = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(cls.ref1, ""),
             dialogue_opponent_addr=cls.opponent_address,
             dialogue_starter_addr=cls.agent_address,
         )
 
     def test_all_methods(self):
         """Test the DialogueLabel."""
-        assert self.dialogue_label.dialogue_reference == (str(1), "")
-        assert self.dialogue_label.dialogue_starter_reference == str(1)
+        assert self.dialogue_label.dialogue_reference == (self.ref1, "")
+        assert self.dialogue_label.dialogue_starter_reference == self.ref1
         assert self.dialogue_label.dialogue_responder_reference == ""
         assert self.dialogue_label.dialogue_opponent_addr == self.opponent_address
         assert self.dialogue_label.dialogue_starter_addr == self.agent_address
@@ -184,7 +208,7 @@ class TestDialogueLabel:
         )
 
         dialogue_label_eq = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             dialogue_opponent_addr=self.opponent_address,
             dialogue_starter_addr=self.agent_address,
         )
@@ -198,7 +222,7 @@ class TestDialogueLabel:
         assert hash(dialogue_label_eq) == hash(self.dialogue_label)
 
         assert self.dialogue_label.json == dict(
-            dialogue_starter_reference=str(1),
+            dialogue_starter_reference=self.ref1,
             dialogue_responder_reference="",
             dialogue_opponent_addr=self.opponent_address,
             dialogue_starter_addr=self.agent_address,
@@ -213,8 +237,9 @@ class TestDialogueBase:
     @classmethod
     def setup(cls):
         """Initialise the environment to test Dialogue."""
-        cls.incomplete_reference = (str(1), "")
-        cls.complete_reference = (str(1), str(1))
+        cls.ref1, cls.ref2 = random_reference(), random_reference()
+        cls.incomplete_reference = (cls.ref1, "")
+        cls.complete_reference = (cls.ref1, cls.ref1)
         cls.opponent_address = "agent 2"
         cls.agent_address = "agent 1"
         cls.dialogue_label = DialogueLabel(
@@ -286,7 +311,7 @@ class TestDialogueBase:
     def test_update_positive(self):
         """Positive test for the 'update' method."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -300,7 +325,7 @@ class TestDialogueBase:
     def test_update_sets_missing_counterparty(self):
         """Test the 'update' method sets the missing counterparty field of the input message."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -317,7 +342,7 @@ class TestDialogueBase:
     def test_update_negative_not_is_extendible(self):
         """Negative test for the 'update' method: dialogue is not extendable with the input message."""
         invalid_message_id = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=0,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -333,7 +358,7 @@ class TestDialogueBase:
     ):
         """Negative test for the '_update_self_initiated_dialogue_label_on_message_with_complete_reference' method: input message is not the second message in the dialogue."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -345,7 +370,7 @@ class TestDialogueBase:
         assert dialogue is not None
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -358,7 +383,7 @@ class TestDialogueBase:
         assert dialogue is not None
 
         third_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=3,
             target=2,
             performative=DefaultMessage.Performative.BYTES,
@@ -380,7 +405,7 @@ class TestDialogueBase:
     def test_reply_positive(self):
         """Positive test for the 'reply' method."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -402,7 +427,7 @@ class TestDialogueBase:
     def test_reply_negative_invalid_target(self):
         """Negative test for the 'reply' method: target message is not in the dialogue."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -414,7 +439,7 @@ class TestDialogueBase:
         assert self.dialogue.update(initial_msg)
 
         invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -438,7 +463,7 @@ class TestDialogueBase:
     def test_basic_rules_positive(self):
         """Positive test for the '_basic_rules' method."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -451,7 +476,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_initial_message_invalid_dialogue_reference(self):
         """Negative test for the '_basic_rules' method: input message is the first message with invalid dialogue reference."""
         invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(2), ""),
+            dialogue_reference=(self.ref2, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -464,7 +489,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_initial_message_invalid_message_id(self):
         """Negative test for the '_basic_rules' method: input message is the first message with invalid message id."""
         invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -477,7 +502,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_initial_message_invalid_target(self):
         """Negative test for the '_basic_rules' method: input message is the first message with invalid target."""
         invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -490,7 +515,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_initial_message_invalid_performative(self):
         """Negative test for the '_basic_rules' method: input message is the first message with invalid performative."""
         invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
@@ -505,7 +530,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_non_initial_message_invalid_dialogue_reference(self):
         """Negative test for the '_basic_rules' method: input message is not the first message, and its dialogue reference is invalid."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -517,7 +542,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_initial_msg)
 
         invalid_msg = DefaultMessage(
-            dialogue_reference=(str(2), str(1)),
+            dialogue_reference=(self.ref2, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -530,7 +555,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_non_initial_message_invalid_message_id(self):
         """Negative test for the '_basic_rules' method: input message is not the first message, and its message id is invalid."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -542,7 +567,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_initial_msg)
 
         invalid_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=3,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -555,7 +580,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_non_initial_message_invalid_target(self):
         """Negative test for the '_basic_rules' method: input message is not the first message, and its target is invalid."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -567,7 +592,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_initial_msg)
 
         invalid_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -580,7 +605,7 @@ class TestDialogueBase:
     def test_basic_rules_negative_non_initial_message_invalid_performative(self):
         """Negative test for the '_basic_rules' method: input message is not the first message, and its performative is invalid."""
         invalid_initial_msg = StateUpdateMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=StateUpdateMessage.Performative.APPLY,
@@ -594,7 +619,7 @@ class TestDialogueBase:
     def test_additional_rules_positive(self):
         """Positive test for the '_additional_rules' method."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -606,7 +631,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_initial_msg)
 
         valid_second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -618,7 +643,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_second_msg)
 
         valid_third_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=3,
             target=2,
             performative=DefaultMessage.Performative.BYTES,
@@ -632,7 +657,7 @@ class TestDialogueBase:
     def test_additional_rules_negative_invalid_target(self):
         """Negative test for the '_additional_rules' method: input message has invalid target (its target is not the last message of the dialogue)."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -644,7 +669,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_initial_msg)
 
         valid_second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -656,7 +681,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_second_msg)
 
         invalid_third_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=3,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -670,7 +695,7 @@ class TestDialogueBase:
     def test_update_dialogue_label_positive(self):
         """Positive test for the 'update_dialogue_label' method."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -682,7 +707,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_initial_msg)
 
         new_label = DialogueLabel(
-            (str(1), str(1)), valid_initial_msg.counterparty, self.agent_address
+            (self.ref1, self.ref1), valid_initial_msg.counterparty, self.agent_address,
         )
         self.dialogue.update_dialogue_label(new_label)
 
@@ -691,7 +716,7 @@ class TestDialogueBase:
     def test_update_dialogue_negative(self):
         """Positive test for the 'update' method in dialogue with wrong message not belonging to dialogue."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(2), ""),
+            dialogue_reference=(self.ref2, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -704,7 +729,7 @@ class TestDialogueBase:
 
     def test_update_dialogue_label_negative_invalid_existing_label(self):
         """Negative test for the 'update_dialogue_label' method: existing dialogue reference is invalid."""
-        incomplete_reference = (str(1), "")
+        incomplete_reference = (self.ref1, "")
         valid_initial_msg = DefaultMessage(
             dialogue_reference=incomplete_reference,
             message_id=1,
@@ -717,7 +742,7 @@ class TestDialogueBase:
 
         assert self.dialogue.update(valid_initial_msg)
 
-        complete_reference = (str(1), str(1))
+        complete_reference = (self.ref1, self.ref1)
         valid_second_msg = DefaultMessage(
             dialogue_reference=complete_reference,
             message_id=2,
@@ -738,7 +763,7 @@ class TestDialogueBase:
         assert self.dialogue.dialogue_label == new_label
 
         new_label = DialogueLabel(
-            (str(1), str(2)), valid_initial_msg.counterparty, self.agent_address
+            (self.ref1, self.ref2), valid_initial_msg.counterparty, self.agent_address,
         )
         with pytest.raises(AssertionError):
             self.dialogue.update_dialogue_label(new_label)
@@ -748,7 +773,7 @@ class TestDialogueBase:
     def test_update_dialogue_label_negative_invalid_input_label(self):
         """Negative test for the 'update_dialogue_label' method: input dialogue label's dialogue reference is invalid."""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -760,7 +785,7 @@ class TestDialogueBase:
         assert self.dialogue.update(valid_initial_msg)
 
         new_label = DialogueLabel(
-            (str(2), ""), valid_initial_msg.counterparty, self.agent_address
+            (self.ref2, ""), valid_initial_msg.counterparty, self.agent_address
         )
         try:
             self.dialogue.update_dialogue_label(new_label)
@@ -784,7 +809,7 @@ class TestDialogueBase:
     def test___str__1(self):
         """Test the '__str__' method: dialogue is self initiated"""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -797,7 +822,7 @@ class TestDialogueBase:
         assert dialogue is not None
 
         valid_second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -811,7 +836,7 @@ class TestDialogueBase:
         assert dialogue is not None
 
         valid_third_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=3,
             target=2,
             performative=DefaultMessage.Performative.BYTES,
@@ -822,16 +847,14 @@ class TestDialogueBase:
 
         assert self.dialogue.update(valid_third_msg)
 
-        dialogue_str = (
-            "Dialogue Label: 1__agent 2_agent 1\nbytes( )\nbytes( )\nbytes( )"
-        )
+        dialogue_str = f"Dialogue Label: {self.ref1}__{self.opponent_address}_{self.agent_address}\nbytes( )\nbytes( )\nbytes( )"
 
         assert str(self.dialogue) == dialogue_str
 
     def test___str__2(self):
         """Test the '__str__' method: dialogue is other initiated"""
         valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -844,7 +867,7 @@ class TestDialogueBase:
         assert self.dialogue_opponent_started.update(valid_initial_msg)
 
         valid_second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -856,7 +879,7 @@ class TestDialogueBase:
         assert self.dialogue_opponent_started.update(valid_second_msg)
 
         valid_third_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=3,
             target=2,
             performative=DefaultMessage.Performative.BYTES,
@@ -868,9 +891,7 @@ class TestDialogueBase:
 
         assert self.dialogue_opponent_started.update(valid_third_msg)
 
-        dialogue_str = (
-            "Dialogue Label: 1_1_agent 2_agent 2\nbytes( )\nbytes( )\nbytes( )"
-        )
+        dialogue_str = f"Dialogue Label: {self.ref1}_{self.ref1}_{self.opponent_address}_{self.opponent_address}\nbytes( )\nbytes( )\nbytes( )"
 
         assert str(self.dialogue_opponent_started) == dialogue_str
 
@@ -881,10 +902,12 @@ class TestDialogueStats:
     @classmethod
     def setup(cls):
         """Initialise the environment to test DialogueStats."""
+        cls.ref1 = random_reference()
+        cls.ref2 = random_reference()
         cls.agent_address = "agent 1"
         cls.opponent_address = "agent 2"
         cls.dialogue_label = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(cls.ref1, ""),
             dialogue_opponent_addr=cls.opponent_address,
             dialogue_starter_addr=cls.agent_address,
         )
@@ -944,10 +967,12 @@ class TestDialoguesBase:
     @classmethod
     def setup(cls):
         """Initialise the environment to test Dialogue."""
+        cls.ref1 = random_reference()
+        cls.ref2 = random_reference()
         cls.agent_address = "agent 1"
         cls.opponent_address = "agent 2"
         cls.dialogue_label = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(cls.ref1, ""),
             dialogue_opponent_addr=cls.opponent_address,
             dialogue_starter_addr=cls.agent_address,
         )
@@ -969,19 +994,11 @@ class TestDialoguesBase:
 
     def test_new_self_initiated_dialogue_reference(self):
         """Test the 'new_self_initiated_dialogue_reference' method."""
-        nonce = self.dialogues._dialogue_nonce
-        assert self.dialogues.new_self_initiated_dialogue_reference() == (
-            str(nonce + 1),
-            "",
-        )
-
-        self.dialogues._create_opponent_initiated(
-            self.opponent_address, ("1", ""), Dialogue.Role.ROLE1
-        )  # increments dialogue nonce
-        assert self.dialogues.new_self_initiated_dialogue_reference() == (
-            str(nonce + 3),
-            "",
-        )
+        dialogue_ref = self.dialogues.new_self_initiated_dialogue_reference()
+        assert isinstance(dialogue_ref, tuple)
+        assert is_hexadecimal(dialogue_ref[0])
+        assert len(dialogue_ref[0]) == 64
+        assert dialogue_ref[1] == ""
 
     def test_create_positive(self):
         """Positive test for the 'create' method."""
@@ -1023,7 +1040,7 @@ class TestDialoguesBase:
     def test_update_positive_new_dialogue_by_other(self):
         """Positive test for the 'update' method: the input message is for a new dialogue dialogue by other."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -1039,7 +1056,7 @@ class TestDialoguesBase:
 
         assert len(self.dialogues.dialogues) == 1
         assert dialogue is not None
-        assert dialogue.last_message.dialogue_reference == (str(1), "")
+        assert dialogue.last_message.dialogue_reference == (self.ref1, "")
         assert dialogue.last_message.message_id == 1
         assert dialogue.last_message.target == 0
         assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
@@ -1048,7 +1065,7 @@ class TestDialoguesBase:
     def test_update_positive_new_dialogue_by_self(self):
         """Positive test for the 'update' method: the input message is for a new dialogue dialogue by self."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -1063,7 +1080,7 @@ class TestDialoguesBase:
 
         assert len(self.dialogues.dialogues) == 1
         assert dialogue is not None
-        assert dialogue.last_message.dialogue_reference == (str(1), "")
+        assert dialogue.last_message.dialogue_reference == (self.ref1, "")
         assert dialogue.last_message.message_id == 1
         assert dialogue.last_message.target == 0
         assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
@@ -1076,7 +1093,7 @@ class TestDialoguesBase:
         )
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1092,7 +1109,7 @@ class TestDialoguesBase:
 
         assert len(self.dialogues.dialogues) == 1
         assert dialogue is not None
-        assert dialogue.last_message.dialogue_reference == (str(1), str(1))
+        assert dialogue.last_message.dialogue_reference == (self.ref1, self.ref1)
         assert dialogue.last_message.message_id == 2
         assert dialogue.last_message.target == 1
         assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
@@ -1101,7 +1118,7 @@ class TestDialoguesBase:
     def test_update_negative_new_dialogue_by_self_no_counterparty(self):
         """Negative test for the 'update' method: the counterparty of the input message is not set."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -1119,7 +1136,7 @@ class TestDialoguesBase:
     def test_update_negative_new_dialogue_by_other_no_sender(self):
         """Negative test for the 'update' method: the counterparty of the input message is not set."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -1142,7 +1159,7 @@ class TestDialoguesBase:
         )
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(2), str(1)),
+            dialogue_reference=(self.ref2, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1155,9 +1172,12 @@ class TestDialoguesBase:
         updated_dialogue = self.dialogues.update(second_msg)
 
         assert updated_dialogue is None
-        assert self.dialogues.dialogues[
+        dialogue_reference = self.dialogues.dialogues[
             dialogue.dialogue_label
-        ].last_message.dialogue_reference == (str(1), "")
+        ].last_message.dialogue_reference
+        assert is_hexadecimal(dialogue_reference[0])
+        assert len(dialogue_reference[0]) == 64
+        assert dialogue_reference[1] == ""
         assert (
             self.dialogues.dialogues[dialogue.dialogue_label].last_message.message_id
             == 1
@@ -1183,7 +1203,7 @@ class TestDialoguesBase:
         )
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1199,7 +1219,7 @@ class TestDialoguesBase:
 
         assert self.dialogues.dialogues[
             dialogue.dialogue_label
-        ].dialogue_label.dialogue_reference == (str(1), str(1))
+        ].dialogue_label.dialogue_reference == (self.ref1, self.ref1)
 
     def test_update_self_initiated_dialogue_label_on_message_with_complete_reference_negative_incorrect_reference(
         self,
@@ -1210,7 +1230,7 @@ class TestDialoguesBase:
         )
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(2), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1224,9 +1244,12 @@ class TestDialoguesBase:
             second_msg
         )
 
-        assert self.dialogues.dialogues[
+        dialogue_reference = self.dialogues.dialogues[
             dialogue.dialogue_label
-        ].dialogue_label.dialogue_reference == (str(1), "")
+        ].dialogue_label.dialogue_reference
+        assert is_hexadecimal(dialogue_reference[0])
+        assert len(dialogue_reference[0]) == 64
+        assert dialogue_reference[1] == ""
 
     def test_get_dialogue_positive_1(self):
         """Positive test for the 'get_dialogue' method: the dialogue is self initiated and the second message is by the other agent."""
@@ -1235,7 +1258,7 @@ class TestDialoguesBase:
         )
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1250,7 +1273,7 @@ class TestDialoguesBase:
 
         assert self.dialogues.dialogues[
             dialogue.dialogue_label
-        ].dialogue_label.dialogue_reference == (str(1), str(1))
+        ].dialogue_label.dialogue_reference == (self.ref1, self.ref1)
 
         retrieved_dialogue = self.dialogues.get_dialogue(second_msg)
 
@@ -1259,7 +1282,7 @@ class TestDialoguesBase:
     def test_get_dialogue_positive_2(self):
         """Positive test for the 'get_dialogue' method: the dialogue is other initiated and the second message is by this agent."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -1272,7 +1295,7 @@ class TestDialoguesBase:
         dialogue = self.dialogues.update(initial_msg)
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1288,7 +1311,7 @@ class TestDialoguesBase:
     def test_update_positive_3(self):
         """Positive test for the 'get_dialogue' method: the dialogue is reference is incomplete and not a first message."""
         initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
@@ -1300,7 +1323,7 @@ class TestDialoguesBase:
         dialogue = self.dialogues.update(initial_msg)
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(self.ref1, ""),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1320,7 +1343,7 @@ class TestDialoguesBase:
         )
 
         second_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
+            dialogue_reference=(self.ref1, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1333,7 +1356,7 @@ class TestDialoguesBase:
         assert dialogue is not None
 
         third_msg = DefaultMessage(
-            dialogue_reference=(str(2), str(1)),
+            dialogue_reference=(self.ref2, self.ref1),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
@@ -1364,7 +1387,7 @@ class TestDialoguesBase:
         )
 
         incorrect_label = DialogueLabel(
-            (str(1), "error"), self.opponent_address, self.agent_address
+            (self.ref1, "error"), self.opponent_address, self.agent_address
         )
 
         retrieved_dialogue = self.dialogues.get_dialogue_from_label(incorrect_label)
@@ -1375,7 +1398,7 @@ class TestDialoguesBase:
         assert len(self.dialogues.dialogues) == 0
 
         self.dialogues._create_self_initiated(
-            self.opponent_address, (str(1), ""), Dialogue.Role.ROLE1
+            self.opponent_address, (self.ref1, ""), Dialogue.Role.ROLE1
         )
         assert len(self.dialogues.dialogues) == 1
 
@@ -1384,7 +1407,7 @@ class TestDialoguesBase:
         assert len(self.dialogues.dialogues) == 0
 
         self.dialogues._create_opponent_initiated(
-            self.opponent_address, (str(1), ""), Dialogue.Role.ROLE2
+            self.opponent_address, (self.ref1, ""), Dialogue.Role.ROLE2
         )
         assert len(self.dialogues.dialogues) == 1
 
@@ -1394,7 +1417,7 @@ class TestDialoguesBase:
 
         try:
             self.dialogues._create_opponent_initiated(
-                self.opponent_address, ("", str(1)), Dialogue.Role.ROLE2
+                self.opponent_address, ("", self.ref1), Dialogue.Role.ROLE2
             )
             result = True
         except AssertionError:
