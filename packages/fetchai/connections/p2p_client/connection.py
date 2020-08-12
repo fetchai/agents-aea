@@ -175,7 +175,7 @@ class PeerToPeerClientConnection(Connection):
         :return: None
         """
         if self.is_connected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.connecting)
         self.channel.logger = self.logger
         self.channel.in_queue = asyncio.Queue()

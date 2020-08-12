@@ -374,7 +374,7 @@ class OEFLocalConnection(Connection):
         """Connect to the local OEF Node."""
         assert self._local_node is not None, "No local node set!"
         if self.is_connected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.connecting)
         self._reader = Queue()
         self._writer = await self._local_node.connect(self.address, self._reader)
@@ -384,7 +384,7 @@ class OEFLocalConnection(Connection):
         """Disconnect from the local OEF Node."""
         assert self._local_node is not None, "No local node set!"
         if self.is_disconnected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         assert self._reader is not None
         await self._local_node.disconnect(self.address)
