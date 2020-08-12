@@ -25,6 +25,7 @@ from pathlib import Path
 import pytest
 
 from aea.mail.base import Envelope
+from aea.protocols.default.dialogues import DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
@@ -221,13 +222,17 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
         assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
+        sender = "sender"
+        default_dialogues = DefaultDialogues(sender)
         message_content = b"hello"
         message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=message_content,
+            performative=DefaultMessage.Performative.BYTES,
+            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
+            content=message_content,
         )
         sent_envelope = Envelope(
             to=self.agent_name,
-            sender="sender",
+            sender=sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -236,4 +241,5 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
         time.sleep(2.0)
         received_envelope = self.read_envelope_from_agent(self.agent_name)
-        assert sent_envelope.message.encode() == received_envelope.message
+        received_message = DefaultMessage.serializer.decode(received_envelope.message)
+        assert sent_envelope.message.content == received_message.content

@@ -21,6 +21,7 @@
 import time
 
 from aea.mail.base import Envelope
+from aea.protocols.default.dialogues import DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -37,13 +38,17 @@ class TestEchoSkill(AEATestCaseEmpty):
         assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
+        sender = "sender"
+        default_dialogues = DefaultDialogues(sender)
         message_content = b"hello"
         message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=message_content,
+            performative=DefaultMessage.Performative.BYTES,
+            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
+            content=message_content,
         )
         sent_envelope = Envelope(
             to=self.agent_name,
-            sender="sender",
+            sender=sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -57,7 +62,7 @@ class TestEchoSkill(AEATestCaseEmpty):
         assert sent_envelope.sender == received_envelope.to
         assert sent_envelope.protocol_id == received_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(received_envelope.message)
-        assert sent_envelope.message == msg
+        assert sent_envelope.message.content == msg.content
 
         check_strings = (
             "Echo Handler: setup method called.",
