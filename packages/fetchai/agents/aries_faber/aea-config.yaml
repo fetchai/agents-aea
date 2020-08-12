@@ -18,7 +18,7 @@ protocols:
 - fetchai/http:0.4.0
 - fetchai/oef_search:0.4.0
 skills:
-- fetchai/aries_faber:0.3.0
+- fetchai/aries_faber:0.4.0
 - fetchai/error:0.4.0
 default_connection: fetchai/http_client:0.6.0
 default_ledger: cosmos

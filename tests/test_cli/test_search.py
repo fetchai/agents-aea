@@ -358,7 +358,7 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.4.0")
+        public_id_echo = PublicId.from_str("fetchai/echo:0.5.0")
         public_id_error = PublicId.from_str("fetchai/error:0.4.0")
         expected = (
             'Searching for ""...\n'
@@ -440,7 +440,7 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.4.0")
+        public_id_echo = PublicId.from_str("fetchai/echo:0.5.0")
         public_id_error = PublicId.from_str("fetchai/error:0.4.0")
         expected = (
             'Searching for ""...\n'

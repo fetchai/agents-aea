@@ -199,7 +199,7 @@ class TestInteractEcho(AEATestCaseEmpty):
     @pytest.mark.integration
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
-        self.add_item("skill", "fetchai/echo:0.4.0")
+        self.add_item("skill", "fetchai/echo:0.5.0")
         self.run_agent()
         process = self.run_interaction()
 
