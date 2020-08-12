@@ -35,7 +35,7 @@ from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_client:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_client:0.5.0")
 
 
 class PeerToPeerChannel:
