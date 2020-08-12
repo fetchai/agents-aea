@@ -41,6 +41,7 @@ from aea.connections.stub.connection import (
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import InBox, Multiplexer, OutBox
+from aea.protocols.default.dialogues import DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 
 
@@ -71,11 +72,12 @@ def _run_interaction_channel():
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
     outbox = OutBox(multiplexer, default_address=identity_stub.address)
+    dialogues = DefaultDialogues(identity_stub.name)
 
     try:
         multiplexer.connect()
         while True:  # pragma: no cover
-            _process_envelopes(agent_name, identity_stub, inbox, outbox)
+            _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
 
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
@@ -86,7 +88,11 @@ def _run_interaction_channel():
 
 
 def _process_envelopes(
-    agent_name: str, identity_stub: Identity, inbox: InBox, outbox: OutBox
+    agent_name: str,
+    identity_stub: Identity,
+    inbox: InBox,
+    outbox: OutBox,
+    dialogues: DefaultDialogues,
 ) -> None:
     """
     Process envelopes.
@@ -95,10 +101,11 @@ def _process_envelopes(
     :param identity_stub: stub identity.
     :param inbox: an inbox object.
     :param outbox: an outbox object.
+    :param dialogues: the dialogues object.
 
     :return: None.
     """
-    envelope = _try_construct_envelope(agent_name, identity_stub.name)
+    envelope = _try_construct_envelope(agent_name, identity_stub.name, dialogues)
     if envelope is None:
         if not inbox.empty():
             envelope = inbox.get_nowait()
@@ -127,7 +134,9 @@ def _construct_message(action_name, envelope):
     return message
 
 
-def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
+def _try_construct_envelope(
+    agent_name: str, sender: str, dialogues: DefaultDialogues
+) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
     try:
@@ -149,9 +158,16 @@ def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
             message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         else:
             message = message_escaped  # pragma: no cover
-        msg = DefaultMessage(performative=performative, content=message)
+        dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
+        msg = DefaultMessage(
+            performative=performative,
+            dialogue_reference=dialogue_reference,
+            content=message,
+        )
         msg.counterparty = agent_name
+        msg.to = agent_name
         msg.sender = sender
+        dialogues.update(msg)
         envelope = Envelope(
             to=msg.counterparty,
             sender=msg.sender,
