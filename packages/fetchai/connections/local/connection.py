@@ -45,7 +45,7 @@ MESSAGE_ID = 1
 RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.6.0")
 
 
 class LocalNode:
