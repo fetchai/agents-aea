@@ -70,7 +70,6 @@ class TestWebhookConnection:
         self.webhook_connection = WebhookConnection(
             configuration=configuration, identity=self.identity,
         )
-        self.webhook_connection.loop = self.loop
         self.dialogues = HttpDialogues(self.identity.address)
 
     async def test_initialization(self):

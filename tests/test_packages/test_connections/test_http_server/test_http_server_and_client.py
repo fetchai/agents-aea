@@ -86,7 +86,6 @@ class TestClientServer:
         self.client = HTTPClientConnection(
             configuration=configuration, identity=self.client_agent_identity
         )
-        self.client.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.client.connect())
         # skill side dialogues
         self._client_dialogues = HttpDialogues(self.client_agent_address)

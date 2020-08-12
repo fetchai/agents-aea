@@ -80,7 +80,6 @@ class TestHTTPClientConnect:
         self.http_client_connection = HTTPClientConnection(
             configuration=configuration, identity=self.agent_identity
         )
-        self.http_client_connection.loop = asyncio.get_event_loop()
         self.connection_address = str(HTTPClientConnection.connection_id)
         self.http_dialogs = HttpDialogues(self.connection_address)
 

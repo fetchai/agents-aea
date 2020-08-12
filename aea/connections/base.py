@@ -88,7 +88,6 @@ class Connection(Component, ABC):
         assert (
             super().public_id == self.connection_id
         ), "Connection ids in configuration and class not matching."
-        self.__loop: Optional[asyncio.AbstractEventLoop] = None
         self._state = AsyncState(ConnectionStates.disconnected)
 
         self._identity = identity
@@ -104,20 +103,8 @@ class Connection(Component, ABC):
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
         """Get the event loop."""
-        return self.__loop or asyncio.get_event_loop()
-
-    @loop.setter
-    def loop(self, loop: asyncio.AbstractEventLoop) -> None:
-        """
-        Set the event loop.
-
-        :param loop: the event loop.
-        :return: None
-        """
-        assert (
-            self.__loop is None or not self.__loop.is_running()
-        ), "Cannot set the loop while it is running."
-        self.__loop = loop
+        assert asyncio.get_event_loop().is_running()
+        return asyncio.get_event_loop()
 
     def _ensure_connected(self) -> None:  # pragma: nocover
         """Raise exception if connection is not connected."""
