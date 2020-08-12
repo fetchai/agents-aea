@@ -193,7 +193,7 @@ aea create aries_alice
 cd aries_alice
 aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/http_client:0.6.0
+aea add connection fetchai/http_client:0.7.0
 aea add connection fetchai/webhook:0.5.0
 aea add skill fetchai/aries_alice:0.5.0
 ```
@@ -278,7 +278,7 @@ aea create aries_faber
 cd aries_faber
 aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/http_client:0.6.0
+aea add connection fetchai/http_client:0.7.0
 aea add connection fetchai/webhook:0.5.0
 aea add skill fetchai/aries_faber:0.4.0
 ```

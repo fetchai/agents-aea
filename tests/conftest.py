@@ -151,9 +151,6 @@ FUNDED_ETH_PRIVATE_KEY_2 = (
 FUNDED_ETH_PRIVATE_KEY_3 = (
     "0x6F611408F7EF304947621C51A4B7D84A13A2B9786E9F984DA790A096E8260C64"
 )
-FUNDED_COSMOS_PRIVATE_KEY_1 = (
-    "0aea4a45c40776f138a22655819519fe213030f6df7c14bf628fdc41de33a7c8"
-)
 NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
 )
@@ -195,7 +192,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.6.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.7.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")

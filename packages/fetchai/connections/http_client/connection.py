@@ -44,7 +44,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.7.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -373,7 +373,7 @@ class HTTPClientConnection(Connection):
         :return: None
         """
         if self.is_connected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.connecting)
         self.channel.logger = self.logger
         await self.channel.connect(self._loop)
@@ -386,7 +386,7 @@ class HTTPClientConnection(Connection):
         :return: None
         """
         if self.is_disconnected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         await self.channel.disconnect()
         self._state.set(ConnectionStates.disconnected)
