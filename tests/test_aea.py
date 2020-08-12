@@ -17,33 +17,49 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains the tests for aea/aea.py."""
 import os
 import tempfile
 import time
+import unittest
 from pathlib import Path
 from threading import Thread
+from typing import Callable
+from unittest.case import TestCase
 from unittest.mock import patch
+
+import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import PublicId
+from aea.configurations.base import PublicId, SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
+from aea.exceptions import AEAException
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
-from aea.skills.base import Skill
+from aea.skills.base import Skill, SkillContext
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
-from tests.common.utils import run_in_thread, wait_for_condition
+from tests.common.utils import (
+    AeaTool,
+    make_behaviour_cls_from_funcion,
+    make_handler_cls_from_funcion,
+    run_in_thread,
+    timeit_context,
+    wait_for_condition,
+)
 
 from .conftest import (
+    COSMOS_PRIVATE_KEY_PATH,
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
@@ -87,11 +103,11 @@ def test_act():
     agent = builder.build()
 
     with run_in_thread(agent.start, timeout=20):
-        wait_for_condition(lambda: agent.is_running, timeout=10)
+        wait_for_condition(lambda: agent.is_running, timeout=20)
         behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
 
         time.sleep(1)
-        wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=10)
+        wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=20)
         agent.stop()
 
 
@@ -106,7 +122,7 @@ def test_start_stop():
     agent = builder.build()
 
     with run_in_thread(agent.start, timeout=20):
-        wait_for_condition(lambda: agent.is_running, timeout=10)
+        wait_for_condition(lambda: agent.is_running, timeout=20)
         agent.stop()
 
 
@@ -122,7 +138,7 @@ def test_double_start():
 
     with run_in_thread(agent.start, timeout=20):
         try:
-            wait_for_condition(lambda: agent.is_running, timeout=10)
+            wait_for_condition(lambda: agent.is_running, timeout=20)
 
             t = Thread(target=agent.start)
             t.start()
@@ -172,7 +188,7 @@ def test_react():
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
-            wait_for_condition(lambda: agent.is_running, timeout=10)
+            wait_for_condition(lambda: agent.is_running, timeout=20)
             agent.outbox.put(envelope)
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
@@ -181,8 +197,8 @@ def test_react():
             )
             assert handler is not None, "Handler is not set."
             wait_for_condition(
-                lambda: msg in handler.handled_messages,
-                timeout=10,
+                lambda: len(handler.handled_messages) > 0,
+                timeout=20,
                 error_msg="The message is not inside the handled_messages.",
             )
 
@@ -613,3 +629,283 @@ def test_start_stop_and_start_stop_again():
         wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=5)
         agent.stop()
         wait_for_condition(lambda: agent.is_stopped, timeout=10)
+
+
+class ExpectedExcepton(Exception):
+    """Exception for testing."""
+
+
+class TestAeaExceptionPolicy:
+    """Tests for exception policies."""
+
+    @staticmethod
+    def raise_exception(*args, **kwargs) -> None:
+        """Raise exception for tests."""
+        raise ExpectedExcepton("we wait it!")
+
+    def setup(self) -> None:
+        """Set test cae instance."""
+        agent_name = "MyAgent"
+
+        builder = AEABuilder()
+        builder.set_name(agent_name)
+        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
+
+        self.handler_called = 0
+
+        def handler_func(*args, **kwargs):
+            self.handler_called += 1
+
+        skill_context = SkillContext()
+        handler_cls = make_handler_cls_from_funcion(handler_func)
+        behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
+
+        self.handler = handler_cls(name="handler1", skill_context=skill_context)
+        self.behaviour = behaviour_cls(name="behaviour1", skill_context=skill_context)
+
+        test_skill = Skill(
+            SkillConfig(name="test_skill", author="fetchai"),
+            skill_context=skill_context,
+            handlers={"handler": self.handler},
+            behaviours={"behaviour": self.behaviour},
+        )
+        skill_context._skill = test_skill  # weird hack
+
+        builder.add_component_instance(test_skill)
+        self.aea = builder.build()
+        self.aea_tool = AeaTool(self.aea)
+
+    def test_no_exceptions(self) -> None:
+        """Test act and handle works if no exception raised."""
+        t = Thread(target=self.aea.start)
+        t.start()
+
+        self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
+        time.sleep(1)
+        assert self.handler_called >= 2
+
+    def test_handle_propagate(self) -> None:
+        """Test propagate policy on message handle."""
+        self.aea._skills_exception_policy = ExceptionPolicyEnum.propagate
+        self.handler.handle = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
+        self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
+
+        with pytest.raises(ExpectedExcepton):
+            self.aea.start()
+
+        assert not self.aea.is_running
+
+    def test_handle_stop_and_exit(self) -> None:
+        """Test stop and exit policy on message handle."""
+        self.aea._skills_exception_policy = ExceptionPolicyEnum.stop_and_exit
+        self.handler.handle = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
+        self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
+
+        with pytest.raises(
+            AEAException, match=r"AEA was terminated cause exception .*"
+        ):
+            self.aea.start()
+
+        assert not self.aea.is_running
+
+    def test_handle_just_log(self) -> None:
+        """Test just log policy on message handle."""
+        self.aea._skills_exception_policy = ExceptionPolicyEnum.just_log
+        self.handler.handle = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
+
+        with patch.object(self.aea._logger, "exception") as patched:
+            t = Thread(target=self.aea.start)
+            t.start()
+
+            self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
+            self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
+            time.sleep(1)
+        assert self.aea.is_running
+        assert patched.call_count == 2
+
+    def test_act_propagate(self) -> None:
+        """Test propagate policy on behaviour act."""
+        self.aea._skills_exception_policy = ExceptionPolicyEnum.propagate
+        self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
+
+        with pytest.raises(ExpectedExcepton):
+            self.aea.start()
+
+        assert not self.aea.is_running
+
+    def test_act_stop_and_exit(self) -> None:
+        """Test stop and exit policy on behaviour act."""
+        self.aea._skills_exception_policy = ExceptionPolicyEnum.stop_and_exit
+        self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
+
+        self.aea.start()
+
+        assert not self.aea.is_running
+
+    def test_act_just_log(self) -> None:
+        """Test just log policy on behaviour act."""
+        self.aea._skills_exception_policy = ExceptionPolicyEnum.just_log
+        self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
+
+        with patch.object(self.aea._logger, "exception") as patched:
+            t = Thread(target=self.aea.start)
+            t.start()
+
+            time.sleep(1)
+        assert self.aea.is_running
+        assert patched.call_count > 1
+
+    def test_act_bad_policy(self) -> None:
+        """Test propagate policy on behaviour act."""
+        self.aea._skills_exception_policy = "non exists policy"  # type: ignore
+        self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
+
+        with pytest.raises(AEAException, match=r"Unsupported exception policy.*"):
+            self.aea.start()
+
+        assert not self.aea.is_running
+
+    def teardown(self) -> None:
+        """Stop AEA if not stopped."""
+        self.aea.teardown()
+        self.aea.stop()
+
+
+def sleep_a_bit(sleep_time: float = 0.1, num_of_sleeps: int = 1) -> None:
+    """Sleep num_of_sleeps time for sleep_time.
+
+    :param sleep_time: time to sleep.
+    :param  num_of_sleeps: how many time sleep for sleep_time.
+
+    :return: None
+    """
+    for _ in range(num_of_sleeps):
+        time.sleep(sleep_time)
+
+
+class BaseTimeExecutionCase(TestCase):
+    """Base Test case for code execute timeout."""
+
+    BASE_TIMEOUT = 0.35
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Set up."""
+        if cls is BaseTimeExecutionCase:
+            raise unittest.SkipTest("Skip BaseTest tests, it's a base class")
+
+    def tearDown(self) -> None:
+        """Tear down."""
+        self.aea_tool.teardown()
+
+    def prepare(self, function: Callable) -> None:
+        """Prepare aea_tool for testing.
+
+        :param function: function be called on react handle or/and Behaviour.act
+        :return: None
+        """
+        agent_name = "MyAgent"
+
+        builder = AEABuilder()
+        builder.set_name(agent_name)
+        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
+
+        self.function_finished = False
+
+        def handler_func(*args, **kwargs):
+            function()
+            self.function_finished = True
+
+        skill_context = SkillContext()
+        handler_cls = make_handler_cls_from_funcion(handler_func)
+
+        behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
+
+        test_skill = Skill(
+            SkillConfig(name="test_skill", author="fetchai"),
+            skill_context=skill_context,
+            handlers={
+                "handler1": handler_cls(name="handler1", skill_context=skill_context)
+            },
+            behaviours={
+                "behaviour1": behaviour_cls(
+                    name="behaviour1", skill_context=skill_context
+                )
+            },
+        )
+        skill_context._skill = test_skill  # weird hack
+
+        builder.add_component_instance(test_skill)
+        aea = builder.build()
+        self.aea_tool = AeaTool(aea)
+        self.aea_tool.put_inbox(AeaTool.dummy_envelope())
+
+    def test_long_handler_cancelled_by_timeout(self):
+        """Test long function terminated by timeout."""
+        num_sleeps = 10
+        sleep_time = self.BASE_TIMEOUT
+        function_sleep_time = num_sleeps * sleep_time
+        execution_timeout = self.BASE_TIMEOUT * 2
+        assert execution_timeout < function_sleep_time
+
+        self.prepare(lambda: sleep_a_bit(sleep_time, num_sleeps))
+        self.aea_tool.set_execution_timeout(execution_timeout)
+        self.aea_tool.setup()
+
+        with timeit_context() as timeit:
+            self.aea_action()
+
+        assert execution_timeout <= timeit.time_passed <= function_sleep_time
+        assert not self.function_finished
+
+    def test_short_handler_not_cancelled_by_timeout(self):
+        """Test short function NOT terminated by timeout."""
+        num_sleeps = 1
+        sleep_time = self.BASE_TIMEOUT
+        function_sleep_time = num_sleeps * sleep_time
+        execution_timeout = self.BASE_TIMEOUT * 2
+
+        assert function_sleep_time <= execution_timeout
+
+        self.prepare(lambda: sleep_a_bit(sleep_time, num_sleeps))
+        self.aea_tool.set_execution_timeout(execution_timeout)
+        self.aea_tool.setup()
+
+        with timeit_context() as timeit:
+            self.aea_action()
+
+        assert function_sleep_time <= timeit.time_passed <= execution_timeout
+        assert self.function_finished
+
+    def test_no_timeout(self):
+        """Test function NOT terminated by timeout cause timeout == 0."""
+        num_sleeps = 1
+        sleep_time = self.BASE_TIMEOUT
+        function_sleep_time = num_sleeps * sleep_time
+        execution_timeout = 0
+
+        self.prepare(lambda: sleep_a_bit(sleep_time, num_sleeps))
+        self.aea_tool.set_execution_timeout(execution_timeout)
+        self.aea_tool.setup()
+
+        with timeit_context() as timeit:
+            self.aea_action()
+
+        assert function_sleep_time <= timeit.time_passed
+        assert self.function_finished
+
+
+class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
+    """Test react timeout."""
+
+    def aea_action(self):
+        """Spin react on AEA."""
+        self.aea_tool.react_one()
+
+
+class ActTimeoutExecutionCase(BaseTimeExecutionCase):
+    """Test act timeout."""
+
+    def aea_action(self):
+        """Spin act on AEA."""
+        self.aea_tool.act_one()

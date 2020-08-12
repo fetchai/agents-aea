@@ -19,10 +19,54 @@
 """This module contains a test for aea.test_tools.test_cases."""
 
 import os
+import time
 from pathlib import Path
 
+import pytest
 
+from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+
+from tests.test_cli import test_generate_wealth, test_interact
+
+
+TestWealthCommandsPositive = test_generate_wealth.TestWealthCommandsPositive
+TestInteractCommand = test_interact.TestInteractCommand
+
+
+class TestConfigCases(AEATestCaseEmpty):
+    """Test config set/get."""
+
+    def test_agent_force_set(self):
+        """Test agent test force set from path."""
+        key_name = "agent.private_key_paths.cosmos"
+        self.force_set_config(key_name, "testdata2000")
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert b"testdata2000" in result.stdout_bytes
+
+    def test_agent_set(self):
+        """Test agent test set from path."""
+        self.set_config("agent.author", "testauthor21")
+        result = self.run_cli_command(
+            "config", "get", "agent.author", cwd=self._get_cwd()
+        )
+        assert b"testauthor21" in result.stdout_bytes
+
+    def test_agent_get_exception(self):
+        """Test agent test get non exists key."""
+        with pytest.raises(AEATestingException, match=".*bad_key.*"):
+            self.run_cli_command("config", "get", "agent.bad_key", cwd=self._get_cwd())
+
+
+class TestRunAgent(AEATestCaseEmpty):
+    """Tests test for generic cases of AEATestCases."""
+
+    def test_run_agent(self):
+        """Run agent and test it's launched."""
+        process = self.run_agent()
+        assert self.is_running(process, timeout=30)
 
 
 class TestGenericCases(AEATestCaseEmpty):
@@ -156,13 +200,6 @@ class TestAEA(AEATestCase):
 
     path_to_aea = Path("tests") / "data" / "dummy_aea"
 
-    def test_agent_set(self):
-        """Test agent test set from path."""
-        result = self.run_cli_command(
-            "config", "get", "agent.agent_name", cwd=self.path_to_aea
-        )
-        assert b"Agent0" in result.stdout_bytes
-
     def test_scaffold_and_fingerprint(self):
         """Test component scaffold and fingerprint."""
         result = self.scaffold_item("skill", "skill1")
@@ -170,3 +207,33 @@ class TestAEA(AEATestCase):
 
         result = self.fingerprint_item("skill", "fetchai/skill1:0.1.0")
         assert result.exit_code == 0
+
+
+class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
+    """Test that we can communicate with agent via stub connection."""
+
+    def test_send_receive_envelope(self):
+        """Run the echo skill sequence."""
+        self.add_item("skill", "fetchai/echo:0.4.0")
+
+        process = self.run_agent()
+        is_running = self.is_running(process)
+        assert is_running, "AEA not running within timeout!"
+
+        # add sending and receiving envelope from input/output files
+        message_content = b"hello"
+        message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content=message_content,
+        )
+        sent_envelope = Envelope(
+            to=self.agent_name,
+            sender="sender",
+            protocol_id=message.protocol_id,
+            message=message,
+        )
+
+        self.send_envelope_to_agent(sent_envelope, self.agent_name)
+
+        time.sleep(2.0)
+        received_envelope = self.read_envelope_from_agent(self.agent_name)
+        assert sent_envelope.message.encode() == received_envelope.message

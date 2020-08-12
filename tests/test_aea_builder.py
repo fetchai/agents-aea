@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
@@ -40,11 +42,13 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.contracts.base import Contract
 from aea.exceptions import AEAException
+from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.protocols.base import Protocol
 from aea.protocols.default import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     CUR_PATH,
@@ -510,3 +514,32 @@ def test_find_import_order():
                 Path(os.path.join(CUR_PATH, "data", "dummy_aea")),
                 True,
             )
+
+
+def test__build_identity_from_wallet():
+    """Test AEABuilder._build_identity_from_wallet."""
+    builder = AEABuilder()
+    builder.set_name("aea_1")
+    builder.add_private_key("fetchai")
+
+    wallet = Mock()
+    wallet.addresses = {}
+    with pytest.raises(ValueError):
+        builder._build_identity_from_wallet(wallet)
+
+    wallet.addresses = {builder._default_ledger: "addr1"}
+    builder._build_identity_from_wallet(wallet)
+
+    wallet.addresses = {builder._default_ledger: "addr1", "fetchai": "addr2"}
+    builder._build_identity_from_wallet(wallet)
+
+
+class TestFromAEAProject(AEATestCaseEmpty):
+    """Test builder set from project dir."""
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self._get_cwd()):
+            aea = builder.build()
+        assert aea.name == self.agent_name

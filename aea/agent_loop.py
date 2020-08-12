@@ -86,8 +86,6 @@ class BaseAgentLoop(WithLogger, ABC):
             await self._gather_tasks()
         except (CancelledError, KeyboardInterrupt):
             await self.wait_run_loop_stopped()
-            if self._exceptions:
-                raise self._exceptions[0]
         logger.debug("agent loop stopped")
         self._state.set(AgentLoopStates.stopped)
 
@@ -187,7 +185,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :return: None
         """
-        if behaviour in self._behaviours_registry:
+        if behaviour in self._behaviours_registry:  # pragma: nocover
             # already registered
             return
 
