@@ -52,7 +52,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     CUR_PATH,
-    FETCHAI_PRIVATE_KEY_PATH,
+    DEFAULT_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
 )
@@ -207,7 +207,7 @@ def test_multiple_builds_with_private_keys():
     """Test multiple calls to the 'build()' method when adding custom private keys."""
     builder = AEABuilder()
     builder.set_name("aea_1")
-    builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
+    builder.add_private_key(DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_PATH)
 
     # the first call works
     aea_1 = builder.build()
@@ -220,7 +220,7 @@ def test_multiple_builds_with_private_keys():
     # after reset, it works
     builder.reset()
     builder.set_name("aea_1")
-    builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
+    builder.add_private_key(DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_PATH)
     aea_2 = builder.build()
     assert isinstance(aea_2, AEA)
 

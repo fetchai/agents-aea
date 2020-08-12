@@ -11,3 +11,4 @@ This is the official list of Fetch.AI authors for copyright purposes.
 * Kevin Chen <kevin.chen@fetch.ai> [Kevin-Chen0](https://github.com/Kevin-Chen0)
 * Yuri Turchenkov <yuri.turchenkov@fetch.ai> [solarw](https://github.com/solarw)
 * Lokman Rahmani <lokman.rahmani@fetch.ai> [lrahmani](https://github.com/lrahmani)
+* Jiří Vestfál <jiri.vestfal@fetch.ai> [MissingNO57](https://github.com/MissingNO57)

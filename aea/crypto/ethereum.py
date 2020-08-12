@@ -22,6 +22,7 @@
 import json
 import logging
 import time
+import warnings
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
 
@@ -119,7 +120,9 @@ class EthereumCrypto(Crypto[Account]):
         :return: signature of the message in string form
         """
         if is_deprecated_mode and len(message) == 32:
-            signature_dict = self.entity.signHash(message)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                signature_dict = self.entity.signHash(message)
             signed_msg = signature_dict["signature"].hex()
         else:
             signable_message = encode_defunct(primitive=message)
@@ -236,9 +239,11 @@ class EthereumHelper(Helper):
         """
         if is_deprecated_mode:
             assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
-            address = Account.recoverHash(  # pylint: disable=no-value-for-parameter
-                message_hash=message, signature=signature
-            )
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                address = Account.recoverHash(  # pylint: disable=no-value-for-parameter
+                    message_hash=message, signature=signature
+                )
         else:
             signable_message = encode_defunct(primitive=message)
             address = Account.recover_message(  # pylint: disable=no-value-for-parameter

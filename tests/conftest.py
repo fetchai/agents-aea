@@ -141,6 +141,7 @@ ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
 )
+DEFAULT_PRIVATE_KEY_PATH = COSMOS_PRIVATE_KEY_PATH
 FUNDED_ETH_PRIVATE_KEY_1 = (
     "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
 )
@@ -149,9 +150,6 @@ FUNDED_ETH_PRIVATE_KEY_2 = (
 )
 FUNDED_ETH_PRIVATE_KEY_3 = (
     "0x6F611408F7EF304947621C51A4B7D84A13A2B9786E9F984DA790A096E8260C64"
-)
-FUNDED_FET_PRIVATE_KEY_1 = (
-    "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
 )
 FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "0aea4a45c40776f138a22655819519fe213030f6df7c14bf628fdc41de33a7c8"
@@ -331,6 +329,15 @@ def skip_test_windows(fn: Callable) -> Callable:
     :return: decorated method.
     """
     return action_for_platform("Windows", skip=True)(fn)
+
+
+def skip_test_macos(fn: Callable) -> Callable:
+    """
+    Decorate a pytest method to skip a test in a case we are on MacOS.
+
+    :return: decorated method.
+    """
+    return action_for_platform("Darwin", skip=True)(fn)
 
 
 def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
