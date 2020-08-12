@@ -22,6 +22,7 @@ from unittest.mock import patch
 
 import pytest
 
+import aea
 from aea.protocols.state_update.message import StateUpdateMessage
 
 
@@ -133,3 +134,29 @@ def test_performative_str():
     """Test performative __str__."""
     assert str(StateUpdateMessage.Performative.INITIALIZE) == "initialize"
     assert str(StateUpdateMessage.Performative.APPLY) == "apply"
+
+
+def test_light_protocol_rule_3_target_less_than_message_id():
+    """Test that if message_id is not 1, target must be > message_id"""
+    with patch.object(
+        aea.protocols.state_update.message.logger, "error"
+    ) as mock_logger:
+        currency_endowment = {"FET": 100}
+        good_endowment = {"a_good": 2}
+        exchange_params = {"FET": 10.0}
+        utility_params = {"a_good": 20.0}
+        message_id = 2
+        target = 2
+        assert StateUpdateMessage(
+            message_id=message_id,
+            target=target,
+            performative=StateUpdateMessage.Performative.INITIALIZE,
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+            exchange_params_by_currency_id=exchange_params,
+            utility_params_by_good_id=utility_params,
+        )
+
+        mock_logger.assert_any_call(
+            f"Invalid 'target'. Expected an integer between 1 and {message_id - 1} inclusive. Found {target}."
+        )
