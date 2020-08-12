@@ -27,7 +27,7 @@ clean-pyc:
 clean-test:
 	rm -fr .tox/
 	rm -f .coverage
-	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}"
+	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 	rm -fr coverage.xml
 	rm -fr htmlcov/
 	rm -fr .hypothesis
@@ -75,14 +75,14 @@ common_checks: security misc_checks lint static docs
 
 .PHONY: test
 test:
-	pytest --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections tests/ --cov-report=html --cov-report=xml --cov-report=term-missing --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections
-	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}"
+	pytest -rfE --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections tests/ --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections  --cov-config=.coveragerc
+	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-sub
 test-sub:
 	#pytest --doctest-modules $(dir) $(tdir) --cov-report=html --cov-report=xml --cov-report=term --cov=$(dir)
-	pytest tests/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing
-	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}"
+	pytest -rfE --doctest-modules aea packages/fetchai/connections tests/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
+	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-all
 test-all:
