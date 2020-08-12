@@ -544,7 +544,7 @@ class P2PLibp2pConnection(Connection):
             # starting receiving msgs
             self._in_queue = asyncio.Queue()
             self._receive_from_node_task = asyncio.ensure_future(
-                self._receive_from_node(), loop=self._loop
+                self._receive_from_node(), loop=self.loop
             )
             self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:

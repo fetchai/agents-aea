@@ -338,6 +338,7 @@ async def test_multiple_envelopes():
 
     num_envelopes = 5
     await connection.connect()
+    assert connection.is_connected
 
     async def wait_num(num):
         for _ in range(num):

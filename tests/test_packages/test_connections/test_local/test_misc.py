@@ -24,7 +24,7 @@ import unittest.mock
 import pytest
 
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.mail.base import AEAConnectionError, Envelope
+from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
@@ -80,8 +80,8 @@ async def test_connection_twice_return_none():
 @pytest.mark.asyncio
 async def test_receiving_when_not_connected_raise_exception():
     """Test that when we try to receive an envelope from a not connected connection we raise exception."""
-    with pytest.raises(AEAConnectionError, match="Connection not established yet."):
-        with LocalNode() as node:
+    with LocalNode() as node:
+        with pytest.raises(ConnectionError):
             address = "address"
             connection = _make_local_connection(address, node)
             await connection.receive()

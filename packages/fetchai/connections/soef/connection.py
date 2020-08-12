@@ -997,13 +997,8 @@ class SOEFConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
-        try:
+        with self._connect_context():
             await self.channel.connect()
-            self._state.set(ConnectionStates.connected)
-        except (CancelledError, Exception) as e:  # pragma: no cover
-            self._state.set(ConnectionStates.disconnected)
-            raise e
 
     @property
     def in_queue(self) -> Optional[asyncio.Queue]:

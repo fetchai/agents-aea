@@ -332,7 +332,7 @@ class TestOEF(UseOef):
                     message=oef_search_registration,
                 )
             )
-            time.sleep(0.5)
+            time.sleep(1)
 
             oef_search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
