@@ -1,2 +1,2 @@
 [run]
-omit = .tox/*
+omit = */.tox/*
