@@ -406,6 +406,7 @@ class Libp2pNode:
                 "Waiting for node process {} to terminate...".format(self.proc.pid)
             )
             self.proc.wait()
+            self._log_file_desc.close()
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
         if os.path.exists(LIBP2P_NODE_ENV_FILE):
