@@ -56,7 +56,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
-    @pytest.mark.flaky(reruns=0)
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     @pytest.mark.integration
     def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
