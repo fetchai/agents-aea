@@ -20,7 +20,7 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Generic, Optional, Tuple, TypeVar
+from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
 
 from aea.mail.base import Address
 
@@ -286,6 +286,30 @@ class LedgerApi(Helper, ABC):
 
         :param tx_digest: the digest associated to the transaction.
         :return: the tx, if present
+        """
+
+    @abstractmethod
+    def get_contract_instance(
+        self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
+    ) -> Any:
+        """
+        Get the instance of a contract.
+
+        :param contract_interface: the contract interface.
+        :param contract_address: the contract address.
+        :return: the contract instance
+        """
+
+    @abstractmethod
+    def get_deploy_transaction(
+        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs,
+    ) -> Dict[str, Any]:
+        """
+        Get the transaction to deploy the smart contract.
+
+        :param contract_interface: the contract interface.
+        :param deployer_address: The address that will deploy the contract.
+        :returns tx: the transaction dictionary.
         """
 
 

@@ -20,7 +20,6 @@
 """Conftest module for Pytest."""
 import asyncio
 import inspect
-import json
 import logging
 import os
 import platform
@@ -142,6 +141,7 @@ ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
 )
+DEFAULT_PRIVATE_KEY_PATH = COSMOS_PRIVATE_KEY_PATH
 FUNDED_ETH_PRIVATE_KEY_1 = (
     "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
 )
@@ -150,12 +150,6 @@ FUNDED_ETH_PRIVATE_KEY_2 = (
 )
 FUNDED_ETH_PRIVATE_KEY_3 = (
     "0x6F611408F7EF304947621C51A4B7D84A13A2B9786E9F984DA790A096E8260C64"
-)
-FUNDED_FET_PRIVATE_KEY_1 = (
-    "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
-)
-FUNDED_COSMOS_PRIVATE_KEY_1 = (
-    "0aea4a45c40776f138a22655819519fe213030f6df7c14bf628fdc41de33a7c8"
 )
 NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
@@ -180,6 +174,8 @@ NON_GENESIS_CONFIG = {
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
 PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
+PUBLIC_DHT_DELEGATE_URI_1 = "agents-p2p-dht.sandbox.fetch-ai.com:11000"
+PUBLIC_DHT_DELEGATE_URI_2 = "agents-p2p-dht.sandbox.fetch-ai.com:11001"
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
@@ -196,7 +192,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.6.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.7.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -212,7 +208,7 @@ PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specificati
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
 contract_config_files = [
-    os.path.join(ROOT_DIR, "aea", "contracts", "scaffold", CONTRACT_YAML),
+    os.path.join(ROOT_DIR, "tests", "data", "dummy_contract", CONTRACT_YAML),
 ]
 
 protocol_config_files = [
@@ -332,6 +328,15 @@ def skip_test_windows(fn: Callable) -> Callable:
     :return: decorated method.
     """
     return action_for_platform("Windows", skip=True)(fn)
+
+
+def skip_test_macos(fn: Callable) -> Callable:
+    """
+    Decorate a pytest method to skip a test in a case we are on MacOS.
+
+    :return: decorated method.
+    """
+    return action_for_platform("Darwin", skip=True)(fn)
 
 
 def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
@@ -826,13 +831,19 @@ def _make_libp2p_connection(
 
 
 def _make_libp2p_client_connection(
-    node_port: int = 11234, node_host: str = "127.0.0.1"
+    node_port: int = 11234, node_host: str = "127.0.0.1", uri: Optional[str] = None,
 ) -> P2PLibp2pClientConnection:
     crypto = make_crypto(COSMOS)
     identity = Identity("", address=crypto.address)
     configuration = ConnectionConfig(
         client_key_file=None,
-        nodes=[{"uri": "{}:{}".format(node_host, node_port)}],
+        nodes=[
+            {
+                "uri": str(uri)
+                if uri is not None
+                else "{}:{}".format(node_host, node_port)
+            }
+        ],
         connection_id=P2PLibp2pClientConnection.connection_id,
     )
     return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
@@ -1001,15 +1012,10 @@ def erc1155_contract():
     if str(configuration.public_id) not in contract_registry.specs:
         # load contract into sys modules
         Contract.from_config(configuration)
-
-        path = Path(configuration.directory, configuration.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            contract_interface = json.load(interface_file)
-
         contract_registry.register(
             id_=str(configuration.public_id),
             entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-            class_kwargs={"contract_interface": contract_interface},
+            class_kwargs={"contract_interface": configuration.contract_interfaces},
             contract_config=configuration,
         )
 

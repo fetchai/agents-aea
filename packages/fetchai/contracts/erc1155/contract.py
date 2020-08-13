@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 
 from vyper.utils import keccak256
 
-from aea.contracts.ethereum import Contract
+from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.mail.base import Address
 
@@ -66,38 +66,6 @@ class ERC1155Contract(Contract):
         """
         token_id = (token_type << 128) + index
         return token_id
-
-    @classmethod
-    def get_deploy_transaction(  # type: ignore
-        cls,
-        ledger_api: LedgerApi,
-        deployer_address: Address,
-        value: int = 0,
-        gas: int = 0,
-    ) -> Dict[str, Any]:
-        """
-        Get the transaction to deploy the smart contract.
-
-        :param ledger_api: the ledger API
-        :param deployer_address: The address that will deploy the contract.
-        :param value: value to send to contract (ETH in Wei)
-        :param gas: the gas to be used
-        :returns tx: the transaction dictionary.
-        """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api)
-        data = instance.constructor().__dict__.get("data_in_transaction")
-        tx = {
-            "from": deployer_address,  # only 'from' address, don't insert 'to' address!
-            "value": value,  # transfer as part of deployment
-            "gas": gas,
-            "gasPrice": ledger_api.api.eth.gasPrice,
-            "nonce": nonce,
-            "data": data,
-        }
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
 
     @classmethod
     def get_create_batch_transaction(

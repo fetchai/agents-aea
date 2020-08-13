@@ -25,7 +25,7 @@ import requests
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import ROOT_DIR, skip_test_windows
+from tests.conftest import ROOT_DIR
 
 API_SPEC_PATH = Path(ROOT_DIR, "examples", "http_ex", "petstore.yaml").absolute()
 
@@ -33,7 +33,6 @@ API_SPEC_PATH = Path(ROOT_DIR, "examples", "http_ex", "petstore.yaml").absolute(
 class TestHttpEchoSkill(AEATestCaseEmpty):
     """Test that http echo skill works."""
 
-    @skip_test_windows
     def test_echo(self):
         """Run the echo skill sequence."""
         self.add_item("connection", "fetchai/http_server:0.6.0")

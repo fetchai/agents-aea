@@ -108,11 +108,14 @@ def test_generate_nonce():
 @pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
-    account = FetchAICrypto(FETCHAI_PRIVATE_KEY_PATH)
+    account = FetchAICrypto()
+    balance = get_wealth(account.address)
+    assert balance > 0, "Failed to fund account."
     fc2 = FetchAICrypto()
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
     amount = 10000
+    assert amount < balance, "Not enough funds."
     transfer_transaction = fetchai_api.get_transfer_transaction(
         sender_address=account.address,
         destination_address=fc2.address,
@@ -165,9 +168,22 @@ def test_get_balance():
     fc = FetchAICrypto()
     balance = fetchai_api.get_balance(fc.address)
     assert balance == 0, "New account has a positive balance."
-    fc = FetchAICrypto(private_key_path=FETCHAI_PRIVATE_KEY_PATH)
-    balance = fetchai_api.get_balance(fc.address)
+    balance = get_wealth(fc.address)
     assert balance > 0, "Existing account has no balance."
+
+
+def get_wealth(address: str):
+    """Get wealth for test."""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    FetchAIFaucetApi().get_wealth(address)
+    balance = 0
+    timeout = 0
+    while timeout < 40 and balance == 0:
+        time.sleep(1)
+        timeout += 1
+        _balance = fetchai_api.get_balance(address)
+        balance = _balance if _balance is not None else 0
+    return balance
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -182,3 +198,23 @@ def test_get_wealth_positive(caplog):
         assert (
             "Message: Transfer pending" in caplog.text
         ), f"Cannot find message in output: {caplog.text}"
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_contract_instance():
+    """Test the get contract instance method."""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    with pytest.raises(NotImplementedError):
+        fetchai_api.get_contract_instance("interface")
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_deploy_transaction():
+    """Test the get deploy transaction method."""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    with pytest.raises(NotImplementedError):
+        fetchai_api.get_deploy_transaction("interface", "deployer")

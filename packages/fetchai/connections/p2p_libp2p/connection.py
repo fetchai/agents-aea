@@ -61,7 +61,7 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.7.0")
 
 MultiAddr = str
 
@@ -534,7 +534,7 @@ class P2PLibp2pConnection(Connection):
         :return: None
         """
         if self.is_connected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.connecting)
         try:
             # start libp2p node
@@ -558,7 +558,7 @@ class P2PLibp2pConnection(Connection):
         :return: None
         """
         if self.is_disconnected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
@@ -569,7 +569,9 @@ class P2PLibp2pConnection(Connection):
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
-            self.logger.debug("Called disconnect when input queue not initialized.")
+            self.logger.debug(  # pragma: nocover
+                "Called disconnect when input queue not initialized."
+            )
         self._state.set(ConnectionStates.disconnected)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:

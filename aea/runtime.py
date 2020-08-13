@@ -118,7 +118,7 @@ class BaseRuntime(ABC):
         return self._state.get() == RuntimeStates.running
 
     @property
-    def is_stopped(self) -> bool:
+    def is_stopped(self) -> bool:  # pragma: nocover
         """Get stopped state of the runtime."""
         return self._state.get() in [RuntimeStates.stopped]
 
@@ -132,7 +132,7 @@ class BaseRuntime(ABC):
         asyncio.set_event_loop(self._loop)
 
     @property
-    def state(self) -> RuntimeStates:
+    def state(self) -> RuntimeStates:  # pragma: nocover
         """
         Get runtime state.
 
@@ -266,7 +266,7 @@ class AsyncRuntime(BaseRuntime):
         This one calls async functions and does not guarantee to wait till runtime stopped.
         """
         logger.debug("Stop runtime coroutine.")
-        if not self._loop.is_running():
+        if not self._loop.is_running():  # pragma: nocover
             logger.debug(
                 "Runtime event loop is not running, start loop with `stop` coroutine"
             )
@@ -304,7 +304,7 @@ class ThreadedRuntime(BaseRuntime):
             self._state.set(RuntimeStates.running)
             self._agent.main_loop.start()
             logger.debug("[{}]: Runtime stopped".format(self._agent.name))
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # pragma: nocover
             raise
         except BaseException:  # pragma: nocover
             logger.exception("Runtime exception during stop:")

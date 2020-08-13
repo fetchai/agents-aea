@@ -69,7 +69,7 @@ class RawTransaction:
         :return: None
         """
         raw_transaction_bytes = pickle.dumps(raw_transaction_object)  # nosec
-        raw_transaction_protobuf_object.raw_transaction_bytes = raw_transaction_bytes
+        raw_transaction_protobuf_object.raw_transaction = raw_transaction_bytes
 
     @classmethod
     def decode(cls, raw_transaction_protobuf_object) -> "RawTransaction":
@@ -82,7 +82,7 @@ class RawTransaction:
         :return: A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
         """
         raw_transaction = pickle.loads(  # nosec
-            raw_transaction_protobuf_object.raw_transaction_bytes
+            raw_transaction_protobuf_object.raw_transaction
         )
         return raw_transaction
 
@@ -146,7 +146,7 @@ class RawMessage:
         :return: None
         """
         raw_message_bytes = pickle.dumps(raw_message_object)  # nosec
-        raw_message_protobuf_object.raw_message_bytes = raw_message_bytes
+        raw_message_protobuf_object.raw_message = raw_message_bytes
 
     @classmethod
     def decode(cls, raw_message_protobuf_object) -> "RawMessage":
@@ -158,9 +158,7 @@ class RawMessage:
         :param raw_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'raw_message_protobuf_object' argument.
         """
-        raw_message = pickle.loads(  # nosec
-            raw_message_protobuf_object.raw_message_bytes
-        )
+        raw_message = pickle.loads(raw_message_protobuf_object.raw_message)  # nosec
         return raw_message
 
     def __eq__(self, other):
@@ -218,9 +216,7 @@ class SignedTransaction:
         :return: None
         """
         signed_transaction_bytes = pickle.dumps(signed_transaction_object)  # nosec
-        signed_transaction_protobuf_object.signed_transaction_bytes = (
-            signed_transaction_bytes
-        )
+        signed_transaction_protobuf_object.signed_transaction = signed_transaction_bytes
 
     @classmethod
     def decode(cls, signed_transaction_protobuf_object) -> "SignedTransaction":
@@ -233,7 +229,7 @@ class SignedTransaction:
         :return: A new instance of this class that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
         """
         signed_transaction = pickle.loads(  # nosec
-            signed_transaction_protobuf_object.signed_transaction_bytes
+            signed_transaction_protobuf_object.signed_transaction
         )
         return signed_transaction
 
@@ -299,7 +295,7 @@ class SignedMessage:
         :return: None
         """
         signed_message_bytes = pickle.dumps(signed_message_object)  # nosec
-        signed_message_protobuf_object.signed_message_bytes = signed_message_bytes
+        signed_message_protobuf_object.signed_message = signed_message_bytes
 
     @classmethod
     def decode(cls, signed_message_protobuf_object) -> "SignedMessage":
@@ -312,7 +308,7 @@ class SignedMessage:
         :return: A new instance of this class that matches the protocol buffer object in the 'signed_message_protobuf_object' argument.
         """
         signed_message = pickle.loads(  # nosec
-            signed_message_protobuf_object.signed_message_bytes
+            signed_message_protobuf_object.signed_message
         )
         return signed_message
 
@@ -786,7 +782,7 @@ class Terms:
         :return: None
         """
         terms_bytes = pickle.dumps(terms_object)  # nosec
-        terms_protobuf_object.terms_bytes = terms_bytes
+        terms_protobuf_object.terms = terms_bytes
 
     @classmethod
     def decode(cls, terms_protobuf_object) -> "Terms":
@@ -798,7 +794,7 @@ class Terms:
         :param terms_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'terms_protobuf_object' argument.
         """
-        terms = pickle.loads(terms_protobuf_object.terms_bytes)  # nosec
+        terms = pickle.loads(terms_protobuf_object.terms)  # nosec
         return terms
 
     def __eq__(self, other):

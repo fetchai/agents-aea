@@ -34,7 +34,7 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
 
@@ -48,7 +48,7 @@ from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
-from aea.helpers.base import cd, sigint_crossplatform
+from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -179,11 +179,12 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        process = subprocess.Popen(  # nosec
-            [sys.executable, *args],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-            cwd=cwd,
+
+        kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
+        kwargs.update(win_popen_kwargs())
+
+        process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
+            [sys.executable, *args], **kwargs,
         )
         cls.subprocesses.append(process)
         return process
@@ -273,7 +274,13 @@ class BaseAEATestCase(ABC):
                 if content2[key] == value:
                     content1.pop(key)
                     content2.pop(key)
-            allowed_diff_keys = ["aea_version", "author", "description", "version"]
+            allowed_diff_keys = [
+                "aea_version",
+                "author",
+                "description",
+                "version",
+                "registry_path",
+            ]
             result = all([key in allowed_diff_keys for key in content1.keys()])
             result = result and all(
                 [key in allowed_diff_keys for key in content2.keys()]
@@ -380,7 +387,9 @@ class BaseAEATestCase(ABC):
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
         for process in subprocesses:
-            sigint_crossplatform(process)
+            process.poll()
+            if process.returncode is None:  # stop only pending processes
+                send_control_c(process)
         for process in subprocesses:
             process.wait(timeout=timeout)
 
@@ -491,7 +500,7 @@ class BaseAEATestCase(ABC):
         :return: Result
         """
         cli_args = ["generate-key", ledger_api_id]
-        if private_key_file is not None:
+        if private_key_file is not None:  # pragma: nocover
             cli_args.append(private_key_file)
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
@@ -656,6 +665,10 @@ class BaseAEATestCase(ABC):
     @classmethod
     def send_envelope_to_agent(cls, envelope: Envelope, agent: str):
         """Send an envelope to an agent, using the stub connection."""
+        # check added cause sometimes fails on win with permission error
+        dir_path = Path(cls.t / agent)
+        assert dir_path.exists()
+        assert dir_path.is_dir()
         write_envelope_to_file(envelope, str(cls.t / agent / DEFAULT_INPUT_FILE_NAME))
 
     @classmethod
@@ -667,7 +680,7 @@ class BaseAEATestCase(ABC):
     def missing_from_output(
         cls,
         process: subprocess.Popen,
-        strings: Tuple[str],
+        strings: Sequence[str],
         timeout: int = DEFAULT_PROCESS_TIMEOUT,
         period: int = 1,
         is_terminating: bool = True,

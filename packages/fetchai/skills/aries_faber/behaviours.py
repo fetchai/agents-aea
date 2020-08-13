@@ -22,7 +22,6 @@
 import json
 from typing import Dict, cast
 
-from aea.mail.base import Address
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
@@ -31,11 +30,10 @@ from packages.fetchai.skills.aries_faber.dialogues import (
     HttpDialogues,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
-
-DEFAULT_ADMIN_HOST = "127.0.0.1"
-DEFAULT_ADMIN_PORT = 8021
-HTTP_COUNTERPARTY = "HTTP Server"
+from packages.fetchai.skills.aries_faber.strategy import (
+    FaberStrategy,
+    HTTP_COUNTERPARTY,
+)
 
 DEFAULT_SEARCH_INTERVAL = 5.0
 
@@ -45,65 +43,45 @@ class FaberBehaviour(TickerBehaviour):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
-        self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
-        self._admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
-        self._alice_address = ""
-
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
         )
         super().__init__(tick_interval=search_interval, **kwargs)
 
-    @property
-    def admin_host(self) -> str:
-        """Get the admin host."""
-        return self._admin_host
-
-    @property
-    def admin_port(self) -> str:
-        """Get the admin port."""
-        return self._admin_port
-
-    @property
-    def admin_url(self) -> str:
-        """Get the admin URL."""
-        return self._admin_url
-
-    @property
-    def alice_address(self) -> Address:
-        """Get Alice's address."""
-        return self._alice_address
-
-    @alice_address.setter
-    def alice_address(self, address: Address) -> None:
-        self._alice_address = address
-
-    def admin_get(self, path: str, content: Dict = None) -> None:
+    def send_http_request_message(
+        self, method: str, url: str, content: Dict = None
+    ) -> None:
         """
-        Get from admin.
+        Send an http request message.
 
-        :param path: the path
-        :param content: the payload
+        :param method: the http request method (i.e. 'GET' or 'POST').
+        :param url: the url to send the message to.
+        :param content: the payload.
+
         :return: None
         """
-        # Request message & envelope
+        # context
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
 
+        # http request message
         request_http_message = HttpMessage(
             dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
-            method="GET",
-            url=self.admin_url + path,
+            method=method,
+            url=url,
             headers="",
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         request_http_message.counterparty = HTTP_COUNTERPARTY
+
+        # http dialogue
         http_dialogue = http_dialogues.update(request_http_message)
         assert (
             http_dialogue is not None
-        ), "faber -> behaviour -> admin_get(): something went wrong when sending a HTTP message."
+        ), "faber -> behaviour -> send_http_request_message(): something went wrong when sending a HTTP message."
+
+        # send
         self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:

@@ -123,7 +123,7 @@ class Agent(ABC):
         return self._multiplexer
 
     @property
-    def inbox(self) -> InBox:
+    def inbox(self) -> InBox:  # pragma: nocover
         """
         Get the inbox.
 
@@ -133,7 +133,7 @@ class Agent(ABC):
         return self._inbox
 
     @property
-    def outbox(self) -> OutBox:
+    def outbox(self) -> OutBox:  # pragma: nocover
         """
         Get the outbox.
 
@@ -148,7 +148,7 @@ class Agent(ABC):
         return self.identity.name
 
     @property
-    def tick(self) -> int:
+    def tick(self) -> int:  # pragma: nocover
         """
         Get the tick or agent loop count.
 

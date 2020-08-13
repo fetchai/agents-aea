@@ -25,7 +25,7 @@ from pathlib import Path
 from aea.configurations.constants import DEFAULT_PRIVATE_KEY_FILE
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
+from tests.conftest import CUR_PATH, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
 from .programmatic_aea import run
@@ -52,7 +52,6 @@ class TestProgrammaticAEA(BaseAEATestCase):
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    @skip_test_windows
     def test_run_agent(self):
         """Run the agent from the file."""
         run()
@@ -60,11 +59,9 @@ class TestProgrammaticAEA(BaseAEATestCase):
         assert os.path.exists(Path(self.t, "output_file"))
         assert os.path.exists(Path(self.t, DEFAULT_PRIVATE_KEY_FILE))
 
-        message_text = (
-            "other_agent,my_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
-        )
+        message_text = b"other_agent,my_aea,fetchai/default:0.4.0,\x08\x02\x12\x011\x1a\x011 \x01*\x07\n\x05hello,"
         path = os.path.join(self.t, "output_file")
-        with open(path, "r") as file:
+        with open(path, "rb") as file:
             msg = file.read()
         assert msg == message_text
 

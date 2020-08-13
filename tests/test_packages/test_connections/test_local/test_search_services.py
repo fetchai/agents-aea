@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the search feature of the local OEF node."""
 import copy
-import time
 import unittest.mock
 from typing import Optional, cast
 
@@ -523,8 +522,7 @@ class TestFilteredSearchResult:
             message=register_service_request,
         )
         cls.multiplexer1.put(envelope)
-
-        time.sleep(1.0)
+        wait_for_condition(lambda: len(cls.node.services) == 1, timeout=10)
 
         # register 'multiplexer2' as a service 'barfoo'.
         cls.data_model_barfoo = DataModel(
@@ -550,7 +548,9 @@ class TestFilteredSearchResult:
             protocol_id=register_service_request.protocol_id,
             message=register_service_request,
         )
+
         cls.multiplexer2.put(envelope)
+        wait_for_condition(lambda: len(cls.node.services) == 2, timeout=10)
 
         # unregister multiplexer1
         data_model = DataModel(
@@ -575,8 +575,9 @@ class TestFilteredSearchResult:
             message=msg,
         )
         cls.multiplexer1.put(envelope)
+        # ensure one service stays registered
+        wait_for_condition(lambda: len(cls.node.services) == 1, timeout=10)
 
-    @pytest.mark.flaky(reruns=0)  # TODO: check reasons!. quite unstable test
     def test_filtered_search_result(self):
         """Test that the search result contains only the entries matching the query."""
         query = Query(constraints=[], model=self.data_model_barfoo)
@@ -609,7 +610,7 @@ class TestFilteredSearchResult:
         response_dialogue = self.dialogues1.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert search_result.agents == (self.address_2,)
+        assert search_result.agents == (self.address_2,), self.node.services
 
     @classmethod
     def teardown_class(cls):

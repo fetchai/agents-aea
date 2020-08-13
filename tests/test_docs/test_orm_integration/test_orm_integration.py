@@ -138,9 +138,9 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
         self.add_item("skill", "fetchai/thermometer:0.8.0")
         setting_path = "agent.default_routing"
@@ -182,9 +182,9 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
         self.add_item("skill", "fetchai/thermometer_client:0.7.0")
         setting_path = "agent.default_routing"

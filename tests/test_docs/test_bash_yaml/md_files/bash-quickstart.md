@@ -41,7 +41,7 @@ v0.5.3
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.8.0
+aea fetch fetchai/my_first_aea:0.9.0
 cd my_first_aea
 ```
 ``` bash
@@ -49,13 +49,13 @@ aea create my_first_aea
 cd my_first_aea
 ```
 ``` bash
-aea add skill fetchai/echo:0.4.0
+aea add skill fetchai/echo:0.5.0
 ```
 ``` bash
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 ``` bash
 aea run
@@ -82,11 +82,21 @@ info: Echo Behaviour: act method called.
 ...
 ```
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,' >> input_file
+cd my_first_aea
+aea interact
 ```
 ``` bash
 info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(dialogue_reference=('', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
+info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=my_first_aea_interact
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+```
+``` bash
+echo 'my_first_aea,sender_aea,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
+```
+``` bash
+info: Echo Behaviour: act method called.
+info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
