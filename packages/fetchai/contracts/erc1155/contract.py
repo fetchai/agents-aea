@@ -19,8 +19,11 @@
 
 """This module contains the erc1155 contract definition."""
 
+
+import json
 import logging
 import random
+import subprocess  # nosec
 from typing import Any, Dict, List, Optional
 
 from vyper.utils import keccak256
@@ -115,7 +118,6 @@ class ERC1155Contract(Contract):
     ) -> Dict[str, Any]:
         """
         Get the transaction to create a single token.
-
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract
         :param deployer_address: the address of the deployer
@@ -124,20 +126,27 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        tx = instance.functions.createSingle(
-            deployer_address, token_id, data
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
-            }
-        )
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
+        if ledger_api.identifier == "ethereum":
+            # create the transaction dict
+            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            tx = instance.functions.createSingle(
+                deployer_address, token_id, data
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            tx = cls._try_estimate_gas(ledger_api, tx)
+            return tx
+        elif ledger_api.identifier == "cosmos":
+            msg = {"create_single": {"item_owner": deployer_address, "id": str(token_id), "path": str(data)}}
+            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, 0, gas)
+            return tx
+        else:
+            NotImplementedError
 
     @classmethod
     def get_mint_batch_transaction(

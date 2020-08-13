@@ -182,6 +182,7 @@ PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
+COSMOS_LOCALNET_CONFIG = {"address": "http://127.0.0.1:1317"}
 ETHEREUM_TESTNET_CONFIG = {
     "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
     "gas_price": 50,

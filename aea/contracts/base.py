@@ -19,9 +19,11 @@
 
 """The base contract."""
 import inspect
+import json
 import logging
 import re
 from pathlib import Path
+import subprocess  # nosec
 from typing import Any, Dict, Optional, cast
 
 from aea.components.base import Component
@@ -192,3 +194,34 @@ class Contract(Component):
         :return: the tx
         """
         raise NotImplementedError
+
+    def list_code(self):
+        command = ["wasmcli", "query", "wasm", "list-code"]
+
+        stdout, _ = subprocess.Popen(  # nosec
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        json_out = json.loads(stdout.decode("ascii"))
+
+        return json_out
+
+    def get_last_code_id(self):
+        code = self.list_code()
+        return code[-1]["id"]
+
+    def get_contract_by_id(self, id):
+        command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(id)]
+
+        stdout, _ = subprocess.Popen(  # nosec
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        json_out = json.loads(stdout.decode("ascii"))
+        return json_out
+
+
+    def get_contract_address(self, id):
+        contract = self.get_contract_by_id(id)
+
+        return contract[-1]["address"]
