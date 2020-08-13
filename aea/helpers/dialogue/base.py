@@ -26,6 +26,7 @@ This module contains the classes required for dialogue management.
 """
 
 import itertools
+import secrets
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
@@ -36,6 +37,8 @@ from aea.protocols.base import Message
 
 class DialogueLabel:
     """The dialogue label class acts as an identifier for dialogues."""
+
+    NONCE_BYTES_NB = 32
 
     def __init__(
         self,
@@ -733,7 +736,6 @@ class Dialogues(ABC):
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
         self._agent_address = agent_address
-        self._dialogue_nonce = 0
         self._dialogue_stats = DialogueStats(end_states)
 
         if message_class is not None:
@@ -777,7 +779,7 @@ class Dialogues(ABC):
 
         :return: the next nonce
         """
-        return str(self._next_dialogue_nonce()), Dialogue.OPPONENT_STARTER_REFERENCE
+        return self._generate_dialogue_nonce(), Dialogue.OPPONENT_STARTER_REFERENCE
 
     def create(
         self, counterparty: Address, performative: Message.Performative, **kwargs,
@@ -814,7 +816,6 @@ class Dialogues(ABC):
 
         if not successfully_updated:
             self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
-            self._dialogue_nonce -= 1
             raise Exception(
                 "Cannot create the a dialogue with the specified performative and contents."
             )
@@ -1037,7 +1038,7 @@ class Dialogues(ABC):
         )
         new_dialogue_reference = (
             dialogue_reference[0],
-            str(self._next_dialogue_nonce()),
+            self._generate_dialogue_nonce(),
         )
         complete_dialogue_label = DialogueLabel(
             new_dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
@@ -1116,11 +1117,11 @@ class Dialogues(ABC):
         """
         pass  # pragma: no cover
 
-    def _next_dialogue_nonce(self) -> int:
+    @staticmethod
+    def _generate_dialogue_nonce() -> str:
         """
-        Increment the nonce and return it.
+        Generate the nonce and return it.
 
         :return: the next nonce
         """
-        self._dialogue_nonce += 1
-        return self._dialogue_nonce
+        return secrets.token_hex(DialogueLabel.NONCE_BYTES_NB)
