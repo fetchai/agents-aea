@@ -612,6 +612,7 @@ class TestDecisionMaker2:
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert signing_msg_response is not None
+        # test twice; should work again even from same agent
         signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
@@ -633,9 +634,8 @@ class TestDecisionMaker2:
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
-        with pytest.raises(Exception):
-            # Exception occurs because the same counterparty sends two identical dialogue references
-            self.decision_maker.message_out_queue.get(timeout=1)
+        signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
+        assert signing_msg_response is not None
 
     @classmethod
     def teardown(cls):

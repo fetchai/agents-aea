@@ -48,7 +48,10 @@ class TestClientServer:
 
     def setup_server(self):
         """Set up server connection."""
-        self.identity = Identity("name", address="server")
+        self.server_agent_address = "server_agent_address"
+        self.server_agent_identity = Identity(
+            "agent running server", address=self.server_agent_address
+        )
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.connection_id = HTTPServerConnection.connection_id
@@ -62,25 +65,31 @@ class TestClientServer:
             restricted_to_protocols=set([self.protocol_id]),
         )
         self.server = HTTPServerConnection(
-            configuration=self.configuration, identity=self.identity,
+            configuration=self.configuration, identity=self.server_agent_identity,
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.server.connect())
+        # skill side dialogues
+        self._server_dialogues = HttpDialogues(self.server_agent_address)
 
     def setup_client(self):
         """Set up client connection."""
-        self.agent_identity = Identity("name", address="client")
+        self.client_agent_address = "client_agent_address"
+        self.client_agent_identity = Identity(
+            "agent running client", address=self.client_agent_address
+        )
         configuration = ConnectionConfig(
             host="localost",
             port="8888",  # TODO: remove host/port for client?
             connection_id=HTTPClientConnection.connection_id,
         )
         self.client = HTTPClientConnection(
-            configuration=configuration, identity=self.agent_identity
+            configuration=configuration, identity=self.client_agent_identity
         )
         self.client.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.client.connect())
-        self._client_dialogues = HttpDialogues("some_addr")
+        # skill side dialogues
+        self._client_dialogues = HttpDialogues(self.client_agent_address)
 
     def setup(self):
         """Set up test case."""
@@ -102,8 +111,8 @@ class TestClientServer:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = "receiver"
-        request_http_message.sender = "sender"
+        request_http_message.counterparty = str(HTTPClientConnection.connection_id)
+        assert self._client_dialogues.update(request_http_message) is not None
         request_envelope = Envelope(
             to=request_http_message.counterparty,
             sender=request_http_message.sender,
@@ -117,9 +126,13 @@ class TestClientServer:
     ) -> Envelope:
         """Make response envelope."""
         incoming_message = cast(HttpMessage, request_envelope.message)
+        incoming_message.is_incoming = True
+        incoming_message.counterparty = str(HTTPServerConnection.connection_id)
+        dialogue = self._server_dialogues.update(incoming_message)
+        assert dialogue is not None
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("1", ""),
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=incoming_message.message_id,
             message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
@@ -129,7 +142,7 @@ class TestClientServer:
             bodyy=incoming_message.bodyy,
         )
         message.counterparty = incoming_message.counterparty
-        message.sender = request_envelope.to
+        assert dialogue.update(message) is not None
         response_envelope = Envelope(
             to=message.counterparty,
             sender=message.sender,
@@ -145,12 +158,17 @@ class TestClientServer:
         initial_request = self._make_request("/test", "POST", bodyy=b"1234567890")
         await self.client.send(initial_request)
         request = await asyncio.wait_for(self.server.receive(), timeout=5)
+        # this is "inside" the server agent
         initial_response = self._make_response(request)
         await self.server.send(initial_response)
         response = await asyncio.wait_for(self.client.receive(), timeout=5)
         assert (
             cast(HttpMessage, initial_request.message).bodyy
             == cast(HttpMessage, response.message).bodyy
+        )
+        assert (
+            initial_request.message.dialogue_reference[0]
+            == response.message.dialogue_reference[0]
         )
 
     def teardown(self):
