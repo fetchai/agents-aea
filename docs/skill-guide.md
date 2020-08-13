@@ -47,7 +47,7 @@ class MySearchBehaviour(TickerBehaviour):
 
         search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
-        agent_location = Location(location["longitude"], location["latitude"])
+        agent_location = Location(longitude=location["longitude"], latitude=location["latitude"])
         radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         close_to_my_service = Constraint(
@@ -431,7 +431,7 @@ Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take 
 <details><summary>Click here to see full code</summary>
 <p>
 
-We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`. 
+We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
 
 ``` python
 from typing import cast
@@ -594,7 +594,7 @@ class Strategy(Model):
         """
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
-            "location": Location(location["longitude"], location["latitude"])
+            "location": Location(longitude=location["longitude"], latitude=location["latitude"])
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         assert (
