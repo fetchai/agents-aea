@@ -643,11 +643,7 @@ class SigningHandler(Handler):
                 assert (
                     last_signing_msg is not None
                 ), "Could not recover last signing message."
-                tx_id = (
-                    last_signing_msg.terms.sender_hash
-                    + "_"
-                    + last_signing_msg.terms.counterparty_hash
-                )
+                tx_id = last_signing_msg.terms.sender_hash
                 if "transactions" not in self.context.shared_state.keys():
                     self.context.shared_state["transactions"] = {}
                 self.context.shared_state["transactions"][tx_id] = {

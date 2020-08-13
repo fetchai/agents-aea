@@ -22,24 +22,32 @@ import datetime
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany, UseOef
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
+    COSMOS,
+    COSMOS_PRIVATE_KEY_FILE,
+    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
-    MAX_FLAKY_RERUNS,
     MAX_FLAKY_RERUNS_ETH,
+    MAX_FLAKY_RERUNS_INTEGRATION,
+    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_GENESIS_CONFIG,
+    NON_GENESIS_CONFIG_TWO,
 )
 
 
-class TestTacSkills(AEATestCaseMany, UseOef):
+class TestTacSkills(AEATestCaseMany):
     """Test that tac skills work."""
 
-    @pytest.mark.unstable
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
+    @pytest.mark.integration
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+    )  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
@@ -51,12 +59,19 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             tac_aea_one, tac_aea_two, tac_controller_name,
         )
 
+        default_routing = {
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
+        }
+
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
-        self.add_item("skill", "fetchai/tac_control:0.4.0")
-        self.set_config("agent.default_ledger", ETHEREUM)
+        self.add_item("connection", "fetchai/soef:0.6.0")
+        self.add_item("skill", "fetchai/tac_control:0.5.0")
+        self.set_config("agent.default_ledger", COSMOS)
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -66,14 +81,37 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        # add keys
+        self.generate_private_key(COSMOS)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+        )
+
+        default_routing = {
+            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
+            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
+        }
+
         # prepare agents for test
-        for agent_name in (tac_aea_one, tac_aea_two):
+        for agent_name, config in (
+            (tac_aea_one, NON_GENESIS_CONFIG),
+            (tac_aea_two, NON_GENESIS_CONFIG_TWO),
+        ):
             self.set_agent_context(agent_name)
             self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
+            self.add_item("connection", "fetchai/soef:0.6.0")
+            self.add_item("connection", "fetchai/ledger:0.3.0")
             self.add_item("skill", "fetchai/tac_participation:0.6.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.7.0")
-            self.set_config("agent.default_ledger", ETHEREUM)
+            self.set_config("agent.default_ledger", COSMOS)
+            setting_path = "agent.default_routing"
+            self.force_set_config(setting_path, default_routing)
             self.run_install()
             diff = self.difference_to_fetched_agent(
                 "fetchai/tac_participant:0.8.0", agent_name
@@ -83,6 +121,18 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             ), "Difference between created and fetched project for files={}".format(
                 diff
             )
+
+            # add keys
+            self.generate_private_key(COSMOS)
+            self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+            self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+            self.add_private_key(
+                COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            )
+
+            # set p2p configs
+            setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+            self.force_set_config(setting_path, config)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -94,30 +144,70 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             "vendor.fetchai.skills.tac_control.models.parameters.args.start_time"
         )
         self.set_config(setting_path, start_time)
-        tac_controller_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.7.0"
+        tac_controller_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
         )
+        missing_strings = self.missing_from_output(
+            tac_controller_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
 
         # run two agents (participants)
         self.set_agent_context(tac_aea_one)
-        tac_aea_one_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.7.0"
-        )
+        tac_aea_one_process = self.run_agent()
 
         self.set_agent_context(tac_aea_two)
-        tac_aea_two_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.7.0"
-        )
+        tac_aea_two_process = self.run_agent()
 
         check_strings = (
-            "Registering TAC data model",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+        )
+        missing_strings = self.missing_from_output(
+            tac_aea_two_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in tac_aea_two output.".format(missing_strings)
+
+        check_strings = (
+            "registering agent on SOEF.",
+            "registering TAC data model on SOEF.",
             "TAC open for registration until:",
-            "Agent registered: 'tac_participant_one'",
-            "Agent registered: 'tac_participant_two'",
-            "Started competition:",
-            "Unregistering TAC data model",
-            "Handling valid transaction:",
-            "Current good & money allocation & score:",
+            "agent registered: 'tac_participant_one'",
+            "agent registered: 'tac_participant_two'",
+            "started competition:",
+            "unregistering TAC data model from SOEF.",
+            "handling valid transaction:",
+            "Current good & money allocation & score: ",
         )
         missing_strings = self.missing_from_output(
             tac_controller_process, check_strings, timeout=240, is_terminating=False
@@ -127,21 +217,24 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
 
         check_strings = (
-            "Searching for TAC, search_id=",
-            "Found the TAC controller. Registering...",
-            "Received start event from the controller. Starting to compete...",
-            "Searching for sellers which match the demand of the agent, search_id=",
-            "Searching for buyers which match the supply of the agent, search_id=",
+            "searching for TAC, search_id=",
+            "found the TAC controller. Registering...",
+            "received start event from the controller. Starting to compete...",
+            "registering agent on SOEF.",
+            "searching for sellers, search_id=",
+            "searching for buyers, search_id=",
             "found potential sellers agents=",
             "sending CFP to agent=",
-            "Accepting propose",
-            "transaction confirmed by decision maker, sending to controller.",
+            "accepting propose",
+            "sending signing_msg=",
+            "message signed by decision maker.",
+            "sending transaction to controller.",
             "sending match accept to",
-            "Received transaction confirmation from the controller: transaction_id=",
+            # "Received transaction confirmation from the controller: transaction_id=",
             "Applying state update!",
             "found potential buyers agents=",
             "sending CFP to agent=",
-            "Declining propose",
+            "declining propose",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=240, is_terminating=False
@@ -160,8 +253,8 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
-@pytest.mark.ethereum
-class TestTacSkillsContract(AEATestCaseMany, UseOef):
+@pytest.mark.ledger
+class TestTacSkillsContract(AEATestCaseMany):
     """Test that tac skills work."""
 
     @pytest.mark.unstable

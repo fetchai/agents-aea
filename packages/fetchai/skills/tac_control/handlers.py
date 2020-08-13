@@ -141,9 +141,13 @@ class TacHandler(Handler):
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
                 error_code=TacMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST,
+                message_id=tac_msg.message_id + 1,
+                target=tac_msg.message_id,
             )
             error_msg.counterparty = tac_msg.counterparty
+            assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
@@ -156,9 +160,13 @@ class TacHandler(Handler):
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
                 error_code=TacMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED,
+                message_id=tac_msg.message_id + 1,
+                target=tac_msg.message_id,
             )
             error_msg.counterparty = tac_msg.counterparty
+            assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
@@ -168,9 +176,13 @@ class TacHandler(Handler):
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
                 error_code=TacMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED,
+                message_id=tac_msg.message_id + 1,
+                target=tac_msg.message_id,
             )
             error_msg.counterparty = tac_msg.counterparty
+            assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
@@ -202,9 +214,13 @@ class TacHandler(Handler):
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
+                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
                 error_code=TacMessage.ErrorCode.AGENT_NOT_REGISTERED,
+                message_id=tac_msg.message_id + 1,
+                target=tac_msg.message_id,
             )
             error_msg.counterparty = tac_msg.counterparty
+            assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
         else:
             self.context.logger.debug(
@@ -236,12 +252,12 @@ class TacHandler(Handler):
 
         game = cast(Game, self.context.game)
         if game.is_transaction_valid(transaction):
-            self._handle_valid_transaction(tac_msg, transaction)
+            self._handle_valid_transaction(tac_msg, tac_dialogue, transaction)
         else:
-            self._handle_invalid_transaction(tac_msg)
+            self._handle_invalid_transaction(tac_msg, tac_dialogue)
 
     def _handle_valid_transaction(
-        self, tac_msg: TacMessage, transaction: Transaction
+        self, tac_msg: TacMessage, tac_dialogue: TacDialogue, transaction: Transaction
     ) -> None:
         """
         Handle a valid transaction.
@@ -259,23 +275,38 @@ class TacHandler(Handler):
         )
         game.settle_transaction(transaction)
 
-        tx_sender_id, tx_counterparty_id = transaction.id.split("_")
         # send the transaction confirmation.
         sender_tac_msg = TacMessage(
             performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
-            tx_id=tx_sender_id,
+            dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
+            transaction_id=transaction.sender_hash,
             amount_by_currency_id=transaction.amount_by_currency_id,
             quantities_by_good_id=transaction.quantities_by_good_id,
-        )
-        counterparty_tac_msg = TacMessage(
-            performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
-            tx_id=tx_counterparty_id,
-            amount_by_currency_id=transaction.amount_by_currency_id,
-            quantities_by_good_id=transaction.quantities_by_good_id,
+            message_id=tac_msg.message_id + 1,
+            target=tac_msg.message_id,
         )
         sender_tac_msg.counterparty = transaction.sender_address
+        assert tac_dialogue.update(sender_tac_msg)
         self.context.outbox.put_message(message=sender_tac_msg)
+
+        tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
+        recovered_tac_dialogue = tac_dialogues.dialogue_by_address.get(
+            transaction.counterparty_address, None
+        )
+        assert recovered_tac_dialogue is not None, "Error when retrieving dialogue."
+        last_msg = recovered_tac_dialogue.last_message
+        assert last_msg is not None, "Error when retrieving last message."
+        counterparty_tac_msg = TacMessage(
+            performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
+            dialogue_reference=recovered_tac_dialogue.dialogue_label.dialogue_reference,
+            transaction_id=transaction.counterparty_hash,
+            amount_by_currency_id=transaction.amount_by_currency_id,
+            quantities_by_good_id=transaction.quantities_by_good_id,
+            message_id=last_msg.message_id + 1,
+            target=last_msg.message_id,
+        )
         counterparty_tac_msg.counterparty = transaction.counterparty_address
+        assert recovered_tac_dialogue.update(counterparty_tac_msg)
         self.context.outbox.put_message(message=counterparty_tac_msg)
 
         # log messages
@@ -284,18 +315,24 @@ class TacHandler(Handler):
         )
         self.context.logger.info("current state:\n{}".format(game.holdings_summary))
 
-    def _handle_invalid_transaction(self, tac_msg: TacMessage) -> None:
+    def _handle_invalid_transaction(
+        self, tac_msg: TacMessage, tac_dialogue: TacDialogue
+    ) -> None:
         """Handle an invalid transaction."""
         self.context.logger.info(
             "handling invalid transaction: {}".format(tac_msg.transaction_id)
         )
-        tac_msg = TacMessage(
+        error_msg = TacMessage(
             performative=TacMessage.Performative.TAC_ERROR,
+            dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
             error_code=TacMessage.ErrorCode.TRANSACTION_NOT_VALID,
             info={"transaction_id": tac_msg.transaction_id},
+            message_id=tac_msg.message_id + 1,
+            target=tac_msg.message_id,
         )
-        tac_msg.counterparty = tac_msg.counterparty
-        self.context.outbox.put_message(message=tac_msg)
+        error_msg.counterparty = tac_msg.counterparty
+        assert tac_dialogue.update(error_msg)
+        self.context.outbox.put_message(message=error_msg)
 
     def _handle_invalid(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
         """
