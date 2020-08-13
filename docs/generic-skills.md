@@ -74,7 +74,7 @@ cd my_seller_aea
 aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_seller:0.9.0
+aea add skill fetchai/generic_seller:0.10.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
@@ -108,7 +108,7 @@ cd my_buyer_aea
 aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_buyer:0.8.0
+aea add skill fetchai/generic_buyer:0.9.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```

@@ -19,8 +19,8 @@ protocols:
 - fetchai/oef_search:0.4.0
 skills:
 - fetchai/error:0.4.0
-- fetchai/generic_seller:0.9.0
-- fetchai/ml_data_provider:0.8.0
+- fetchai/generic_seller:0.10.0
+- fetchai/ml_data_provider:0.9.0
 default_connection: fetchai/p2p_libp2p:0.7.0
 default_ledger: cosmos
 logging_config:

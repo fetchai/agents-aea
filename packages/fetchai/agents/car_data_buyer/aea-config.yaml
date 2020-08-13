@@ -19,9 +19,9 @@ protocols:
 - fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.4.0
 skills:
-- fetchai/carpark_client:0.8.0
+- fetchai/carpark_client:0.9.0
 - fetchai/error:0.4.0
-- fetchai/generic_buyer:0.8.0
+- fetchai/generic_buyer:0.9.0
 default_connection: fetchai/p2p_libp2p:0.7.0
 default_ledger: cosmos
 logging_config:
