@@ -181,7 +181,12 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
+        kwargs = dict(
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            env=os.environ.copy(),
+            cwd=cwd,
+        )
         kwargs.update(win_popen_kwargs())
 
         process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
