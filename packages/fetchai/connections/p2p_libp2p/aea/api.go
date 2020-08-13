@@ -232,8 +232,7 @@ func (aea *AeaApi) Init() error {
 
 func (aea *AeaApi) Connect() error {
 	// open pipes
-	var err error
-	err = aea.pipe.Connect()
+	err := aea.pipe.Connect()
 
 	if err != nil {
 		logger.Error().Str("err", err.Error()).

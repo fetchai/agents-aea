@@ -44,32 +44,43 @@ class LocalPortablePipe(ABC):
     @abstractmethod
     async def connect(self, timeout=PIPE_CONN_TIMEOUT) -> bool:
         """
+        Setup the communication channel with the other process
         """
 
     @abstractmethod
     async def write(self, data: bytes) -> None:
         """
+        Write `data` bytes to the other end of the channel
+        Will first write the size than the actual data
         """
 
     @abstractmethod
     async def read(self) -> Optional[bytes]:
         """
+        Read bytes from the other end of the channel
+        Will first read the size than the actual data
         """
 
     @property
     @abstractmethod
     def in_path(self) -> str:
         """
+        Returns the rendezvous point for incoming communication
         """
 
     @property
     @abstractmethod
     def out_path(self) -> str:
         """
+        Returns the rendezvous point for outgoing communication
         """
 
 
 class TCPSocketPipe(LocalPortablePipe):
+    """
+    Interprocess communication implementation using tcp sockets
+    """
+
     def __init__(self, loop: Optional[AbstractEventLoop] = None):
         self.logger = _default_logger
         self._timeout = 0
@@ -266,18 +277,18 @@ class PosixNamedPipe(LocalPortablePipe):
 
     @property
     def in_path(self) -> str:
-        """
-        """
         return self._in_path
 
     @property
     def out_path(self) -> str:
-        """
-        """
         return self._out_path
 
 
 def make_pipe() -> LocalPortablePipe:
+    """
+    Build a portable bidirectional Interprocess Communication Channel
+    """
+
     if os.name == "posix":
         return PosixNamedPipe()
     elif os.name == "nt":
