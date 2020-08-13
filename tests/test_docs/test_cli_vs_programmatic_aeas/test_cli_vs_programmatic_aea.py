@@ -178,6 +178,6 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         )
         lines.insert(
             158,
-            f"    strategy._agent_location = Location({location['longitude']}, {location['latitude']})",
+            f"    strategy._agent_location = Location(longitude={location['longitude']}, latitude={location['latitude']})",
         )
         file.write_text("\n".join(lines))
