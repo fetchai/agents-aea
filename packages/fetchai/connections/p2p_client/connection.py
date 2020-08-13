@@ -190,7 +190,7 @@ class PeerToPeerClientConnection(Connection):
         :return: None
         """
         if self.is_disconnected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         self.channel.disconnect()
         self._state.set(ConnectionStates.disconnected)
@@ -203,9 +203,9 @@ class PeerToPeerClientConnection(Connection):
         :return: None
         """
         if not self.is_connected:
-            raise ConnectionError(
+            raise ConnectionError(  # pragma: no cover
                 "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+            )
         self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
@@ -215,9 +215,9 @@ class PeerToPeerClientConnection(Connection):
         :return: the envelope received, or None.
         """
         if not self.is_connected:
-            raise ConnectionError(
+            raise ConnectionError(  # pragma: no cover
                 "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+            )
         assert self.channel.in_queue is not None
         try:
             envelope = await self.channel.in_queue.get()
