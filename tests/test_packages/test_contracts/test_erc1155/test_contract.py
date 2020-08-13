@@ -18,19 +18,21 @@
 # ------------------------------------------------------------------------------
 
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
+
 import json
-import pytest
 import time
 
-from aea.crypto.registries import crypto_registry, ledger_apis_registry, faucet_apis_registry
+import pytest
+
+from aea.crypto.registries import crypto_registry, faucet_apis_registry, ledger_apis_registry
 
 from tests.conftest import (
+    COSMOS,
+    COSMOS_TESTNET_CONFIG,
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
     ETHEREUM_TESTNET_CONFIG,
-    COSMOS,
-    COSMOS_TESTNET_CONFIG
 )
 
 ledger = [
@@ -258,6 +260,7 @@ def deployer_cosmos_crypto_api(request):
     crypto_id = request.param[0]
     api = crypto_registry.make(crypto_id)
     yield api
+
 
 @pytest.fixture(params=cosmos_crypto)
 def item_owner_cosmos_crypto_api(request):

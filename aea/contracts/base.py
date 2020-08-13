@@ -22,8 +22,8 @@ import inspect
 import json
 import logging
 import re
-from pathlib import Path
 import subprocess  # nosec
+from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
 from aea.components.base import Component
@@ -195,7 +195,14 @@ class Contract(Component):
         """
         raise NotImplementedError
 
-    def list_code(self):
+    @staticmethod
+    def get_last_code_id():
+        """
+        Uses wasmcli to get ID of latest deployed .wasm bytecode
+
+        :return: code id of last deployed .wasm bytecode
+        """
+
         command = ["wasmcli", "query", "wasm", "list-code"]
 
         stdout, _ = subprocess.Popen(  # nosec
@@ -204,24 +211,23 @@ class Contract(Component):
 
         json_out = json.loads(stdout.decode("ascii"))
 
-        return json_out
+        return json_out[-1]["id"]
 
-    def get_last_code_id(self):
-        code = self.list_code()
-        return code[-1]["id"]
+    @staticmethod
+    def get_contract_address(code_id: int):
+        """
+        Uses wasmcli to get contract address of latest initialised contract by its ID
 
-    def get_contract_by_id(self, id):
-        command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(id)]
+        :param code_id: id of deployed CosmWasm bytecode
+        :return: contract address of last initialised contract
+        """
+
+        command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(code_id)]
 
         stdout, _ = subprocess.Popen(  # nosec
             command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         ).communicate()
 
         json_out = json.loads(stdout.decode("ascii"))
-        return json_out
 
-
-    def get_contract_address(self, id):
-        contract = self.get_contract_by_id(id)
-
-        return contract[-1]["address"]
+        return json_out[-1]["address"]

@@ -20,10 +20,8 @@
 """This module contains the erc1155 contract definition."""
 
 
-import json
 import logging
 import random
-import subprocess  # nosec
 from typing import Any, Dict, List, Optional
 
 from vyper.utils import keccak256
@@ -146,7 +144,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, 0, gas)
             return tx
         else:
-            NotImplementedError
+            raise NotImplementedError
 
     @classmethod
     def get_mint_batch_transaction(
