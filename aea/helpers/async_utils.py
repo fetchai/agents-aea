@@ -20,7 +20,7 @@
 import asyncio
 import datetime
 import logging
-import subprocess
+import subprocess  # nosec
 import time
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
