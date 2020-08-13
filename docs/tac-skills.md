@@ -121,6 +121,12 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea config set agent.default_ledger cosmos
 ```
 
+In `tac_controller/aea-config.yaml` add 
+``` yaml
+default_routing:
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+```
+
 </p>
 </details>
 
@@ -156,6 +162,13 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea config set agent.default_ledger cosmos
 ```
 
+In `tac_participant_one/aea-config.yaml` add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+```
+
 Then, build participant two:
 ``` bash
 cd tac_participant_two
@@ -167,6 +180,13 @@ aea add skill fetchai/tac_negotiation:0.7.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea config set agent.default_ledger cosmos
+```
+
+In `tac_participant_two/aea-config.yaml` add 
+``` yaml
+default_routing:
+  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
+  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
 
 </p>

@@ -56,7 +56,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
+    @pytest.mark.flaky(reruns=0)
     @pytest.mark.integration
     def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
@@ -178,6 +178,6 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         )
         lines.insert(
             158,
-            f"    strategy._agent_location = Location({location['longitude']}, {location['latitude']})",
+            f"    strategy._agent_location = Location(longitude={location['longitude']}, latitude={location['latitude']})",
         )
         file.write_text("\n".join(lines))

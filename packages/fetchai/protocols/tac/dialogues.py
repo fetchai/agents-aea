@@ -44,7 +44,11 @@ class TacDialogue(Dialogue):
     VALID_REPLIES = {
         TacMessage.Performative.CANCELLED: frozenset(),
         TacMessage.Performative.GAME_DATA: frozenset(
-            {TacMessage.Performative.TRANSACTION}
+            {
+                TacMessage.Performative.TRANSACTION,
+                TacMessage.Performative.TRANSACTION_CONFIRMATION,
+                TacMessage.Performative.CANCELLED,
+            }
         ),
         TacMessage.Performative.REGISTER: frozenset(
             {
@@ -58,10 +62,14 @@ class TacDialogue(Dialogue):
             {
                 TacMessage.Performative.TRANSACTION_CONFIRMATION,
                 TacMessage.Performative.TAC_ERROR,
+                TacMessage.Performative.CANCELLED,
             }
         ),
         TacMessage.Performative.TRANSACTION_CONFIRMATION: frozenset(
-            {TacMessage.Performative.TRANSACTION}
+            {
+                TacMessage.Performative.TRANSACTION,
+                TacMessage.Performative.TRANSACTION_CONFIRMATION,
+            }
         ),
         TacMessage.Performative.UNREGISTER: frozenset(
             {TacMessage.Performative.TAC_ERROR}

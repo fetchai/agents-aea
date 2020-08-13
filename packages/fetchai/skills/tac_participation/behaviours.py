@@ -125,12 +125,15 @@ class TransactionProcessBehaviour(TickerBehaviour):
         transactions = cast(
             Dict[str, Dict[str, Any]], self.context.shared_state.get("transactions", {})
         )
-        for tx_id, tx_content in transactions.items():
+        tx_ids = list(transactions.keys())
+        for tx_id in tx_ids:
             self.context.logger.info(
                 "sending transaction {} to controller.".format(tx_id)
             )
             last_msg = tac_dialogue.last_message
             assert last_msg is not None, "No last message available."
+            tx_content = transactions.pop(tx_id, None)
+            assert tx_content is not None, "Tx for id={} not found.".format(tx_id)
             terms = tx_content["terms"]
             sender_signature = tx_content["sender_signature"]
             counterparty_signature = tx_content["counterparty_signature"]
