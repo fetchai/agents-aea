@@ -884,7 +884,7 @@ class OefSearchHandler(Handler):
         :return: None
         """
         agents = list(oef_search_msg.agents)
-        search_id = int(oef_search_msg.dialogue_reference[0])
+        search_id = oef_search_msg.dialogue_reference[0]
         if self.context.agent_address in agents:
             agents.remove(self.context.agent_address)
         agents_less_self = tuple(agents)
@@ -895,7 +895,7 @@ class OefSearchHandler(Handler):
         )
 
     def _handle_search(
-        self, agents: Tuple[str, ...], search_id: int, is_searching_for_sellers: bool
+        self, agents: Tuple[str, ...], search_id: str, is_searching_for_sellers: bool
     ) -> None:
         """
         Handle the search response.

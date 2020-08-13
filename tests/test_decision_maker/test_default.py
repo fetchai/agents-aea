@@ -590,9 +590,10 @@ class TestDecisionMaker2:
         """Test message signing for unknown."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
         signing_dialogues = SigningDialogues("agent")
+        dialogue_reference = signing_dialogues.new_self_initiated_dialogue_reference()
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
+            dialogue_reference=dialogue_reference,
             skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
             skill_callback_info={},
             terms=Terms(
@@ -612,6 +613,29 @@ class TestDecisionMaker2:
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert signing_msg_response is not None
+        signing_dialogues = SigningDialogues("agent")
+        signing_msg = SigningMessage(
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
+            dialogue_reference=dialogue_reference,
+            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
+            skill_callback_info={},
+            terms=Terms(
+                ledger_id="unknown",
+                sender_address="pk1",
+                counterparty_address="pk2",
+                amount_by_currency_id={"FET": -1},
+                is_sender_payable_tx_fee=True,
+                quantities_by_good_id={"good_id": 10},
+                nonce="transaction nonce",
+            ),
+            raw_message=RawMessage("unknown", message),
+        )
+        signing_msg.counterparty = "decision_maker"
+        signing_dialogue = signing_dialogues.update(signing_msg)
+        assert signing_dialogue is not None
+        with pytest.raises(Exception):
+            # Exception occurs because the same counterparty sends two identical dialogue references
+            self.decision_maker.message_out_queue.get(timeout=1)
         # test twice; should work again even from same agent
         signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
