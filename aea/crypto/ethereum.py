@@ -480,7 +480,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "from": deployer_address,  # only 'from' address, don't insert 'to' address!
             "value": value,  # transfer as part of deployment
             "gas": gas,
-            "gasPrice": self.api.eth.gasPrice,
+            "gasPrice": self.api.eth.gasPrice,  # TODO: refine
             "nonce": nonce,
             "data": data,
         }
