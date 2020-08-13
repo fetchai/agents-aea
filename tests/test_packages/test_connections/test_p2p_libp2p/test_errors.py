@@ -42,14 +42,12 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 from tests.conftest import (
     COSMOS,
     _make_libp2p_connection,
-    skip_test_windows,
 )
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
 
 
-@skip_test_windows
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionFailureGolangBuild:
     """Test that golang build async fails if timeout exceeded or wrong path"""
@@ -89,7 +87,6 @@ class TestP2PLibp2pConnectionFailureGolangBuild:
             pass
 
 
-@skip_test_windows
 class TestP2PLibp2pConnectionFailureGolangRun:
     """Test that golang run fails if wrong path or timeout"""
 
@@ -112,7 +109,6 @@ class TestP2PLibp2pConnectionFailureGolangRun:
 
     def test_timeout(self):
         self.connection.node._connection_timeout = 0
-        self.connection.node._connection_attempts = 2
         muxer = Multiplexer([self.connection])
         with pytest.raises(Exception):
             muxer.connect()
@@ -129,7 +125,6 @@ class TestP2PLibp2pConnectionFailureGolangRun:
             pass
 
 
-@skip_test_windows
 class TestP2PLibp2pConnectionFailureNodeDisconnect:
     """Test that connection handles node disconnecting properly"""
 
@@ -159,7 +154,6 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect:
             pass
 
 
-@skip_test_windows
 class TestP2PLibp2pConnectionFailureSetupNewConnection:
     """Test that connection constructor ensures proper configuration"""
 
@@ -213,7 +207,6 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             pass
 
 
-@skip_test_windows
 def test_libp2pconnection_awaitable_proc_cancelled():
     proc = AwaitableProc(["sleep", "100"], shell=False)
     proc_task = asyncio.ensure_future(proc.start())

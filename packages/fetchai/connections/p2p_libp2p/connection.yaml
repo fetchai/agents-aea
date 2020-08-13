@@ -9,10 +9,12 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   README.md: QmPvrvhRUQEt2hruwoY73xwwdNdQyssBuxK9XNACSjvQRS
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmW5fUpVZmV3pxgoakm3RvsvCGC6FwT2XprcqXHM8rBXP5
+  aea/api.go: QmeTUV3SFNriu3AzHPmABAVYSNisGoHN3kcmNfVtCMRfEt
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
-  connection.py: QmRDSgAPjY9D2CZVnGth3xKsncAtaBH8kob42Teu6zbnd4
+  aea/pipe_unix.go: Qmaa2PxBCLetEmzEaCLjcRq8b98QTmr5gcoGhXQLPKPcY2
+  aea/pipe_windows.go: QmRavDwA9ABnMrXq2JVbvYqYKSrw2goEtwp1qhqm6uMHXx
+  connection.py: QmRZQNMd9i1JadR6uEwWEfUZXX2rpETFUwRwWqP4CrQYkB
   dht/dhtclient/dhtclient.go: QmasA3GrgswTnUJoffBzeeqxeT3GjLu6foN6PHJhWNpMMa
   dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s

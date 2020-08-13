@@ -39,13 +39,11 @@ from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
-    skip_test_windows,
 )
 
 DEFAULT_PORT = 10234
 
 
-@skip_test_windows
 @pytest.mark.integration
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionRelayPublicDHT:
@@ -83,7 +81,6 @@ class TestLibp2pConnectionRelayPublicDHT:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionRelayNodeRestart:
     """Test that connection will reliably route envelope to destination in case of relay node restart within timeout"""
