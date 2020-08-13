@@ -67,7 +67,7 @@ class TestTacSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/soef:0.6.0")
-        self.add_item("skill", "fetchai/tac_control:0.4.0")
+        self.add_item("skill", "fetchai/tac_control:0.5.0")
         self.set_config("agent.default_ledger", COSMOS)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)

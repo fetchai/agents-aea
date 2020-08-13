@@ -9,7 +9,7 @@ cd tac_controller
 aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/tac_control:0.4.0
+aea add skill fetchai/tac_control:0.5.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea config set agent.default_ledger cosmos
