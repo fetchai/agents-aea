@@ -19,7 +19,6 @@
 
 """This module contains the p2p libp2p connection."""
 
-from abc import ABC, abstractmethod
 import asyncio
 import logging
 import os
@@ -29,7 +28,6 @@ import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from pathlib import Path
 from random import randint
-from threading import Thread
 from typing import IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
@@ -39,7 +37,7 @@ from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import AwaitableProc
-from aea.helpers.pipe import make_pipe, LocalPortablePipe
+from aea.helpers.pipe import LocalPortablePipe, make_pipe
 from aea.mail.base import Address, Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
@@ -66,6 +64,7 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.7.0")
 MultiAddr = str
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
+
 
 async def _golang_module_build_async(
     path: str,
@@ -247,7 +246,7 @@ class Libp2pNode:
         self.env_file = os.path.join(os.path.abspath(os.getcwd()), self.env_file)
 
         # named pipes (fifos)
-        self.pipe = None # type: Optional[LocalPortablePipe]
+        self.pipe = None  # type: Optional[LocalPortablePipe]
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
@@ -329,7 +328,7 @@ class Libp2pNode:
         )
 
         self.logger.info("Connecting to libp2p node...")
-        
+
         try:
             connected = await self.pipe.connect(timeout=self._connection_timeout)
             if not connected:
@@ -345,14 +344,13 @@ class Libp2pNode:
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
         self.logger.info("My libp2p addresses: {}".format(self.multiaddrs))
 
-
     async def write(self, data: bytes) -> None:
         """
         Write to the writer stream.
 
         :param data: data to write to stream
         """
-        self.logger.debug("Writing libp2pNode...")
+        assert self.pipe is not None
         await self.pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -361,7 +359,7 @@ class Libp2pNode:
 
         :return: bytes
         """
-        self.logger.debug("Reading libp2pNode...")
+        assert self.pipe is not None
         return await self.pipe.read()
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key

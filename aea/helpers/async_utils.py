@@ -357,6 +357,7 @@ async def cancel_and_wait(task: Optional[Task]) -> Any:
     except CancelledError as e:
         return e
 
+
 class AwaitableProc:
     """
     Async-friendly subprocess.Popen
@@ -388,4 +389,3 @@ class AwaitableProc:
     def _in_thread(self):
         self.proc.wait()
         self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)
-

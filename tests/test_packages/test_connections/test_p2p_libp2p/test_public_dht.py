@@ -23,7 +23,7 @@ import os
 import shutil
 import tempfile
 
-#import pytest
+# import pytest
 
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
