@@ -68,6 +68,7 @@ func (sock *TCPSocketPipe) Write(data []byte) error {
 	binary.BigEndian.PutUint32(buf, size)
 	buf = append(buf, data...)
 	_, err := sock.conn.Write(buf)
+	logger.Debug().Msgf("wrote data to pipe: %d bytes", size)
 	return err
 }
 

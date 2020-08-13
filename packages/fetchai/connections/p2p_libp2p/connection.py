@@ -287,7 +287,7 @@ class Libp2pNode:
         self.logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
-        self.pipe = make_pipe()
+        self.pipe = make_pipe(logger=self.logger)
 
         # setup config
         if os.path.exists(self.env_file):

@@ -81,13 +81,18 @@ class TCPSocketPipe(LocalPortablePipe):
     Interprocess communication implementation using tcp sockets
     """
 
-    def __init__(self, loop: Optional[AbstractEventLoop] = None):
-        self.logger = _default_logger
+    def __init__(
+        self,
+        logger: logging.Logger = _default_logger,
+        loop: Optional[AbstractEventLoop] = None,
+    ):
+        self.logger = logger
         self._timeout = 0
         self._server = None  # type: Optional[asyncio.AbstractServer]
         self._connected = None  # type: Optional[asyncio.Event]
         self._reader = None  # type: Optional[asyncio.StreamReader]
         self._writer = None  # type: Optional[asyncio.StreamWriter]
+        self._loop = loop if loop is not None else asyncio.get_event_loop()
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(("", 0))
@@ -165,8 +170,12 @@ class PosixNamedPipe(LocalPortablePipe):
     Interprocess communication implementation using Posix named pipes
     """
 
-    def __init__(self, loop: Optional[AbstractEventLoop] = None):
-        self.logger = _default_logger
+    def __init__(
+        self,
+        logger: logging.Logger = _default_logger,
+        loop: Optional[AbstractEventLoop] = None,
+    ):
+        self.logger = logger
         tmp_dir = tempfile.mkdtemp()
         self._in_path = "{}/process_to_aea".format(tmp_dir)
         self._out_path = "{}/aea_to_process".format(tmp_dir)
@@ -284,14 +293,14 @@ class PosixNamedPipe(LocalPortablePipe):
         return self._out_path
 
 
-def make_pipe() -> LocalPortablePipe:
+def make_pipe(logger: logging.Logger = _default_logger) -> LocalPortablePipe:
     """
     Build a portable bidirectional Interprocess Communication Channel
     """
 
     if os.name == "posix":
-        return PosixNamedPipe()
+        return PosixNamedPipe(logger=logger)
     elif os.name == "nt":
-        return TCPSocketPipe()
+        return TCPSocketPipe(logger=logger)
     else:
         raise Exception("make pipe is not supported on platform {}".format(os.name))

@@ -23,7 +23,7 @@ import os
 import shutil
 import tempfile
 
-# import pytest
+import pytest
 
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
@@ -48,7 +48,7 @@ AEA_DEFAULT_LAUNCH_TIMEOUT = 15
 AEA_LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb
 
 
-# @pytest.mark.integration
+@pytest.mark.integration
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionPublicDHTRelay:
     """Test that public DHT's relay service is working properly"""
@@ -198,7 +198,7 @@ class TestLibp2pConnectionPublicDHTRelay:
             pass
 
 
-# @pytest.mark.integration
+@pytest.mark.integration
 class TestLibp2pConnectionPublicDHTDelegate:
     """Test that public DHT's delegate service is working properly"""
 
@@ -320,7 +320,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
             multiplexer1.disconnect()
 
 
-# @pytest.mark.integration
+@pytest.mark.integration
 class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
     """"Test that public DHT's relay service is working properly, using aea cli"""
 
@@ -366,7 +366,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
         super(TestLibp2pConnectionPublicDHTRelayAEACli, cls).teardown_class()
 
 
-# @pytest.mark.integration
+@pytest.mark.integration
 class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 

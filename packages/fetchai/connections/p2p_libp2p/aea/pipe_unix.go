@@ -67,18 +67,11 @@ func (pipe *UnixPipe) Read() ([]byte, error) {
 
 func (pipe *UnixPipe) Write(data []byte) error {
 	size := uint32(len(data))
-	buf := make([]byte, 4)
+	buf := make([]byte, 4, 4+size)
 	binary.BigEndian.PutUint32(buf, size)
+	buf = append(buf, data...)
 	_, err := pipe.msgout.Write(buf)
-	if err != nil {
-		return errors.New("while writing size to pipe " + err.Error())
-	}
-	logger.Debug().Msgf("wrote size to pipe %d %x", size, buf)
-	_, err = pipe.msgout.Write(data)
-	if err != nil {
-		return errors.New("while writing data to pipe " + err.Error())
-	}
-	logger.Debug().Msgf("wrote data to pipe len %d", size)
+	logger.Debug().Msgf("wrote data to pipe: %d bytes", size)
 	return err
 }
 
