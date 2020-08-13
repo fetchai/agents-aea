@@ -296,7 +296,7 @@ jobs:
         pip install tox
         sudo apt-get install -y protobuf-compiler
     - name: Run all tests
-      run: tox -e py3.7 -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_protocols --ignore=tests/test_packages/test_skills -m 'not unstable'
+      run: tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_protocols --ignore=tests/test_packages/test_skills -m 'not unstable'
       continue-on-error: true
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

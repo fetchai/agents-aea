@@ -63,7 +63,7 @@ aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 aea run
 ```
 ``` bash
-Successfully minted items. Transaction digest: ...
+registering service on SOEF.
 ```
 ``` bash
 aea run
@@ -85,3 +85,12 @@ default_routing:
   fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
   fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+

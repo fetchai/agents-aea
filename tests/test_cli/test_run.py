@@ -1242,6 +1242,23 @@ def _raise_click_exception(*args, **kwargs):
 class RunAEATestCase(TestCase):
     """Test case for run_aea method."""
 
+    def test_run_aea_positive_mock(self):
+        """Test run_aea method for positive result (mocked)."""
+        ctx = mock.Mock()
+        aea = mock.Mock()
+        ctx.config = {"skip_consistency_check": True}
+        with mock.patch("aea.cli.run._build_aea", return_value=aea):
+            run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
+
+    def test_run_aea_positive_install_deps_mock(self):
+        """Test run_aea method for positive result (mocked), install deps true."""
+        ctx = mock.Mock()
+        aea = mock.Mock()
+        ctx.config = {"skip_consistency_check": True}
+        with mock.patch("aea.cli.run.do_install"):
+            with mock.patch("aea.cli.run._build_aea", return_value=aea):
+                run_aea(ctx, ["author/name:0.1.0"], "env_file", True)
+
     @mock.patch("aea.cli.run._prepare_environment", _raise_click_exception)
     def test_run_aea_negative(self, *mocks):
         """Test run_aea method for negative result."""
