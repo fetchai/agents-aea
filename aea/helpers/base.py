@@ -253,6 +253,8 @@ def send_control_c(
     :return: None
     """
     if platform.system() == "Windows":
+        if process.stdin:  # cause ctrl-c event will be handled with stdin
+            process.stdin.close()
         os.kill(process.pid, signal.CTRL_C_EVENT)  # pylint: disable=no-member
     elif kill_group:
         pgid = os.getpgid(process.pid)

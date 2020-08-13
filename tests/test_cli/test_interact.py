@@ -16,8 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This test module contains tests for iteract command."""
-import signal
 import time
 from unittest import TestCase, mock
 
@@ -28,10 +29,11 @@ from aea.cli.interact import (
     _process_envelopes,
     _try_construct_envelope,
 )
+from aea.helpers.base import send_control_c
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
-from tests.conftest import MAX_FLAKY_RERUNS, skip_test_macos, skip_test_windows
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 class TestInteractCommand(AEATestCaseMany):
@@ -196,8 +198,6 @@ class ProcessEnvelopesTestCase(TestCase):
 class TestInteractEcho(AEATestCaseEmpty):
     """Test 'aea interact' with the echo skill."""
 
-    @skip_test_macos
-    @skip_test_windows
     @pytest.mark.integration
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
@@ -222,7 +222,7 @@ class TestInteractEcho(AEATestCaseEmpty):
         process.stdin.flush()
         time.sleep(1.0)
 
-        process.send_signal(signal.SIGINT)
+        send_control_c(process)
         time.sleep(0.5)
 
         expected_output = [

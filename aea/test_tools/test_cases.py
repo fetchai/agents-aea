@@ -181,7 +181,12 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
+        kwargs = dict(
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            env=os.environ.copy(),
+            cwd=cwd,
+        )
         kwargs.update(win_popen_kwargs())
 
         process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
@@ -642,7 +647,7 @@ class BaseAEATestCase(ABC):
                 cls.stderr[process.pid] += line
 
     @classmethod
-    def _log_capture(cls, name, pid, line):
+    def _log_capture(cls, name, pid, line):  # pragma: nocover
         if not cls.capture_log:
             return
         sys.stdout.write(f"[{pid}]{name}>{line}")
