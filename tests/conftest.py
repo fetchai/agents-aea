@@ -95,6 +95,7 @@ from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
+
 CliRunner = ImportedCliRunner
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -970,6 +971,13 @@ def check_test_cwd(request):
     if old_cwd != os.getcwd():
         os.chdir(ROOT_DIR)
         raise CwdException()
+
+
+@pytest.fixture(autouse=True)
+def set_logging_to_debug(request):
+    """Set aea logger to debug."""
+    aea_logger = logging.getLogger("aea")
+    aea_logger.setLevel(logging.DEBUG)
 
 
 @pytest.fixture(autouse=True)
