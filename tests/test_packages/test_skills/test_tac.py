@@ -44,6 +44,7 @@ from tests.conftest import (
 class TestTacSkills(AEATestCaseMany):
     """Test that tac skills work."""
 
+    @pytest.mark.integration
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
