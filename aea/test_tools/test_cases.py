@@ -647,7 +647,7 @@ class BaseAEATestCase(ABC):
                 cls.stderr[process.pid] += line
 
     @classmethod
-    def _log_capture(cls, name, pid, line):
+    def _log_capture(cls, name, pid, line):  # pragma: nocover
         if not cls.capture_log:
             return
         sys.stdout.write(f"[{pid}]{name}>{line}")
