@@ -29,6 +29,8 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 class TestEchoSkill(AEATestCaseEmpty):
     """Test that echo skill works."""
 
+    capture_log = True
+
     def test_echo(self):
         """Run the echo skill sequence."""
         self.add_item("skill", "fetchai/echo:0.5.0")
