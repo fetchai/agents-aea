@@ -10,7 +10,7 @@ connections:
 - fetchai/http_client:0.7.0
 - fetchai/p2p_libp2p:0.7.0
 - fetchai/soef:0.6.0
-- fetchai/stub:0.7.0
+- fetchai/stub:0.8.0
 - fetchai/webhook:0.5.0
 contracts: []
 protocols:

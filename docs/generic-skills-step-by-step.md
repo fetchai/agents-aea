@@ -43,14 +43,14 @@ This step-by-step guide recreates two AEAs already developed by Fetch.ai. You ca
 ``` bash
 aea fetch fetchai/generic_seller:0.7.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.9.0
+aea eject skill fetchai/generic_seller:0.10.0
 cd ..
 ```
 
 ``` bash
 aea fetch fetchai/generic_buyer:0.7.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.8.0
+aea eject skill fetchai/generic_buyer:0.9.0
 cd ..
 ```
 

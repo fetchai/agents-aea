@@ -1,6 +1,6 @@
 name: simple_service_registration
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

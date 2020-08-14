@@ -144,22 +144,31 @@ nav:
             - Base: 'api/helpers/dialogue/base.md'
           - Exception Policy: 'api/helpers/exception_policy.md'
           - Exec Timeout: 'api/helpers/exec_timeout.md'
+          - File Lock: 'api/helpers/file_lock.md'
           - IPFS:
             - Base: 'api/helpers/ipfs/base.md'
+          - Logging: 'api/helpers/logging.md'
           - MultipleExecutor: 'api/helpers/multiple_executor.md'
+          - Pipe: 'api/helpers/pipe.md'
           - Preferences:
             - Base: 'api/helpers/preference_representations/base.md'
+          - Pypi: 'api/helpers/pypi.md'
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
           - Test Cases: 'api/helpers/test_cases.md'
           - Transaction:
             - Base: 'api/helpers/transaction/base.md'
+          - Win32: 'api/helpers/win32.md'
         - Identity: 'api/identity/base.md'
         - Mail: 'api/mail/base.md'
         - Protocols:
           - Base: 'api/protocols/base.md'
-          - Generator: 'api/protocols/generator.md'
+          - Generator:
+            - Base: 'api/protocols/generator/base.md'
+            - Common: 'api/protocols/generator/common.md'
+            - Extract Specification: 'api/protocols/generator/extract_specification.md'
+            - Validate: 'api/protocols/generator/validate.md'
           - Default Protocol:
             - Custom Types: 'api/protocols/default/custom_types.md'
             - Dialogues: 'api/protocols/default/dialogues.md'

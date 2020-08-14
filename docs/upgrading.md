@@ -1,5 +1,17 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.5.3 to v0.5.4
+
+The contract base class was slightly modified. If you have implemented your own contract package you need to update it accordingly.
+
+The dialogue reference nonce is now randomly generated. This can result in previously working but buggy implementations (which relied on the order of dialogue reference nonces) to now fail.
+
+## v0.5.2 to v0.5.3
+
+Connection states and logger usage in connections where updated. If you have implemented your own connection package you need to update it accordingly.
+
+Additional dialogue consistency checks where enabled. This can result in previously working but buggy implementations to now fail.
+
 ## v0.5.1 to 0.5.2
 
 No public APIs have been changed.
