@@ -173,6 +173,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
         module = importlib.util.module_from_spec(spec)
         sys.modules[import_path] = module
+        logger.debug(f"loading {import_path}: {module}")
         spec.loader.exec_module(module)  # type: ignore
 
 

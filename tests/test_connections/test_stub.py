@@ -35,6 +35,7 @@ from aea.connections.stub.connection import (
     _process_line,
     lock_file,
     write_envelope,
+    write_with_lock,
 )
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
@@ -125,9 +126,7 @@ class TestStubConnectionReception:
         encoded_envelope = encoded_envelope.encode("utf-8")
 
         with open(self.input_file_path, "ab+") as f:
-            with lock_file(f):
-                f.write(encoded_envelope)
-                f.flush()
+            write_with_lock(f, encoded_envelope)
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert "any" == actual_envelope.to
@@ -145,9 +144,7 @@ class TestStubConnectionReception:
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
-            with lock_file(f):
-                f.write(encoded_envelope)
-                f.flush()
+            write_with_lock(f, encoded_envelope)
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope == actual_envelope
