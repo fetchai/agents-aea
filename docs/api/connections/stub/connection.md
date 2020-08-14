@@ -26,6 +26,15 @@ write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None
 
 Write envelope to file.
 
+<a name="aea.connections.stub.connection.write_with_lock"></a>
+#### write`_`with`_`lock
+
+```python
+write_with_lock(file_pointer: IO[bytes], data: Union[bytes]) -> None
+```
+
+Write bytes to file protected with file lock.
+
 <a name="aea.connections.stub.connection.StubConnection"></a>
 ## StubConnection Objects
 
