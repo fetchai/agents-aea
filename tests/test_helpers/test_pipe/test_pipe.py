@@ -20,7 +20,6 @@
 import asyncio
 import os
 import struct
-from asyncio.futures import CancelledError
 from threading import Thread
 from typing import IO, Optional, Union
 
@@ -86,7 +85,7 @@ class PosixNamedPipeClient:
                 size = struct.pack("!I", len(data))
                 os.write(self._out, size)
                 os.write(self._out, data)
-            except (asyncio.IncompleteReadError, CancelledError):
+            except (asyncio.IncompleteReadError, asyncio.CancelledError):
                 break
         print("PosixNamedPipe exiting...")
 
@@ -116,7 +115,7 @@ class TCPSocketPipeClient:
             except ConnectionRefusedError:
                 await asyncio.sleep(TCP_SOCKET_PIPE_CLIENT_CONN_TIMEOUT)
                 continue
-            except (asyncio.IncompleteReadError, CancelledError):
+            except (asyncio.IncompleteReadError, asyncio.CancelledError):
                 return
 
         try:
@@ -134,7 +133,7 @@ class TCPSocketPipeClient:
                 self._writer.write(data)
                 await self._writer.drain()
 
-        except (asyncio.IncompleteReadError, CancelledError):
+        except (asyncio.IncompleteReadError, asyncio.CancelledError):
             return
 
 
