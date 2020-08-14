@@ -29,8 +29,6 @@ nav:
     - Demos:
       - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
-      # - Contract deploy and interact: 'erc1155-skills.md'
-      # - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
       - Gym skill: 'gym-skill.md'
       - ML skills: 'ml-skills.md'
@@ -55,7 +53,7 @@ nav:
         - Logging: 'logging.md'
         - Use multiplexer stand-alone: 'multiplexer-standalone.md'
         - Create stand-alone transaction: 'standalone-transaction.md'
-        # - Create decision-maker transaction: 'decision-maker-transaction.md'
+        - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
         - Known limitations: 'known-limits.md'
         - Build an AEA programmatically: 'build-aea-programmatically.md'
@@ -121,7 +119,6 @@ nav:
         - Context: 'api/context/base.md'
         - Contracts:
           - Base: 'api/contracts/base.md'
-          - Ethereum: 'api/contracts/ethereum.md'
         - Crypto:
           - Base: 'api/crypto/base.md'
           - Cosmos: 'api/crypto/cosmos.md'
@@ -147,31 +144,43 @@ nav:
             - Base: 'api/helpers/dialogue/base.md'
           - Exception Policy: 'api/helpers/exception_policy.md'
           - Exec Timeout: 'api/helpers/exec_timeout.md'
+          - File Lock: 'api/helpers/file_lock.md'
           - IPFS:
             - Base: 'api/helpers/ipfs/base.md'
+          - Logging: 'api/helpers/logging.md'
           - MultipleExecutor: 'api/helpers/multiple_executor.md'
+          - Pipe: 'api/helpers/pipe.md'
           - Preferences:
             - Base: 'api/helpers/preference_representations/base.md'
+          - Pypi: 'api/helpers/pypi.md'
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
           - Test Cases: 'api/helpers/test_cases.md'
           - Transaction:
             - Base: 'api/helpers/transaction/base.md'
+          - Win32: 'api/helpers/win32.md'
         - Identity: 'api/identity/base.md'
         - Mail: 'api/mail/base.md'
         - Protocols:
           - Base: 'api/protocols/base.md'
-          - Generator: 'api/protocols/generator.md'
+          - Generator:
+            - Base: 'api/protocols/generator/base.md'
+            - Common: 'api/protocols/generator/common.md'
+            - Extract Specification: 'api/protocols/generator/extract_specification.md'
+            - Validate: 'api/protocols/generator/validate.md'
           - Default Protocol:
             - Custom Types: 'api/protocols/default/custom_types.md'
+            - Dialogues: 'api/protocols/default/dialogues.md'
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
           - Signing Protocol:
             - Custom Types: 'api/protocols/signing/custom_types.md'
+            - Dialogues: 'api/protocols/signing/dialogues.md'
             - Message: 'api/protocols/signing/message.md'
             - Serialization: 'api/protocols/signing/serialization.md'
           - State Update Protocol:
+            - Dialogues: 'api/protocols/state_update/dialogues.md'
             - Message: 'api/protocols/state_update/message.md'
             - Serialization: 'api/protocols/state_update/serialization.md'
         - Registries:

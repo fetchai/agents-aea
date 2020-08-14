@@ -20,6 +20,7 @@
 import asyncio
 import datetime
 import logging
+import subprocess  # nosec
 import time
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
@@ -355,3 +356,36 @@ async def cancel_and_wait(task: Optional[Task]) -> Any:
         return await task
     except CancelledError as e:
         return e
+
+
+class AwaitableProc:
+    """
+    Async-friendly subprocess.Popen
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.proc = None
+        self._thread = None
+        self.loop = None
+        self.future = None
+
+    async def start(self):
+        """Start the subprocess"""
+        self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
+        self.loop = asyncio.get_event_loop()
+        self.future = asyncio.futures.Future()
+        self._thread = Thread(target=self._in_thread)
+        self._thread.start()
+        try:
+            return await asyncio.shield(self.future)
+        except asyncio.CancelledError:  # pragma: nocover
+            self.proc.terminate()
+            return await self.future
+        finally:
+            self._thread.join()
+
+    def _in_thread(self):
+        self.proc.wait()
+        self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)

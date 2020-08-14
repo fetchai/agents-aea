@@ -59,7 +59,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.6.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.7.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
@@ -71,12 +71,12 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_seller:0.9.0
+aea add skill fetchai/generic_seller:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 In `my_seller_aea/aea-config.yaml` add 
@@ -93,7 +93,7 @@ default_routing:
 
 Then, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.6.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.7.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
@@ -105,12 +105,12 @@ The following steps create the buyer from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_buyer:0.8.0
+aea add skill fetchai/generic_buyer:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` add 
@@ -175,7 +175,7 @@ models:
       unit_price: 10
     class_name: GenericStrategy
 ```
-The `data_model`, `data_model_name` and the `service_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
+The `data_model`, `data_model_name` and the `service_data` are used to register the service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
 
 In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) defines the `search_query`, which has to match the `service_data` of the seller.
 

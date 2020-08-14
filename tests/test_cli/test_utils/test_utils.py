@@ -145,10 +145,13 @@ class PublicIdParameterTestCase(TestCase):
 @mock.patch("aea.cli.utils.config.os.path.dirname", return_value="dir-name")
 @mock.patch("aea.cli.utils.config.os.path.exists", return_value=False)
 @mock.patch("aea.cli.utils.config.os.makedirs")
+@mock.patch("builtins.open")
 class InitConfigFolderTestCase(TestCase):
     """Test case for _init_cli_config method."""
 
-    def test_init_cli_config_positive(self, makedirs_mock, exists_mock, dirname_mock):
+    def test_init_cli_config_positive(
+        self, open_mock, makedirs_mock, exists_mock, dirname_mock
+    ):
         """Test for _init_cli_config method positive result."""
         _init_cli_config()
         dirname_mock.assert_called_once()
@@ -275,7 +278,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.4.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -289,7 +292,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.4.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -308,7 +311,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.4.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -317,7 +320,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.4.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -331,7 +334,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.4.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 

@@ -1,17 +1,17 @@
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.10.0
+aea fetch fetchai/erc1155_deployer:0.11.0
 cd erc1155_deployer
 aea install
 ```
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/erc1155_deploy:0.10.0
+aea add skill fetchai/erc1155_deploy:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -25,19 +25,19 @@ aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt --connection
 ```
 ``` bash
-aea fetch fetchai/erc1155_client:0.10.0
+aea fetch fetchai/erc1155_client:0.11.0
 cd erc1155_client
 aea install
 ```
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/erc1155_client:0.9.0
+aea add skill fetchai/erc1155_client:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -63,7 +63,7 @@ aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 aea run
 ```
 ``` bash
-Successfully minted items. Transaction digest: ...
+registering service on SOEF.
 ```
 ``` bash
 aea run
@@ -85,3 +85,12 @@ default_routing:
   fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
   fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
 ```
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+

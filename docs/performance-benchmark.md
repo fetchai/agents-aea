@@ -173,7 +173,8 @@ mem mean (kb): 53.9078125 ± 0.11487297672320501
 ```
 
 Chart is drawn for argument 1: sleep:
-<center>![Char over argument 1 - sleep value](assets/benchmark_chart.png)</center>
+
+<img src="../assets/benchmark_chart.png" alt="Char over argument 1 - sleep value" class="center">
 
 The most interesting part is CPU usage, as you can see  cPU usage decreases with increasing value of idle sleep.
 Memory usage and execution time can slightly differ per case execution.

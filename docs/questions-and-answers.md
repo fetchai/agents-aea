@@ -15,7 +15,7 @@ You can read more about the AEAs <a href="../app-areas/"> here </a>
 For the Autonomous Economic Agents (AEAs) to be able to talk to others, firstly they need to find them,
 and then, implement the same protocols in order to be able to deserialize the envelops they receive.
 <br><br>
-You can read more about the Search and Discovery <a href="../oef-ledger/">here</a> and more about envelops and protocols <a href="../core-components/">here</a>
+You can read more about the Search and Discovery <a href="../oef-ledger/">here</a> and more about envelops and protocols <a href="../core-components-1/">here</a>
 
 </details>
 
@@ -51,9 +51,9 @@ You can find example of this implementation in the <a href='../generic-skills-st
 <details><summary>How does one connect a frontend?</summary>
 There are two options that one could connect a frontend. The first option would be to create an HTTP connection and then create an app that will communicate with this
 connections.
-The other option is to create a frontend client that will communicate with the agent via the [OEF communication network](../oef-ledger).
+The other option is to create a frontend client that will communicate with the agent via the <a href="../oef-ledger/">OEF communication network</a>.
 <br><br>
-You can find a more detailed approach <a href="../connect-a-frontend/">here</a>
+You can find a more detailed approach <a href="../connect-a-frontend/">here</a>.
 </details>
 
 <details><summary>Is the AEA framework ideal for agent-based modeling?</summary>
@@ -72,7 +72,7 @@ You can find more details about the CLI commands <a href="../cli-commands/">here
 </details>
 
 <details><summary>When a new AEA is created, is the `vendor` folder populated with some default packages?</summary>
-All AEA projects by default hold the `fetchai/stub:0.7.0` connection, the `fetchai/default:0.4.0` protocol and the `fetchai/error:0.4.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+All AEA projects by default hold the `fetchai/stub:0.8.0` connection, the `fetchai/default:0.4.0` protocol and the `fetchai/error:0.4.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
 <br><br>
 You can find more details about the file structure <a href="../package-imports/">here</a>
 </details>

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains generic tools for AEA end-to-end testing."""
 
 from pathlib import Path
@@ -26,6 +25,7 @@ import yaml
 
 from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import PublicId
+from aea.connections.stub.connection import write_envelope
 from aea.mail.base import Envelope
 
 
@@ -38,16 +38,8 @@ def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
 
     :return: None
     """
-    encoded_envelope_str = "{},{},{},{},".format(
-        envelope.to,
-        envelope.sender,
-        envelope.protocol_id,
-        envelope.message_bytes.decode("utf-8"),
-    )
-    encoded_envelope = encoded_envelope_str.encode("utf-8")
     with open(Path(file_path), "ab+") as f:
-        f.write(encoded_envelope)
-        f.flush()
+        write_envelope(envelope, f)
 
 
 def read_envelope_from_file(file_path: str):

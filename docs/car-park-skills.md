@@ -5,7 +5,7 @@ The AEA car-park skills demonstrate an interaction between two AEAs.
 
 ## Discussion
 
-The full Fetch.ai car park AEA demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
+The full Fetch.ai car park AEA demo is documented in its own repo <a href="https://github.com/fetchai/carpark_agent">here</a>.
 This demo allows you to test the AEA functionality of the car park AEA demo without the detection logic.
 
 It demonstrates how the AEAs trade car park information.
@@ -55,7 +55,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.9.0
+aea fetch fetchai/car_detector:0.10.0
 cd car_detector
 aea install
 ```
@@ -67,12 +67,12 @@ The following steps create the car detector from scratch:
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/carpark_detection:0.8.0
+aea add skill fetchai/carpark_detection:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 In `car_detector/aea-config.yaml` add 
@@ -89,7 +89,7 @@ default_routing:
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.9.0
+aea fetch fetchai/car_data_buyer:0.10.0
 cd car_data_buyer
 aea install
 ```
@@ -101,12 +101,12 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/carpark_client:0.8.0
+aea add skill fetchai/carpark_client:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 In `car_data_buyer/aea-config.yaml` add 

@@ -29,7 +29,7 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.cli.install import do_install
 from aea.cli.utils.click_utils import ConnectionsOption
-from aea.cli.utils.constants import AEA_LOGO
+from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
@@ -114,10 +114,8 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
     """
     load_env_file(env_file)
     if is_install_deps:
-        if Path("requirements.txt").exists():
-            do_install(ctx, requirement="requirements.txt")
-        else:
-            do_install(ctx)
+        requirements_path = REQUIREMENTS if Path(REQUIREMENTS).exists() else None
+        do_install(ctx, requirement=requirements_path)
 
 
 def _build_aea(
@@ -129,7 +127,7 @@ def _build_aea(
         )
         aea = builder.build(connection_ids=connection_ids)
         return aea
-    except AEAPackageLoadingError as e:
+    except AEAPackageLoadingError as e:  # pragma: nocover
         raise click.ClickException("Package loading error: {}".format(str(e)))
     except Exception as e:
         # TODO use an ad-hoc exception class for predictable errors

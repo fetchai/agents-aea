@@ -33,7 +33,7 @@ To learn more about some of the distinctive characteristics of agent-oriented de
 
 If you would like to develop an AEA in a language different to Python then check out our <a href="language-agnostic-definition">language agnostic AEA definition</a>.
 
-AEAs achieve their goals with the help of the <a href="oef-ledger">Open Economic Framework (OEF)</a> - a decentralized communication and search & discovery system for agents - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. Third-party blockchains, such as Ethereum, may also allow AEA integration.
+AEAs achieve their goals with the help of the <a href="oef-ledger">Open Economic Framework (OEF)</a> - a decentralized communication and search & discovery system for agents - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. Third-party blockchains, such as <a href="https://ethereum.org/en/" target=_blank>Ethereum</a>, may also allow AEA integration.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

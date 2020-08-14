@@ -23,9 +23,12 @@ import base64
 import hashlib
 import json
 import logging
+import os
+import subprocess  # nosec
+import tempfile
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, Tuple
+from typing import Any, BinaryIO, Dict, Optional, Tuple
 
 from bech32 import bech32_encode, convertbits
 
@@ -384,6 +387,218 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 balance = int(result[0]["amount"])
         return balance
 
+    def get_deploy_transaction(
+        self,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
+        tx_fee: int = 0,
+        gas: int = 80000,
+        denom: Optional[str] = None,
+        memo: str = "",
+        chain_id: Optional[str] = None,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """
+        Create a CosmWasm bytecode deployment transaction.
+
+        :param sender_address: the sender address of the message initiator.
+        :param filename: the path to wasm bytecode file.
+        :param gas: Maximum amount of gas to be used on executing command.
+        :param memo: Any string comment.
+        :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+        :return: the unsigned CosmWasm contract deploy message
+        """
+        denom = denom if denom is not None else self.denom
+        chain_id = chain_id if chain_id is not None else self.chain_id
+        account_number, sequence = self._try_get_account_number_and_sequence(
+            deployer_address
+        )
+        deploy_msg = {
+            "type": "wasm/store-code",
+            "value": {
+                "sender": deployer_address,
+                "wasm_byte_code": contract_interface["wasm_byte_code"],
+                "source": "",
+                "builder": "",
+            },
+        }
+        tx = self._get_transaction(
+            account_number,
+            chain_id,
+            tx_fee,
+            denom,
+            gas,
+            memo,
+            sequence,
+            msg=deploy_msg,
+        )
+        return tx
+
+    def get_init_transaction(
+        self,
+        deployer_address: Address,
+        code_id: int,
+        init_msg: Any,
+        amount: int,
+        tx_fee: int,
+        gas: int = 80000,
+        denom: Optional[str] = None,
+        label: str = "",
+        memo: str = "",
+        chain_id: Optional[str] = None,
+    ) -> Optional[Any]:
+        """
+        Create a CosmWasm InitMsg transaction.
+
+        :param deployer_address: the deployer address of the message initiator.
+        :param amount: Contract's initial funds amount
+        :param code_id: the ID of contract bytecode.
+        :param init_msg: the InitMsg containing parameters for contract constructor.
+        :param gas: Maximum amount of gas to be used on executing command.
+        :param denom: the name of the denomination of the contract funds
+        :param label: the label name of the contract
+        :param memo: Any string comment.
+        :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+        :return: the unsigned CosmWasm InitMsg
+        """
+        denom = denom if denom is not None else self.denom
+        chain_id = chain_id if chain_id is not None else self.chain_id
+        account_number, sequence = self._try_get_account_number_and_sequence(
+            deployer_address
+        )
+        instantiate_msg = {
+            "type": "wasm/instantiate",
+            "value": {
+                "sender": deployer_address,
+                "code_id": str(code_id),
+                "label": label,
+                "init_msg": init_msg,
+                "init_funds": [{"denom": denom, "amount": str(amount)}],
+            },
+        }
+        tx = self._get_transaction(
+            account_number,
+            chain_id,
+            tx_fee,
+            denom,
+            gas,
+            memo,
+            sequence,
+            msg=instantiate_msg,
+        )
+        return tx
+
+    def get_handle_transaction(
+        self,
+        sender_address: Address,
+        contract_address: Address,
+        handle_msg: Any,
+        amount: int,
+        tx_fee: int,
+        denom: Optional[str] = None,
+        gas: int = 80000,
+        memo: str = "",
+        chain_id: Optional[str] = None,
+    ) -> Optional[Any]:
+        """
+        Create a CosmWasm HandleMsg transaction.
+
+        :param sender_address: the sender address of the message initiator.
+        :param contract_address: the address of the smart contract.
+        :param handle_msg: HandleMsg in JSON format.
+        :param gas: Maximum amount of gas to be used on executing command.
+        :param memo: Any string comment.
+        :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+        :return: the unsigned CosmWasm HandleMsg
+        """
+        denom = denom if denom is not None else self.denom
+        chain_id = chain_id if chain_id is not None else self.chain_id
+        account_number, sequence = self._try_get_account_number_and_sequence(
+            sender_address
+        )
+        execute_msg = {
+            "type": "wasm/execute",
+            "value": {
+                "sender": sender_address,
+                "contract": contract_address,
+                "msg": handle_msg,
+                "sent_funds": [{"amount": str(amount), "denom": denom}],
+            },
+        }
+        tx = self._get_transaction(
+            account_number,
+            chain_id,
+            tx_fee,
+            denom,
+            gas,
+            memo,
+            sequence,
+            msg=execute_msg,
+        )
+        return tx
+
+    @staticmethod
+    @try_decorator(
+        "Encountered exception when trying to execute wasm transaction: {}",
+        logger_method=logger.warning,
+    )
+    def try_execute_wasm_transaction(
+        tx_signed: Any, signed_tx_filename: str = "tx.signed"
+    ) -> Optional[str]:
+        """
+        Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
+
+        :param tx_signed: the signed transaction.
+        :return: the transaction digest
+        """
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(os.path.join(tmpdirname, signed_tx_filename), "w") as f:
+                f.write(json.dumps(tx_signed))
+
+            command = [
+                "wasmcli",
+                "tx",
+                "broadcast",
+                os.path.join(tmpdirname, signed_tx_filename),
+            ]
+
+            stdout, _ = subprocess.Popen(  # nosec
+                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            ).communicate()
+
+        return stdout.decode("ascii")
+
+    @staticmethod
+    @try_decorator(
+        "Encountered exception when trying to execute wasm query: {}",
+        logger_method=logger.warning,
+    )
+    def try_execute_wasm_query(
+        contract_address: Address, query_msg: Any
+    ) -> Optional[str]:
+        """
+        Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
+
+        :param contract_address: the address of the smart contract.
+        :param query_msg: QueryMsg in JSON format.
+        :return: the message receipt
+        """
+        command = [
+            "wasmcli",
+            "query",
+            "wasm",
+            "contract-state",
+            "smart",
+            str(contract_address),
+            json.dumps(query_msg),
+        ]
+
+        stdout, _ = subprocess.Popen(  # nosec
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        return stdout.decode("ascii")
+
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
         sender_address: Address,
@@ -392,8 +607,6 @@ class CosmosApi(LedgerApi, CosmosHelper):
         tx_fee: int,
         tx_nonce: str,
         denom: Optional[str] = None,
-        account_number: int = 0,
-        sequence: int = 0,
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
@@ -407,7 +620,10 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
-        :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
+        :param denom: the denomination of tx fee and amount
+        :param gas: the gas used.
+        :param memo: memo to include in tx.
+        :param chain_id: the chain ID of the transaction.
         :return: the transfer transaction
         """
         denom = denom if denom is not None else self.denom
@@ -415,24 +631,60 @@ class CosmosApi(LedgerApi, CosmosHelper):
         account_number, sequence = self._try_get_account_number_and_sequence(
             sender_address
         )
-        transfer = {
+        transfer_msg = {
             "type": "cosmos-sdk/MsgSend",
             "value": {
+                "amount": [{"amount": str(amount), "denom": denom}],
                 "from_address": sender_address,
                 "to_address": destination_address,
-                "amount": [{"denom": denom, "amount": str(amount)}],
             },
         }
+        tx = self._get_transaction(
+            account_number,
+            chain_id,
+            tx_fee,
+            denom,
+            gas,
+            memo,
+            sequence,
+            msg=transfer_msg,
+        )
+        return tx
+
+    @staticmethod
+    def _get_transaction(
+        account_number: int,
+        chain_id: str,
+        tx_fee: int,
+        denom: str,
+        gas: int,
+        memo: str,
+        sequence: int,
+        msg: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Get a transaction.
+
+        :param account_number: the account number.
+        :param chain_id: the chain ID of the transaction.
+        :param tx_fee: the transaction fee.
+        :param denom: the denomination of tx fee and amount
+        :param gas: the gas used.
+        :param memo: memo to include in tx.
+        :param msg: the transaction msg.
+        :param sequence: the sequence.
+        :return: the transaction
+        """
         tx = {
             "account_number": str(account_number),
-            "sequence": str(sequence),
             "chain_id": chain_id,
             "fee": {
+                "amount": [{"amount": str(tx_fee), "denom": denom}],
                 "gas": str(gas),
-                "amount": [{"denom": denom, "amount": str(tx_fee)}],
             },
             "memo": memo,
-            "msgs": [transfer],
+            "msgs": [msg],
+            "sequence": str(sequence),
         }
         return tx
 
@@ -466,8 +718,38 @@ class CosmosApi(LedgerApi, CosmosHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        tx_digest = self._try_send_signed_transaction(tx_signed)
+        if self.is_cosmwasm_transaction(tx_signed):
+            tx_digest = self.try_execute_wasm_transaction(tx_signed)
+        elif self.is_transfer_transaction(tx_signed):
+            tx_digest = self._try_send_signed_transaction(tx_signed)
+        else:  # pragma: nocover
+            logger.warning(
+                "Cannot send transaction. Unknown transaction type: {}".format(
+                    tx_signed
+                )
+            )
+            tx_digest = None
         return tx_digest
+
+    @staticmethod
+    def is_cosmwasm_transaction(tx_signed: Any) -> bool:
+        """Check whether it is a cosmwasm tx."""
+        try:
+            _type = tx_signed["value"]["msg"][0]["type"]
+            result = _type in ["wasm/store-code", "wasm/instantiate", "wasm/execute"]
+        except KeyError:  # pragma: nocover
+            result = False
+        return result
+
+    @staticmethod
+    def is_transfer_transaction(tx_signed: Any) -> bool:
+        """Check whether it is a transfer tx."""
+        try:
+            _type = tx_signed["tx"]["msg"][0]["type"]
+            result = _type in ["cosmos-sdk/MsgSend"]
+        except KeyError:  # pragma: nocover
+            result = False
+        return result
 
     @try_decorator(
         "Encountered exception when trying to send tx: {}", logger_method=logger.warning
@@ -524,6 +806,23 @@ class CosmosApi(LedgerApi, CosmosHelper):
         # Cosmos does not distinguis between transaction receipt and transaction
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
         return tx_receipt
+
+    def get_contract_instance(
+        self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
+    ) -> Any:
+        """
+        Get the instance of a contract.
+
+        :param contract_interface: the contract interface.
+        :param contract_address: the contract address.
+        :return: the contract instance
+        """
+        # Instance object not available for cosmwasm
+        return None
+
+
+class CosmWasmCLIWrapper:
+    """Wrapper of the CosmWasm CLI."""
 
 
 class CosmosFaucetApi(FaucetApi):

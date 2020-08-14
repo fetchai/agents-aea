@@ -21,7 +21,6 @@
 package aea
 
 import (
-	"encoding/binary"
 	"errors"
 	"log"
 	"net"
@@ -45,6 +44,13 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Str("package", "AeaApi").
 	Logger()
 
+type Pipe interface {
+	Connect() error
+	Read() ([]byte, error)
+	Write(data []byte) error
+	Close() error
+}
+
 /*
 
   AeaApi type
@@ -63,8 +69,7 @@ type AeaApi struct {
 	port_public   uint16
 	host_delegate string
 	port_delegate uint16
-	msgin         *os.File
-	msgout        *os.File
+	pipe          Pipe
 	out_queue     chan *Envelope
 	closing       bool
 	connected     bool
@@ -96,7 +101,7 @@ func (aea AeaApi) EntryPeers() []string {
 }
 
 func (aea AeaApi) Put(envelope *Envelope) error {
-	return write_envelope(aea.msgout, envelope)
+	return write_envelope(aea.pipe, envelope)
 }
 
 func (aea *AeaApi) Get() *Envelope {
@@ -219,22 +224,20 @@ func (aea *AeaApi) Init() error {
 		aea.entry_peers = strings.SplitN(entry_peers, ",", -1)
 	}
 
+	// setup pipe
+	aea.pipe = NewPipe(aea.msgin_path, aea.msgout_path)
+
 	return nil
 }
 
 func (aea *AeaApi) Connect() error {
 	// open pipes
-	var erro, erri error
-	aea.msgout, erro = os.OpenFile(aea.msgout_path, os.O_WRONLY, os.ModeNamedPipe)
-	aea.msgin, erri = os.OpenFile(aea.msgin_path, os.O_RDONLY, os.ModeNamedPipe)
+	err := aea.pipe.Connect()
 
-	if erri != nil || erro != nil {
-		logger.Error().Str("err", erri.Error()).Str("err", erro.Error()).
-			Msgf("while opening pipes %s %s", aea.msgin_path, aea.msgout_path)
-		if erri != nil {
-			return erri
-		}
-		return erro
+	if err != nil {
+		logger.Error().Str("err", err.Error()).
+			Msg("while connecting to pipe")
+		return err
 	}
 
 	aea.closing = false
@@ -248,19 +251,6 @@ func (aea *AeaApi) Connect() error {
 	return nil
 }
 
-/*
-func (aea *AeaApi) WithSandbox() *AeaApi {
-	var err error
-	fmt.Println("[aea-api  ][warning] running in sandbox mode")
-	aea.msgin_path, aea.msgout_path, aea.id, aea.host, aea.port, err = setup_aea_sandbox()
-	if err != nil {
-		return nil
-	}
-	aea.sandbox = true
-	return aea
-}
-*/
-
 func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
 	envelope := &Envelope{}
 	err := proto.Unmarshal(buf, envelope)
@@ -270,7 +260,7 @@ func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
 func (aea *AeaApi) listen_for_envelopes() {
 	//TOFIX(LR) add an exit strategy
 	for {
-		envel, err := read_envelope(aea.msgin)
+		envel, err := read_envelope(aea.pipe)
 		if err != nil {
 			logger.Error().Str("err", err.Error()).Msg("while receiving envelope")
 			logger.Info().Msg("disconnecting")
@@ -289,8 +279,7 @@ func (aea *AeaApi) listen_for_envelopes() {
 }
 
 func (aea *AeaApi) stop() {
-	aea.msgin.Close()
-	aea.msgout.Close()
+	aea.pipe.Close()
 }
 
 /*
@@ -299,50 +288,18 @@ func (aea *AeaApi) stop() {
 
 */
 
-func write(pipe *os.File, data []byte) error {
-	size := uint32(len(data))
-	buf := make([]byte, 4)
-	binary.BigEndian.PutUint32(buf, size)
-	_, err := pipe.Write(buf)
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while writing size to pipe: %d %x", size, buf)
-		return err
-	}
-	logger.Debug().Msgf("writing size to pipe %d %x", size, buf)
-	_, err = pipe.Write(data)
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while writing data to pipe %x", data)
-	}
-	logger.Debug().Msgf("writing data to pipe len %d", size)
-	return err
-}
-
-func read(pipe *os.File) ([]byte, error) {
-	buf := make([]byte, 4)
-	_, err := pipe.Read(buf)
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msg("while receiving size")
-		return buf, err
-	}
-	size := binary.BigEndian.Uint32(buf)
-
-	buf = make([]byte, size)
-	_, err = pipe.Read(buf)
-	return buf, err
-}
-
-func write_envelope(pipe *os.File, envelope *Envelope) error {
+func write_envelope(pipe Pipe, envelope *Envelope) error {
 	data, err := proto.Marshal(envelope)
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
 		return err
 	}
-	return write(pipe, data)
+	return pipe.Write(data)
 }
 
-func read_envelope(pipe *os.File) (*Envelope, error) {
+func read_envelope(pipe Pipe) (*Envelope, error) {
 	envelope := &Envelope{}
-	data, err := read(pipe)
+	data, err := pipe.Read()
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msg("while receiving data")
 		return envelope, err
@@ -350,90 +307,3 @@ func read_envelope(pipe *os.File) (*Envelope, error) {
 	err = proto.Unmarshal(data, envelope)
 	return envelope, err
 }
-
-/*
-
-  Sandbox
-  - DISABLED
-
-*/
-
-/*
-func setup_aea_sandbox() (string, string, string, string, uint16, error) {
-	// setup id
-	id := ""
-	// setup uri
-	host := "127.0.0.1"
-	port := uint16(5000 + rand.Intn(10000))
-	// setup pipes
-	ROOT_PATH := "/tmp/aea_sandbox_" + strconv.FormatInt(time.Now().Unix(), 10)
-	msgin_path := ROOT_PATH + ".in"
-	msgout_path := ROOT_PATH + ".out"
-	// create pipes
-	if _, err := os.Stat(msgin_path); !os.IsNotExist(err) {
-		os.Remove(msgin_path)
-	}
-	if _, err := os.Stat(msgout_path); !os.IsNotExist(err) {
-		os.Remove(msgout_path)
-	}
-	erri := syscall.Mkfifo(msgin_path, 0666)
-	erro := syscall.Mkfifo(msgout_path, 0666)
-	if erri != nil || erro != nil {
-		fmt.Println("[aea-api  ][error][sandbox] setting up pipes:", erri, erro)
-		if erri != nil {
-			return "", "", "", "", 0, erri
-		}
-		return "", "", "", "", 0, erro
-	}
-	// TOFIX(LR) should use channels
-	go func() {
-		err := run_aea_sandbox(msgin_path, msgout_path)
-		if err != nil {
-		}
-	}()
-	return msgin_path, msgout_path, id, host, port, nil
-}
-
-func run_aea_sandbox(msgin_path string, msgout_path string) error {
-	// open pipe
-	msgout, erro := os.OpenFile(msgout_path, os.O_RDONLY, os.ModeNamedPipe)
-	msgin, erri := os.OpenFile(msgin_path, os.O_WRONLY, os.ModeNamedPipe)
-	if erri != nil || erro != nil {
-		fmt.Println("[aea-api  ][error][sandbox] error while opening pipes:", erri, erro)
-		if erri != nil {
-			return erri
-		} else {
-			return erro
-		}
-	}
-
-	// consume envelopes
-	go func() {
-		for {
-			envel, err := read_envelope(msgout)
-			if err != nil {
-				fmt.Println("[aea-api  ][error][sandbox] stopped receiving envelopes:", err)
-				return
-			}
-			fmt.Println("[aea-api  ][error][sandbox] consumed envelope", envel)
-		}
-	}()
-
-	// produce envelopes
-	go func() {
-		i := 1
-		for {
-			time.Sleep(time.Duration((rand.Intn(5000) + 3000)) * time.Millisecond)
-			envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.3.0", []byte("\x08\x01*\x07\n\x05Message from sandbox " + strconv.Itoa(i)), ""}
-			err := write_envelope(msgin, envel)
-			if err != nil {
-				fmt.Println("[aea-api  ][error][sandbox] stopped producing envelopes:", err)
-				return
-			}
-			i += 1
-		}
-	}()
-
-	return nil
-}
-*/

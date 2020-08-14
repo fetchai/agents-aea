@@ -16,19 +16,13 @@ message Envelope{
     string uri = 5;
 }
 ```
-<!--
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Additional constraints on envelope fields will be added soon!</p>
-</div>
--->
 
 The format for the above fields, except `message`, is specified below. For those with `regexp`, the format is described in <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target=_blank>regular expression</a>.
 
 <ul>
-<li>to: any string</li>
-<li>sender: any string</li>
+<li>to and sender: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target=_blank>secp256k1</a>-compatible elliptic curve</li>
 <li>protocol_id: (`regexp`) `^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`</li>
+<li>bytes: any bytes string</li>
 <li>URI: <a href="https://tools.ietf.org/html/rfc3986" target=_blank>this syntax</a></li>
 </ul>
 </li>

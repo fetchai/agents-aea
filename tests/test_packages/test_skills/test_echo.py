@@ -18,36 +18,39 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the echo skill."""
-
 import time
 
 from aea.mail.base import Envelope
+from aea.protocols.default.dialogues import DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import AEATestCaseEmpty
-
-from tests.conftest import skip_test_windows
 
 
 class TestEchoSkill(AEATestCaseEmpty):
     """Test that echo skill works."""
 
-    @skip_test_windows
+    capture_log = True
+
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.4.0")
+        self.add_item("skill", "fetchai/echo:0.5.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
+        sender = "sender"
+        default_dialogues = DefaultDialogues(sender)
         message_content = b"hello"
         message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=message_content,
+            performative=DefaultMessage.Performative.BYTES,
+            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
+            content=message_content,
         )
         sent_envelope = Envelope(
             to=self.agent_name,
-            sender="sender",
+            sender=sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -61,7 +64,7 @@ class TestEchoSkill(AEATestCaseEmpty):
         assert sent_envelope.sender == received_envelope.to
         assert sent_envelope.protocol_id == received_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(received_envelope.message)
-        assert sent_envelope.message == msg
+        assert sent_envelope.message.content == msg.content
 
         check_strings = (
             "Echo Handler: setup method called.",

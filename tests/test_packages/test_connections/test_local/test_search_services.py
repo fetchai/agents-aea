@@ -17,9 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the search feature of the local OEF node."""
-import asyncio
 import copy
-import time
 import unittest.mock
 from typing import Optional, cast
 
@@ -47,6 +45,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from tests.common.mocks import AnyStringWith
+from tests.common.utils import wait_for_condition
 from tests.conftest import MAX_FLAKY_RERUNS, _make_local_connection
 
 
@@ -93,12 +92,15 @@ class TestNoValidDialogue:
             protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
-        self.multiplexer.put(envelope)
-        with unittest.mock.patch.object(self.node.logger, "warning") as mock_logger:
-            await asyncio.sleep(0.1)
-            mock_logger.assert_any_call(
-                AnyStringWith("Could not create dialogue for message=")
-            )
+        with unittest.mock.patch.object(
+            self.node, "_handle_oef_message", side_effect=self.node._handle_oef_message
+        ) as mock_handle:
+            with unittest.mock.patch.object(self.node.logger, "warning") as mock_logger:
+                self.multiplexer.put(envelope)
+                wait_for_condition(lambda: mock_handle.called, timeout=1.0)
+                mock_logger.assert_any_call(
+                    AnyStringWith("Could not create dialogue for message=")
+                )
 
     @classmethod
     def teardown_class(cls):
@@ -520,8 +522,7 @@ class TestFilteredSearchResult:
             message=register_service_request,
         )
         cls.multiplexer1.put(envelope)
-
-        time.sleep(1.0)
+        wait_for_condition(lambda: len(cls.node.services) == 1, timeout=10)
 
         # register 'multiplexer2' as a service 'barfoo'.
         cls.data_model_barfoo = DataModel(
@@ -547,7 +548,9 @@ class TestFilteredSearchResult:
             protocol_id=register_service_request.protocol_id,
             message=register_service_request,
         )
+
         cls.multiplexer2.put(envelope)
+        wait_for_condition(lambda: len(cls.node.services) == 2, timeout=10)
 
         # unregister multiplexer1
         data_model = DataModel(
@@ -572,8 +575,9 @@ class TestFilteredSearchResult:
             message=msg,
         )
         cls.multiplexer1.put(envelope)
+        # ensure one service stays registered
+        wait_for_condition(lambda: len(cls.node.services) == 1, timeout=10)
 
-    @pytest.mark.flaky(reruns=0)  # TODO: check reasons!. quite unstable test
     def test_filtered_search_result(self):
         """Test that the search result contains only the entries matching the query."""
         query = Query(constraints=[], model=self.data_model_barfoo)
@@ -606,7 +610,7 @@ class TestFilteredSearchResult:
         response_dialogue = self.dialogues1.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert search_result.agents == (self.address_2,)
+        assert search_result.agents == (self.address_2,), self.node.services
 
     @classmethod
     def teardown_class(cls):

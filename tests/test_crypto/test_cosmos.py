@@ -20,6 +20,7 @@
 """This module contains the tests of the ethereum module."""
 import logging
 import time
+from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
@@ -105,11 +106,14 @@ def test_generate_nonce():
 @pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
-    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    account = CosmosCrypto()
+    balance = get_wealth(account.address)
+    assert balance > 0, "Failed to fund account."
     cc2 = CosmosCrypto()
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
 
     amount = 10000
+    assert amount < balance, "Not enough funds."
     transfer_transaction = cosmos_api.get_transfer_transaction(
         sender_address=account.address,
         destination_address=cc2.address,
@@ -161,9 +165,22 @@ def test_get_balance():
     cc = CosmosCrypto()
     balance = cosmos_api.get_balance(cc.address)
     assert balance == 0, "New account has a positive balance."
-    cc = CosmosCrypto(private_key_path=COSMOS_PRIVATE_KEY_PATH)
-    balance = cosmos_api.get_balance(cc.address)
+    balance = get_wealth(cc.address)
     assert balance > 0, "Existing account has no balance."
+
+
+def get_wealth(address: str):
+    """Get wealth for test."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    CosmosFaucetApi().get_wealth(address)
+    balance = 0
+    timeout = 0
+    while timeout < 40 and balance == 0:
+        time.sleep(1)
+        timeout += 1
+        _balance = cosmos_api.get_balance(address)
+        balance = _balance if _balance is not None else 0
+    return balance
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -183,7 +200,7 @@ def test_get_wealth_positive(caplog):
 @pytest.mark.ledger
 def test_format_default():
     """Test if default CosmosSDK transaction is correctly formated."""
-    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    account = CosmosCrypto()
     cc2 = CosmosCrypto()
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
 
@@ -270,3 +287,166 @@ def test_format_cosmwasm():
 
     # Compare Wasm formatted transaction with signed transaction
     assert signed_transaction == wasm_formated_transaction
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_deploy_transaction_cosmwasm():
+    """Test the get deploy transaction method."""
+    cc2 = CosmosCrypto()
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+
+    contract_interface = {"wasm_byte_code": b""}
+    deployer_address = cc2.address
+    deploy_transaction = cosmos_api.get_deploy_transaction(
+        contract_interface, deployer_address
+    )
+
+    assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
+    assert "account_number" in deploy_transaction
+    assert "chain_id" in deploy_transaction
+    assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
+        "amount": [{"amount": "0", "denom": "atestfet"}],
+        "gas": "80000",
+    }
+    assert "memo" in deploy_transaction
+    assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
+    msg = deploy_transaction["msgs"][0]
+    assert "type" in msg and msg["type"] == "wasm/store-code"
+    assert (
+        "value" in msg
+        and msg["value"]["sender"] == deployer_address
+        and msg["value"]["wasm_byte_code"] == contract_interface["wasm_byte_code"]
+    )
+    assert "sequence" in deploy_transaction
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_init_transaction_cosmwasm():
+    """Test the get deploy transaction method."""
+    cc2 = CosmosCrypto()
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    init_msg = "init_msg"
+    code_id = 1
+    deployer_address = cc2.address
+    tx_fee = 1
+    amount = 10
+    deploy_transaction = cosmos_api.get_init_transaction(
+        deployer_address, code_id, init_msg, amount, tx_fee
+    )
+
+    assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
+    assert "account_number" in deploy_transaction
+    assert "chain_id" in deploy_transaction
+    assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
+        "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
+        "gas": "80000",
+    }
+    assert "memo" in deploy_transaction
+    assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
+    msg = deploy_transaction["msgs"][0]
+    assert "type" in msg and msg["type"] == "wasm/instantiate"
+    assert (
+        "value" in msg
+        and msg["value"]["sender"] == deployer_address
+        and msg["value"]["code_id"] == str(code_id)
+        and msg["value"]["label"] == ""
+        and msg["value"]["init_msg"] == init_msg
+        and msg["value"]["init_funds"] == [{"denom": "atestfet", "amount": str(amount)}]
+    )
+    assert "sequence" in deploy_transaction
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_handle_transaction_cosmwasm():
+    """Test the get deploy transaction method."""
+    cc2 = CosmosCrypto()
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    handle_msg = "handle_msg"
+    sender_address = cc2.address
+    contract_address = "contract_address"
+    tx_fee = 1
+    amount = 10
+    handle_transaction = cosmos_api.get_handle_transaction(
+        sender_address, contract_address, handle_msg, amount, tx_fee
+    )
+
+    assert type(handle_transaction) == dict and len(handle_transaction) == 6
+    assert "account_number" in handle_transaction
+    assert "chain_id" in handle_transaction
+    assert "fee" in handle_transaction and handle_transaction["fee"] == {
+        "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
+        "gas": "80000",
+    }
+    assert "memo" in handle_transaction
+    assert "msgs" in handle_transaction and len(handle_transaction["msgs"]) == 1
+    msg = handle_transaction["msgs"][0]
+    assert "type" in msg and msg["type"] == "wasm/execute"
+    assert (
+        "value" in msg
+        and msg["value"]["sender"] == sender_address
+        and msg["value"]["contract"] == contract_address
+        and msg["value"]["msg"] == handle_msg
+        and msg["value"]["sent_funds"] == [{"denom": "atestfet", "amount": str(amount)}]
+    )
+    assert "sequence" in handle_transaction
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_try_execute_wasm_query():
+    """Test the execute wasm query method."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    process_mock = mock.Mock()
+    output = "output".encode("ascii")
+    attrs = {"communicate.return_value": (output, "error")}
+    process_mock.configure_mock(**attrs)
+    with mock.patch("subprocess.Popen", return_value=process_mock):
+        result = cosmos_api.try_execute_wasm_query(
+            contract_address="contract_address", query_msg={}
+        )
+    assert result == output.decode("ascii")
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_try_execute_wasm_transaction():
+    """Test the execute wasm query method."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    process_mock = mock.Mock()
+    output = "output".encode("ascii")
+    attrs = {"communicate.return_value": (output, "error")}
+    process_mock.configure_mock(**attrs)
+    with mock.patch("subprocess.Popen", return_value=process_mock):
+        result = cosmos_api.try_execute_wasm_transaction(tx_signed="signed_transaction")
+    assert result == output.decode("ascii")
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_send_signed_transaction_wasm_transaction():
+    """Test the send_signed_transaction method for a wasm transaction."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    tx_signed = {"value": {"msg": [{"type": "wasm/store-code"}]}}
+    with mock.patch.object(
+        cosmos_api, "try_execute_wasm_transaction", return_value="digest"
+    ):
+        result = cosmos_api.send_signed_transaction(tx_signed=tx_signed)
+    assert result == "digest"
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_contract_instance():
+    """Test the get contract instance method."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    assert cosmos_api.get_contract_instance("interface") is None

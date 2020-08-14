@@ -32,7 +32,7 @@ Messages must adhere to a protocol.
 
 * dialogues, which define rules over message sequences.
 
-The framework provides one default protocol, called `default`. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#defaultmessage-objects">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#defaultserializer-objects">`DefaultSerializer`</a> and <a href="..api/protocols/default/dialogues#defaultdialogues-objects">`DefaultDialogue`</a> classes.
+The framework provides one default protocol, called `default`. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#aea.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#aea.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#aea.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
 Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>. For more details on protocols also read the protocol guide <a href="../protocol">here</a>.
 

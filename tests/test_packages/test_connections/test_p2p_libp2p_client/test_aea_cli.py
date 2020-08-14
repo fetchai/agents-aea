@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
-
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -26,7 +25,6 @@ from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
-    skip_test_windows,
 )
 
 DEFAULT_PORT = 10234
@@ -37,7 +35,6 @@ DEFAULT_CLIENTS_PER_NODE = 4
 DEFAULT_LAUNCH_TIMEOUT = 10
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p_client connection is correctly run"""

@@ -22,7 +22,7 @@ cd my_aea_projects/
 
 We highly recommend using a virtual environment to ensure consistency across dependencies.
 
-Check that you have [`pipenv`](https://github.com/pypa/pipenv).
+Check that you have <a href="https://github.com/pypa/pipenv">`pipenv`</a>.
 
 ``` bash
 which pipenv
@@ -38,7 +38,7 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 
 ## Installation
 
-The following installs the entire AEA package which also includes a [command-line interface (CLI)](../cli-commands).
+The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>.
 
 ``` bash
 pip install aea[all]
@@ -86,7 +86,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.3
+v0.5.4
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -103,11 +103,11 @@ The echo skill is a simple demo that introduces you to the main business logic c
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.8.0
+aea fetch fetchai/my_first_aea:0.9.0
 cd my_first_aea
 ```
 
-To learn more about the folder structure of an AEA project read on [here](../package-imports).
+To learn more about the folder structure of an AEA project read on <a href="../package-imports/">here</a>.
 
 <details><summary>Alternatively: step by step install</summary>
 
@@ -123,9 +123,9 @@ cd my_first_aea
 <br>
 Second, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.4.0
+aea add skill fetchai/echo:0.5.0
 ```
-This copies the `fetchai/echo:0.4.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.4.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.5.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.5.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ## Usage of the stub connection
@@ -147,12 +147,12 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
 ## Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.7.0` connection.
+Run the AEA with the default `fetchai/stub:0.8.0` connection.
 
 ``` bash
 aea run
@@ -161,7 +161,7 @@ aea run
 or
 
 ``` bash
-aea run --connections fetchai/stub:0.7.0
+aea run --connections fetchai/stub:0.8.0
 ```
 
 You will see the echo skill running in the terminal window.
@@ -173,7 +173,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.3
+v0.5.4
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -187,34 +187,42 @@ info: Echo Behaviour: act method called.
 
 The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the Behaviour method act. This is the main agent loop in action.
 
-Let's look at the `Handler` in more depth.
-
 ### Add a message to the input file
 
-From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
+From a different terminal and same directory, we send the AEA a message wrapped in an envelop using the CLI interact command:
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,' >> input_file
+cd my_first_aea
+aea interact
 ```
 
-You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
+You can now send the AEA messages via an interactive tool by typing `hello` into the prompt and hitting enter twice (once to send, once more to check for a response). You will see the `Echo Handler` dealing with the envelope and contained message (your dialogue reference will be different):
 
 ``` bash
 info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(dialogue_reference=('', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
+info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=my_first_aea_interact
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
 <details><summary>CLI interact command</summary>
 
-Optionally, use the CLI interact command from a different terminal:
+Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-aea interact
+echo 'my_first_aea,sender_aea,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
 ```
 
-You can then send the AEA messages via an interactive tool by typing `hello` into the prompt and hitting enter twice (once to send, once more to check for a response).
+You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
+
+``` bash
+info: Echo Behaviour: act method called.
+info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+```
+
+Note, due to the dialogue reference having to be incremented, you can only send the above envelope once!
 
 </details>
 
@@ -246,6 +254,7 @@ import signal
 import time
 
 from aea.mail.base import Envelope
+from aea.protocols.default.dialogues import DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCase
@@ -261,13 +270,17 @@ class TestEchoSkill(AEATestCase):
         assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
+        sender_aea = "sender_aea"
+        dialogues = DefaultDialogues(sender_aea)
         message_content = b"hello"
         message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=message_content,
+            performative=DefaultMessage.Performative.BYTES,
+            dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
+            content=message_content,
         )
         sent_envelope = Envelope(
             to=self.agent_name,
-            sender="sender_aea",
+            sender=sender_aea,
             protocol_id=message.protocol_id,
             message=DefaultSerializer().encode(message),
         )
@@ -280,7 +293,8 @@ class TestEchoSkill(AEATestCase):
         assert sent_envelope.to == received_envelope.sender
         assert sent_envelope.sender == received_envelope.to
         assert sent_envelope.protocol_id == received_envelope.protocol_id
-        assert sent_envelope.message == received_envelope.message
+        received_message = DefaultMessage.serializer.decode(received_envelope.message)
+        assert message.content == received_message.content
 
         check_strings = (
             "Echo Handler: setup method called.",

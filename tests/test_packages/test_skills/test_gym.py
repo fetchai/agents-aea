@@ -22,15 +22,15 @@
 import os
 import shutil
 
+
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import ROOT_DIR, skip_test_windows
+from tests.conftest import ROOT_DIR
 
 
 class TestGymSkill(AEATestCaseEmpty):
     """Test that gym skill works."""
 
-    @skip_test_windows
     def test_gym(self):
         """Run the gym skill sequence."""
         self.add_item("skill", "fetchai/gym:0.5.0")
@@ -42,7 +42,7 @@ class TestGymSkill(AEATestCaseEmpty):
         self.set_config(setting_path, "fetchai/gym:0.5.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/gym_aea:0.7.0", self.agent_name
+            "fetchai/gym_aea:0.8.0", self.agent_name
         )
         assert (
             diff == []

@@ -9,7 +9,7 @@ The AEA `erc1155_deploy` and `erc1155_client` skills demonstrate an interaction 
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-##Discussion
+## Discussion
 
 The scope of the specific demo is to demonstrate how to deploy a smart contract and interact with it. For the specific use-case, we create two AEAs one that deploys and creates tokens inside the smart contract and the other that signs a transaction so we can complete an atomic swap. The smart contract we are using is an ERC1155 smart contract
 with a one-step atomic swap functionality. That means the trade between the two AEAs can be trustless.
@@ -26,7 +26,7 @@ with a one-step atomic swap functionality. That means the trade between the two 
 Fetch the AEA that will deploy the contract.
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.10.0
+aea fetch fetchai/erc1155_deployer:0.11.0
 cd erc1155_deployer
 aea install
 ```
@@ -39,12 +39,12 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/erc1155_deploy:0.10.0
+aea add skill fetchai/erc1155_deploy:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 Then update the agent config (`aea-config.yaml`) with the default routing:
@@ -81,7 +81,7 @@ aea add-key cosmos cosmos_private_key.txt --connection
 In another terminal, fetch the AEA that will get some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.10.0
+aea fetch fetchai/erc1155_client:0.11.0
 cd erc1155_client
 aea install
 ```
@@ -94,12 +94,12 @@ Create the AEA that will get some tokens from the deployer.
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/erc1155_client:0.9.0
+aea add skill fetchai/erc1155_client:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
 
 Then update the agent config (`aea-config.yaml`) with the default routing:
@@ -166,15 +166,30 @@ First, run the deployer AEA.
 aea run
 ```
 
+Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+
 It will perform the following steps:
 - deploy the smart contract
 - create a batch of items in the smart contract
-- mint a batch of itemsin the smart contract
+- mint a batch of items in the smart contract
 
 At some point you should see the log output:
 ``` bash
-Successfully minted items. Transaction digest: ...
+registering service on SOEF.
 ```
+
+Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+
+``` yaml
+config:
+  delegate_uri: 127.0.0.1:11001
+  entry_peers: ['SOME_ADDRESS']
+  local_uri: 127.0.0.1:9001
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9001
+```
+
+where `SOME_ADDRESS` is replaced accordingly.
 
 Then, in the separate terminal run the client AEA.
 

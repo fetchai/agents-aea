@@ -16,8 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This test module contains tests for iteract command."""
 
+
+"""This test module contains tests for iteract command."""
+import time
 from unittest import TestCase, mock
 
 import pytest
@@ -27,17 +29,17 @@ from aea.cli.interact import (
     _process_envelopes,
     _try_construct_envelope,
 )
+from aea.helpers.base import send_control_c
 from aea.mail.base import Envelope
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
-from tests.conftest import MAX_FLAKY_RERUNS, skip_test_windows
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 class TestInteractCommand(AEATestCaseMany):
     """Test that interact command work."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    @skip_test_windows
     def test_interact_command_positive(self):
         """Run interaction."""
         agent_name = "test_iteraction_agent"
@@ -58,7 +60,8 @@ class TestInteractCommand(AEATestCaseMany):
             missing_strings
         )
 
-        self.terminate_agents(agent_process, interaction_process)
+        self.terminate_agents(interaction_process)
+        self.terminate_agents(agent_process)
         assert (
             self.is_successfully_terminated()
         ), "Agent {} wasn't successfully terminated.".format(agent_name)
@@ -115,25 +118,25 @@ class TryConstructEnvelopeTestCase(TestCase):
     @mock.patch("builtins.input", return_value="Inputed value")
     def test__try_construct_envelope_positive(self, *mocks):
         """Test _try_construct_envelope for positive result."""
-        envelope = _try_construct_envelope("agent_name", "sender")
+        envelope = _try_construct_envelope("agent_name", "sender", mock.Mock())
         self.assertIsInstance(envelope, Envelope)
 
     @mock.patch("builtins.input", return_value="")
     def test__try_construct_envelope_positive_no_input_message(self, *mocks):
         """Test _try_construct_envelope for no input message result."""
-        envelope = _try_construct_envelope("agent_name", "sender")
+        envelope = _try_construct_envelope("agent_name", "sender", "dialogues")
         self.assertEqual(envelope, None)
 
     @mock.patch("builtins.input", _raise_keyboard_interrupt)
     def test__try_construct_envelope_keyboard_interrupt(self, *mocks):
         """Test _try_construct_envelope for keyboard interrupt result."""
         with self.assertRaises(KeyboardInterrupt):
-            _try_construct_envelope("agent_name", "sender")
+            _try_construct_envelope("agent_name", "sender", "dialogues")
 
     @mock.patch("builtins.input", _raise_exception)
     def test__try_construct_envelope_exception_raised(self, *mocks):
         """Test _try_construct_envelope for exception raised result."""
-        envelope = _try_construct_envelope("agent_name", "sender")
+        envelope = _try_construct_envelope("agent_name", "sender", "dialogues")
         self.assertEqual(envelope, None)
 
 
@@ -154,24 +157,25 @@ class ProcessEnvelopesTestCase(TestCase):
         inbox.empty = lambda: False
         inbox.get_nowait = lambda: "Not None"
         outbox = mock.Mock()
+        dialogues = mock.Mock()
 
         try_construct_envelope_mock.return_value = None
         constructed_message = "Constructed message"
         construct_message_mock.return_value = constructed_message
 
         # no envelope and inbox not empty behaviour
-        _process_envelopes(agent_name, identity_stub, inbox, outbox)
+        _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
         click_echo_mock.assert_called_once_with(constructed_message)
 
         # no envelope and inbox empty behaviour
         inbox.empty = lambda: True
-        _process_envelopes(agent_name, identity_stub, inbox, outbox)
+        _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
         click_echo_mock.assert_called_with("Received no new envelope!")
 
         # present envelope behaviour
         try_construct_envelope_mock.return_value = "Not None envelope"
         outbox.put = mock.Mock()
-        _process_envelopes(agent_name, identity_stub, inbox, outbox)
+        _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
         outbox.put.assert_called_once_with("Not None envelope")
         click_echo_mock.assert_called_with(constructed_message)
 
@@ -185,6 +189,66 @@ class ProcessEnvelopesTestCase(TestCase):
         inbox.empty = lambda: False
         inbox.get_nowait = lambda: None
         outbox = mock.Mock()
+        dialogues = mock.Mock()
 
         with self.assertRaises(AssertionError):
-            _process_envelopes(agent_name, identity_stub, inbox, outbox)
+            _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
+
+
+class TestInteractEcho(AEATestCaseEmpty):
+    """Test 'aea interact' with the echo skill."""
+
+    @pytest.mark.integration
+    def test_interact(self):
+        """Test the 'aea interact' command with the echo skill."""
+        self.add_item("skill", "fetchai/echo:0.5.0")
+        self.run_agent()
+        process = self.run_interaction()
+
+        time.sleep(1.0)
+
+        # send first message
+        process.stdin.write(b"hello\n")
+        process.stdin.flush()
+        time.sleep(3.0)
+
+        # read incoming messages
+        process.stdin.write(b"\n")
+        process.stdin.flush()
+        time.sleep(1.0)
+
+        # read another message - should return nothing
+        process.stdin.write(b"\n")
+        process.stdin.flush()
+        time.sleep(1.0)
+
+        send_control_c(process)
+        time.sleep(0.5)
+
+        expected_output = [
+            "Starting AEA interaction channel...",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Sending envelope:",
+            f"to: {self.agent_name}",
+            f"sender: {self.agent_name}_interact",
+            "protocol_id: fetchai/default:0.4.0",
+            "message_id=1 target=0 performative=bytes content=b'hello')",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Interrupting input, checking inbox ...",
+            "Received envelope:",
+            f"to: {self.agent_name}_interact",
+            f"sender: {self.agent_name}",
+            "protocol_id: fetchai/default:0.4.0",
+            "message_id=2 target=1 performative=bytes content=b'hello')",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Interrupting input, checking inbox ...",
+            "Received no new envelope!",
+            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Interaction interrupted!",
+        ]
+        missing = self.missing_from_output(
+            process, expected_output, timeout=10, is_terminating=False
+        )
+        assert len(missing) == 0, "Strings {} didn't appear in agent output.".format(
+            missing
+        )
