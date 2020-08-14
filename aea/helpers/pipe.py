@@ -61,6 +61,12 @@ class LocalPortablePipe(ABC):
         Will first read the size than the actual data
         """
 
+    @abstractmethod
+    async def close(self) -> None:
+        """
+        Close the communication channel
+        """
+
     @property
     @abstractmethod
     def in_path(self) -> str:
@@ -112,7 +118,7 @@ class TCPSocketPipe(LocalPortablePipe):
 
         try:
             await asyncio.wait_for(self._connected.wait(), self._timeout)
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError:  # pragma: no cover
             return False
 
         self._server.close()
@@ -148,13 +154,19 @@ class TCPSocketPipe(LocalPortablePipe):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:
+        except asyncio.IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )
             )
             return None
+
+    async def close(self) -> None:
+        assert self._writer is not None, "Pipe not connected"
+        self._writer.write_eof()
+        await self._writer.drain()
+        self._writer.close()
 
     @property
     def in_path(self) -> str:
@@ -204,7 +216,7 @@ class PosixNamedPipe(LocalPortablePipe):
 
     async def connect(self, timeout=PIPE_CONN_TIMEOUT) -> bool:
         self._connection_timeout = timeout / PIPE_CONN_ATTEMPTS if timeout > 0 else 0
-        if self._connection_attempts <= 1:
+        if self._connection_attempts <= 1:  # pragma: no cover
             return False
         self._connection_attempts -= 1
 
@@ -276,13 +288,19 @@ class PosixNamedPipe(LocalPortablePipe):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:
-            self.logger.info(  # pragma: nocover
+        except asyncio.IncompleteReadError as e:  # pragma: no cover
+            self.logger.info(
                 "Connection disconnected while reading from pipe ({}/{})".format(
                     len(e.partial), e.expected
                 )
             )
-            return None  # pragma: nocover
+            return None
+
+    async def close(self) -> None:
+        assert self._fileobj is not None, "Pipe not connected"
+        self._fileobj.close()
+        os.close(self._out)
+        await asyncio.sleep(0)
 
     @property
     def in_path(self) -> str:
@@ -300,7 +318,7 @@ def make_pipe(logger: logging.Logger = _default_logger) -> LocalPortablePipe:
 
     if os.name == "posix":
         return PosixNamedPipe(logger=logger)
-    elif os.name == "nt":
+    elif os.name == "nt":  # pragma: nocover
         return TCPSocketPipe(logger=logger)
-    else:
+    else:  # pragma: nocover
         raise Exception("make pipe is not supported on platform {}".format(os.name))
