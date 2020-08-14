@@ -45,7 +45,8 @@ class Location:
 
     @property
     def tuple(self) -> Tuple[float, float]:
-        return cast(Tuple, (self.latitude, self.longitude))
+        """Get the tuple representation of a location."""
+        return (self.latitude, self.longitude)
 
     def distance(self, other: "Location") -> float:
         """
