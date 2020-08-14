@@ -112,6 +112,7 @@ class TCPSocketPipeClient:
                     self._port,  # pylint: disable=protected-access
                     loop=self._loop,
                 )
+                break
             except ConnectionRefusedError:
                 await asyncio.sleep(TCP_SOCKET_PIPE_CLIENT_CONN_TIMEOUT)
                 continue
