@@ -5,6 +5,7 @@
 - Adds support for Windows in p2p connections
 - Makes all tests Windows compatible
 - Adds integration tests for p2p public dht
+- Modifies contract base class to make it cross-ledger compatible
 - Changes dialogue reference nonce generation
 - Fixes tac skills (non-contract versions)
 - Fixes Aries identity skills
