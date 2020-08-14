@@ -248,191 +248,188 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     ), "Error, found: {}".format(tx)
 
 
-@pytest.fixture(params=cosmos_ledger)
-def cosmos_ledger_api(request):
-    ledger_id, config = request.param
-    api = ledger_apis_registry.make(ledger_id, **config)
-    yield api
+class TestCosmWasmContract:
+    @pytest.fixture(params=cosmos_ledger)
+    def cosmos_ledger_api(self, request):
+        ledger_id, config = request.param
+        api = ledger_apis_registry.make(ledger_id, **config)
+        yield api
 
+    @pytest.fixture(params=cosmos_crypto)
+    def deployer_cosmos_crypto_api(self, request):
+        crypto_id = request.param[0]
+        api = crypto_registry.make(crypto_id)
+        yield api
 
-@pytest.fixture(params=cosmos_crypto)
-def deployer_cosmos_crypto_api(request):
-    crypto_id = request.param[0]
-    api = crypto_registry.make(crypto_id)
-    yield api
+    @pytest.fixture(params=cosmos_crypto)
+    def item_owner_cosmos_crypto_api(self, request):
+        crypto_id = request.param[0]
+        api = crypto_registry.make(crypto_id)
+        yield api
 
+    @pytest.fixture(params=cosmos_crypto)
+    def cosmos_faucet_api(self, request):
+        item_id = request.param[0]
+        api = faucet_apis_registry.make(item_id)
+        yield api
 
-@pytest.fixture(params=cosmos_crypto)
-def item_owner_cosmos_crypto_api(request):
-    crypto_id = request.param[0]
-    api = crypto_registry.make(crypto_id)
-    yield api
+    def refill_from_faucet(self, ledger_api, faucet_api, address):
+        start_balance = ledger_api.get_balance(address)
 
+        faucet_api.get_wealth(address)
 
-@pytest.fixture(params=cosmos_crypto)
-def cosmos_faucet_api(request):
-    item_id = request.param[0]
-    api = faucet_apis_registry.make(item_id)
-    yield api
+        tries = 10
+        while tries > 0:
+            tries -= 1
+            time.sleep(1)
 
+            balance = ledger_api.get_balance(address)
+            if balance != start_balance:
+                break
 
-def refill_from_faucet(ledger_api, faucet_api, address):
-    start_balance = ledger_api.get_balance(address)
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    def test_cosmwasm_contract_deploy_and_interact(self, cosmos_ledger_api, deployer_cosmos_crypto_api,
+                                                   item_owner_cosmos_crypto_api,
+                                                   erc1155_contract, cosmos_faucet_api):
+        token_ids_a = [
+            340282366920938463463374607431768211456,
+            340282366920938463463374607431768211457,
+            340282366920938463463374607431768211458,
+            340282366920938463463374607431768211459,
+            340282366920938463463374607431768211460,
+            340282366920938463463374607431768211461,
+            340282366920938463463374607431768211462,
+            340282366920938463463374607431768211463,
+            340282366920938463463374607431768211464,
+            340282366920938463463374607431768211465,
+        ]
 
-    faucet_api.get_wealth(address)
+        token_id_b = 680564733841876926926749214863536422912
 
-    tries = 10
-    while tries > 0:
-        tries -= 1
-        time.sleep(1)
+        # Refill deployer account from faucet
+        self.refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, deployer_cosmos_crypto_api.address)
 
-        balance = ledger_api.get_balance(address)
-        if balance != start_balance:
-            break
+        # Refill item owner account from faucet
+        self.refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, item_owner_cosmos_crypto_api.address)
 
+        # Deploy contract
+        tx = erc1155_contract.get_deploy_transaction(
+            ledger_api=cosmos_ledger_api, deployer_address=deployer_cosmos_crypto_api.address, gas=900000
+        )
+        assert len(tx) == 6
+        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
+        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        assert len(receipt) == 7
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
 
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_cosmwasm_get_transactions(cosmos_ledger_api, deployer_cosmos_crypto_api, item_owner_cosmos_crypto_api,
-                                   erc1155_contract, cosmos_faucet_api):
-    token_ids_a = [
-        340282366920938463463374607431768211456,
-        340282366920938463463374607431768211457,
-        340282366920938463463374607431768211458,
-        340282366920938463463374607431768211459,
-        340282366920938463463374607431768211460,
-        340282366920938463463374607431768211461,
-        340282366920938463463374607431768211462,
-        340282366920938463463374607431768211463,
-        340282366920938463463374607431768211464,
-        340282366920938463463374607431768211465,
-    ]
+        code_id = cosmos_ledger_api.get_last_code_id()
 
-    token_id_b = 680564733841876926926749214863536422912
+        # Init contract
+        tx = cosmos_ledger_api.get_init_transaction(deployer_cosmos_crypto_api.address, code_id, {}, 0, 0, label="ERC1155")
+        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
+        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        assert len(receipt) == 7
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
 
-    # Refill deployer account from faucet
-    refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, deployer_cosmos_crypto_api.address)
+        contract_address = cosmos_ledger_api.get_contract_address(code_id)
 
-    # Refill item owner account from faucet
-    refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, item_owner_cosmos_crypto_api.address)
+        # Create single token
+        tx = erc1155_contract.get_create_single_transaction(
+            ledger_api=cosmos_ledger_api,
+            contract_address=contract_address,
+            deployer_address=deployer_cosmos_crypto_api.address,
+            token_id=token_id_b,
+        )
+        assert len(tx) == 6
+        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
+        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        assert len(receipt) == 6
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
 
-    # Deploy contract
-    tx = erc1155_contract.get_deploy_transaction(
-        ledger_api=cosmos_ledger_api, deployer_address=deployer_cosmos_crypto_api.address, gas=900000
-    )
-    assert len(tx) == 6
-    signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-    receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
-    assert len(receipt) == 7
-    assert all(
-        [
-            key in receipt
-            for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
-        ])
+        # Create batch of tokens
+        tx = erc1155_contract.get_create_batch_transaction(
+            ledger_api=cosmos_ledger_api,
+            contract_address=contract_address,
+            deployer_address=deployer_cosmos_crypto_api.address,
+            token_ids=token_ids_a,
+        )
+        assert len(tx) == 6
+        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
+        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        assert len(receipt) == 6
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
 
-    code_id = cosmos_ledger_api.get_last_code_id()
+        # Mint single token
+        tx = erc1155_contract.get_mint_single_transaction(
+            ledger_api=cosmos_ledger_api,
+            contract_address=contract_address,
+            deployer_address=deployer_cosmos_crypto_api.address,
+            recipient_address=item_owner_cosmos_crypto_api.address,
+            token_id=token_id_b,
+            mint_quantity=1
+        )
+        assert len(tx) == 6
+        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
+        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        assert len(receipt) == 6
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
 
-    # Init contract
-    tx = cosmos_ledger_api.get_init_transaction(deployer_cosmos_crypto_api.address, code_id, {}, 0, 0, label="ERC1155")
-    signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-    receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
-    assert len(receipt) == 7
-    assert all(
-        [
-            key in receipt
-            for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
-        ])
+        # Get balance of single token
+        res = erc1155_contract.get_balance(
+            ledger_api=cosmos_ledger_api,
+            contract_address=contract_address,
+            agent_address=item_owner_cosmos_crypto_api.address,
+            token_id=token_id_b,
+        )
+        assert "balance" in res
+        assert res["balance"] == '1'
 
-    contract_address = cosmos_ledger_api.get_contract_address(code_id)
+        # Mint batch of tokens
+        tx = erc1155_contract.get_mint_batch_transaction(
+            ledger_api=cosmos_ledger_api,
+            contract_address=contract_address,
+            deployer_address=deployer_cosmos_crypto_api.address,
+            recipient_address=item_owner_cosmos_crypto_api.address,
+            token_ids=token_ids_a,
+            mint_quantities=[1] * len(token_ids_a)
+        )
+        assert len(tx) == 6
+        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
+        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        assert len(receipt) == 6
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
 
-    # Create single token
-    tx = erc1155_contract.get_create_single_transaction(
-        ledger_api=cosmos_ledger_api,
-        contract_address=contract_address,
-        deployer_address=deployer_cosmos_crypto_api.address,
-        token_id=token_id_b,
-    )
-    assert len(tx) == 6
-    signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-    receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
-    assert len(receipt) == 6
-    assert all(
-        [
-            key in receipt
-            for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-        ])
-
-    # Create batch of tokens
-    tx = erc1155_contract.get_create_batch_transaction(
-        ledger_api=cosmos_ledger_api,
-        contract_address=contract_address,
-        deployer_address=deployer_cosmos_crypto_api.address,
-        token_ids=token_ids_a,
-    )
-    assert len(tx) == 6
-    signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-    receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
-    assert len(receipt) == 6
-    assert all(
-        [
-            key in receipt
-            for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-        ])
-
-    # Mint single token
-    tx = erc1155_contract.get_mint_single_transaction(
-        ledger_api=cosmos_ledger_api,
-        contract_address=contract_address,
-        deployer_address=deployer_cosmos_crypto_api.address,
-        recipient_address=item_owner_cosmos_crypto_api.address,
-        token_id=token_id_b,
-        mint_quantity=1
-    )
-    assert len(tx) == 6
-    signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-    receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
-    assert len(receipt) == 6
-    assert all(
-        [
-            key in receipt
-            for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-        ])
-
-    # Get balance of single token
-    res = erc1155_contract.get_balance(
-        ledger_api=cosmos_ledger_api,
-        contract_address=contract_address,
-        agent_address=item_owner_cosmos_crypto_api.address,
-        token_id=token_id_b,
-    )
-    assert "balance" in res
-    assert res["balance"] == '1'
-
-    # Mint batch of tokens
-    tx = erc1155_contract.get_mint_batch_transaction(
-        ledger_api=cosmos_ledger_api,
-        contract_address=contract_address,
-        deployer_address=deployer_cosmos_crypto_api.address,
-        recipient_address=item_owner_cosmos_crypto_api.address,
-        token_ids=token_ids_a,
-        mint_quantities=[1] * len(token_ids_a)
-    )
-    assert len(tx) == 6
-    signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-    receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
-    assert len(receipt) == 6
-    assert all(
-        [
-            key in receipt
-            for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-        ])
-
-    # Get balances of multiple tokens
-    res = erc1155_contract.get_balances(
-        ledger_api=cosmos_ledger_api,
-        contract_address=contract_address,
-        agent_address=item_owner_cosmos_crypto_api.address,
-        token_ids=token_ids_a,
-    )
-    assert "balances" in res
-    assert res["balances"] == ['1'] * len(token_ids_a)
+        # Get balances of multiple tokens
+        res = erc1155_contract.get_balances(
+            ledger_api=cosmos_ledger_api,
+            contract_address=contract_address,
+            agent_address=item_owner_cosmos_crypto_api.address,
+            token_ids=token_ids_a,
+        )
+        assert "balances" in res
+        assert res["balances"] == ['1'] * len(token_ids_a)

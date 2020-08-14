@@ -383,31 +383,36 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: a ledger transaction object
         """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(from_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        value_eth_wei = ledger_api.api.toWei(value, "ether")
-        tx = instance.functions.trade(
-            from_address,
-            to_address,
-            token_id,
-            from_supply,
-            to_supply,
-            value_eth_wei,
-            trade_nonce,
-            signature,
-            data,
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "from": from_address,
-                "value": value_eth_wei,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
-            }
-        )
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
+        if ledger_api.identifier == "ethereum":
+            # create the transaction dict
+            nonce = ledger_api.api.eth.getTransactionCount(from_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            value_eth_wei = ledger_api.api.toWei(value, "ether")
+            tx = instance.functions.trade(
+                from_address,
+                to_address,
+                token_id,
+                from_supply,
+                to_supply,
+                value_eth_wei,
+                trade_nonce,
+                signature,
+                data,
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "from": from_address,
+                    "value": value_eth_wei,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            tx = cls._try_estimate_gas(ledger_api, tx)
+            return tx
+        elif ledger_api.identifier == "cosmos":
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
 
     @classmethod
     def get_balances(
