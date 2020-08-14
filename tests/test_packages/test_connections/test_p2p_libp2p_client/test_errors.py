@@ -39,11 +39,9 @@ from tests.conftest import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     libp2p_log_on_failure,
-    skip_test_windows,
 )
 
 
-@skip_test_windows
 @pytest.mark.asyncio
 class TestLibp2pClientConnectionFailureNodeNotConnected:
     """Test that connection fails when node not running"""
@@ -55,7 +53,6 @@ class TestLibp2pClientConnectionFailureNodeNotConnected:
             await conn.connect()
 
 
-@skip_test_windows
 class TestLibp2pClientConnectionFailureConnectionSetup:
     """Test that connection fails when setup incorrectly"""
 
@@ -103,7 +100,6 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             pass
 
 
-@skip_test_windows
 class TestLibp2pClientConnectionNodeDisconnected:
     """Test that connection will properly handle node disconnecting"""
 

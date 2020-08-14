@@ -1368,9 +1368,10 @@ class AEABuilder:
                     f"Skipping registration of contract {configuration.public_id} since already registered."
                 )
                 continue
-            logger.debug(f"Registering contract {configuration.public_id}")
-
-            try:
+            logger.debug(  # pragma: nocover
+                f"Registering contract {configuration.public_id}"
+            )
+            try:  # pragma: nocover
                 contract_registry.register(
                     id_=str(configuration.public_id),
                     entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
