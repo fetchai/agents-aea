@@ -72,7 +72,9 @@ class GenericStrategy(Model):
 
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
-            "location": Location(location["longitude"], location["latitude"])
+            "location": Location(
+                longitude=location["longitude"], latitude=location["latitude"]
+            )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         assert (

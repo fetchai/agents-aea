@@ -196,7 +196,7 @@ cd my_first_aea
 aea interact
 ```
 
-You can now send the AEA messages via an interactive tool by typing `hello` into the prompt and hitting enter twice (once to send, once more to check for a response). You will see the `Echo Handler` dealing with the envelope and contained message:
+You can now send the AEA messages via an interactive tool by typing `hello` into the prompt and hitting enter twice (once to send, once more to check for a response). You will see the `Echo Handler` dealing with the envelope and contained message (your dialogue reference will be different):
 
 ``` bash
 info: Echo Behaviour: act method called.

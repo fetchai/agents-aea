@@ -95,6 +95,7 @@ from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
+
 CliRunner = ImportedCliRunner
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -171,6 +172,13 @@ NON_GENESIS_CONFIG = {
     "local_uri": "127.0.0.1:9001",
     "log_file": "libp2p_node.log",
     "public_uri": "127.0.0.1:9001",
+}
+NON_GENESIS_CONFIG_TWO = {
+    "delegate_uri": "127.0.0.1:11002",
+    "entry_peers": [COSMOS_P2P_ADDRESS],
+    "local_uri": "127.0.0.1:9002",
+    "log_file": "libp2p_node.log",
+    "public_uri": "127.0.0.1:9002",
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
 PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
@@ -963,6 +971,13 @@ def check_test_cwd(request):
     if old_cwd != os.getcwd():
         os.chdir(ROOT_DIR)
         raise CwdException()
+
+
+@pytest.fixture(autouse=True)
+def set_logging_to_debug(request):
+    """Set aea logger to debug."""
+    aea_logger = logging.getLogger("aea")
+    aea_logger.setLevel(logging.DEBUG)
 
 
 @pytest.fixture(autouse=True)

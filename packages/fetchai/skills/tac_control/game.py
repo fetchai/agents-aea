@@ -357,6 +357,9 @@ class Transaction(Terms):
         assert (
             message.performative == TacMessage.Performative.TRANSACTION
         ), "Wrong performative"
+        sender_is_seller = all(
+            [value >= 0 for value in message.amount_by_currency_id.values()]
+        )
         transaction = Transaction(
             ledger_id=message.ledger_id,
             sender_address=message.sender_address,
@@ -364,8 +367,8 @@ class Transaction(Terms):
             amount_by_currency_id=message.amount_by_currency_id,
             fee_by_currency_id=message.fee_by_currency_id,
             quantities_by_good_id=message.quantities_by_good_id,
-            is_sender_payable_tx_fee=True,  # TODO: check
-            nonce=str(message.nonce),
+            is_sender_payable_tx_fee=not sender_is_seller,
+            nonce=message.nonce,
             sender_signature=message.sender_signature,
             counterparty_signature=message.counterparty_signature,
         )
