@@ -283,6 +283,7 @@ def refill_from_faucet(ledger_api, faucet_api, address):
 
     tries = 10
     while tries > 0:
+        tries -= 1
         time.sleep(1)
 
         balance = ledger_api.get_balance(address)
@@ -292,7 +293,8 @@ def refill_from_faucet(ledger_api, faucet_api, address):
 
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_cosmwasm_get_transactions(cosmos_ledger_api, deployer_cosmos_crypto_api, item_owner_cosmos_crypto_api, erc1155_contract, cosmos_faucet_api):
+def test_cosmwasm_get_transactions(cosmos_ledger_api, deployer_cosmos_crypto_api, item_owner_cosmos_crypto_api,
+                                   erc1155_contract, cosmos_faucet_api):
     token_ids_a = [
         340282366920938463463374607431768211456,
         340282366920938463463374607431768211457,
@@ -311,10 +313,10 @@ def test_cosmwasm_get_transactions(cosmos_ledger_api, deployer_cosmos_crypto_api
         680564733841876926926749214863536422913,
     ]
 
-    # Re-fill deployer account from faucet
+    # Refill deployer account from faucet
     refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, deployer_cosmos_crypto_api.address)
 
-    # Re-fill deployer account from faucet
+    # Refill item owner account from faucet
     refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, item_owner_cosmos_crypto_api.address)
 
     # Deploy contract
@@ -331,7 +333,7 @@ def test_cosmwasm_get_transactions(cosmos_ledger_api, deployer_cosmos_crypto_api
             for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
         ])
 
-    code_id = erc1155_contract.get_last_code_id()
+    code_id = cosmos_ledger_api.get_last_code_id()
 
     # Init contract
     tx = cosmos_ledger_api.get_init_transaction(deployer_cosmos_crypto_api.address, code_id, {}, 0, 0, label="ERC1155")
@@ -344,7 +346,7 @@ def test_cosmwasm_get_transactions(cosmos_ledger_api, deployer_cosmos_crypto_api
             for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
         ])
 
-    contract_address = erc1155_contract.get_contract_address(code_id)
+    contract_address = cosmos_ledger_api.get_contract_address(code_id)
 
     # Create single token
     tx = erc1155_contract.get_create_single_transaction(
