@@ -43,14 +43,6 @@ crypto = [
     (ETHEREUM,),
 ]
 
-cosmos_ledger = [
-    (COSMOS, COSMOS_TESTNET_CONFIG),
-]
-
-cosmos_crypto = [
-    (COSMOS,)
-]
-
 
 @pytest.fixture(params=ledger)
 def ledger_api(request):
@@ -249,29 +241,32 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
 
 
 class TestCosmWasmContract:
-    @pytest.fixture(params=cosmos_ledger)
-    def cosmos_ledger_api(self, request):
-        ledger_id, config = request.param
-        api = ledger_apis_registry.make(ledger_id, **config)
-        yield api
+    def setup(self):
+        self.ledger_api = ledger_apis_registry.make(COSMOS, **COSMOS_TESTNET_CONFIG)
+        self.faucet_api = faucet_apis_registry.make(COSMOS)
+        self.deployer_crypto = crypto_registry.make(COSMOS)
+        self.item_owner_crypto = crypto_registry.make(COSMOS)
 
-    @pytest.fixture(params=cosmos_crypto)
-    def deployer_cosmos_crypto_api(self, request):
-        crypto_id = request.param[0]
-        api = crypto_registry.make(crypto_id)
-        yield api
+        self.token_ids_a = [
+            340282366920938463463374607431768211456,
+            340282366920938463463374607431768211457,
+            340282366920938463463374607431768211458,
+            340282366920938463463374607431768211459,
+            340282366920938463463374607431768211460,
+            340282366920938463463374607431768211461,
+            340282366920938463463374607431768211462,
+            340282366920938463463374607431768211463,
+            340282366920938463463374607431768211464,
+            340282366920938463463374607431768211465,
+        ]
 
-    @pytest.fixture(params=cosmos_crypto)
-    def item_owner_cosmos_crypto_api(self, request):
-        crypto_id = request.param[0]
-        api = crypto_registry.make(crypto_id)
-        yield api
+        self.token_id_b = 680564733841876926926749214863536422912
 
-    @pytest.fixture(params=cosmos_crypto)
-    def cosmos_faucet_api(self, request):
-        item_id = request.param[0]
-        api = faucet_apis_registry.make(item_id)
-        yield api
+        # Refill deployer account from faucet
+        self.refill_from_faucet(self.ledger_api, self.faucet_api, self.deployer_crypto.address)
+
+        # Refill item owner account from faucet
+        self.refill_from_faucet(self.ledger_api, self.faucet_api, self.item_owner_crypto.address)
 
     def refill_from_faucet(self, ledger_api, faucet_api, address):
         start_balance = ledger_api.get_balance(address)
@@ -289,37 +284,15 @@ class TestCosmWasmContract:
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    def test_cosmwasm_contract_deploy_and_interact(self, cosmos_ledger_api, deployer_cosmos_crypto_api,
-                                                   item_owner_cosmos_crypto_api,
-                                                   erc1155_contract, cosmos_faucet_api):
-        token_ids_a = [
-            340282366920938463463374607431768211456,
-            340282366920938463463374607431768211457,
-            340282366920938463463374607431768211458,
-            340282366920938463463374607431768211459,
-            340282366920938463463374607431768211460,
-            340282366920938463463374607431768211461,
-            340282366920938463463374607431768211462,
-            340282366920938463463374607431768211463,
-            340282366920938463463374607431768211464,
-            340282366920938463463374607431768211465,
-        ]
-
-        token_id_b = 680564733841876926926749214863536422912
-
-        # Refill deployer account from faucet
-        self.refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, deployer_cosmos_crypto_api.address)
-
-        # Refill item owner account from faucet
-        self.refill_from_faucet(cosmos_ledger_api, cosmos_faucet_api, item_owner_cosmos_crypto_api.address)
+    def test_cosmwasm_contract_deploy_and_interact(self, erc1155_contract):
 
         # Deploy contract
         tx = erc1155_contract.get_deploy_transaction(
-            ledger_api=cosmos_ledger_api, deployer_address=deployer_cosmos_crypto_api.address, gas=900000
+            ledger_api=self.ledger_api, deployer_address=self.deployer_crypto.address, gas=900000
         )
         assert len(tx) == 6
-        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
         assert len(receipt) == 7
         assert all(
             [
@@ -327,12 +300,12 @@ class TestCosmWasmContract:
                 for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
             ])
 
-        code_id = cosmos_ledger_api.get_last_code_id()
+        code_id = self.ledger_api.get_last_code_id()
 
         # Init contract
-        tx = cosmos_ledger_api.get_init_transaction(deployer_cosmos_crypto_api.address, code_id, {}, 0, 0, label="ERC1155")
-        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        tx = self.ledger_api.get_init_transaction(self.deployer_crypto.address, code_id, {}, 0, 0, label="ERC1155")
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
         assert len(receipt) == 7
         assert all(
             [
@@ -340,18 +313,18 @@ class TestCosmWasmContract:
                 for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
             ])
 
-        contract_address = cosmos_ledger_api.get_contract_address(code_id)
+        contract_address = self.ledger_api.get_contract_address(code_id)
 
         # Create single token
         tx = erc1155_contract.get_create_single_transaction(
-            ledger_api=cosmos_ledger_api,
+            ledger_api=self.ledger_api,
             contract_address=contract_address,
-            deployer_address=deployer_cosmos_crypto_api.address,
-            token_id=token_id_b,
+            deployer_address=self.deployer_crypto.address,
+            token_id=self.token_id_b,
         )
         assert len(tx) == 6
-        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
         assert len(receipt) == 6
         assert all(
             [
@@ -361,14 +334,14 @@ class TestCosmWasmContract:
 
         # Create batch of tokens
         tx = erc1155_contract.get_create_batch_transaction(
-            ledger_api=cosmos_ledger_api,
+            ledger_api=self.ledger_api,
             contract_address=contract_address,
-            deployer_address=deployer_cosmos_crypto_api.address,
-            token_ids=token_ids_a,
+            deployer_address=self.deployer_crypto.address,
+            token_ids=self.token_ids_a,
         )
         assert len(tx) == 6
-        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
         assert len(receipt) == 6
         assert all(
             [
@@ -378,16 +351,16 @@ class TestCosmWasmContract:
 
         # Mint single token
         tx = erc1155_contract.get_mint_single_transaction(
-            ledger_api=cosmos_ledger_api,
+            ledger_api=self.ledger_api,
             contract_address=contract_address,
-            deployer_address=deployer_cosmos_crypto_api.address,
-            recipient_address=item_owner_cosmos_crypto_api.address,
-            token_id=token_id_b,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.item_owner_crypto.address,
+            token_id=self.token_id_b,
             mint_quantity=1
         )
         assert len(tx) == 6
-        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
         assert len(receipt) == 6
         assert all(
             [
@@ -397,26 +370,26 @@ class TestCosmWasmContract:
 
         # Get balance of single token
         res = erc1155_contract.get_balance(
-            ledger_api=cosmos_ledger_api,
+            ledger_api=self.ledger_api,
             contract_address=contract_address,
-            agent_address=item_owner_cosmos_crypto_api.address,
-            token_id=token_id_b,
+            agent_address=self.item_owner_crypto.address,
+            token_id=self.token_id_b,
         )
         assert "balance" in res
         assert res["balance"] == '1'
 
         # Mint batch of tokens
         tx = erc1155_contract.get_mint_batch_transaction(
-            ledger_api=cosmos_ledger_api,
+            ledger_api=self.ledger_api,
             contract_address=contract_address,
-            deployer_address=deployer_cosmos_crypto_api.address,
-            recipient_address=item_owner_cosmos_crypto_api.address,
-            token_ids=token_ids_a,
-            mint_quantities=[1] * len(token_ids_a)
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.item_owner_crypto.address,
+            token_ids=self.token_ids_a,
+            mint_quantities=[1] * len(self.token_ids_a)
         )
         assert len(tx) == 6
-        signed_tx = deployer_cosmos_crypto_api.sign_transaction(tx)
-        receipt = json.loads(cosmos_ledger_api.send_signed_transaction(signed_tx))
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
         assert len(receipt) == 6
         assert all(
             [
@@ -426,10 +399,10 @@ class TestCosmWasmContract:
 
         # Get balances of multiple tokens
         res = erc1155_contract.get_balances(
-            ledger_api=cosmos_ledger_api,
+            ledger_api=self.ledger_api,
             contract_address=contract_address,
-            agent_address=item_owner_cosmos_crypto_api.address,
-            token_ids=token_ids_a,
+            agent_address=self.item_owner_crypto.address,
+            token_ids=self.token_ids_a,
         )
         assert "balances" in res
-        assert res["balances"] == ['1'] * len(token_ids_a)
+        assert res["balances"] == ['1'] * len(self.token_ids_a)
