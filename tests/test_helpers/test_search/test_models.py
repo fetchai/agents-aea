@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helpers.search.models."""
-
+from typing import Tuple
 from unittest.mock import Mock
 
 import pytest
@@ -47,6 +47,8 @@ def test_location():
     assert Location(1.1, 2.2) == Location(1.1, 2.2)
 
     assert Location(1.1, 2.2) is not None
+    assert isinstance(loc.tuple, Tuple)
+    assert loc.tuple == (loc.latitude, loc.longitude)
 
 
 def test_attribute():
