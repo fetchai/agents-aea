@@ -380,7 +380,7 @@ class AwaitableProc:
         self._thread.start()
         try:
             return await asyncio.shield(self.future)
-        except asyncio.CancelledError:
+        except asyncio.CancelledError:  # pragma: nocover
             self.proc.terminate()
             return await self.future
         finally:

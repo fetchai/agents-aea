@@ -85,6 +85,7 @@ class PosixNamedPipeClient:
                 size = struct.pack("!I", len(data))
                 os.write(self._out, size)
                 os.write(self._out, data)
+                self._out.flush()
             except (asyncio.IncompleteReadError, asyncio.CancelledError):
                 break
         print("PosixNamedPipe exiting...")
