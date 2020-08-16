@@ -39,15 +39,9 @@ class SimpleBehaviour(Behaviour, ABC):
         if act is not None:
             self.act = act  # type: ignore
 
-    def setup(self) -> None:
-        """Set the behaviour up."""
-
     def act(self) -> None:
         """Do the action."""
         raise NotImplementedError  # pragma: no cover
-
-    def teardown(self) -> None:
-        """Tear the behaviour down."""
 
 
 class CompositeBehaviour(Behaviour, ABC):

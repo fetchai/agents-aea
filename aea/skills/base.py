@@ -279,7 +279,6 @@ class SkillComponent(ABC):
         """Get the config of the skill component."""
         return self.configuration.args
 
-    @abstractmethod
     def setup(self) -> None:
         """
         Implement the setup.
@@ -287,7 +286,6 @@ class SkillComponent(ABC):
         :return: None
         """
 
-    @abstractmethod
     def teardown(self) -> None:
         """
         Implement the teardown.
@@ -503,12 +501,6 @@ class Handler(SkillComponent, ABC):
 
 class Model(SkillComponent, ABC):
     """This class implements an abstract model."""
-
-    def setup(self) -> None:
-        """Set the class up."""
-
-    def teardown(self) -> None:
-        """Tear the class down."""
 
     @classmethod
     def parse_module(
