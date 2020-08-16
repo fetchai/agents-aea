@@ -1,6 +1,7 @@
 name: tac
 author: fetchai
 version: 0.5.0
+type: protocol
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0

@@ -23,6 +23,9 @@
     "version": {
       "$ref": "definitions.json#/definitions/package_version"
     },
+    "type": {
+      "$ref": "definitions.json#/definitions/component_type"
+    },
     "license": {
       "$ref": "definitions.json#/definitions/license"
     },

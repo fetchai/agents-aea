@@ -636,6 +636,7 @@ class PackageConfiguration(Configuration, ABC):
     """
 
     default_configuration_filename: str
+    package_type: PackageType
 
     def __init__(
         self,
@@ -748,9 +749,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         return self._pypi_dependencies
 
     @property
-    @abstractmethod
     def component_type(self) -> ComponentType:
         """Get the component type."""
+        return ComponentType(self.package_type.value)
 
     @property
     def component_id(self) -> ComponentId:
@@ -858,6 +859,7 @@ class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
+    package_type = PackageType.CONNECTION
 
     def __init__(
         self,
@@ -921,11 +923,6 @@ class ConnectionConfig(ComponentConfiguration):
         self.config = config
 
     @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.CONNECTION
-
-    @property
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the connection dependencies."""
         return set(
@@ -941,6 +938,7 @@ class ConnectionConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.package_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -992,6 +990,7 @@ class ProtocolConfig(ComponentConfiguration):
     """Handle protocol configuration."""
 
     default_configuration_filename = DEFAULT_PROTOCOL_CONFIG_FILE
+    package_type = PackageType.PROTOCOL
 
     def __init__(
         self,
@@ -1020,11 +1019,6 @@ class ProtocolConfig(ComponentConfiguration):
         self.description = description
 
     @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.PROTOCOL
-
-    @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return OrderedDict(
@@ -1032,6 +1026,7 @@ class ProtocolConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.package_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1090,6 +1085,7 @@ class SkillConfig(ComponentConfiguration):
     """Class to represent a skill configuration file."""
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
+    package_type = PackageType.SKILL
 
     def __init__(
         self,
@@ -1130,11 +1126,6 @@ class SkillConfig(ComponentConfiguration):
         self.is_abstract = is_abstract
 
     @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.SKILL
-
-    @property
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the skill dependencies."""
         return (
@@ -1166,6 +1157,7 @@ class SkillConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.package_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1246,6 +1238,7 @@ class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
 
     default_configuration_filename = DEFAULT_AEA_CONFIG_FILE
+    package_type = PackageType.AGENT
 
     def __init__(
         self,
@@ -1604,6 +1597,7 @@ class ProtocolSpecification(ProtocolConfig):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.package_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1666,6 +1660,7 @@ class ContractConfig(ComponentConfiguration):
     """Handle contract configuration."""
 
     default_configuration_filename = DEFAULT_CONTRACT_CONFIG_FILE
+    package_type = PackageType.CONTRACT
 
     def __init__(
         self,
@@ -1698,11 +1693,6 @@ class ContractConfig(ComponentConfiguration):
             contract_interface_paths if contract_interface_paths is not None else {}
         )
         self.class_name = class_name
-
-    @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.CONTRACT
 
     @property
     def contract_interfaces(self) -> Dict[str, str]:
@@ -1743,6 +1733,7 @@ class ContractConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.package_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,

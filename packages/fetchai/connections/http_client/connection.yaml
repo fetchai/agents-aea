@@ -1,6 +1,7 @@
 name: http_client
 author: fetchai
 version: 0.7.0
+type: connection
 description: The HTTP_client connection that wraps a web-based client connecting to
   a RESTful API specification.
 license: Apache-2.0

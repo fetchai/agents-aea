@@ -1,6 +1,7 @@
 name: echo
 author: fetchai
 version: 0.5.0
+type: skill
 description: The echo skill implements simple echo functionality.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

@@ -1,6 +1,7 @@
 name: soef
 author: fetchai
 version: 0.6.0
+type: connection
 description: The soef connection provides a connection api to the simple OEF.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

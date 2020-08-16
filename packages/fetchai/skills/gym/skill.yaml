@@ -1,6 +1,7 @@
 name: gym
 author: fetchai
 version: 0.5.0
+type: skill
 description: The gym skill wraps an RL agent.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
