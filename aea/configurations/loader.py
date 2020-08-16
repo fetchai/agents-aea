@@ -185,7 +185,7 @@ class ConfigLoader(Generic[T]):
         """
         Validate a configuration file.
 
-        :param json_data:
+        :param json_data: the JSON object of the configuration file to validate.
         :return: None
         :raises ValidationError: if the file doesn't comply with the JSON schema.
               | ValueError: if other consistency checks fail.
