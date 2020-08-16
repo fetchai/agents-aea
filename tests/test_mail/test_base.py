@@ -325,3 +325,14 @@ def test_envelope_skill_id_raises_value_error():
         mock_logger_method.assert_called_with(
             f"URI - {bad_uri} - not a valid skill id."
         )
+
+
+def test_message_reply():
+    """Test Message.reply() method."""
+    msg = Message(foo="bar")
+    msg.sender = "sender"
+    msg.to = "to"
+    reply = msg.reply()
+    assert msg.body == reply.body
+    assert reply.sender == msg.to
+    assert reply.to == msg.sender

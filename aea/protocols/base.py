@@ -94,7 +94,7 @@ class Message:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
-        # assert self._sender is None, "Sender already set."
+        assert self._sender is None, "Sender already set."
         self._sender = sender
 
     @property
@@ -212,6 +212,24 @@ class Message:
     def is_set(self, key: str) -> bool:
         """Check value is set for key."""
         return key in self._body
+
+    def reply(self) -> "Message":
+        """
+        Return the same message, but with inverted sender/recipient.
+
+        >>> msg = Message()
+        >>> msg.sender = "sender"
+        >>> msg.to = "to"
+        >>> reply = msg.reply()
+        >>> reply.sender
+        'to'
+        >>> reply.to
+        'sender'
+        """
+        result = Message(**self.body)
+        result.sender = self.to
+        result.to = self.sender
+        return result
 
     def _is_consistent(self) -> bool:  # pylint: disable=no-self-use
         """Check that the data is consistent."""
