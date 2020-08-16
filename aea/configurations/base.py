@@ -720,6 +720,8 @@ class PackageConfiguration(Configuration, ABC):
 class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
 
+    package_type: PackageType
+
     def __init__(
         self,
         name: str,
@@ -938,7 +940,7 @@ class ConnectionConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
-                "type": self.package_type.value,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1026,7 +1028,7 @@ class ProtocolConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
-                "type": self.package_type.value,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1157,7 +1159,7 @@ class SkillConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
-                "type": self.package_type.value,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1597,7 +1599,6 @@ class ProtocolSpecification(ProtocolConfig):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
-                "type": self.package_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1733,7 +1734,7 @@ class ContractConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
-                "type": self.package_type.value,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
