@@ -427,6 +427,41 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
+<a name="aea.crypto.base.LedgerApi.get_contract_instance"></a>
+#### get`_`contract`_`instance
+
+```python
+ | @abstractmethod
+ | get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
+```
+
+Get the instance of a contract.
+
+**Arguments**:
+
+- `contract_interface`: the contract interface.
+- `contract_address`: the contract address.
+
+**Returns**:
+
+the contract instance
+
+<a name="aea.crypto.base.LedgerApi.get_deploy_transaction"></a>
+#### get`_`deploy`_`transaction
+
+```python
+ | @abstractmethod
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs, ,) -> Dict[str, Any]
+```
+
+Get the transaction to deploy the smart contract.
+
+**Arguments**:
+
+- `contract_interface`: the contract interface.
+- `deployer_address`: The address that will deploy the contract.
+:returns tx: the transaction dictionary.
+
 <a name="aea.crypto.base.FaucetApi"></a>
 ## FaucetApi Objects
 

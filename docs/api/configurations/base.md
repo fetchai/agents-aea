@@ -18,7 +18,7 @@ These fields will be forwarded to the 'pip' command.
 #### Dependencies
 
 A dictionary from package name to dependency data structure (see above).
-The package name must satisfy [the constraints on Python packages names](https://www.python.org/dev/peps/pep-0426/`name`).
+The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426/`name`">the constraints on Python packages names</a>.
 
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
@@ -1383,7 +1383,7 @@ Handle contract configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None, description: str = "", path_to_contract_interface: str = "", class_name: str = "")
+ | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None, description: str = "", contract_interface_paths: Optional[Dict[str, str]] = None, class_name: str = "")
 ```
 
 Initialize a protocol configuration object.
@@ -1397,6 +1397,16 @@ Initialize a protocol configuration object.
 ```
 
 Get the component type.
+
+<a name="aea.configurations.base.ContractConfig.contract_interfaces"></a>
+#### contract`_`interfaces
+
+```python
+ | @property
+ | contract_interfaces() -> Dict[str, str]
+```
+
+Get the contract interfaces.
 
 <a name="aea.configurations.base.ContractConfig.json"></a>
 #### json

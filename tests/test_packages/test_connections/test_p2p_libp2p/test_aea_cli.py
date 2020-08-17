@@ -23,7 +23,7 @@ import os
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import libp2p_log_on_failure, skip_test_windows
+from tests.conftest import libp2p_log_on_failure
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
@@ -32,14 +32,13 @@ DEFAULT_NET_SIZE = 4
 LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb
 
 
-@skip_test_windows
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
     @libp2p_log_on_failure
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
 
         # for logging
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -71,13 +70,12 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).teardown_class()
 
 
-@skip_test_windows
 class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
     @libp2p_log_on_failure
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"

@@ -62,7 +62,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.9.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.10.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -178,6 +178,6 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         )
         lines.insert(
             158,
-            f"    strategy._agent_location = Location({location['longitude']}, {location['latitude']})",
+            f"    strategy._agent_location = Location(longitude={location['longitude']}, latitude={location['latitude']})",
         )
         file.write_text("\n".join(lines))

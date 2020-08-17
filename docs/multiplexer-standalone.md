@@ -9,7 +9,7 @@ from threading import Thread
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.stub.connection import StubConnection
+from aea.connections.stub.connection import StubConnection, write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
@@ -63,7 +63,7 @@ We use the input and output text files to send an envelope to our agent and rece
             "multiplexer,some_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
-            f.write(message_text)
+            write_with_lock(f, message_text)
 
         # Wait for the envelope to get processed
         time.sleep(2)
@@ -119,7 +119,7 @@ from threading import Thread
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.stub.connection import StubConnection
+from aea.connections.stub.connection import StubConnection, write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
@@ -158,7 +158,7 @@ def run():
             "multiplexer,some_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
-            f.write(message_text)
+            write_with_lock(f, message_text)
 
         # Wait for the envelope to get processed
         time.sleep(2)

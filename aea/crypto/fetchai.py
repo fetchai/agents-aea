@@ -23,6 +23,7 @@ import hashlib
 import json
 import logging
 import time
+import warnings
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, Optional, Tuple, cast
 
@@ -268,7 +269,9 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
         if not ("host" in kwargs and "port" in kwargs):
             network = kwargs.pop("network", DEFAULT_NETWORK)
             kwargs["network"] = network
-        self._api = FetchaiLedgerApi(**kwargs)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self._api = FetchaiLedgerApi(**kwargs)
 
     @property
     def api(self) -> FetchaiLedgerApi:

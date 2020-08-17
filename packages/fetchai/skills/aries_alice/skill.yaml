@@ -1,16 +1,16 @@
 name: aries_alice
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
-  behaviours.py: QmZ1hadywhjNUxw56R3r5ZoiZwvoK6EyzGPVHRVtRYXaQ4
+  behaviours.py: QmPgXB6ebzAUkLaCoPgibqpZrJCUHjHv4N9wbnHfiR8Ggz
   dialogues.py: QmdPR5nNYj4JJdR9Stfis97M8XfP2pi2KqsVsApUzhD9hH
-  handlers.py: QmVVjSsPPSLTH6gTDSYKqtFn13YdVfhnL9fJnqKEJ6j92M
-  strategy.py: QmPXzDbERHva7wu3yL787JBVWVPxb1RR4VHR16S8GEaJg5
+  handlers.py: QmTtqM5oWBEAZcHdTuwuPtbiZZGWontMNEtmDxcccS2u2Y
+  strategy.py: QmUJ8Bv7Zs5WLjWiy915ReZQucbYxWPMwz48oEVADcywbt
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -20,8 +20,6 @@ skills: []
 behaviours:
   alice:
     args:
-      admin_host: 127.0.0.1
-      admin_port: 8031
       services_interval: 20
     class_name: AliceBehaviour
 handlers:
@@ -46,6 +44,8 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
+      admin_host: 127.0.0.1
+      admin_port: 8031
       location:
         latitude: 0.127
         longitude: 51.5194

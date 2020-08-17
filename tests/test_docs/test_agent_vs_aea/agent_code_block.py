@@ -27,7 +27,7 @@ from typing import List, Optional
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection
+from aea.connections.stub.connection import StubConnection, write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
@@ -110,7 +110,7 @@ def run():
             b"my_agent,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
-            f.write(message_text)
+            write_with_lock(f, message_text)
 
         # Wait for the envelope to get processed
         time.sleep(2)

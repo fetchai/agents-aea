@@ -611,3 +611,23 @@ async def test_default_route_applied(caplog):
             await multiplexer.disconnect()
 
             assert "Using default routing:" in caplog.text
+
+
+def test_multiplexer_setup():
+    """Test multiplexer setup to set connections."""
+    node = LocalNode()
+    tmpdir = Path(tempfile.mkdtemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+
+    connection_1 = _make_local_connection("my_addr", node)
+    connection_2 = _make_stub_connection(input_file_path, output_file_path)
+    connection_3 = _make_dummy_connection()
+    connections = [connection_1, connection_2, connection_3]
+    multiplexer = Multiplexer([])
+    with pytest.raises(AssertionError):
+        multiplexer._connection_consistency_checks()
+    multiplexer.setup(connections, default_routing=None)
+    multiplexer._connection_consistency_checks()

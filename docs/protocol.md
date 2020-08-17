@@ -6,7 +6,7 @@
 
 * dialogues, which define rules over message sequences.
 
-The framework provides one default protocol, called `default` and introduced <a href="#fetchaidefault020-protocol">below</a>. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#defaultmessage-objects">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#defaultserializer-objects">`DefaultSerializer`</a> and <a href="..api/protocols/default/dialogues#defaultdialogues-objects">`DefaultDialogue`</a> classes.
+The framework provides one default protocol, called `default` and introduced below. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#aea.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#aea.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#aea.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
 Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
 
@@ -119,7 +119,7 @@ Each AEA's `fetchai/error:0.4.0` skill utilises the `fetchai/default:0.4.0` prot
 
 ## `fetchai/oef_search:0.4.0` protocol
 
-The `fetchai/oef_search:0.4.0` protocol is used by AEAs to interact with an [OEF search node](../oef-ledger) to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.4.0` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
 
 The `fetchai/oef_search:0.4.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
@@ -230,9 +230,9 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.4.0`.
+* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.4.0`.
 
-* If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
+* If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python
 class OefErrorOperation(Enum):
 
@@ -247,7 +247,7 @@ class OefErrorOperation(Enum):
 
 ## `fetchai/fipa:0.5.0` protocol
 
-This protocol provides classes and functions necessary for communication between AEAs via a variant of the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language.
+This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="http://www.fipa.org/repository/aclspecs.html">FIPA</a> Agent Communication Language.
 
 The `fetchai/fipa:0.5.0` protocol definition includes a `FipaMessage` with the following performatives:
 

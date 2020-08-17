@@ -62,7 +62,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.9.0
+aea fetch fetchai/ml_data_provider:0.10.0
 cd ml_data_provider
 aea install
 ```
@@ -74,11 +74,11 @@ The following steps create the data provider from scratch:
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/ml_data_provider:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea add skill fetchai/ml_data_provider:0.9.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea install
 ```
 
@@ -96,7 +96,7 @@ default_routing:
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.9.0
+aea fetch fetchai/ml_model_trainer:0.10.0
 cd ml_model_trainer
 aea install
 ```
@@ -108,11 +108,11 @@ The following steps create the model trainer from scratch:
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/p2p_libp2p:0.6.0
+aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/ml_train:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.6.0
+aea add skill fetchai/ml_train:0.9.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 aea install
 ```
 

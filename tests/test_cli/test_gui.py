@@ -38,11 +38,11 @@ from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
+    MAX_FLAKY_RERUNS,
     tcpping,
 )
 
 
-@pytest.mark.network
 class TestGui:
     """Test that the command 'aea gui' works as expected."""
 
@@ -66,6 +66,7 @@ class TestGui:
 
         assert result.exit_code == 0
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""
         self.proc = PexpectWrapper(  # nosec

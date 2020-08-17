@@ -1,6 +1,6 @@
 name: thermometer_client
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: The thermometer client skill implements the skill to purchase temperature
   data.
 license: Apache-2.0
@@ -19,7 +19,7 @@ protocols:
 - fetchai/ledger_api:0.2.0
 - fetchai/oef_search:0.4.0
 skills:
-- fetchai/generic_buyer:0.8.0
+- fetchai/generic_buyer:0.9.0
 behaviours:
   search:
     args:

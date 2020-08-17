@@ -7,7 +7,7 @@ The base contract.
 ## Contract Objects
 
 ```python
-class Contract(Component,  ABC)
+class Contract(Component)
 ```
 
 Abstract definition of a contract.
@@ -50,7 +50,6 @@ Get the configuration.
 
 ```python
  | @classmethod
- | @abstractmethod
  | get_instance(cls, ledger_api: LedgerApi, contract_address: Optional[str] = None) -> Any
 ```
 
@@ -106,7 +105,7 @@ the contract object.
 
 ```python
  | @classmethod
- | get_deploy_transaction(cls, ledger_api: LedgerApi, **kwargs) -> bytes
+ | get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str, **kwargs) -> Dict[str, Any]
 ```
 
 Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
@@ -117,18 +116,19 @@ to handle the contract requests manually.
 **Arguments**:
 
 - `ledger_api`: the ledger apis.
+- `deployer_address`: The address that will deploy the contract.
 - `kwargs`: keyword arguments.
 
 **Returns**:
 
-the bytes representing the state.
+the tx
 
 <a name="aea.contracts.base.Contract.get_raw_transaction"></a>
 #### get`_`raw`_`transaction
 
 ```python
  | @classmethod
- | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes
+ | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
 ```
 
 Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -143,14 +143,14 @@ to handle the contract requests manually.
 
 **Returns**:
 
-the bytes representing the state.
+the tx
 
 <a name="aea.contracts.base.Contract.get_raw_message"></a>
 #### get`_`raw`_`message
 
 ```python
  | @classmethod
- | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes
+ | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
 ```
 
 Handler method for the 'GET_RAW_MESSAGE' requests.
@@ -165,14 +165,14 @@ to handle the contract requests manually.
 
 **Returns**:
 
-the bytes representing the state.
+the tx
 
 <a name="aea.contracts.base.Contract.get_state"></a>
 #### get`_`state
 
 ```python
  | @classmethod
- | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> bytes
+ | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
 ```
 
 Handler method for the 'GET_STATE' requests.
@@ -187,5 +187,5 @@ to handle the contract requests manually.
 
 **Returns**:
 
-the bytes representing the state.
+the tx
 

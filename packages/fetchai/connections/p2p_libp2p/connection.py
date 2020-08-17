@@ -20,17 +20,14 @@
 """This module contains the p2p libp2p connection."""
 
 import asyncio
-import errno
 import logging
 import os
 import shutil
-import struct
 import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from pathlib import Path
 from random import randint
-from threading import Thread
 from typing import IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
@@ -39,6 +36,8 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
+from aea.helpers.async_utils import AwaitableProc
+from aea.helpers.pipe import LocalPortablePipe, make_pipe
 from aea.mail.base import Address, Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
@@ -55,10 +54,12 @@ LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
 LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 
+PIPE_CONN_TIMEOUT = 10.0
+
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.7.0")
 
 MultiAddr = str
 
@@ -134,39 +135,6 @@ def _golang_module_run(
         raise e
 
     return proc
-
-
-class AwaitableProc:
-    """
-    Async-friendly subprocess.Popen
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-        self.proc = None
-        self._thread = None
-        self.loop = None
-        self.future = None
-
-    async def start(self):
-        """Start the subprocess"""
-        self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
-        self.loop = asyncio.get_event_loop()
-        self.future = asyncio.futures.Future()
-        self._thread = Thread(target=self._in_thread)
-        self._thread.start()
-        try:
-            return await asyncio.shield(self.future)
-        except asyncio.CancelledError:
-            self.proc.terminate()
-            return await self.future
-        finally:
-            self._thread.join()
-
-    def _in_thread(self):
-        self.proc.wait()
-        self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)
 
 
 class Uri:
@@ -278,28 +246,14 @@ class Libp2pNode:
         self.env_file = os.path.join(os.path.abspath(os.getcwd()), self.env_file)
 
         # named pipes (fifos)
-        tmp_dir = tempfile.mkdtemp()
-        self.libp2p_to_aea_path = "{}/{}-libp2p_to_aea".format(tmp_dir, self.pub[:5])
-        self.aea_to_libp2p_path = "{}/{}-aea_to_libp2p".format(tmp_dir, self.pub[:5])
-        self._libp2p_to_aea = -1
-        self._aea_to_libp2p = -1
-        self._connection_attempts = 10
-        self._connection_timeout = 1.0
+        self.pipe = None  # type: Optional[LocalPortablePipe]
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
-        self._stream_reader = None  # type: Optional[asyncio.StreamReader]
         self._log_file_desc = None  # type: Optional[IO[str]]
-        self._reader_protocol = None  # type: Optional[asyncio.StreamReaderProtocol]
-        self._fileobj = None  # type: Optional[IO[str]]
 
         self.logger = logger
-
-    @property
-    def reader_protocol(self) -> asyncio.StreamReaderProtocol:
-        """Get reader protocol."""
-        assert self._reader_protocol is not None, "reader protocol not set!"
-        return self._reader_protocol
+        self._connection_timeout = PIPE_CONN_TIMEOUT
 
     async def start(self) -> None:
         """
@@ -333,15 +287,7 @@ class Libp2pNode:
         self.logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
-        in_path = self.libp2p_to_aea_path
-        out_path = self.aea_to_libp2p_path
-        self.logger.debug("Creating pipes ({}, {})...".format(in_path, out_path))
-        if os.path.exists(in_path):
-            os.remove(in_path)  # pragma: no cover
-        if os.path.exists(out_path):
-            os.remove(out_path)  # pragma: no cover
-        os.mkfifo(in_path)
-        os.mkfifo(out_path)
+        self.pipe = make_pipe(logger=self.logger)
 
         # setup config
         if os.path.exists(self.env_file):
@@ -362,8 +308,8 @@ class Libp2pNode:
                     )
                 )
             )
-            env_file.write("NODE_TO_AEA={}\n".format(in_path))
-            env_file.write("AEA_TO_NODE={}\n".format(out_path))
+            env_file.write("NODE_TO_AEA={}\n".format(self.pipe.in_path))
+            env_file.write("AEA_TO_NODE={}\n".format(self.pipe.out_path))
             env_file.write(
                 "AEA_P2P_URI_PUBLIC={}\n".format(
                     str(self.public_uri) if self.public_uri is not None else ""
@@ -382,58 +328,17 @@ class Libp2pNode:
         )
 
         self.logger.info("Connecting to libp2p node...")
-        await self._connect()
 
-    async def _connect(self) -> None:
-        """
-        Connnect to the peer node.
-
-        :return: None
-        """
-        if self._connection_attempts == 1:
+        try:
+            connected = await self.pipe.connect(timeout=self._connection_timeout)
+            if not connected:
+                raise Exception("Couldn't connect to libp2p p2p process within timeout")
+        except Exception as e:
             with open(self.log_file, "r") as f:
                 self.logger.error("Couldn't connect to libp2p p2p process, logs:")
                 self.logger.error(f.read())
             self.stop()
-            raise Exception("Couldn't connect to libp2p p2p process")
-            # TOFIX(LR) use proper exception
-        self._connection_attempts -= 1
-
-        self.logger.debug(
-            "Attempt opening pipes {}, {}...".format(
-                self.libp2p_to_aea_path, self.aea_to_libp2p_path
-            )
-        )
-
-        self._libp2p_to_aea = os.open(
-            self.libp2p_to_aea_path, os.O_RDONLY | os.O_NONBLOCK
-        )
-
-        try:
-            self._aea_to_libp2p = os.open(
-                self.aea_to_libp2p_path, os.O_WRONLY | os.O_NONBLOCK
-            )
-        except OSError as e:
-            if e.errno == errno.ENXIO:
-                self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
-                await asyncio.sleep(self._connection_timeout)
-                await self._connect()
-                return
-            else:
-                raise e  # pragma: no cover
-
-        # setup reader
-        assert (
-            self._libp2p_to_aea != -1
-            and self._aea_to_libp2p != -1
-            and self._loop is not None
-        ), "Incomplete initialization."
-        self._stream_reader = asyncio.StreamReader(loop=self._loop)
-        self._reader_protocol = asyncio.StreamReaderProtocol(
-            self._stream_reader, loop=self._loop
-        )
-        self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
-        await self._loop.connect_read_pipe(lambda: self.reader_protocol, self._fileobj)
+            raise e
 
         self.logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
@@ -445,10 +350,8 @@ class Libp2pNode:
 
         :param data: data to write to stream
         """
-        size = struct.pack("!I", len(data))
-        os.write(self._aea_to_libp2p, size)
-        os.write(self._aea_to_libp2p, data)
-        # TOFIX(LR) can use asyncio.connect_write_pipe
+        assert self.pipe is not None
+        await self.pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
         """
@@ -456,26 +359,8 @@ class Libp2pNode:
 
         :return: bytes
         """
-        assert (
-            self._stream_reader is not None
-        ), "StreamReader not set, call connect first!"
-        try:
-            self.logger.debug("Waiting for messages...")
-            buf = await self._stream_reader.readexactly(4)
-            if not buf:  # pragma: no cover
-                return None
-            size = struct.unpack("!I", buf)[0]
-            data = await self._stream_reader.readexactly(size)
-            if not data:  # pragma: no cover
-                return None
-            return data
-        except asyncio.streams.IncompleteReadError as e:
-            self.logger.info(  # pragma: nocover
-                "Connection disconnected while reading from node ({}/{})".format(
-                    len(e.partial), e.expected
-                )
-            )
-            return None  # pragma: nocover
+        assert self.pipe is not None
+        return await self.pipe.read()
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
     def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
@@ -521,6 +406,8 @@ class Libp2pNode:
                 "Waiting for node process {} to terminate...".format(self.proc.pid)
             )
             self.proc.wait()
+            assert self._log_file_desc is not None
+            self._log_file_desc.close()
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
         if os.path.exists(LIBP2P_NODE_ENV_FILE):
@@ -647,7 +534,7 @@ class P2PLibp2pConnection(Connection):
         :return: None
         """
         if self.is_connected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.connecting)
         try:
             # start libp2p node
@@ -671,7 +558,7 @@ class P2PLibp2pConnection(Connection):
         :return: None
         """
         if self.is_disconnected:
-            return
+            return  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
@@ -682,7 +569,9 @@ class P2PLibp2pConnection(Connection):
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
-            self.logger.debug("Called disconnect when input queue not initialized.")
+            self.logger.debug(  # pragma: nocover
+                "Called disconnect when input queue not initialized."
+            )
         self._state.set(ConnectionStates.disconnected)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:

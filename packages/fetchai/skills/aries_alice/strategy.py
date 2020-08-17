@@ -27,6 +27,18 @@ from aea.helpers.search.generic import (
 from aea.helpers.search.models import Description, Location
 from aea.skills.base import Model
 
+# default configs
+DEFAULT_ADMIN_HOST = "127.0.0.1"
+DEFAULT_ADMIN_PORT = 8031
+
+# commands
+ADMIN_COMMAND_RECEIVE_INVITE = "/connections/receive-invitation"
+
+# convenience
+ALICE_ACA_IDENTITY = "Alice_ACA"
+HTTP_COUNTERPARTY = "HTTP Server"
+
+# search
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SERVICE_DATA = {"key": "intro_service", "value": "intro_alice"}
 
@@ -43,6 +55,13 @@ class AliceStrategy(Model):
 
         :return: None
         """
+        # config
+        self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
+        self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
+
+        self._admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
+
+        # search
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
             "location": Location(location["longitude"], location["latitude"])
@@ -56,6 +75,21 @@ class AliceStrategy(Model):
         self._remove_service_data = {"key": self._set_service_data["key"]}
 
         super().__init__(**kwargs)
+
+    @property
+    def admin_host(self) -> str:
+        """Get the admin host."""
+        return self._admin_host
+
+    @property
+    def admin_port(self) -> str:
+        """Get the admin port."""
+        return self._admin_port
+
+    @property
+    def admin_url(self) -> str:
+        """Get the admin URL."""
+        return self._admin_url
 
     def get_location_description(self) -> Description:
         """

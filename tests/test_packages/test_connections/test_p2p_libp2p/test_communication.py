@@ -35,14 +35,12 @@ from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
-    skip_test_windows,
 )
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
 
 
-@skip_test_windows
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
     """Test that connection is established and torn down correctly"""
@@ -79,7 +77,6 @@ class TestP2PLibp2pConnectionConnectDisconnect:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionEchoEnvelope:
     """Test that connection will route envelope to destination"""
@@ -189,7 +186,6 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
@@ -280,7 +276,6 @@ class TestP2PLibp2pConnectionRouting:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
     """Test that connection will route envelope to destination using the same relay node"""
@@ -399,7 +394,6 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
     """Test that libp2p DHT network will reliably route envelopes from relay/non-relay to relay/non-relay nodes"""
@@ -512,7 +506,6 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             pass
 
 
-@skip_test_windows
 def test_libp2pconnection_uri():
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)

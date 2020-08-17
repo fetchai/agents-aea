@@ -106,11 +106,14 @@ def test_generate_nonce():
 @pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
-    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    account = CosmosCrypto()
+    balance = get_wealth(account.address)
+    assert balance > 0, "Failed to fund account."
     cc2 = CosmosCrypto()
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
 
     amount = 10000
+    assert amount < balance, "Not enough funds."
     transfer_transaction = cosmos_api.get_transfer_transaction(
         sender_address=account.address,
         destination_address=cc2.address,
@@ -162,9 +165,22 @@ def test_get_balance():
     cc = CosmosCrypto()
     balance = cosmos_api.get_balance(cc.address)
     assert balance == 0, "New account has a positive balance."
-    cc = CosmosCrypto(private_key_path=COSMOS_PRIVATE_KEY_PATH)
-    balance = cosmos_api.get_balance(cc.address)
+    balance = get_wealth(cc.address)
     assert balance > 0, "Existing account has no balance."
+
+
+def get_wealth(address: str):
+    """Get wealth for test."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    CosmosFaucetApi().get_wealth(address)
+    balance = 0
+    timeout = 0
+    while timeout < 40 and balance == 0:
+        time.sleep(1)
+        timeout += 1
+        _balance = cosmos_api.get_balance(address)
+        balance = _balance if _balance is not None else 0
+    return balance
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -184,7 +200,7 @@ def test_get_wealth_positive(caplog):
 @pytest.mark.ledger
 def test_format_default():
     """Test if default CosmosSDK transaction is correctly formated."""
-    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    account = CosmosCrypto()
     cc2 = CosmosCrypto()
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
 
@@ -419,7 +435,7 @@ def test_try_execute_wasm_transaction():
 def test_send_signed_transaction_wasm_transaction():
     """Test the send_signed_transaction method for a wasm transaction."""
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
-    tx_signed = {"tx": {"msg": [{"type": "wasm/store-code"}]}}
+    tx_signed = {"value": {"msg": [{"type": "wasm/store-code"}]}}
     with mock.patch.object(
         cosmos_api, "try_execute_wasm_transaction", return_value="digest"
     ):

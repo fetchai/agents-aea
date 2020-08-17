@@ -56,8 +56,7 @@ The controller GUI at <a href="http://localhost:8097" target=_blank>http://local
 
 In the Environment tab, make sure you have the `tac_controller` environment selected.
 
-<center>![AEA Visdom UI](assets/visdom_ui.png)</center>
-
+<img src="../assets/visdom_ui.png" alt="AEA Visdom UI" class="center">
 
 ## Alternative build and run
 

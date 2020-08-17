@@ -155,7 +155,7 @@ class Transactions(Model):
 
         :return: None
         """
-        confirmed_tx_ids = self.context.shared_state.get(
+        confirmed_tx_ids = self.context.shared_state.pop(
             "confirmed_tx_ids", []
         )  # type: List[str]
         for transaction_id in confirmed_tx_ids:

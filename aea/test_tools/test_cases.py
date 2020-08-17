@@ -34,7 +34,7 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
 
@@ -48,7 +48,7 @@ from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
-from aea.helpers.base import cd, send_control_c
+from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -89,6 +89,8 @@ class BaseAEATestCase(ABC):
     stdout: Dict[int, str]  # dict of process.pid: string stdout
     stderr: Dict[int, str]  # dict of process.pid: string stderr
     _is_teardown_class_called: bool = False
+    capture_log: bool = False
+    cli_log_options: List[str] = []
 
     @classmethod
     def set_agent_context(cls, agent_name: str):
@@ -179,13 +181,13 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
-
-        if sys.platform == "win32":  # pragma: nocover
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            kwargs["startupinfo"] = startupinfo
-            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+        kwargs = dict(
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            env=os.environ.copy(),
+            cwd=cwd,
+        )
+        kwargs.update(win_popen_kwargs())
 
         process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
             [sys.executable, *args], **kwargs,
@@ -347,12 +349,7 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        process = cls._run_python_subprocess(
-            "-m", "aea.cli", "run", *args, cwd=cls._get_cwd()
-        )
-        cls._start_output_read_thread(process)
-        cls._start_error_read_thread(process)
-        return process
+        return cls._start_cli_process("run", *args)
 
     @classmethod
     def run_interaction(cls) -> subprocess.Popen:
@@ -365,8 +362,18 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
+        return cls._start_cli_process("interact")
+
+    @classmethod
+    def _start_cli_process(cls, *args: str) -> subprocess.Popen:
+        """
+        Start cli subprocess with args specified.
+
+        :param args: CLI args
+        :return: subprocess object.
+        """
         process = cls._run_python_subprocess(
-            "-m", "aea.cli", "interact", cwd=cls._get_cwd()
+            "-m", "aea.cli", *cls.cli_log_options, *args, cwd=cls._get_cwd()
         )
         cls._start_output_read_thread(process)
         cls._start_error_read_thread(process)
@@ -385,8 +392,8 @@ class BaseAEATestCase(ABC):
         Run from agent's directory.
 
         :param subprocesses: the subprocesses running the agents
-        :param signal: the signal for interuption
-        :param timeout: the timeout for interuption
+        :param signal: the signal for interruption
+        :param timeout: the timeout for interruption
         """
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
@@ -629,13 +636,22 @@ class BaseAEATestCase(ABC):
     @classmethod
     def _read_out(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
         for line in TextIOWrapper(process.stdout, encoding="utf-8"):
+            cls._log_capture("stdout", process.pid, line)
             cls.stdout[process.pid] += line
 
     @classmethod
     def _read_err(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
         if process.stderr is not None:
             for line in TextIOWrapper(process.stderr, encoding="utf-8"):
+                cls._log_capture("stderr", process.pid, line)
                 cls.stderr[process.pid] += line
+
+    @classmethod
+    def _log_capture(cls, name, pid, line):  # pragma: nocover
+        if not cls.capture_log:
+            return
+        sys.stdout.write(f"[{pid}]{name}>{line}")
+        sys.stdout.flush()
 
     @classmethod
     def _start_output_read_thread(cls, process: subprocess.Popen) -> None:
@@ -669,6 +685,10 @@ class BaseAEATestCase(ABC):
     @classmethod
     def send_envelope_to_agent(cls, envelope: Envelope, agent: str):
         """Send an envelope to an agent, using the stub connection."""
+        # check added cause sometimes fails on win with permission error
+        dir_path = Path(cls.t / agent)
+        assert dir_path.exists()
+        assert dir_path.is_dir()
         write_envelope_to_file(envelope, str(cls.t / agent / DEFAULT_INPUT_FILE_NAME))
 
     @classmethod
@@ -680,7 +700,7 @@ class BaseAEATestCase(ABC):
     def missing_from_output(
         cls,
         process: subprocess.Popen,
-        strings: Tuple[str],
+        strings: Sequence[str],
         timeout: int = DEFAULT_PROCESS_TIMEOUT,
         period: int = 1,
         is_terminating: bool = True,

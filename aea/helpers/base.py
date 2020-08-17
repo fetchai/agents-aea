@@ -173,6 +173,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
         module = importlib.util.module_from_spec(spec)
         sys.modules[import_path] = module
+        logger.debug(f"loading {import_path}: {module}")
         spec.loader.exec_module(module)  # type: ignore
 
 
@@ -224,7 +225,27 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
         raise ValueError("Other platforms not supported.")
 
 
-def send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None:
+def win_popen_kwargs() -> dict:
+    """
+    Return kwargs to start a process in windows with new process group.
+
+    Help to handle ctrl c properly.
+    Return empty dict if platform is not win32
+    """
+    kwargs: dict = {}
+
+    if sys.platform == "win32":  # pragma: nocover
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        kwargs["startupinfo"] = startupinfo
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+    return kwargs
+
+
+def send_control_c(
+    process: subprocess.Popen, kill_group: bool = False
+) -> None:  # pragma: nocover # cause platform dependent
     """
     Send ctrl-C crossplatform to terminate a subprocess.
 
@@ -233,6 +254,8 @@ def send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None:
     :return: None
     """
     if platform.system() == "Windows":
+        if process.stdin:  # cause ctrl-c event will be handled with stdin
+            process.stdin.close()
         os.kill(process.pid, signal.CTRL_C_EVENT)  # pylint: disable=no-member
     elif kill_group:
         pgid = os.getpgid(process.pid)
