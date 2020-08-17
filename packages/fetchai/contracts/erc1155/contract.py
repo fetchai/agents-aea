@@ -132,7 +132,6 @@ class ERC1155Contract(Contract):
     ) -> Dict[str, Any]:
         """
         Get the transaction to create a single token.
-        
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract
         :param deployer_address: the address of the deployer
