@@ -16,15 +16,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """The base connection package."""
+import asyncio
 import inspect
 import logging
 import re
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop
+from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Set, TYPE_CHECKING, cast
+from typing import Generator, Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
@@ -86,7 +88,6 @@ class Connection(Component, ABC):
         assert (
             super().public_id == self.connection_id
         ), "Connection ids in configuration and class not matching."
-        self._loop: Optional[AbstractEventLoop] = None
         self._state = AsyncState(ConnectionStates.disconnected)
 
         self._identity = identity
@@ -100,22 +101,25 @@ class Connection(Component, ABC):
         )
 
     @property
-    def loop(self) -> Optional[AbstractEventLoop]:
+    def loop(self) -> asyncio.AbstractEventLoop:
         """Get the event loop."""
-        return self._loop
+        assert asyncio.get_event_loop().is_running()
+        return asyncio.get_event_loop()
 
-    @loop.setter
-    def loop(self, loop: AbstractEventLoop) -> None:
-        """
-        Set the event loop.
+    def _ensure_connected(self) -> None:  # pragma: nocover
+        """Raise exception if connection is not connected."""
+        if not self.is_connected:
+            raise ConnectionError("Connection is not connected! Connect first!")
 
-        :param loop: the event loop.
-        :return: None
-        """
-        assert (
-            self._loop is None or not self._loop.is_running()
-        ), "Cannot set the loop while it is running."
-        self._loop = loop
+    @contextmanager
+    def _connect_context(self) -> Generator:
+        """Set state connecting, disconnecteing, dicsconnected during connect method."""
+        with self._state.transit(
+            initial=ConnectionStates.connecting,
+            success=ConnectionStates.connected,
+            fail=ConnectionStates.disconnected,
+        ):
+            yield
 
     @property
     def address(self) -> "Address":  # pragma: nocover

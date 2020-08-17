@@ -8,7 +8,7 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   README.md: QmPBurf9eeV1J7rrfmeudJXUU7KDVFNJArPrV8nNwjizfx
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
-  connection.py: QmQFTgN95u1mqPobekFJXvCD9TWS4AsFFq3exeRUGQnyMz
+  connection.py: Qmc3GefaaXhnqinVQT5CqRA9wRfEbBSj3u59B3ByRNJz4s
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/gym:0.4.0

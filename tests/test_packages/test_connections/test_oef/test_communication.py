@@ -332,7 +332,7 @@ class TestOEF(UseOef):
                     message=oef_search_registration,
                 )
             )
-            time.sleep(0.5)
+            time.sleep(1)
 
             oef_search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
@@ -1037,7 +1037,6 @@ class TestSendWithOEF(UseOef):
         oef_connection = _make_oef_connection(
             address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        oef_connection.loop = asyncio.get_event_loop()
         await oef_connection.connect()
         oef_search_dialogues = OefSearchDialogues("agent_address")
         msg = OefSearchMessage(
@@ -1094,7 +1093,6 @@ class TestSendWithOEF(UseOef):
         oef_connection = _make_oef_connection(
             address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        oef_connection.loop = asyncio.get_event_loop()
         await oef_connection.connect()
 
         with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
@@ -1116,7 +1114,6 @@ class TestSendWithOEF(UseOef):
         oef_connection = _make_oef_connection(
             address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        oef_connection.loop = asyncio.get_event_loop()
         await oef_connection.connect()
 
         with unittest.mock.patch.object(
@@ -1133,7 +1130,6 @@ class TestSendWithOEF(UseOef):
         oef_connection = _make_oef_connection(
             address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        oef_connection.loop = asyncio.get_event_loop()
 
         assert not oef_connection.is_connected
         await oef_connection.connect()

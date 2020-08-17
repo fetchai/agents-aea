@@ -215,8 +215,8 @@ class StubConnection(Connection):
 
     async def read_envelopes(self) -> None:
         """Read envelopes from inptut file, decode and put into in_queue."""
-        assert self.in_queue is not None, "Input queue not initialized."
-        assert self._loop is not None, "Loop not initialized."
+        self._ensure_connected()
+        assert self.in_queue is not None
 
         logger.debug("Read messages!")
         async for data in self._file_read_and_trunc(delay=self.read_delay):
@@ -243,6 +243,7 @@ class StubConnection(Connection):
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
+        self._ensure_connected()
         if self.in_queue is None:  # pragma: nocover
             logger.error("Input queue not initialized.")
             return None
@@ -258,16 +259,9 @@ class StubConnection(Connection):
         if self.is_connected:
             return
 
-        self._state.set(ConnectionStates.connecting)
-
-        try:
-            self._loop = asyncio.get_event_loop()
+        with self._connect_context():
             self.in_queue = asyncio.Queue()
-            self._read_envelopes_task = self._loop.create_task(self.read_envelopes())
-            self._state.set(ConnectionStates.connected)
-        except Exception:  # pragma: no cover
-            self._state.set(ConnectionStates.disconnected)
-            raise
+            self._read_envelopes_task = self.loop.create_task(self.read_envelopes())
 
     async def _stop_read_envelopes(self) -> None:
         """
@@ -313,7 +307,7 @@ class StubConnection(Connection):
 
         :return: None
         """
-        assert self.loop is not None, "Loop not initialized."
+        self._ensure_connected()
         await self.loop.run_in_executor(
             self._write_pool, write_envelope, envelope, self.output_file
         )

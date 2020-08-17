@@ -29,7 +29,7 @@ from typing import Dict, List, Optional, Tuple, cast
 from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.search.models import Description
-from aea.mail.base import AEAConnectionError, Address, Envelope
+from aea.mail.base import Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -373,12 +373,13 @@ class OEFLocalConnection(Connection):
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
         assert self._local_node is not None, "No local node set!"
-        if self.is_connected:
-            return  # pragma: nocover
-        self._state.set(ConnectionStates.connecting)
-        self._reader = Queue()
-        self._writer = await self._local_node.connect(self.address, self._reader)
-        self._state.set(ConnectionStates.connected)
+
+        if self.is_connected:  # pragma: nocover
+            return
+
+        with self._connect_context():
+            self._reader = Queue()
+            self._writer = await self._local_node.connect(self.address, self._reader)
 
     async def disconnect(self) -> None:
         """Disconnect from the local OEF Node."""
@@ -394,10 +395,7 @@ class OEFLocalConnection(Connection):
 
     async def send(self, envelope: Envelope):
         """Send a message."""
-        if not self.is_connected:
-            raise AEAConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )
+        self._ensure_connected()
         self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore  # pylint: disable=protected-access
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
@@ -406,10 +404,7 @@ class OEFLocalConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.is_connected:
-            raise AEAConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )
+        self._ensure_connected()
         try:
             assert self._reader is not None
             envelope = await self._reader.get()
