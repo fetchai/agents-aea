@@ -35,7 +35,7 @@ from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.6.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 

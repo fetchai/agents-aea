@@ -201,7 +201,7 @@ class TestInteractEcho(AEATestCaseEmpty):
     @pytest.mark.integration
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
-        self.add_item("skill", "fetchai/echo:0.5.0")
+        self.add_item("skill", "fetchai/echo:0.6.0")
         self.run_agent()
         process = self.run_interaction()
 
@@ -227,23 +227,23 @@ class TestInteractEcho(AEATestCaseEmpty):
 
         expected_output = [
             "Starting AEA interaction channel...",
-            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
             "Sending envelope:",
             f"to: {self.agent_name}",
             f"sender: {self.agent_name}_interact",
-            "protocol_id: fetchai/default:0.4.0",
+            "protocol_id: fetchai/default:0.5.0",
             "message_id=1 target=0 performative=bytes content=b'hello')",
-            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
             "Interrupting input, checking inbox ...",
             "Received envelope:",
             f"to: {self.agent_name}_interact",
             f"sender: {self.agent_name}",
-            "protocol_id: fetchai/default:0.4.0",
+            "protocol_id: fetchai/default:0.5.0",
             "message_id=2 target=1 performative=bytes content=b'hello')",
-            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
             "Interrupting input, checking inbox ...",
             "Received no new envelope!",
-            "Provide message of protocol fetchai/default:0.4.0 for performative bytes:",
+            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
             "Interaction interrupted!",
         ]
         missing = self.missing_from_output(

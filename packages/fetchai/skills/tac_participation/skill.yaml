@@ -1,6 +1,6 @@
 name: tac_participation
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 type: skill
 description: The tac participation skill implements the logic for an AEA to participate
   in the TAC.
@@ -14,10 +14,10 @@ fingerprint:
   handlers.py: QmcBhfgj8NSyisXEFedyiHmNXgEGXqyvziAeRpbkPHgvjD
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.8.0
+- fetchai/erc1155:0.9.0
 protocols:
-- fetchai/oef_search:0.4.0
-- fetchai/tac:0.5.0
+- fetchai/oef_search:0.5.0
+- fetchai/tac:0.6.0
 skills: []
 behaviours:
   tac_search:

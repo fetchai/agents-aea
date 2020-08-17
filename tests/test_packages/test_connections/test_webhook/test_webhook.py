@@ -140,7 +140,7 @@ class TestWebhookConnection:
         envelope = Envelope(
             to="addr",
             sender="my_id",
-            protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.5.0"),
             message=http_message,
         )
         with patch.object(self.webhook_connection.logger, "warning") as mock_logger:

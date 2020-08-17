@@ -162,10 +162,10 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.6.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.7.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.6.0")])
+        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.7.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = agent.resources.get_connection(local_connection_id)
@@ -217,10 +217,10 @@ def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.6.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.7.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.6.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.7.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = aea.resources.get_connection(local_connection_id)
@@ -303,10 +303,10 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.6.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.7.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.6.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.7.0")])
         local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
@@ -536,8 +536,6 @@ def test_no_handlers_registered():
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    # local_connection_id = PublicId.from_str("fetchai/stub:0.4.0")
-    # builder.set_default_connection(local_connection_id)
     aea = builder.build()
 
     with patch.object(
