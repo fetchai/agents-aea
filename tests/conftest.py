@@ -216,6 +216,7 @@ PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specificati
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
 contract_config_files = [
+    os.path.join(FETCHAI_PREF, "contracts", "erc1155", CONTRACT_YAML),
     os.path.join(ROOT_DIR, "tests", "data", "dummy_contract", CONTRACT_YAML),
 ]
 

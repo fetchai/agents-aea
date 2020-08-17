@@ -1,6 +1,7 @@
 name: http_server
 author: fetchai
 version: 0.6.0
+type: connection
 description: The HTTP server connection that wraps http server implementing a RESTful
   API specification.
 license: Apache-2.0

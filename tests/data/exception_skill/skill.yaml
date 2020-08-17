@@ -1,6 +1,7 @@
 name: exception
 author: fetchai
 version: 0.1.0
+type: skill
 description: Raise an exception, at some point.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

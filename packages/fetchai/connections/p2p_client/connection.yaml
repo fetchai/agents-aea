@@ -1,6 +1,7 @@
 name: p2p_client
 author: fetchai
 version: 0.5.0
+type: connection
 description: The p2p_client connection provides a connection with the fetch.ai mail
   provider.
 license: Apache-2.0

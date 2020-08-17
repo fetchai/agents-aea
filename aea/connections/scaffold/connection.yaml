@@ -1,6 +1,7 @@
 name: scaffold
 author: fetchai
 version: 0.1.0
+type: connection
 description: The scaffold connection provides a scaffold for a connection to be implemented
   by the developer.
 license: Apache-2.0

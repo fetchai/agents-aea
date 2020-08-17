@@ -1,6 +1,7 @@
 name: webhook
 author: fetchai
 version: 0.5.0
+type: connection
 description: The webhook connection that wraps a webhook functionality.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

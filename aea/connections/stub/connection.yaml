@@ -1,6 +1,7 @@
 name: stub
 author: fetchai
 version: 0.8.0
+type: connection
 description: The stub connection implements a connection stub which reads/writes messages
   from/to file.
 license: Apache-2.0

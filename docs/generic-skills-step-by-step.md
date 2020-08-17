@@ -1357,6 +1357,7 @@ Since we made so many changes to our AEA we have to update the `skill.yaml` (at 
 name: generic_seller
 author: fetchai
 version: 0.1.0
+type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
@@ -2886,6 +2887,7 @@ First, we update the `skill.yaml`. Make sure that your `skill.yaml` matches with
 name: generic_buyer
 author: fetchai
 version: 0.1.0
+type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

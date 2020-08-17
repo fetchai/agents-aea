@@ -1,6 +1,7 @@
 name: dummy
 author: fetchai
 version: 0.1.0
+type: connection
 description: dummy_connection connection description.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
