@@ -106,7 +106,7 @@ def test_when_package_has_missing_dependency():
         "Missing dependencies: ['(protocol, fetchai/oef_search:0.5.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.1.0" requires
+        # connection "fetchai/oef:0.8.0" requires
         # "fetchai/oef_search:0.5.0" and "fetchai/fipa:0.6.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,

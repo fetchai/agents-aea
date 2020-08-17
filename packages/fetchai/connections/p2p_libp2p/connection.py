@@ -625,6 +625,7 @@ class P2PLibp2pConnection(Connection):
         res = shutil.which("go")
         if res is None:
             raise AEAException(  # pragma: nocover
-                "Please install go before running the `fetchai/p2p_libp2p:0.1.0` connection. "
-                "Go is available for download here: https://golang.org/doc/install"
+                "Please install go before running the `{} connection. Go is available for download here: https://golang.org/doc/install".format(
+                    PUBLIC_ID
+                )
             )

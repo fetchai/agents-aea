@@ -536,8 +536,6 @@ def test_no_handlers_registered():
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    # local_connection_id = PublicId.from_str("fetchai/stub:0.4.0")
-    # builder.set_default_connection(local_connection_id)
     aea = builder.build()
 
     with patch.object(
