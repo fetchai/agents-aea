@@ -86,11 +86,44 @@ def _ordered_dumping(fun: Callable):
     return ordered_dump
 
 
-# Wrapped YAML loaders/dumpers to preserve the order of keys.
-yaml_load: Callable[[TextIO], Dict] = _ordered_loading(yaml.load)
-yaml_load_all: Callable[[TextIO], List[Dict]] = _ordered_loading(yaml.load_all)
-yaml_dump: Callable[[Dict, TextIO], None] = _ordered_dumping(yaml.dump)
-yaml_dump_all: Callable[[List[Dict], TextIO], None] = _ordered_dumping(yaml.dump_all)
+@_ordered_loading
+def yaml_load(*args, **kwargs) -> Dict[str, Any]:
+    """
+    Load a yaml from a file pointer in an ordered way.
+
+    :return: the yaml
+    """
+    return yaml.load(*args, **kwargs)
+
+
+@_ordered_loading
+def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
+    """
+    Load a multi-paged yaml from a file pointer in an ordered way.
+
+    :return: the yaml
+    """
+    return yaml.load_all(*args, **kwargs)
+
+
+@_ordered_dumping
+def yaml_dump(*args, **kwargs) -> None:
+    """
+    Dump multi-paged yaml data to a yaml file in an ordered way.
+
+    :return None
+    """
+    yaml.dump(*args, **kwargs)
+
+
+@_ordered_dumping
+def yaml_dump_all(*args, **kwargs) -> None:
+    """
+    Dump multi-paged yaml data to a yaml file in an ordered way.
+
+    :return None
+    """
+    yaml.dump_all(*args, **kwargs)
 
 
 def _get_module(spec):
