@@ -373,7 +373,8 @@ class OEFLocalConnection(Connection):
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
         assert self._local_node is not None, "No local node set!"
-        if self.is_connected:
+
+        if self.is_connected:  # pragma: nocover
             return
 
         with self._connect_context():

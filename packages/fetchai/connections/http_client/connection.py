@@ -372,7 +372,7 @@ class HTTPClientConnection(Connection):
 
         :return: None
         """
-        if self.is_connected:
+        if self.is_connected:  # pragma: nocover
             return
 
         with self._connect_context():
