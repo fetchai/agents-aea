@@ -163,7 +163,7 @@ consider to cite it with the following BibTex entry:
 
 ```
 @misc{agents-aea,
-  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani},
+  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál},
   Title = {Autonomous Economic Agent (AEA) Framework},
   Year = {2019},
 }

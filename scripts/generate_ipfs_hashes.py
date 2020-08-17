@@ -511,11 +511,19 @@ def check_hashes(timeout: float = 10.0) -> int:
     return return_code
 
 
+def clean_directory() -> None:
+    """Clean the directory."""
+    clean_command = ["make", "clean"]
+    process = subprocess.Popen(clean_command, stdout=subprocess.PIPE)  # nosec
+    _, _ = process.communicate()
+
+
 if __name__ == "__main__":
     arguments = parse_arguments()
     if arguments.check:
         return_code = check_hashes(arguments.timeout)
     else:
+        clean_directory()
         return_code = update_hashes(arguments.timeout)
 
     sys.exit(return_code)

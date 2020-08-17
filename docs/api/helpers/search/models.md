@@ -26,6 +26,16 @@ Initialize a location.
 - `latitude`: the latitude of the location.
 - `longitude`: the longitude of the location.
 
+<a name="aea.helpers.search.models.Location.tuple"></a>
+#### tuple
+
+```python
+ | @property
+ | tuple() -> Tuple[float, float]
+```
+
+Get the tuple representation of a location.
+
 <a name="aea.helpers.search.models.Location.distance"></a>
 #### distance
 

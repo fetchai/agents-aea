@@ -220,11 +220,10 @@ class WebhookConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
-        self.channel.logger = self.logger
-        self.channel.in_queue = asyncio.Queue()
-        await self.channel.connect()
-        self._state.set(ConnectionStates.connected)
+        with self._connect_context():
+            self.channel.logger = self.logger
+            self.channel.in_queue = asyncio.Queue()
+            await self.channel.connect()
 
     async def disconnect(self) -> None:
         """
@@ -246,10 +245,7 @@ class WebhookConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         assert self.channel.in_queue is not None
         await self.channel.send(envelope)
 
@@ -259,10 +255,7 @@ class WebhookConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         assert self.channel.in_queue is not None
         try:
             envelope = await self.channel.in_queue.get()

@@ -1,6 +1,7 @@
 name: tcp
 author: fetchai
 version: 0.6.0
+type: connection
 description: The tcp connection implements a tcp server and client.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -10,7 +11,7 @@ fingerprint:
   base.py: QmRwaGZS51WTDWh7TvfNEw4MtuzNH5yqT22HRVmGMrzwZ8
   connection.py: QmTFkiw3JLmhEM6CKRpKjv9Y32nuCQevZ2gVKoQ4gExeW9
   tcp_client.py: QmTXs6z3rvxB59FmGuu46CeY1eHRPBNQ4CPZm1y7hRpusp
-  tcp_server.py: QmPLTPEzeWPGU2Bt4kCaTXXKTqNNffHX5dr3LG75YQ249z
+  tcp_server.py: QmTv4hNxEBy7iG5YGemy6ugDcRfNV4JGpCR6ngigNB9jbq
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: TCPClientConnection

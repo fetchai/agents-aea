@@ -561,6 +561,7 @@ class SigningHandler(Handler):
                 last_fipa_msg.counterparty[-5:], signing_msg.signed_message,
             )
         )
+        assert fipa_dialogue.update(inform_msg), "Failure during update."
         self.context.outbox.put_message(message=inform_msg)
 
     def _handle_error(

@@ -74,7 +74,7 @@ cd my_thermometer_aea
 aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/thermometer:0.8.0
+aea add skill fetchai/thermometer:0.9.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
@@ -109,7 +109,7 @@ cd my_thermometer_client
 aea add connection fetchai/p2p_libp2p:0.7.0
 aea add connection fetchai/soef:0.6.0
 aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/thermometer_client:0.7.0
+aea add skill fetchai/thermometer_client:0.8.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
 ```
@@ -214,7 +214,7 @@ aea install
 Before being able to modify a package we need to eject it from vendor:
 
 ``` bash
-aea eject skill fetchai/thermometer:0.8.0
+aea eject skill fetchai/thermometer:0.9.0
 ```
 
 This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.

@@ -277,3 +277,21 @@ async cancel_and_wait(task: Optional[Task]) -> Any
 
 Wait cancelled task and skip CancelledError.
 
+<a name="aea.helpers.async_utils.AwaitableProc"></a>
+## AwaitableProc Objects
+
+```python
+class AwaitableProc()
+```
+
+Async-friendly subprocess.Popen
+
+<a name="aea.helpers.async_utils.AwaitableProc.start"></a>
+#### start
+
+```python
+ | async start()
+```
+
+Start the subprocess
+

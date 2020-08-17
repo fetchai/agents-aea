@@ -66,7 +66,7 @@ class TestCarPark(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.8.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.9.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
         )
@@ -98,7 +98,7 @@ class TestCarPark(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
-        self.add_item("skill", "fetchai/carpark_client:0.8.0")
+        self.add_item("skill", "fetchai/carpark_client:0.9.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
         )
@@ -236,7 +236,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.8.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.9.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
@@ -271,7 +271,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.6.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
         self.add_item("connection", "fetchai/ledger:0.3.0")
-        self.add_item("skill", "fetchai/carpark_client:0.8.0")
+        self.add_item("skill", "fetchai/carpark_client:0.9.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()

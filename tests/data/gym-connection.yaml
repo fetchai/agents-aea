@@ -1,6 +1,7 @@
 name: gym
 author: fetchai
 version: 0.1.0
+type: connection
 license: Apache-2.0
 fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR

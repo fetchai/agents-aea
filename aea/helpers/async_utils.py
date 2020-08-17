@@ -16,22 +16,26 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the misc utils for async code."""
 import asyncio
 import datetime
 import logging
+import subprocess  # nosec
 import time
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from asyncio.tasks import Task
 from collections.abc import Iterable
+from contextlib import contextmanager
 from threading import Thread
 from typing import (
     Any,
     Awaitable,
     Callable,
     Container,
+    Generator,
     List,
     Optional,
     Sequence,
@@ -59,6 +63,9 @@ def ensure_list(value: Any) -> List:
         return list(value)
 
     return [value]
+
+
+not_set = object()
 
 
 class AsyncState:
@@ -157,6 +164,30 @@ class AsyncState:
             return await watcher
         finally:
             self._remove_watcher(watcher)
+
+    @contextmanager
+    def transit(
+        self, initial: Any = not_set, success: Any = not_set, fail: Any = not_set
+    ) -> Generator:
+        """
+        Change state context according to success or not.
+
+        :param initial: set state on context enter, not_set by default
+        :param success: set state on context block done, not_set by default
+        :param fail: set state on context block raises exception, not_set by default
+
+        :return: None
+        """
+        try:
+            if initial is not not_set:
+                self.set(initial)
+            yield
+            if success is not not_set:
+                self.set(success)
+        except BaseException:
+            if fail is not not_set:
+                self.set(fail)
+            raise
 
 
 class PeriodicCaller:
@@ -355,3 +386,36 @@ async def cancel_and_wait(task: Optional[Task]) -> Any:
         return await task
     except CancelledError as e:
         return e
+
+
+class AwaitableProc:
+    """
+    Async-friendly subprocess.Popen
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.proc = None
+        self._thread = None
+        self.loop = None
+        self.future = None
+
+    async def start(self):
+        """Start the subprocess"""
+        self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
+        self.loop = asyncio.get_event_loop()
+        self.future = asyncio.futures.Future()
+        self._thread = Thread(target=self._in_thread)
+        self._thread.start()
+        try:
+            return await asyncio.shield(self.future)
+        except asyncio.CancelledError:  # pragma: nocover
+            self.proc.terminate()
+            return await self.future
+        finally:
+            self._thread.join()
+
+    def _in_thread(self):
+        self.proc.wait()
+        self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)

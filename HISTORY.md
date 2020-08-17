@@ -1,5 +1,19 @@
 # Release History
 
+## 0.5.4 (2020-08-13)
+
+- Adds support for Windows in p2p connections
+- Makes all tests Windows compatible
+- Adds integration tests for p2p public dht
+- Modifies contract base class to make it cross-ledger compatible
+- Changes dialogue reference nonce generation
+- Fixes tac skills (non-contract versions)
+- Fixes Aries identity skills
+- Extends cosmos crypto api to support cosmwasm
+- Adds full test coverage for framework and connection packages
+- Multiple docs updates including automated link integrity checks
+- Multiple additional tests and test stability fixes
+
 ## 0.5.3 (2020-08-05)
 
 - Adds support for re-starting agent after stopping it

@@ -7,13 +7,13 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ``` bash
 aea fetch fetchai/generic_seller:0.7.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.9.0
+aea eject skill fetchai/generic_seller:0.10.0
 cd ..
 ```
 ``` bash
 aea fetch fetchai/generic_buyer:0.7.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.8.0
+aea eject skill fetchai/generic_buyer:0.9.0
 cd ..
 ```
 ``` bash
@@ -77,6 +77,7 @@ aea delete my_generic_buyer
 name: generic_seller
 author: fetchai
 version: 0.1.0
+type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
@@ -146,6 +147,7 @@ dependencies: {}
 name: generic_buyer
 author: fetchai
 version: 0.1.0
+type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

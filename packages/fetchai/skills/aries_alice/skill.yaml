@@ -1,6 +1,7 @@
 name: aries_alice
 author: fetchai
 version: 0.5.0
+type: skill
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0

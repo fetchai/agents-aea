@@ -269,8 +269,8 @@ Run from agent's directory.
 **Arguments**:
 
 - `subprocesses`: the subprocesses running the agents
-- `signal`: the signal for interuption
-- `timeout`: the timeout for interuption
+- `signal`: the signal for interruption
+- `timeout`: the timeout for interruption
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.is_successfully_terminated"></a>
 #### is`_`successfully`_`terminated

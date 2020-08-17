@@ -25,7 +25,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Dict, List, Mapping, Optional, Type, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,11 @@ class Location:
         """
         self.latitude = latitude
         self.longitude = longitude
+
+    @property
+    def tuple(self) -> Tuple[float, float]:
+        """Get the tuple representation of a location."""
+        return (self.latitude, self.longitude)
 
     def distance(self, other: "Location") -> float:
         """

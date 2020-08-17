@@ -155,7 +155,7 @@ class ConfigLoader(Generic[T]):
         """
         configuration_file_json = yaml_load(file_pointer)
 
-        self.validator.validate(instance=configuration_file_json)
+        self._validate(configuration_file_json)
 
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
@@ -180,6 +180,27 @@ class ConfigLoader(Generic[T]):
         """Get the configuration loader from the type."""
         configuration_type = PackageType(configuration_type)
         return ConfigLoaders.from_package_type(configuration_type)
+
+    def _validate(self, json_data: Dict) -> None:
+        """
+        Validate a configuration file.
+
+        :param json_data: the JSON object of the configuration file to validate.
+        :return: None
+        :raises ValidationError: if the file doesn't comply with the JSON schema.
+              | ValueError: if other consistency checks fail.
+        """
+        # this might raise ValidationError.
+        self.validator.validate(instance=json_data)
+
+        expected_type = self.configuration_class.package_type
+        # TODO 'type' is optional for backward compatibility
+        if expected_type != PackageType.AGENT and "type" in json_data:
+            actual_type = PackageType(json_data["type"])
+            if expected_type != actual_type:
+                raise ValueError(
+                    f"The field type is not correct: expected {expected_type}, found {actual_type}."
+                )
 
 
 class ConfigLoaders:

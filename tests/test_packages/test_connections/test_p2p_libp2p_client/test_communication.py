@@ -37,7 +37,6 @@ from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
-    skip_test_windows,
 )
 
 DEFAULT_PORT = 10234
@@ -46,7 +45,6 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
 
 
-@skip_test_windows
 @pytest.mark.asyncio
 class TestLibp2pClientConnectionConnectDisconnect:
     """Test that connection is established and torn down correctly"""
@@ -86,7 +84,6 @@ class TestLibp2pClientConnectionConnectDisconnect:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestLibp2pClientConnectionEchoEnvelope:
     """Test that connection will route envelope to destination through the same libp2p node"""
@@ -227,7 +224,6 @@ class TestLibp2pClientConnectionEchoEnvelope:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
     """Test that connection will route envelope to destination connected to different node"""
@@ -391,7 +387,6 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             pass
 
 
-@skip_test_windows
 @libp2p_log_on_failure_all
 class TestLibp2pClientConnectionRouting:
     """Test that libp2p DHT network will reliably route envelopes from clients connected to different nodes"""
@@ -493,7 +488,6 @@ class TestLibp2pClientConnectionRouting:
             pass
 
 
-@skip_test_windows
 def test_libp2pclientconnection_uri():
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)

@@ -173,6 +173,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
         module = importlib.util.module_from_spec(spec)
         sys.modules[import_path] = module
+        logger.debug(f"loading {import_path}: {module}")
         spec.loader.exec_module(module)  # type: ignore
 
 
@@ -253,6 +254,8 @@ def send_control_c(
     :return: None
     """
     if platform.system() == "Windows":
+        if process.stdin:  # cause ctrl-c event will be handled with stdin
+            process.stdin.close()
         os.kill(process.pid, signal.CTRL_C_EVENT)  # pylint: disable=no-member
     elif kill_group:
         pgid = os.getpgid(process.pid)

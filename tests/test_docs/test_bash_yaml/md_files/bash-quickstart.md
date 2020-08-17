@@ -36,7 +36,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.3
+v0.5.4
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -55,13 +55,13 @@ aea add skill fetchai/echo:0.5.0
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.4.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 ``` bash
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.7.0
+aea run --connections fetchai/stub:0.8.0
 ```
 ``` bash
     _     _____     _
@@ -70,7 +70,7 @@ aea run --connections fetchai/stub:0.7.0
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.5.3
+v0.5.4
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

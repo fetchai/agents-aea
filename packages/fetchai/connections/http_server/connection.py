@@ -533,6 +533,7 @@ class HTTPServerConnection(Connection):
         """
         if self.is_connected:
             return
+
         self._state.set(ConnectionStates.connecting)
         self.channel.logger = self.logger
         await self.channel.connect(loop=self.loop)
@@ -549,6 +550,7 @@ class HTTPServerConnection(Connection):
         """
         if self.is_disconnected:
             return
+
         self._state.set(ConnectionStates.disconnecting)
         await self.channel.disconnect()
         self._state.set(ConnectionStates.disconnected)
@@ -560,10 +562,7 @@ class HTTPServerConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
@@ -572,10 +571,7 @@ class HTTPServerConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         try:
             return await self.channel.get_message()
         except CancelledError:  # pragma: no cover

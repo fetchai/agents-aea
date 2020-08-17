@@ -37,6 +37,7 @@ aea run
 name: my_search
 author: fetchai
 version: 0.1.0
+type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -77,6 +78,7 @@ default_routing:
 name: simple_service_registration
 author: fetchai
 version: 0.4.0
+type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

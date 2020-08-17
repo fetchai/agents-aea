@@ -89,6 +89,8 @@ class BaseAEATestCase(ABC):
     stdout: Dict[int, str]  # dict of process.pid: string stdout
     stderr: Dict[int, str]  # dict of process.pid: string stderr
     _is_teardown_class_called: bool = False
+    capture_log: bool = False
+    cli_log_options: List[str] = []
 
     @classmethod
     def set_agent_context(cls, agent_name: str):
@@ -179,8 +181,12 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-
-        kwargs = dict(stdout=subprocess.PIPE, env=os.environ.copy(), cwd=cwd,)
+        kwargs = dict(
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            env=os.environ.copy(),
+            cwd=cwd,
+        )
         kwargs.update(win_popen_kwargs())
 
         process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
@@ -343,12 +349,7 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        process = cls._run_python_subprocess(
-            "-m", "aea.cli", "run", *args, cwd=cls._get_cwd()
-        )
-        cls._start_output_read_thread(process)
-        cls._start_error_read_thread(process)
-        return process
+        return cls._start_cli_process("run", *args)
 
     @classmethod
     def run_interaction(cls) -> subprocess.Popen:
@@ -361,8 +362,18 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
+        return cls._start_cli_process("interact")
+
+    @classmethod
+    def _start_cli_process(cls, *args: str) -> subprocess.Popen:
+        """
+        Start cli subprocess with args specified.
+
+        :param args: CLI args
+        :return: subprocess object.
+        """
         process = cls._run_python_subprocess(
-            "-m", "aea.cli", "interact", cwd=cls._get_cwd()
+            "-m", "aea.cli", *cls.cli_log_options, *args, cwd=cls._get_cwd()
         )
         cls._start_output_read_thread(process)
         cls._start_error_read_thread(process)
@@ -381,8 +392,8 @@ class BaseAEATestCase(ABC):
         Run from agent's directory.
 
         :param subprocesses: the subprocesses running the agents
-        :param signal: the signal for interuption
-        :param timeout: the timeout for interuption
+        :param signal: the signal for interruption
+        :param timeout: the timeout for interruption
         """
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
@@ -625,13 +636,22 @@ class BaseAEATestCase(ABC):
     @classmethod
     def _read_out(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
         for line in TextIOWrapper(process.stdout, encoding="utf-8"):
+            cls._log_capture("stdout", process.pid, line)
             cls.stdout[process.pid] += line
 
     @classmethod
     def _read_err(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
         if process.stderr is not None:
             for line in TextIOWrapper(process.stderr, encoding="utf-8"):
+                cls._log_capture("stderr", process.pid, line)
                 cls.stderr[process.pid] += line
+
+    @classmethod
+    def _log_capture(cls, name, pid, line):  # pragma: nocover
+        if not cls.capture_log:
+            return
+        sys.stdout.write(f"[{pid}]{name}>{line}")
+        sys.stdout.flush()
 
     @classmethod
     def _start_output_read_thread(cls, process: subprocess.Popen) -> None:

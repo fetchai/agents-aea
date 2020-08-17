@@ -225,10 +225,9 @@ class GymConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
-        self.channel.logger = self.logger
-        await self.channel.connect()
-        self._state.set(ConnectionStates.connected)
+        with self._connect_context():
+            self.channel.logger = self.logger
+            await self.channel.connect()
 
     async def disconnect(self) -> None:
         """
@@ -250,18 +249,12 @@ class GymConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )
+        self._ensure_connected()
         await self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )
+        self._ensure_connected()
         try:
             envelope = await self.channel.get()
             return envelope
