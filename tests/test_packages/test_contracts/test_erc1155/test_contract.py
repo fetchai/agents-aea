@@ -444,3 +444,41 @@ class TestCosmWasmContract:
 
         assert "balances" in res
         assert res["balances"] == {token_id: 1 for token_id in self.token_ids_a}
+
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    def test_cosmwasm_unimplemented_exception_single_atomic_swap(
+        self, erc1155_contract
+    ):
+        pytest.raises(
+            NotImplementedError,
+            erc1155_contract.get_atomic_swap_single_transaction,
+            self.ledger_api,
+            contract_address=None,
+            from_address=None,
+            to_address=None,
+            token_id=0,
+            from_supply=0,
+            to_supply=0,
+            value=0,
+            trade_nonce=0,
+            signature="",
+        )
+
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    def test_cosmwasm_unimplemented_exception_batch_atomic_swap(self, erc1155_contract):
+        pytest.raises(
+            NotImplementedError,
+            erc1155_contract.get_atomic_swap_batch_transaction,
+            self.ledger_api,
+            contract_address=None,
+            from_address=None,
+            to_address=None,
+            token_ids=[0],
+            from_supplies=[0],
+            to_supplies=[0],
+            value=0,
+            trade_nonce=0,
+            signature="",
+        )

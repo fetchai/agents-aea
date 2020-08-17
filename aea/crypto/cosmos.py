@@ -28,7 +28,7 @@ import subprocess  # nosec
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple, List
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
 from bech32 import bech32_encode, convertbits
 

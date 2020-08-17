@@ -324,7 +324,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_id: int,
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, Dict[int, int]]:
         """
         Get the balance for a specific token id.
 
