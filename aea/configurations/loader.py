@@ -147,20 +147,16 @@ class ConfigLoader(Generic[T]):
 
     def load(self, file_pointer: TextIO) -> T:
         """
-        Load an agent configuration file.
+        Load a configuration file.
 
         :param file_pointer: the file pointer to the configuration file
         :return: the configuration object.
-        :raises
         """
-        configuration_file_json = yaml_load(file_pointer)
-
-        self._validate(configuration_file_json)
-
-        key_order = list(configuration_file_json.keys())
-        configuration_obj = self.configuration_class.from_json(configuration_file_json)
-        configuration_obj._key_order = key_order  # pylint: disable=protected-access
-        return configuration_obj
+        if self.configuration_class.package_type == PackageType.AGENT:
+            # return self._load_agent_config(file_pointer)
+            return self._load_component_config(file_pointer)
+        else:
+            return self._load_component_config(file_pointer)
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.
@@ -201,6 +197,21 @@ class ConfigLoader(Generic[T]):
                 raise ValueError(
                     f"The field type is not correct: expected {expected_type}, found {actual_type}."
                 )
+
+    def _load_component_config(self, file_pointer: TextIO) -> T:
+        """Load a component configuration."""
+        configuration_file_json = yaml_load(file_pointer)
+
+        self._validate(configuration_file_json)
+
+        key_order = list(configuration_file_json.keys())
+        configuration_obj = self.configuration_class.from_json(configuration_file_json)
+        configuration_obj._key_order = key_order  # pylint: disable=protected-access
+        return configuration_obj
+
+    def _load_agent_config(self, file_pointer: TextIO) -> T:
+        """Load an agent configuration."""
+        # TODO
 
 
 class ConfigLoaders:

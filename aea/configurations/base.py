@@ -1262,6 +1262,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        component_configurations: Optional[Dict[ComponentId, Configuration]] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1310,6 +1311,9 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self.component_configurations = (
+            component_configurations if component_configurations is not None else {}
+        )
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
