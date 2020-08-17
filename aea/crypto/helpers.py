@@ -25,19 +25,9 @@ from pathlib import Path
 
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 
-COSMOS_PRIVATE_KEY_FILE = "cosmos_private_key.txt"
-FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
-ETHEREUM_PRIVATE_KEY_FILE = "eth_private_key.txt"
-IDENTIFIER_TO_KEY_FILES = {
-    CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE,
-    EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_FILE,
-    FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE,
-}
+PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 
 logger = logging.getLogger(__name__)
 
@@ -55,13 +45,18 @@ def verify_or_create_private_keys(
     fp = path_to_aea_config.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
-    for identifier, _value in aea_conf.private_key_paths.read_all():
+    for identifier, _ in aea_conf.private_key_paths.read_all():
         if identifier not in crypto_registry.supported_ids:  # pragma: nocover
-            ValueError("Unsupported identifier in private key paths.")
+            ValueError(
+                "Unsupported identifier `{}` in private key paths. Supported identifier: {}".format(
+                    identifier, crypto_registry.supported_ids
+                )
+            )
 
-    for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
+    for identifier in crypto_registry.supported_ids:
         config_private_key_path = aea_conf.private_key_paths.read(identifier)
         if config_private_key_path is None:
+            private_key_path = PRIVATE_KEY_PATH_SCHEMA.format(identifier)
             if identifier == aea_conf.default_ledger:  # pragma: nocover
                 create_private_key(
                     identifier,
@@ -72,13 +67,13 @@ def verify_or_create_private_keys(
             try:
                 try_validate_private_key_path(
                     identifier,
-                    str(aea_project_path / private_key_path),
+                    str(aea_project_path / config_private_key_path),
                     exit_on_error=exit_on_error,
                 )
             except FileNotFoundError:  # pragma: no cover
                 raise ValueError(
                     "File {} for private key {} not found.".format(
-                        repr(private_key_path), identifier,
+                        repr(config_private_key_path), identifier,
                     )
                 )
 

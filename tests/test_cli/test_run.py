@@ -43,11 +43,17 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.exceptions import AEAPackageLoadingError
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CliRunner,
+    FETCHAI_PRIVATE_KEY_FILE,
+    MAX_FLAKY_RERUNS,
+    ROOT_DIR,
+)
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -271,7 +277,7 @@ def test_run_unknown_private_key():
 
     find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-        fetchai_not: fet_private_key.txt"""
+        fetchai_not: fetchai_private_key.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 

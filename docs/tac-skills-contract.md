@@ -130,7 +130,7 @@ aea config set agent.default_ledger ethereum
 We first generate a private key.
 ``` bash
 aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
+aea add-key ethereum ethereum_private_key.txt
 ```
 
 To create some wealth for your AEAs for the Ethereum `ropsten` network. Note that this needs to be executed from each AEA folder:

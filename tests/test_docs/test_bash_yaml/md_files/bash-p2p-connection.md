@@ -32,7 +32,7 @@ My libp2p addresses: ...
 ```
 ``` bash
 aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
+aea add-key fetchai fetchai_private_key.txt
 ```
 ``` bash
 aea generate-wealth fetchai
