@@ -94,7 +94,7 @@ class Message:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
-        assert self._sender is None, "Sender already set."
+        # assert self._sender is None, "Sender already set."
         self._sender = sender
 
     @property
