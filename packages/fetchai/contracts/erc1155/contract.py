@@ -332,7 +332,7 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param agent_address: the address
         :param token_id: the token id
-        :return: the balance in a dictionary - {"balance": 'U256'}
+        :return: the balance in a dictionary - {"balance": {token_id: int, balance: int}}
         """
         if ledger_api.identifier == "ethereum":
             instance = cls.get_instance(ledger_api, contract_address)
@@ -428,7 +428,7 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param agent_address: the address
         :param token_ids: the token id
-        :return: the balances in dictionary - {"balances": [{id: U256, balance: U256}...]}
+        :return: the balances in dictionary - {"balances": {id: int, balance: int}}
         """
         if ledger_api.identifier == "ethereum":
             instance = cls.get_instance(ledger_api, contract_address)
@@ -753,7 +753,7 @@ class ERC1155Contract(Contract):
         return tx
 
     @staticmethod
-    def get_last_code_id(ledger_api: LedgerApi):
+    def get_last_code_id(ledger_api: LedgerApi) -> int:
         """
         Uses wasmcli to get ID of latest deployed .wasm bytecode
         :param ledger_api: the ledger API
@@ -769,7 +769,7 @@ class ERC1155Contract(Contract):
             raise NotImplementedError
 
     @staticmethod
-    def get_contract_address(ledger_api: LedgerApi, code_id: int):
+    def get_contract_address(ledger_api: LedgerApi, code_id: int) -> str:
         """
         Uses wasmcli to get contract address of latest initialised contract by its ID
         :param ledger_api: the ledger API
