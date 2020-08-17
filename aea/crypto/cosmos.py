@@ -825,6 +825,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         """
         Uses subprocess to execute command and get result as JSON dict
 
+        :param command: the shell command to be executed
         :return: the stdout result converted to JSON dict
         """
         stdout, _ = subprocess.Popen(  # nosec
