@@ -22,12 +22,13 @@
 import json
 import logging
 import random
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from vyper.utils import keccak256
 
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
+from aea.crypto.cosmos import CosmosApi
 from aea.mail.base import Address
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
@@ -111,7 +112,8 @@ class ERC1155Contract(Contract):
             msg = {
                 "create_batch": {"item_owner": str(deployer_address), "tokens": tokens}
             }
-            tx = ledger_api.get_handle_transaction(
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -160,7 +162,8 @@ class ERC1155Contract(Contract):
                     "path": str(data),
                 }
             }
-            tx = ledger_api.get_handle_transaction(
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -219,7 +222,8 @@ class ERC1155Contract(Contract):
                     "tokens": tokens,
                 }
             }
-            tx = ledger_api.get_handle_transaction(
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -305,7 +309,8 @@ class ERC1155Contract(Contract):
                     "data": str(data),
                 }
             }
-            tx = ledger_api.get_handle_transaction(
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -319,7 +324,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_id: int,
-    ) -> Dict[str, str]:
+    ) -> Dict[str, Any]:
         """
         Get the balance for a specific token id.
 
@@ -335,10 +340,13 @@ class ERC1155Contract(Contract):
             result = {token_id: balance}
             return {"balance": result}
         elif ledger_api.identifier == "cosmos":
+            cosmos_api = cast(CosmosApi, ledger_api)
             msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
-            res = ledger_api.try_execute_wasm_query(contract_address, msg)
-
-            return json.loads(res)
+            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
+            query_json_res = json.loads(query_res)
+            # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
+            result = {token_id: int(query_json_res["balance"])}
+            return {"balance": result}
         else:
             raise NotImplementedError
 
@@ -412,15 +420,15 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_ids: List[int],
-    ) -> Dict[str, List[str]]:
+    ) -> Dict[str, Dict[int, int]]:
         """
         Get the balances for a batch of specific token ids.
 
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract
         :param agent_address: the address
-        :param token_id: the token id
-        :return: the balances in dictionary - {"balances": [U256, ...]}
+        :param token_ids: the token id
+        :return: the balances in dictionary - {"balances": [{id: U256, balance: U256}...]}
         """
         if ledger_api.identifier == "ethereum":
             instance = cls.get_instance(ledger_api, contract_address)
@@ -436,8 +444,15 @@ class ERC1155Contract(Contract):
 
             msg = {"balance_batch": {"addresses": tokens}}
 
-            res = ledger_api.try_execute_wasm_query(contract_address, msg)
-            return json.loads(res)
+            cosmos_api = cast(CosmosApi, ledger_api)
+            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
+            query_json_res = json.loads(query_res)
+            # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
+            result = {
+                token_id: int(balance)
+                for token_id, balance in zip(token_ids, query_json_res["balances"])
+            }
+            return {"balances": result}
         else:
             raise NotImplementedError
 
@@ -745,16 +760,27 @@ class ERC1155Contract(Contract):
 
         :return: code id of last deployed .wasm bytecode
         """
-
-        return ledger_api.get_last_code_id()
+        if ledger_api.identifier == "ethereum":
+            raise NotImplementedError
+        elif ledger_api.identifier == "cosmos":
+            cosmos_api = cast(CosmosApi, ledger_api)
+            return cosmos_api.get_last_code_id()
+        else:
+            raise NotImplementedError
 
     @staticmethod
     def get_contract_address(ledger_api: LedgerApi, code_id: int):
         """
         Uses wasmcli to get contract address of latest initialised contract by its ID
         :param ledger_api: the ledger API
+        :param code_id: the ID of stored contract CosmWasm
 
         :return: contract address of last initialised contract
         """
-
-        return ledger_api.get_contract_address(code_id)
+        if ledger_api.identifier == "ethereum":
+            raise NotImplementedError
+        elif ledger_api.identifier == "cosmos":
+            cosmos_api = cast(CosmosApi, ledger_api)
+            return cosmos_api.get_contract_address(code_id)
+        else:
+            raise NotImplementedError

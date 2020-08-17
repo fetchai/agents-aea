@@ -28,7 +28,7 @@ import subprocess  # nosec
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple
+from typing import Any, BinaryIO, Dict, Optional, Tuple, List
 
 from bech32 import bech32_encode, convertbits
 
@@ -821,7 +821,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         return None
 
     @staticmethod
-    def _execute_shell_command(command: [str]) -> Dict[str, str]:
+    def _execute_shell_command(command: List[str]) -> Any:
         """
         Uses subprocess to execute command and get result as JSON dict
 
@@ -846,7 +846,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
         return res[-1]["id"]
 
-    def get_contract_address(self, code_id: int):
+    def get_contract_address(self, code_id: int) -> str:
         """
         Uses wasmcli to get contract address of latest initialised contract by its ID
 

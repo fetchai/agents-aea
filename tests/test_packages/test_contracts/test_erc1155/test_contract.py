@@ -283,7 +283,7 @@ class TestCosmWasmContract:
 
         faucet_api.get_wealth(address)
 
-        tries = 10
+        tries = 15
         while tries > 0:
             tries -= 1
             time.sleep(1)
@@ -420,7 +420,7 @@ class TestCosmWasmContract:
             token_id=self.token_id_b,
         )
         assert "balance" in res
-        assert res["balance"] == "1"
+        assert res["balance"][self.token_id_b] == 1
 
         # Mint batch of tokens
         tx = erc1155_contract.get_mint_batch_transaction(
@@ -441,5 +441,6 @@ class TestCosmWasmContract:
             agent_address=self.item_owner_crypto.address,
             token_ids=self.token_ids_a,
         )
+
         assert "balances" in res
-        assert res["balances"] == ["1"] * len(self.token_ids_a)
+        assert res["balances"] == {token_id: 1 for token_id in self.token_ids_a}
