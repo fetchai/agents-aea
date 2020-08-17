@@ -24,7 +24,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union
+from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -34,6 +34,8 @@ from yaml import SafeLoader
 
 from aea.configurations.base import (
     AgentConfig,
+    ComponentConfiguration,
+    ComponentId,
     ConnectionConfig,
     ContractConfig,
     PackageType,
@@ -41,7 +43,7 @@ from aea.configurations.base import (
     ProtocolSpecification,
     SkillConfig,
 )
-from aea.helpers.base import yaml_dump, yaml_load
+from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
@@ -153,8 +155,7 @@ class ConfigLoader(Generic[T]):
         :return: the configuration object.
         """
         if self.configuration_class.package_type == PackageType.AGENT:
-            # return self._load_agent_config(file_pointer)
-            return self._load_component_config(file_pointer)
+            return cast(T, self._load_agent_config(file_pointer))
         else:
             return self._load_component_config(file_pointer)
 
@@ -165,9 +166,10 @@ class ConfigLoader(Generic[T]):
         :param file_pointer: the file pointer to the configuration file
         :return: None
         """
-        result = configuration.ordered_json
-        self.validator.validate(instance=result)
-        yaml_dump(result, file_pointer)
+        if self.configuration_class.package_type == PackageType.AGENT:
+            self._dump_agent_config(cast(AgentConfig, configuration), file_pointer)
+        else:
+            self._dump_component_config(configuration, file_pointer)
 
     @classmethod
     def from_configuration_type(
@@ -201,17 +203,66 @@ class ConfigLoader(Generic[T]):
     def _load_component_config(self, file_pointer: TextIO) -> T:
         """Load a component configuration."""
         configuration_file_json = yaml_load(file_pointer)
+        return self._load_from_json(configuration_file_json)
 
+    def _load_from_json(self, configuration_file_json: Dict) -> T:
+        """Load component configuration from JSON object."""
         self._validate(configuration_file_json)
-
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
         return configuration_obj
 
-    def _load_agent_config(self, file_pointer: TextIO) -> T:
+    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
         """Load an agent configuration."""
-        # TODO
+        configuration_file_jsons = yaml_load_all(file_pointer)
+
+        if len(configuration_file_jsons) == 0:
+            raise ValueError("Agent configuration file was empty.")
+        agent_config_json = configuration_file_jsons[0]
+        self._validate(agent_config_json)
+        key_order = list(agent_config_json.keys())
+        agent_configuration_obj = cast(
+            AgentConfig, self.configuration_class.from_json(agent_config_json)
+        )
+        agent_configuration_obj._key_order = (  # pylint: disable=protected-access
+            key_order
+        )
+
+        component_configurations: Dict[ComponentId, ComponentConfiguration] = {}
+        # load the other components.
+        for i, component_configuration_json in enumerate(configuration_file_jsons[1:]):
+            if "type" not in component_configuration_json:
+                raise ValueError(f"Component type of component number {i+1} not found.")
+            component_type_str = component_configuration_json["type"]
+            loader = ConfigLoaders.from_package_type(component_type_str)
+            configuration_obj = loader._load_from_json(  # pylint: disable=protected-access
+                component_configuration_json
+            )
+            if configuration_obj.component_id in component_configurations:
+                raise ValueError(
+                    f"Configuration of component {configuration_obj.component_id} occurs more than once."
+                )
+            component_configurations[configuration_obj.component_id] = configuration_obj
+
+        agent_configuration_obj.component_configurations = component_configurations
+        return agent_configuration_obj
+
+    def _dump_agent_config(
+        self, configuration: AgentConfig, file_pointer: TextIO
+    ) -> None:
+        """Dump agent configuration."""
+        self.validator.validate(instance=configuration.ordered_json)
+        result = [configuration.ordered_json] + [
+            c.ordered_json for c in configuration.component_configurations.values()
+        ]
+        yaml_dump_all(result, file_pointer)
+
+    def _dump_component_config(self, configuration: T, file_pointer: TextIO) -> None:
+        """Dump component configuration."""
+        result = configuration.ordered_json
+        self.validator.validate(instance=result)
+        yaml_dump(result, file_pointer)
 
 
 class ConfigLoaders:

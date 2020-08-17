@@ -59,15 +59,6 @@
         }
       }
     },
-    "ledger_apis": {
-      "type": "object",
-      "uniqueItems": true,
-      "patternProperties": {
-        "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "definitions.json#/definitions/ledger_api"
-        }
-      }
-    },
     "default_ledger": {
       "$ref": "definitions.json#/definitions/ledger_id"
     },

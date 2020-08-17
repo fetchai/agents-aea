@@ -1262,7 +1262,9 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
-        component_configurations: Optional[Dict[ComponentId, Configuration]] = None,
+        component_configurations: Optional[
+            Dict[ComponentId, ComponentConfiguration]
+        ] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(

@@ -93,7 +93,7 @@ def yaml_load(*args, **kwargs) -> Dict[str, Any]:
 
     :return: the yaml
     """
-    return yaml.load(*args, **kwargs)
+    return yaml.load(*args, **kwargs)  # nosec
 
 
 @_ordered_loading
@@ -103,7 +103,7 @@ def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
 
     :return: the yaml
     """
-    return yaml.load_all(*args, **kwargs)
+    return list(yaml.load_all(*args, **kwargs))  # nosec
 
 
 @_ordered_dumping
@@ -113,7 +113,7 @@ def yaml_dump(*args, **kwargs) -> None:
 
     :return None
     """
-    yaml.dump(*args, **kwargs)
+    yaml.dump(*args, **kwargs)  # nosec
 
 
 @_ordered_dumping
@@ -123,7 +123,7 @@ def yaml_dump_all(*args, **kwargs) -> None:
 
     :return None
     """
-    yaml.dump_all(*args, **kwargs)
+    yaml.dump_all(*args, **kwargs)  # nosec
 
 
 def _get_module(spec):

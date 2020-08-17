@@ -292,6 +292,7 @@ agent_config_files = [
     os.path.join(CUR_PATH, "data", "dummy_aea", AGENT_YAML),
     os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
     os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml"),
+    # os.path.join(CUR_PATH, "data", "aea-config.example_multipage.yaml"), TODO add it.
     os.path.join(FETCHAI_PREF, "agents", "aries_alice", AGENT_YAML),
     os.path.join(FETCHAI_PREF, "agents", "aries_faber", AGENT_YAML),
     os.path.join(FETCHAI_PREF, "agents", "car_data_buyer", AGENT_YAML),
