@@ -21,6 +21,7 @@
 
 import json
 import time
+from typing import Dict
 
 import pytest
 
@@ -247,6 +248,7 @@ class TestCosmWasmContract:
         self.deployer_crypto = crypto_registry.make(COSMOS)
         self.item_owner_crypto = crypto_registry.make(COSMOS)
 
+        # Test tokens IDs
         self.token_ids_a = [
             340282366920938463463374607431768211456,
             340282366920938463463374607431768211457,
@@ -282,38 +284,70 @@ class TestCosmWasmContract:
             if balance != start_balance:
                 break
 
+    def sign_send_verify_handle_transaction(self, tx: Dict[str, str], sender_crypto):
+        """
+        Sign, send and verify if HandleMsg transaction was successful.
+
+        :param tx: the transaction
+        :param sender_crypto: Crypto to sign transaction with
+        :return: Nothing - asserts pass if transaction is successful
+        """
+
+        signed_tx = sender_crypto.sign_transaction(tx)
+        res: str = self.ledger_api.send_signed_transaction(signed_tx)
+        # Convert message return string to JSON dict
+        receipt: Dict[str, str] = json.loads(res)
+        assert len(receipt) == 6
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
+
+    def sign_send_verify_deploy_init_transaction(self, tx: Dict[str, str], sender_crypto):
+        """
+        Sign, send and verify if deploy or InitMsg transaction was successful.
+
+        :param tx: the transaction
+        :param sender_crypto: Crypto to sign transaction with
+        :return: Nothing - asserts pass if transaction is successful
+        """
+
+        signed_tx = sender_crypto.sign_transaction(tx)
+        res: str = self.ledger_api.send_signed_transaction(signed_tx)
+        # Convert message return string to JSON dict
+        receipt: Dict[str, str] = json.loads(res)
+        assert len(receipt) == 7
+        assert all(
+            [
+                key in receipt
+                for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
+            ])
+
     @pytest.mark.integration
     @pytest.mark.ledger
     def test_cosmwasm_contract_deploy_and_interact(self, erc1155_contract):
-
         # Deploy contract
         tx = erc1155_contract.get_deploy_transaction(
             ledger_api=self.ledger_api, deployer_address=self.deployer_crypto.address, gas=900000
         )
         assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
-        assert len(receipt) == 7
-        assert all(
-            [
-                key in receipt
-                for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
-
-        code_id = self.ledger_api.get_last_code_id()
+        self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
+        code_id = erc1155_contract.get_last_code_id(self.ledger_api)
 
         # Init contract
-        tx = self.ledger_api.get_init_transaction(self.deployer_crypto.address, code_id, {}, 0, 0, label="ERC1155")
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
-        assert len(receipt) == 7
-        assert all(
-            [
-                key in receipt
-                for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
+        tx = self.ledger_api.get_init_transaction(
+            self.deployer_crypto.address,
+            code_id,
+            init_msg={},
+            tx_fee=0,
+            amount=0,
+            label="ERC1155"
+        )
+        assert len(tx) == 6
+        self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
 
-        contract_address = self.ledger_api.get_contract_address(code_id)
+        contract_address = erc1155_contract.get_contract_address(self.ledger_api, code_id)
 
         # Create single token
         tx = erc1155_contract.get_create_single_transaction(
@@ -323,14 +357,7 @@ class TestCosmWasmContract:
             token_id=self.token_id_b,
         )
         assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
-        assert len(receipt) == 6
-        assert all(
-            [
-                key in receipt
-                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
+        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Create batch of tokens
         tx = erc1155_contract.get_create_batch_transaction(
@@ -340,14 +367,7 @@ class TestCosmWasmContract:
             token_ids=self.token_ids_a,
         )
         assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
-        assert len(receipt) == 6
-        assert all(
-            [
-                key in receipt
-                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
+        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Mint single token
         tx = erc1155_contract.get_mint_single_transaction(
@@ -359,14 +379,7 @@ class TestCosmWasmContract:
             mint_quantity=1
         )
         assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
-        assert len(receipt) == 6
-        assert all(
-            [
-                key in receipt
-                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
+        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Get balance of single token
         res = erc1155_contract.get_balance(
@@ -388,14 +401,7 @@ class TestCosmWasmContract:
             mint_quantities=[1] * len(self.token_ids_a)
         )
         assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        receipt = json.loads(self.ledger_api.send_signed_transaction(signed_tx))
-        assert len(receipt) == 6
-        assert all(
-            [
-                key in receipt
-                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
+        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Get balances of multiple tokens
         res = erc1155_contract.get_balances(

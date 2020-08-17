@@ -821,7 +821,19 @@ class CosmosApi(LedgerApi, CosmosHelper):
         return None
 
     @staticmethod
-    def get_last_code_id():
+    def _execute_shell_command(command: [str]) -> Dict[str, str]:
+        """
+        Uses subprocess to execute command and get result as JSON dict
+
+        :return: the stdout result converted to JSON dict
+        """
+        stdout, _ = subprocess.Popen(  # nosec
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        return json.loads(stdout.decode("ascii"))
+
+    def get_last_code_id(self):
         """
         Uses wasmcli to get ID of latest deployed .wasm bytecode
 
@@ -829,17 +841,11 @@ class CosmosApi(LedgerApi, CosmosHelper):
         """
 
         command = ["wasmcli", "query", "wasm", "list-code"]
+        res = self._execute_shell_command(command)
 
-        stdout, _ = subprocess.Popen(  # nosec
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        ).communicate()
+        return res[-1]["id"]
 
-        json_out = json.loads(stdout.decode("ascii"))
-
-        return json_out[-1]["id"]
-
-    @staticmethod
-    def get_contract_address(code_id: int):
+    def get_contract_address(self, code_id: int):
         """
         Uses wasmcli to get contract address of latest initialised contract by its ID
 
@@ -848,14 +854,9 @@ class CosmosApi(LedgerApi, CosmosHelper):
         """
 
         command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(code_id)]
+        res = self._execute_shell_command(command)
 
-        stdout, _ = subprocess.Popen(  # nosec
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        ).communicate()
-
-        json_out = json.loads(stdout.decode("ascii"))
-
-        return json_out[-1]["address"]
+        return res[-1]["address"]
 
 
 class CosmWasmCLIWrapper:

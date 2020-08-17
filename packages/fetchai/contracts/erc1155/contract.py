@@ -90,7 +90,6 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == "ethereum":
-            # create the transaction dict
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createBatch(
@@ -116,7 +115,7 @@ class ERC1155Contract(Contract):
                         'tokens': tokens
                     }
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, 0, 0, gas=gas)
+            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
             return tx
         else:
             raise NotImplementedError
@@ -142,7 +141,6 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == "ethereum":
-            # create the transaction dict
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createSingle(
@@ -165,7 +163,7 @@ class ERC1155Contract(Contract):
                         "path": str(data)
                     }
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, 0, 0, gas=gas)
+            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
             return tx
         else:
             raise NotImplementedError
@@ -197,7 +195,6 @@ class ERC1155Contract(Contract):
         """
         cls.validate_mint_quantities(token_ids, mint_quantities)
         if ledger_api.identifier == "ethereum":
-            # create the transaction dict
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mintBatch(
@@ -224,7 +221,7 @@ class ERC1155Contract(Contract):
                         "tokens": tokens
                     }
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, 0, 0, gas=gas)
+            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
             return tx
         else:
             raise NotImplementedError
@@ -286,7 +283,6 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == "ethereum":
-            # create the transaction dict
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mint(
@@ -310,7 +306,7 @@ class ERC1155Contract(Contract):
                         "data": str(data)
                     }
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, 0, 0, gas=gas)
+            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
             return tx
         else:
             raise NotImplementedError
@@ -322,7 +318,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_id: int,
-    ) -> Dict[str, Dict[int, int]]:
+    ) -> Dict[str, str]:
         """
         Get the balance for a specific token id.
 
@@ -330,7 +326,7 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param agent_address: the address
         :param token_id: the token id
-        :return: the balance in a dictionary
+        :return: the balance in a dictionary - {"balance": 'U256'}
         """
         if ledger_api.identifier == "ethereum":
             instance = cls.get_instance(ledger_api, contract_address)
@@ -346,6 +342,7 @@ class ERC1155Contract(Contract):
                     }
             }
             res = ledger_api.try_execute_wasm_query(contract_address, msg)
+
             return json.loads(res)
         else:
             raise NotImplementedError
@@ -384,7 +381,6 @@ class ERC1155Contract(Contract):
         :return: a ledger transaction object
         """
         if ledger_api.identifier == "ethereum":
-            # create the transaction dict
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -421,7 +417,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_ids: List[int],
-    ) -> Dict[str, Dict[int, int]]:
+    ) -> Dict[str, List[str]]:
         """
         Get the balances for a batch of specific token ids.
 
@@ -429,7 +425,7 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param agent_address: the address
         :param token_id: the token id
-        :return: the balances
+        :return: the balances in dictionary - {"balances": [U256, ...]}
         """
         if ledger_api.identifier == "ethereum":
             instance = cls.get_instance(ledger_api, contract_address)
@@ -750,3 +746,25 @@ class ERC1155Contract(Contract):
                 "[ERC1155Contract]: Error when trying to estimate gas: {}".format(e)
             )
         return tx
+
+    @staticmethod
+    def get_last_code_id(ledger_api: LedgerApi):
+        """
+        Uses wasmcli to get ID of latest deployed .wasm bytecode
+        :param ledger_api: the ledger API
+
+        :return: code id of last deployed .wasm bytecode
+        """
+
+        return ledger_api.get_last_code_id()
+
+    @staticmethod
+    def get_contract_address(ledger_api: LedgerApi, code_id: int):
+        """
+        Uses wasmcli to get contract address of latest initialised contract by its ID
+        :param ledger_api: the ledger API
+
+        :return: contract address of last initialised contract
+        """
+
+        return ledger_api.get_contract_address(code_id)
