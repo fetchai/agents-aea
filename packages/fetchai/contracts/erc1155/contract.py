@@ -106,16 +106,14 @@ class ERC1155Contract(Contract):
         elif ledger_api.identifier == "cosmos":
             tokens = []
             for token_id in token_ids:
-                tokens.append({'id': str(token_id), 'path': str(token_id)})
+                tokens.append({"id": str(token_id), "path": str(token_id)})
 
             msg = {
-                "create_batch":
-                    {
-                        'item_owner': str(deployer_address),
-                        'tokens': tokens
-                    }
+                "create_batch": {"item_owner": str(deployer_address), "tokens": tokens}
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
+            tx = ledger_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
             return tx
         else:
             raise NotImplementedError
@@ -156,14 +154,15 @@ class ERC1155Contract(Contract):
             return tx
         elif ledger_api.identifier == "cosmos":
             msg = {
-                "create_single":
-                    {
-                        "item_owner": deployer_address,
-                        "id": str(token_id),
-                        "path": str(data)
-                    }
+                "create_single": {
+                    "item_owner": deployer_address,
+                    "id": str(token_id),
+                    "path": str(data),
+                }
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
+            tx = ledger_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
             return tx
         else:
             raise NotImplementedError
@@ -214,21 +213,22 @@ class ERC1155Contract(Contract):
                 tokens.append({"id": str(token_id), "value": str(quantity)})
 
             msg = {
-                "mint_batch":
-                    {
-                        "to_address": recipient_address,
-                        "data": str(data),
-                        "tokens": tokens
-                    }
+                "mint_batch": {
+                    "to_address": recipient_address,
+                    "data": str(data),
+                    "tokens": tokens,
+                }
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
+            tx = ledger_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
             return tx
         else:
             raise NotImplementedError
 
     @classmethod
     def validate_mint_quantities(
-            cls, token_ids: List[int], mint_quantities: List[int]
+        cls, token_ids: List[int], mint_quantities: List[int]
     ) -> None:
         """Validate the mint quantities."""
         for token_id, mint_quantity in zip(token_ids, mint_quantities):
@@ -298,15 +298,16 @@ class ERC1155Contract(Contract):
             return tx
         elif ledger_api.identifier == "cosmos":
             msg = {
-                "mint_single":
-                    {
-                        "to_address": recipient_address,
-                        "id": str(token_id),
-                        "supply": str(mint_quantity),
-                        "data": str(data)
-                    }
+                "mint_single": {
+                    "to_address": recipient_address,
+                    "id": str(token_id),
+                    "supply": str(mint_quantity),
+                    "data": str(data),
+                }
             }
-            tx = ledger_api.get_handle_transaction(deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas)
+            tx = ledger_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
             return tx
         else:
             raise NotImplementedError
@@ -334,13 +335,7 @@ class ERC1155Contract(Contract):
             result = {token_id: balance}
             return {"balance": result}
         elif ledger_api.identifier == "cosmos":
-            msg = {
-                "balance":
-                    {
-                        "address": str(agent_address),
-                        "id": str(token_id)
-                    }
-            }
+            msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
             res = ledger_api.try_execute_wasm_query(contract_address, msg)
 
             return json.loads(res)
@@ -439,12 +434,7 @@ class ERC1155Contract(Contract):
             for token_id in token_ids:
                 tokens.append({"address": agent_address, "id": str(token_id)})
 
-            msg = {
-                "balance_batch":
-                    {
-                        "addresses": tokens
-                    }
-            }
+            msg = {"balance_batch": {"addresses": tokens}}
 
             res = ledger_api.try_execute_wasm_query(contract_address, msg)
             return json.loads(res)

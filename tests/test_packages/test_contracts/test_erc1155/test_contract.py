@@ -25,7 +25,11 @@ from typing import Dict
 
 import pytest
 
-from aea.crypto.registries import crypto_registry, faucet_apis_registry, ledger_apis_registry
+from aea.crypto.registries import (
+    crypto_registry,
+    faucet_apis_registry,
+    ledger_apis_registry,
+)
 
 from tests.conftest import (
     COSMOS,
@@ -265,10 +269,14 @@ class TestCosmWasmContract:
         self.token_id_b = 680564733841876926926749214863536422912
 
         # Refill deployer account from faucet
-        self.refill_from_faucet(self.ledger_api, self.faucet_api, self.deployer_crypto.address)
+        self.refill_from_faucet(
+            self.ledger_api, self.faucet_api, self.deployer_crypto.address
+        )
 
         # Refill item owner account from faucet
-        self.refill_from_faucet(self.ledger_api, self.faucet_api, self.item_owner_crypto.address)
+        self.refill_from_faucet(
+            self.ledger_api, self.faucet_api, self.item_owner_crypto.address
+        )
 
     def refill_from_faucet(self, ledger_api, faucet_api, address):
         start_balance = ledger_api.get_balance(address)
@@ -301,10 +309,20 @@ class TestCosmWasmContract:
         assert all(
             [
                 key in receipt
-                for key in ["height", "txhash", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
+                for key in [
+                    "height",
+                    "txhash",
+                    "raw_log",
+                    "logs",
+                    "gas_wanted",
+                    "gas_used",
+                ]
+            ]
+        )
 
-    def sign_send_verify_deploy_init_transaction(self, tx: Dict[str, str], sender_crypto):
+    def sign_send_verify_deploy_init_transaction(
+        self, tx: Dict[str, str], sender_crypto
+    ):
         """
         Sign, send and verify if deploy or InitMsg transaction was successful.
 
@@ -321,15 +339,26 @@ class TestCosmWasmContract:
         assert all(
             [
                 key in receipt
-                for key in ["height", "txhash", "data", "raw_log", "logs", "gas_wanted", "gas_used"]
-            ])
+                for key in [
+                    "height",
+                    "txhash",
+                    "data",
+                    "raw_log",
+                    "logs",
+                    "gas_wanted",
+                    "gas_used",
+                ]
+            ]
+        )
 
     @pytest.mark.integration
     @pytest.mark.ledger
     def test_cosmwasm_contract_deploy_and_interact(self, erc1155_contract):
         # Deploy contract
         tx = erc1155_contract.get_deploy_transaction(
-            ledger_api=self.ledger_api, deployer_address=self.deployer_crypto.address, gas=900000
+            ledger_api=self.ledger_api,
+            deployer_address=self.deployer_crypto.address,
+            gas=900000,
         )
         assert len(tx) == 6
         self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
@@ -342,12 +371,14 @@ class TestCosmWasmContract:
             init_msg={},
             tx_fee=0,
             amount=0,
-            label="ERC1155"
+            label="ERC1155",
         )
         assert len(tx) == 6
         self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
 
-        contract_address = erc1155_contract.get_contract_address(self.ledger_api, code_id)
+        contract_address = erc1155_contract.get_contract_address(
+            self.ledger_api, code_id
+        )
 
         # Create single token
         tx = erc1155_contract.get_create_single_transaction(
@@ -376,7 +407,7 @@ class TestCosmWasmContract:
             deployer_address=self.deployer_crypto.address,
             recipient_address=self.item_owner_crypto.address,
             token_id=self.token_id_b,
-            mint_quantity=1
+            mint_quantity=1,
         )
         assert len(tx) == 6
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
@@ -389,7 +420,7 @@ class TestCosmWasmContract:
             token_id=self.token_id_b,
         )
         assert "balance" in res
-        assert res["balance"] == '1'
+        assert res["balance"] == "1"
 
         # Mint batch of tokens
         tx = erc1155_contract.get_mint_batch_transaction(
@@ -398,7 +429,7 @@ class TestCosmWasmContract:
             deployer_address=self.deployer_crypto.address,
             recipient_address=self.item_owner_crypto.address,
             token_ids=self.token_ids_a,
-            mint_quantities=[1] * len(self.token_ids_a)
+            mint_quantities=[1] * len(self.token_ids_a),
         )
         assert len(tx) == 6
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
@@ -411,4 +442,4 @@ class TestCosmWasmContract:
             token_ids=self.token_ids_a,
         )
         assert "balances" in res
-        assert res["balances"] == ['1'] * len(self.token_ids_a)
+        assert res["balances"] == ["1"] * len(self.token_ids_a)
