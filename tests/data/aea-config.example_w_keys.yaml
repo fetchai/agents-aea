@@ -23,8 +23,8 @@ logging_config:
   version: 1
 private_key_paths:
    cosmos: cosmos_private_key.txt
-   ethereum: eth_private_key.txt
+   ethereum: ethereum_private_key.txt
 connection_private_key_paths:
    cosmos: cosmos_private_key.txt
-   ethereum: eth_private_key.txt
+   ethereum: ethereum_private_key.txt
 registry_path: ../../packages

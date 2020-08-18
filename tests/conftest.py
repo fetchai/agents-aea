@@ -65,11 +65,7 @@ from aea.contracts import Contract, contract_registry
 from aea.crypto.cosmos import _COSMOS
 from aea.crypto.ethereum import _ETHEREUM
 from aea.crypto.fetchai import _FETCHAI
-from aea.crypto.helpers import (
-    COSMOS_PRIVATE_KEY_FILE,
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-)
+from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
@@ -131,6 +127,10 @@ ETHEREUM = _ETHEREUM
 FETCHAI = _FETCHAI
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
+
+COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
+ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
 
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(

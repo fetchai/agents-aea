@@ -67,7 +67,7 @@ Additionally, create the private key for the deployer AEA. Generate and add a ke
 
 ``` bash
 aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
+aea add-key ethereum ethereum_private_key.txt
 ```
 
 And one for the P2P connection:
@@ -122,7 +122,7 @@ Additionally, create the private key for the client AEA. Generate and add a key 
 
 ``` bash
 aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
+aea add-key ethereum ethereum_private_key.txt
 ```
 
 And one for the P2P connection:

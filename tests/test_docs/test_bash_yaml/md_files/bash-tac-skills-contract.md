@@ -16,7 +16,7 @@ aea config set agent.default_ledger ethereum
 ```
 ``` bash
 aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
+aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
 aea generate-wealth ethereum

@@ -28,7 +28,7 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.helpers import COSMOS_PRIVATE_KEY_FILE, create_private_key
+from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
@@ -46,7 +46,8 @@ SOEF_PORT = 9002
 ENTRY_PEER_ADDRESS = (
     "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"
 )
-COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
+COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
+COSMOS_PRIVATE_KEY_FILE_CONNECTION = PRIVATE_KEY_PATH_SCHEMA.format("cosmos_connection")
 ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
