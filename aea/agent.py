@@ -17,13 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of a generic agent."""
-
+import datetime
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from typing import Dict, List, Optional, Type
+from typing import Callable, Dict, List, Optional, Tuple, Type
 
-from aea.agent_loop import BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import Connection
 from aea.identity.base import Identity
 from aea.multiplexer import InBox, Multiplexer, OutBox
@@ -35,11 +34,6 @@ logger = logging.getLogger(__name__)
 
 class Agent(ABC):
     """This class provides an abstract base class for a generic agent."""
-
-    RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
-        "sync": SyncAgentLoop,
-    }
-    DEFAULT_RUN_LOOP: str = "sync"
 
     RUNTIMES: Dict[str, Type[BaseRuntime]] = {
         "async": AsyncRuntime,
@@ -78,9 +72,7 @@ class Agent(ABC):
 
         self._tick = 0
 
-        self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
-        loop_cls = self._get_main_loop_class()
-        self._main_loop: BaseAgentLoop = loop_cls(self)
+        self._loop_mode = loop_mode
 
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         runtime_cls = self._get_runtime_class()
@@ -95,14 +87,6 @@ class Agent(ABC):
     def is_stopped(self):
         """Get running state of the runtime and agent."""
         return self.runtime.is_stopped
-
-    def _get_main_loop_class(self) -> Type[BaseAgentLoop]:
-        """Get main loop class based on loop mode."""
-        if self._loop_mode not in self.RUN_LOOPS:
-            raise ValueError(
-                f"Loop `{self._loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
-            )
-        return self.RUN_LOOPS[self._loop_mode]
 
     def _get_runtime_class(self) -> Type[BaseRuntime]:
         """Get runtime class based on runtime mode."""
@@ -162,14 +146,9 @@ class Agent(ABC):
         return self._timeout
 
     @property
-    def loop_mode(self) -> str:
+    def loop_mode(self) -> Optional[str]:
         """Get the agent loop mode."""
         return self._loop_mode
-
-    @property
-    def main_loop(self) -> BaseAgentLoop:
-        """Get the main agent loop."""
-        return self._main_loop
 
     @property
     def runtime(self) -> BaseRuntime:
@@ -278,3 +257,13 @@ class Agent(ABC):
         :return: RuntimeStates
         """
         return self._runtime.state
+
+    def _get_periodic_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        """
+        Get all periodic tasks for agent.
+
+        :return: dict of callable with period specified
+        """
+        return {self.act: (self.tick, None)}

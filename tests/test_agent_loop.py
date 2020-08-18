@@ -18,8 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains tests of the implementation of an agent loop using asyncio."""
 import asyncio
+import datetime
 from queue import Empty
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 from unittest.mock import MagicMock
 
 import pytest
@@ -111,6 +112,14 @@ class AsyncFakeAgent:
 
         self.decision_maker.message_out_queue = AsyncFriendlyQueue()
         self.timeout = 0.001
+
+    def _get_behaviours_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        tasks = {}
+        for behaviour in self.active_behaviours:
+            tasks[behaviour.act_wrapper] = (behaviour.tick_interval, behaviour.start_at)
+        return tasks
 
     @property
     def active_behaviours(self) -> List[Behaviour]:

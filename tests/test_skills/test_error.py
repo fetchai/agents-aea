@@ -96,7 +96,7 @@ class TestSkillError:
         self.t = Thread(target=self.my_aea.start)
         self.t.start()
         wait_for_condition(
-            lambda: self.my_aea._main_loop and self.my_aea._main_loop.is_running, 10
+            lambda: self.my_aea.runtime and self.my_aea.runtime.is_running, 10
         )
 
     def test_error_handler_handle(self):

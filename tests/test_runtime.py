@@ -94,7 +94,7 @@ class TestThreadedRuntime(TestAsyncRuntime):
     def test_error_state(self):
         """Test runtime fails on start."""
         with patch.object(
-            self.runtime._agent.main_loop, "start", side_effect=AssertionError("oops")
+            self.runtime.main_loop, "start", side_effect=AssertionError("oops")
         ):
             with pytest.raises(AssertionError, match="oops"):
                 self.runtime.start()

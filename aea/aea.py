@@ -17,9 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an autonomous economic agent (AEA)."""
+import datetime
 import logging
 from asyncio import AbstractEventLoop
-from typing import Any, Callable, Collection, Dict, List, Optional, Sequence, Type, cast
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    cast,
+)
 
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
@@ -396,7 +408,7 @@ class AEA(Agent, WithLogger):
     def _setup_loggers(self):
         """Set up logger with agent name."""
         for element in [
-            self.main_loop,
+            self.runtime.main_loop,
             self.multiplexer,
             self.task_manager,
             self.resources.component_registry,
@@ -407,3 +419,21 @@ class AEA(Agent, WithLogger):
             element.logger = AgentLoggerAdapter(
                 element.logger, agent_name=self._identity.name
             )
+
+    def _get_periodic_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        """
+        Get all periodic tasks for agent.
+
+        :return: dict of callable with period specified
+        """
+        return {**super()._get_periodic_tasks(), **self._get_behaviours_tasks()}
+
+    def _get_behaviours_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        tasks = {}
+        for behaviour in self.active_behaviours:
+            tasks[behaviour.act_wrapper] = (behaviour.tick_interval, behaviour.start_at)
+        return tasks

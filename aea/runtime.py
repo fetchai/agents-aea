@@ -25,9 +25,9 @@ from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from contextlib import suppress
 from enum import Enum
-from typing import Optional, TYPE_CHECKING, cast
+from typing import Dict, Optional, TYPE_CHECKING, Type, cast
 
-from aea.agent_loop import AsyncState
+from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_utils import ensure_loop
 from aea.multiplexer import AsyncMultiplexer
 
@@ -51,6 +51,12 @@ class RuntimeStates(Enum):
 class BaseRuntime(ABC):
     """Abstract runtime class to create implementations."""
 
+    RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
+        "sync": SyncAgentLoop,
+        "async": AsyncAgentLoop,
+    }
+    DEFAULT_RUN_LOOP: str = "sync"
+
     def __init__(
         self, agent: "Agent", loop: Optional[AbstractEventLoop] = None
     ) -> None:
@@ -69,7 +75,37 @@ class BaseRuntime(ABC):
         self._state.add_callback(self._log_runtime_state)
         self._was_started = False
 
+        self.main_loop: BaseAgentLoop = self._get_main_loop_instance(
+            agent._loop_mode or self.DEFAULT_RUN_LOOP
+        )
+
+    def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
+        """
+        Get main loop class based on loop mode.
+
+        :param: loop_mode: str.
+
+        :return: MainLoop class
+        """
+        if loop_mode not in self.RUN_LOOPS:
+            raise ValueError(
+                f"Loop `{loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
+            )
+        return self.RUN_LOOPS[loop_mode]
+
+    def _get_main_loop_instance(self, loop_mode: str) -> BaseAgentLoop:
+        """
+        Construct main loop instance.
+
+        :param: loop_mode: str.
+
+        :return: AgentLoop instance
+        """
+        loop_cls = self._get_main_loop_class(loop_mode)
+        return loop_cls(self._agent)
+
     def _log_runtime_state(self, state) -> None:
+        """Log a runtime state changed."""
         logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
 
     def start(self) -> None:
@@ -167,7 +203,7 @@ class AsyncRuntime(BaseRuntime):
         """
         super().set_loop(loop)
         self._agent.multiplexer.set_loop(self._loop)
-        self._agent.main_loop.set_loop(self._loop)
+        self.main_loop.set_loop(self._loop)
         self._async_stop_lock = asyncio.Lock()
 
     def _start(self) -> None:
@@ -220,7 +256,7 @@ class AsyncRuntime(BaseRuntime):
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self._agent.start_setup()
         self._state.set(RuntimeStates.running)
-        await self._agent.main_loop.run_loop()
+        await self.main_loop.run_loop()
 
     async def _stop_runtime(self) -> None:
         """
@@ -243,10 +279,10 @@ class AsyncRuntime(BaseRuntime):
                     return
 
                 self._state.set(RuntimeStates.stopping)
-                self._agent.main_loop.stop()
+                self.main_loop.stop()
 
                 with suppress(BaseException):
-                    await self._agent.main_loop.wait_run_loop_stopped()
+                    await self.main_loop.wait_run_loop_stopped()
 
                 self._teardown()
 
@@ -302,7 +338,7 @@ class ThreadedRuntime(BaseRuntime):
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         try:
             self._state.set(RuntimeStates.running)
-            self._agent.main_loop.start()
+            self.main_loop.start()
             logger.debug("[{}]: Runtime stopped".format(self._agent.name))
         except KeyboardInterrupt:  # pragma: nocover
             raise
@@ -314,7 +350,7 @@ class ThreadedRuntime(BaseRuntime):
     def _stop(self) -> None:
         """Implement runtime stop function here."""
         self._state.set(RuntimeStates.stopping)
-        self._agent.main_loop.stop()
+        self.main_loop.stop()
         self._teardown()
         self._agent.multiplexer.disconnect()
         logger.debug("[{}]: Runtime stopped".format(self._agent.name))
