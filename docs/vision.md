@@ -22,7 +22,7 @@ AEA users are, among others:
 
 We envisage the AEA framework to be used by businesses of all sizes to deploy multi-agent solutions into the decentralized agent economy cultivated by Fetch.ai.
 
-With start up grants we will kick start solutions while testing product-problem fit and identifying our user base.
+With start up grants we will kick start solutions while testing product-market fit and identifying our user base.
 
 
 

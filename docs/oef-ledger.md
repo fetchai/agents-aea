@@ -14,7 +14,8 @@ The 'Open Economic Framework' (OEF) consists of protocols, languages and market 
 
 At present, the OEF's capabilities are fulfilled by two components:
 
-- a permissionless, public peer to peer (agent to agent) communication network, called the Agent Communication Network; and
+- a permissionless, public peer to peer (agent to agent) communication network, called the Agent Communication Network;
+- a set of <a href="../protocol">agent interaction protocols</a>; and
 - a centralized search and discovery system.
 
 The latter will be decentralized over time.
@@ -29,9 +30,9 @@ Agents can receive messages from other agents if they are both connected to the 
 
 ### Centralized search and discovery
 
-A <a href="../simple-oef">`simple OEF search node`</a> allows agents to search and discover each other. In particular, agents can register themselves and their services as well as send search requests.
+A <a href="../simple-oef">simple OEF (SOEF) search node</a> allows agents to search and discover each other. In particular, agents can register themselves and their services as well as send search requests.
 
-For two agents to be able to find each other, at least one must register themselves and the other must query the `simple OEF search node` for it. Detailed documentation is provided <a href="../simple-oef">`here`</a>.
+For two agents to be able to find each other, at least one must register themselves and the other must query the SOEF search node for it. Detailed documentation is provided <a href="../simple-oef">here</a>.
 
 <!-- <details><summary>Click here for a local development alternative (deprecated).</summary>
 <p>
@@ -85,7 +86,7 @@ You can install the `svn` command with (`brew install subversion` or `sudo apt-g
 
 ## Ledgers
 
-Ledgers enable the AEAs to complete a transaction, which can involve the transfer of funds to each other or the execution of smart contracts. They ensure the truth and integrity of agent to agent interactions.
+Ledgers enable the AEAs to complete a transaction, which can involve the transfer of funds to each other or the execution of smart contracts. They optionally ensure the truth and integrity of agent to agent interactions.
 
 Whilst a ledger can, in principle, also be used to store structured data - for instance, training data in a machine learning model - in most use cases the resulting costs and privacy implications do not make this a relevant use of the ledger. Instead, usually only references to the structured data - often in the form of hashes - are stored on the ledger and the actual data is stored off-chain.
 

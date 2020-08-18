@@ -1,7 +1,9 @@
 # Agent-oriented development
+
 In this section, we highlight some of the most fundamental characteristics of the agent-oriented approach to solution development, which might be different from some of the existing paradigms and methodologies you may be used to. We hope that with this, we can guide you towards having the right mindset when you are designing your own agent-based solutions to real world problems. 
 
 ## Decentralisation
+
 Multi-Agent Systems (**MAS**) are inherently decentralised. The vision is, an environment in which every agent is able to directly connect with everyone else and interact with them without having to rely on third-parties to facilitate this. This is in direct contrast to centralised systems in which a single entity is the central point of authority, through which all interactions happen. For example systems based on the client-server architecture, in which clients interact with one another, regarding a specific service (e.g. communication, trade), only through the server.
 
 Note, this is not to say that facilitators and middlemen have no place in a multi-agent system; rather it is the 'commanding reliance on middlemen' that MAS disagrees with.

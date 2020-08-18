@@ -3,7 +3,7 @@ you can use the Fetch.ai AEA framework.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-This example will take you through the simplest AEA in order to make you familiar with the framework.
+This example will take you through the simplest AEA in order to make you familiar with the framework basics.
 
 ## System Requirements
 
@@ -62,7 +62,7 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target=_blank>tools for Visual Studio</a>.
 
-## Setup Author name
+## Setup author name
 
 You can now setup your author name:
 ``` bash
@@ -100,8 +100,6 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 
 The echo skill is a simple demo that introduces you to the main business logic components of an AEA. The fastest way to create your first AEA is to fetch it!
 
-If you want to follow a step by step guide we show you how to do it at the end of the file.
-
 ``` bash
 aea fetch fetchai/my_first_aea:0.10.0
 cd my_first_aea
@@ -128,9 +126,13 @@ aea add skill fetchai/echo:0.6.0
 This copies the `fetchai/echo:0.6.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.6.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
+## Communication via envelopes and messages
+
+AEAs use envelopes containing messages for communication. To learn more check out the next section in the getting started series.
+
 ## Usage of the stub connection
 
-AEAs use envelopes containing messages for communication. We use a stub connection to send envelopes to and receive envelopes from the AEA.
+In this demo we use a stub connection to send envelopes to and receive envelopes from the AEA.
 
 The stub connection is already added to the AEA by default.
 
@@ -185,7 +187,7 @@ info: Echo Behaviour: act method called.
 ...
 ```
 
-The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the Behaviour method act. This is the main agent loop in action.
+The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the Behaviour method `act`. This is the main agent loop in action.
 
 ### Add a message to the input file
 
