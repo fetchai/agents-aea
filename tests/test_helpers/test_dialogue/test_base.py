@@ -1149,7 +1149,7 @@ class TestDialoguesBase:
     def test_update_self_initiated_dialogue_label_on_message_with_complete_reference_positive(
         self,
     ):
-        """Positive test for the '_update_self_initiated_dialogue_label_on_message_with_complete_reference' method."""
+        """Positive test for the '_complete_dialogue_reference' method."""
         _, dialogue = self.dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
         )
@@ -1164,7 +1164,7 @@ class TestDialoguesBase:
         second_msg.sender = self.opponent_address
         second_msg.to = self.agent_address
 
-        self.dialogues._update_self_initiated_dialogue_label_on_message_with_complete_reference(
+        self.dialogues._complete_dialogue_reference(
             second_msg
         )
 
@@ -1175,7 +1175,7 @@ class TestDialoguesBase:
     def test_update_self_initiated_dialogue_label_on_message_with_complete_reference_negative_incorrect_reference(
         self,
     ):
-        """Negative test for the '_update_self_initiated_dialogue_label_on_message_with_complete_reference' method: the input message has invalid dialogue reference."""
+        """Negative test for the '_complete_dialogue_reference' method: the input message has invalid dialogue reference."""
         _, dialogue = self.dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
         )
@@ -1190,7 +1190,7 @@ class TestDialoguesBase:
         second_msg.sender = self.opponent_address
         second_msg.to = self.agent_address
 
-        self.dialogues._update_self_initiated_dialogue_label_on_message_with_complete_reference(
+        self.dialogues._complete_dialogue_reference(
             second_msg
         )
 
@@ -1214,7 +1214,7 @@ class TestDialoguesBase:
         second_msg.sender = self.opponent_address
         second_msg.to = self.agent_address
 
-        self.dialogues._update_self_initiated_dialogue_label_on_message_with_complete_reference(
+        self.dialogues._complete_dialogue_reference(
             second_msg
         )
 

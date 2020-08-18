@@ -34,6 +34,10 @@ from aea.mail.base import Address
 from aea.protocols.base import Message
 
 
+class InvalidDialogueMessage(Exception):
+    """Exception for adding invalid message to a dialogue."""
+
+
 class DialogueLabel:
     """The dialogue label class acts as an identifier for dialogues."""
 
@@ -127,7 +131,7 @@ class DialogueLabel:
     def get_incomplete_version(self) -> "DialogueLabel":
         """Get the incomplete version of the label."""
         dialogue_label = DialogueLabel(
-            (self.dialogue_starter_reference, Dialogue.OPPONENT_STARTER_REFERENCE),
+            (self.dialogue_starter_reference, Dialogue.UNASSIGNED_DIALOGUE_REFERENCE),
             self.dialogue_opponent_addr,
             self.dialogue_starter_addr,
         )
@@ -164,7 +168,7 @@ class Dialogue(ABC):
 
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0
-    OPPONENT_STARTER_REFERENCE = ""
+    UNASSIGNED_DIALOGUE_REFERENCE = ""
 
     class Rules:
         """This class defines the rules for the dialogue."""
@@ -433,6 +437,12 @@ class Dialogue(ABC):
         """
         return len(self._outgoing_messages) == 0 and len(self._incoming_messages) == 0
 
+    def is_message_by_self(self, message: Message) -> bool:
+        return message.sender == self.agent_address
+
+    def is_message_by_other(self, message: Message) -> bool:
+        return not self.is_message_by_self(message)
+
     def update(self, message: Message) -> bool:
         """
         Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
@@ -459,45 +469,30 @@ class Dialogue(ABC):
         Check if the message is belonging to the dialogue.
 
         :param message: the message
-        :return: Ture if message is part of the dialogue, False otherwise
+        :return: True if message is part of the dialogue, False otherwise
         """
         if self.is_self_initiated:
-            if message.sender == self.agent_address:
-                self_initiated_dialogue_label = DialogueLabel(
-                    (
-                        message.dialogue_reference[0],
-                        Dialogue.OPPONENT_STARTER_REFERENCE,
-                    ),
-                    message.to,
-                    self.agent_address,
-                )
-            elif message.to == self.agent_address:
-                self_initiated_dialogue_label = DialogueLabel(
-                    (
-                        message.dialogue_reference[0],
-                        Dialogue.OPPONENT_STARTER_REFERENCE,
-                    ),
-                    message.sender,
-                    self.agent_address,
-                )
+            if self.is_message_by_self(message):
+                opponent = message.to
             else:
-                raise SyntaxError(
-                    "neither 'to' nor 'sender' match the agent's address in this dialogue."
-                )
+                opponent = message.sender
+            self_initiated_dialogue_label = DialogueLabel(
+                (
+                    message.dialogue_reference[0],
+                    Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+                ),
+                opponent,
+                self.agent_address,
+            )
             result = self_initiated_dialogue_label in self.dialogue_labels
         else:
-            if message.sender == self.agent_address:
-                other_initiated_dialogue_label = DialogueLabel(
-                    message.dialogue_reference, message.to, message.to
-                )
-            elif message.to == self.agent_address:
-                other_initiated_dialogue_label = DialogueLabel(
-                    message.dialogue_reference, message.sender, message.sender
-                )
+            if self.is_message_by_self(message):
+                opponent = message.to
             else:
-                raise SyntaxError(
-                    "neither 'to' nor 'sender' match the agent's address in this dialogue."
-                )
+                opponent = message.sender
+            other_initiated_dialogue_label = DialogueLabel(
+                message.dialogue_reference, opponent, message.to
+            )
             result = other_initiated_dialogue_label in self.dialogue_labels
         return result
 
@@ -618,9 +613,9 @@ class Dialogue(ABC):
         :param final_dialogue_label: the final dialogue label
         """
         assert (
-            self.dialogue_label.dialogue_reference[1] == self.OPPONENT_STARTER_REFERENCE
+            self.dialogue_label.dialogue_reference[1] == self.UNASSIGNED_DIALOGUE_REFERENCE
             and final_dialogue_label.dialogue_reference[1]
-            != self.OPPONENT_STARTER_REFERENCE
+            != self.UNASSIGNED_DIALOGUE_REFERENCE
         ), "Dialogue label cannot be updated."
         self._dialogue_label = final_dialogue_label
 
@@ -768,13 +763,19 @@ class Dialogues(ABC):
         """
         return self._dialogue_stats
 
+    def is_message_by_self(self, message: Message) -> bool:
+        return message.sender == self.agent_address
+
+    def is_message_by_other(self, message: Message) -> bool:
+        return not self.is_message_by_self(message)
+
     def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
         """
         Return a dialogue label for a new self initiated dialogue.
 
         :return: the next nonce
         """
-        return str(self._next_dialogue_nonce()), Dialogue.OPPONENT_STARTER_REFERENCE
+        return str(self._next_dialogue_nonce()), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
 
     def create(
         self, counterparty: Address, performative: Message.Performative, **kwargs,
@@ -788,10 +789,6 @@ class Dialogues(ABC):
 
         :return: the initial message and the dialogue.
         """
-        assert (
-            self._message_class is not None
-        ), "No 'message_class' argument was provided to this class on construction."
-
         initial_message = self._message_class(
             dialogue_reference=self.new_self_initiated_dialogue_reference(),
             message_id=Dialogue.STARTING_MESSAGE_ID,
@@ -826,48 +823,35 @@ class Dialogues(ABC):
         If the message is addressed to an existing dialogue, the dialogue is retrieved, extended with this message and returned.
         If there are any errors, e.g. the message dialogue reference does not exists or the message is invalid w.r.t. the dialogue, return None.
 
-        :param message: a new message
+        :param message: a new incoming message
         :return: the new or existing dialogue the message is intended for, or None in case of any errors.
         """
+        assert self.is_message_by_other(message), "Invalid 'update' usage. Update must only be used with a message by another agent."
+        assert message.has_to, "The message's 'to' field is not set {}".format(message)
+        assert message.has_sender, "The message's 'sender' field is not set {}".format(message)
+
         dialogue_reference = message.dialogue_reference
 
-        if not message.has_to:
-            raise ValueError("The message's 'to' field is not set {}".format(message))
-        if not message.has_sender:
-            raise ValueError(
-                "The message's 'sender' field is not set {}".format(message)
-            )
-
         is_invalid_label = (
-            dialogue_reference[0] == Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
         )
         is_new_dialogue = (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and message.message_id == 1
-            and message.target == 0
         )
         is_incomplete_label_and_non_initial_msg = (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and message.message_id > 1
         )
+
         if is_invalid_label:
             dialogue = None  # type: Optional[Dialogue]
-        elif (
-            is_new_dialogue and message.sender != self.agent_address
-        ):  # new dialogue by other
+        elif is_new_dialogue:  # new dialogue
             dialogue = self._create_opponent_initiated(
                 dialogue_opponent_addr=message.sender,
-                dialogue_reference=dialogue_reference,
-                role=self._role_from_first_message(message),
-            )
-        elif (
-            is_new_dialogue and message.sender == self.agent_address
-        ):  # new dialogue by self
-            dialogue = self._create_self_initiated(
-                dialogue_opponent_addr=message.to,
                 dialogue_reference=dialogue_reference,
                 role=self._role_from_first_message(message),
             )
@@ -878,21 +862,17 @@ class Dialogues(ABC):
             # as multiple messages can be sent before one is received with complete reference
             dialogue = self.get_dialogue(message)
         else:
-            self._update_self_initiated_dialogue_label_on_message_with_complete_reference(
-                message
-            )
+            self._complete_dialogue_reference(message)
             dialogue = self.get_dialogue(message)
 
         if dialogue is not None and dialogue.update(message):
             result = dialogue  # type: Optional[Dialogue]
-        else:  # couldn't find the dialogue or invalid message
+        else:  # couldn't find the dialogue or invalid message for the dialogue found
             result = None
 
         return result
 
-    def _update_self_initiated_dialogue_label_on_message_with_complete_reference(
-        self, message: Message
-    ) -> None:
+    def _complete_dialogue_reference(self, message: Message) -> None:
         """
         Update a self initiated dialogue label with a complete dialogue reference from counterparty's first message.
 
@@ -901,12 +881,12 @@ class Dialogues(ABC):
         """
         dialogue_reference = message.dialogue_reference
         assert (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] != Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
         ), "Only complete dialogue references allowed."
         self_initiated_dialogue_reference = (
             dialogue_reference[0],
-            Dialogue.OPPONENT_STARTER_REFERENCE,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
         )
         self_initiated_dialogue_label = DialogueLabel(
             self_initiated_dialogue_reference, message.sender, self.agent_address,
@@ -939,24 +919,16 @@ class Dialogues(ABC):
         :param message: a message
         :return: the dialogue, or None in case such a dialogue does not exist
         """
-        if message.sender == self.agent_address:
-            self_initiated_dialogue_label = DialogueLabel(
-                message.dialogue_reference, message.to, self.agent_address
-            )
-            other_initiated_dialogue_label = DialogueLabel(
-                message.dialogue_reference, message.to, message.to
-            )
-        elif message.to == self.agent_address:
-            self_initiated_dialogue_label = DialogueLabel(
-                message.dialogue_reference, message.sender, self.agent_address
-            )
-            other_initiated_dialogue_label = DialogueLabel(
-                message.dialogue_reference, message.sender, message.sender
-            )
+        if self.is_message_by_self(message):
+            opponent = message.to
         else:
-            raise SyntaxError(
-                "neither 'to' nor 'sender' match the agent's address in this dialogue."
-            )
+            opponent = message.sender
+        self_initiated_dialogue_label = DialogueLabel(
+            message.dialogue_reference, opponent, self.agent_address
+        )
+        other_initiated_dialogue_label = DialogueLabel(
+            message.dialogue_reference, opponent, message.to
+        )
 
         self_initiated_dialogue_label = self.get_latest_label(
             self_initiated_dialogue_label
@@ -1014,8 +986,8 @@ class Dialogues(ABC):
         :return: the created dialogue.
         """
         assert (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
         ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
         incomplete_dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
@@ -1039,8 +1011,8 @@ class Dialogues(ABC):
         :return: the created dialogue
         """
         assert (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
         ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
         incomplete_dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
