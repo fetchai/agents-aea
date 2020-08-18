@@ -23,7 +23,6 @@ import inspect
 import json
 import os
 import re
-from collections import OrderedDict
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Generic, List, Set, TextIO, Tuple, Type, TypeVar, Union, cast
@@ -267,18 +266,9 @@ class ConfigLoader(Generic[T]):
     ) -> None:
         """Dump agent configuration."""
         agent_config_part = configuration.ordered_json
-        component_configurations = agent_config_part.pop("component_configurations")
+        agent_config_part.pop("component_configurations")
         self.validator.validate(instance=agent_config_part)
-        result = [agent_config_part] + [
-            OrderedDict(
-                name=id_.name,
-                author=id_.author,
-                version=id_.version,
-                type=id_.component_type.value,
-                **obj,
-            )
-            for id_, obj in component_configurations
-        ]
+        result = [agent_config_part] + configuration.component_configurations_json()
         yaml_dump_all(result, file_pointer)
 
     def _dump_component_config(self, configuration: T, file_pointer: TextIO) -> None:

@@ -22,6 +22,7 @@
 import os
 import re
 from pathlib import Path
+from textwrap import dedent
 from typing import Collection
 from unittest.mock import Mock, patch
 
@@ -35,6 +36,7 @@ from aea.configurations.base import (
     ComponentId,
     ComponentType,
     ConnectionConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     ProtocolConfig,
     PublicId,
     SkillConfig,
@@ -543,3 +545,43 @@ class TestFromAEAProject(AEATestCaseEmpty):
         with cd(self._get_cwd()):
             aea = builder.build()
         assert aea.name == self.agent_name
+
+
+class TestFromAEAProjectWithCustomComponentConfig(AEATestCaseEmpty):
+    """Test builder set from project dir with custom component config."""
+
+    def _add_stub_connection_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        configuration += dedent(
+            f"""
+        ---
+        name: stub
+        author: fetchai
+        version: 0.8.0
+        type: connection
+        config:
+            input_file: "{self.expected_input_file}"
+            output_file: "{self.expected_output_file}"
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self.expected_input_file = "custom_input_file"
+        self.expected_output_file = "custom_input_file"
+        self._add_stub_connection_config()
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self._get_cwd()):
+            aea = builder.build()
+        assert aea.name == self.agent_name
+        stub_connection = aea.resources.get_connection(
+            PublicId.from_str("fetchai/stub:0.8.0")
+        )
+        assert stub_connection.configuration.config == dict(
+            input_file=self.expected_input_file, output_file=self.expected_output_file
+        )

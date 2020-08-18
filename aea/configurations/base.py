@@ -722,6 +722,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
 
     package_type: PackageType
+    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -857,12 +858,21 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         _check_aea_version(self)
 
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+
 
 class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
+    configurable_fields = {"config"}
 
     def __init__(
         self,
@@ -988,6 +998,15 @@ class ConnectionConfig(ComponentConfiguration):
             **cast(dict, obj.get("config", {})),
         )
 
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        self.config = data.get("config", self.config)
+
 
 class ProtocolConfig(ComponentConfiguration):
     """Handle protocol configuration."""
@@ -1089,6 +1108,7 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
+    configurable_fields = {"handlers", "behaviours", "models"}
 
     def __init__(
         self,
@@ -1235,6 +1255,17 @@ class SkillConfig(ComponentConfiguration):
             skill_config.models.create(model_id, model_config)
 
         return skill_config
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        self.handlers = data.get("handlers", self.handlers)
+        self.behaviours = data.get("behaviours", self.behaviours)
+        self.models = data.get("models", self.models)
 
 
 class AgentConfig(PackageConfiguration):
@@ -1389,10 +1420,10 @@ class AgentConfig(PackageConfiguration):
         """
         self._default_ledger = ledger_id
 
-    def component_configurations_json(self) -> List[Dict]:
+    def component_configurations_json(self) -> List[OrderedDict]:
         """Get the component configurations in JSON format."""
         return [
-            dict(
+            OrderedDict(
                 name=component_id.name,
                 author=component_id.author,
                 version=component_id.version,

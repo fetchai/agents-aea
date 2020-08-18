@@ -339,6 +339,7 @@ class AEABuilder:
             ComponentType.PROTOCOL: {},
             ComponentType.SKILL: {},
         }
+        self._custom_component_configurations: Dict[ComponentId, Dict] = {}
         self._to_reset: bool = False
         self._build_called: bool = False
         if not is_full_reset:
@@ -1218,6 +1219,9 @@ class AEABuilder:
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+        self._custom_component_configurations = (
+            agent_configuration.component_configurations
+        )
 
     def _find_import_order(
         self,
@@ -1352,6 +1356,11 @@ class AEABuilder:
                     )
             else:
                 configuration = deepcopy(configuration)
+                configuration.update(
+                    self._custom_component_configurations.get(
+                        configuration.component_id, {}
+                    )
+                )
                 _logger = make_logger(configuration, agent_name)
                 component = load_component_from_config(
                     configuration, logger=_logger, **kwargs
