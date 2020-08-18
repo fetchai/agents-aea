@@ -99,7 +99,7 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_fetch_and_delete(self):
         """Fetch and delete agent from repo."""
         agent_name = "some_agent_for_tests"
-        self.fetch_agent("fetchai/my_first_aea:0.9.0", agent_name)
+        self.fetch_agent("fetchai/my_first_aea:0.10.0", agent_name)
         assert os.path.exists(agent_name)
         self.delete_agents(agent_name)
         assert not os.path.exists(agent_name)
@@ -107,7 +107,7 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_diff(self):
         """Test difference_to_fetched_agent."""
         agent_name = "some_agent_for_tests2"
-        self.fetch_agent("fetchai/my_first_aea:0.9.0", agent_name)
+        self.fetch_agent("fetchai/my_first_aea:0.10.0", agent_name)
         self.run_cli_command(
             "config", "set", "agent.default_ledger", "test_ledger", cwd=agent_name
         )
@@ -116,7 +116,7 @@ class TestGenericCases(AEATestCaseEmpty):
         )
         assert b"test_ledger" in result.stdout_bytes
         diff = self.difference_to_fetched_agent(
-            "fetchai/my_first_aea:0.9.0", agent_name
+            "fetchai/my_first_aea:0.10.0", agent_name
         )
         assert diff
         assert "test_ledger" in diff[1]
@@ -124,9 +124,9 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_no_diff(self):
         """Test no difference for two aea configs."""
         agent_name = "some_agent_for_tests3"
-        self.fetch_agent("fetchai/my_first_aea:0.9.0", agent_name)
+        self.fetch_agent("fetchai/my_first_aea:0.10.0", agent_name)
         diff = self.difference_to_fetched_agent(
-            "fetchai/my_first_aea:0.9.0", agent_name
+            "fetchai/my_first_aea:0.10.0", agent_name
         )
         assert not diff
 
@@ -165,10 +165,10 @@ class TestAddAndRejectComponent(AEATestCaseEmpty):
 
     def test_add_and_eject(self):
         """Test add/reject components."""
-        result = self.add_item("skill", "fetchai/echo:0.5.0", local=True)
+        result = self.add_item("skill", "fetchai/echo:0.6.0", local=True)
         assert result.exit_code == 0
 
-        result = self.eject_item("skill", "fetchai/echo:0.5.0")
+        result = self.eject_item("skill", "fetchai/echo:0.6.0")
         assert result.exit_code == 0
 
 
@@ -215,7 +215,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
     def test_send_receive_envelope(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.5.0")
+        self.add_item("skill", "fetchai/echo:0.6.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)

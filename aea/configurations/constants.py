@@ -25,13 +25,13 @@ from aea.configurations.base import PublicId
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.8.0")
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.4.0")
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.4.0")
+DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.9.0")
+DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.5.0")
+DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.5.0")
 DEFAULT_LEDGER = CosmosCrypto.identifier
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
 DEFAULT_REGISTRY_PATH = DRP
 DEFAULT_LICENSE = DL
-SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.2.0")
-STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.2.0")
+SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.3.0")
+STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.3.0")
 LOCAL_PROTOCOLS = [DEFAULT_PROTOCOL, SIGNING_PROTOCOL, STATE_UPDATE_PROTOCOL]

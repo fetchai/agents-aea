@@ -124,7 +124,7 @@ We use the input and output text files to send an envelope to our agent and rece
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
@@ -245,7 +245,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.4.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)

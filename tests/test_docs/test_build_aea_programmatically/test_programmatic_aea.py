@@ -59,7 +59,7 @@ class TestProgrammaticAEA(BaseAEATestCase):
         assert os.path.exists(Path(self.t, "output_file"))
         assert os.path.exists(Path(self.t, DEFAULT_PRIVATE_KEY_FILE))
 
-        message_text_1 = b"other_agent,my_aea,fetchai/default:0.4.0,"
+        message_text_1 = b"other_agent,my_aea,fetchai/default:0.5.0,"
         message_text_2 = b"\x01*\x07\n\x05hello,"
         path = os.path.join(self.t, "output_file")
         with open(path, "rb") as file:
