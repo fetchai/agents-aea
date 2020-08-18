@@ -4,12 +4,12 @@ To fund an AEA for testing on a test-net you need to request some test tokens fr
 Add a private key to the agent:
 ``` bash
 aea generate-key fetchai
-aea add-key fetchai fet_private_key.txt
+aea add-key fetchai fetchai_private_key.txt
 ```
 or
 ``` bash
 aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
+aea add-key ethereum ethereum_private_key.txt
 ```
 
 ## Using a faucet website

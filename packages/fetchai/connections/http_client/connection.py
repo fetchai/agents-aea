@@ -44,7 +44,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.8.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -317,7 +317,7 @@ class HTTPClientAsyncChannel:
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",
-            protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.5.0"),
             context=context,
             message=http_message,
         )
@@ -372,12 +372,12 @@ class HTTPClientConnection(Connection):
 
         :return: None
         """
-        if self.is_connected:
-            return  # pragma: nocover
-        self._state.set(ConnectionStates.connecting)
-        self.channel.logger = self.logger
-        await self.channel.connect(self._loop)
-        self._state.set(ConnectionStates.connected)
+        if self.is_connected:  # pragma: nocover
+            return
+
+        with self._connect_context():
+            self.channel.logger = self.logger
+            await self.channel.connect(self.loop)
 
     async def disconnect(self) -> None:
         """
@@ -398,10 +398,7 @@ class HTTPClientConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
@@ -410,10 +407,7 @@ class HTTPClientConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         try:
             return await self.channel.get_message()
         except Exception:  # pragma: nocover # pylint: disable=broad-except

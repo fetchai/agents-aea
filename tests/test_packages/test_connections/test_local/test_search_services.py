@@ -31,7 +31,7 @@ from aea.helpers.search.models import (
     Description,
     Query,
 )
-from aea.mail.base import AEAConnectionError, Envelope
+from aea.mail.base import Envelope
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
@@ -441,7 +441,7 @@ class TestAgentMessage:
             protocol_id=msg.protocol_id,
             message=msg,
         )
-        with pytest.raises(AEAConnectionError):
+        with pytest.raises(ConnectionError):
             await _make_local_connection(self.address_1, self.node,).send(envelope)
 
         self.multiplexer1.connect()

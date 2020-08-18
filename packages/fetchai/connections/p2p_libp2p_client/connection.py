@@ -23,7 +23,7 @@ import asyncio
 import logging
 import random
 import struct
-from asyncio import AbstractEventLoop, CancelledError
+from asyncio import CancelledError
 from random import randint
 from typing import List, Optional, Union, cast
 
@@ -35,7 +35,7 @@ from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.6.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -146,7 +146,6 @@ class P2PLibp2pClientConnection(Connection):
         self._reader = None  # type: Optional[asyncio.StreamReader]
         self._writer = None  # type: Optional[asyncio.StreamWriter]
 
-        self._loop = None  # type: Optional[AbstractEventLoop]
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._process_messages_task = None  # type: Union[asyncio.Future, None]
 
@@ -161,8 +160,6 @@ class P2PLibp2pClientConnection(Connection):
 
         self._state.set(ConnectionStates.connecting)
 
-        if self._loop is None:
-            self._loop = asyncio.get_event_loop()
         try:
             # connect libp2p client
 
@@ -170,7 +167,7 @@ class P2PLibp2pClientConnection(Connection):
             self._reader, self._writer = await asyncio.open_connection(
                 self.node_uri.host,
                 self.node_uri._port,  # pylint: disable=protected-access
-                loop=self._loop,
+                loop=self.loop,
             )
 
             # send agent address to node
@@ -183,7 +180,7 @@ class P2PLibp2pClientConnection(Connection):
             # start receiving msgs
             self._in_queue = asyncio.Queue()
             self._process_messages_task = asyncio.ensure_future(
-                self._process_messages(), loop=self._loop
+                self._process_messages(), loop=self.loop
             )
             self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:

@@ -286,7 +286,6 @@ class AsyncMultiplexer(WithLogger):
                 "Connection {} already established.".format(connection.connection_id)
             )
         else:
-            connection.loop = self._loop
             await connection.connect()
             self.logger.debug(
                 "Connection {} has been set up successfully.".format(

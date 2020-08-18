@@ -7,6 +7,7 @@
     "aea_version",
     "agent_name",
     "author",
+    "description",
     "version",
     "license",
     "private_key_paths",
