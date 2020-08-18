@@ -103,7 +103,7 @@ jobs:
           ipfs init
           # setup wasmcli
           wget --no-check-certificate 'https://drive.google.com/u/1/uc?id=1KklHyzZ0WlVYz2M7BNRGxTI0WZFVL8CO&export=download' -O wasmcli
-          sudo cp wasmcli ~/go/bin/wasmcli
+          sudo cp wasmcli /usr/local/bin/wasmcli
           wasmcli config chain-id agent-land
           wasmcli config trust-node false
           wasmcli config node https://rpc-agent-land.fetch.ai:443
