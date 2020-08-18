@@ -151,6 +151,20 @@ class ConfigLoader(Generic[T]):
         protocol_specification.dialogue_config = dialogue_configuration
         return protocol_specification
 
+    def validate(self, json_data: Dict) -> None:
+        """
+        Validate a JSON object.
+
+        :param json_data: the JSON data.
+        :return: None.
+        """
+        if self.configuration_class.package_type == PackageType.AGENT:
+            json_data_copy = deepcopy(json_data)
+            json_data_copy.pop("component_configurations")
+            self._validator.validate(instance=json_data_copy)
+        else:
+            self._validator.validate(instance=json_data)
+
     def load(self, file_pointer: TextIO) -> T:
         """
         Load a configuration file.
