@@ -1263,9 +1263,17 @@ class SkillConfig(ComponentConfiguration):
         :param data: the data to replace.
         :return: None
         """
-        self.handlers = data.get("handlers", self.handlers)
-        self.behaviours = data.get("behaviours", self.behaviours)
-        self.models = data.get("models", self.models)
+        for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
+            behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
+            self.behaviours.update(behaviour_id, behaviour_config)
+
+        for handler_id, handler_data in data.get("handlers", {}).items():
+            handler_config = SkillComponentConfiguration.from_json(handler_data)
+            self.handlers.update(handler_id, handler_config)
+
+        for model_id, model_data in data.get("models", {}).items():
+            model_config = SkillComponentConfiguration.from_json(model_data)
+            self.models.update(model_id, model_config)
 
 
 class AgentConfig(PackageConfiguration):

@@ -573,7 +573,7 @@ class TestFromAEAProjectWithCustomComponentConfig(AEATestCaseEmpty):
     def test_from_project(self):
         """Test builder set from project dir."""
         self.expected_input_file = "custom_input_file"
-        self.expected_output_file = "custom_input_file"
+        self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
