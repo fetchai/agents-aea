@@ -821,7 +821,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         return None
 
     @staticmethod
-    def _execute_shell_command(command: List[str]) -> Any:
+    def _execute_shell_command(command: List[str]) -> List[Dict[str, str]]:
         """
         Uses subprocess to execute command and get result as JSON dict
 
@@ -834,7 +834,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
         return json.loads(stdout.decode("ascii"))
 
-    def get_last_code_id(self):
+    def get_last_code_id(self) -> int:
         """
         Uses wasmcli to get ID of latest deployed .wasm bytecode
 
@@ -844,7 +844,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
         command = ["wasmcli", "query", "wasm", "list-code"]
         res = self._execute_shell_command(command)
 
-        return res[-1]["id"]
+        return int(res[-1]["id"])
 
     def get_contract_address(self, code_id: int) -> str:
         """
