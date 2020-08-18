@@ -160,7 +160,7 @@ class ConfigLoader(Generic[T]):
         """
         if self.configuration_class.package_type == PackageType.AGENT:
             json_data_copy = deepcopy(json_data)
-            json_data_copy.pop("component_configurations")
+            json_data_copy.pop("component_configurations", None)
             self._validator.validate(instance=json_data_copy)
         else:
             self._validator.validate(instance=json_data)
@@ -207,7 +207,7 @@ class ConfigLoader(Generic[T]):
               | ValueError: if other consistency checks fail.
         """
         # this might raise ValidationError.
-        self.validator.validate(instance=json_data)
+        self.validate(json_data)
 
         expected_type = self.configuration_class.package_type
         # TODO 'type' is optional for backward compatibility
@@ -367,6 +367,7 @@ class ConfigLoader(Generic[T]):
         elif component_id.component_type == ComponentType.CONNECTION:
             temporary_config["class_name"] = "SomeClassName"
             temporary_config["protocols"] = []
+            temporary_config.setdefault("config", {})
         elif component_id.component_type == ComponentType.CONTRACT:
             temporary_config["class_name"] = "SomeClassName"
         elif component_id.component_type == ComponentType.SKILL:

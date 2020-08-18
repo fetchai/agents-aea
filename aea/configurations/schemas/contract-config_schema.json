@@ -51,6 +51,9 @@
         }
       }
     },
+    "path_to_contract_interface": {
+      "type": "string"
+    },
     "class_name": {
       "type": "string"
     }

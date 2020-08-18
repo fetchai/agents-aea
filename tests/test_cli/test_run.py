@@ -696,6 +696,59 @@ class TestRunFailsWhenConfigurationFileNotFound:
             pass
 
 
+class TestRunFailsWhenConfigurationFileIsEmpty:
+    """Test that the command 'aea run' fails when the agent configuration file is empty."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).write_text("")
+
+        os.chdir(Path(cls.t, cls.agent_name))
+
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "run"], standalone_mode=False
+        )
+
+    def test_exit_code_equal_to_1(self):
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_log_error_message(self):
+        """Test that the log error message is fixed."""
+        s = "Agent configuration file was empty."
+        assert self.result.exception.message == s
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
 class TestRunFailsWhenConfigurationFileInvalid:
     """Test that the command 'aea run' fails when the agent configuration file is invalid."""
 
@@ -722,7 +775,9 @@ class TestRunFailsWhenConfigurationFileInvalid:
         )
         assert result.exit_code == 0
 
-        Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).write_text("")
+        Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).write_text(
+            "invalid_attribute: 'foo'\n"
+        )
 
         os.chdir(Path(cls.t, cls.agent_name))
 
