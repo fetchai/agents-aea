@@ -45,7 +45,7 @@ MESSAGE_ID = 1
 RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.7.0")
 
 
 class LocalNode:
@@ -150,7 +150,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.4.0"):
+        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.5.0"):
             await self._handle_oef_message(envelope)
         else:
             await self._handle_agent_message(envelope)

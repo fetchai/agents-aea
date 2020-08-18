@@ -50,7 +50,7 @@ The format for the above fields, except `message`, is specified below. For those
   <p>This section is incomplete, and will be updated soon!</p>
 </div>
 </li>
-<li> It SHOULD implement the `fetchai/default:0.1.0` protocol which satisfies the following protobuf schema:
+<li> It SHOULD implement the `fetchai/default:0.5.0` protocol which satisfies the following protobuf schema:
 
 ``` proto
 syntax = "proto3";

@@ -44,7 +44,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.8.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -317,7 +317,7 @@ class HTTPClientAsyncChannel:
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",
-            protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.5.0"),
             context=context,
             message=http_message,
         )

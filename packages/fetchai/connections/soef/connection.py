@@ -56,7 +56,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.7.0")
 
 NOT_SPECIFIED = object()
 
@@ -962,7 +962,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.4.0")
+                PublicId.from_str("fetchai/oef_search:0.5.0")
             ]
 
         super().__init__(**kwargs)

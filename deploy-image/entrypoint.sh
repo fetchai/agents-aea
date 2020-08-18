@@ -5,7 +5,7 @@ if [ -z ${AGENT_REPO_URL+x} ] ; then
         rm myagent -rf
         aea create myagent
         cd myagent
-        aea add skill fetchai/echo:0.3.0
+        aea add skill fetchai/echo:0.6.0
     else
         echo "cloning $AGENT_REPO_URL inside '$(pwd)/myagent'"
         echo git clone $AGENT_REPO_URL myagent
