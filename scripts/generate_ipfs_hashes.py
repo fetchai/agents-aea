@@ -134,7 +134,9 @@ def sort_configuration_file(config: PackageConfiguration):
     if config.package_type == PackageType.AGENT:
         json_data = config.ordered_json
         component_configurations = json_data.pop("component_configurations")
-        yaml_dump_all([json_data] + component_configurations)
+        yaml_dump_all(
+            [json_data] + component_configurations, configuration_filepath.open("w")
+        )
     else:
         yaml_dump(config.ordered_json, configuration_filepath.open("w"))
 
