@@ -52,11 +52,21 @@ def test_config_loader_get_required_fields():
     config_loader.required_fields
 
 
-def test_config_loader_dump():
+def test_config_loader_dump_component():
     """Test ConfigLoader.dump"""
     config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
     configuration = MagicMock()
     with mock.patch.object(aea.configurations.loader, "yaml_dump"), mock.patch(
+        "jsonschema.Draft4Validator.validate"
+    ), mock.patch("builtins.open"):
+        config_loader.dump(configuration, open("foo"))
+
+
+def test_config_loader_dump_agent_config():
+    """Test ConfigLoader.dump"""
+    config_loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+    configuration = MagicMock(ordered_json={"component_configurations": []})
+    with mock.patch.object(aea.configurations.loader, "yaml_dump_all"), mock.patch(
         "jsonschema.Draft4Validator.validate"
     ), mock.patch("builtins.open"):
         config_loader.dump(configuration, open("foo"))

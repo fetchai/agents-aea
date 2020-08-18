@@ -26,6 +26,7 @@ import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from copy import deepcopy
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -922,7 +923,7 @@ class ConnectionConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.config = config
+        self.config = config if len(config) > 0 else {}
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -984,7 +985,7 @@ class ConnectionConfig(ComponentConfiguration):
             excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
-            **cast(dict, obj.get("config")),
+            **cast(dict, obj.get("config", {})),
         )
 
 
@@ -1262,9 +1263,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
-        component_configurations: Optional[
-            Dict[ComponentId, ComponentConfiguration]
-        ] = None,
+        component_configurations: Optional[Dict[ComponentId, Dict]] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1390,6 +1389,19 @@ class AgentConfig(PackageConfiguration):
         """
         self._default_ledger = ledger_id
 
+    def component_configurations_json(self) -> List[Dict]:
+        """Get the component configurations in JSON format."""
+        return [
+            dict(
+                name=component_id.name,
+                author=component_id.author,
+                version=component_id.version,
+                type=component_id.component_type.value,
+                **obj,
+            )
+            for component_id, obj in self.component_configurations.items()
+        ]
+
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
@@ -1412,6 +1424,7 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
+                "component_configurations": self.component_configurations_json(),
             }
         )  # type: Dict[str, Any]
 
@@ -1466,7 +1479,20 @@ class AgentConfig(PackageConfiguration):
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
+            component_configurations=None,
         )
+        component_configurations = {}
+        for config in obj.get("component_configurations", []):
+            tmp = deepcopy(config)
+            name = tmp.pop("name")
+            author = tmp.pop("author")
+            version = tmp.pop("version")
+            type_ = tmp.pop("type")
+            component_id = ComponentId(
+                ComponentType(type_), PublicId(author, name, version)
+            )
+            component_configurations[component_id] = tmp
+        agent_config.component_configurations = component_configurations
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)

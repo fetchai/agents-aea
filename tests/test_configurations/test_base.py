@@ -206,7 +206,10 @@ class TestAgentConfig:
     def test_from_json_and_to_json(self, agent_path):
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(agent_path)
-        original_json = yaml.safe_load(f)
+        original_jsons = list(yaml.safe_load_all(f))
+        components = original_jsons[1:]
+        original_json = original_jsons[0]
+        original_json["component_configurations"] = components
 
         expected_config = AgentConfig.from_json(original_json)
         assert isinstance(expected_config, AgentConfig)

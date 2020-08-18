@@ -10,7 +10,6 @@
     "license",
     "aea_version",
     "class_name",
-    "config",
     "protocols"
   ],
   "properties": {
