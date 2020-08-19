@@ -37,7 +37,7 @@ from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import AwaitableProc
-from aea.helpers.pipe import LocalPortablePipe, make_pipe
+from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Address, Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
@@ -246,7 +246,7 @@ class Libp2pNode:
         self.env_file = os.path.join(os.path.abspath(os.getcwd()), self.env_file)
 
         # named pipes (fifos)
-        self.pipe = None  # type: Optional[LocalPortablePipe]
+        self.pipe = None  # type: Optional[IPCChannel]
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
@@ -287,7 +287,7 @@ class Libp2pNode:
         self.logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
-        self.pipe = make_pipe(logger=self.logger)
+        self.pipe = make_ipc_channel(logger=self.logger)
 
         # setup config
         if os.path.exists(self.env_file):
