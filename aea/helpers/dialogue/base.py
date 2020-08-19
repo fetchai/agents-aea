@@ -28,6 +28,7 @@ This module contains the classes required for dialogue management.
 import itertools
 from abc import ABC, abstractmethod
 from enum import Enum
+from inspect import signature
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
 from aea.mail.base import Address
@@ -397,6 +398,10 @@ class Dialogue(ABC):
     def is_message_by_other(self, message: Message) -> bool:
         return not self.is_message_by_self(message)
 
+    def has_message(self, message: Message) -> bool:
+        retrieved_message = self.get_message(message.message_id)
+        return message == retrieved_message
+
     def update(self, message: Message) -> None:
         """
         Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
@@ -760,6 +765,10 @@ class Dialogues(ABC):
         assert issubclass(dialogue_class, Dialogue)
         self._dialogue_class = dialogue_class
 
+        sig = signature(role_from_first_message)
+        assert len(sig.parameters.keys()) == 1
+        assert list(sig.parameters.values())[0].annotation == Message
+        assert sig.return_annotation == Dialogue.Role
         self._role_from_first_message = role_from_first_message
 
     @property

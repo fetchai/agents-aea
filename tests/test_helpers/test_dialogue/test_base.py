@@ -267,13 +267,6 @@ class TestDialogueBase:
 
     def test_dialogue_properties(self):
         """Test dialogue properties."""
-        assert self.dialogue.dialogue_label == self.dialogue_label
-        assert self.dialogue.incomplete_dialogue_label == self.dialogue_label
-        assert self.dialogue.agent_address == self.agent_address
-
-        assert self.dialogue.role == Dialogue.Role.ROLE1
-        assert str(self.dialogue.role) == "role1"
-
         assert self.dialogue.initial_performatives == frozenset(
             {DefaultMessage.Performative.BYTES}
         )
@@ -295,6 +288,14 @@ class TestDialogueBase:
             DefaultMessage.Performative.ERROR
         ) == frozenset({})
 
+        assert self.dialogue.dialogue_label == self.dialogue_label
+        assert self.dialogue.incomplete_dialogue_label == self.dialogue_label
+        assert self.dialogue.dialogue_labels == {self.dialogue_label}
+        assert self.dialogue.agent_address == self.agent_address
+
+        assert self.dialogue.role == Dialogue.Role.ROLE1
+        assert str(self.dialogue.role) == "role1"
+
         assert self.dialogue.is_self_initiated
 
         assert self.dialogue.last_incoming_message is None
@@ -308,6 +309,54 @@ class TestDialogueBase:
         )
 
         assert self.dialogue.is_empty
+
+    def test_is_message_by_self(self):
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_2.sender = self.opponent_address
+        message_2.to = self.agent_address
+
+        assert not self.dialogue.is_message_by_self(message_2)
+
+    def test_has_message(self):
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        self.dialogue.update(message_1)
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_2.sender = self.agent_address
+        message_2.to = self.opponent_address
+
+        assert self.dialogue.has_message(message_2)
 
     def test_update_positive(self):
         """Positive test for the 'update' method."""
