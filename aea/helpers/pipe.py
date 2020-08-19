@@ -40,15 +40,15 @@ TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS = 5
 TCP_SOCKET_PIPE_CLIENT_CONN_TIMEOUT = 0.1
 
 
-class IPCChannel(ABC):
+class IPCChannelClient(ABC):
     """
-    Multi-platform interprocess communication channel
+    Multi-platform interprocess communication channel for the client side
     """
 
     @abstractmethod
     async def connect(self, timeout=PIPE_CONN_TIMEOUT) -> bool:
         """
-        Setup the communication channel and wait for other end to connect
+        Connect to communication channel
 
         :param timeout: timeout for other end to connect
         """
@@ -74,42 +74,28 @@ class IPCChannel(ABC):
     @abstractmethod
     async def close(self) -> None:
         """
-        Close the communication channel and clean it up
+        Close the communication channel
         """
+
+
+class IPCChannel(IPCChannelClient):
+    """
+    Multi-platform interprocess communication channel
+    """
 
     @property
     @abstractmethod
     def in_path(self) -> str:
         """
-        Returns the rendezvous point for incoming communication
+        Rendezvous point for incoming communication
         """
 
     @property
     @abstractmethod
     def out_path(self) -> str:
         """
-        Returns the rendezvous point for outgoing communication
+        Rendezvous point for outgoing communication
         """
-
-
-class IPCChannelClient(IPCChannel):
-    """
-    Multi-platform interprocess communication channel for the client side
-    """
-
-    @property
-    def in_path(self) -> str:
-        """
-        Not supported
-        """
-        return str()
-
-    @property
-    def out_path(self) -> str:
-        """
-        Not supported
-        """
-        return str()
 
 
 class PosixNamedPipeProtocol:
@@ -404,12 +390,12 @@ class TCPSocketChannel(IPCChannel):
 
     @property
     def in_path(self) -> str:
-        """ Returns the rendezvous point for incoming communication """
+        """ Rendezvous point for incoming communication """
         return str(self._port)
 
     @property
     def out_path(self) -> str:
-        """ Returns the rendezvous point for outgoing communication """
+        """ Rendezvous point for outgoing communication """
         return str(self._port)
 
 
@@ -483,12 +469,12 @@ class PosixNamedPipeChannel(IPCChannel):
 
     @property
     def in_path(self) -> str:
-        """ Returns the rendezvous point for incoming communication """
+        """ Rendezvous point for incoming communication """
         return self._in_path
 
     @property
     def out_path(self) -> str:
-        """ Returns the rendezvous point for outgoing communication """
+        """ Rendezvous point for outgoing communication """
         return self._out_path
 
 
@@ -548,7 +534,7 @@ class TCPSocketChannelClient(IPCChannelClient):
                 break
             except ConnectionRefusedError:
                 await asyncio.sleep(TCP_SOCKET_PIPE_CLIENT_CONN_TIMEOUT)
-            except Exception:  # pragma: nocover
+            except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 return False
 
         return connected
