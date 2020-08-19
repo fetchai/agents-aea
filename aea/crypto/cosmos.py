@@ -946,8 +946,8 @@ class CosmosFaucetApi(FaucetApi):
 
         uid = None
         if response.status_code == 200:
-            response = response.json()
-            uid = response["uid"]
+            data = response.json()
+            uid = data["uid"]
 
             logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
@@ -978,9 +978,9 @@ class CosmosFaucetApi(FaucetApi):
             return None
 
         # parse the response
-        response = response.json()
+        data = response.json()
         return CosmosFaucetStatus(
-            tx_digest=response.get("txDigest"),
-            status=response["status"],
-            status_code=response["statusCode"],
+            tx_digest=data.get("txDigest"),
+            status=data["status"],
+            status_code=data["statusCode"],
         )
