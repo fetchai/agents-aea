@@ -269,9 +269,8 @@ def test_agent_configuration_loading_multipage():
     # test component configurations loaded correctly
     assert len(agent_config.component_configurations) == 1
     keys = list(agent_config.component_configurations)
-    expected_component_id = ComponentId(
-        "skill", PublicId.from_str("dummy_author/dummy:0.1.0")
-    )
+    dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
+    expected_component_id = ComponentId("skill", dummy_skill_public_id)
     assert keys[0] == expected_component_id
 
 
@@ -352,15 +351,17 @@ def test_agent_configuration_loading_multipage_validation_error():
 )
 def test_agent_configuration_loading_multipage_positive_case(component_type):
     """Test agent configuration loading, multi-page case, positive case."""
+    public_id = PublicId("dummy_author", "dummy", "0.1.0")
     file = Path(CUR_PATH, "data", "aea-config.example.yaml").open()
     json_data = yaml.safe_load(file)
+    json_data[component_type.to_plural()].append(str(public_id))
     modified_file = io.StringIO()
     yaml.safe_dump(json_data, modified_file)
     modified_file.flush()
     modified_file.write("---\n")
-    modified_file.write("author: dummy_author\n")
-    modified_file.write("name: dummy\n")
-    modified_file.write("version: 0.1.0\n")
+    modified_file.write(f"author: {public_id.author}\n")
+    modified_file.write(f"name: {public_id.name}\n")
+    modified_file.write(f"version: {public_id.version}\n")
     modified_file.write(f"type: {component_type.value}\n")
     modified_file.seek(0)
     expected_component_id = ComponentId(

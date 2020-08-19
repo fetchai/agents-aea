@@ -585,3 +585,37 @@ class TestFromAEAProjectWithCustomComponentConfig(AEATestCaseEmpty):
         assert stub_connection.configuration.config == dict(
             input_file=self.expected_input_file, output_file=self.expected_output_file
         )
+
+
+class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmpty):
+    """Test builder set from project dir with custom component config fails
+    when the component is not declared in the agent configuration."""
+
+    def _add_stub_connection_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        configuration += dedent(
+            f"""
+        ---
+        name: non_existing_package
+        author: some_author
+        version: 0.1.0
+        type: protocol
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self.expected_input_file = "custom_input_file"
+        self.expected_output_file = "custom_output_file"
+        self._add_stub_connection_config()
+        with pytest.raises(
+            AssertionError,
+            match=fr"Component \(protocol, some_author/non_existing_package:0.1.0\) not declared in the agent configuration.",
+        ):
+            with cd(self._get_cwd()):
+                AEABuilder.from_aea_project(Path(self._get_cwd()))

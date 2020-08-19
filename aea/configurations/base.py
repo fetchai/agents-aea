@@ -1351,9 +1351,31 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
             component_configurations if component_configurations is not None else {}
         )
+
+    @property
+    def component_configurations(self) -> Dict[ComponentId, Dict]:
+        """Get the custom component configurations."""
+        return self._component_configurations
+
+    @component_configurations.setter
+    def component_configurations(self, d: Dict[ComponentId, Dict]) -> None:
+        """Set the component configurations."""
+        package_type_to_set = {
+            PackageType.PROTOCOL: self.protocols,
+            PackageType.CONNECTION: self.connections,
+            PackageType.CONTRACT: self.contracts,
+            PackageType.SKILL: self.skills,
+        }
+        # TODO add validation of dict values.
+        for component_id, _ in d.items():
+            assert (
+                component_id.public_id in package_type_to_set[component_id.package_type]
+            ), f"Component {component_id} not declared in the agent configuration."
+        self._component_configurations = d
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
