@@ -26,11 +26,11 @@ from unittest.mock import MagicMock, call
 import pytest
 
 from aea.crypto.cosmos import (
+    COSMOS_TESTNET_FAUCET_STATUS_BASE_URL,
     CosmosApi,
     CosmosCrypto,
     CosmosFaucetApi,
     FAUCET_STATUS_COMPLETED,
-    COSMOS_TESTNET_FAUCET_STATUS_BASE_URL,
     FAUCET_STATUS_PENDING,
     FAUCET_STATUS_PROCESSING,
 )
@@ -209,7 +209,7 @@ def get_wealth(address: str):
 @mock.patch("requests.post")
 def test_successful_faucet_operation(mock_post, mock_get):
     address = "a normal cosmos address would be here"
-    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here",})
+    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
 
     mock_get.return_value = MockRequestsResponse(
         {
@@ -236,7 +236,7 @@ def test_successful_faucet_operation(mock_post, mock_get):
 @mock.patch("requests.post")
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
     address = "a normal cosmos address would be here"
-    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here",})
+    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
 
     mock_get.side_effect = [
         MockRequestsResponse(
@@ -269,7 +269,7 @@ def test_successful_realistic_faucet_operation(mock_post, mock_get):
     faucet.get_wealth(address)
 
     mock_post.assert_has_calls(
-        [call(url=COSMOS_TESTNET_FAUCET_STATUS_BASE_URL, data={"Address": address}),]
+        [call(url=COSMOS_TESTNET_FAUCET_STATUS_BASE_URL, data={"Address": address})]
     )
     mock_get.assert_has_calls(
         [

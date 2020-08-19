@@ -27,7 +27,7 @@ import os
 import subprocess  # nosec
 import tempfile
 import time
-from dataclasses import dataclass
+from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
@@ -875,11 +875,17 @@ class CosmWasmCLIWrapper:
     """Wrapper of the CosmWasm CLI."""
 
 
+""" Equivalent to:
+
 @dataclass
 class CosmosFaucetStatus:
     tx_digest: Optional[str]
     status: str
     status_code: int
+"""
+CosmosFaucetStatus = namedtuple(
+    "CosmosFaucetStatus", ["tx_digest", "status", "status_code"]
+)
 
 
 class CosmosFaucetApi(FaucetApi):
