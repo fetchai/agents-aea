@@ -21,17 +21,30 @@
 import logging
 import time
 from unittest import mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 
-from aea.crypto.cosmos import CosmosApi, CosmosCrypto, CosmosFaucetApi
+from aea.crypto.cosmos import CosmosApi, CosmosCrypto, CosmosFaucetApi, FAUCET_STATUS_COMPLETED, COSMOS_TESTNET_FAUCET_STATUS_BASE_URL, FAUCET_STATUS_PENDING, FAUCET_STATUS_PROCESSING
 
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_PATH,
     COSMOS_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
 )
+
+
+class MockRequestsResponse:
+    def __init__(self, data, status_code=None):
+        self._data = data
+        self._status_code = status_code or 200
+
+    @property
+    def status_code(self):
+        return 200
+
+    def json(self):
+        return self._data
 
 
 def test_creation():
@@ -181,6 +194,70 @@ def get_wealth(address: str):
         _balance = cosmos_api.get_balance(address)
         balance = _balance if _balance is not None else 0
     return balance
+
+@pytest.mark.ledger
+@mock.patch("requests.get")
+@mock.patch("requests.post")
+def test_successful_faucet_operation(mock_post, mock_get):
+    address = 'a normal cosmos address would be here'
+    mock_post.return_value = MockRequestsResponse({
+        'uid': 'a-uuid-v4-would-be-here',
+    })
+
+    mock_get.return_value = MockRequestsResponse({
+        'uid': 'a-uuid-v4-would-be-here',
+        'txDigest': '0x transaction hash would be here',
+        'status': 'completed',
+        'statusCode': FAUCET_STATUS_COMPLETED,
+    })
+
+    faucet = CosmosFaucetApi()
+    faucet.get_wealth(address)
+
+    mock_post.assert_has_calls([call(url=COSMOS_TESTNET_FAUCET_STATUS_BASE_URL, data={'Address': address})])
+    mock_get.assert_has_calls([call(f'{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/a-uuid-v4-would-be-here')])
+
+@pytest.mark.ledger
+@mock.patch("requests.get")
+@mock.patch("requests.post")
+def test_successful_realistic_faucet_operation(mock_post, mock_get):
+    address = 'a normal cosmos address would be here'
+    mock_post.return_value = MockRequestsResponse({
+        'uid': 'a-uuid-v4-would-be-here',
+    })
+
+    mock_get.side_effect = [
+        MockRequestsResponse({
+            'uid': 'a-uuid-v4-would-be-here',
+            'txDigest': None,
+            'status': 'pending',
+            'statusCode': FAUCET_STATUS_PENDING,
+        }),
+        MockRequestsResponse({
+            'uid': 'a-uuid-v4-would-be-here',
+            'txDigest': None,
+            'status': 'processing',
+            'statusCode': FAUCET_STATUS_PROCESSING,
+        }),
+        MockRequestsResponse({
+            'uid': 'a-uuid-v4-would-be-here',
+            'txDigest': '0x transaction hash would be here',
+            'status': 'completed',
+            'statusCode': FAUCET_STATUS_COMPLETED,
+        }),
+    ]
+
+    faucet = CosmosFaucetApi(poll_interval=0)
+    faucet.get_wealth(address)
+
+    mock_post.assert_has_calls([
+        call(url=COSMOS_TESTNET_FAUCET_STATUS_BASE_URL, data={'Address': address}),
+    ])
+    mock_get.assert_has_calls([
+        call(f'{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/a-uuid-v4-would-be-here'),
+        call(f'{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/a-uuid-v4-would-be-here'),
+        call(f'{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/a-uuid-v4-would-be-here'),
+    ])
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)

@@ -27,6 +27,7 @@ import os
 import subprocess  # nosec
 import tempfile
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
@@ -44,11 +45,19 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
-COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
+COSMOS_TESTNET_FAUCET_STATUS_BASE_URL = "https://faucet-agent-land.prod.fetch-ai.com/claim/requests"
 TESTNET_NAME = "testnet"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "agent-land"
+
+FAUCET_STATUS_PENDING = 1
+FAUCET_STATUS_PROCESSING = 2
+FAUCET_STATUS_COMPLETED = 20
+FAUCET_STATUS_FAILED = 21
+FAUCET_STATUS_TIMED_OUT = 22
+FAUCET_STATUS_RATE_LIMITED = 23
+FAUCET_STATUS_RATE_UNAVAILABLE = 99
 
 
 class CosmosCrypto(Crypto[SigningKey]):
@@ -864,11 +873,21 @@ class CosmWasmCLIWrapper:
     """Wrapper of the CosmWasm CLI."""
 
 
+@dataclass
+class CosmosFaucetStatus:
+    tx_digest: Optional[str]
+    status: str
+    status_code: int
+
+
 class CosmosFaucetApi(FaucetApi):
     """Cosmos testnet faucet API."""
 
     identifier = _COSMOS
     testnet_name = TESTNET_NAME
+
+    def __init__(self, poll_interval=None):
+        self._poll_interval = float(poll_interval or 1)
 
     def get_wealth(self, address: Address) -> None:
         """
@@ -877,14 +896,35 @@ class CosmosFaucetApi(FaucetApi):
         :param address: the address.
         :return: None
         """
-        self._try_get_wealth(address)
+        uid = self._try_create_faucet_claim(address)
+        if uid is None:
+            raise RuntimeError('Unable to create faucet claim')
+
+        while True:
+
+            # lookup status form the claim uid
+            status = self._try_check_faucet_claim(uid)
+            if status is None:
+                raise RuntimeError('Failed to check faucet claim status')
+
+            # if the status is complete or failed
+            if status.status_code >= FAUCET_STATUS_COMPLETED:
+
+                # do the failure check
+                if status.status_code != FAUCET_STATUS_COMPLETED:
+                    raise RuntimeError(f'Failed to get wealth for {address}')
+
+                break
+
+            # wait for a bit
+            time.sleep(self._poll_interval)
 
     @staticmethod
     @try_decorator(
-        "An error occured while attempting to generate wealth:\n{}",
+        "An error occured while attempting to request a faucet request:\n{}",
         logger_method=logger.error,
     )
-    def _try_get_wealth(address: Address) -> None:
+    def _try_create_faucet_claim(address: Address) -> Optional[str]:
         """
         Get wealth from the faucet for the provided address.
 
@@ -892,12 +932,46 @@ class CosmosFaucetApi(FaucetApi):
         :return: None
         """
         response = requests.post(
-            url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
+            url=COSMOS_TESTNET_FAUCET_STATUS_BASE_URL, data={"Address": address}
         )
+
+        uid = None
         if response.status_code == 200:
-            tx_hash = response.text
-            logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
+            response = response.json()
+            uid = response['uid']
+
+            logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
             logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)
             )
+
+        return uid
+
+    @staticmethod
+    @try_decorator(
+        "An error occured while attempting to request a faucet request:\n{}",
+        logger_method=logger.error,
+    )
+    def _try_check_faucet_claim(uid: str) -> Optional[CosmosFaucetStatus]:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        url = f'{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/{uid}'
+        response = requests.get(url)
+        if response.status_code != 200:
+            logger.warning(
+                "Response: {}, Text: {}".format(response.status_code, response.text)
+            )
+            return None
+
+        # parse the response
+        response = response.json()
+        return CosmosFaucetStatus(
+            tx_digest=response.get('txDigest'),
+            status=response['status'],
+            status_code=response['statusCode'],
+        )
