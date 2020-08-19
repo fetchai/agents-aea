@@ -34,7 +34,7 @@ PEER_ID = "16Uiu2HAkw1VyY3RkiuMy38XKjb6w9EhbtXfwHkRpbQzNvXYVkG1T"
 
 def test_multiaddr_consistency():
     key = make_crypto(DEFAULT_LEDGER)
-    maddr1 = MultiAddr(HOST, PORT, key)
+    maddr1 = MultiAddr(HOST, PORT, key.public_key)
 
     tmpdir = tempfile.mkdtemp()
     key_file = tmpdir + "/key"
@@ -42,7 +42,7 @@ def test_multiaddr_consistency():
         key.dump(k)
 
     key2 = make_crypto(DEFAULT_LEDGER, private_key_path=key_file)
-    maddr2 = MultiAddr(HOST, PORT, key2)
+    maddr2 = MultiAddr(HOST, PORT, key2.public_key)
 
     rmtree(tmpdir)
 
@@ -56,7 +56,7 @@ def test_multiaddr_correctness():
         k.write(PRIV_KEY)
 
     key = make_crypto(DEFAULT_LEDGER, private_key_path=key_file)
-    maddr = MultiAddr(HOST, PORT, key)
+    maddr = MultiAddr(HOST, PORT, key.public_key)
 
     rmtree(tmpdir)
 
