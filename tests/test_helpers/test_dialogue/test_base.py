@@ -84,38 +84,6 @@ class Dialogue(BaseDialogue):
             message_class=message_class,
         )
 
-    @property
-    def initial_performatives(self) -> FrozenSet[Message.Performative]:
-        """
-        Get the performatives one of which the terminal message in the dialogue must have.
-
-        :return: the valid performatives of an terminal message
-        """
-        return cast(FrozenSet[Message.Performative], self.INITIAL_PERFORMATIVES)
-
-    @property
-    def terminal_performatives(self) -> FrozenSet[Message.Performative]:
-        """
-        Get the performatives one of which the terminal message in the dialogue must have.
-
-        :return: the valid performatives of an terminal message
-        """
-        return cast(FrozenSet[Message.Performative], self.TERMINAL_PERFORMATIVES)
-
-    @property
-    def valid_replies(
-        self,
-    ) -> Dict[Message.Performative, FrozenSet[Message.Performative]]:
-        """
-        Get all the valid performatives which are a valid replies to performatives.
-
-        :return: the full valid reply structure.
-        """
-        return cast(
-            Dict[Message.Performative, FrozenSet[Message.Performative]],
-            self.VALID_REPLIES,
-        )
-
     def is_valid(self, message: Message) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in the dialogue.
@@ -165,19 +133,6 @@ class Dialogues(BaseDialogues):
             dialogue_class=dialogue_class,
             role_from_first_message=role_from_first_message,
         )
-
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
-    ) -> Dialogue:
-        """
-        Create a dialogue instance.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        pass
 
 
 class TestDialogueLabel:
@@ -268,24 +223,24 @@ class TestDialogueBase:
 
     def test_dialogue_properties(self):
         """Test dialogue properties."""
-        assert self.dialogue.initial_performatives == frozenset(
+        assert self.dialogue.rules.initial_performatives == frozenset(
             {DefaultMessage.Performative.BYTES}
         )
-        assert self.dialogue.terminal_performatives == frozenset(
+        assert self.dialogue.rules.terminal_performatives == frozenset(
             {DefaultMessage.Performative.ERROR}
         )
-        assert self.dialogue.valid_replies == {
+        assert self.dialogue.rules.valid_replies == {
             DefaultMessage.Performative.BYTES: frozenset(
                 {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
             ),
             DefaultMessage.Performative.ERROR: frozenset(),
         }
-        assert self.dialogue.get_valid_replies(
+        assert self.dialogue.rules.get_valid_replies(
             DefaultMessage.Performative.BYTES
         ) == frozenset(
             {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
         )
-        assert self.dialogue.get_valid_replies(
+        assert self.dialogue.rules.get_valid_replies(
             DefaultMessage.Performative.ERROR
         ) == frozenset({})
 
@@ -302,16 +257,11 @@ class TestDialogueBase:
         assert self.dialogue.last_incoming_message is None
         assert self.dialogue.last_outgoing_message is None
         assert self.dialogue.last_message is None
-        with pytest.raises(AssertionError) as cm:
-            self.dialogue.get_message(3)
-        assert (
-            str(cm.value)
-            == "This dialogue does not have a message with id 3. Last message id is 0."
-        )
 
         assert self.dialogue.is_empty
 
     def test_is_message_by_self(self):
+        """Test the 'is_message_by_self' method."""
         message_1 = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -332,9 +282,36 @@ class TestDialogueBase:
         message_2.sender = self.opponent_address
         message_2.to = self.agent_address
 
+        assert self.dialogue.is_message_by_self(message_1)
         assert not self.dialogue.is_message_by_self(message_2)
 
+    def test_is_message_by_other(self):
+        """Test the 'is_message_by_other' method."""
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_2.sender = self.opponent_address
+        message_2.to = self.agent_address
+
+        assert not self.dialogue.is_message_by_other(message_1)
+        assert self.dialogue.is_message_by_other(message_2)
+
     def test_has_message(self):
+        """Test the 'has_message' method."""
         message_1 = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -434,7 +411,11 @@ class TestDialogueBase:
 
         with pytest.raises(InvalidDialogueMessage) as cm:
             self.dialogue.update(invalid_message_id)
-        assert str(cm.value) == "Invalid message_id. Expected 1. Found 2."
+        assert (
+            str(cm.value)
+            == "Message 2 is invalid with respect to this dialogue. Error: "
+            + "Invalid message_id. Expected 1. Found 2."
+        )
 
         assert self.dialogue.last_outgoing_message is None
 
@@ -452,8 +433,38 @@ class TestDialogueBase:
 
         with pytest.raises(InvalidDialogueMessage) as cm:
             self.dialogue.update(invalid_initial_msg)
-        assert str(cm.value) == "message does not belong to this dialogue."
+        assert str(cm.value) == (
+            "The message 1 does not belong to this dialogue."
+            "The dialogue reference of the message is {}, while the dialogue reference of the dialogue is {}".format(
+                invalid_initial_msg.dialogue_reference,
+                self.dialogue.dialogue_label.dialogue_reference,
+            )
+        )
         assert self.dialogue.is_empty
+
+    def test_is_belonging_to_dialogue(self):
+        valid_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_msg.sender = self.agent_address
+        valid_msg.to = self.opponent_address
+
+        invalid_msg = DefaultMessage(
+            dialogue_reference=(str(2), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_msg.sender = self.agent_address
+        invalid_msg.to = self.opponent_address
+
+        assert self.dialogue.is_belonging_to_dialogue(valid_msg)
+        assert not self.dialogue.is_belonging_to_dialogue(invalid_msg)
 
     def test_reply_positive(self):
         """Positive test for the 'reply' method."""
@@ -502,17 +513,126 @@ class TestDialogueBase:
         invalid_initial_msg.sender = self.agent_address
         invalid_initial_msg.to = self.opponent_address
 
-        with pytest.raises(InvalidDialogueMessage) as cm:
+        with pytest.raises(AssertionError) as cm:
             self.dialogue.reply(
                 target_message=invalid_initial_msg,
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"Hello Back",
             )
-        assert (
-            str(cm.value)
-            == "Invalid target. Expected a value less than or equal to 1. Found 2."
-        )
+        assert str(cm.value) == "The target message does not exist in this dialogue."
         assert self.dialogue.last_message.message_id == 1
+
+    def test_is_valid_next_message_positive(self):
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
+
+        self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        valid_second_msg.sender = self.opponent_address
+        valid_second_msg.to = self.agent_address
+
+        self.dialogue.update(valid_second_msg)
+
+        valid_third_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=2,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back 2",
+        )
+        valid_third_msg.sender = self.agent_address
+        valid_third_msg.to = self.opponent_address
+
+        result, msg = self.dialogue.is_valid_next_message(valid_third_msg)
+        assert result is True
+        assert msg == "Message is valid with respect to this dialogue."
+
+    def test_is_valid_next_message_negative_basic_validation_fails(self):
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
+
+        result, msg = self.dialogue.is_valid_next_message(invalid_initial_msg)
+        assert result is False
+        assert msg == "Invalid message_id. Expected 1. Found 2."
+
+    def test_is_valid_next_message_negative_additional_validation_fails(self):
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
+
+        self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        valid_second_msg.sender = self.opponent_address
+        valid_second_msg.to = self.agent_address
+
+        self.dialogue.update(valid_second_msg)
+
+        invalid_third_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back 2",
+        )
+        invalid_third_msg.sender = self.agent_address
+        invalid_third_msg.to = self.opponent_address
+
+        result, msg = self.dialogue.is_valid_next_message(invalid_third_msg)
+        assert result is False
+        assert msg == "Invalid target. Expected 2. Found 1."
+
+    def test_is_valid_next_message_negative_is_valid_fails(self):
+        def failing_is_valid(message: Message) -> Tuple[bool, str]:
+            return False, "some reason"
+
+        self.dialogue.is_valid = failing_is_valid
+        valid_message = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_message.sender = self.agent_address
+        valid_message.to = self.opponent_address
+
+        result, msg = self.dialogue.is_valid_next_message(valid_message)
+        assert result is False
+        assert msg == "some reason"
 
     def test_basic_rules_positive(self):
         """Positive test for the '_basic_rules' method."""
@@ -597,7 +717,7 @@ class TestDialogueBase:
         assert (
             msg
             == "Invalid initial performative. Expected one of {}. Found error.".format(
-                self.dialogue.initial_performatives
+                self.dialogue.rules.initial_performatives
             )
         )
 
@@ -746,7 +866,7 @@ class TestDialogueBase:
         result, msg = self.dialogue._basic_validation(invalid_second_msg)
         assert result is False
         assert msg == "Invalid performative. Expected one of {}. Found {}.".format(
-            self.dialogue.get_valid_replies(valid_initial_msg.performative),
+            self.dialogue.rules.get_valid_replies(valid_initial_msg.performative),
             invalid_second_msg.performative,
         )
 
