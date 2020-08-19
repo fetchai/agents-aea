@@ -895,6 +895,7 @@ class CosmosFaucetApi(FaucetApi):
 
         :param address: the address.
         :return: None
+        :raises: RuntimeError of explicit faucet failures
         """
         uid = self._try_create_faucet_claim(address)
         if uid is None:
@@ -926,10 +927,10 @@ class CosmosFaucetApi(FaucetApi):
     )
     def _try_create_faucet_claim(address: Address) -> Optional[str]:
         """
-        Get wealth from the faucet for the provided address.
+        Create a token faucet claim request
 
-        :param address: the address.
-        :return: None
+        :param address: the address to request funds
+        :return: None on failure, otherwise the request uid
         """
         response = requests.post(
             url=COSMOS_TESTNET_FAUCET_STATUS_BASE_URL, data={"Address": address}
@@ -955,10 +956,10 @@ class CosmosFaucetApi(FaucetApi):
     )
     def _try_check_faucet_claim(uid: str) -> Optional[CosmosFaucetStatus]:
         """
-        Get wealth from the faucet for the provided address.
+        Check the status of a faucet request
 
-        :param address: the address.
-        :return: None
+        :param uid: The request uid to be checked
+        :return: None on failure otherwise a CosmosFaucetStatus for the specified uid
         """
         url = f'{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/{uid}'
         response = requests.get(url)
