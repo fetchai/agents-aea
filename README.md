@@ -65,7 +65,7 @@ A framework for autonomous economic agent (AEA) development
 
        pip install "aea[all]"
 
-3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
+3. Then, build your agent as described in the [docs](https://docs.fetch.ai/aea/).
 
 <p align="center">
   <a href="https://www.youtube.com/embed/xpJA4IT5X88">
