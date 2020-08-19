@@ -166,9 +166,9 @@ class AsyncAgentLoop(BaseAgentLoop):
         self, task_callable: Callable, exc: Exception
     ) -> None:
         """
-        Call on behaviour's act exception.
+        Call on periodic task exception.
 
-        :param fn: behaviour's act
+        :param task_callable: function to be called
         :param: exc: Exception  raised
 
         :return: None
@@ -186,9 +186,11 @@ class AsyncAgentLoop(BaseAgentLoop):
         start_at: Optional[datetime.datetime],
     ) -> None:
         """
-        Register behaviour to run periodically.
+        Register function to run periodically.
 
-        :param behaviour: Behaviour object
+        :param task_callable: function to be called
+        :param pediod: float: in seconds
+        :param start_at: optional datetime, when to run task for the first time, otherwise call it right now
 
         :return: None
         """
@@ -199,8 +201,8 @@ class AsyncAgentLoop(BaseAgentLoop):
         periodic_caller = PeriodicCaller(
             partial(
                 self._agent._execution_control,  # pylint: disable=protected-access # TODO: refactoring!
-                task_callable,
-                task_callable,
+                task_callable,  # callable
+                task_callable,  # component
             ),
             period=period,
             start_at=start_at,
@@ -212,20 +214,20 @@ class AsyncAgentLoop(BaseAgentLoop):
         self.logger.debug(f"Periodic task {task_callable} registered.")
 
     def _register_periodic_tasks(self) -> None:
-        """Register all AEA behaviours to run periodically."""
+        """Register all AEA related periodic tasks."""
         for (
             task_callable,
             (period, start_at),
         ) in (
-            self._agent._get_behaviours_tasks().items()
-        ):  # pylint: disable=protected-access
+            self._agent._get_behaviours_tasks().items()  # pylint: disable=protected-access
+        ):
             self._register_periodic_task(task_callable, period, start_at)
 
     def _unregister_periodic_task(self, task_callable: Callable) -> None:
         """
-        Unregister periodic execution of the behaviour.
+        Unregister periodic execution of the task.
 
-        :param behaviour: Behaviour to schedule periodic execution.
+        :param task_callable: function to be called periodically.
         :return: None
         """
         periodic_caller = self._periodic_tasks.pop(task_callable, None)

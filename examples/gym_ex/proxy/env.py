@@ -149,7 +149,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        if not self._agent.multiplexer.is_connected:
+        if not self._agent.runtime.multiplexer.is_connected:
             self._connect()
         gym_msg = GymMessage(
             dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
@@ -194,7 +194,7 @@ class ProxyEnv(gym.Env):
         """
         assert not self._agent_thread.is_alive(), "Agent already running."
         self._agent_thread.start()
-        while not self._agent.multiplexer.is_connected:
+        while not self._agent.runtime.multiplexer.is_connected:
             time.sleep(0.1)
 
     def _disconnect(self):

@@ -25,7 +25,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Type
 
 from aea.connections.base import Connection
 from aea.identity.base import Identity
-from aea.multiplexer import InBox, Multiplexer, OutBox
+from aea.multiplexer import InBox, OutBox
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 
@@ -62,29 +62,30 @@ class Agent(ABC):
 
         :return: None
         """
-        self._identity = identity
         self._connections = connections
-
-        self._multiplexer = Multiplexer(self._connections, loop=loop)
-        self._inbox = InBox(self._multiplexer)
-        self._outbox = OutBox(self._multiplexer, identity.address)
-        self._timeout = timeout
-
-        self._tick = 0
-
+        self._identity = identity
         self._loop_mode = loop_mode
-
+        self._timeout = timeout
+        self._tick = 0
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         runtime_cls = self._get_runtime_class()
         self._runtime: BaseRuntime = runtime_cls(agent=self, loop=loop)
 
+        self._inbox = InBox(self.runtime.multiplexer)
+        self._outbox = OutBox(self.runtime.multiplexer, self._identity.address)
+
     @property
-    def is_running(self):
+    def active_connections(self) -> List[Connection]:
+        """Return list of active connections."""
+        return self._connections
+
+    @property
+    def is_running(self) -> bool:
         """Get running state of the runtime and agent."""
         return self.runtime.is_running
 
     @property
-    def is_stopped(self):
+    def is_stopped(self) -> bool:
         """Get running state of the runtime and agent."""
         return self.runtime.is_stopped
 
@@ -96,15 +97,20 @@ class Agent(ABC):
             )
         return self.RUNTIMES[self._runtime_mode]
 
+    def _get_multiplexer_setup_options(  # pylint: disable=no-self-use # cause overrided in AEA
+        self,
+    ) -> Optional[Dict]:
+        """
+        Get dict of multiplexer setup options.
+
+        :return: dict of kwargs for Multipelxer.setup
+        """
+        return {"connections": self.active_connections}
+
     @property
     def identity(self) -> Identity:
         """Get the identity."""
         return self._identity
-
-    @property
-    def multiplexer(self) -> Multiplexer:
-        """Get the multiplexer."""
-        return self._multiplexer
 
     @property
     def inbox(self) -> InBox:  # pragma: nocover
@@ -146,18 +152,14 @@ class Agent(ABC):
         return self._timeout
 
     @property
-    def loop_mode(self) -> Optional[str]:
+    def loop_mode(self) -> str:
         """Get the agent loop mode."""
-        return self._loop_mode
+        return self._loop_mode or self.runtime.DEFAULT_RUN_LOOP
 
     @property
     def runtime(self) -> BaseRuntime:
         """Get the runtime."""
         return self._runtime
-
-    def setup_multiplexer(self) -> None:
-        """Set up the multiplexer."""
-        pass
 
     def start(self) -> None:
         """

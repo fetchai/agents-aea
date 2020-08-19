@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import datetime
 import logging
@@ -37,6 +38,7 @@ from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SKILL
+from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
@@ -133,7 +135,7 @@ class AEA(Agent, WithLogger):
         )
         self._context = AgentContext(
             self.identity,
-            self.multiplexer.connection_status,
+            self.runtime.multiplexer.connection_status,
             self.outbox,
             self.decision_maker.message_in_queue,
             decision_maker_handler.context,
@@ -176,19 +178,6 @@ class AEA(Agent, WithLogger):
     def task_manager(self) -> TaskManager:
         """Get the task manager."""
         return self._task_manager
-
-    def setup_multiplexer(self) -> None:
-        """Set up the multiplexer."""
-        connections = self.resources.get_all_connections()
-        if self._connection_ids is not None:
-            connections = [
-                c for c in connections if c.connection_id in self._connection_ids
-            ]
-        self.multiplexer.setup(
-            connections,
-            default_routing=self.context.default_routing,
-            default_connection=self.context.default_connection,
-        )
 
     @property
     def filter(self) -> Filter:
@@ -248,6 +237,23 @@ class AEA(Agent, WithLogger):
         while not self.inbox.empty() and counter < self.max_reactions:
             counter += 1
             self._react_one()
+
+    @property
+    def active_connections(self) -> List[Connection]:
+        """Return list of active connections."""
+        connections = self.resources.get_all_connections()
+        if self._connection_ids is not None:
+            connections = [
+                c for c in connections if c.connection_id in self._connection_ids
+            ]
+        return connections
+
+    def _get_multiplexer_setup_options(self) -> Optional[Dict]:
+        return dict(
+            connections=self.active_connections,
+            default_routing=self.context.default_routing,
+            default_connection=self.context.default_connection,
+        )
 
     def _react_one(self) -> None:
         """
@@ -409,7 +415,7 @@ class AEA(Agent, WithLogger):
         """Set up logger with agent name."""
         for element in [
             self.runtime.main_loop,
-            self.multiplexer,
+            self.runtime.multiplexer,
             self.task_manager,
             self.resources.component_registry,
             self.resources.behaviour_registry,

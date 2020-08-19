@@ -29,7 +29,7 @@ from typing import Dict, Optional, TYPE_CHECKING, Type, cast
 
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_utils import ensure_loop
-from aea.multiplexer import AsyncMultiplexer
+from aea.multiplexer import AsyncMultiplexer, Multiplexer
 
 if TYPE_CHECKING:  # pragma: nocover
     from aea.agent import Agent
@@ -68,15 +68,41 @@ class BaseRuntime(ABC):
         :return: None
         """
         self._agent: "Agent" = agent
-        self._loop = ensure_loop(
+        self._loop: AbstractEventLoop = ensure_loop(
             loop
         )  # TODO: decide who constructs loop: agent, runtime, multiplexer.
         self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
         self._state.add_callback(self._log_runtime_state)
         self._was_started = False
 
+        self._multiplexer: Multiplexer = self._get_multiplexer_instance()
+
         self.main_loop: BaseAgentLoop = self._get_main_loop_instance(
             agent._loop_mode or self.DEFAULT_RUN_LOOP
+        )
+
+    def setup_multiplexer(self) -> None:
+        """Set up the multiplexer."""
+        setup_options = (
+            self._agent._get_multiplexer_setup_options()  # pylint: disable=protected-access
+        )
+        if setup_options:
+            self.multiplexer.setup(**setup_options)
+
+    @property
+    def loop(self) -> AbstractEventLoop:
+        """Get event loop."""
+        return self._loop
+
+    @property
+    def multiplexer(self) -> Multiplexer:
+        """Get multiplexer."""
+        return self._multiplexer
+
+    def _get_multiplexer_instance(self) -> Multiplexer:
+        """Create multiplexer instance."""
+        return Multiplexer(
+            self._agent._connections, loop=self.loop  # pylint: disable=protected-access
         )
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
@@ -202,8 +228,8 @@ class AsyncRuntime(BaseRuntime):
         :param loop: event loop to use.
         """
         super().set_loop(loop)
-        self._agent.multiplexer.set_loop(self._loop)
-        self.main_loop.set_loop(self._loop)
+        self.multiplexer.set_loop(self.loop)
+        self.main_loop.set_loop(self.loop)
         self._async_stop_lock = asyncio.Lock()
 
     def _start(self) -> None:
@@ -214,13 +240,13 @@ class AsyncRuntime(BaseRuntime):
 
         Start runtime asynchonously in own event loop.
         """
-        self.set_loop(self._loop)
+        self.set_loop(self.loop)
 
-        logger.debug(f"Start runtime event loop {self._loop}: {id(self._loop)}")
-        self._task = self._loop.create_task(self.run_runtime())
+        logger.debug(f"Start runtime event loop {self.loop}: {id(self.loop)}")
+        self._task = self.loop.create_task(self.run_runtime())
 
         try:
-            self._loop.run_until_complete(self._task)
+            self.loop.run_until_complete(self._task)
             logger.debug("Runtime loop stopped!")
         except Exception:
             logger.exception("Exception raised during runtime processing")
@@ -244,12 +270,12 @@ class AsyncRuntime(BaseRuntime):
 
     async def _multiplexer_disconnect(self) -> None:
         """Call multiplexer disconnect asynchronous way."""
-        await AsyncMultiplexer.disconnect(self._agent.multiplexer)
+        await AsyncMultiplexer.disconnect(self.multiplexer)
 
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""
-        self._agent.setup_multiplexer()
-        await AsyncMultiplexer.connect(self._agent.multiplexer)
+        self.setup_multiplexer()
+        await AsyncMultiplexer.connect(self.multiplexer)
 
     async def _start_agent_loop(self) -> None:
         """Start agent main loop asynchronous way."""
@@ -302,21 +328,21 @@ class AsyncRuntime(BaseRuntime):
         This one calls async functions and does not guarantee to wait till runtime stopped.
         """
         logger.debug("Stop runtime coroutine.")
-        if not self._loop.is_running():  # pragma: nocover
+        if not self.loop.is_running():  # pragma: nocover
             logger.debug(
                 "Runtime event loop is not running, start loop with `stop` coroutine"
             )
 
             with suppress(BaseException):
-                self._loop.run_until_complete(asyncio.sleep(0.01))
+                self.loop.run_until_complete(asyncio.sleep(0.01))
 
-            self._loop.run_until_complete(self._stop_runtime())
+            self.loop.run_until_complete(self._stop_runtime())
             return
 
         def set_task():
-            self._stopping_task = self._loop.create_task(self._stop_runtime())
+            self._stopping_task = self.loop.create_task(self._stop_runtime())
 
-        self._loop.call_soon_threadsafe(set_task)
+        self.loop.call_soon_threadsafe(set_task)
 
 
 class ThreadedRuntime(BaseRuntime):
@@ -326,10 +352,10 @@ class ThreadedRuntime(BaseRuntime):
         """Implement runtime start function here."""
         self._state.set(RuntimeStates.starting)
 
-        self._agent.multiplexer.set_loop(asyncio.new_event_loop())
+        self.multiplexer.set_loop(asyncio.new_event_loop())
 
-        self._agent.setup_multiplexer()
-        self._agent.multiplexer.connect()
+        self.setup_multiplexer()
+        self.multiplexer.connect()
         self._agent.start_setup()
         self._start_agent_loop()
 
@@ -352,6 +378,6 @@ class ThreadedRuntime(BaseRuntime):
         self._state.set(RuntimeStates.stopping)
         self.main_loop.stop()
         self._teardown()
-        self._agent.multiplexer.disconnect()
+        self.multiplexer.disconnect()
         logger.debug("[{}]: Runtime stopped".format(self._agent.name))
         self._state.set(RuntimeStates.stopped)

@@ -194,7 +194,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea.multiplexer.in_queue.put(envelope)
+        self.aea.runtime.multiplexer.in_queue.put(envelope)
 
     def is_inbox_empty(self) -> bool:
         """
@@ -202,7 +202,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        return self.aea.multiplexer.in_queue.empty()
+        return self.aea.runtime.multiplexer.in_queue.empty()
 
     def react(self) -> None:
         """

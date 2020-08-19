@@ -84,7 +84,7 @@ class TestSkillError:
         )
         self.my_aea.resources.add_connection(self.connection)
 
-        self.my_aea._inbox = InboxWithHistory(self.my_aea.multiplexer)
+        self.my_aea._inbox = InboxWithHistory(self.my_aea.runtime.multiplexer)
         self.skill_context = SkillContext(self.my_aea._context)
         logger_name = "aea.{}.skills.{}.{}".format(
             self.my_aea._context.agent_name, "fetchai", "error"
