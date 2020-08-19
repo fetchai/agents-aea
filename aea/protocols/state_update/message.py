@@ -34,7 +34,7 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = ProtocolId.from_str("fetchai/state_update:0.2.0")
+    protocol_id = ProtocolId.from_str("fetchai/state_update:0.3.0")
 
     class Performative(Enum):
         """Performatives for the state_update protocol."""

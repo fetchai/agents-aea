@@ -55,7 +55,7 @@ class TestClientServer:
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.4.0")
+        self.protocol_id = PublicId.from_str("fetchai/http:0.5.0")
 
         self.configuration = ConnectionConfig(
             host=self.host,
@@ -86,7 +86,6 @@ class TestClientServer:
         self.client = HTTPClientConnection(
             configuration=configuration, identity=self.client_agent_identity
         )
-        self.client.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.client.connect())
         # skill side dialogues
         self._client_dialogues = HttpDialogues(self.client_agent_address)

@@ -27,7 +27,7 @@ from asyncio.tasks import Task
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
-from typing import AsyncIterable, IO, List, Optional
+from typing import AsyncIterable, IO, List, Optional, Union
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
@@ -44,7 +44,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.9.0")
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
@@ -103,9 +103,13 @@ def write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None:
     """Write envelope to file."""
     encoded_envelope = _encode(envelope, separator=SEPARATOR)
     logger.debug("write {}: to {}".format(encoded_envelope, file_pointer.name))
+    write_with_lock(file_pointer, encoded_envelope)
 
+
+def write_with_lock(file_pointer: IO[bytes], data: Union[bytes]) -> None:
+    """Write bytes to file protected with file lock."""
     with lock_file(file_pointer):
-        file_pointer.write(encoded_envelope)
+        file_pointer.write(data)
         file_pointer.flush()
 
 
@@ -211,8 +215,8 @@ class StubConnection(Connection):
 
     async def read_envelopes(self) -> None:
         """Read envelopes from inptut file, decode and put into in_queue."""
-        assert self.in_queue is not None, "Input queue not initialized."
-        assert self._loop is not None, "Loop not initialized."
+        self._ensure_connected()
+        assert self.in_queue is not None
 
         logger.debug("Read messages!")
         async for data in self._file_read_and_trunc(delay=self.read_delay):
@@ -239,6 +243,7 @@ class StubConnection(Connection):
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
+        self._ensure_connected()
         if self.in_queue is None:  # pragma: nocover
             logger.error("Input queue not initialized.")
             return None
@@ -254,16 +259,9 @@ class StubConnection(Connection):
         if self.is_connected:
             return
 
-        self._state.set(ConnectionStates.connecting)
-
-        try:
-            self._loop = asyncio.get_event_loop()
+        with self._connect_context():
             self.in_queue = asyncio.Queue()
-            self._read_envelopes_task = self._loop.create_task(self.read_envelopes())
-            self._state.set(ConnectionStates.connected)
-        except Exception:  # pragma: no cover
-            self._state.set(ConnectionStates.disconnected)
-            raise
+            self._read_envelopes_task = self.loop.create_task(self.read_envelopes())
 
     async def _stop_read_envelopes(self) -> None:
         """
@@ -309,7 +307,7 @@ class StubConnection(Connection):
 
         :return: None
         """
-        assert self.loop is not None, "Loop not initialized."
+        self._ensure_connected()
         await self.loop.run_in_executor(
             self._write_pool, write_envelope, envelope, self.output_file
         )

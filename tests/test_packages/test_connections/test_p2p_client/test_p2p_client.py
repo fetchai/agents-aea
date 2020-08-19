@@ -56,7 +56,6 @@ class TestP2p:
             provider_addr=cls.address,
             provider_port=cls.port,
         )
-        cls.p2p_client_connection.loop = asyncio.get_event_loop()
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
@@ -95,7 +94,6 @@ async def test_p2p_receive():
     p2p_connection = _make_p2p_client_connection(
         address=ent.public_key_hex, provider_addr=address, provider_port=port,
     )
-    p2p_connection.loop = asyncio.get_event_loop()
 
     fake_get_messages_empty = MagicMock(return_value=[])
 
@@ -145,7 +143,6 @@ async def test_p2p_send():
     p2p_client_connection = _make_p2p_client_connection(
         address=ent.public_key_hex, provider_addr=address, provider_port=port,
     )
-    p2p_client_connection.loop = asyncio.get_event_loop()
     envelope = Envelope(
         to="receiver",
         sender="sender",

@@ -1,6 +1,7 @@
 name: signing
 author: fetchai
-version: 0.2.0
+version: 0.3.0
+type: protocol
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -9,7 +10,7 @@ fingerprint:
   __init__.py: QmcCL3TTdvd8wxYKzf2d3cgKEtY9RzLjPCn4hex4wmb6h6
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
   dialogues.py: QmaoSYB1baPGuVa64H7xtMkNjTybQguPbFBSzBwLsTVT8x
-  message.py: QmRXGbAy2oYWecxXmdxfQW9dNspinwhxVuSK4RqR4WZTvE
+  message.py: QmWJkNVGy4QAd8gbFUP5fUWkPKFpXsBMtoPg7B1nHe198J
   serialization.py: QmPUWHUpQ9pst42s1naM5nTbsxxko5HxPi2gB86FQnMGnL
   signing.proto: QmT59ZVsevFoJ51uiuAzCgHGowmwfo3bLAKRSgXV1qyXFo
   signing_pb2.py: QmPZFneKLZUipxAZ3usnmUm1br6VvetzvBpid6GU4JjR39

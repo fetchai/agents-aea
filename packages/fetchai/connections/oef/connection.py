@@ -56,7 +56,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.8.0")
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -388,7 +388,7 @@ class OEFChannel(OEFAgent):
                 )
                 raise ValueError("Cannot send message.")
 
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.4.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.5.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -533,7 +533,6 @@ class OEFConnection(Connection):
         self.oef_port = port
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port)  # type: ignore
         self._connection_check_task = None  # type: Optional[asyncio.Future]
-        self._loop: Optional[AbstractEventLoop] = None
 
     async def connect(self) -> None:
         """
@@ -544,18 +543,13 @@ class OEFConnection(Connection):
         """
         if self.is_connected:
             return
-        self._state.set(ConnectionStates.connecting)
-        try:
+
+        with self._connect_context():
             self.channel.aea_logger = self.logger
-            self._loop = asyncio.get_event_loop()
             await self.channel.connect()
-            self._connection_check_task = self._loop.create_task(
+            self._connection_check_task = self.loop.create_task(
                 self._connection_check()
             )
-            self._state.set(ConnectionStates.connected)
-        except (CancelledError, Exception) as e:  # pragma: no cover
-            self._state.set(ConnectionStates.disconnected)
-            raise e
 
     async def _connection_check(self) -> None:
         """

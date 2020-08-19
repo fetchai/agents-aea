@@ -6,16 +6,16 @@ aea scaffold skill my_search
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
 ``` bash
-aea add protocol fetchai/oef_search:0.4.0
+aea add protocol fetchai/oef_search:0.5.0
 ```
 ``` bash
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/p2p_libp2p:0.7.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/p2p_libp2p:0.8.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.10.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.11.0 && cd simple_service_registration
 ```
 ``` bash
 aea generate-key cosmos
@@ -37,6 +37,7 @@ aea run
 name: my_search
 author: fetchai
 version: 0.1.0
+type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -44,7 +45,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.4.0
+- fetchai/oef_search:0.5.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -71,12 +72,13 @@ dependencies: {}
 ```
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 ``` yaml
 name: simple_service_registration
 author: fetchai
 version: 0.4.0
+type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
@@ -89,7 +91,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.4.0
+- fetchai/oef_search:0.5.0
 skills: []
 behaviours:
   service:

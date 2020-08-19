@@ -169,7 +169,7 @@ class PosixNamedPipeProtocol:
         self._in = os.open(self._in_path, os.O_RDONLY | os.O_NONBLOCK)
 
         try:
-            self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK)
+            self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK | os.O_SYNC)
         except OSError as e:
             if e.errno == errno.ENXIO:
                 self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
@@ -207,8 +207,7 @@ class PosixNamedPipeProtocol:
         """
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
-        os.write(self._out, size)
-        os.write(self._out, data)
+        os.write(self._out, size + data)
 
     async def read(self) -> Optional[bytes]:
         """
@@ -280,8 +279,7 @@ class TCPSocketProtocol:
         assert self._writer is not None
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
-        self._writer.write(size)
-        self._writer.write(data)
+        self._writer.write(size + data)
         await self._writer.drain()
 
     async def read(self) -> Optional[bytes]:

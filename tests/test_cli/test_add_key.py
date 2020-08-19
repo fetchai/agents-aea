@@ -30,10 +30,6 @@ import aea
 from aea.cli import cli
 from aea.cli.add_key import _try_add_key
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.helpers import (
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-)
 
 from tests.conftest import (
     AUTHOR,
@@ -41,7 +37,9 @@ from tests.conftest import (
     CUR_PATH,
     CliRunner,
     ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE,
     ROOT_DIR,
 )
 from tests.test_cli.tools_for_testing import ContextMock

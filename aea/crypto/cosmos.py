@@ -28,7 +28,7 @@ import subprocess  # nosec
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
 from bech32 import bech32_encode, convertbits
 
@@ -819,6 +819,45 @@ class CosmosApi(LedgerApi, CosmosHelper):
         """
         # Instance object not available for cosmwasm
         return None
+
+    @staticmethod
+    def _execute_shell_command(command: List[str]) -> List[Dict[str, str]]:
+        """
+        Uses subprocess to execute command and get result as JSON dict
+
+        :param command: the shell command to be executed
+        :return: the stdout result converted to JSON dict
+        """
+        stdout, _ = subprocess.Popen(  # nosec
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        return json.loads(stdout.decode("ascii"))
+
+    def get_last_code_id(self) -> int:
+        """
+        Uses wasmcli to get ID of latest deployed .wasm bytecode
+
+        :return: code id of last deployed .wasm bytecode
+        """
+
+        command = ["wasmcli", "query", "wasm", "list-code"]
+        res = self._execute_shell_command(command)
+
+        return int(res[-1]["id"])
+
+    def get_contract_address(self, code_id: int) -> str:
+        """
+        Uses wasmcli to get contract address of latest initialised contract by its ID
+
+        :param code_id: id of deployed CosmWasm bytecode
+        :return: contract address of last initialised contract
+        """
+
+        command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(code_id)]
+        res = self._execute_shell_command(command)
+
+        return res[-1]["address"]
 
 
 class CosmWasmCLIWrapper:
