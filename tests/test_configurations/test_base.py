@@ -37,6 +37,7 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
+    DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
     ProtocolConfig,
@@ -50,9 +51,11 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.loader import ConfigLoaders
 
 from tests.conftest import (
     AUTHOR,
+    ROOT_DIR,
     agent_config_files,
     connection_config_files,
     contract_config_files,
@@ -197,6 +200,27 @@ class TestSkillConfig:
         actual_config = SkillConfig.from_json(expected_json)
         actual_json = actual_config.json
         assert expected_json == actual_json
+
+    def test_update_method(self):
+        """Test the update method."""
+        skill_config_path = Path(
+            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+        )
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+        new_configurations = {
+            "behaviours": {"new_behaviour": {"args": {}, "class_name": "SomeClass"}},
+            "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
+            "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
+        }
+        skill_config.update(new_configurations)
+
+        new_behaviour = skill_config.behaviours.read("new_behaviour")
+        assert new_behaviour.json == new_configurations["behaviours"]["new_behaviour"]
+        new_handler = skill_config.handlers.read("new_handler")
+        assert new_handler.json == new_configurations["handlers"]["new_handler"]
+        new_model = skill_config.models.read("new_model")
+        assert new_model.json == new_configurations["models"]["new_model"]
 
 
 class TestAgentConfig:

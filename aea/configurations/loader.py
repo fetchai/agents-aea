@@ -25,7 +25,7 @@ import os
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Generic, List, Set, TextIO, Tuple, Type, TypeVar, Union, cast
+from typing import Dict, Generic, List, TextIO, Tuple, Type, TypeVar, Union, cast
 
 
 import jsonschema
@@ -384,16 +384,9 @@ class ConfigLoader(Generic[T]):
         :param configuration: the configuration object.
         :return: None
         """
-        configurable_fields: Set[str] = set()
-        if component_id.package_type == PackageType.PROTOCOL:
-            configurable_fields = set()
-        elif component_id.package_type == PackageType.CONNECTION:
-            configurable_fields = {"config"}
-        elif component_id.package_type == PackageType.CONTRACT:
-            configurable_fields = set()
-        elif component_id.package_type == PackageType.SKILL:
-            configurable_fields = {"handlers", "behaviours", "models"}
-
+        configurable_fields = (
+            component_id.package_type.configuration_class().configurable_fields
+        )
         non_configurable_fields = set(configuration.keys()).difference(
             configurable_fields
         )

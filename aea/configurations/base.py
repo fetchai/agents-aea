@@ -129,6 +129,17 @@ class PackageType(Enum):
         """
         return self.value + "s"
 
+    def configuration_class(self) -> Type["PackageConfiguration"]:
+        """Get the configuration class."""
+        d = {
+            PackageType.AGENT: AgentConfig,
+            PackageType.PROTOCOL: ProtocolConfig,
+            PackageType.CONNECTION: ConnectionConfig,
+            PackageType.CONTRACT: ContractConfig,
+            PackageType.SKILL: SkillConfig,
+        }
+        return d[self]
+
     def __str__(self):
         """Convert to string."""
         return str(self.value)
@@ -638,6 +649,7 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
+    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -722,7 +734,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
 
     package_type: PackageType
-    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -1142,9 +1153,9 @@ class SkillConfig(ComponentConfiguration):
         self.skills: List[PublicId] = (skills if skills is not None else [])
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.handlers = CRUDCollection[SkillComponentConfiguration]()
-        self.behaviours = CRUDCollection[SkillComponentConfiguration]()
-        self.models = CRUDCollection[SkillComponentConfiguration]()
+        self.handlers: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
+        self.behaviours: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
+        self.models: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
 
         self.is_abstract = is_abstract
 
@@ -1263,6 +1274,7 @@ class SkillConfig(ComponentConfiguration):
         :param data: the data to replace.
         :return: None
         """
+        # TODO check consistency of data.
         for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
             behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
             self.behaviours.update(behaviour_id, behaviour_config)
@@ -1542,6 +1554,27 @@ class AgentConfig(PackageConfiguration):
             runtime_mode=cast(str, obj.get("runtime_mode")),
             component_configurations=None,
         )
+
+        for crypto_id, path in obj.get("private_key_paths", {}).items():
+            agent_config.private_key_paths.create(crypto_id, path)
+
+        for crypto_id, path in obj.get("connection_private_key_paths", {}).items():
+            agent_config.connection_private_key_paths.create(crypto_id, path)
+
+        # parse connection public ids
+        agent_config.connections = set(
+            map(PublicId.from_str, obj.get("connections", []),)
+        )
+
+        # parse contracts public ids
+        agent_config.contracts = set(map(PublicId.from_str, obj.get("contracts", []),))
+
+        # parse protocol public ids
+        agent_config.protocols = set(map(PublicId.from_str, obj.get("protocols", []),))
+
+        # parse skills public ids
+        agent_config.skills = set(map(PublicId.from_str, obj.get("skills", []),))
+
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
@@ -1554,48 +1587,6 @@ class AgentConfig(PackageConfiguration):
             )
             component_configurations[component_id] = tmp
         agent_config.component_configurations = component_configurations
-
-        for crypto_id, path in obj.get("private_key_paths", {}).items():
-            agent_config.private_key_paths.create(crypto_id, path)
-
-        for crypto_id, path in obj.get("connection_private_key_paths", {}).items():
-            agent_config.connection_private_key_paths.create(crypto_id, path)
-
-        # parse connection public ids
-        connections = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("connections", []),
-            )
-        )
-        agent_config.connections = cast(Set[PublicId], connections)
-
-        # parse contracts public ids
-        contracts = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("contracts", []),
-            )
-        )
-        agent_config.contracts = cast(Set[PublicId], contracts)
-
-        # parse protocol public ids
-        protocols = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("protocols", []),
-            )
-        )
-        agent_config.protocols = cast(Set[PublicId], protocols)
-
-        # parse skills public ids
-        skills = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("skills", []),
-            )
-        )
-        agent_config.skills = cast(Set[PublicId], skills)
 
         # set default connection
         default_connection_name = obj.get("default_connection", None)
