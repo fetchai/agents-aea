@@ -131,7 +131,7 @@ class PackageType(Enum):
 
     def configuration_class(self) -> Type["PackageConfiguration"]:
         """Get the configuration class."""
-        d = {
+        d: Dict[PackageType, Type["PackageConfiguration"]] = {
             PackageType.AGENT: AgentConfig,
             PackageType.PROTOCOL: ProtocolConfig,
             PackageType.CONNECTION: ConnectionConfig,
