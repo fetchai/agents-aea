@@ -41,9 +41,6 @@ async def test_connect_twice():
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
 
-    loop = asyncio.get_event_loop()
-    tcp_connection.loop = loop
-
     await tcp_connection.connect()
     await asyncio.sleep(0.1)
     with unittest.mock.patch.object(tcp_connection.logger, "warning") as mock_logger:
@@ -58,9 +55,6 @@ async def test_connect_raises_exception():
     """Test the case that a connection attempt raises an exception."""
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
-
-    loop = asyncio.get_event_loop()
-    tcp_connection.loop = loop
 
     with unittest.mock.patch.object(tcp_connection.logger, "error") as mock_logger:
         with unittest.mock.patch.object(

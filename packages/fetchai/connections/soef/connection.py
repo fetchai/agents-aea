@@ -56,7 +56,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.7.0")
 
 NOT_SPECIFIED = object()
 
@@ -962,7 +962,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.4.0")
+                PublicId.from_str("fetchai/oef_search:0.5.0")
             ]
 
         super().__init__(**kwargs)
@@ -997,13 +997,8 @@ class SOEFConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
-        try:
+        with self._connect_context():
             await self.channel.connect()
-            self._state.set(ConnectionStates.connected)
-        except (CancelledError, Exception) as e:  # pragma: no cover
-            self._state.set(ConnectionStates.disconnected)
-            raise e
 
     @property
     def in_queue(self) -> Optional[asyncio.Queue]:

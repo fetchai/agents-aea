@@ -1,6 +1,7 @@
 name: scaffold
 author: fetchai
 version: 0.1.0
+type: contract
 description: The scaffold contract scaffolds a contract to be implemented by the developer.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

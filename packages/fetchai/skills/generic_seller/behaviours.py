@@ -33,7 +33,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.4.0"
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):

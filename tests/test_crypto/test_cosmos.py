@@ -450,3 +450,69 @@ def test_get_contract_instance():
     """Test the get contract instance method."""
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
     assert cosmos_api.get_contract_instance("interface") is None
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+@mock.patch("aea.crypto.cosmos.CosmosApi._execute_shell_command")
+def test_get_contract_address(mock_api_call):
+    """Test the get_contract_address method used for interaction with CosmWasm contracts."""
+
+    mock_res = [
+        {
+            "code_id": 999,
+            "creator": "cosmos_creator_address",
+            "label": "SOME_LABEL",
+            "address": "cosmos_contract_address",
+        }
+    ]
+
+    mock_api_call.return_value = mock_res
+
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+
+    res = cosmos_api.get_contract_address(code_id=999)
+    assert res == mock_res[-1]["address"]
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+@mock.patch("aea.crypto.cosmos.CosmosApi._execute_shell_command")
+def test_get_last_code_id(mock_api_call):
+    """Test the get_last_code_id method used for interaction with CosmWasm contracts."""
+
+    mock_res = [
+        {
+            "id": 1,
+            "creator": "cosmos14xjnl2mwwfz6pztpwzj6s89npxr0e3lhxl52nv",
+            "data_hash": "59D6DD8D6034C9E97015DD9E12DAFCE404FA5C413FA81CFBE0EF3E427F0A9BA3",
+            "source": "",
+            "builder": "",
+        }
+    ]
+
+    mock_api_call.return_value = mock_res
+
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+
+    res = cosmos_api.get_last_code_id()
+    assert res == mock_res[-1]["id"]
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+@mock.patch("subprocess.Popen.communicate")
+def test_execute_shell_command(mock_api_call):
+    """Test the helper _execute_shell_command method"""
+
+    mock_res = b'{"SOME": "RESULT"}', "ERROR"
+
+    mock_api_call.return_value = mock_res
+
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+
+    res = cosmos_api._execute_shell_command(["test", "command"])
+    assert res == {"SOME": "RESULT"}

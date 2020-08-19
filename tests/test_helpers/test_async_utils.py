@@ -19,6 +19,7 @@
 """This module contains the tests for AsyncFriendlyQueue."""
 import asyncio
 from concurrent.futures._base import CancelledError
+from contextlib import suppress
 
 import pytest
 
@@ -63,6 +64,26 @@ async def test_async_state():
 
     # state is already set
     await state.wait(2)
+
+
+@pytest.mark.asyncio
+async def test_async_state_transit():
+    """Test async state transit contextmanager."""
+    state = AsyncState()
+    state.set(None)
+
+    with state.transit(initial=1, success=2, fail=3):
+        assert state.get() == 1
+    assert state.get() == 2
+
+    state.set(None)
+
+    with suppress(ValueError):
+        with state.transit(initial=1, success=2, fail=3):
+            assert state.get() == 1
+            raise ValueError()
+
+    assert state.get() == 3
 
 
 @pytest.mark.asyncio

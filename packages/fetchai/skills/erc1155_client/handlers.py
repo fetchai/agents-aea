@@ -47,7 +47,7 @@ from packages.fetchai.skills.erc1155_client.dialogues import (
 )
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.4.0"
 
 
 class FipaHandler(Handler):
@@ -155,7 +155,7 @@ class FipaHandler(Handler):
                 performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
                 dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
-                contract_id="fetchai/erc1155:0.8.0",
+                contract_id="fetchai/erc1155:0.9.0",
                 contract_address=fipa_msg.proposal.values["contract_address"],
                 callable="get_hash_single",
                 kwargs=ContractApiMessage.Kwargs(

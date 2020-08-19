@@ -16,10 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the base module."""
-
 from unittest import TestCase
+
+import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
@@ -30,7 +30,7 @@ class ConnectionTestCase(TestCase):
 
     def setUp(self):
         """Set the tst up."""
-
+        # for pydocstyle
         class TestConnection(Connection):
             """Test class for Connection."""
 
@@ -58,13 +58,21 @@ class ConnectionTestCase(TestCase):
 
         self.TestConnection = TestConnection
 
-    def test_loop_positive(self):
+    @pytest.mark.asyncio
+    async def test_loop_only_in_running_loop(self):
         """Test loop property positive result."""
         obj = self.TestConnection(
             ConnectionConfig("some_connection", "fetchai", "0.1.0")
         )
-        obj._loop = "loop"
         obj.loop
+
+    def test_loop_fails_on_non_running_loop(self):
+        """Test loop property positive result."""
+        obj = self.TestConnection(
+            ConnectionConfig("some_connection", "fetchai", "0.1.0")
+        )
+        with pytest.raises(AssertionError):
+            obj.loop
 
     def test_excluded_protocols_positive(self):
         """Test excluded_protocols property positive result."""
