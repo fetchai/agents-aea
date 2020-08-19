@@ -112,4 +112,62 @@ This will scaffold a contract package called `my_new_contract` with three files:
 * `contract.py`, containing the scaffolded contract class
 * `contract.yaml` containing the scaffolded configuration file
 
+
+Once your scaffold is in place, you can create a `build` folder in the package and copy the smart contract interface (e.g. bytes code and ABI) to it. Then, specify the path to the interfaces in the `contract.yaml`. For instance, if you use Ethereum, then you might specify the following:
+
+``` yaml
+contract_interface_paths:
+    ethereum: build/my_contract.json
+```
+where `ethereum` is the ledger id and `my_contract.json` is the file containing the byte code and ABI.
+
+
+Finally, you will want to implement the part of the contract interface you need in `contract.py`:
+
+``` python
+from aea.contracts.base import Contract
+from aea.crypto.base import LedgerApi
+
+
+class MyContract(Contract):
+    """The MyContract contract class which acts as a bridge between AEA framework and ERC1155 ABI."""
+
+    @classmethod
+    def get_create_batch_transaction(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        deployer_address: str,
+        token_ids: List[int],
+        data: Optional[bytes] = b"",
+        gas: int = 300000,
+    ) -> Dict[str, Any]:
+        """
+        Get the transaction to create a batch of tokens.
+
+        :param ledger_api: the ledger API
+        :param contract_address: the address of the contract
+        :param deployer_address: the address of the deployer
+        :param token_ids: the list of token ids for creation
+        :param data: the data to include in the transaction
+        :param gas: the gas to be used
+        :return: the transaction object
+        """
+        # create the transaction dict
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        instance = cls.get_instance(ledger_api, contract_address)
+        tx = instance.functions.createBatch(
+            deployer_address, token_ids
+        ).buildTransaction(
+            {
+                "gas": gas,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+        tx = cls._try_estimate_gas(ledger_api, tx)
+        return tx
+```
+Above, we implement a method to create a transaction, in this case a transaction to create a batch of tokens. The method will be called by the framework, specifically the `fetchai/ledger:0.4.0` connection once it receives a message (see bullet point 2 above). The method first gets the latest transaction nonce of the `deployer_address`, then constracts the contract instance, then uses the instance to build the transaction and finally updates the gas on the transaction.
+
 It helps to look at existing contract packages, like `fetchai/erc1155:0.9.0`, and skills using them, like `fetchai/erc1155_client:0.11.0` and `fetchai/erc1155_deploy:0.12.0`, for inspiration and guidance.
