@@ -45,7 +45,9 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
-COSMOS_TESTNET_FAUCET_STATUS_BASE_URL = "https://faucet-agent-land.prod.fetch-ai.com/claim/requests"
+COSMOS_TESTNET_FAUCET_STATUS_BASE_URL = (
+    "https://faucet-agent-land.prod.fetch-ai.com/claim/requests"
+)
 TESTNET_NAME = "testnet"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
@@ -899,21 +901,21 @@ class CosmosFaucetApi(FaucetApi):
         """
         uid = self._try_create_faucet_claim(address)
         if uid is None:
-            raise RuntimeError('Unable to create faucet claim')
+            raise RuntimeError("Unable to create faucet claim")
 
         while True:
 
             # lookup status form the claim uid
             status = self._try_check_faucet_claim(uid)
             if status is None:
-                raise RuntimeError('Failed to check faucet claim status')
+                raise RuntimeError("Failed to check faucet claim status")
 
             # if the status is complete or failed
             if status.status_code >= FAUCET_STATUS_COMPLETED:
 
                 # do the failure check
                 if status.status_code != FAUCET_STATUS_COMPLETED:
-                    raise RuntimeError(f'Failed to get wealth for {address}')
+                    raise RuntimeError(f"Failed to get wealth for {address}")
 
                 break
 
@@ -939,7 +941,7 @@ class CosmosFaucetApi(FaucetApi):
         uid = None
         if response.status_code == 200:
             response = response.json()
-            uid = response['uid']
+            uid = response["uid"]
 
             logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
@@ -961,7 +963,7 @@ class CosmosFaucetApi(FaucetApi):
         :param uid: The request uid to be checked
         :return: None on failure otherwise a CosmosFaucetStatus for the specified uid
         """
-        url = f'{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/{uid}'
+        url = f"{COSMOS_TESTNET_FAUCET_STATUS_BASE_URL}/{uid}"
         response = requests.get(url)
         if response.status_code != 200:
             logger.warning(
@@ -972,7 +974,7 @@ class CosmosFaucetApi(FaucetApi):
         # parse the response
         response = response.json()
         return CosmosFaucetStatus(
-            tx_digest=response.get('txDigest'),
-            status=response['status'],
-            status_code=response['statusCode'],
+            tx_digest=response.get("txDigest"),
+            status=response["status"],
+            status_code=response["statusCode"],
         )
