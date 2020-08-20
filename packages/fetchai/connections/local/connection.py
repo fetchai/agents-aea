@@ -19,7 +19,6 @@
 """Extension to the Local Node."""
 
 import asyncio
-import copy
 import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
@@ -250,10 +249,11 @@ class LocalNode:
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 )
-                msg.counterparty = oef_search_msg.sender
+                msg.sender = oef_search_msg.to
+                msg.to = oef_search_msg.sender
                 assert dialogue.update(msg)
                 envelope = Envelope(
-                    to=msg.counterparty,
+                    to=msg.to,
                     sender=msg.sender,
                     protocol_id=msg.protocol_id,
                     message=msg,
@@ -295,14 +295,12 @@ class LocalNode:
                 message_id=oef_search_msg.message_id + 1,
                 agents=tuple(sorted(set(result))),
             )
-            msg.counterparty = oef_search_msg.sender
+            msg.sender = oef_search_msg.to
+            msg.to = oef_search_msg.sender
             assert dialogue.update(msg)
 
             envelope = Envelope(
-                to=msg.counterparty,
-                sender=msg.sender,
-                protocol_id=msg.protocol_id,
-                message=msg,
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
             )
             await self._send(envelope)
 
@@ -314,17 +312,10 @@ class LocalNode:
 
         :param envelope: incoming envelope
 
-        :return: Tuple[MEssage, Optional[Dialogue]]
+        :return: Tuple[Message, Optional[Dialogue]]
         """
         assert self._dialogues is not None, "Call connect before!"
-        message_orig = cast(OefSearchMessage, envelope.message)
-        message = copy.copy(
-            message_orig
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = (
-            message_orig.sender
-        )  # TODO: fix; should be done by framework
+        message = cast(OefSearchMessage, envelope.message)
         dialogue = cast(OefSearchDialogue, self._dialogues.update(message))
         return message, dialogue
 

@@ -57,7 +57,9 @@ class SearchBehaviour(TickerBehaviour):
             ledger_id=strategy.ledger_id,
             address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+        # ledger_api_msg.sender = ???
+        ledger_api_msg.to = LEDGER_API_ADDRESS
+
         ledger_api_dialogues.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
 
@@ -78,7 +80,8 @@ class SearchBehaviour(TickerBehaviour):
                 dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            oef_search_msg.counterparty = self.context.search_service_address
+            oef_search_msg.sender = self.context.agent_address
+            oef_search_msg.to = self.context.search_service_address
             oef_search_dialogues.update(oef_search_msg)
             self.context.outbox.put_message(message=oef_search_msg)
 

@@ -373,14 +373,7 @@ class SOEFChannel:
         assert isinstance(envelope.message, OefSearchMessage), ValueError(
             "Message not of type OefSearchMessage"
         )
-        oef_message_orig = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.copy(
-            oef_message_orig
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        oef_message.is_incoming = True  # TODO: fix; should be done by framework
-        oef_message.counterparty = (
-            oef_message_orig.sender
-        )  # TODO: fix; should be done by framework
+        oef_message = cast(OefSearchMessage, envelope.message)
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )
@@ -734,10 +727,11 @@ class SOEFChannel:
             target=oef_search_message.message_id,
             message_id=oef_search_message.message_id + 1,
         )
-        message.counterparty = oef_search_message.counterparty
+        message.sender = oef_search_message.to
+        message.to = oef_search_message.sender
         assert oef_search_dialogue.update(message)
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=SOEFConnection.connection_id.latest,
             protocol_id=message.protocol_id,
             message=message,
@@ -941,10 +935,11 @@ class SOEFChannel:
             target=oef_message.message_id,
             message_id=oef_message.message_id + 1,
         )
-        message.counterparty = oef_message.counterparty
+        message.sender = oef_message.to
+        message.to = oef_message.sender
         assert oef_search_dialogue.update(message)
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=SOEFConnection.connection_id.latest,
             protocol_id=message.protocol_id,
             message=message,

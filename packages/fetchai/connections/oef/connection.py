@@ -19,7 +19,6 @@
 """Extension to the OEF Python SDK."""
 
 import asyncio
-import copy
 import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -291,7 +290,8 @@ class OEFChannel(OEFAgent):
             message_id=last_msg.message_id + 1,
             agents=tuple(agents),
         )
-        msg.counterparty = last_msg.counterparty
+        msg.sender = last_msg.to
+        msg.to = last_msg.sender
         oef_search_dialogue.update(msg)
         envelope = Envelope(
             to=self.address,
@@ -333,7 +333,8 @@ class OEFChannel(OEFAgent):
             message_id=last_msg.message_id + 1,
             oef_error_operation=operation,
         )
-        msg.counterparty = last_msg.counterparty
+        msg.sender = last_msg.to
+        msg.to = last_msg.sender
         oef_search_dialogue.update(msg)
         envelope = Envelope(
             to=self.address,
@@ -409,10 +410,7 @@ class OEFChannel(OEFAgent):
         assert isinstance(
             envelope.message, OefSearchMessage
         ), "Message not of type OefSearchMessage"
-        oef_message_original = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.copy(oef_message_original)
-        oef_message.counterparty = oef_message_original.sender
-        oef_message.is_incoming = True  # TODO: fix
+        oef_message = cast(OefSearchMessage, envelope.message)
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )

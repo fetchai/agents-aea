@@ -86,8 +86,8 @@ class Message:
 
         :return the address
         """
-        assert self.has_sender, "Message's 'Sender' field must be set."
-        return self._sender  # type: ignore
+        assert self._sender is not None, "Message's 'Sender' field must be set."
+        return self._sender
 
     @sender.setter
     def sender(self, sender: Address) -> None:
@@ -103,8 +103,8 @@ class Message:
     @property
     def to(self) -> Address:
         """Get address of receiver."""
-        assert self.has_to, "Message's 'To' field must be set."
-        return self._to  # type: ignore
+        assert self._to is not None, "Message's 'To' field must be set."
+        return self._to
 
     @to.setter
     def to(self, to: Address) -> None:

@@ -173,11 +173,13 @@ class WebhookChannel:
             bodyy=payload_bytes if payload_bytes is not None else b"",
             dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
         )
-        http_message.counterparty = self.agent_address
+        # ToDo
+        # http_message.sender = ???
+        http_message.to = self.agent_address
         http_dialogue = self._dialogues.update(http_message)
         assert http_dialogue is not None, "Could not create dialogue."
         envelope = Envelope(
-            to=http_message.counterparty,
+            to=http_message.to,
             sender=http_message.sender,
             protocol_id=http_message.protocol_id,
             context=context,

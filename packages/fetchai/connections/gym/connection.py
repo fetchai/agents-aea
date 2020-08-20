@@ -20,7 +20,6 @@
 """Gym connector and gym channel."""
 
 import asyncio
-import copy
 import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
@@ -70,14 +69,7 @@ class GymChannel:
 
         :return: Tuple[MEssage, Optional[Dialogue]]
         """
-        orig_message = cast(GymMessage, envelope.message)
-        message = copy.copy(
-            orig_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = (
-            orig_message.sender
-        )  # TODO: fix; should be done by framework
+        message = cast(GymMessage, envelope.message)
         dialogue = cast(GymDialogue, self._dialogues.update(message))
         return message, dialogue
 
@@ -162,13 +154,11 @@ class GymChannel:
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        msg.counterparty = gym_message.counterparty
+        msg.sender = gym_message.to
+        msg.to = gym_message.sender
         assert dialogue.update(msg), "Error during dialogue update."
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         await self._send(envelope)
 

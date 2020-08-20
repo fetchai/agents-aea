@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains base classes for the ledger API connection."""
 import asyncio
-import copy
 import logging
 from abc import ABC, abstractmethod
 from asyncio import Task
@@ -107,12 +106,9 @@ class RequestDispatcher(ABC):
         :return: an awaitable.
         """
         assert isinstance(envelope.message, Message)
-        message_original = envelope.message
-        message = copy.copy(message_original)
+        message = envelope.message
         ledger_id = self.get_ledger_id(message)
         api = self.ledger_api_registry.make(ledger_id, **self.api_config(ledger_id))
-        message.is_incoming = True
-        message.counterparty = message_original.sender
         dialogue = self.dialogues.update(message)
         assert dialogue is not None, "No dialogue created."
         performative = message.performative

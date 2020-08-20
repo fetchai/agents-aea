@@ -20,7 +20,6 @@
 """HTTP client connection and channel."""
 
 import asyncio
-import copy
 import json
 import logging
 from asyncio import CancelledError
@@ -117,14 +116,7 @@ class HTTPClientAsyncChannel:
 
         :return: Tuple[MEssage, Optional[Dialogue]]
         """
-        orig_message = cast(HttpMessage, envelope.message)
-        message = copy.copy(
-            orig_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = (
-            orig_message.sender
-        )  # TODO: fix; should be done by framework
+        message = cast(HttpMessage, envelope.message)
         dialogue = cast(HttpDialogue, self._dialogues.update(message))
         return message, dialogue
 
@@ -312,7 +304,8 @@ class HTTPClientAsyncChannel:
             target=http_request_message.message_id,
             message_id=http_request_message.message_id + 1,
         )
-        http_message.counterparty = http_request_message.counterparty
+        http_message.sender = http_request_message.to
+        http_message.to = http_request_message.sender
         assert dialogue.update(http_message)
         envelope = Envelope(
             to=self.agent_address,

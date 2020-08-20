@@ -139,7 +139,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 balance=balance,
                 ledger_id=message.ledger_id,
             )
-            response.counterparty = message.counterparty
+            response.sender = message.to
+            response.to = message.sender
             dialogue.update(response)
         return response
 
@@ -175,7 +176,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                     message.terms.ledger_id, raw_transaction
                 ),
             )
-            response.counterparty = message.counterparty
+            response.sender = message.to
+            response.to = message.sender
             dialogue.update(response)
         return response
 
@@ -239,7 +241,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                     transaction,
                 ),
             )
-            response.counterparty = message.counterparty
+            response.sender = message.to
+            response.to = message.sender
             dialogue.update(response)
         return response
 
@@ -270,7 +273,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                     message.signed_transaction.ledger_id, transaction_digest
                 ),
             )
-            response.counterparty = message.counterparty
+            response.sender = message.to
+            response.to = message.sender
             dialogue.update(response)
         return response
 
@@ -296,6 +300,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             message=str(e),
             data=b"",
         )
-        response.counterparty = message.counterparty
+        response.sender = message.to
+        response.to = message.sender
         dialogue.update(response)
         return response

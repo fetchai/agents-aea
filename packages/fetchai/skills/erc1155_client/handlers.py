@@ -113,7 +113,8 @@ class FipaHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.counterparty = fipa_msg.counterparty
+        default_msg.sender = fipa_msg.to
+        default_msg.to = fipa_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
@@ -144,7 +145,7 @@ class FipaHandler(Handler):
             # accept any proposal with the correct keys
             self.context.logger.info(
                 "received valid PROPOSE from sender={}: proposal={}".format(
-                    fipa_msg.counterparty[-5:], fipa_msg.proposal.values,
+                    fipa_msg.sender[-5:], fipa_msg.proposal.values,
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
@@ -160,7 +161,7 @@ class FipaHandler(Handler):
                 callable="get_hash_single",
                 kwargs=ContractApiMessage.Kwargs(
                     {
-                        "from_address": fipa_msg.counterparty,
+                        "from_address": fipa_msg.sender,
                         "to_address": self.context.agent_address,
                         "token_id": int(fipa_msg.proposal.values["token_id"]),
                         "from_supply": int(fipa_msg.proposal.values["from_supply"]),
@@ -173,7 +174,7 @@ class FipaHandler(Handler):
             terms = Terms(
                 ledger_id=strategy.ledger_id,
                 sender_address=self.context.agent_address,
-                counterparty_address=fipa_msg.counterparty,
+                counterparty_address=fipa_msg.sender,
                 amount_by_currency_id={},
                 quantities_by_good_id={
                     str(fipa_msg.proposal.values["token_id"]): int(
@@ -184,7 +185,8 @@ class FipaHandler(Handler):
                 is_sender_payable_tx_fee=False,
                 nonce=str(fipa_msg.proposal.values["trade_nonce"]),
             )
-            contract_api_msg.counterparty = LEDGER_API_ADDRESS
+            contract_api_msg.sender = self.context.agent_address
+            contract_api_msg.to = LEDGER_API_ADDRESS
             contract_api_dialogue = cast(
                 Optional[ContractApiDialogue],
                 contract_api_dialogues.update(contract_api_msg),
@@ -201,7 +203,7 @@ class FipaHandler(Handler):
         else:
             self.context.logger.info(
                 "received invalid PROPOSE from sender={}: proposal={}".format(
-                    fipa_msg.counterparty[-5:], fipa_msg.proposal.values,
+                    fipa_msg.sender[-5:], fipa_msg.proposal.values,
                 )
             )
 
@@ -323,7 +325,8 @@ class OefSearchHandler(Handler):
                 performative=FipaMessage.Performative.CFP,
                 query=query,
             )
-            cfp_msg.counterparty = opponent_address
+            cfp_msg.sender = self.context.agent_address
+            cfp_msg.to = opponent_address
             fipa_dialogues.update(cfp_msg)
             self.context.logger.info(
                 "sending CFP to agent={}".format(opponent_address[-5:])
@@ -432,7 +435,8 @@ class ContractApiHandler(Handler):
             terms=contract_api_dialogue.terms,
             skill_callback_info={},
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.sender = self.context.agent_address
+        signing_msg.to = "decision_maker"
         signing_dialogue = cast(
             Optional[SigningDialogue], signing_dialogues.update(signing_msg)
         )
@@ -555,10 +559,11 @@ class SigningHandler(Handler):
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             info={"tx_signature": signing_msg.signed_message.body},
         )
-        inform_msg.counterparty = last_fipa_msg.counterparty
+        inform_msg.sender = last_fipa_msg.to
+        inform_msg.to = last_fipa_msg.sender
         self.context.logger.info(
             "sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(
-                last_fipa_msg.counterparty[-5:], signing_msg.signed_message,
+                last_fipa_msg.sender[-5:], signing_msg.signed_message,
             )
         )
         assert fipa_dialogue.update(inform_msg), "Failure during update."

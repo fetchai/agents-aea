@@ -90,7 +90,8 @@ class EchoHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"default_message": message.encode()},
         )
-        reply.counterparty = message.sender
+        reply.sender = message.sender
+        reply.to = message.sender
         default_dialogues.update(reply)
         self.context.outbox.put_message(message=reply)
 
@@ -116,7 +117,7 @@ class EchoHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "Echo Handler: message={}, sender={}".format(message, message.counterparty)
+            "Echo Handler: message={}, sender={}".format(message, message.sender)
         )
         reply = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES,
@@ -125,7 +126,8 @@ class EchoHandler(Handler):
             target=message.message_id,
             content=message.content,
         )
-        reply.counterparty = message.sender
+        reply.sender = message.sender
+        reply.to = message.sender
         assert dialogue.update(reply)
         self.context.outbox.put_message(message=reply)
 

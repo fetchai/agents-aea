@@ -20,7 +20,6 @@
 
 """HTTP server connection, channel, server, and handler."""
 import asyncio
-import copy
 import email
 import logging
 from abc import ABC, abstractmethod
@@ -168,7 +167,8 @@ class Request(OpenAPIRequest):
             bodyy=self.body if self.body is not None else b"",
             version="",
         )
-        http_message.counterparty = agent_address
+        http_message.sender = str(connection_id)
+        http_message.to = agent_address
         dialogue = cast(Optional[HttpDialogue], dialogues.update(http_message))
         assert dialogue is not None, "Could not create dialogue for message={}".format(
             http_message
@@ -462,13 +462,7 @@ class HTTPChannel(BaseAsyncChannel):
             )
             raise ValueError("Cannot send message.")
 
-        http_message = cast(HttpMessage, envelope.message)
-        message = copy.copy(
-            http_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
-
+        message = cast(HttpMessage, envelope.message)
         dialogue = self._dialogues.update(message)
 
         if dialogue is None:
