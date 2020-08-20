@@ -590,6 +590,15 @@ class PackageId:
             public_id = PublicId(username, package_name, version)
             return PackageId(package_type, public_id)
 
+    @property
+    def to_uri_path(self) -> str:
+        """
+        Turn the package id into a uri path string.
+
+        :return: uri path string
+        """
+        return f"{str(self.package_type)}/{self.author}/{self.name}/{self.version}"
+
     def __hash__(self):
         """Get the hash."""
         return hash((self.package_type, self.public_id))

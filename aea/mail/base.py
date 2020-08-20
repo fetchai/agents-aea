@@ -208,11 +208,7 @@ class EnvelopeContext:
 
     def __str__(self):
         """Get the string representation."""
-        return "EnvelopeContext(connection_id={connection_id}, skill_id={skill_id}, uri_raw={uri_raw})".format(
-            connection_id=str(self.connection_id),
-            skill_id=str(self.skill_id),
-            uri_raw=str(self.uri),
-        )
+        return f"EnvelopeContext(connection_id={self.connection_id}, skill_id={self.skill_id}, uri_raw={self.uri_raw})"
 
     def __eq__(self, other):
         """Compare with another object."""

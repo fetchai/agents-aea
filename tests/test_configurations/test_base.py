@@ -482,6 +482,12 @@ def test_package_id_from_uri_path():
     assert result.public_id.version == "0.1.0"
 
 
+def test_package_id_to_uri_path():
+    """Test PackageId.to_uri_path"""
+    package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    assert package_id.to_uri_path == "protocol/author/name/0.1.0"
+
+
 def test_package_id_from_uri_path_negative():
     """Test PackageId.from_uri_path with invalid type"""
     with pytest.raises(
