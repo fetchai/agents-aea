@@ -164,14 +164,11 @@ def _try_construct_envelope(
             dialogue_reference=dialogue_reference,
             content=message,
         )
-        msg.counterparty = agent_name
+        msg.to = agent_name
         msg.sender = sender
         assert dialogues.update(msg) is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")

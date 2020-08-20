@@ -279,10 +279,8 @@ class AEA(Agent, WithLogger):
                 msg = envelope.message
             else:
                 msg = protocol.serializer.decode(envelope.message)
-            msg.counterparty = envelope.sender
             msg.sender = envelope.sender
-            # msg.to = envelope.to
-            msg.is_incoming = True
+            msg.to = envelope.to
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
             self.logger.warning("Decoding error. Exception: {}".format(str(e)))
             error_handler.send_decoding_error(envelope)

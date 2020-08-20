@@ -478,6 +478,7 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
+        valid_initial_msg.sender = self.agent_address
         valid_initial_msg.to = self.opponent_address
 
         self.dialogue.update(valid_initial_msg)
@@ -512,25 +513,6 @@ class TestDialogueBase:
 
         assert self.dialogue.last_message.message_id == 2
 
-    def test_update_sets_missing_sender(self):
-        """Test the 'update' method sets the missing counterparty field of the input message."""
-        valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello",
-        )
-        valid_initial_msg.to = self.opponent_address
-
-        self.dialogue.update(valid_initial_msg)
-
-        assert self.dialogue.last_outgoing_message == valid_initial_msg
-        assert (
-            self.dialogue.last_outgoing_message.sender
-            == self.dialogue.dialogue_label.dialogue_starter_addr
-        )
-
     def test_update_negative_is_valid_nex_message_fails(self):
         """Negative test for the 'update' method: input message is invalid with respect to the dialogue."""
         invalid_message_id = DefaultMessage(
@@ -540,6 +522,7 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
+        invalid_message_id.sender = self.agent_address
         invalid_message_id.to = self.opponent_address
 
         with pytest.raises(InvalidDialogueMessage) as cm:

@@ -671,7 +671,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                         signing_msg.raw_message.is_deprecated_mode,
                     ),
                 )
-        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.sender = signing_msg.to
+        signing_msg_response.to = signing_msg.sender
         signing_dialogue.update(signing_msg_response)
         self.message_out_queue.put(signing_msg_response)
 
@@ -710,7 +711,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                         signing_msg.raw_transaction.ledger_id, signed_tx
                     ),
                 )
-        signing_msg_response.counterparty = signing_msg.counterparty
+        signing_msg_response.sender = signing_msg.to
+        signing_msg_response.to = signing_msg.sender
         signing_dialogue.update(signing_msg_response)
         self.message_out_queue.put(signing_msg_response)
 

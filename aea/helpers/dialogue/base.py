@@ -174,9 +174,11 @@ class Dialogue(ABC):
     STARTING_TARGET = 0
     UNASSIGNED_DIALOGUE_REFERENCE = ""
 
-    INITIAL_PERFORMATIVES = frozenset()
-    TERMINAL_PERFORMATIVES = frozenset()
-    VALID_REPLIES = dict()
+    INITIAL_PERFORMATIVES = frozenset()  # type: FrozenSet[Message.Performative]
+    TERMINAL_PERFORMATIVES = frozenset()  # type: FrozenSet[Message.Performative]
+    VALID_REPLIES = (
+        dict()
+    )  # type: Dict[Message.Performative, FrozenSet[Message.Performative]]
 
     class Rules:
         """This class defines the rules for the dialogue."""
@@ -493,7 +495,7 @@ class Dialogue(ABC):
         if self.is_empty:
             return False
 
-        return self.STARTING_MESSAGE_ID <= message_id <= self.last_message.message_id
+        return self.STARTING_MESSAGE_ID <= message_id <= self.last_message.message_id  # type: ignore
 
     def update(self, message: Message) -> None:
         """
@@ -503,9 +505,6 @@ class Dialogue(ABC):
         :return: None
         :raises: InvalidDialogueMessage: if message does not belong to this dialogue, or if message is invalid
         """
-        if not message.has_sender:
-            message.sender = self.agent_address
-
         if not self.is_belonging_to_dialogue(message):
             raise InvalidDialogueMessage(
                 "The message {} does not belong to this dialogue."
@@ -555,9 +554,13 @@ class Dialogue(ABC):
             result = other_initiated_dialogue_label in self.dialogue_labels
         return result
 
-    def reply(self, target_message: Message, performative, **kwargs) -> Message:
+    def reply(
+        self, performative, target_message: Optional[Message] = None, **kwargs
+    ) -> Message:
         """
         Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
+
+        Note if no target_message is provided, the last message in the dialogue will be replied to.
 
         :param target_message: the message to reply to.
         :param performative: the performative of the reply message.
@@ -566,14 +569,18 @@ class Dialogue(ABC):
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
         assert not self.is_empty, "Cannot reply in an empty dialogue!"
+
+        if target_message is None:
+            target_message = self.last_message
+
         assert self.has_message(
-            target_message
+            target_message  # type: ignore
         ), "The target message does not exist in this dialogue."
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
-            message_id=self.last_message.message_id + 1,
-            target=target_message.message_id,
+            message_id=self.last_message.message_id + 1,  # type: ignore
+            target=target_message.message_id,  # type: ignore
             performative=performative,
             **kwargs,
         )
@@ -709,7 +716,7 @@ class Dialogue(ABC):
                 ),
             )
 
-        last_message_id = self.last_message.message_id
+        last_message_id = self.last_message.message_id  # type: ignore
         if message_id != last_message_id + 1:
             return (
                 False,
@@ -759,7 +766,7 @@ class Dialogue(ABC):
         if self.is_empty:
             return True, "The message passes additional validation."
 
-        last_target = self.last_message.target
+        last_target = self.last_message.target  # type: ignore
         if message.target == last_target + 1:
             return True, "The message passes additional validation."
 
@@ -1140,7 +1147,7 @@ class Dialogues(ABC):
         other_initiated_dialogue_label = DialogueLabel(
             message.dialogue_reference,
             self.counterparty_from_message(message),
-            message.to,
+            self.counterparty_from_message(message),
         )
 
         self_initiated_dialogue_label = self.get_latest_label(
