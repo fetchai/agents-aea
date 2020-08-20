@@ -179,8 +179,9 @@ class EnvelopeContext:
         """Get uri in string format."""
         return str(self.uri) if self.uri is not None else ""
 
+    @staticmethod
     def _get_public_ids_from_uri(
-        self, uri: URI
+        uri: URI,
     ) -> Tuple[Optional[PublicId], Optional[PublicId]]:
         """
         Try get skill and connection id from uri.
@@ -207,8 +208,10 @@ class EnvelopeContext:
 
     def __str__(self):
         """Get the string representation."""
-        return "EnvelopeContext(connection_id={connection_id}, uri_raw={uri_raw})".format(
-            connection_id=str(self.connection_id), uri_raw=str(self.uri),
+        return "EnvelopeContext(connection_id={connection_id}, skill_id={skill_id}, uri_raw={uri_raw})".format(
+            connection_id=str(self.connection_id),
+            skill_id=str(self.skill_id),
+            uri_raw=str(self.uri),
         )
 
     def __eq__(self, other):

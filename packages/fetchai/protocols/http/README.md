@@ -1,15 +1,5 @@
 # HTTP Protocol
 
-**Name:** http
-
-**Author**: fetchai
-
-**Version**: 0.4.0
-
-**Short Description**: A protocol for HTTP requests and responses.
-
-**License**: Apache-2.0
-
 ## Description
 
 This is a protocol for interacting with a client/server via HTTP requests and responses.
@@ -20,7 +10,7 @@ This is a protocol for interacting with a client/server via HTTP requests and re
 ---
 name: http
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

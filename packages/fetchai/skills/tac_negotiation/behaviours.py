@@ -223,7 +223,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             )
             assert oef_search_dialogue is not None, "OefSearchDialogue not created."
             oef_search_dialogue.is_seller_search = is_seller_search
-            self.context.outbox.put_message(message=oef_msg)
+            envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
+            self.context.outbox.put_message(message=oef_msg, context=envelope_context)
             self.context.logger.info(
                 "searching for {}, search_id={}.".format(
                     searching_for, oef_msg.dialogue_reference
