@@ -509,6 +509,17 @@ class PublicId(JSONSerializable):
 class PackageId:
     """A package identifier."""
 
+    PACKAGE_TYPE_REGEX = r"({}|{}|{}|{}|{})".format(
+        PackageType.AGENT,
+        PackageType.PROTOCOL,
+        PackageType.SKILL,
+        PackageType.CONNECTION,
+        PackageType.CONTRACT,
+    )
+    PACKAGE_ID_URI_REGEX = r"{}/{}".format(
+        PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
+    )
+
     def __init__(self, package_type: Union[PackageType, str], public_id: PublicId):
         """
         Initialize the package id.
@@ -548,6 +559,36 @@ class PackageId:
     def package_prefix(self) -> Tuple[PackageType, str, str]:
         """Get the package identifier without the version."""
         return self.package_type, self.author, self.name
+
+    @classmethod
+    def from_uri_path(cls, package_id_uri_path: str) -> "PackageId":
+        """
+        Initialize the public id from the string.
+
+        >>> str(PackageId.from_uri_path("skill/author/package_name/0.1.0"))
+        '(skill, author/package_name:0.1.0)'
+
+        A bad formatted input raises value error:
+        >>> PackageId.from_uri_path("very/bad/formatted:input")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'very/bad/formatted:input' is not well formatted.
+
+        :param public_id_uri_path: the public id in uri path string format.
+        :return: the public id object.
+        :raises ValueError: if the string in input is not well formatted.
+        """
+        if not re.match(cls.PACKAGE_ID_URI_REGEX, package_id_uri_path):
+            raise ValueError(
+                "Input '{}' is not well formatted.".format(package_id_uri_path)
+            )
+        else:
+            package_type_str, username, package_name, version = re.findall(
+                cls.PACKAGE_ID_URI_REGEX, package_id_uri_path
+            )[0][:4]
+            package_type = PackageType(package_type_str)
+            public_id = PublicId(username, package_name, version)
+            return PackageId(package_type, public_id)
 
     def __hash__(self):
         """Get the hash."""

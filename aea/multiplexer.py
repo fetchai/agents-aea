@@ -419,6 +419,7 @@ class AsyncMultiplexer(WithLogger):
                 "No connection registered with id: {}.".format(connection_id)
             )
 
+        # third, if no other option route by default connection
         if connection_id is None:
             self.logger.debug(
                 "Using default connection: {}".format(self.default_connection)
@@ -715,7 +716,7 @@ class OutBox:
         :return: None
         """
         self._multiplexer.logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'...".format(
+            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'.".format(
                 envelope.to,
                 envelope.sender,
                 envelope.protocol_id,
@@ -735,17 +736,12 @@ class OutBox:
         self._multiplexer.put(envelope)
 
     def put_message(
-        self,
-        message: Message,
-        context: Optional[EnvelopeContext] = None,
-        sender: Optional[str] = None,
+        self, message: Message, context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
 
         This constructs an envelope with the input arguments.
-
-        "sender" is a deprecated kwarg and will be removed in the next version
 
         :param message: the message
         :param context: the envelope context
@@ -755,11 +751,11 @@ class OutBox:
             raise ValueError("Provided message not of type Message.")
         if not message.has_counterparty:
             raise ValueError("Provided message has message.counterparty not set.")
-        if not message.has_sender and sender is None:
+        if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
             to=message.counterparty,
-            sender=sender or message.sender,  # TODO: remove "sender"
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=context,

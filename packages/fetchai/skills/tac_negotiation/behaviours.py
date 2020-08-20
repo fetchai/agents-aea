@@ -21,6 +21,7 @@
 
 from typing import Optional, cast
 
+from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -106,7 +107,10 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert oef_search_dialogue is not None, "OefSearchDialogue not created."
-        self.context.outbox.put_message(message=oef_search_msg)
+        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
+        self.context.outbox.put_message(
+            message=oef_search_msg, context=envelope_context
+        )
         self.context.logger.info("registering agent on SOEF.")
 
     def _register_service(self) -> None:
@@ -136,7 +140,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         oef_msg.counterparty = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_msg)
         assert oef_dialogue is not None, "OefSearchDialogue not created."
-        self.context.outbox.put_message(message=oef_msg)
+        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
+        self.context.outbox.put_message(message=oef_msg, context=envelope_context)
 
     def _unregister_service(self) -> None:
         """
@@ -162,7 +167,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         oef_msg.counterparty = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_msg)
         assert oef_dialogue is not None, "OefSearchDialogue not created."
-        self.context.outbox.put_message(message=oef_msg)
+        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
+        self.context.outbox.put_message(message=oef_msg, context=envelope_context)
 
     def _unregister_agent(self) -> None:
         """
@@ -183,7 +189,10 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         oef_search_msg.counterparty = self.context.search_service_address
         oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert oef_search_dialogue is not None, "OefSearchDialogue not created."
-        self.context.outbox.put_message(message=oef_search_msg)
+        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
+        self.context.outbox.put_message(
+            message=oef_search_msg, context=envelope_context
+        )
         self.context.logger.info("unregistering agent from SOEF.")
 
     def _search_services(self) -> None:
