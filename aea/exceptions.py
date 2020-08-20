@@ -26,3 +26,18 @@ class AEAException(Exception):
 
 class AEAPackageLoadingError(AEAException):
     """Class for exceptions that are raised for loading errors of AEA packages."""
+
+
+class AEAEnforceError(AEAException):
+    """Class for enforcement errors."""
+
+
+def enforce(is_valid_condition: bool, exception_text: str) -> None:
+    """
+    Evaluate a condition and raise an exception with the provided text if it is not satisfied.
+
+    :param is_valid_condition: the valid condition
+    :param exception_text: the exception to be raised
+    """
+    if not is_valid_condition:
+        AEAEnforceError(exception_text)

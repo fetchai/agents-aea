@@ -765,10 +765,11 @@ class AEABuilder:
         :param wallet: the wallet
         :return: the identity
         """
-        assert self._name is not None, "You must set the name of the agent."
+        if self._name is None:
+            raise ValueError("You must set the name of the agent.")
 
         if not wallet.addresses:
-            raise ValueError("wallet has no addresses")
+            raise ValueError("Wallet has no addresses.")
 
         if len(wallet.addresses) > 1:
             identity = Identity(
