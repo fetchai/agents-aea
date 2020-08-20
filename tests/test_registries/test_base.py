@@ -524,7 +524,7 @@ class TestFilter:
         )
         t.counterparty = "skill"
         t.sender = "decision_maker"
-        self.aea.decision_maker.message_out_queue.put(t)
+        self.aea.runtime.decision_maker.message_out_queue.put(t)
         self.aea._filter.handle_internal_messages()
 
         internal_handlers_list = self.aea.resources.get_handlers(t.protocol_id)

@@ -285,7 +285,7 @@ class Agent(ABC):
         """
         return self._runtime.state
 
-    def _get_periodic_tasks(
+    def get_periodic_tasks(
         self,
     ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
         """

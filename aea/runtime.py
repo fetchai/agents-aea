@@ -27,6 +27,7 @@ from enum import Enum
 from typing import Dict, Optional, TYPE_CHECKING, Type, cast
 
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
+from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import ensure_loop
 from aea.multiplexer import AsyncMultiplexer, Multiplexer
 from aea.skills.tasks import TaskManager
@@ -77,6 +78,7 @@ class BaseRuntime(ABC):
 
         self._multiplexer: Multiplexer = self._get_multiplexer_instance()
         self._task_manager = TaskManager()
+        self._decision_maker: Optional[DecisionMaker] = None
 
         self.main_loop: BaseAgentLoop = self._get_main_loop_instance(
             agent._loop_mode or self.DEFAULT_RUN_LOOP
@@ -125,6 +127,17 @@ class BaseRuntime(ABC):
             )
         return self.RUN_LOOPS[loop_mode]
 
+    @property
+    def decision_maker(self) -> Optional[DecisionMaker]:
+        """Return decision maker if set."""
+        return self._decision_maker
+
+    def set_decision_maker(self, decision_maker_handler: DecisionMakerHandler) -> None:
+        """Set decision maker with handler provided."""
+        self._decision_maker = DecisionMaker(
+            decision_maker_handler=decision_maker_handler
+        )
+
     def _get_main_loop_instance(self, loop_mode: str) -> BaseAgentLoop:
         """
         Construct main loop instance.
@@ -167,6 +180,8 @@ class BaseRuntime(ABC):
     def _teardown(self) -> None:
         """Tear down runtime."""
         logger.debug("[{}]: Runtime teardown...".format(self._agent.name))
+        if self.decision_maker:
+            self.decision_maker.stop()
         self.task_manager.stop()
         self._agent.teardown()
         logger.debug("[{}]: Runtime teardown completed".format(self._agent.name))
@@ -288,6 +303,8 @@ class AsyncRuntime(BaseRuntime):
         """Start agent main loop asynchronous way."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self.task_manager.start()
+        if self.decision_maker:
+            self.decision_maker.start()
         self._agent.start_setup()
         self._state.set(RuntimeStates.running)
         await self.main_loop.run_loop()

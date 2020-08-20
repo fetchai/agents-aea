@@ -108,10 +108,17 @@ class AsyncFakeAgent:
         self.filter = MagicMock()
         self.filter._process_internal_message = MagicMock()
         self.filter._handle_new_behaviours = MagicMock()
-        self.decision_maker = MagicMock()
-
-        self.decision_maker.message_out_queue = AsyncFriendlyQueue()
+        self.runtime = MagicMock()
+        self.runtime.decision_maker.message_out_queue = AsyncFriendlyQueue()
+        self.filter.decision_maker_out_queue = (
+            self.runtime.decision_maker.message_out_queue
+        )
         self.timeout = 0.001
+
+    def get_periodic_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        return self._get_behaviours_tasks()
 
     def _get_behaviours_tasks(
         self,
@@ -142,7 +149,7 @@ class AsyncFakeAgent:
 
     def put_internal_message(self, msg: Any) -> None:
         """Add a message to internal queue."""
-        self.decision_maker.message_out_queue.put_nowait(msg)
+        self.runtime.decision_maker.message_out_queue.put_nowait(msg)
 
     def act(self) -> None:
         """Call all acts of behaviours."""
@@ -194,7 +201,7 @@ class SyncFakeAgent(AsyncFakeAgent):
 
     def put_internal_message(self, msg: Any) -> None:
         """Add a message to internal queue."""
-        self.decision_maker.message_out_queue.put_nowait(msg)
+        self.runtime.decision_maker.message_out_queue.put_nowait(msg)
 
 
 class TestAsyncAgentLoop:

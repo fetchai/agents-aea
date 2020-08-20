@@ -41,7 +41,7 @@ from aea.configurations.constants import DEFAULT_SKILL
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
+from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
@@ -128,14 +128,15 @@ class AEA(Agent, WithLogger):
         decision_maker_handler = decision_maker_handler_class(
             identity=identity, wallet=wallet
         )
-        self._decision_maker = DecisionMaker(
-            decision_maker_handler=decision_maker_handler
-        )
+        self.runtime.set_decision_maker(decision_maker_handler)
+
+        assert self.runtime.decision_maker  # for type check, it's set already
+
         self._context = AgentContext(
             self.identity,
             self.runtime.multiplexer.connection_status,
             self.outbox,
-            self.decision_maker.message_in_queue,
+            self.runtime.decision_maker.message_in_queue,
             decision_maker_handler.context,
             self.runtime.task_manager,
             default_connection,
@@ -146,16 +147,13 @@ class AEA(Agent, WithLogger):
         self._execution_timeout = execution_timeout
         self._connection_ids = connection_ids
         self._resources = resources
-        self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
+        self._filter = Filter(
+            self.resources, self.runtime.decision_maker.message_out_queue
+        )
 
         self._skills_exception_policy = skill_exception_policy
 
         self._setup_loggers()
-
-    @property
-    def decision_maker(self) -> DecisionMaker:
-        """Get decision maker."""
-        return self._decision_maker
 
     @property
     def context(self) -> AgentContext:
@@ -194,7 +192,6 @@ class AEA(Agent, WithLogger):
 
         :return: None
         """
-        self.decision_maker.start()
         self.resources.setup()
         ExecTimeoutThreadGuard.start()
 
@@ -254,20 +251,15 @@ class AEA(Agent, WithLogger):
         """
         envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
         if envelope is not None:
-            self._handle(envelope)
+            self._handle_envelope(envelope)
 
     def _get_error_handler(self) -> Optional[Handler]:
-        """Get error hadnler."""
+        """Get error handler."""
         return self.resources.get_handler(DefaultMessage.protocol_id, DEFAULT_SKILL)
 
-    def _handle(self, envelope: Envelope) -> None:
-        """
-        Handle an envelope.
-
-        :param envelope: the envelope to handle.
-        :return: None
-        """
-        self.logger.debug("Handling envelope: {}".format(envelope))
+    def _get_msg_and_handlers_for_envelope(
+        self, envelope: Envelope
+    ) -> Tuple[Optional[Message], List[Handler]]:
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
         # TODO specify error handler in config and make this work for different skill/protocol versions.
@@ -276,12 +268,12 @@ class AEA(Agent, WithLogger):
         if error_handler is None:
             self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
             self.stop()
-            return
+            return None, []
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
             error_handler.send_unsupported_protocol(envelope)
-            return
+            return None, []
 
         try:
             if isinstance(envelope.message, Message):
@@ -295,7 +287,7 @@ class AEA(Agent, WithLogger):
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
             self.logger.warning("Decoding error. Exception: {}".format(str(e)))
             error_handler.send_decoding_error(envelope)
-            return
+            return None, []
 
         handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.skill_id
@@ -303,6 +295,21 @@ class AEA(Agent, WithLogger):
 
         if len(handlers) == 0:
             error_handler.send_unsupported_skill(envelope)
+            return None, []
+
+        return msg, handlers
+
+    def _handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle an envelope.
+
+        :param envelope: the envelope to handle.
+        :return: None
+        """
+        self.logger.debug("Handling envelope: {}".format(envelope))
+        msg, handlers = self._get_msg_and_handlers_for_envelope(envelope)
+
+        if msg is None:
             return
 
         for handler in handlers:
@@ -397,7 +404,6 @@ class AEA(Agent, WithLogger):
         :return: None
         """
         self.logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.decision_maker.stop()
         self.resources.teardown()
         ExecTimeoutThreadGuard.stop()
 
@@ -416,7 +422,7 @@ class AEA(Agent, WithLogger):
                 element.logger, agent_name=self._identity.name
             )
 
-    def _get_periodic_tasks(
+    def get_periodic_tasks(
         self,
     ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
         """
@@ -424,11 +430,16 @@ class AEA(Agent, WithLogger):
 
         :return: dict of callable with period specified
         """
-        return {**super()._get_periodic_tasks(), **self._get_behaviours_tasks()}
+        return self._get_behaviours_tasks()
 
     def _get_behaviours_tasks(
         self,
     ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        """
+        Get all periodic tasks for AEA behaviours.
+
+        :return: dict of callable with period specified
+        """
         tasks = {}
         for behaviour in self.active_behaviours:
             tasks[behaviour.act_wrapper] = (behaviour.tick_interval, behaviour.start_at)

@@ -219,7 +219,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             task_callable,
             (period, start_at),
         ) in (
-            self._agent._get_behaviours_tasks().items()  # pylint: disable=protected-access
+            self._agent.get_periodic_tasks().items()  # pylint: disable=protected-access
         ):
             self._register_periodic_task(task_callable, period, start_at)
 
@@ -279,7 +279,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     async def _task_process_internal_messages(self) -> None:
         """Process decision maker's internal messages."""
-        queue = self._agent.decision_maker.message_out_queue
+        queue = self._agent.filter.decision_maker_out_queue
         while self.is_running:
             msg = await queue.async_get()
             # TODO: better interaction with agent's internal messages
@@ -314,10 +314,10 @@ class SyncAgentLoop(BaseAgentLoop):
     async def _agent_loop(self) -> None:
         """Run loop inside coroutine but call synchronous callbacks from agent."""
         while self.is_running:
-            self._spin_main_loop()
+            await self._spin_main_loop()
             await asyncio.sleep(self._agent.timeout)
 
-    def _spin_main_loop(self) -> None:
+    async def _spin_main_loop(self) -> None:
         """Run one spin of agent loop: act, react, update."""
         self._agent.act()
         self._agent.react()

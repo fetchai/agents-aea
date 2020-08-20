@@ -524,7 +524,7 @@ def test_error_handler_is_not_set():
     )
 
     with patch.object(agent, "stop") as mocked_stop:
-        agent._handle(envelope)
+        agent._handle_envelope(envelope)
 
     mocked_stop.assert_called()
 
@@ -556,7 +556,7 @@ def test_no_handlers_registered():
             message=msg,
         )
         with patch.object(aea.filter, "get_active_handlers", return_value=[]):
-            aea._handle(envelope)
+            aea._handle_envelope(envelope)
             mock_logger.assert_any_call(
                 f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
             )
