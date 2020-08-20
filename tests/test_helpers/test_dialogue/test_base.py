@@ -223,6 +223,14 @@ class TestDialogueBase:
 
     def test_dialogue_properties(self):
         """Test dialogue properties."""
+        assert self.dialogue.dialogue_label == self.dialogue_label
+        assert self.dialogue.incomplete_dialogue_label == self.dialogue_label
+        assert self.dialogue.dialogue_labels == {self.dialogue_label}
+        assert self.dialogue.agent_address == self.agent_address
+
+        assert self.dialogue.role == Dialogue.Role.ROLE1
+        assert str(self.dialogue.role) == "role1"
+
         assert self.dialogue.rules.initial_performatives == frozenset(
             {DefaultMessage.Performative.BYTES}
         )
@@ -244,14 +252,6 @@ class TestDialogueBase:
             DefaultMessage.Performative.ERROR
         ) == frozenset({})
 
-        assert self.dialogue.dialogue_label == self.dialogue_label
-        assert self.dialogue.incomplete_dialogue_label == self.dialogue_label
-        assert self.dialogue.dialogue_labels == {self.dialogue_label}
-        assert self.dialogue.agent_address == self.agent_address
-
-        assert self.dialogue.role == Dialogue.Role.ROLE1
-        assert str(self.dialogue.role) == "role1"
-
         assert self.dialogue.is_self_initiated
 
         assert self.dialogue.last_incoming_message is None
@@ -259,6 +259,35 @@ class TestDialogueBase:
         assert self.dialogue.last_message is None
 
         assert self.dialogue.is_empty
+
+    def test_counterparty_from_message(self):
+        """Test the 'counterparty_from_message' method."""
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_2.sender = self.opponent_address
+        message_2.to = self.agent_address
+
+        assert (
+            self.dialogue.counterparty_from_message(message_1) == self.opponent_address
+        )
+        assert (
+            self.dialogue.counterparty_from_message(message_2) == self.opponent_address
+        )
 
     def test_is_message_by_self(self):
         """Test the 'is_message_by_self' method."""
@@ -310,8 +339,10 @@ class TestDialogueBase:
         assert not self.dialogue.is_message_by_other(message_1)
         assert self.dialogue.is_message_by_other(message_2)
 
-    def test_has_message(self):
-        """Test the 'has_message' method."""
+    def test_try_get_message(self):
+        """Test the 'try_get_message' method."""
+        assert self.dialogue.try_get_message(1) is None
+
         message_1 = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -324,17 +355,119 @@ class TestDialogueBase:
 
         self.dialogue.update(message_1)
 
+        assert self.dialogue.try_get_message(2) is None
+
         message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello II",
+        )
+        message_2.sender = self.agent_address
+        message_2.to = self.opponent_address
+
+        self.dialogue.update(message_2)
+
+        assert self.dialogue.try_get_message(2) == message_2
+
+    def test_get_message(self):
+        """Test the 'get_message' method."""
+        with pytest.raises(AssertionError) as cm:
+            self.dialogue.get_message(1)
+        assert str(cm.value) == "Message not present."
+
+        message_1 = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        self.dialogue.update(message_1)
+
+        with pytest.raises(AssertionError) as cm:
+            self.dialogue.get_message(2)
+        assert str(cm.value) == "Message not present."
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello II",
+        )
         message_2.sender = self.agent_address
         message_2.to = self.opponent_address
 
-        assert self.dialogue.has_message(message_2)
+        self.dialogue.update(message_2)
+
+        assert self.dialogue.get_message(2) == message_2
+
+    def test_has_message(self):
+        """Test the 'has_message' method."""
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        assert self.dialogue.has_message(message_1) is False
+
+        self.dialogue.update(message_1)
+
+        assert self.dialogue.has_message(message_1) is True
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello II",
+        )
+        message_2.sender = self.agent_address
+        message_2.to = self.opponent_address
+
+        assert self.dialogue.has_message(message_2) is False
+
+    def test_has_message_id(self):
+        """Test the 'has_message_id' method."""
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        assert self.dialogue.has_message_id(1) is False
+
+        self.dialogue.update(message_1)
+
+        assert self.dialogue.has_message_id(1) is True
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello II",
+        )
+        message_2.sender = self.agent_address
+        message_2.to = self.opponent_address
+
+        self.dialogue.update(message_2)
+
+        assert self.dialogue.has_message_id(3) is False
 
     def test_update_positive(self):
         """Positive test for the 'update' method."""
@@ -398,8 +531,8 @@ class TestDialogueBase:
             == self.dialogue.dialogue_label.dialogue_starter_addr
         )
 
-    def test_update_negative_not_is_extendible(self):
-        """Negative test for the 'update' method: dialogue is not extendable with the input message."""
+    def test_update_negative_is_valid_nex_message_fails(self):
+        """Negative test for the 'update' method: input message is invalid with respect to the dialogue."""
         invalid_message_id = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=2,
@@ -443,6 +576,7 @@ class TestDialogueBase:
         assert self.dialogue.is_empty
 
     def test_is_belonging_to_dialogue(self):
+        """Test for the 'is_belonging_to_dialogue' method"""
         valid_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -488,6 +622,27 @@ class TestDialogueBase:
 
         assert self.dialogue.last_message.message_id == 2
 
+    def test_reply_negative_empty_dialogue(self):
+        """Negative test for the 'reply' method: target message is not in the dialogue."""
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.sender = self.agent_address
+        initial_msg.to = self.opponent_address
+
+        with pytest.raises(AssertionError) as cm:
+            self.dialogue.reply(
+                target_message=initial_msg,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"Hello Back",
+            )
+        assert str(cm.value) == "Cannot reply in an empty dialogue!"
+        assert self.dialogue.is_empty
+
     def test_reply_negative_invalid_target(self):
         """Negative test for the 'reply' method: target message is not in the dialogue."""
         initial_msg = DefaultMessage(
@@ -523,6 +678,7 @@ class TestDialogueBase:
         assert self.dialogue.last_message.message_id == 1
 
     def test_is_valid_next_message_positive(self):
+        """Positive test for the 'validate_next_message' method"""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -557,11 +713,12 @@ class TestDialogueBase:
         valid_third_msg.sender = self.agent_address
         valid_third_msg.to = self.opponent_address
 
-        result, msg = self.dialogue.is_valid_next_message(valid_third_msg)
+        result, msg = self.dialogue.validate_next_message(valid_third_msg)
         assert result is True
         assert msg == "Message is valid with respect to this dialogue."
 
     def test_is_valid_next_message_negative_basic_validation_fails(self):
+        """Negative test for the 'validate_next_message' method: basic_validation method fails"""
         invalid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=2,
@@ -572,11 +729,12 @@ class TestDialogueBase:
         invalid_initial_msg.sender = self.agent_address
         invalid_initial_msg.to = self.opponent_address
 
-        result, msg = self.dialogue.is_valid_next_message(invalid_initial_msg)
+        result, msg = self.dialogue.validate_next_message(invalid_initial_msg)
         assert result is False
         assert msg == "Invalid message_id. Expected 1. Found 2."
 
     def test_is_valid_next_message_negative_additional_validation_fails(self):
+        """Negative test for the 'validate_next_message' method: additional_validation method fails"""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -611,11 +769,13 @@ class TestDialogueBase:
         invalid_third_msg.sender = self.agent_address
         invalid_third_msg.to = self.opponent_address
 
-        result, msg = self.dialogue.is_valid_next_message(invalid_third_msg)
+        result, msg = self.dialogue.validate_next_message(invalid_third_msg)
         assert result is False
         assert msg == "Invalid target. Expected 2. Found 1."
 
     def test_is_valid_next_message_negative_is_valid_fails(self):
+        """Negative test for the 'validate_next_message' method: is_valid method fails"""
+
         def failing_is_valid(message: Message) -> Tuple[bool, str]:
             return False, "some reason"
 
@@ -630,12 +790,12 @@ class TestDialogueBase:
         valid_message.sender = self.agent_address
         valid_message.to = self.opponent_address
 
-        result, msg = self.dialogue.is_valid_next_message(valid_message)
+        result, msg = self.dialogue.validate_next_message(valid_message)
         assert result is False
         assert msg == "some reason"
 
-    def test_basic_rules_positive(self):
-        """Positive test for the '_basic_rules' method."""
+    def test_basic_validation_positive(self):
+        """Positive test for the '_basic_validation' method."""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -648,26 +808,26 @@ class TestDialogueBase:
 
         result, msg = self.dialogue._basic_validation(valid_initial_msg)
         assert result is True
-        assert msg == "The message passes basic validation."
+        assert msg == "The initial message passes basic validation."
 
-    def test_basic_rules_negative_initial_message_invalid_dialogue_reference(self):
-        """Negative test for the '_basic_rules' method: input message is the first message with invalid dialogue reference."""
-        invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(2), ""),
-            message_id=1,
-            target=0,
+        self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        invalid_initial_msg.sender = self.agent_address
-        invalid_initial_msg.to = self.opponent_address
+        valid_second_msg.sender = self.agent_address
+        valid_second_msg.to = self.opponent_address
 
-        result, msg = self.dialogue._basic_validation(invalid_initial_msg)
-        assert result is False
-        assert msg == "Invalid dialogue_reference[0]. Expected 1. Found 2."
+        result, msg = self.dialogue._basic_validation(valid_second_msg)
+        assert result is True
+        assert msg == "The non-initial message passes basic validation."
 
-    def test_basic_rules_negative_initial_message_invalid_message_id(self):
-        """Negative test for the '_basic_rules' method: input message is the first message with invalid message id."""
+    def test_basic_validation_negative_initial_message_invalid(self):
+        """Negative test for the '_basic_validation' method: initial message is invalid."""
         invalid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=2,
@@ -682,103 +842,8 @@ class TestDialogueBase:
         assert result is False
         assert msg == "Invalid message_id. Expected 1. Found 2."
 
-    def test_basic_rules_negative_initial_message_invalid_target(self):
-        """Negative test for the '_basic_rules' method: input message is the first message with invalid target."""
-        invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=1,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello",
-        )
-        invalid_initial_msg.sender = self.agent_address
-        invalid_initial_msg.to = self.opponent_address
-
-        result, msg = self.dialogue._basic_validation(invalid_initial_msg)
-        assert result is False
-        assert msg == "Invalid target. Expected 0. Found 1."
-
-    def test_basic_rules_negative_initial_message_invalid_performative(self):
-        """Negative test for the '_basic_rules' method: input message is the first message with invalid performative."""
-        invalid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.ERROR,
-            error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
-            error_msg="some_error_message",
-            error_data={"some_data": b"some_bytes"},
-        )
-        invalid_initial_msg.sender = self.agent_address
-        invalid_initial_msg.to = self.opponent_address
-
-        result, msg = self.dialogue._basic_validation(invalid_initial_msg)
-        assert result is False
-        assert (
-            msg
-            == "Invalid initial performative. Expected one of {}. Found error.".format(
-                self.dialogue.rules.initial_performatives
-            )
-        )
-
-    def test_basic_rules_negative_non_initial_message_invalid_dialogue_reference(self):
-        """Negative test for the '_basic_rules' method: input message is not the first message, and its dialogue reference is invalid."""
-        valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello",
-        )
-        valid_initial_msg.sender = self.agent_address
-        valid_initial_msg.to = self.opponent_address
-
-        self.dialogue.update(valid_initial_msg)
-
-        invalid_msg = DefaultMessage(
-            dialogue_reference=(str(2), str(1)),
-            message_id=2,
-            target=1,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello back",
-        )
-        invalid_msg.sender = self.opponent_address
-        invalid_msg.to = self.agent_address
-
-        result, msg = self.dialogue._basic_validation(invalid_msg)
-        assert result is False
-        assert msg == "Invalid dialogue_reference[0]. Expected 1. Found 2."
-
-    def test_basic_rules_negative_non_initial_message_invalid_message_id(self):
-        """Negative test for the '_basic_rules' method: input message is not the first message, and its message id is invalid."""
-        valid_initial_msg = DefaultMessage(
-            dialogue_reference=(str(1), ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello",
-        )
-        valid_initial_msg.sender = self.agent_address
-        valid_initial_msg.to = self.opponent_address
-
-        self.dialogue.update(valid_initial_msg)
-
-        invalid_msg = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
-            message_id=3,
-            target=1,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello back",
-        )
-        invalid_msg.sender = self.opponent_address
-        invalid_msg.to = self.agent_address
-
-        result, msg = self.dialogue._basic_validation(invalid_msg)
-        assert result is False
-        assert msg == "Invalid message_id. Expected 2. Found 3."
-
-    def test_basic_rules_negative_non_initial_message_invalid_target_I(self):
-        """Negative test for the '_basic_rules' method: input message is not the first message, and its target is less than 1."""
+    def test_basic_validation_negative_non_initial_message_invalid(self):
+        """Negative test for the '_basic_validation' method: non-initial message is invalid."""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -808,8 +873,222 @@ class TestDialogueBase:
             == "Invalid target. Expected a value greater than or equal to 1. Found 0."
         )
 
-    def test_basic_rules_negative_non_initial_message_invalid_target_II(self):
-        """Negative test for the '_basic_rules' method: input message is not the first message, and its target is greater than the id of the last existing message."""
+    def test_basic_validation_initial_message_positive(self):
+        """Positive test for the '_basic_validation_initial_message' method."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
+
+        result, msg = self.dialogue._basic_validation_initial_message(valid_initial_msg)
+        assert result is True
+        assert msg == "The initial message passes basic validation."
+
+    def test_basic_validation_initial_message_negative_invalid_dialogue_reference(self):
+        """Negative test for the '_basic_validation' method: input message has invalid dialogue reference."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(2), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
+
+        result, msg = self.dialogue._basic_validation_initial_message(
+            invalid_initial_msg
+        )
+        assert result is False
+        assert msg == "Invalid dialogue_reference[0]. Expected 1. Found 2."
+
+    def test_basic_validation_initial_message_negative_invalid_message_id(self):
+        """Negative test for the '_basic_validation' method: input message has invalid message id."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
+
+        result, msg = self.dialogue._basic_validation_initial_message(
+            invalid_initial_msg
+        )
+        assert result is False
+        assert msg == "Invalid message_id. Expected 1. Found 2."
+
+    def test_basic_validation_initial_message_negative_invalid_target(self):
+        """Negative test for the '_basic_validation_initial_message' method: input message has invalid target."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
+
+        result, msg = self.dialogue._basic_validation_initial_message(
+            invalid_initial_msg
+        )
+        assert result is False
+        assert msg == "Invalid target. Expected 0. Found 1."
+
+    def test_basic_validation_initial_message_negative_invalid_performative(self):
+        """Negative test for the '_basic_validation_initial_message' method: input message has invalid performative."""
+        invalid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
+            error_msg="some_error_message",
+            error_data={"some_data": b"some_bytes"},
+        )
+        invalid_initial_msg.sender = self.agent_address
+        invalid_initial_msg.to = self.opponent_address
+
+        result, msg = self.dialogue._basic_validation_initial_message(
+            invalid_initial_msg
+        )
+        assert result is False
+        assert (
+            msg
+            == "Invalid initial performative. Expected one of {}. Found error.".format(
+                self.dialogue.rules.initial_performatives
+            )
+        )
+
+    def test_basic_validation_non_initial_message_positive(self):
+        """Positive test for the '_basic_validation_non_initial_message' method."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
+
+        self.dialogue.update(valid_initial_msg)
+
+        valid_second_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_second_msg.sender = self.agent_address
+        valid_second_msg.to = self.opponent_address
+
+        result, msg = self.dialogue._basic_validation_non_initial_message(
+            valid_second_msg
+        )
+        assert result is True
+        assert msg == "The non-initial message passes basic validation."
+
+    def test_basic_validation_non_initial_message_negative_invalid_dialogue_reference(
+        self,
+    ):
+        """Negative test for the '_basic_validation_non_initial_message' method: input message has invalid dialogue reference."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
+
+        self.dialogue.update(valid_initial_msg)
+
+        invalid_msg = DefaultMessage(
+            dialogue_reference=(str(2), str(1)),
+            message_id=2,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        invalid_msg.sender = self.opponent_address
+        invalid_msg.to = self.agent_address
+
+        result, msg = self.dialogue._basic_validation_non_initial_message(invalid_msg)
+        assert result is False
+        assert msg == "Invalid dialogue_reference[0]. Expected 1. Found 2."
+
+    def test_basic_validation_non_initial_message_negative_invalid_message_id(self):
+        """Negative test for the '_basic_validation_non_initial_message' method: input message has invalid message id."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
+
+        self.dialogue.update(valid_initial_msg)
+
+        invalid_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=3,
+            target=1,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        invalid_msg.sender = self.opponent_address
+        invalid_msg.to = self.agent_address
+
+        result, msg = self.dialogue._basic_validation_non_initial_message(invalid_msg)
+        assert result is False
+        assert msg == "Invalid message_id. Expected 2. Found 3."
+
+    def test_basic_validation_non_initial_message_negative_invalid_target_1(self):
+        """Negative test for the '_basic_validation_non_initial_message' method: input message has target less than 1."""
+        valid_initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        valid_initial_msg.sender = self.agent_address
+        valid_initial_msg.to = self.opponent_address
+
+        self.dialogue.update(valid_initial_msg)
+
+        invalid_msg = DefaultMessage(
+            dialogue_reference=(str(1), str(1)),
+            message_id=2,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello back",
+        )
+        invalid_msg.sender = self.opponent_address
+        invalid_msg.to = self.agent_address
+
+        result, msg = self.dialogue._basic_validation_non_initial_message(invalid_msg)
+        assert result is False
+        assert (
+            msg
+            == "Invalid target. Expected a value greater than or equal to 1. Found 0."
+        )
+
+    def test_basic_validation_non_initial_message_negative_invalid_target_2(self):
+        """Negative test for the '_basic_validation_non_initial_message' method: input message has target greater than the id of the last existing message."""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -832,14 +1111,14 @@ class TestDialogueBase:
         invalid_msg.sender = self.opponent_address
         invalid_msg.to = self.agent_address
 
-        result, msg = self.dialogue._basic_validation(invalid_msg)
+        result, msg = self.dialogue._basic_validation_non_initial_message(invalid_msg)
         assert result is False
         assert (
             msg == "Invalid target. Expected a value less than or equal to 1. Found 2."
         )
 
-    def test_basic_rules_negative_non_initial_message_invalid_performative(self):
-        """Negative test for the '_basic_rules' method: input message is not the first message, and its performative is invalid."""
+    def test_basic_validation_non_initial_message_negative_invalid_performative(self):
+        """Negative test for the '_basic_validation_non_initial_message' method: input message has invalid performative."""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
             message_id=1,
@@ -863,14 +1142,16 @@ class TestDialogueBase:
         invalid_second_msg.sender = self.opponent_address
         invalid_second_msg.to = self.agent_address
 
-        result, msg = self.dialogue._basic_validation(invalid_second_msg)
+        result, msg = self.dialogue._basic_validation_non_initial_message(
+            invalid_second_msg
+        )
         assert result is False
         assert msg == "Invalid performative. Expected one of {}. Found {}.".format(
             self.dialogue.rules.get_valid_replies(valid_initial_msg.performative),
             invalid_second_msg.performative,
         )
 
-    def test_additional_rules_positive(self):
+    def test_additional_validation_positive(self):
         """Positive test for the '_additional_rules' method."""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
@@ -881,6 +1162,10 @@ class TestDialogueBase:
         )
         valid_initial_msg.sender = self.agent_address
         valid_initial_msg.to = self.opponent_address
+
+        result, msg = self.dialogue._additional_validation(valid_initial_msg)
+        assert result is True
+        assert msg == "The message passes additional validation."
 
         self.dialogue.update(valid_initial_msg)
 
@@ -910,7 +1195,7 @@ class TestDialogueBase:
         assert result is True
         assert msg == "The message passes additional validation."
 
-    def test_additional_rules_negative_invalid_target(self):
+    def test_additional_validation_negative_invalid_target(self):
         """Negative test for the '_additional_rules' method: input message has invalid target (its target is not the last message of the dialogue)."""
         valid_initial_msg = DefaultMessage(
             dialogue_reference=(str(1), ""),
@@ -1008,8 +1293,9 @@ class TestDialogueBase:
         new_label = DialogueLabel(
             (str(1), str(2)), valid_initial_msg.to, self.agent_address
         )
-        with pytest.raises(AssertionError):
+        with pytest.raises(AssertionError) as cm:
             self.dialogue.update_dialogue_label(new_label)
+        assert str(cm.value) == "Dialogue label cannot be updated."
 
         assert self.dialogue.dialogue_label != new_label
 
@@ -1227,6 +1513,87 @@ class TestDialoguesBase:
             Dialogue.EndState.FAILED: 0,
         }
 
+    def test_counterparty_from_message(self):
+        """Test the 'counterparty_from_message' method."""
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_2.sender = self.opponent_address
+        message_2.to = self.agent_address
+
+        assert (
+            self.own_dialogues.counterparty_from_message(message_1)
+            == self.opponent_address
+        )
+        assert (
+            self.own_dialogues.counterparty_from_message(message_2)
+            == self.opponent_address
+        )
+
+    def test_is_message_by_self(self):
+        """Test the 'is_message_by_self' method."""
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_2.sender = self.opponent_address
+        message_2.to = self.agent_address
+
+        assert self.own_dialogues.is_message_by_self(message_1)
+        assert not self.own_dialogues.is_message_by_self(message_2)
+
+    def test_is_message_by_other(self):
+        """Test the 'is_message_by_other' method."""
+        message_1 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_1.sender = self.agent_address
+        message_1.to = self.opponent_address
+
+        message_2 = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        message_2.sender = self.opponent_address
+        message_2.to = self.agent_address
+
+        assert not self.own_dialogues.is_message_by_other(message_1)
+        assert self.own_dialogues.is_message_by_other(message_2)
+
     def test_new_self_initiated_dialogue_reference(self):
         """Test the 'new_self_initiated_dialogue_reference' method."""
         self_initiated_ref = self.own_dialogues.new_self_initiated_dialogue_reference()
@@ -1252,17 +1619,16 @@ class TestDialoguesBase:
     def test_create_negative_incorrect_performative_content_combination(self):
         """Negative test for the 'create' method: invalid performative and content combination (i.e. invalid message)."""
         assert len(self.own_dialogues.dialogues) == 0
-        try:
+        with pytest.raises(SyntaxError) as cm:
             self.own_dialogues.create(
                 self.opponent_address,
                 DefaultMessage.Performative.ERROR,
                 content=b"Hello",
             )
-            result = True
-        except Exception:
-            result = False
-
-        assert not result
+        assert (
+            str(cm.value)
+            == "Cannot create a dialogue with the specified performative and contents."
+        )
         assert len(self.own_dialogues.dialogues) == 0
 
     def test_update_positive_new_dialogue_by_other(self):
@@ -1335,6 +1701,29 @@ class TestDialoguesBase:
 
         assert not self.own_dialogues.update(invalid_message_id)
 
+    def test_update_negative_new_dialogue_by_self(self):
+        """Negative test for the 'update' method: the 'to' field of the input message is not set."""
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        initial_msg.sender = self.agent_address
+        initial_msg.to = self.opponent_address
+
+        assert len(self.own_dialogues.dialogues) == 0
+
+        with pytest.raises(AssertionError) as cm:
+            self.own_dialogues.update(initial_msg)
+        assert (
+            str(cm.value)
+            == "Invalid 'update' usage. Update must only be used with a message by another agent."
+        )
+
+        assert len(self.own_dialogues.dialogues) == 0
+
     def test_update_negative_new_dialogue_by_self_no_to(self):
         """Negative test for the 'update' method: the 'to' field of the input message is not set."""
         initial_msg = DefaultMessage(
@@ -1372,6 +1761,28 @@ class TestDialoguesBase:
         with pytest.raises(AssertionError) as cm:
             self.own_dialogues.update(initial_msg)
         assert str(cm.value) == "Message's 'Sender' field must be set."
+
+        assert len(self.own_dialogues.dialogues) == 0
+
+    def test_update_negative_invalid_message(self):
+        """Negative test for the 'update' method: the message is invalid."""
+        initial_msg = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
+            error_msg="some_error_message",
+            error_data={"some_data": b"some_bytes"},
+        )
+        initial_msg.sender = self.opponent_address
+        initial_msg.to = self.agent_address
+
+        assert len(self.own_dialogues.dialogues) == 0
+
+        dialogue = self.own_dialogues.update(initial_msg)
+
+        assert dialogue is None
 
         assert len(self.own_dialogues.dialogues) == 0
 
@@ -1422,9 +1833,7 @@ class TestDialoguesBase:
             == b"Hello"
         )
 
-    def test_update_self_initiated_dialogue_label_on_message_with_complete_reference_positive(
-        self,
-    ):
+    def test_complete_dialogue_reference_positive(self,):
         """Positive test for the '_complete_dialogue_reference' method."""
         msg, dialogue = self.own_dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
@@ -1452,9 +1861,7 @@ class TestDialoguesBase:
             == second_msg.dialogue_reference
         )
 
-    def test_update_self_initiated_dialogue_label_on_message_with_complete_reference_negative_incorrect_reference(
-        self,
-    ):
+    def test_complete_dialogue_reference_negative_incorrect_reference(self,):
         """Negative test for the '_complete_dialogue_reference' method: the input message has invalid dialogue reference."""
         msg, dialogue = self.own_dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
@@ -1581,6 +1988,10 @@ class TestDialoguesBase:
 
         assert retrieved_dialogue is None
 
+    def test_get_latest_label(self):
+        """Positive test for the 'get_latest_label' method."""
+        pass
+
     def test_get_dialogue_from_label_positive(self):
         """Positive test for the 'get_dialogue_from_label' method."""
         _, dialogue = self.own_dialogues.create(
@@ -1614,6 +2025,10 @@ class TestDialoguesBase:
         )
         assert len(self.own_dialogues.dialogues) == 1
 
+    def test_create_self_initiated_negative_invalid_dialogue_reference(self):
+        """Negative test for the '_create_self_initiated' method: invalid dialogue reference"""
+        pass
+
     def test_create_opponent_initiated_positive(self):
         """Positive test for the '_create_opponent_initiated' method."""
         assert len(self.own_dialogues.dialogues) == 0
@@ -1638,7 +2053,19 @@ class TestDialoguesBase:
         assert not result
         assert len(self.own_dialogues.dialogues) == 0
 
-    def test__generate_dialogue_nonce(self):
+    def test__create_positive(self):
+        """Positive test for the '_create' method."""
+        pass
+
+    def test__create_negative_incomplete_dialogue_label_present(self):
+        """Negative test for the '_create' method: incomplete dialogue label already present."""
+        pass
+
+    def test__create_negative_dialogue_label_present(self):
+        """Negative test for the '_create' method: dialogue label already present."""
+        pass
+
+    def test_generate_dialogue_nonce(self):
         """Test the '_generate_dialogue_nonce' method."""
         nonce = self.own_dialogues._generate_dialogue_nonce()
         assert (
