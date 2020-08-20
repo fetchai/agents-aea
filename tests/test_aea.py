@@ -341,8 +341,8 @@ def test_initialize_aea_programmatically():
             # TODO the previous code caused an error:
             #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
             dummy_task = DummyTask()
-            task_id = aea.task_manager.enqueue_task(dummy_task)
-            async_result = aea.task_manager.get_task_result(task_id)
+            task_id = aea.enqueue_task(dummy_task)
+            async_result = aea.get_task_result(task_id)
             expected_dummy_task = async_result.get(10.0)
             wait_for_condition(
                 lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
@@ -433,8 +433,8 @@ def test_initialize_aea_programmatically_build_resources():
                 )
 
                 dummy_task = DummyTask()
-                task_id = aea.task_manager.enqueue_task(dummy_task)
-                async_result = aea.task_manager.get_task_result(task_id)
+                task_id = aea.enqueue_task(dummy_task)
+                async_result = aea.get_task_result(task_id)
                 expected_dummy_task = async_result.get(10.0)
                 wait_for_condition(
                     lambda: expected_dummy_task.nb_execute_called > 0, timeout=10

@@ -16,12 +16,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains the implementation of a generic agent."""
 import datetime
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from typing import Callable, Dict, List, Optional, Tuple, Type
+from multiprocessing.pool import AsyncResult
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
 from aea.connections.base import Connection
 from aea.identity.base import Identity
@@ -96,6 +99,28 @@ class Agent(ABC):
                 f"Runtime `{self._runtime_mode} is not supported. valid are: `{list(self.RUNTIMES.keys())}`"
             )
         return self.RUNTIMES[self._runtime_mode]
+
+    def enqueue_task(
+        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+    ) -> int:
+        """
+        Enqueue a task with the task manager.
+
+        :param func: the callable instance to be enqueued
+        :param args: the positional arguments to be passed to the function.
+        :param kwds: the keyword arguments to be passed to the function.
+        :return the task id to get the the result.
+        :raises ValueError: if the task manager is not running.
+        """
+        return self.runtime.task_manager.enqueue_task(func, args, kwds)
+
+    def get_task_result(self, task_id: int) -> AsyncResult:
+        """
+        Get the result from a task.
+
+        :return: async result for task_id
+        """
+        return self.runtime.task_manager.get_task_result(task_id)
 
     def _get_multiplexer_setup_options(  # pylint: disable=no-self-use # cause overrided in AEA
         self,

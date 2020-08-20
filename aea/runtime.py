@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of runtime for economic agent (AEA)."""
 
 import asyncio
@@ -30,6 +29,7 @@ from typing import Dict, Optional, TYPE_CHECKING, Type, cast
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_utils import ensure_loop
 from aea.multiplexer import AsyncMultiplexer, Multiplexer
+from aea.skills.tasks import TaskManager
 
 if TYPE_CHECKING:  # pragma: nocover
     from aea.agent import Agent
@@ -76,6 +76,7 @@ class BaseRuntime(ABC):
         self._was_started = False
 
         self._multiplexer: Multiplexer = self._get_multiplexer_instance()
+        self._task_manager = TaskManager()
 
         self.main_loop: BaseAgentLoop = self._get_main_loop_instance(
             agent._loop_mode or self.DEFAULT_RUN_LOOP
@@ -88,6 +89,11 @@ class BaseRuntime(ABC):
         )
         if setup_options:
             self.multiplexer.setup(**setup_options)
+
+    @property
+    def task_manager(self) -> TaskManager:
+        """Get the task manager."""
+        return self._task_manager
 
     @property
     def loop(self) -> AbstractEventLoop:
@@ -161,6 +167,7 @@ class BaseRuntime(ABC):
     def _teardown(self) -> None:
         """Tear down runtime."""
         logger.debug("[{}]: Runtime teardown...".format(self._agent.name))
+        self.task_manager.stop()
         self._agent.teardown()
         logger.debug("[{}]: Runtime teardown completed".format(self._agent.name))
 
@@ -280,6 +287,7 @@ class AsyncRuntime(BaseRuntime):
     async def _start_agent_loop(self) -> None:
         """Start agent main loop asynchronous way."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
+        self.task_manager.start()
         self._agent.start_setup()
         self._state.set(RuntimeStates.running)
         await self.main_loop.run_loop()
@@ -362,6 +370,7 @@ class ThreadedRuntime(BaseRuntime):
     def _start_agent_loop(self) -> None:
         """Start aget's main loop."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
+        self.task_manager.start()
         try:
             self._state.set(RuntimeStates.running)
             self.main_loop.start()

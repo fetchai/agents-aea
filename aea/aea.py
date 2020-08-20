@@ -57,7 +57,6 @@ from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, SkillComponent
 from aea.skills.error.handlers import ErrorHandler
-from aea.skills.tasks import TaskManager
 
 
 class AEA(Agent, WithLogger):
@@ -126,7 +125,6 @@ class AEA(Agent, WithLogger):
         WithLogger.__init__(self, logger=cast(logging.Logger, aea_logger))
 
         self.max_reactions = max_reactions
-        self._task_manager = TaskManager()
         decision_maker_handler = decision_maker_handler_class(
             identity=identity, wallet=wallet
         )
@@ -139,7 +137,7 @@ class AEA(Agent, WithLogger):
             self.outbox,
             self.decision_maker.message_in_queue,
             decision_maker_handler.context,
-            self.task_manager,
+            self.runtime.task_manager,
             default_connection,
             default_routing if default_routing is not None else {},
             search_service_address,
@@ -175,11 +173,6 @@ class AEA(Agent, WithLogger):
         self._resources = resources
 
     @property
-    def task_manager(self) -> TaskManager:
-        """Get the task manager."""
-        return self._task_manager
-
-    @property
     def filter(self) -> Filter:
         """Get the filter."""
         return self._filter
@@ -196,13 +189,11 @@ class AEA(Agent, WithLogger):
         Performs the following:
 
         - loads the resources (unless in programmatic mode)
-        - starts the task manager
         - starts the decision maker
         - calls setup() on the resources
 
         :return: None
         """
-        self.task_manager.start()
         self.decision_maker.start()
         self.resources.setup()
         ExecTimeoutThreadGuard.start()
@@ -407,7 +398,6 @@ class AEA(Agent, WithLogger):
         """
         self.logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.decision_maker.stop()
-        self.task_manager.stop()
         self.resources.teardown()
         ExecTimeoutThreadGuard.stop()
 
@@ -416,7 +406,7 @@ class AEA(Agent, WithLogger):
         for element in [
             self.runtime.main_loop,
             self.runtime.multiplexer,
-            self.task_manager,
+            self.runtime.task_manager,
             self.resources.component_registry,
             self.resources.behaviour_registry,
             self.resources.handler_registry,
