@@ -602,7 +602,6 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += self.indent + "import logging\n"
-        cls_str += self.indent + "from enum import Enum\n"
         cls_str += self._import_from_typing_module() + "\n\n"
         cls_str += self.indent + "from aea.configurations.base import ProtocolId\n"
         cls_str += MESSAGE_IMPORT + "\n"
@@ -1070,7 +1069,9 @@ class ProtocolGenerator:
         cls_str += self.indent + "Dialogue.__init__(\n"
         cls_str += self.indent + "self,\n"
         cls_str += self.indent + "dialogue_label=dialogue_label,\n"
-        cls_str += self.indent + "message_class={}Message,\n".format(self.protocol_specification_in_camel_case)
+        cls_str += self.indent + "message_class={}Message,\n".format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += self.indent + "agent_address=agent_address,\n"
         cls_str += self.indent + "role=role,\n"
         cls_str += self.indent + ")\n"
@@ -1103,7 +1104,10 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += self.indent + "self,\n"
         cls_str += self.indent + "agent_address: Address,\n"
-        cls_str += self.indent + "role_from_first_message: Callable[[Message], Dialogue.Role],\n"
+        cls_str += (
+            self.indent
+            + "role_from_first_message: Callable[[Message], Dialogue.Role],\n"
+        )
         cls_str += self.indent + "dialogue_class: Type[FipaDialogue] = FipaDialogue,\n"
         self._change_indent(-1)
         cls_str += self.indent + ") -> None:\n"
@@ -1120,8 +1124,13 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += self.indent + "self,\n"
         cls_str += self.indent + "agent_address=agent_address,\n"
-        cls_str += self.indent + "end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),\n"
-        cls_str += self.indent + "message_class={}Message,\n".format(self.protocol_specification_in_camel_case)
+        cls_str += (
+            self.indent
+            + "end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),\n"
+        )
+        cls_str += self.indent + "message_class={}Message,\n".format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += self.indent + "dialogue_class=dialogue_class,\n"
         cls_str += self.indent + "role_from_first_message=role_from_first_message,\n"
         self._change_indent(-1)
