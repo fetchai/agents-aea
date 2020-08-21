@@ -29,7 +29,7 @@ from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.mail.base import Envelope, EnvelopeContext, URI
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
@@ -195,7 +195,7 @@ class TestSkillError:
             sender="",
             protocol_id=protocol_id,
             message=b"",
-            context=EnvelopeContext(uri=URI(skill_id.to_uri_path)),
+            context=EnvelopeContext(skill_id=skill_id),
         )
         with unittest.mock.patch.object(self.skill_context.outbox, "put_message"):
             with unittest.mock.patch.object(

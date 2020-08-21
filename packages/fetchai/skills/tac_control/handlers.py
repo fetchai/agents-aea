@@ -305,8 +305,10 @@ class TacHandler(Handler):
             message_id=last_msg.message_id + 1,
             target=last_msg.message_id,
         )
+        assert last_msg.counterparty == transaction.counterparty_address
         counterparty_tac_msg.counterparty = transaction.counterparty_address
-        assert recovered_tac_dialogue.update(counterparty_tac_msg)
+        is_updated = recovered_tac_dialogue.update(counterparty_tac_msg)
+        assert is_updated, "Error during dialogue update."
         self.context.outbox.put_message(message=counterparty_tac_msg)
 
         # log messages

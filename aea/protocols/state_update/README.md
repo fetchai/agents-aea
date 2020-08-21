@@ -1,15 +1,5 @@
 # State Update Protocol
 
-**Name:** state_update
-
-**Author**: fetchai
-
-**Version**: 0.2.0
-
-**Short Description**: A protocol for state updates to the decision maker state.
-
-**License**: Apache-2.0
-
 ## Description
 
 This is a protocol for updating the state of a decision maker.
@@ -20,7 +10,7 @@ This is a protocol for updating the state of a decision maker.
 ---
 name: state_update
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'

@@ -6,7 +6,7 @@ description: A protocol for interacting with a gym connection.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmPcnBEUW1NfTBRwMvpPQJ8NTP6MG3CueUjjHQJ1sf77uQ
+  README.md: QmPPy7v2qKeRzuTEsaM8VJh2PEG3mJoKTtP58CTp6aLj7s
   __init__.py: QmWBvruqGuU2BVCq8cuP1S3mgvuC78yrG4TdtSvKhCT8qX
   custom_types.py: QmfDaswopanUqsETQXMatKfwwDSSo7q2Edz9MXGimT5jbf
   dialogues.py: Qmd7n1c7wWacCkTx1kxsuo73QhxN6e4uufPYmF775cYqVx

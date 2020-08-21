@@ -35,12 +35,14 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Address, Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
-from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue as BaseOefSearchDialogue,
+)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
@@ -57,6 +59,41 @@ STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
 PUBLIC_ID = PublicId.from_str("fetchai/oef:0.8.0")
+
+
+class OefSearchDialogue(BaseOefSearchDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseOefSearchDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self._envelope_context = None  # type: Optional[EnvelopeContext]
+
+    @property
+    def envelope_context(self) -> Optional[EnvelopeContext]:
+        """Get envelope_context."""
+        return self._envelope_context
+
+    @envelope_context.setter
+    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
+        """Set envelope_context."""
+        assert self._envelope_context is None, "envelope_context already set!"
+        self._envelope_context = envelope_context
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -298,6 +335,7 @@ class OEFChannel(OEFAgent):
             sender=DEFAULT_OEF,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
+            context=oef_search_dialogue.envelope_context,
         )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
@@ -340,6 +378,7 @@ class OEFChannel(OEFAgent):
             sender=DEFAULT_OEF,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
+            context=oef_search_dialogue.envelope_context,
         )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
@@ -421,6 +460,7 @@ class OEFChannel(OEFAgent):
                 "Could not create dialogue for message={}".format(oef_message)
             )  # pragma: nocover
             return  # pragma: nocover
+        oef_search_dialogue.envelope_context = envelope.context
         self.oef_msg_id += 1
         self.oef_msg_id_to_dialogue[self.oef_msg_id] = oef_search_dialogue
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:

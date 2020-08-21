@@ -500,6 +500,30 @@ def test_package_id_lt():
     assert package_id_1 < package_id_2
 
 
+def test_package_id_from_uri_path():
+    """Test PackageId.from_uri_path"""
+    result = PackageId.from_uri_path("skill/author/package_name/0.1.0")
+    assert str(result.package_type) == "skill"
+    assert result.public_id.name == "package_name"
+    assert result.public_id.author == "author"
+    assert result.public_id.version == "0.1.0"
+
+
+def test_package_id_to_uri_path():
+    """Test PackageId.to_uri_path"""
+    package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    assert package_id.to_uri_path == "protocol/author/name/0.1.0"
+
+
+def test_package_id_from_uri_path_negative():
+    """Test PackageId.from_uri_path with invalid type"""
+    with pytest.raises(
+        ValueError,
+        match="Input 'not_a_valid_type/author/package_name/0.1.0' is not well formatted.",
+    ):
+        PackageId.from_uri_path("not_a_valid_type/author/package_name/0.1.0")
+
+
 def test_component_id_prefix_import_path():
     """Test ComponentId.prefix_import_path"""
     component_id = ComponentId(
