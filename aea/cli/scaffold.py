@@ -169,7 +169,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
 def _scaffold_dm_handler(ctx: Context):
     """Add a scaffolded decision maker handler to the project and configuration."""
-    existing_dm_handler = getattr(ctx.agent_config, "decision_maker_handler")
+    existing_dm_handler = ctx.agent_config.decision_maker_handler
 
     # check if we already have a decision maker in the project
     if existing_dm_handler != {}:

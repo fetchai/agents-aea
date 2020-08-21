@@ -126,7 +126,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         transaction: Any, signature: str, base64_pbk: str
     ) -> Any:
         """
-        Format default CosmosSDK transaction and add signature
+        Format default CosmosSDK transaction and add signature.
 
         :param transaction: the transaction to be formatted
         :param signature: the transaction signature
@@ -160,7 +160,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         transaction: Any, signature: str, base64_pbk: str
     ) -> Any:
         """
-        Format CosmWasm transaction and add signature
+        Format CosmWasm transaction and add signature.
 
         :param transaction: the transaction to be formatted
         :param signature: the transaction signature
@@ -168,7 +168,6 @@ class CosmosCrypto(Crypto[SigningKey]):
 
         :return: formatted transaction with signature
         """
-
         pushable_tx = {
             "type": "cosmos-sdk/StdTx",
             "value": {
@@ -195,7 +194,6 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-
         transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
         transaction_bytes = transaction_str.encode("utf-8")
         signed_transaction = self.sign_message(transaction_bytes)
@@ -353,9 +351,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
     identifier = _COSMOS
 
     def __init__(self, **kwargs):
-        """
-        Initialize the Ethereum ledger APIs.
-        """
+        """Initialize the Ethereum ledger APIs."""
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
@@ -824,7 +820,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
     @staticmethod
     def _execute_shell_command(command: List[str]) -> List[Dict[str, str]]:
         """
-        Uses subprocess to execute command and get result as JSON dict
+        Execute command using subprocess and get result as JSON dict.
 
         :param command: the shell command to be executed
         :return: the stdout result converted to JSON dict
@@ -837,7 +833,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
     def get_last_code_id(self) -> int:
         """
-        Uses wasmcli to get ID of latest deployed .wasm bytecode
+        Get ID of latest deployed .wasm bytecode.
 
         :return: code id of last deployed .wasm bytecode
         """
@@ -849,7 +845,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
 
     def get_contract_address(self, code_id: int) -> str:
         """
-        Uses wasmcli to get contract address of latest initialised contract by its ID
+        Get contract address of latest initialised contract by its ID.
 
         :param code_id: id of deployed CosmWasm bytecode
         :return: contract address of last initialised contract
