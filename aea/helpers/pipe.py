@@ -155,7 +155,7 @@ class PosixNamedPipeProtocol:
         self._in = os.open(self._in_path, os.O_RDONLY | os.O_NONBLOCK | os.O_SYNC)
 
         try:
-            self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK | os.O_SYNC)
+            self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK)
         except OSError as e:
             if e.errno == errno.ENXIO:
                 self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
@@ -194,7 +194,7 @@ class PosixNamedPipeProtocol:
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
         os.write(self._out, size + data)
-        #os.fsync(self._out)
+        self._out.flush()
 
     async def read(self) -> Optional[bytes]:
         """

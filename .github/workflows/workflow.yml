@@ -13,9 +13,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [macos-latest, ubuntu-latest]
         python-version: [3.6]
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -48,4 +48,4 @@ jobs:
         python scripts/update_symlinks_cross_platform.py
     - name: Unit tests
       run: |
-        tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
+        tox -e py${{ matrix.python-version }} -- tests/test_helpers/test_pipe/test_pipe.py -m 'not integration and not unstable'
