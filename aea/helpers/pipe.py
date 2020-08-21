@@ -218,6 +218,7 @@ class PosixNamedPipeProtocol:
             data = await self._stream_reader.readexactly(size)
             if not data:  # pragma: no cover
                 return None
+            self.logger.debug("received message: {}".format(data))
             return data
         except asyncio.IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
