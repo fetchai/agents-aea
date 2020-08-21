@@ -25,6 +25,7 @@ import pickle  # nosec
 from typing import Any, Dict, List, Optional, Tuple
 
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import enforce
 
 Address = str
 
@@ -42,8 +43,8 @@ class RawTransaction:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert self._body is not None, "body must not be None"
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(self._body is not None, "body must not be None")
 
     @property
     def ledger_id(self) -> str:
@@ -113,11 +114,12 @@ class RawMessage:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert self._body is not None, "body must not be None"
-        assert isinstance(
-            self._is_deprecated_mode, bool
-        ), "is_deprecated_mode must be bool"
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(self._body is not None, "body must not be None")
+        enforce(
+            isinstance(self._is_deprecated_mode, bool),
+            "is_deprecated_mode must be bool",
+        )
 
     @property
     def ledger_id(self) -> str:
@@ -188,8 +190,8 @@ class SignedTransaction:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert self._body is not None, "body must not be None"
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(self._body is not None, "body must not be None")
 
     @property
     def ledger_id(self) -> str:
@@ -260,11 +262,12 @@ class SignedMessage:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert isinstance(self._body, str), "body must be string"
-        assert isinstance(
-            self._is_deprecated_mode, bool
-        ), "is_deprecated_mode must be bool"
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(isinstance(self._body, str), "body must be string")
+        enforce(
+            isinstance(self._is_deprecated_mode, bool),
+            "is_deprecated_mode must be bool",
+        )
 
     @property
     def ledger_id(self) -> str:
@@ -337,8 +340,8 @@ class State:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert self._body is not None, "body must not be None"
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(self._body is not None, "body must not be None")
 
     @property
     def ledger_id(self) -> str:
@@ -463,42 +466,59 @@ class Terms:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert isinstance(self._sender_address, str), "sender_address must be str"
-        assert isinstance(
-            self._counterparty_address, str
-        ), "counterparty_address must be str"
-        assert isinstance(self._amount_by_currency_id, dict) and all(
-            [
-                isinstance(key, str) and isinstance(value, int)
-                for key, value in self._amount_by_currency_id.items()
-            ]
-        ), "amount_by_currency_id must be a dictionary with str keys and int values."
-        assert isinstance(self._quantities_by_good_id, dict) and all(
-            [
-                isinstance(key, str) and isinstance(value, int)
-                for key, value in self._quantities_by_good_id.items()
-            ]
-        ), "quantities_by_good_id must be a dictionary with str keys and int values."
-        assert isinstance(
-            self._is_sender_payable_tx_fee, bool
-        ), "is_sender_payable_tx_fee must be bool"
-        assert isinstance(self._nonce, str), "nonce must be str"
-        assert self._fee_by_currency_id is None or (
-            isinstance(self._fee_by_currency_id, dict)
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(isinstance(self._sender_address, str), "sender_address must be str")
+        enforce(
+            isinstance(self._counterparty_address, str),
+            "counterparty_address must be str",
+        )
+        enforce(
+            isinstance(self._amount_by_currency_id, dict)
             and all(
                 [
-                    isinstance(key, str) and isinstance(value, int) and value >= 0
-                    for key, value in self._fee_by_currency_id.items()
+                    isinstance(key, str) and isinstance(value, int)
+                    for key, value in self._amount_by_currency_id.items()
                 ]
-            )
-        ), "fee must be None or Dict[str, int] with positive fees only."
-        assert all(
-            [
-                key in self._amount_by_currency_id
-                for key in self._fee_by_currency_id.keys()
-            ]
-        ), "Fee dictionary has keys which are not present in amount dictionary."
+            ),
+            "amount_by_currency_id must be a dictionary with str keys and int values.",
+        )
+        enforce(
+            isinstance(self._quantities_by_good_id, dict)
+            and all(
+                [
+                    isinstance(key, str) and isinstance(value, int)
+                    for key, value in self._quantities_by_good_id.items()
+                ]
+            ),
+            "quantities_by_good_id must be a dictionary with str keys and int values.",
+        )
+        enforce(
+            isinstance(self._is_sender_payable_tx_fee, bool),
+            "is_sender_payable_tx_fee must be bool",
+        )
+        enforce(isinstance(self._nonce, str), "nonce must be str")
+        enforce(
+            self._fee_by_currency_id is None
+            or (
+                isinstance(self._fee_by_currency_id, dict)
+                and all(
+                    [
+                        isinstance(key, str) and isinstance(value, int) and value >= 0
+                        for key, value in self._fee_by_currency_id.items()
+                    ]
+                )
+            ),
+            "fee must be None or Dict[str, int] with positive fees only.",
+        )
+        enforce(
+            all(
+                [
+                    key in self._amount_by_currency_id
+                    for key in self._fee_by_currency_id.keys()
+                ]
+            ),
+            "Fee dictionary has keys which are not present in amount dictionary.",
+        )
         if self._is_strict:
             is_pos_amounts = all(
                 [amount >= 0 for amount in self._amount_by_currency_id.values()]
@@ -512,9 +532,11 @@ class Terms:
             is_neg_quantities = all(
                 [quantity <= 0 for quantity in self._quantities_by_good_id.values()]
             )
-            assert (is_pos_amounts and is_neg_quantities) or (
-                is_neg_amounts and is_pos_quantities
-            ), "quantities and amounts do not constitute valid terms. All quantities must be of same sign. All amounts must be of same sign. Quantities and amounts must be of different sign."
+            enforce(
+                (is_pos_amounts and is_neg_quantities)
+                or (is_neg_amounts and is_pos_quantities),
+                "quantities and amounts do not constitute valid terms. All quantities must be of same sign. All amounts must be of same sign. Quantities and amounts must be of different sign.",
+            )
 
     @property
     def id(self) -> str:
@@ -549,7 +571,9 @@ class Terms:
     @counterparty_address.setter
     def counterparty_address(self, counterparty_address: Address) -> None:
         """Set the counterparty address."""
-        assert isinstance(counterparty_address, str), "counterparty_address must be str"
+        enforce(
+            isinstance(counterparty_address, str), "counterparty_address must be str"
+        )
         self._counterparty_address = counterparty_address
 
     @property
@@ -577,16 +601,17 @@ class Terms:
     @property
     def currency_id(self) -> str:
         """Get the amount the sender must pay."""
-        assert self.is_single_currency, "More than one currency id, cannot get id."
+        enforce(self.is_single_currency, "More than one currency id, cannot get id.")
         value = next(iter(self._amount_by_currency_id.keys()))
         return value
 
     @property
     def sender_payable_amount(self) -> int:
         """Get the amount the sender must pay."""
-        assert (
-            self.is_single_currency or self.is_empty_currency
-        ), "More than one currency id, cannot get amount."
+        enforce(
+            self.is_single_currency or self.is_empty_currency,
+            "More than one currency id, cannot get amount.",
+        )
         value = (
             next(iter(self._amount_by_currency_id.values()))
             if not self.is_empty_currency
@@ -598,9 +623,10 @@ class Terms:
     @property
     def sender_payable_amount_incl_fee(self) -> int:
         """Get the amount the sender must pay inclusive fee."""
-        assert (
-            self.is_single_currency or self.is_empty_currency
-        ), "More than one currency id, cannot get amount."
+        enforce(
+            self.is_single_currency or self.is_empty_currency,
+            "More than one currency id, cannot get amount.",
+        )
         payable = self.sender_payable_amount
         if self.is_sender_payable_tx_fee and len(self._fee_by_currency_id) == 1:
             payable += next(iter(self._fee_by_currency_id.values()))
@@ -609,9 +635,10 @@ class Terms:
     @property
     def counterparty_payable_amount(self) -> int:
         """Get the amount the counterparty must pay."""
-        assert (
-            self.is_single_currency or self.is_empty_currency
-        ), "More than one currency id, cannot get amount."
+        enforce(
+            self.is_single_currency or self.is_empty_currency,
+            "More than one currency id, cannot get amount.",
+        )
         value = (
             next(iter(self._amount_by_currency_id.values()))
             if not self.is_empty_currency
@@ -623,9 +650,10 @@ class Terms:
     @property
     def counterparty_payable_amount_incl_fee(self) -> int:
         """Get the amount the counterparty must pay."""
-        assert (
-            self.is_single_currency or self.is_empty_currency
-        ), "More than one currency id, cannot get amount."
+        enforce(
+            self.is_single_currency or self.is_empty_currency,
+            "More than one currency id, cannot get amount.",
+        )
         payable = self.counterparty_payable_amount
         if not self.is_sender_payable_tx_fee and len(self._fee_by_currency_id) == 1:
             payable += next(iter(self._fee_by_currency_id.values()))
@@ -664,10 +692,11 @@ class Terms:
     @property
     def fee(self) -> int:
         """Get the fee."""
-        assert self.has_fee, "fee_by_currency_id not set."
-        assert (
-            len(self.fee_by_currency_id) == 1
-        ), "More than one currency id, cannot get fee."
+        enforce(self.has_fee, "fee_by_currency_id not set.")
+        enforce(
+            len(self.fee_by_currency_id) == 1,
+            "More than one currency id, cannot get fee.",
+        )
         return next(iter(self._fee_by_currency_id.values()))
 
     @property
@@ -838,8 +867,8 @@ class TransactionDigest:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert self._body is not None, "body must not be None"
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(self._body is not None, "body must not be None")
 
     @property
     def ledger_id(self) -> str:
@@ -910,9 +939,9 @@ class TransactionReceipt:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert isinstance(self._ledger_id, str), "ledger_id must be str"
-        assert self._receipt is not None, "receipt must not be None"
-        assert self._transaction is not None, "transaction must not be None"
+        enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
+        enforce(self._receipt is not None, "receipt must not be None")
+        enforce(self._transaction is not None, "transaction must not be None")
 
     @property
     def ledger_id(self) -> str:

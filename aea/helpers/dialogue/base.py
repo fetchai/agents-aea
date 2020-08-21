@@ -31,6 +31,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
+from aea.exceptions import enforce
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
@@ -229,9 +230,10 @@ class Dialogue(ABC):
             :param performative: the performative in a message
             :return: list of valid performative replies
             """
-            assert (
-                performative in self.valid_replies
-            ), "this performative '{}' is not supported".format(performative)
+            enforce(
+                performative in self.valid_replies,
+                "this performative '{}' is not supported".format(performative),
+            )
             return self.valid_replies[performative]
 
     class Role(Enum):
@@ -281,7 +283,10 @@ class Dialogue(ABC):
         self._rules = rules
 
         if message_class is not None:
-            assert issubclass(message_class, Message)
+            enforce(
+                issubclass(message_class, Message),
+                "Message class provided not a subclass of `Message`.",
+            )
         self._message_class = message_class
 
     @property
@@ -318,7 +323,8 @@ class Dialogue(ABC):
 
         :return: the agent address
         """
-        assert self._agent_address is not None, "agent_address is not set."
+        if self._agent_address is None:
+            raise ValueError("agent_address is not set.")
         return self._agent_address
 
     @agent_address.setter
@@ -337,7 +343,8 @@ class Dialogue(ABC):
 
         :return: the agent's role
         """
-        assert self._role is not None, "Role is not set."
+        if self._role is None:
+            raise ValueError("Role is not set.")
         return self._role
 
     @role.setter
@@ -357,7 +364,8 @@ class Dialogue(ABC):
 
         :return: the rules
         """
-        assert self._rules is not None, "Rules is not set."
+        if self._rules is None:
+            raise ValueError("Rules is not set.")
         return self._rules
 
     @property
@@ -475,9 +483,10 @@ class Dialogue(ABC):
             message.counterparty = self.dialogue_label.dialogue_opponent_addr
 
         if counterparty is not None:
-            assert (
-                message.counterparty == self.dialogue_label.dialogue_opponent_addr
-            ), "The counterparty specified in the message is different from the opponent in this dialogue."
+            enforce(
+                message.counterparty == self.dialogue_label.dialogue_opponent_addr,
+                "The counterparty specified in the message is different from the opponent in this dialogue.",
+            )
 
     def is_belonging_to_dialogue(self, message: Message) -> bool:
         """
@@ -510,10 +519,12 @@ class Dialogue(ABC):
 
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
-        assert (
-            self._message_class is not None
-        ), "No 'message_class' argument was provided to this class on construction."
-        assert self.last_message is not None, "Cannot reply in an empty dialogue!"
+        if self._message_class is None:
+            raise ValueError(
+                "No 'message_class' argument was provided to this class on construction."
+            )
+        if self.last_message is None:
+            raise ValueError("Cannot reply in an empty dialogue!")
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
@@ -616,11 +627,12 @@ class Dialogue(ABC):
 
         :param final_dialogue_label: the final dialogue label
         """
-        assert (
+        enforce(
             self.dialogue_label.dialogue_reference[1] == self.OPPONENT_STARTER_REFERENCE
             and final_dialogue_label.dialogue_reference[1]
-            != self.OPPONENT_STARTER_REFERENCE
-        ), "Dialogue label cannot be updated."
+            != self.OPPONENT_STARTER_REFERENCE,
+            "Dialogue label cannot be updated.",
+        )
         self._dialogue_label = final_dialogue_label
 
     @abstractmethod
@@ -706,10 +718,10 @@ class DialogueStats(ABC):
         :return: None
         """
         if is_self_initiated:
-            assert end_state in self._self_initiated, "End state not present!"
+            enforce(end_state in self._self_initiated, "End state not present!")
             self._self_initiated[end_state] += 1
         else:
-            assert end_state in self._other_initiated, "End state not present!"
+            enforce(end_state in self._other_initiated, "End state not present!")
             self._other_initiated[end_state] += 1
 
 
@@ -739,11 +751,17 @@ class Dialogues(ABC):
         self._dialogue_stats = DialogueStats(end_states)
 
         if message_class is not None:
-            assert issubclass(message_class, Message)
+            enforce(
+                issubclass(message_class, Message),
+                "Message class provided not a subclass of `Message`.",
+            )
         self._message_class = message_class
 
         if dialogue_class is not None:
-            assert issubclass(dialogue_class, Dialogue)
+            enforce(
+                issubclass(dialogue_class, Dialogue),
+                "Dialogue class provided not a subclass of `Dialogue`.",
+            )
         self._dialogue_class = dialogue_class
 
         if role_from_first_message is not None:
@@ -761,7 +779,7 @@ class Dialogues(ABC):
     @property
     def agent_address(self) -> Address:
         """Get the address of the agent for whom dialogues are maintained."""
-        assert self._agent_address != "", "agent_address is not set."
+        enforce(self._agent_address != "", "agent_address is not set.")
         return self._agent_address
 
     @property
@@ -793,9 +811,10 @@ class Dialogues(ABC):
 
         :return: the initial message and the dialogue.
         """
-        assert (
-            self._message_class is not None
-        ), "No 'message_class' argument was provided to this class on construction."
+        if self._message_class is None:
+            raise ValueError(
+                "No 'message_class' argument was provided to this class on construction."
+            )
 
         initial_message = self._message_class(
             dialogue_reference=self.new_self_initiated_dialogue_reference(),
@@ -900,10 +919,11 @@ class Dialogues(ABC):
         :return: None
         """
         dialogue_reference = message.dialogue_reference
-        assert (
+        enforce(
             dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] != Dialogue.OPPONENT_STARTER_REFERENCE
-        ), "Only complete dialogue references allowed."
+            and dialogue_reference[1] != Dialogue.OPPONENT_STARTER_REFERENCE,
+            "Only complete dialogue references allowed.",
+        )
         self_initiated_dialogue_reference = (
             dialogue_reference[0],
             Dialogue.OPPONENT_STARTER_REFERENCE,
@@ -920,11 +940,12 @@ class Dialogues(ABC):
                 self_initiated_dialogue_label.dialogue_starter_addr,
             )
             self_initiated_dialogue.update_dialogue_label(final_dialogue_label)
-            assert (
+            enforce(
                 self_initiated_dialogue.dialogue_label not in self.dialogues
                 and self_initiated_dialogue_label
-                not in self._incomplete_to_complete_dialogue_labels
-            ), "DialogueLabel already present in dialogues."
+                not in self._incomplete_to_complete_dialogue_labels,
+                "DialogueLabel already present in dialogues.",
+            )
             self.dialogues.update(
                 {self_initiated_dialogue.dialogue_label: self_initiated_dialogue}
             )
@@ -1004,10 +1025,11 @@ class Dialogues(ABC):
 
         :return: the created dialogue.
         """
-        assert (
+        enforce(
             dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
-        ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE,
+            "Cannot initiate dialogue with preassigned dialogue_responder_reference!",
+        )
         incomplete_dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
@@ -1029,10 +1051,11 @@ class Dialogues(ABC):
 
         :return: the created dialogue
         """
-        assert (
+        enforce(
             dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
-        ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
+            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE,
+            "Cannot initiate dialogue with preassigned dialogue_responder_reference!",
+        )
         incomplete_dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
         )
@@ -1063,10 +1086,11 @@ class Dialogues(ABC):
 
         :return: the created dialogue
         """
-        assert (
+        enforce(
             incomplete_dialogue_label
-            not in self._incomplete_to_complete_dialogue_labels
-        ), "Incomplete dialogue label already present."
+            not in self._incomplete_to_complete_dialogue_labels,
+            "Incomplete dialogue label already present.",
+        )
         if complete_dialogue_label is None:
             dialogue_label = incomplete_dialogue_label
         else:
@@ -1074,9 +1098,10 @@ class Dialogues(ABC):
                 incomplete_dialogue_label
             ] = complete_dialogue_label
             dialogue_label = complete_dialogue_label
-        assert (
-            dialogue_label not in self.dialogues
-        ), "Dialogue label already present in dialogues."
+        enforce(
+            dialogue_label not in self.dialogues,
+            "Dialogue label already present in dialogues.",
+        )
         if self._message_class is not None and self._dialogue_class is not None:
             dialogue = self._dialogue_class(
                 dialogue_label=dialogue_label,

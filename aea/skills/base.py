@@ -41,7 +41,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.context.base import AgentContext
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_aea_package, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.mail.base import Address
@@ -84,12 +84,14 @@ class SkillContext:
 
     @logger.setter
     def logger(self, logger_: Logger) -> None:
-        assert self._logger is None, "Logger already set."
+        if self._logger is None:
+            raise ValueError("Logger already set.")
         self._logger = logger_
 
     def _get_agent_context(self) -> AgentContext:
         """Get the agent context."""
-        assert self._agent_context is not None, "Agent context not set yet."
+        if self._agent_context is None:
+            raise ValueError("Agent context not set yet.")
         return self._agent_context
 
     def set_agent_context(self, agent_context: AgentContext) -> None:
@@ -109,7 +111,8 @@ class SkillContext:
     @property
     def skill_id(self) -> PublicId:
         """Get the skill id of the skill context."""
-        assert self._skill is not None, "Skill not set yet."
+        if self._skill is None:
+            raise ValueError("Skill not set yet.")
         return self._skill.configuration.public_id
 
     @property
@@ -191,7 +194,8 @@ class SkillContext:
     @property
     def task_manager(self) -> TaskManager:
         """Get behaviours of the skill."""
-        assert self._skill is not None, "Skill not initialized."
+        if self._skill is None:
+            raise ValueError("Skill not initialized.")
         return self._get_agent_context().task_manager
 
     @property
@@ -202,13 +206,15 @@ class SkillContext:
     @property
     def handlers(self) -> SimpleNamespace:
         """Get handlers of the skill."""
-        assert self._skill is not None, "Skill not initialized."
+        if self._skill is None:
+            raise ValueError("Skill not initialized.")
         return SimpleNamespace(**self._skill.handlers)
 
     @property
     def behaviours(self) -> SimpleNamespace:
         """Get behaviours of the skill."""
-        assert self._skill is not None, "Skill not initialized."
+        if self._skill is None:
+            raise ValueError("Skill not initialized.")
         return SimpleNamespace(**self._skill.behaviours)
 
     @property
@@ -238,8 +244,10 @@ class SkillComponent(ABC):
         :param configuration: the configuration for the component.
         :param skill_context: the skill context.
         """
-        assert name is not None, "SkillComponent name is not provided."
-        assert skill_context is not None, "SkillConext is not provided"
+        if name is None:
+            raise ValueError("SkillComponent name is not provided.")
+        if skill_context is None:
+            raise ValueError("SkillConext is not provided")
         if configuration is None:
             class_name = type(self).__name__
             configuration = SkillComponentConfiguration(class_name=class_name, **kwargs)
@@ -259,7 +267,6 @@ class SkillComponent(ABC):
     @property
     def context(self) -> SkillContext:
         """Get the context of the skill component."""
-        assert self._context is not None, "Skill context not set yet."
         return self._context
 
     @property
@@ -270,7 +277,8 @@ class SkillComponent(ABC):
     @property
     def configuration(self) -> SkillComponentConfiguration:
         """Get the skill component configuration."""
-        assert self._configuration is not None, "Configuration not set."
+        if self._configuration is None:
+            ValueError("Configuration not set.")
         return self._configuration
 
     # TODO consider rename this property
@@ -401,9 +409,10 @@ class Behaviour(AbstractBehaviour, ABC):
             skill_context.logger.debug(
                 "Processing behaviour {}".format(behaviour_class_name)
             )
-            assert (
-                behaviour_id.isidentifier()
-            ), "'{}' is not a valid identifier.".format(behaviour_id)
+            enforce(
+                behaviour_id.isidentifier(),
+                "'{}' is not a valid identifier.".format(behaviour_id),
+            )
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
                 skill_context.logger.warning(
@@ -481,8 +490,9 @@ class Handler(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing handler {}".format(handler_class_name)
             )
-            assert handler_id.isidentifier(), "'{}' is not a valid identifier.".format(
-                handler_id
+            enforce(
+                handler_id.isidentifier(),
+                "'{}' is not a valid identifier.".format(handler_id),
             )
             handler_class = name_to_class.get(handler_class_name, None)
             if handler_class is None:
@@ -577,8 +587,9 @@ class Model(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing model id={}, class={}".format(model_id, model_class_name)
             )
-            assert model_id.isidentifier(), "'{}' is not a valid identifier.".format(
-                model_id
+            enforce(
+                model_id.isidentifier(),
+                "'{}' is not a valid identifier.".format(model_id),
             )
             model = name_to_class.get(model_class_name, None)
             if model is None:
@@ -662,7 +673,8 @@ class Skill(Component):
     @property
     def skill_context(self) -> SkillContext:
         """Get the skill context."""
-        assert self._skill_context is not None, "Skill context not set."
+        if self._skill_context is None:
+            raise ValueError("Skill context not set.")
         return self._skill_context
 
     @property
@@ -722,9 +734,8 @@ class Skill(Component):
         :param agent_context: the agent context.
         :return: the skill.
         """
-        assert (
-            configuration.directory is not None
-        ), "Configuration must be associated with a directory."
+        if configuration.directory is None:
+            raise ValueError("Configuration must be associated with a directory.")
 
         # we put the initialization here because some skill components
         # might need some info from the skill

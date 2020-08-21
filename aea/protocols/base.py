@@ -38,6 +38,7 @@ from aea.configurations.base import (
     ProtocolConfig,
     PublicId,
 )
+from aea.exceptions import enforce
 from aea.helpers.base import load_aea_package
 
 logger = logging.getLogger(__name__)
@@ -88,7 +89,8 @@ class Message:
 
         :return the address
         """
-        assert self._sender is not None, "Sender must not be None."
+        if self._sender is None:
+            raise ValueError("Sender must not be None.")
         return self._sender
 
     @sender.setter
@@ -105,13 +107,15 @@ class Message:
     @property
     def to(self) -> Address:
         """Get address of receiver."""
-        assert self._to is not None, "To must not be None."
+        if self._to is None:
+            raise ValueError("To must not be None.")
         return self._to
 
     @to.setter
     def to(self, to: Address) -> None:
         """Set address of receiver."""
-        assert self._to is None, "To already set."
+        if self._to is None:
+            raise ValueError("To already set.")
         self._to = to
 
     @property
@@ -126,7 +130,8 @@ class Message:
 
         :return the address
         """
-        assert self._counterparty is not None, "Counterparty must not be None."
+        if self._counterparty is None:
+            raise ValueError("Counterparty must not be None.")
         return self._counterparty
 
     @counterparty.setter
@@ -170,25 +175,29 @@ class Message:
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
         """Get the dialogue_reference of the message."""
-        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
+        if not self.is_set("dialogue_reference"):
+            raise ValueError("dialogue_reference is not set.")
         return cast(Tuple[str, str], self.get("dialogue_reference"))
 
     @property
     def message_id(self) -> int:
         """Get the message_id of the message."""
-        assert self.is_set("message_id"), "message_id is not set."
+        if not self.is_set("message_id"):
+            raise ValueError("message_id is not set.")
         return cast(int, self.get("message_id"))
 
     @property
     def performative(self) -> "Performative":
         """Get the performative of the message."""
-        assert self.is_set("performative"), "performative is not set."
+        if not self.is_set("performative"):
+            raise ValueError("performative is not set.")
         return cast(Message.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
         """Get the target of the message."""
-        assert self.is_set("target"), "target is not set."
+        if not self.is_set("target"):
+            raise ValueError("target is not set.")
         return cast(int, self.get("target"))
 
     def set(self, key: str, value: Any) -> None:
@@ -379,9 +388,8 @@ class Protocol(Component):
         :param configuration: the protocol configuration.
         :return: the protocol object.
         """
-        assert (
-            configuration.directory is not None
-        ), "Configuration must be associated with a directory."
+        if configuration.directory is None:
+            raise ValueError("Configuration must be associated with a directory.")
         load_aea_package(configuration)
         class_module = importlib.import_module(
             configuration.prefix_import_path + ".message"
@@ -395,7 +403,7 @@ class Protocol(Component):
                 lambda x: re.match("{}Message".format(name_camel_case), x[0]), classes
             )
         )
-        assert len(message_classes) == 1, "Not exactly one message class detected."
+        enforce(len(message_classes) == 1, "Not exactly one message class detected.")
         message_class = message_classes[0][1]
         class_module = importlib.import_module(
             configuration.prefix_import_path + ".serialization"
@@ -407,9 +415,9 @@ class Protocol(Component):
                 classes,
             )
         )
-        assert (
-            len(serializer_classes) == 1
-        ), "Not exactly one serializer class detected."
+        enforce(
+            len(serializer_classes) == 1, "Not exactly one serializer class detected."
+        )
         serialize_class = serializer_classes[0][1]
         message_class.serializer = serialize_class
 

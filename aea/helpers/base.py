@@ -149,7 +149,8 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     :return: None
     """
     dir_ = configuration.directory
-    assert dir_ is not None
+    if dir_ is None:
+        raise ValueError("Cannot load aea package. Directory not set.")
 
     # patch sys.modules with dummy modules
     prefix_root = "packages"

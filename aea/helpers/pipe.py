@@ -30,6 +30,8 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from typing import IO, Optional
 
+from aea.exceptions import enforce
+
 _default_logger = logging.getLogger(__name__)
 
 PIPE_CONN_TIMEOUT = 10.0
@@ -112,7 +114,8 @@ class TCPSocketPipe(LocalPortablePipe):
         self._server = await asyncio.start_server(
             self._handle_connection, host="127.0.0.1", port=self._port
         )
-        assert self._server.sockets is not None
+        if self._server.sockets is None:
+            raise ValueError("Sockets is not set on server.")
         self._port = self._server.sockets[0].getsockname()[1]
         self.logger.debug("socket pipe setup {}".format(self._port))
 
@@ -129,13 +132,15 @@ class TCPSocketPipe(LocalPortablePipe):
     async def _handle_connection(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     ):
-        assert self._connected is not None
+        if self._connected is None:
+            raise ValueError("Not connected!")
         self._connected.set()
         self._reader = reader
         self._writer = writer
 
     async def write(self, data: bytes) -> None:
-        assert self._writer is not None
+        if self._writer is None:
+            raise ValueError("Writer not set.")
         size = struct.pack("!I", len(data))
         self._writer.write(size)
         self._writer.write(data)
@@ -143,7 +148,8 @@ class TCPSocketPipe(LocalPortablePipe):
 
     async def read(self) -> Optional[bytes]:
         self.logger.debug("Reading pipes...")
-        assert self._reader is not None
+        if self._reader is None:
+            raise ValueError("Reader not set.")
         try:
             self.logger.debug("Waiting for messages...")
             buf = await self._reader.readexactly(4)
@@ -163,7 +169,8 @@ class TCPSocketPipe(LocalPortablePipe):
             return None
 
     async def close(self) -> None:
-        assert self._writer is not None, "Pipe not connected"
+        if self._writer is None:
+            raise ValueError("Writer not set.")
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
@@ -237,9 +244,10 @@ class PosixNamedPipe(LocalPortablePipe):
                 raise e  # pragma: no cover
 
         # setup reader
-        assert (
-            self._in != -1 and self._out != -1 and self._loop is not None
-        ), "Incomplete initialization."
+        enforce(
+            self._in != -1 and self._out != -1 and self._loop is not None,
+            "Incomplete initialization.",
+        )
         self._stream_reader = asyncio.StreamReader(loop=self._loop)
         self._reader_protocol = asyncio.StreamReaderProtocol(
             self._stream_reader, loop=self._loop
@@ -254,7 +262,8 @@ class PosixNamedPipe(LocalPortablePipe):
     @property
     def __reader_protocol(self) -> asyncio.StreamReaderProtocol:
         """Get reader protocol."""
-        assert self._reader_protocol is not None, "reader protocol not set!"
+        if self._reader_protocol is None:
+            raise ValueError("reader protocol not set!")
         return self._reader_protocol
 
     async def write(self, data: bytes) -> None:
@@ -275,9 +284,8 @@ class PosixNamedPipe(LocalPortablePipe):
         :return: bytes
         """
         self.logger.debug("reading {}...".format(""))
-        assert (
-            self._stream_reader is not None
-        ), "StreamReader not set, call connect first!"
+        if self._stream_reader is None:
+            raise ValueError("StreamReader not set, call connect first!")
         try:
             self.logger.debug("Waiting for messages...")
             buf = await self._stream_reader.readexactly(4)
@@ -297,7 +305,8 @@ class PosixNamedPipe(LocalPortablePipe):
             return None
 
     async def close(self) -> None:
-        assert self._fileobj is not None, "Pipe not connected"
+        if self._fileobj is None:
+            raise ValueError("Pipe not connected")
         self._fileobj.close()
         os.close(self._out)
         await asyncio.sleep(0)

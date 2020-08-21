@@ -53,14 +53,15 @@ class Identity:
         :param default_address_key: the key for the default address.
         """
         self._name = name
-        assert default_address_key is not None, "Provide a key for the default address."
-        assert (address is None) != (
-            addresses is None
-        ), "Either provide a single address or a dictionary of addresses, not both."
+        if default_address_key is None:
+            ValueError("Provide a key for the default address.")
+        if (address is None) == (addresses is None):
+            raise ValueError(
+                "Either provide a single address or a dictionary of addresses, not both."
+            )
         if address is None:
-            assert (addresses is not None) and len(
-                addresses
-            ) > 0, "Provide at least one pair of addresses."
+            if addresses is None or len(addresses) > 0:
+                raise ValueError("Provide at least one pair of addresses.")
             address = addresses[default_address_key]
         self._address = address
         if addresses is None:
