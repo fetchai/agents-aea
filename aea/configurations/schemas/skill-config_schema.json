@@ -90,13 +90,6 @@
         }
       }
     },
-    "ledgers": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "type": "string"
-      }
-    },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
     },

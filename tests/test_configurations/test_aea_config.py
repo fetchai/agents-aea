@@ -32,11 +32,17 @@ import yaml
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import AgentConfig, PackageType
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import (
+    AgentConfig,
+    ComponentId,
+    ComponentType,
+    PackageType,
+    PublicId,
+)
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import CUR_PATH, ROOT_DIR
 
 
 class NotSet(type):
@@ -247,3 +253,123 @@ class TestRuntimeModeConfigVariable(BaseConfigTestVariable):
     REQUIRED = False
     AEA_ATTR_NAME = "_runtime_mode"
     AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_RUNTIME_MODE
+
+
+def test_agent_configuration_loading_multipage():
+    """Test agent configuration loading, multi-page case."""
+    loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+    agent_config = loader.load(
+        Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
+    )
+
+    # test main agent configuration loaded correctly
+    assert agent_config.agent_name == "myagent"
+    assert agent_config.author == "fetchai"
+
+    # test component configurations loaded correctly
+    assert len(agent_config.component_configurations) == 1
+    keys = list(agent_config.component_configurations)
+    dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
+    expected_component_id = ComponentId("skill", dummy_skill_public_id)
+    assert keys[0] == expected_component_id
+
+
+def test_agent_configuration_loading_multipage_when_empty_file():
+    """Test agent configuration loading, multi-page case, in case of empty file."""
+    with pytest.raises(ValueError, match="Agent configuration file was empty."):
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        loader.load(io.StringIO())
+
+
+def test_agent_configuration_loading_multipage_when_type_not_found():
+    """Test agent configuration loading, multi-page case, when type not found in some component."""
+    # remove type field manually
+    file = Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
+    jsons = list(yaml.safe_load_all(file))
+    jsons[1].pop("type")
+    modified_file = io.StringIO()
+    yaml.safe_dump_all(jsons, modified_file)
+    modified_file.seek(0)
+
+    with pytest.raises(
+        ValueError, match="There are missing fields in component id 1: {'type'}."
+    ):
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        loader.load(modified_file)
+
+
+def test_agent_configuration_loading_multipage_when_same_id():
+    """
+    Test agent configuration loading, multi-page case,
+    when there are two components with the same id.
+    """
+    file = Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
+    jsons = list(yaml.safe_load_all(file))
+    # add twice the last component
+    jsons.append(jsons[-1])
+    modified_file = io.StringIO()
+    yaml.safe_dump_all(jsons, modified_file)
+    modified_file.seek(0)
+
+    with pytest.raises(
+        ValueError,
+        match=r"Configuration of component \(skill, dummy_author/dummy:0.1.0\) occurs more than once.",
+    ):
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        loader.load(modified_file)
+
+
+def test_agent_configuration_loading_multipage_validation_error():
+    """
+    Test agent configuration loading, multi-page case,
+    when the configuration is invalid.
+    """
+    file = Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
+    jsons = list(yaml.safe_load_all(file))
+    # make invalid the last component configuration
+    jsons[-1]["invalid_attribute"] = "foo"
+    modified_file = io.StringIO()
+    yaml.safe_dump_all(jsons, modified_file)
+    modified_file.seek(0)
+
+    with pytest.raises(
+        ValueError,
+        match=fr"Configuration of component \(skill, dummy_author/dummy:0.1.0\) is not valid.",
+    ):
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        loader.load(modified_file)
+
+
+@pytest.mark.parametrize(
+    "component_type",
+    [
+        ComponentType.PROTOCOL,
+        ComponentType.CONNECTION,
+        ComponentType.CONTRACT,
+        ComponentType.SKILL,
+    ],
+)
+def test_agent_configuration_loading_multipage_positive_case(component_type):
+    """Test agent configuration loading, multi-page case, positive case."""
+    public_id = PublicId("dummy_author", "dummy", "0.1.0")
+    file = Path(CUR_PATH, "data", "aea-config.example.yaml").open()
+    json_data = yaml.safe_load(file)
+    json_data[component_type.to_plural()].append(str(public_id))
+    modified_file = io.StringIO()
+    yaml.safe_dump(json_data, modified_file)
+    modified_file.flush()
+    modified_file.write("---\n")
+    modified_file.write(f"author: {public_id.author}\n")
+    modified_file.write(f"name: {public_id.name}\n")
+    modified_file.write(f"version: {public_id.version}\n")
+    modified_file.write(f"type: {component_type.value}\n")
+    modified_file.seek(0)
+    expected_component_id = ComponentId(
+        component_type, PublicId("dummy_author", "dummy", "0.1.0")
+    )
+
+    loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+    agent_config = loader.load(modified_file)
+    assert isinstance(agent_config.component_configurations, dict)
+    assert len(agent_config.component_configurations)
+    assert set(agent_config.component_configurations.keys()) == {expected_component_id}

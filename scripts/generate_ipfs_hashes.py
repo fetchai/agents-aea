@@ -54,7 +54,7 @@ from aea.configurations.base import (
     SkillConfig,
     _compute_fingerprint,
 )
-from aea.helpers.base import yaml_dump
+from aea.helpers.base import yaml_dump, yaml_dump_all
 
 AUTHOR = "fetchai"
 CORE_PATH = Path("aea")
@@ -131,7 +131,14 @@ def sort_configuration_file(config: PackageConfiguration):
     # load config file to get ignore patterns, dump again immediately to impose ordering
     assert config.directory is not None
     configuration_filepath = config.directory / config.default_configuration_filename
-    yaml_dump(config.ordered_json, configuration_filepath.open("w"))
+    if config.package_type == PackageType.AGENT:
+        json_data = config.ordered_json
+        component_configurations = json_data.pop("component_configurations")
+        yaml_dump_all(
+            [json_data] + component_configurations, configuration_filepath.open("w")
+        )
+    else:
+        yaml_dump(config.ordered_json, configuration_filepath.open("w"))
 
 
 def ipfs_hashing(

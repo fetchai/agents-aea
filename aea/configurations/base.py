@@ -26,6 +26,7 @@ import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from copy import deepcopy
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -127,6 +128,17 @@ class PackageType(Enum):
 
         """
         return self.value + "s"
+
+    def configuration_class(self) -> Type["PackageConfiguration"]:
+        """Get the configuration class."""
+        d: Dict[PackageType, Type["PackageConfiguration"]] = {
+            PackageType.AGENT: AgentConfig,
+            PackageType.PROTOCOL: ProtocolConfig,
+            PackageType.CONNECTION: ConnectionConfig,
+            PackageType.CONTRACT: ContractConfig,
+            PackageType.SKILL: SkillConfig,
+        }
+        return d[self]
 
     def __str__(self):
         """Convert to string."""
@@ -637,6 +649,7 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
+    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -856,12 +869,21 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         _check_aea_version(self)
 
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+
 
 class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
+    configurable_fields = {"config"}
 
     def __init__(
         self,
@@ -922,7 +944,7 @@ class ConnectionConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.config = config
+        self.config = config if len(config) > 0 else {}
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -984,8 +1006,17 @@ class ConnectionConfig(ComponentConfiguration):
             excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
-            **cast(dict, obj.get("config")),
+            **cast(dict, obj.get("config", {})),
         )
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        self.config = data.get("config", self.config)
 
 
 class ProtocolConfig(ComponentConfiguration):
@@ -1088,6 +1119,7 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
+    configurable_fields = {"handlers", "behaviours", "models"}
 
     def __init__(
         self,
@@ -1121,9 +1153,9 @@ class SkillConfig(ComponentConfiguration):
         self.skills: List[PublicId] = (skills if skills is not None else [])
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.handlers = CRUDCollection[SkillComponentConfiguration]()
-        self.behaviours = CRUDCollection[SkillComponentConfiguration]()
-        self.models = CRUDCollection[SkillComponentConfiguration]()
+        self.handlers: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
+        self.behaviours: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
+        self.models: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
 
         self.is_abstract = is_abstract
 
@@ -1235,6 +1267,26 @@ class SkillConfig(ComponentConfiguration):
 
         return skill_config
 
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        # TODO check consistency of data.
+        for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
+            behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
+            self.behaviours.update(behaviour_id, behaviour_config)
+
+        for handler_id, handler_data in data.get("handlers", {}).items():
+            handler_config = SkillComponentConfiguration.from_json(handler_data)
+            self.handlers.update(handler_id, handler_config)
+
+        for model_id, model_data in data.get("models", {}).items():
+            model_config = SkillComponentConfiguration.from_json(model_data)
+            self.models.update(model_id, model_config)
+
 
 class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
@@ -1262,6 +1314,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        component_configurations: Optional[Dict[ComponentId, Dict]] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1310,6 +1363,31 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self._component_configurations: Dict[ComponentId, Dict] = {}
+        self.component_configurations = (
+            component_configurations if component_configurations is not None else {}
+        )
+
+    @property
+    def component_configurations(self) -> Dict[ComponentId, Dict]:
+        """Get the custom component configurations."""
+        return self._component_configurations
+
+    @component_configurations.setter
+    def component_configurations(self, d: Dict[ComponentId, Dict]) -> None:
+        """Set the component configurations."""
+        package_type_to_set = {
+            PackageType.PROTOCOL: self.protocols,
+            PackageType.CONNECTION: self.connections,
+            PackageType.CONTRACT: self.contracts,
+            PackageType.SKILL: self.skills,
+        }
+        # TODO add validation of dict values.
+        for component_id, _ in d.items():
+            assert (
+                component_id.public_id in package_type_to_set[component_id.package_type]
+            ), f"Component {component_id} not declared in the agent configuration."
+        self._component_configurations = d
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1384,6 +1462,19 @@ class AgentConfig(PackageConfiguration):
         """
         self._default_ledger = ledger_id
 
+    def component_configurations_json(self) -> List[OrderedDict]:
+        """Get the component configurations in JSON format."""
+        return [
+            OrderedDict(
+                name=component_id.name,
+                author=component_id.author,
+                version=component_id.version,
+                type=component_id.component_type.value,
+                **obj,
+            )
+            for component_id, obj in self.component_configurations.items()
+        ]
+
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
@@ -1406,6 +1497,7 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
+                "component_configurations": self.component_configurations_json(),
             }
         )  # type: Dict[str, Any]
 
@@ -1460,6 +1552,7 @@ class AgentConfig(PackageConfiguration):
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
+            component_configurations=None,
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():
@@ -1469,40 +1562,31 @@ class AgentConfig(PackageConfiguration):
             agent_config.connection_private_key_paths.create(crypto_id, path)
 
         # parse connection public ids
-        connections = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("connections", []),
-            )
+        agent_config.connections = set(
+            map(PublicId.from_str, obj.get("connections", []),)
         )
-        agent_config.connections = cast(Set[PublicId], connections)
 
         # parse contracts public ids
-        contracts = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("contracts", []),
-            )
-        )
-        agent_config.contracts = cast(Set[PublicId], contracts)
+        agent_config.contracts = set(map(PublicId.from_str, obj.get("contracts", []),))
 
         # parse protocol public ids
-        protocols = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("protocols", []),
-            )
-        )
-        agent_config.protocols = cast(Set[PublicId], protocols)
+        agent_config.protocols = set(map(PublicId.from_str, obj.get("protocols", []),))
 
         # parse skills public ids
-        skills = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("skills", []),
+        agent_config.skills = set(map(PublicId.from_str, obj.get("skills", []),))
+
+        component_configurations = {}
+        for config in obj.get("component_configurations", []):
+            tmp = deepcopy(config)
+            name = tmp.pop("name")
+            author = tmp.pop("author")
+            version = tmp.pop("version")
+            type_ = tmp.pop("type")
+            component_id = ComponentId(
+                ComponentType(type_), PublicId(author, name, version)
             )
-        )
-        agent_config.skills = cast(Set[PublicId], skills)
+            component_configurations[component_id] = tmp
+        agent_config.component_configurations = component_configurations
 
         # set default connection
         default_connection_name = obj.get("default_connection", None)
