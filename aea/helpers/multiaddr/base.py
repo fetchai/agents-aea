@@ -98,7 +98,7 @@ class MultiAddr:
 
         try:
             VerifyingKey._from_compressed(_hex_to_bytes(public_key), curves.SECP256k1)
-        except keys.MalformedPointError as e:
+        except keys.MalformedPointError as e:  # pragma: no cover
             raise Exception("Malformed public key:{}".format(str(e)))
 
         self._public_key = public_key
