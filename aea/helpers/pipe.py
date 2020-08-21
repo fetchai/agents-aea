@@ -242,7 +242,7 @@ class PosixNamedPipeProtocol:
 
             os.close(self._out)
             self._fileobj.close()
-        except OSError:
+        except OSError:  # pragma: no cover
             pass
         await asyncio.sleep(0)
 
@@ -329,7 +329,6 @@ class TCPSocketChannel(IPCChannel):
         """ Initialize tcp socket interprocess communication channel"""
         self.logger = logger
         self._loop = loop
-        self._timeout = 0.0
         self._server = None  # type: Optional[asyncio.AbstractServer]
         self._connected = None  # type: Optional[asyncio.Event]
         self._sock = None  # type: Optional[TCPSocketProtocol]
@@ -351,7 +350,6 @@ class TCPSocketChannel(IPCChannel):
             self._loop = asyncio.get_event_loop()
 
         self._connected = asyncio.Event()
-        self._timeout = timeout if timeout > 0 else 0
         self._server = await asyncio.start_server(
             self._handle_connection, host="127.0.0.1", port=self._port
         )
@@ -360,7 +358,7 @@ class TCPSocketChannel(IPCChannel):
         self.logger.debug("socket pipe rdv point: {}".format(self._port))
 
         try:
-            await asyncio.wait_for(self._connected.wait(), self._timeout)
+            await asyncio.wait_for(self._connected.wait(), timeout)
         except asyncio.TimeoutError:  # pragma: no cover
             return False
 
@@ -518,6 +516,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         self._sock = None  # type: Optional[TCPSocketProtocol]
 
         self._attempts = TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS
+        self._timeout = PIPE_CONN_TIMEOUT / self._attempts
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
@@ -528,6 +527,8 @@ class TCPSocketChannelClient(IPCChannelClient):
 
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
+
+        self._timeout = timeout / TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS
 
         self.logger.debug(
             "Attempting to connect to {}:{}.....".format("127.0.0.1", self._port)
@@ -548,7 +549,7 @@ class TCPSocketChannelClient(IPCChannelClient):
                 connected = True
                 break
             except ConnectionRefusedError:
-                await asyncio.sleep(TCP_SOCKET_PIPE_CLIENT_CONN_TIMEOUT)
+                await asyncio.sleep(self._timeout)
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 return False
 
