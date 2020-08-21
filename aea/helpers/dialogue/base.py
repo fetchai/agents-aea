@@ -505,6 +505,9 @@ class Dialogue(ABC):
         :return: None
         :raises: InvalidDialogueMessage: if message does not belong to this dialogue, or if message is invalid
         """
+        if not message.has_sender:
+            message.sender = self.agent_address
+
         if not self.is_belonging_to_dialogue(message):
             raise InvalidDialogueMessage(
                 "The message {} does not belong to this dialogue."
