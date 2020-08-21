@@ -249,7 +249,6 @@ class LocalNode:
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 )
-                msg.sender = oef_search_msg.to
                 msg.to = oef_search_msg.sender
                 assert dialogue.update(msg)
                 envelope = Envelope(
@@ -295,7 +294,6 @@ class LocalNode:
                 message_id=oef_search_msg.message_id + 1,
                 agents=tuple(sorted(set(result))),
             )
-            msg.sender = oef_search_msg.to
             msg.to = oef_search_msg.sender
             assert dialogue.update(msg)
 

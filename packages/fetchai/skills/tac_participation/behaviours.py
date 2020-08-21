@@ -77,7 +77,7 @@ class TacSearchBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
@@ -153,6 +153,6 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 counterparty_signature=counterparty_signature,
                 nonce=terms.nonce,
             )
-            msg.counterparty = game.conf.controller_addr
+            msg.to = game.conf.controller_addr
             tac_dialogue.update(msg)
             self.context.outbox.put_message(message=msg)

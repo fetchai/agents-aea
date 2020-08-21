@@ -143,7 +143,7 @@ class ProxyEnv(gym.Env):
             dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
             performative=GymMessage.Performative.RESET,
         )
-        gym_msg.counterparty = self.gym_address
+        gym_msg.to = self.gym_address
         gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
         assert gym_dialogue is not None
         self._active_dialogue = gym_dialogue
@@ -174,7 +174,7 @@ class ProxyEnv(gym.Env):
             message_id=last_msg.message_id + 1,
             target=last_msg.message_id,
         )
-        gym_msg.counterparty = self.gym_address
+        gym_msg.to = self.gym_address
         assert self.active_gym_dialogue.update(gym_msg)
         self._skill_context.outbox.put_message(message=gym_msg)
 
@@ -196,7 +196,7 @@ class ProxyEnv(gym.Env):
             message_id=last_msg.message_id + 1,
             target=last_msg.message_id,
         )
-        gym_msg.counterparty = self.gym_address
+        gym_msg.to = self.gym_address
         assert self.active_gym_dialogue.update(gym_msg)
         # Send the message via the proxy agent and to the environment
         self._skill_context.outbox.put_message(message=gym_msg)

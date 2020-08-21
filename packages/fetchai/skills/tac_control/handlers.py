@@ -110,7 +110,7 @@ class TacHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"tac_message": tac_msg.encode()},
         )
-        default_msg.counterparty = tac_msg.counterparty
+        default_msg.to = tac_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
@@ -146,16 +146,16 @@ class TacHandler(Handler):
                 message_id=tac_msg.message_id + 1,
                 target=tac_msg.message_id,
             )
-            error_msg.counterparty = tac_msg.counterparty
+            error_msg.to = tac_msg.sender
             assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
         game = cast(Game, self.context.game)
-        if tac_msg.counterparty in game.registration.agent_addr_to_name:
+        if tac_msg.sender in game.registration.agent_addr_to_name:
             self.context.logger.warning(
                 "agent already registered: '{}'".format(
-                    game.registration.agent_addr_to_name[tac_msg.counterparty],
+                    game.registration.agent_addr_to_name[tac_msg.sender],
                 )
             )
             error_msg = TacMessage(
@@ -165,7 +165,7 @@ class TacHandler(Handler):
                 message_id=tac_msg.message_id + 1,
                 target=tac_msg.message_id,
             )
-            error_msg.counterparty = tac_msg.counterparty
+            error_msg.to = tac_msg.sender
             assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
@@ -181,12 +181,12 @@ class TacHandler(Handler):
                 message_id=tac_msg.message_id + 1,
                 target=tac_msg.message_id,
             )
-            error_msg.counterparty = tac_msg.counterparty
+            error_msg.to = tac_msg.sender
             assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
-        game.registration.register_agent(tac_msg.counterparty, agent_name)
+        game.registration.register_agent(tac_msg.sender, agent_name)
         self.context.logger.info("agent registered: '{}'".format(agent_name))
 
     def _on_unregister(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
@@ -208,9 +208,9 @@ class TacHandler(Handler):
             )
             return
 
-        if tac_msg.counterparty not in game.registration.agent_addr_to_name:
+        if tac_msg.sender not in game.registration.agent_addr_to_name:
             self.context.logger.warning(
-                "agent not registered: '{}'".format(tac_msg.counterparty)
+                "agent not registered: '{}'".format(tac_msg.sender)
             )
             error_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
@@ -219,16 +219,16 @@ class TacHandler(Handler):
                 message_id=tac_msg.message_id + 1,
                 target=tac_msg.message_id,
             )
-            error_msg.counterparty = tac_msg.counterparty
+            error_msg.to = tac_msg.sender
             assert tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
         else:
             self.context.logger.debug(
                 "agent unregistered: '{}'".format(
-                    game.conf.agent_addr_to_name[tac_msg.counterparty],
+                    game.conf.agent_addr_to_name[tac_msg.sender],
                 )
             )
-            game.registration.unregister_agent(tac_msg.counterparty)
+            game.registration.unregister_agent(tac_msg.sender)
 
     def _on_transaction(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
         """
@@ -285,7 +285,7 @@ class TacHandler(Handler):
             message_id=tac_msg.message_id + 1,
             target=tac_msg.message_id,
         )
-        sender_tac_msg.counterparty = transaction.sender_address
+        sender_tac_msg.to = transaction.sender_address
         assert tac_dialogue.update(sender_tac_msg)
         self.context.outbox.put_message(message=sender_tac_msg)
 
@@ -305,7 +305,7 @@ class TacHandler(Handler):
             message_id=last_msg.message_id + 1,
             target=last_msg.message_id,
         )
-        counterparty_tac_msg.counterparty = transaction.counterparty_address
+        counterparty_tac_msg.to = transaction.counterparty_address
         assert recovered_tac_dialogue.update(counterparty_tac_msg)
         self.context.outbox.put_message(message=counterparty_tac_msg)
 
@@ -330,7 +330,7 @@ class TacHandler(Handler):
             message_id=tac_msg.message_id + 1,
             target=tac_msg.message_id,
         )
-        error_msg.counterparty = tac_msg.counterparty
+        error_msg.to = tac_msg.sender
         assert tac_dialogue.update(error_msg)
         self.context.outbox.put_message(message=error_msg)
 

@@ -57,7 +57,7 @@ def make_test_envelope() -> Envelope:
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = "any"
+    msg.to = "any"
     envelope = Envelope(
         to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
     )

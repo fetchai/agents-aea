@@ -146,7 +146,7 @@ class Transactions(Model):
             skill_callback_info=skill_callback_info,
             raw_message=raw_message,
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         return signing_msg
 
     def update_confirmed_transactions(self) -> None:

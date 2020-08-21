@@ -113,7 +113,7 @@ class GenericFipaHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.counterparty = fipa_msg.counterparty
+        default_msg.to = fipa_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
@@ -129,7 +129,7 @@ class GenericFipaHandler(Handler):
         """
         self.context.logger.info(
             "received proposal={} from sender={}".format(
-                fipa_msg.proposal.values, fipa_msg.counterparty[-5:],
+                fipa_msg.proposal.values, fipa_msg.sender[-5:],
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -137,13 +137,9 @@ class GenericFipaHandler(Handler):
         affordable = strategy.is_affordable_proposal(fipa_msg.proposal)
         if acceptable and affordable:
             self.context.logger.info(
-                "accepting the proposal from sender={}".format(
-                    fipa_msg.counterparty[-5:]
-                )
+                "accepting the proposal from sender={}".format(fipa_msg.sender[-5:])
             )
-            terms = strategy.terms_from_proposal(
-                fipa_msg.proposal, fipa_msg.counterparty
-            )
+            terms = strategy.terms_from_proposal(fipa_msg.proposal, fipa_msg.sender)
             fipa_dialogue.terms = terms
             accept_msg = FipaMessage(
                 message_id=fipa_msg.message_id + 1,
@@ -151,14 +147,12 @@ class GenericFipaHandler(Handler):
                 target=fipa_msg.message_id,
                 performative=FipaMessage.Performative.ACCEPT,
             )
-            accept_msg.counterparty = fipa_msg.counterparty
+            accept_msg.to = fipa_msg.sender
             fipa_dialogue.update(accept_msg)
             self.context.outbox.put_message(message=accept_msg)
         else:
             self.context.logger.info(
-                "declining the proposal from sender={}".format(
-                    fipa_msg.counterparty[-5:]
-                )
+                "declining the proposal from sender={}".format(fipa_msg.sender[-5:])
             )
             decline_msg = FipaMessage(
                 message_id=fipa_msg.message_id + 1,
@@ -166,7 +160,7 @@ class GenericFipaHandler(Handler):
                 target=fipa_msg.message_id,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            decline_msg.counterparty = fipa_msg.counterparty
+            decline_msg.to = fipa_msg.sender
             fipa_dialogue.update(decline_msg)
             self.context.outbox.put_message(message=decline_msg)
 
@@ -185,7 +179,7 @@ class GenericFipaHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "received DECLINE from sender={}".format(fipa_msg.counterparty[-5:])
+            "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
         )
         if fipa_msg.target == 1:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -208,7 +202,7 @@ class GenericFipaHandler(Handler):
         """
         self.context.logger.info(
             "received MATCH_ACCEPT_W_INFORM from sender={} with info={}".format(
-                fipa_msg.counterparty[-5:], fipa_msg.info
+                fipa_msg.sender[-5:], fipa_msg.info
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -224,7 +218,7 @@ class GenericFipaHandler(Handler):
                 dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 terms=fipa_dialogue.terms,
             )
-            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+            ledger_api_msg.to = LEDGER_API_ADDRESS
             ledger_api_dialogue = cast(
                 Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
             )
@@ -245,13 +239,11 @@ class GenericFipaHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info={"Done": "Sending payment via bank transfer"},
             )
-            inform_msg.counterparty = fipa_msg.counterparty
+            inform_msg.to = fipa_msg.sender
             fipa_dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
-                "informing counterparty={} of payment.".format(
-                    fipa_msg.counterparty[-5:]
-                )
+                "informing counterparty={} of payment.".format(fipa_msg.sender[-5:])
             )
 
     def _handle_inform(
@@ -269,7 +261,7 @@ class GenericFipaHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "received INFORM from sender={}".format(fipa_msg.counterparty[-5:])
+            "received INFORM from sender={}".format(fipa_msg.sender[-5:])
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
@@ -281,7 +273,7 @@ class GenericFipaHandler(Handler):
             )
         else:
             self.context.logger.info(
-                "received no data from sender={}".format(fipa_msg.counterparty[-5:])
+                "received no data from sender={}".format(fipa_msg.sender[-5:])
             )
 
     def _handle_invalid(
@@ -404,7 +396,7 @@ class GenericOefSearchHandler(Handler):
                 dialogue_reference=fipa_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            cfp_msg.counterparty = counterparty
+            cfp_msg.to = counterparty
             fipa_dialogues.update(cfp_msg)
             self.context.outbox.put_message(message=cfp_msg)
             self.context.logger.info(
@@ -507,7 +499,7 @@ class GenericSigningHandler(Handler):
             message_id=last_ledger_api_msg.message_id + 1,
             signed_transaction=signing_msg.signed_transaction,
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+        ledger_api_msg.to = LEDGER_API_ADDRESS
         ledger_api_dialogue.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")
@@ -654,7 +646,7 @@ class GenericLedgerApiHandler(Handler):
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
             skill_callback_info={},
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = cast(
             Optional[SigningDialogue], signing_dialogues.update(signing_msg)
         )
@@ -691,7 +683,7 @@ class GenericLedgerApiHandler(Handler):
             target=fipa_msg.message_id,
             info={"transaction_digest": ledger_api_msg.transaction_digest.body},
         )
-        inform_msg.counterparty = fipa_dialogue.dialogue_label.dialogue_opponent_addr
+        inform_msg.to = fipa_dialogue.dialogue_label.dialogue_opponent_addr
         fipa_dialogue.update(inform_msg)
         self.context.outbox.put_message(message=inform_msg)
         self.context.logger.info(

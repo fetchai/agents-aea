@@ -84,7 +84,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
@@ -105,7 +105,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
@@ -126,7 +126,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering service from SOEF.")
@@ -147,7 +147,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")

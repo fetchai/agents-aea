@@ -290,7 +290,6 @@ class OEFChannel(OEFAgent):
             message_id=last_msg.message_id + 1,
             agents=tuple(agents),
         )
-        msg.sender = last_msg.to
         msg.to = last_msg.sender
         oef_search_dialogue.update(msg)
         envelope = Envelope(
@@ -333,7 +332,6 @@ class OEFChannel(OEFAgent):
             message_id=last_msg.message_id + 1,
             oef_error_operation=operation,
         )
-        msg.sender = last_msg.to
         msg.to = last_msg.sender
         oef_search_dialogue.update(msg)
         envelope = Envelope(

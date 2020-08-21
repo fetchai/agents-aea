@@ -194,7 +194,7 @@ class OefSearchHandler(Handler):
             dialogue_reference=tac_dialogues.new_self_initiated_dialogue_reference(),
             agent_name=self.context.agent_name,
         )
-        tac_msg.counterparty = controller_addr
+        tac_msg.to = controller_addr
         tac_dialogue = cast(Optional[TacDialogue], tac_dialogues.update(tac_msg))
         assert tac_dialogue is not None, "TacDialogue not created."
         game.tac_dialogue = tac_dialogue
@@ -236,7 +236,7 @@ class TacHandler(Handler):
         self.context.logger.debug(
             "handling controller response. performative={}".format(tac_msg.performative)
         )
-        if tac_msg.counterparty != game.expected_controller_addr:
+        if tac_msg.sender != game.expected_controller_addr:
             raise ValueError(
                 "The sender of the message is not the controller agent we registered with."
             )
@@ -316,7 +316,7 @@ class TacHandler(Handler):
             "received start event from the controller. Starting to compete..."
         )
         game = cast(Game, self.context.game)
-        game.init(tac_msg, tac_msg.counterparty)
+        game.init(tac_msg, tac_msg.sender)
         game.update_game_phase(Phase.GAME)
 
         if game.is_using_contract:
@@ -359,7 +359,7 @@ class TacHandler(Handler):
             utility_params_by_good_id=tac_msg.utility_params_by_good_id,
         )
         self.context.shared_state["fee_by_currency_id"] = tac_msg.fee_by_currency_id
-        state_update_msg.counterparty = "decision_maker"
+        state_update_msg.to = "decision_maker"
         state_update_dialogue = cast(
             Optional[StateUpdateDialogue],
             state_update_dialogues.update(state_update_msg),
@@ -427,7 +427,7 @@ class TacHandler(Handler):
             amount_by_currency_id=tac_msg.amount_by_currency_id,
             quantities_by_good_id=tac_msg.quantities_by_good_id,
         )
-        state_update_msg.counterparty = "decision_maker"
+        state_update_msg.to = "decision_maker"
         state_update_dialogue.update(state_update_msg)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
         if "confirmed_tx_ids" not in self.context.shared_state.keys():

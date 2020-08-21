@@ -104,7 +104,7 @@ class MlTradeHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"ml_trade_message": ml_trade_msg.encode()},
         )
-        default_msg.counterparty = ml_trade_msg.counterparty
+        default_msg.to = ml_trade_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
@@ -120,7 +120,7 @@ class MlTradeHandler(Handler):
         """
         query = ml_trade_msg.query
         self.context.logger.info(
-            "got a Call for Terms from {}.".format(ml_trade_msg.counterparty[-5:])
+            "got a Call for Terms from {}.".format(ml_trade_msg.sender[-5:])
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_matching_supply(query):
@@ -129,7 +129,7 @@ class MlTradeHandler(Handler):
         terms = strategy.generate_terms()
         self.context.logger.info(
             "sending to the address={} a Terms message: {}".format(
-                ml_trade_msg.counterparty[-5:], terms.values
+                ml_trade_msg.sender[-5:], terms.values
             )
         )
         terms_msg = MlTradeMessage(
@@ -139,7 +139,7 @@ class MlTradeHandler(Handler):
             target=ml_trade_msg.message_id,
             terms=terms,
         )
-        terms_msg.counterparty = ml_trade_msg.counterparty
+        terms_msg.to = ml_trade_msg.sender
         ml_trade_dialogue.update(terms_msg)
         self.context.outbox.put_message(message=terms_msg)
 
@@ -155,9 +155,7 @@ class MlTradeHandler(Handler):
         """
         terms = ml_trade_msg.terms
         self.context.logger.info(
-            "got an Accept from {}: {}".format(
-                ml_trade_msg.counterparty[-5:], terms.values
-            )
+            "got an Accept from {}: {}".format(ml_trade_msg.sender[-5:], terms.values)
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_valid_terms(terms):
@@ -166,7 +164,7 @@ class MlTradeHandler(Handler):
         data = strategy.sample_data(terms.values["batch_size"])
         self.context.logger.info(
             "sending to address={} a Data message: shape={}".format(
-                ml_trade_msg.counterparty[-5:], data[0].shape
+                ml_trade_msg.sender[-5:], data[0].shape
             )
         )
         payload = pickle.dumps(data)  # nosec
@@ -178,7 +176,7 @@ class MlTradeHandler(Handler):
             terms=terms,
             payload=payload,
         )
-        data_msg.counterparty = ml_trade_msg.counterparty
+        data_msg.to = ml_trade_msg.sender
         ml_trade_dialogue.update(data_msg)
         self.context.outbox.put_message(message=data_msg)
 

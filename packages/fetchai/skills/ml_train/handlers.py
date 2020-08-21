@@ -117,7 +117,7 @@ class MlTradeHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"ml_trade_message": ml_trade_msg.encode()},
         )
-        default_msg.counterparty = ml_trade_msg.counterparty
+        default_msg.to = ml_trade_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
@@ -134,7 +134,7 @@ class MlTradeHandler(Handler):
         terms = ml_trade_msg.terms
         self.context.logger.info(
             "received terms message from {}: terms={}".format(
-                ml_trade_msg.counterparty[-5:], terms.values
+                ml_trade_msg.sender[-5:], terms.values
             )
         )
 
@@ -170,7 +170,7 @@ class MlTradeHandler(Handler):
                     fee_by_currency_id={terms.values["currency_id"]: 1},
                 ),
             )
-            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+            ledger_api_msg.to = LEDGER_API_ADDRESS
             ledger_api_dialogue = cast(
                 Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
             )
@@ -192,7 +192,7 @@ class MlTradeHandler(Handler):
                 tx_digest=DUMMY_DIGEST,
                 terms=terms,
             )
-            ml_accept.counterparty = ml_trade_msg.counterparty
+            ml_accept.to = ml_trade_msg.sender
             ml_trade_dialogue.update(ml_accept)
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info("sending dummy transaction digest ...")
@@ -213,13 +213,13 @@ class MlTradeHandler(Handler):
         if data is None:
             self.context.logger.info(
                 "received data message with no data from {}".format(
-                    ml_trade_msg.counterparty[-5:]
+                    ml_trade_msg.sender[-5:]
                 )
             )
         else:
             self.context.logger.info(
                 "received data message from {}: data shape={}, terms={}".format(
-                    ml_trade_msg.counterparty[-5:], data[0].shape, terms.values
+                    ml_trade_msg.sender[-5:], data[0].shape, terms.values
                 )
             )
             # training_task = MLTrainTask(data, self.context.ml_model)
@@ -350,7 +350,7 @@ class OEFSearchHandler(Handler):
                 dialogue_reference=ml_trade_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            cft_msg.counterparty = opponent_address
+            cft_msg.to = opponent_address
             ml_trade_dialogues.update(cft_msg)
             self.context.outbox.put_message(message=cft_msg)
 
@@ -482,7 +482,7 @@ class LedgerApiHandler(Handler):
             terms=last_msg.terms,
             skill_callback_info={},
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = cast(
             Optional[SigningDialogue], signing_dialogues.update(signing_msg)
         )
@@ -520,12 +520,12 @@ class LedgerApiHandler(Handler):
             tx_digest=ledger_api_msg.transaction_digest.body,
             terms=ml_trade_msg.terms,
         )
-        ml_accept.counterparty = ml_trade_msg.counterparty
+        ml_accept.to = ml_trade_msg.sender
         ml_trade_dialogue.update(ml_accept)
         self.context.outbox.put_message(message=ml_accept)
         self.context.logger.info(
             "informing counterparty={} of transaction digest={}.".format(
-                ml_trade_msg.counterparty[-5:], ledger_api_msg.transaction_digest,
+                ml_trade_msg.sender[-5:], ledger_api_msg.transaction_digest,
             )
         )
 
@@ -640,7 +640,7 @@ class SigningHandler(Handler):
             message_id=last_ledger_api_msg.message_id + 1,
             signed_transaction=signing_msg.signed_transaction,
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+        ledger_api_msg.to = LEDGER_API_ADDRESS
         ledger_api_dialogue.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")

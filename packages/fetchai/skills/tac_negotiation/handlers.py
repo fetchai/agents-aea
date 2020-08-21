@@ -118,7 +118,7 @@ class FipaNegotiationHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.counterparty = fipa_msg.counterparty
+        default_msg.to = fipa_msg.sender
         assert (
             default_dialogues.update(default_msg) is not None
         ), "DefaultDialogue not constructed."
@@ -201,7 +201,7 @@ class FipaNegotiationHandler(Handler):
                 target=cfp.message_id,
                 proposal=proposal_description,
             )
-        fipa_msg.counterparty = cfp.counterparty
+        fipa_msg.to = cfp.sender
         fipa_dialogue.update(fipa_msg)
         self.context.outbox.put_message(message=fipa_msg)
 
@@ -258,7 +258,7 @@ class FipaNegotiationHandler(Handler):
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_PROPOSE, fipa_dialogue.is_self_initiated
             )
-        fipa_msg.counterparty = propose.counterparty
+        fipa_msg.to = propose.sender
         fipa_dialogue.update(fipa_msg)
         self.context.outbox.put_message(message=fipa_msg)
 
@@ -349,7 +349,7 @@ class FipaNegotiationHandler(Handler):
                 # tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None)
                 # assert tx_nonce is not None, "tx_nonce must be provided"
                 # transaction_msg = contract.get_hash_batch_transaction_msg(
-                #     from_address=accept.counterparty,
+                #     from_address=accept.sender,
                 #     to_address=self.context.agent_address,  # must match self
                 #     token_ids=[
                 #         int(key)
@@ -409,7 +409,7 @@ class FipaNegotiationHandler(Handler):
                 dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
                 target=accept.message_id,
             )
-            fipa_msg.counterparty = accept.counterparty
+            fipa_msg.to = accept.sender
             fipa_dialogue.update(fipa_msg)
             dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(
@@ -464,7 +464,7 @@ class FipaNegotiationHandler(Handler):
                 # ), "tx_nonce or tx_signature not available"
                 # transaction_msg = contract.get_atomic_swap_batch_transaction_msg(
                 #     from_address=self.context.agent_address,
-                #     to_address=match_accept.counterparty,
+                #     to_address=match_accept.sender,
                 #     token_ids=[
                 #         int(key)
                 #         for key in transaction_msg.terms.quantities_by_good_id.keys()
@@ -620,7 +620,7 @@ class SigningHandler(Handler):
                 target=last_fipa_message.message_id,
                 info={"signature": signing_msg.signed_message.body},
             )
-            fipa_msg.counterparty = last_fipa_message.counterparty
+            fipa_msg.to = last_fipa_message.sender
             fipa_dialogue.update(fipa_msg)
             self.context.outbox.put_message(message=fipa_msg)
             self.context.logger.info(
@@ -703,7 +703,7 @@ class SigningHandler(Handler):
                     "tx_id": signing_msg.dialogue_reference[0],
                 },
             )
-            fipa_msg.counterparty = fipa_dialogue.dialogue_label.dialogue_opponent_addr
+            fipa_msg.to = fipa_dialogue.dialogue_label.dialogue_opponent_addr
             fipa_dialogue.update(fipa_msg)
             self.context.outbox.put_message(message=fipa_msg)
         elif (
@@ -924,7 +924,7 @@ class OefSearchHandler(Handler):
                     performative=FipaMessage.Performative.CFP,
                     query=query,
                 )
-                fipa_msg.counterparty = opponent_addr
+                fipa_msg.to = opponent_addr
                 fipa_dialogues.update(fipa_msg)
                 self.context.outbox.put_message(message=fipa_msg)
         else:

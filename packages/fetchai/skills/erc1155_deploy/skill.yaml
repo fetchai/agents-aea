@@ -8,9 +8,9 @@ license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
-  behaviours.py: QmWJ5kZc8u5ieaf2fVMcWgJ9g837iX5psTUXFvLMdfNgZF
+  behaviours.py: QmNMUe9dXhUA8Fw46vAqMDPnzQuYS7DY81W4ZyskuB6tjv
   dialogues.py: QmR6qb8PdmUozHANKMuLaKfLGKxgnx2zFzbkmcgqXq8wgg
-  handlers.py: QmNsMnenb5NEHyEP9ZVreWNCXe5Q3yMhnWWBfvFouKiQ44
+  handlers.py: QmVqy5MWSnMJ7ytbECSjLsr9UPykjrkvNotqGnZCKMWzXU
   strategy.py: QmYvu2yH9fh2reqPXuTLFcX82fjeFA5Wm5K9DrTrDduJ49
 fingerprint_ignore_patterns: []
 contracts:

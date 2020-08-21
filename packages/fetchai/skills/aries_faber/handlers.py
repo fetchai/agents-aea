@@ -98,7 +98,6 @@ class FaberHTTPHandler(Handler):
             performative=DefaultMessage.Performative.BYTES,
             content=json.dumps(content).encode("utf-8"),
         )
-        message.sender = self.context.agent_address
         message.to = strategy.alice_aea_address
 
         # default dialogue

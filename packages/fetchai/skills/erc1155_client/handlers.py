@@ -113,7 +113,6 @@ class FipaHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.sender = fipa_msg.to
         default_msg.to = fipa_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
@@ -185,7 +184,6 @@ class FipaHandler(Handler):
                 is_sender_payable_tx_fee=False,
                 nonce=str(fipa_msg.proposal.values["trade_nonce"]),
             )
-            contract_api_msg.sender = self.context.agent_address
             contract_api_msg.to = LEDGER_API_ADDRESS
             contract_api_dialogue = cast(
                 Optional[ContractApiDialogue],
@@ -325,7 +323,6 @@ class OefSearchHandler(Handler):
                 performative=FipaMessage.Performative.CFP,
                 query=query,
             )
-            cfp_msg.sender = self.context.agent_address
             cfp_msg.to = opponent_address
             fipa_dialogues.update(cfp_msg)
             self.context.logger.info(
@@ -435,7 +432,6 @@ class ContractApiHandler(Handler):
             terms=contract_api_dialogue.terms,
             skill_callback_info={},
         )
-        signing_msg.sender = self.context.agent_address
         signing_msg.to = "decision_maker"
         signing_dialogue = cast(
             Optional[SigningDialogue], signing_dialogues.update(signing_msg)
@@ -559,7 +555,6 @@ class SigningHandler(Handler):
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             info={"tx_signature": signing_msg.signed_message.body},
         )
-        inform_msg.sender = last_fipa_msg.to
         inform_msg.to = last_fipa_msg.sender
         self.context.logger.info(
             "sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(

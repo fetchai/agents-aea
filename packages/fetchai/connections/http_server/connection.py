@@ -167,7 +167,6 @@ class Request(OpenAPIRequest):
             bodyy=self.body if self.body is not None else b"",
             version="",
         )
-        http_message.sender = str(connection_id)
         http_message.to = agent_address
         dialogue = cast(Optional[HttpDialogue], dialogues.update(http_message))
         assert dialogue is not None, "Could not create dialogue for message={}".format(

@@ -20,7 +20,6 @@
 
 """This module contains the tests of the ledger API connection module."""
 import asyncio
-import copy
 import logging
 from typing import cast
 from unittest.mock import Mock, patch
@@ -92,7 +91,7 @@ async def test_get_balance(
         address=address,
     )
 
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     ledger_api_dialogue = ledger_api_dialogues.update(request)
     assert ledger_api_dialogue is not None
     envelope = Envelope(
@@ -108,10 +107,7 @@ async def test_get_balance(
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_msg = copy.copy(response_msg_orig)
-    response_msg.is_incoming = True
-    response_msg.counterparty = response_msg_orig.sender
+    response_msg = cast(LedgerApiMessage, response.message)
     response_dialogue = ledger_api_dialogues.update(response_msg)
     assert response_dialogue == ledger_api_dialogue
     assert response_msg.performative == LedgerApiMessage.Performative.BALANCE
@@ -149,7 +145,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
             chain_id=3,
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     ledger_api_dialogue = ledger_api_dialogues.update(request)
     assert ledger_api_dialogue is not None
     envelope = Envelope(
@@ -164,10 +160,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_message = copy.copy(response_msg_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_msg_orig.sender
+    response_message = cast(LedgerApiMessage, response.message)
     assert (
         response_message.performative == LedgerApiMessage.Performative.RAW_TRANSACTION
     )
@@ -184,7 +177,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
         signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     ledger_api_dialogue.update(request)
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
@@ -198,10 +191,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_message = copy.copy(response_msg_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_msg_orig.sender
+    response_message = cast(LedgerApiMessage, response.message)
     assert (
         response_message.performative != LedgerApiMessage.Performative.ERROR
     ), f"Received error: {response_message.message}"
@@ -226,7 +216,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         target=response_message.message_id,
         transaction_digest=response_message.transaction_digest,
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     ledger_api_dialogue.update(request)
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
@@ -240,10 +230,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_message = copy.copy(response_msg_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_msg_orig.sender
+    response_message = cast(LedgerApiMessage, response.message)
     assert (
         response_message.performative
         == LedgerApiMessage.Performative.TRANSACTION_RECEIPT

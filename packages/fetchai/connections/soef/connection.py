@@ -727,7 +727,6 @@ class SOEFChannel:
             target=oef_search_message.message_id,
             message_id=oef_search_message.message_id + 1,
         )
-        message.sender = oef_search_message.to
         message.to = oef_search_message.sender
         assert oef_search_dialogue.update(message)
         envelope = Envelope(
@@ -935,7 +934,6 @@ class SOEFChannel:
             target=oef_message.message_id,
             message_id=oef_message.message_id + 1,
         )
-        message.sender = oef_message.to
         message.to = oef_message.sender
         assert oef_search_dialogue.update(message)
         envelope = Envelope(

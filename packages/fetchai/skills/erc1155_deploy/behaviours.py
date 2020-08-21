@@ -113,7 +113,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             ledger_id=strategy.ledger_id,
             address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+        ledger_api_msg.to = LEDGER_API_ADDRESS
         ledger_api_dialogues.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
 
@@ -138,7 +138,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 {"deployer_address": self.context.agent_address}
             ),
         )
-        contract_api_msg.counterparty = LEDGER_API_ADDRESS
+        contract_api_msg.to = LEDGER_API_ADDRESS
         contract_api_dialogue = cast(
             Optional[ContractApiDialogue],
             contract_api_dialogues.update(contract_api_msg),
@@ -173,7 +173,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 }
             ),
         )
-        contract_api_msg.counterparty = LEDGER_API_ADDRESS
+        contract_api_msg.to = LEDGER_API_ADDRESS
         contract_api_dialogue = cast(
             Optional[ContractApiDialogue],
             contract_api_dialogues.update(contract_api_msg),
@@ -210,7 +210,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 }
             ),
         )
-        contract_api_msg.counterparty = LEDGER_API_ADDRESS
+        contract_api_msg.to = LEDGER_API_ADDRESS
         contract_api_dialogue = cast(
             Optional[ContractApiDialogue],
             contract_api_dialogues.update(contract_api_msg),
@@ -236,7 +236,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
@@ -257,7 +257,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
@@ -278,7 +278,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering service from SOEF.")
@@ -299,7 +299,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")

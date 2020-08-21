@@ -111,7 +111,7 @@ class FipaHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.counterparty = fipa_msg.counterparty
+        default_msg.to = fipa_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
@@ -127,7 +127,7 @@ class FipaHandler(Handler):
         """
         strategy = cast(Strategy, self.context.strategy)
         self.context.logger.info(
-            "received CFP from sender={}".format(fipa_msg.counterparty[-5:])
+            "received CFP from sender={}".format(fipa_msg.sender[-5:])
         )
         if not strategy.is_tokens_minted:
             self.context.logger.info("Contract items not minted yet. Try again later.")
@@ -142,11 +142,11 @@ class FipaHandler(Handler):
             performative=FipaMessage.Performative.PROPOSE,
             proposal=fipa_dialogue.proposal,
         )
-        proposal_msg.counterparty = fipa_msg.counterparty
+        proposal_msg.to = fipa_msg.sender
         fipa_dialogue.update(proposal_msg)
         self.context.logger.info(
             "sending PROPOSE to agent={}: proposal={}".format(
-                fipa_msg.counterparty[-5:], fipa_dialogue.proposal.values,
+                fipa_msg.sender[-5:], fipa_dialogue.proposal.values,
             )
         )
         self.context.outbox.put_message(message=proposal_msg)
@@ -167,7 +167,7 @@ class FipaHandler(Handler):
         if tx_signature is not None:
             self.context.logger.info(
                 "received ACCEPT_W_INFORM from sender={}: tx_signature={}".format(
-                    fipa_msg.counterparty[-5:], tx_signature
+                    fipa_msg.sender[-5:], tx_signature
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
@@ -184,7 +184,7 @@ class FipaHandler(Handler):
                 kwargs=ContractApiMessage.Kwargs(
                     {
                         "from_address": self.context.agent_address,
-                        "to_address": fipa_msg.counterparty,
+                        "to_address": fipa_msg.sender,
                         "token_id": int(fipa_dialogue.proposal.values["token_id"]),
                         "from_supply": int(
                             fipa_dialogue.proposal.values["from_supply"]
@@ -198,7 +198,7 @@ class FipaHandler(Handler):
                     }
                 ),
             )
-            contract_api_msg.counterparty = LEDGER_API_ADDRESS
+            contract_api_msg.to = LEDGER_API_ADDRESS
             contract_api_dialogue = cast(
                 Optional[ContractApiDialogue],
                 contract_api_dialogues.update(contract_api_msg),
@@ -207,14 +207,14 @@ class FipaHandler(Handler):
                 contract_api_dialogue is not None
             ), "Contract api dialogue not created."
             contract_api_dialogue.terms = strategy.get_single_swap_terms(
-                fipa_dialogue.proposal, fipa_msg.counterparty
+                fipa_dialogue.proposal, fipa_msg.sender
             )
             self.context.outbox.put_message(message=contract_api_msg)
             self.context.logger.info("requesting single atomic swap transaction...")
         else:
             self.context.logger.info(
                 "received ACCEPT_W_INFORM from sender={} with no signature.".format(
-                    fipa_msg.counterparty[-5:]
+                    fipa_msg.sender[-5:]
                 )
             )
 
@@ -338,7 +338,7 @@ class LedgerApiHandler(Handler):
             target=ledger_api_msg.message_id,
             transaction_digest=ledger_api_msg.transaction_digest,
         )
-        msg.counterparty = ledger_api_msg.counterparty
+        msg.to = ledger_api_msg.sender
         ledger_api_dialogue.update(msg)
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
@@ -502,7 +502,7 @@ class ContractApiHandler(Handler):
             terms=contract_api_dialogue.terms,
             skill_callback_info={},
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = cast(
             Optional[SigningDialogue], signing_dialogues.update(signing_msg)
         )
@@ -622,7 +622,7 @@ class SigningHandler(Handler):
             dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
             signed_transaction=signing_msg.signed_transaction,
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
+        ledger_api_msg.to = LEDGER_API_ADDRESS
         ledger_api_dialogue = cast(
             Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
         )

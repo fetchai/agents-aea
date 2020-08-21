@@ -188,7 +188,7 @@ class TACBehaviour(SimpleBehaviour):
             dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=desc,
         )
-        oef_msg.counterparty = self.context.search_service_address
+        oef_msg.to = self.context.search_service_address
         self.context.outbox.put_message(message=oef_msg)
         self._registered_desc = desc
         self.context.logger.info(
@@ -211,7 +211,7 @@ class TACBehaviour(SimpleBehaviour):
                 dialogue_reference=(str(self._oef_msg_id), ""),
                 service_description=self._registered_desc,
             )
-            oef_msg.counterparty = self.context.search_service_address
+            oef_msg.to = self.context.search_service_address
             self.context.outbox.put_message(message=oef_msg)
             self._registered_desc = None
 
@@ -263,7 +263,7 @@ class TACBehaviour(SimpleBehaviour):
                 "sending game data to '{}'.".format(agent_address)
             )
             self.context.logger.debug("game data={}".format(str(tac_msg)))
-            tac_msg.counterparty = agent_address
+            tac_msg.to = agent_address
             self.context.outbox.put_message(message=tac_msg)
 
     def _end_tac(self, game: Game, reason: str) -> None:
@@ -271,7 +271,7 @@ class TACBehaviour(SimpleBehaviour):
         self.context.logger.info("notifying agents that TAC is {}.".format(reason))
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
-            tac_msg.counterparty = agent_addr
+            tac_msg.to = agent_addr
             self.context.outbox.put_message(message=tac_msg)
 
     def _game_finished_summary(self, game: Game) -> None:

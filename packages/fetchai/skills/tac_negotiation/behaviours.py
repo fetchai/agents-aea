@@ -103,7 +103,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert oef_search_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_search_msg)
@@ -133,7 +133,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_msg.counterparty = self.context.search_service_address
+        oef_msg.to = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_msg)
         assert oef_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_msg)
@@ -159,7 +159,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_msg.counterparty = self.context.search_service_address
+        oef_msg.to = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_msg)
         assert oef_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_msg)
@@ -180,7 +180,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert oef_search_dialogue is not None, "OefSearchDialogue not created."
         self.context.outbox.put_message(message=oef_search_msg)
@@ -208,7 +208,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
                 dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            oef_msg.counterparty = self.context.search_service_address
+            oef_msg.to = self.context.search_service_address
             oef_search_dialogue = cast(
                 Optional[OefSearchDialogue], oef_search_dialogues.update(oef_msg)
             )

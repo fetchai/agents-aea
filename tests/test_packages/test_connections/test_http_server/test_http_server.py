@@ -20,7 +20,6 @@
 """This module contains the tests of the HTTP Server connection module."""
 
 import asyncio
-import copy
 import logging
 import os
 from traceback import print_exc
@@ -117,11 +116,6 @@ class TestHTTPServer:
         self, envelope: Envelope
     ) -> Tuple[HttpMessage, HttpDialogue]:
         message = cast(HttpMessage, envelope.message)
-        message = copy.copy(
-            message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
         dialogue = cast(HttpDialogue, self._dialogues.update(message))
         assert dialogue is not None
         return message, dialogue

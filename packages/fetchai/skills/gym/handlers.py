@@ -94,7 +94,7 @@ class GymHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"gym_message": gym_msg.encode()},
         )
-        default_msg.counterparty = gym_msg.counterparty
+        default_msg.to = gym_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 

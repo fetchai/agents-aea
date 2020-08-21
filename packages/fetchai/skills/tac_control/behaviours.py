@@ -111,7 +111,7 @@ class TacBehaviour(Behaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
@@ -132,7 +132,7 @@ class TacBehaviour(Behaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering TAC data model on SOEF.")
@@ -153,7 +153,7 @@ class TacBehaviour(Behaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self._registered_description = None
@@ -175,7 +175,7 @@ class TacBehaviour(Behaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
+        oef_search_msg.to = self.context.search_service_address
         oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")
@@ -211,7 +211,7 @@ class TacBehaviour(Behaviour):
                 good_id_to_name=game.conf.good_id_to_name,
                 version_id=game.conf.version_id,
             )
-            tac_msg.counterparty = agent_address
+            tac_msg.to = agent_address
             tac_dialogues.update(tac_msg)
             self.context.outbox.put_message(message=tac_msg)
             self.context.logger.debug(
@@ -233,7 +233,7 @@ class TacBehaviour(Behaviour):
                 message_id=last_msg.message_id + 1,
                 target=last_msg.message_id,
             )
-            tac_msg.counterparty = agent_address
+            tac_msg.to = agent_address
             tac_dialogues.update(tac_msg)
             self.context.outbox.put_message(message=tac_msg)
         if game.phase == Phase.GAME:

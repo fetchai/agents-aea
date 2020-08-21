@@ -27,7 +27,7 @@ This module contains the classes required for dialogue management.
 
 import itertools
 import secrets
-from abc import ABC, abstractmethod
+from abc import ABC
 from enum import Enum
 from inspect import signature
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
@@ -615,7 +615,7 @@ class Dialogue(ABC):
         if not result_additional_validation:
             return False, msg_additional_validation
 
-        result_is_valid, msg_is_valid = self.is_valid(message)
+        result_is_valid, msg_is_valid = self._custom_validation(message)
         if not result_is_valid:
             return False, msg_is_valid
 
@@ -791,8 +791,7 @@ class Dialogue(ABC):
         ), "Dialogue label cannot be updated."
         self._dialogue_label = final_dialogue_label
 
-    @abstractmethod
-    def is_valid(self, message: Message) -> Tuple[bool, str]:
+    def _custom_validation(self, message: Message) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in the dialogue.
 
@@ -801,6 +800,7 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
+        return True, "The message passes custom validation."
 
     @staticmethod
     def _interleave(list_1, list_2) -> List:

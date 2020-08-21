@@ -105,8 +105,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         Model.__init__(self, **kwargs)
         BaseFipaDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> Dialogue.Role:
+    def role_from_first_message(self, message: Message) -> Dialogue.Role:
         """
         Infer the role of the agent from an incoming or outgoing first message
 
@@ -128,11 +127,11 @@ class FipaDialogues(Model, BaseFipaDialogues):
                     SUPPLY_DATAMODEL_NAME, DEMAND_DATAMODEL_NAME
                 )
             )
-        if message.is_incoming:
+        if message.sender != self.agent_address:  # message is by other
             is_seller = (
                 query.model.name == SUPPLY_DATAMODEL_NAME
             )  # the counterparty is querying for supply/sellers (this agent is receiving their CFP so is the seller)
-        else:
+        else:  # message is by self
             is_seller = (
                 query.model.name == DEMAND_DATAMODEL_NAME
             )  # the agent is querying for demand/buyers (this agent is sending the CFP so it is the seller)

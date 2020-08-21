@@ -212,14 +212,11 @@ class TestGymConnection:
             performative=GymMessage.Performative.RESET,
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
         )
-        msg.counterparty = self.gym_address
+        msg.to = self.gym_address
         sending_dialogue = self.dialogues.update(msg)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         await self.gym_con.connect()
 
@@ -228,10 +225,7 @@ class TestGymConnection:
             mock.assert_called()
 
         response = await asyncio.wait_for(self.gym_con.receive(), timeout=3)
-        response_msg_orig = cast(GymMessage, response.message)
-        response_msg = copy.copy(response_msg_orig)
-        response_msg.is_incoming = True
-        response_msg.counterparty = response_msg_orig.sender
+        response_msg = cast(GymMessage, response.message)
         response_dialogue = self.dialogues.update(response_msg)
 
         assert response_msg.performative == GymMessage.Performative.STATUS

@@ -128,7 +128,6 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             message=str(e),
             data=b"",
         )
-        response.sender = message.to
         response.to = message.sender
         dialogue.update(response)
         return response
@@ -153,7 +152,6 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         try:
             data = self._get_data(ledger_api, message, contract)
             response = response_builder(data)
-            response.sender = message.to
             response.to = message.sender
             dialogue.update(response)
         except AEAException as e:

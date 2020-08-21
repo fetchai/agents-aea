@@ -154,7 +154,6 @@ class GymChannel:
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        msg.sender = gym_message.to
         msg.to = gym_message.sender
         assert dialogue.update(msg), "Error during dialogue update."
         envelope = Envelope(

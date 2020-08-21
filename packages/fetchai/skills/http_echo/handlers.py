@@ -86,7 +86,7 @@ class HttpHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"http_message": http_msg.encode()},
         )
-        default_msg.counterparty = http_msg.counterparty
+        default_msg.to = http_msg.sender
         default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
@@ -130,7 +130,7 @@ class HttpHandler(Handler):
             bodyy=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
         )
         self.context.logger.info("responding with: {}".format(http_response))
-        http_response.counterparty = http_msg.counterparty
+        http_response.to = http_msg.sender
         assert http_dialogue.update(http_response)
         self.context.outbox.put_message(message=http_response)
 
@@ -154,7 +154,7 @@ class HttpHandler(Handler):
             bodyy=b"",
         )
         self.context.logger.info("responding with: {}".format(http_response))
-        http_response.counterparty = http_msg.counterparty
+        http_response.to = http_msg.sender
         assert http_dialogue.update(http_response)
         self.context.outbox.put_message(message=http_response)
 

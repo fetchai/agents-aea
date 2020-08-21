@@ -110,10 +110,10 @@ class TestClientServer:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = str(HTTPClientConnection.connection_id)
+        request_http_message.to = str(HTTPClientConnection.connection_id)
         assert self._client_dialogues.update(request_http_message) is not None
         request_envelope = Envelope(
-            to=request_http_message.counterparty,
+            to=request_http_message.to,
             sender=request_http_message.sender,
             protocol_id=request_http_message.protocol_id,
             message=request_http_message,
@@ -125,8 +125,6 @@ class TestClientServer:
     ) -> Envelope:
         """Make response envelope."""
         incoming_message = cast(HttpMessage, request_envelope.message)
-        incoming_message.is_incoming = True
-        incoming_message.counterparty = str(HTTPServerConnection.connection_id)
         dialogue = self._server_dialogues.update(incoming_message)
         assert dialogue is not None
         message = HttpMessage(
@@ -140,10 +138,10 @@ class TestClientServer:
             status_text=status_text,
             bodyy=incoming_message.bodyy,
         )
-        message.counterparty = incoming_message.counterparty
+        message.to = incoming_message.sender
         assert dialogue.update(message) is not None
         response_envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             context=request_envelope.context,

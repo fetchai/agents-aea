@@ -78,7 +78,6 @@ class AliceBehaviour(TickerBehaviour):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        request_http_message.sender = self.context.agent_address
         request_http_message.to = HTTP_COUNTERPARTY
 
         # http dialogue
@@ -135,7 +134,6 @@ class AliceBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.sender = self.context.agent_address
         oef_search_msg.to = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert (
@@ -160,7 +158,6 @@ class AliceBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.sender = self.context.agent_address
         oef_search_msg.to = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert (
@@ -185,7 +182,6 @@ class AliceBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.sender = self.context.agent_address
         oef_search_msg.to = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert (
@@ -210,7 +206,6 @@ class AliceBehaviour(TickerBehaviour):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.sender = self.context.agent_address
         oef_search_msg.to = self.context.search_service_address
         oef_dialogue = oef_search_dialogues.update(oef_search_msg)
         assert (
