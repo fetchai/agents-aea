@@ -86,7 +86,7 @@ class BaseRuntime(ABC):
         self.main_loop: BaseAgentLoop = self._get_main_loop_instance(self._loop_mode)
 
     @property
-    def loop_mode(self) -> str:
+    def loop_mode(self) -> str:  # pragma: nocover
         """Get current loop mode."""
         return self._loop_mode
 
@@ -127,7 +127,7 @@ class BaseRuntime(ABC):
 
         :return: MainLoop class
         """
-        if loop_mode not in self.RUN_LOOPS:
+        if loop_mode not in self.RUN_LOOPS:  # pragma: nocover
             raise ValueError(
                 f"Loop `{loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
             )
@@ -136,7 +136,7 @@ class BaseRuntime(ABC):
     @property
     def decision_maker(self) -> DecisionMaker:
         """Return decision maker if set."""
-        if self._decision_maker is None:
+        if self._decision_maker is None:  # pragma: nocover
             raise ValueError("call `set_decision_maker` first!")
         return self._decision_maker
 
@@ -188,7 +188,7 @@ class BaseRuntime(ABC):
     def _teardown(self) -> None:
         """Tear down runtime."""
         logger.debug("[{}]: Runtime teardown...".format(self._agent.name))
-        if self._decision_maker is not None:
+        if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.stop()
         self.task_manager.stop()
         self._agent.teardown()
@@ -315,7 +315,7 @@ class AsyncRuntime(BaseRuntime):
         """Start agent main loop asynchronous way."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self.task_manager.start()
-        if self._decision_maker is not None:
+        if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.start()
         self._agent.start_setup()
         self._state.set(RuntimeStates.running)
@@ -400,7 +400,7 @@ class ThreadedRuntime(BaseRuntime):
         """Start aget's main loop."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self.task_manager.start()
-        if self._decision_maker is not None:
+        if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.start()
         try:
             self._state.set(RuntimeStates.running)
