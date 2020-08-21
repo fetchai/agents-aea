@@ -23,7 +23,7 @@ from binascii import unhexlify
 
 import base58
 
-import multihash
+import multihash  # type: ignore
 
 from aea.helpers.multiaddr.crypto_pb2 import KeyType, PublicKey
 
