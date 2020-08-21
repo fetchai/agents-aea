@@ -232,9 +232,10 @@ class PosixNamedPipeProtocol:
 
     async def close(self) -> None:
         """ Disconnect pipe """
+        self.logger.debug("closing pipe (in={})...".format(self._in_path))
         assert self._fileobj is not None, "Pipe not connected"
-        self._fileobj.close()
         os.close(self._out)
+        self._fileobj.close()
         await asyncio.sleep(0)
 
 
