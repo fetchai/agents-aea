@@ -44,7 +44,7 @@ def _run_echo_service(client: IPCChannelClient):
                 if not data:
                     break
                 await client.write(data)
-        except (asyncio.IncompleteReadError, asyncio.CancelledError):
+        except (asyncio.IncompleteReadError, asyncio.CancelledError, OSError):
             pass
         finally:
             print("closing client pipe...")

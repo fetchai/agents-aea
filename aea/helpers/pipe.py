@@ -128,7 +128,7 @@ class PosixNamedPipeProtocol:
         self._log_file_desc = None  # type: Optional[IO[str]]
         self._reader_protocol = None  # type: Optional[asyncio.StreamReaderProtocol]
         self._fileobj = None  # type: Optional[IO[str]]
-        #self._out_fo = None
+        # self._out_fo = None
 
         self._connection_attempts = PIPE_CONN_ATTEMPTS
         self._connection_timeout = PIPE_CONN_TIMEOUT
@@ -177,7 +177,7 @@ class PosixNamedPipeProtocol:
         await self._loop.connect_read_pipe(
             lambda: self.__reader_protocol, self._fileobj
         )
-        #self._out_fo = os.fdopen(self._out, "wb")
+        # self._out_fo = os.fdopen(self._out, "wb")
 
         return True
 
@@ -197,8 +197,8 @@ class PosixNamedPipeProtocol:
         size = struct.pack("!I", len(data))
         os.write(self._out, size + data)
         asyncio.sleep(0.0)
-        #self._out_fo.write(size + data)
-        #self._out_fo.flush()
+        # self._out_fo.write(size + data)
+        # self._out_fo.flush()
 
     async def read(self) -> Optional[bytes]:
         """
@@ -215,6 +215,8 @@ class PosixNamedPipeProtocol:
             if not buf:  # pragma: no cover
                 return None
             size = struct.unpack("!I", buf)[0]
+            if size <= 0:  # pragma: no cover
+                return None
             data = await self._stream_reader.readexactly(size)
             if not data:  # pragma: no cover
                 return None
@@ -234,8 +236,14 @@ class PosixNamedPipeProtocol:
         """ Disconnect pipe """
         self.logger.debug("closing pipe (in={})...".format(self._in_path))
         assert self._fileobj is not None, "Pipe not connected"
-        os.close(self._out)
-        self._fileobj.close()
+        # TOFIX(LR) Hack for MacOSX
+        try:
+            size = struct.pack("!I", 0)
+            os.write(self._out, size)
+            os.close(self._out)
+            self._fileobj.close()
+        except OSError:
+            pass
         await asyncio.sleep(0)
 
 
