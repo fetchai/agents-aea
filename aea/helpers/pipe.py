@@ -128,7 +128,7 @@ class PosixNamedPipeProtocol:
         self._log_file_desc = None  # type: Optional[IO[str]]
         self._reader_protocol = None  # type: Optional[asyncio.StreamReaderProtocol]
         self._fileobj = None  # type: Optional[IO[str]]
-        self._out_fo = None
+        #self._out_fo = None
 
         self._connection_attempts = PIPE_CONN_ATTEMPTS
         self._connection_timeout = PIPE_CONN_TIMEOUT
@@ -177,7 +177,7 @@ class PosixNamedPipeProtocol:
         await self._loop.connect_read_pipe(
             lambda: self.__reader_protocol, self._fileobj
         )
-        self._out_fo = os.fdopen(self._out, "wb")
+        #self._out_fo = os.fdopen(self._out, "wb")
 
         return True
 
@@ -195,9 +195,9 @@ class PosixNamedPipeProtocol:
         """
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
-        #os.write(self._out, size + data)
-        self._out_fo.write(size + data)
-        self._out_fo.flush()
+        os.write(self._out, size + data)
+        #self._out_fo.write(size + data)
+        #self._out_fo.flush()
 
     async def read(self) -> Optional[bytes]:
         """
