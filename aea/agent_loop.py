@@ -201,8 +201,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         periodic_caller = PeriodicCaller(
             partial(
                 self._agent._execution_control,  # pylint: disable=protected-access # TODO: refactoring!
-                task_callable,  # callable
-                task_callable,  # component
+                task_callable,
             ),
             period=period,
             start_at=start_at,
@@ -218,9 +217,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         for (
             task_callable,
             (period, start_at),
-        ) in (
-            self._agent.get_periodic_tasks().items()  # pylint: disable=protected-access
-        ):
+        ) in self._agent.get_periodic_tasks().items():
             self._register_periodic_task(task_callable, period, start_at)
 
     def _unregister_periodic_task(self, task_callable: Callable) -> None:

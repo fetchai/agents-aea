@@ -29,7 +29,7 @@ from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.skills.base import Behaviour, Handler, SkillComponent, SkillContext
+from aea.skills.base import Behaviour, Handler, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 
 from tests.common.utils import run_in_thread, wait_for_condition
@@ -173,7 +173,6 @@ class AsyncFakeAgent:
     def _execution_control(
         self,
         fn: Callable,
-        component: SkillComponent,
         args: Optional[Sequence] = None,
         kwargs: Optional[Dict] = None,
     ) -> Any:

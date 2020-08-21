@@ -59,19 +59,21 @@ class BaseRuntime(ABC):
     DEFAULT_RUN_LOOP: str = "sync"
 
     def __init__(
-        self, agent: "Agent", loop: Optional[AbstractEventLoop] = None
+        self,
+        agent: "Agent",
+        loop_mode: Optional[str] = None,
+        loop: Optional[AbstractEventLoop] = None,
     ) -> None:
         """
         Init runtime.
 
         :param agent: Agent to run.
+        :param loop_mode: agent main loop mode.
         :param loop: optional event loop. if not provided a new one will be created.
         :return: None
         """
         self._agent: "Agent" = agent
-        self._loop: AbstractEventLoop = ensure_loop(
-            loop
-        )  # TODO: decide who constructs loop: agent, runtime, multiplexer.
+        self._loop: AbstractEventLoop = ensure_loop(loop)
         self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
         self._state.add_callback(self._log_runtime_state)
         self._was_started = False
@@ -80,9 +82,13 @@ class BaseRuntime(ABC):
         self._task_manager = TaskManager()
         self._decision_maker: Optional[DecisionMaker] = None
 
-        self.main_loop: BaseAgentLoop = self._get_main_loop_instance(
-            agent._loop_mode or self.DEFAULT_RUN_LOOP
-        )
+        self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
+        self.main_loop: BaseAgentLoop = self._get_main_loop_instance(self._loop_mode)
+
+    @property
+    def loop_mode(self) -> str:
+        """Get current loop mode."""
+        return self._loop_mode
 
     def setup_multiplexer(self) -> None:
         """Set up the multiplexer."""
@@ -110,7 +116,7 @@ class BaseRuntime(ABC):
     def _get_multiplexer_instance(self) -> Multiplexer:
         """Create multiplexer instance."""
         return Multiplexer(
-            self._agent._connections, loop=self.loop  # pylint: disable=protected-access
+            self._agent.connections, loop=self.loop  # pylint: disable=protected-access
         )
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
@@ -229,16 +235,20 @@ class AsyncRuntime(BaseRuntime):
     """Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loop."""
 
     def __init__(
-        self, agent: "Agent", loop: Optional[AbstractEventLoop] = None
+        self,
+        agent: "Agent",
+        loop_mode: Optional[str] = None,
+        loop: Optional[AbstractEventLoop] = None,
     ) -> None:
         """
         Init runtime.
 
         :param agent: Agent to run.
+        :param loop_mode: agent main loop mode.
         :param loop: optional event loop. if not provided a new one will be created.
         :return: None
         """
-        super().__init__(agent=agent, loop=loop)
+        super().__init__(agent=agent, loop_mode=loop_mode, loop=loop)
         self._stopping_task: Optional[asyncio.Task] = None
         self._async_stop_lock: Optional[asyncio.Lock] = None
         self._task: Optional[asyncio.Task] = None

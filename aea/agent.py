@@ -67,15 +67,21 @@ class Agent(ABC):
         """
         self._connections = connections
         self._identity = identity
-        self._loop_mode = loop_mode
         self._timeout = timeout
         self._tick = 0
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         runtime_cls = self._get_runtime_class()
-        self._runtime: BaseRuntime = runtime_cls(agent=self, loop=loop)
+        self._runtime: BaseRuntime = runtime_cls(
+            agent=self, loop_mode=loop_mode, loop=loop
+        )
 
         self._inbox = InBox(self.runtime.multiplexer)
         self._outbox = OutBox(self.runtime.multiplexer, self._identity.address)
+
+    @property
+    def connections(self) -> List[Connection]:
+        """Return list of connections."""
+        return self._connections
 
     @property
     def active_connections(self) -> List[Connection]:
@@ -100,6 +106,23 @@ class Agent(ABC):
             )
         return self.RUNTIMES[self._runtime_mode]
 
+    def _execution_control(  # pylint: disable=no-self-use  # cause  overrided in AEA
+        self,
+        fn: Callable,
+        args: Optional[Sequence] = None,
+        kwargs: Optional[Dict] = None,
+    ) -> Any:
+        """
+        Execute function within wrapper.
+
+        :param fn: function to call
+        :param args: optional sequence of arguments to pass to function on call
+        :param kwargs: optional dict of keyword arguments to pass to function on call
+
+        :return: same as function does
+        """
+        return fn(*(args or []), **(kwargs or {}))
+
     def enqueue_task(
         self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
     ) -> int:
@@ -122,9 +145,7 @@ class Agent(ABC):
         """
         return self.runtime.task_manager.get_task_result(task_id)
 
-    def _get_multiplexer_setup_options(  # pylint: disable=no-self-use # cause overrided in AEA
-        self,
-    ) -> Optional[Dict]:
+    def _get_multiplexer_setup_options(self,) -> Optional[Dict]:
         """
         Get dict of multiplexer setup options.
 
@@ -175,11 +196,6 @@ class Agent(ABC):
     def timeout(self) -> float:
         """Get the time in (fractions of) seconds to time out an agent between act and react."""
         return self._timeout
-
-    @property
-    def loop_mode(self) -> str:
-        """Get the agent loop mode."""
-        return self._loop_mode or self.runtime.DEFAULT_RUN_LOOP
 
     @property
     def runtime(self) -> BaseRuntime:

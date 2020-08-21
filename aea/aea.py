@@ -55,7 +55,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.skills.base import Behaviour, Handler, SkillComponent
+from aea.skills.base import Behaviour, Handler
 from aea.skills.error.handlers import ErrorHandler
 
 
@@ -187,7 +187,6 @@ class AEA(Agent, WithLogger):
         Performs the following:
 
         - loads the resources (unless in programmatic mode)
-        - starts the decision maker
         - calls setup() on the resources
 
         :return: None
@@ -322,7 +321,7 @@ class AEA(Agent, WithLogger):
         :param message: message to be handled.
         :param handler: handler suitable for this message protocol.
         """
-        self._execution_control(handler.handle, handler, [message])
+        self._execution_control(handler.handle, [message])
 
     def _behaviour_act(self, behaviour: Behaviour) -> None:
         """
@@ -331,12 +330,11 @@ class AEA(Agent, WithLogger):
         :param behaviour: behaviour already defined
         :return: None
         """
-        self._execution_control(behaviour.act_wrapper, behaviour)
+        self._execution_control(behaviour.act_wrapper)
 
     def _execution_control(
         self,
         fn: Callable,
-        component: SkillComponent,
         args: Optional[Sequence] = None,
         kwargs: Optional[Dict] = None,
     ) -> Any:
@@ -346,35 +344,34 @@ class AEA(Agent, WithLogger):
         Logs error, stop agent or propagate excepion depends on policy defined.
 
         :param fn: function to call
-        :param component: skill component function belongs to
         :param args: optional sequence of arguments to pass to function on call
         :param kwargs: optional dict of keyword arguments to pass to function on call
 
         :return: same as function
         """
         # docstyle: ignore
-        def log_exception(e, fn, component):
-            self.logger.exception(f"<{e}> raised during `{fn}` call of `{component}`")
+        def log_exception(e, fn):
+            self.logger.exception(f"<{e}> raised during `{fn}`")
 
         try:
             with ExecTimeoutThreadGuard(self._execution_timeout):
                 return fn(*(args or []), **(kwargs or {}))
         except TimeoutException:
             self.logger.warning(
-                "`{}` of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
-                    fn, component, self._execution_timeout
+                "`{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
+                    fn, self._execution_timeout
                 )
             )
         except Exception as e:  # pylint: disable=broad-except
             if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
                 raise
             elif self._skills_exception_policy == ExceptionPolicyEnum.just_log:
-                log_exception(e, fn, component)
+                log_exception(e, fn)
             elif self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
-                log_exception(e, fn, component)
+                log_exception(e, fn)
                 self.stop()
                 raise AEAException(
-                    f"AEA was terminated cause exception `{e}` in skills {component} {fn}! Please check logs."
+                    f"AEA was terminated cause exception `{e}` in skills {fn}! Please check logs."
                 )
             else:
                 raise AEAException(
@@ -397,8 +394,6 @@ class AEA(Agent, WithLogger):
 
         Performs the following:
 
-        - stops the decision maker
-        - stops the task manager
         - tears down the resources.
 
         :return: None
