@@ -23,6 +23,8 @@ from binascii import unhexlify
 
 import base58
 
+from ecdsa import VerifyingKey, curves, keys
+
 import multihash  # type: ignore
 
 from aea.helpers.multiaddr.crypto_pb2 import KeyType, PublicKey
@@ -93,12 +95,18 @@ class MultiAddr:
 
         self._host = host
         self._port = port
-        # TODO(LR) check that public_key is in correct format
+
+        try:
+            VerifyingKey._from_compressed(_hex_to_bytes(public_key), curves.SECP256k1)
+        except keys.MalformedPointError as e:
+            raise Exception("Malformed public key:{}".format(str(e)))
+
         self._public_key = public_key
         self._peerid = self._compute_peerid()
 
     def _compute_peerid(self) -> str:
         """
+        Compute base58 representation of libp2p PeerID from Bitcoin EC encoded Secp256k1 public key
         """
 
         key_protobuf = PublicKey(
@@ -116,4 +124,5 @@ class MultiAddr:
         return f"/dns/{self._host}/tcp/{str(self._port)}/p2p/{self._peerid}"
 
     def __str__(self) -> str:
+        """ default string representation of a mutliaddress """
         return self.format()
