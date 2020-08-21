@@ -16,17 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the implementation of a generic agent."""
 
+
+"""This module contains the implementation of a generic agent."""
+import datetime
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from typing import Dict, List, Optional, Type
+from multiprocessing.pool import AsyncResult
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
-from aea.agent_loop import BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import Connection
 from aea.identity.base import Identity
-from aea.multiplexer import InBox, Multiplexer, OutBox
+from aea.multiplexer import InBox, OutBox
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 
@@ -35,11 +37,6 @@ logger = logging.getLogger(__name__)
 
 class Agent(ABC):
     """This class provides an abstract base class for a generic agent."""
-
-    RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
-        "sync": SyncAgentLoop,
-    }
-    DEFAULT_RUN_LOOP: str = "sync"
 
     RUNTIMES: Dict[str, Type[BaseRuntime]] = {
         "async": AsyncRuntime,
@@ -68,41 +65,38 @@ class Agent(ABC):
 
         :return: None
         """
-        self._identity = identity
         self._connections = connections
-
-        self._multiplexer = Multiplexer(self._connections, loop=loop)
-        self._inbox = InBox(self._multiplexer)
-        self._outbox = OutBox(self._multiplexer, identity.address)
+        self._identity = identity
         self._timeout = timeout
-
         self._tick = 0
-
-        self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
-        loop_cls = self._get_main_loop_class()
-        self._main_loop: BaseAgentLoop = loop_cls(self)
-
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         runtime_cls = self._get_runtime_class()
-        self._runtime: BaseRuntime = runtime_cls(agent=self, loop=loop)
+        self._runtime: BaseRuntime = runtime_cls(
+            agent=self, loop_mode=loop_mode, loop=loop
+        )
+
+        self._inbox = InBox(self.runtime.multiplexer)
+        self._outbox = OutBox(self.runtime.multiplexer, self._identity.address)
 
     @property
-    def is_running(self):
+    def connections(self) -> List[Connection]:
+        """Return list of connections."""
+        return self._connections
+
+    @property
+    def active_connections(self) -> List[Connection]:
+        """Return list of active connections."""
+        return self._connections
+
+    @property
+    def is_running(self) -> bool:
         """Get running state of the runtime and agent."""
         return self.runtime.is_running
 
     @property
-    def is_stopped(self):
+    def is_stopped(self) -> bool:
         """Get running state of the runtime and agent."""
         return self.runtime.is_stopped
-
-    def _get_main_loop_class(self) -> Type[BaseAgentLoop]:
-        """Get main loop class based on loop mode."""
-        if self._loop_mode not in self.RUN_LOOPS:
-            raise ValueError(
-                f"Loop `{self._loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
-            )
-        return self.RUN_LOOPS[self._loop_mode]
 
     def _get_runtime_class(self) -> Type[BaseRuntime]:
         """Get runtime class based on runtime mode."""
@@ -112,15 +106,57 @@ class Agent(ABC):
             )
         return self.RUNTIMES[self._runtime_mode]
 
+    def _execution_control(  # pylint: disable=no-self-use  # cause  overrided in AEA
+        self,
+        fn: Callable,
+        args: Optional[Sequence] = None,
+        kwargs: Optional[Dict] = None,
+    ) -> Any:
+        """
+        Execute function within wrapper.
+
+        :param fn: function to call
+        :param args: optional sequence of arguments to pass to function on call
+        :param kwargs: optional dict of keyword arguments to pass to function on call
+
+        :return: same as function does
+        """
+        return fn(*(args or []), **(kwargs or {}))
+
+    def enqueue_task(
+        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+    ) -> int:
+        """
+        Enqueue a task with the task manager.
+
+        :param func: the callable instance to be enqueued
+        :param args: the positional arguments to be passed to the function.
+        :param kwds: the keyword arguments to be passed to the function.
+        :return the task id to get the the result.
+        :raises ValueError: if the task manager is not running.
+        """
+        return self.runtime.task_manager.enqueue_task(func, args, kwds)
+
+    def get_task_result(self, task_id: int) -> AsyncResult:
+        """
+        Get the result from a task.
+
+        :return: async result for task_id
+        """
+        return self.runtime.task_manager.get_task_result(task_id)
+
+    def _get_multiplexer_setup_options(self,) -> Optional[Dict]:
+        """
+        Get dict of multiplexer setup options.
+
+        :return: dict of kwargs for Multipelxer.setup
+        """
+        return {"connections": self.active_connections}
+
     @property
     def identity(self) -> Identity:
         """Get the identity."""
         return self._identity
-
-    @property
-    def multiplexer(self) -> Multiplexer:
-        """Get the multiplexer."""
-        return self._multiplexer
 
     @property
     def inbox(self) -> InBox:  # pragma: nocover
@@ -162,23 +198,9 @@ class Agent(ABC):
         return self._timeout
 
     @property
-    def loop_mode(self) -> str:
-        """Get the agent loop mode."""
-        return self._loop_mode
-
-    @property
-    def main_loop(self) -> BaseAgentLoop:
-        """Get the main agent loop."""
-        return self._main_loop
-
-    @property
     def runtime(self) -> BaseRuntime:
         """Get the runtime."""
         return self._runtime
-
-    def setup_multiplexer(self) -> None:
-        """Set up the multiplexer."""
-        pass
 
     def start(self) -> None:
         """
@@ -278,3 +300,13 @@ class Agent(ABC):
         :return: RuntimeStates
         """
         return self._runtime.state
+
+    def get_periodic_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        """
+        Get all periodic tasks for agent.
+
+        :return: dict of callable with period specified
+        """
+        return {self.act: (self._timeout, None)}

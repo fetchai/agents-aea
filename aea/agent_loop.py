@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
+import datetime
 import logging
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
@@ -41,7 +42,6 @@ from aea.helpers.async_utils import (
 )
 from aea.helpers.logging import WithLogger
 from aea.multiplexer import InBox
-from aea.skills.base import Behaviour
 
 
 logger = logging.getLogger(__name__)
@@ -160,71 +160,82 @@ class AsyncAgentLoop(BaseAgentLoop):
         super().__init__(agent=agent, loop=loop)
         self._agent: "AEA" = self._agent
 
-        self._behaviours_registry: Dict[Behaviour, PeriodicCaller] = {}
+        self._periodic_tasks: Dict[Callable, PeriodicCaller] = {}
 
-    def _behaviour_exception_callback(self, fn: Callable, exc: Exception) -> None:
+    def _periodic_task_exception_callback(
+        self, task_callable: Callable, exc: Exception
+    ) -> None:
         """
-        Call on behaviour's act exception.
+        Call on periodic task exception.
 
-        :param fn: behaviour's act
+        :param task_callable: function to be called
         :param: exc: Exception  raised
 
         :return: None
         """
         self.logger.exception(
-            f"Loop: Exception: `{exc}` occured during `{fn}` processing"
+            f"Loop: Exception: `{exc}` occured during `{task_callable}` processing"
         )
         self._exceptions.append(exc)
         self._state.set(AgentLoopStates.error)
 
-    def _register_behaviour(self, behaviour: Behaviour) -> None:
+    def _register_periodic_task(
+        self,
+        task_callable: Callable,
+        period: float,
+        start_at: Optional[datetime.datetime],
+    ) -> None:
         """
-        Register behaviour to run periodically.
+        Register function to run periodically.
 
-        :param behaviour: Behaviour object
+        :param task_callable: function to be called
+        :param pediod: float: in seconds
+        :param start_at: optional datetime, when to run task for the first time, otherwise call it right now
 
         :return: None
         """
-        if behaviour in self._behaviours_registry:  # pragma: nocover
+        if task_callable in self._periodic_tasks:  # pragma: nocover
             # already registered
             return
 
         periodic_caller = PeriodicCaller(
             partial(
                 self._agent._execution_control,  # pylint: disable=protected-access # TODO: refactoring!
-                behaviour.act_wrapper,
-                behaviour,
+                task_callable,
             ),
-            behaviour.tick_interval,
-            behaviour.start_at,
-            self._behaviour_exception_callback,
-            self._loop,
+            period=period,
+            start_at=start_at,
+            exception_callback=self._periodic_task_exception_callback,
+            loop=self._loop,
         )
-        self._behaviours_registry[behaviour] = periodic_caller
+        self._periodic_tasks[task_callable] = periodic_caller
         periodic_caller.start()
-        self.logger.debug(f"Behaviour {behaviour} registered.")
+        self.logger.debug(f"Periodic task {task_callable} registered.")
 
-    def _register_all_behaviours(self) -> None:
-        """Register all AEA behaviours to run periodically."""
-        for behaviour in self._agent.active_behaviours:
-            self._register_behaviour(behaviour)
+    def _register_periodic_tasks(self) -> None:
+        """Register all AEA related periodic tasks."""
+        for (
+            task_callable,
+            (period, start_at),
+        ) in self._agent.get_periodic_tasks().items():
+            self._register_periodic_task(task_callable, period, start_at)
 
-    def _unregister_behaviour(self, behaviour: Behaviour) -> None:
+    def _unregister_periodic_task(self, task_callable: Callable) -> None:
         """
-        Unregister periodic execution of the behaviour.
+        Unregister periodic execution of the task.
 
-        :param behaviour: Behaviour to schedule periodic execution.
+        :param task_callable: function to be called periodically.
         :return: None
         """
-        periodic_caller = self._behaviours_registry.pop(behaviour, None)
+        periodic_caller = self._periodic_tasks.pop(task_callable, None)
         if periodic_caller is None:  # pragma: nocover
             return
         periodic_caller.stop()
 
     def _stop_all_behaviours(self) -> None:
         """Unregister periodic execution of all registered behaviours."""
-        for behaviour in list(self._behaviours_registry.keys()):
-            self._unregister_behaviour(behaviour)
+        for task_callable in list(self._periodic_tasks.keys()):
+            self._unregister_periodic_task(task_callable)
 
     async def _task_wait_for_error(self) -> None:
         """Wait for error and raise first."""
@@ -265,7 +276,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     async def _task_process_internal_messages(self) -> None:
         """Process decision maker's internal messages."""
-        queue = self._agent.decision_maker.message_out_queue
+        queue = self._agent.filter.decision_maker_out_queue
         while self.is_running:
             msg = await queue.async_get()
             # TODO: better interaction with agent's internal messages
@@ -279,7 +290,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             # TODO: better handling internal messages for skills internal updates
             self._agent.filter._handle_new_behaviours()  # pylint: disable=protected-access # TODO: refactoring!
             self._agent.filter._handle_new_handlers()  # pylint: disable=protected-access # TODO: refactoring!
-            self._register_all_behaviours()  # re register, cause new may appear
+            self._register_periodic_tasks()  # re register, cause new may appear
             await asyncio.sleep(self.NEW_BEHAVIOURS_PROCESS_SLEEP)
 
 
@@ -300,10 +311,10 @@ class SyncAgentLoop(BaseAgentLoop):
     async def _agent_loop(self) -> None:
         """Run loop inside coroutine but call synchronous callbacks from agent."""
         while self.is_running:
-            self._spin_main_loop()
+            await self._spin_main_loop()
             await asyncio.sleep(self._agent.timeout)
 
-    def _spin_main_loop(self) -> None:
+    async def _spin_main_loop(self) -> None:
         """Run one spin of agent loop: act, react, update."""
         self._agent.act()
         self._agent.react()

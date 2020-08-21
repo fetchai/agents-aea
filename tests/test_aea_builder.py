@@ -202,8 +202,8 @@ class TestReentrancy:
 
     def test_connections_instances_are_different(self):
         """Test that connection instances are different."""
-        aea1_connections = self.aea1.multiplexer.connections
-        aea2_connections = self.aea2.multiplexer.connections
+        aea1_connections = self.aea1.runtime.multiplexer.connections
+        aea2_connections = self.aea2.runtime.multiplexer.connections
         self.are_components_different(aea1_connections, aea2_connections)
 
 

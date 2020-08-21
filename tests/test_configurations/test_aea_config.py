@@ -230,6 +230,15 @@ class TestLoopModeConfigVariable(BaseConfigTestVariable):
     AEA_ATTR_NAME = "_loop_mode"
     AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_LOOP_MODE
 
+    def _get_aea_value(self, aea: AEA) -> Any:
+        """Get AEA attribute value.
+
+        :param aea: AEA isntance to get atribute value from.
+
+        :return: value of attribute.
+        """
+        return aea.runtime.loop_mode
+
 
 class TestSkillExceptionPolicyConfigVariable(BaseConfigTestVariable):
     """Test `skill_exception_policy` aea config option."""

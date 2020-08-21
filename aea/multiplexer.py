@@ -582,7 +582,7 @@ class Multiplexer(AsyncMultiplexer):
     def setup(
         self,
         connections: Collection[Connection],
-        default_routing: Dict[PublicId, PublicId],
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
     ) -> None:
         """
@@ -593,7 +593,7 @@ class Multiplexer(AsyncMultiplexer):
         :param default_connection: the default connection.
         :return: None.
         """
-        self.default_routing = default_routing
+        self.default_routing = default_routing or {}
         self._connections = []
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)

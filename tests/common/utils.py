@@ -183,11 +183,11 @@ class AeaTool:
 
     def put_inbox(self, envelope: Envelope) -> None:
         """Add an envelope to agent's inbox."""
-        self.aea._multiplexer.in_queue.put(envelope)
+        self.aea.runtime.multiplexer.in_queue.put(envelope)
 
     def is_inbox_empty(self) -> bool:
         """Check there is no messages in inbox."""
-        return self.aea._multiplexer.in_queue.empty()
+        return self.aea.runtime.multiplexer.in_queue.empty()
 
     def set_execution_timeout(self, timeout: float) -> None:
         """Set act/handle exeution timeout for AEE.
