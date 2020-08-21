@@ -196,6 +196,7 @@ class PosixNamedPipeProtocol:
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
         os.write(self._out, size + data)
+        asyncio.sleep(0.0)
         #self._out_fo.write(size + data)
         #self._out_fo.flush()
 
@@ -209,7 +210,7 @@ class PosixNamedPipeProtocol:
             self._stream_reader is not None
         ), "StreamReader not set, call connect first!"
         try:
-            self.logger.debug("waiting for messages...")
+            self.logger.debug("waiting for messages ({})...".format(self._in_path))
             buf = await self._stream_reader.readexactly(4)
             if not buf:  # pragma: no cover
                 return None
