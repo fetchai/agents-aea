@@ -210,7 +210,7 @@ class PosixNamedPipeProtocol:
             self._stream_reader is not None
         ), "StreamReader not set, call connect first!"
         try:
-            self.logger.debug("waiting for messages ({})...".format(self._in_path))
+            self.logger.debug("waiting for messages (in={})...".format(self._in_path))
             buf = await self._stream_reader.readexactly(4)
             if not buf:  # pragma: no cover
                 return None
@@ -220,7 +220,6 @@ class PosixNamedPipeProtocol:
             data = await self._stream_reader.readexactly(size)
             if not data:  # pragma: no cover
                 return None
-            self.logger.debug("received message: {}".format(data))
             return data
         except asyncio.IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
@@ -236,10 +235,11 @@ class PosixNamedPipeProtocol:
         """ Disconnect pipe """
         self.logger.debug("closing pipe (in={})...".format(self._in_path))
         assert self._fileobj is not None, "Pipe not connected"
-        # TOFIX(LR) Hack for MacOSX
         try:
+            # TOFIX(LR) Hack for MacOSX
             size = struct.pack("!I", 0)
             os.write(self._out, size)
+
             os.close(self._out)
             self._fileobj.close()
         except OSError:

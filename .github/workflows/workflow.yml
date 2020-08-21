@@ -8,14 +8,181 @@ on:
   pull_request:
 
 jobs:
+
+  common_checks_1:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install pipenv
+      - name: Pipenv lock
+        run: pipenv lock
+
+  common_checks_2:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - uses: actions/setup-go@master
+        with:
+          go-version: '^1.14.0'
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+      - name: Security Check
+        run: tox -e bandit
+      - name: Safety Check
+        run: tox -e safety
+      - name: Code style check
+        run: |
+          tox -e black-check
+          tox -e flake8
+      - name: Static type check
+        run: tox -e mypy
+      - name: Golang code style check
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.28
+          working-directory: packages/fetchai/connections/p2p_libp2p/
+
+  common_checks_3:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+      - name: Pylint check
+        run: |
+          tox -e pylint
+
+  common_checks_4:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          # install IPFS
+          sudo apt-get install -y wget
+          wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_linux-amd64.tar.gz
+          tar xvfz go-ipfs.tar.gz
+          sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+          ipfs init
+      - name: License Check
+        run: tox -e liccheck
+      - name: Copyright Check
+        run: tox -e copyright_check
+      - name: AEA Package Hashes Check
+        run: tox -e hash_check -- --timeout 20.0
+      - name: Check package versions in documentation
+        run: tox -e package_version_checks
+      - name: Check package dependencies
+        run: tox -e package_dependencies_checks
+      - name: Generate Documentation
+        run: tox -e docs
+
+  integration_checks:
+    continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
+    - common_checks_3
+    - common_checks_4
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Sync AEA loop integration tests
+      run: |
+        tox -e py3.8 -- --aea-loop sync -m 'sync'
+    - name: Async integration tests
+      run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
+
+  integration_checks_ledger:
+    continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
+    - common_checks_3
+    - common_checks_4
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.8
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+      - name: Integration tests
+        run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
+        continue-on-error: true
+      - name: Force green exit
+        run: exit 0
+
   platform_checks:
     continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
+    - common_checks_3
+    - common_checks_4
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
-        python-version: [3.6]
-    timeout-minutes: 15
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8]
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -49,3 +216,94 @@ jobs:
     - name: Unit tests
       run: |
         tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
+
+  platform_checks_sync_aea_loop:
+    continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
+    - common_checks_3
+    - common_checks_4
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Unit tests
+      run: |
+        tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
+
+  golang_checks:
+    continue-on-error: True
+    needs:
+    - common_checks_1
+    - common_checks_2
+    - common_checks_3
+    - common_checks_4
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.6]
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - if: matrix.python-version == '3.6'
+      name: Golang unit tests
+      working-directory: ./packages/fetchai/connections/p2p_libp2p
+      run: go test -p 1 -timeout 0 -count 1 -v ./...
+
+  coverage_checks:
+    continue-on-error: True
+    needs:
+    - integration_checks
+    - integration_checks_ledger
+    - platform_checks
+    - platform_checks_sync_aea_loop
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.7
+    - uses: actions/setup-go@master
+      with:
+        go-version: '^1.14.0'
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Run all tests
+      run: tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_protocols --ignore=tests/test_packages/test_skills -m 'not unstable'
+      continue-on-error: true
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        yml: ./codecov.yml
+        fail_ci_if_error: false

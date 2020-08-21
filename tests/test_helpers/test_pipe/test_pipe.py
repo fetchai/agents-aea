@@ -47,9 +47,7 @@ def _run_echo_service(client: IPCChannelClient):
         except (asyncio.IncompleteReadError, asyncio.CancelledError, OSError):
             pass
         finally:
-            print("closing client pipe...")
             await client.close()
-            print("closing client pipe...done")
 
     loop = asyncio.new_event_loop()
     loop.run_until_complete(echo_service(client))
@@ -85,10 +83,8 @@ class TestAEAHelperMakePipe:
         except Exception:
             raise
         finally:
-            print("closing pipe...")
             await pipe.close()
             client.join()
-            print("closing pipe...done")
 
 
 @pytest.mark.asyncio
