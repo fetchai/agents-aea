@@ -69,6 +69,7 @@ base_deps = [
     "packaging>=20.3",
     "semver>=2.9.1",
     "protobuf",
+    "pymultihash==0.8.2",
     "pyyaml>=4.2b1",
     "requests==2.22.0",
 ]
