@@ -48,6 +48,7 @@ from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
+from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
@@ -590,7 +591,8 @@ class BaseAEATestCase(ABC):
         :return: command line output
         """
         cls.run_cli_command("get-wealth", ledger_api_id, cwd=cls._get_cwd())
-        assert cls.last_cli_runner_result is not None, "Runner result not set!"
+        if cls.last_cli_runner_result is None:
+            raise ValueError("Runner result not set!")
         return str(cls.last_cli_runner_result.stdout_bytes, "utf-8")
 
     @classmethod
@@ -602,7 +604,9 @@ class BaseAEATestCase(ABC):
         :param dest: the destination file.
         :return: None
         """
-        assert src.is_file() and dest.is_file(), "Source or destination is not a file."
+        enforce(
+            src.is_file() and dest.is_file(), "Source or destination is not a file."
+        )
         dest.write_text(src.read_text())
 
     @classmethod
@@ -687,8 +691,8 @@ class BaseAEATestCase(ABC):
         """Send an envelope to an agent, using the stub connection."""
         # check added cause sometimes fails on win with permission error
         dir_path = Path(cls.t / agent)
-        assert dir_path.exists()
-        assert dir_path.is_dir()
+        enforce(dir_path.exists(), "Dir path does not exist.")
+        enforce(dir_path.is_dir(), "Dir path is not a directory.")
         write_envelope_to_file(envelope, str(cls.t / agent / DEFAULT_INPUT_FILE_NAME))
 
     @classmethod

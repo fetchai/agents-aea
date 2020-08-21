@@ -87,19 +87,20 @@ class Component(ABC, WithLogger):
     @property
     def configuration(self) -> ComponentConfiguration:
         """Get the component configuration."""
-        assert (
-            self._configuration is not None
-        ), "The component is not associated with a configuration."
+        if self._configuration is None:
+            raise ValueError("The component is not associated with a configuration.")
         return self._configuration
 
     @property
     def directory(self) -> Path:
         """Get the directory. Raise error if it has not been set yet."""
-        assert self._directory is not None, "Directory not set yet."
+        if self._directory is None:
+            raise ValueError("Directory not set yet.")
         return self._directory
 
     @directory.setter
     def directory(self, path: Path) -> None:
         """Set the directory. Raise error if already set."""
-        assert self._directory is None, "Directory already set."
+        if self._directory is not None:
+            raise ValueError("Directory already set.")
         self._directory = path

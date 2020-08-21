@@ -32,6 +32,7 @@ from aea.configurations.base import (
     ContractId,
 )
 from aea.crypto.base import LedgerApi
+from aea.exceptions import enforce
 from aea.helpers.base import load_aea_package, load_module
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,8 @@ class Contract(Component):
     @property
     def configuration(self) -> ContractConfig:
         """Get the configuration."""
-        assert self._configuration is not None, "Configuration not set."
+        if self._configuration is None:
+            raise ValueError("Configuration not set.")
         return cast(ContractConfig, super().configuration)
 
     @classmethod
@@ -101,9 +103,8 @@ class Contract(Component):
         :param configuration: the contract configuration.
         :return: the contract object.
         """
-        assert (
-            configuration.directory is not None
-        ), "Configuration must be associated with a directory."
+        if configuration.directory is None:
+            raise ValueError("Configuration must be associated with a directory.")
         directory = configuration.directory
         load_aea_package(configuration)
         contract_module = load_module("contracts", directory / "contract.py")
@@ -115,8 +116,9 @@ class Contract(Component):
         name_to_class = dict(contract_classes)
         logger.debug("Processing contract {}".format(contract_class_name))
         contract_class = name_to_class.get(contract_class_name, None)
-        assert contract_class_name is not None, "Contract class '{}' not found.".format(
-            contract_class_name
+        enforce(
+            contract_class_name is not None,
+            "Contract class '{}' not found.".format(contract_class_name),
         )
 
         # TODO: load interfaces here

@@ -36,6 +36,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.crypto.wallet import CryptoStore
+from aea.exceptions import enforce
 from aea.helpers.async_utils import AsyncState
 from aea.helpers.base import load_aea_package, load_module
 from aea.identity.base import Identity
@@ -83,11 +84,12 @@ class Connection(Component, ABC):
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        assert configuration is not None, "The configuration must be provided."
+        enforce(configuration is not None, "The configuration must be provided.")
         super().__init__(configuration, **kwargs)
-        assert (
-            super().public_id == self.connection_id
-        ), "Connection ids in configuration and class not matching."
+        enforce(
+            super().public_id == self.connection_id,
+            "Connection ids in configuration and class not matching.",
+        )
         self._state = AsyncState(ConnectionStates.disconnected)
 
         self._identity = identity
@@ -103,7 +105,7 @@ class Connection(Component, ABC):
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
         """Get the event loop."""
-        assert asyncio.get_event_loop().is_running()
+        enforce(asyncio.get_event_loop().is_running(), "Event loop is not running.")
         return asyncio.get_event_loop()
 
     def _ensure_connected(self) -> None:  # pragma: nocover
@@ -124,15 +126,17 @@ class Connection(Component, ABC):
     @property
     def address(self) -> "Address":  # pragma: nocover
         """Get the address."""
-        assert (
-            self._identity is not None
-        ), "You must provide the identity in order to retrieve the address."
+        if self._identity is None:
+            raise ValueError(
+                "You must provide the identity in order to retrieve the address."
+            )
         return self._identity.address
 
     @property
     def crypto_store(self) -> CryptoStore:  # pragma: nocover
         """Get the crypto store."""
-        assert self._crypto_store is not None, "CryptoStore not available."
+        if self._crypto_store is None:
+            raise ValueError("CryptoStore not available.")
         return self._crypto_store
 
     @property
@@ -148,7 +152,8 @@ class Connection(Component, ABC):
     @property
     def configuration(self) -> ConnectionConfig:
         """Get the connection configuration."""
-        assert self._configuration is not None, "Configuration not set."
+        if self._configuration is None:
+            raise ValueError("Configuration not set.")
         return cast(ConnectionConfig, super().configuration)
 
     @property
@@ -236,9 +241,10 @@ class Connection(Component, ABC):
         directory = cast(Path, configuration.directory)
         load_aea_package(configuration)
         connection_module_path = directory / "connection.py"
-        assert (
-            connection_module_path.exists() and connection_module_path.is_file()
-        ), "Connection module '{}' not found.".format(connection_module_path)
+        enforce(
+            connection_module_path.exists() and connection_module_path.is_file(),
+            "Connection module '{}' not found.".format(connection_module_path),
+        )
         connection_module = load_module(
             "connection_module", directory / "connection.py"
         )
@@ -250,8 +256,9 @@ class Connection(Component, ABC):
         name_to_class = dict(connection_classes)
         logger.debug("Processing connection {}".format(connection_class_name))
         connection_class = name_to_class.get(connection_class_name, None)
-        assert connection_class is not None, "Connection class '{}' not found.".format(
-            connection_class_name
+        enforce(
+            connection_class is not None,
+            "Connection class '{}' not found.".format(connection_class_name),
         )
         return connection_class(
             configuration=configuration,

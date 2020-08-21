@@ -51,6 +51,7 @@ from packaging.version import Version
 import semver
 
 import aea
+from aea.exceptions import enforce
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 T = TypeVar("T")
@@ -238,7 +239,7 @@ class Configuration(JSONSerializable, ABC):
         # parse all the known keys. This might ignore some keys in the dictionary.
         seen_keys = set()
         for key in self._key_order:
-            assert key not in result, "Key in results!"
+            enforce(key not in result, "Key in results!")
             value = data.get(key)
             if value is not None:
                 result[key] = value
@@ -663,9 +664,8 @@ class PackageConfiguration(Configuration, ABC):
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         """
         super().__init__()
-        assert (
-            name is not None and author is not None
-        ), "Name and author must be set on the configuration!"
+        if name is None or author is None:
+            ValueError("Name and author must be set on the configuration!")
         self.name = name
         self.author = author
         self.version = version if version != "" else DEFAULT_VERSION
@@ -689,7 +689,8 @@ class PackageConfiguration(Configuration, ABC):
     @directory.setter
     def directory(self, directory: Path) -> None:
         """Set directory if not already set."""
-        assert self._directory is None, "Directory already set"
+        if self._directory is not None:
+            ValueError("Directory already set")
         self._directory = directory
 
     @staticmethod
@@ -883,24 +884,24 @@ class ConnectionConfig(ComponentConfiguration):
     ):
         """Initialize a connection configuration object."""
         if connection_id is None:
-            assert name != "", "Name or connection_id must be set."
-            assert author != "", "Author or connection_id must be set."
-            assert version != "", "Version or connection_id must be set."
+            enforce(name != "", "Name or connection_id must be set.")
+            enforce(author != "", "Author or connection_id must be set.")
+            enforce(version != "", "Version or connection_id must be set.")
         else:
-            assert name in (
-                "",
-                connection_id.name,
-            ), "Non matching name in ConnectionConfig name and public id."
+            enforce(
+                name in ("", connection_id.name,),
+                "Non matching name in ConnectionConfig name and public id.",
+            )
             name = connection_id.name
-            assert author in (
-                "",
-                connection_id.author,
-            ), "Non matching author in ConnectionConfig author and public id."
+            enforce(
+                author in ("", connection_id.author,),
+                "Non matching author in ConnectionConfig author and public id.",
+            )
             author = connection_id.author
-            assert version in (
-                "",
-                connection_id.version,
-            ), "Non matching version in ConnectionConfig version and public id."
+            enforce(
+                version in ("", connection_id.version,),
+                "Non matching version in ConnectionConfig version and public id.",
+            )
             version = connection_id.version
         super().__init__(
             name,
@@ -1350,7 +1351,8 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_connection(self) -> str:
         """Get the default connection."""
-        assert self._default_connection is not None, "Default connection not set yet."
+        if self._default_connection is None:
+            raise ValueError("Default connection not set yet.")
         return str(self._default_connection)
 
     @default_connection.setter
@@ -1371,7 +1373,8 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_ledger(self) -> str:
         """Get the default ledger."""
-        assert self._default_ledger is not None, "Default ledger not set yet."
+        if self._default_ledger is None:
+            raise ValueError("Default ledger not set yet.")
         return self._default_ledger
 
     @default_ledger.setter
@@ -1702,7 +1705,8 @@ class ContractConfig(ComponentConfiguration):
 
     def _get_contract_interfaces(self) -> Dict[str, str]:
         """Get the contract interfaces."""
-        assert self.directory is not None, "Set directory before calling."
+        if self.directory is None:
+            raise ValueError("Set directory before calling.")
         contract_interfaces = {}  # type: Dict[str, str]
         for identifier, path in self.contract_interface_paths.items():
             full_path = Path(self.directory, path)
@@ -1792,7 +1796,7 @@ def _compute_fingerprint(
     for file in all_files:
         file_hash = hasher.get(str(file))
         key = str(file.relative_to(package_directory))
-        assert key not in fingerprints, "Key in fingerprints!"  # nosec
+        enforce(key not in fingerprints, "Key in fingerprints!")  # nosec
         # use '/' as path separator
         normalized_path = Path(key).as_posix()
         fingerprints[normalized_path] = file_hash
