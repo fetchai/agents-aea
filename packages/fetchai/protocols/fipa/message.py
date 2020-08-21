@@ -45,7 +45,7 @@ class FipaMessage(Message):
 
     Query = CustomQuery
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the fipa protocol."""
 
         ACCEPT = "accept"
