@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest]
-        python-version: [3.6, 3.7, 3.8]
-    timeout-minutes: 30
+        python-version: [3.6]
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master

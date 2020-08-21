@@ -152,7 +152,7 @@ class PosixNamedPipeProtocol:
             "Attempt opening pipes {}, {}...".format(self._in_path, self._out_path)
         )
 
-        self._in = os.open(self._in_path, os.O_RDONLY | os.O_NONBLOCK)
+        self._in = os.open(self._in_path, os.O_RDONLY | os.O_NONBLOCK | os.O_SYNC)
 
         try:
             self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK | os.O_SYNC)
@@ -194,7 +194,7 @@ class PosixNamedPipeProtocol:
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
         os.write(self._out, size + data)
-        os.fsync(self._out)
+        #os.fsync(self._out)
 
     async def read(self) -> Optional[bytes]:
         """
