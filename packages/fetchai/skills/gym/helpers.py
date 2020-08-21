@@ -175,7 +175,7 @@ class ProxyEnv(gym.Env):
             target=last_msg.message_id,
         )
         gym_msg.to = self.gym_address
-        assert self.active_gym_dialogue.update(gym_msg)
+        self.active_gym_dialogue.update(gym_msg)
         self._skill_context.outbox.put_message(message=gym_msg)
 
     def _encode_and_send_action(self, action: Action, step_id: int) -> None:
@@ -197,7 +197,7 @@ class ProxyEnv(gym.Env):
             target=last_msg.message_id,
         )
         gym_msg.to = self.gym_address
-        assert self.active_gym_dialogue.update(gym_msg)
+        self.active_gym_dialogue.update(gym_msg)
         # Send the message via the proxy agent and to the environment
         self._skill_context.outbox.put_message(message=gym_msg)
 

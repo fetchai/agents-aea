@@ -19,7 +19,6 @@
 
 """This module contains the tests of the soef connection module."""
 
-import copy
 import logging
 import time
 from threading import Thread
@@ -90,11 +89,11 @@ def test_soef():
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
+        message.to = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
@@ -116,11 +115,11 @@ def test_soef():
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
+        message.to = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
@@ -138,11 +137,11 @@ def test_soef():
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
+        message.to = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
@@ -163,11 +162,11 @@ def test_soef():
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
+        message.to = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
         search_envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
@@ -182,12 +181,9 @@ def test_soef():
 
         # check for search results
         envelope = multiplexer.get()
-        orig_message = envelope.message
-        assert orig_message.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(orig_message.agents) >= 0
-        message = copy.copy(orig_message)
-        message.is_incoming = True  # TODO: fix
-        message.counterparty = orig_message.sender  # TODO; fix
+        message = envelope.message
+        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert len(message.agents) >= 0
         receiving_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 
@@ -197,11 +193,11 @@ def test_soef():
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
+        message.to = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
         search_envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
@@ -238,11 +234,11 @@ def test_soef():
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
+        message.to = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
@@ -257,12 +253,9 @@ def test_soef():
         wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
 
         envelope = multiplexer.get()
-        orig_message = envelope.message
-        assert orig_message.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(orig_message.agents) >= 0
-        message = copy.copy(orig_message)
-        message.is_incoming = True  # TODO: fix
-        message.counterparty = orig_message.sender  # TODO; fix
+        message = envelope.message
+        assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert len(message.agents) >= 0
         receiving_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
 
@@ -273,11 +266,11 @@ def test_soef():
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.counterparty = SOEFConnection.connection_id.latest
+        message.to = SOEFConnection.connection_id.latest
         sending_dialogue = oef_search_dialogues.update(message)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=crypto.address,
             protocol_id=message.protocol_id,
             message=message,

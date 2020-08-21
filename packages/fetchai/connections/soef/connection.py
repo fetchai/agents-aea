@@ -728,7 +728,7 @@ class SOEFChannel:
             message_id=oef_search_message.message_id + 1,
         )
         message.to = oef_search_message.sender
-        assert oef_search_dialogue.update(message)
+        oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.to,
             sender=SOEFConnection.connection_id.latest,
@@ -935,7 +935,7 @@ class SOEFChannel:
             message_id=oef_message.message_id + 1,
         )
         message.to = oef_message.sender
-        assert oef_search_dialogue.update(message)
+        oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.to,
             sender=SOEFConnection.connection_id.latest,

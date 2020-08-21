@@ -92,7 +92,7 @@ class TestStubConnectionReception:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = "any"
+        msg.to = "any"
         expected_envelope = Envelope(
             to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
         )
@@ -105,7 +105,7 @@ class TestStubConnectionReception:
         assert expected_envelope.sender == actual_envelope.sender
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
-        msg.counterparty = actual_envelope.to
+        msg.to = actual_envelope.to
         assert expected_envelope.message == msg
 
     def test_reception_b(self):
@@ -232,7 +232,7 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = "any"
+        msg.to = "any"
         expected_envelope = Envelope(
             to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
         )
@@ -260,7 +260,7 @@ class TestStubConnectionSending:
         assert expected_envelope.sender == actual_envelope.sender
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
-        msg.counterparty = actual_envelope.to
+        msg.to = actual_envelope.to
         assert expected_envelope.message == msg
 
     @classmethod

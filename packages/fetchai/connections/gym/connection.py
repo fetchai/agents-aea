@@ -155,7 +155,7 @@ class GymChannel:
             await self._run_in_executor(self.gym_env.close)
             return
         msg.to = gym_message.sender
-        assert dialogue.update(msg), "Error during dialogue update."
+        dialogue.update(msg)
         envelope = Envelope(
             to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )

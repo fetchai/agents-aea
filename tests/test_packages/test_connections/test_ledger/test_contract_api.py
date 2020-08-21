@@ -19,7 +19,6 @@
 
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
-import copy
 import logging
 import unittest.mock
 from typing import cast
@@ -56,7 +55,7 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({"deployer_address": address}),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -72,10 +71,7 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message_orig = cast(ContractApiMessage, response.message)
-    response_message = copy.copy(response_message_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_message_orig.sender
+    response_message = cast(ContractApiMessage, response.message)
     assert (
         response_message.performative == ContractApiMessage.Performative.RAW_TRANSACTION
     ), "Error: {}".format(response_message.message)
@@ -106,7 +102,7 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
             {"deployer_address": address, "token_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -122,10 +118,7 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message_orig = cast(ContractApiMessage, response.message)
-    response_message = copy.copy(response_message_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_message_orig.sender
+    response_message = cast(ContractApiMessage, response.message)
     assert (
         response_message.performative == ContractApiMessage.Performative.RAW_TRANSACTION
     ), "Error: {}".format(response_message.message)
@@ -165,7 +158,7 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
             }
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -181,10 +174,7 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message_orig = cast(ContractApiMessage, response.message)
-    response_message = copy.copy(response_message_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_message_orig.sender
+    response_message = cast(ContractApiMessage, response.message)
     assert (
         response_message.performative == ContractApiMessage.Performative.RAW_MESSAGE
     ), "Error: {}".format(response_message.message)
@@ -215,7 +205,7 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
             {"agent_address": address, "token_id": token_id}
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -231,10 +221,7 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
 
     assert response is not None
     assert type(response.message) == ContractApiMessage
-    response_message_orig = cast(ContractApiMessage, response.message)
-    response_message = copy.copy(response_message_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_message_orig.sender
+    response_message = cast(ContractApiMessage, response.message)
     assert (
         response_message.performative == ContractApiMessage.Performative.STATE
     ), "Error: {}".format(response_message.message)
@@ -269,7 +256,7 @@ async def test_run_async():
             }
         ),
     )
-    message.counterparty = "test"
+    message.to = "test"
     dialogue = contract_api_dialogues.update(message)
     api = None
     msg = await ContractApiRequestDispatcher(ConnectionStatus()).run_async(
@@ -313,7 +300,7 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
             {"agent_address": address, "token_id": token_id}
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -365,7 +352,7 @@ async def test_callable_wrong_number_of_arguments_apis(
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({}),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -421,7 +408,7 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({}),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -463,7 +450,7 @@ async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
             {"agent_address": address, "token_id": token_id}
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(
@@ -511,7 +498,7 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
             {"agent_address": address, "token_id": token_id}
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
+    request.to = str(ledger_apis_connection.connection_id)
     contract_api_dialogue = contract_api_dialogues.update(request)
     assert contract_api_dialogue is not None
     envelope = Envelope(

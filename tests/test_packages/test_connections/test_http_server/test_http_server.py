@@ -138,7 +138,7 @@ class TestHTTPServer:
             status_text="Success",
             bodyy=b"Response body",
         )
-        message.counterparty = incoming_message.counterparty
+        message.to = incoming_message.sender
         assert dialogue.update(message)
         response_envelope = Envelope(
             to=envelope.sender,
@@ -176,10 +176,10 @@ class TestHTTPServer:
             headers=incoming_message.headers,
             bodyy=b"Request body",
         )
-        message.counterparty = incoming_message.counterparty
+        message.to = incoming_message.sender
         assert not dialogue.update(message)
         response_envelope = Envelope(
-            to=envelope.sender,
+            to=message.to,
             sender=envelope.to,
             protocol_id=envelope.protocol_id,
             context=envelope.context,
@@ -218,10 +218,10 @@ class TestHTTPServer:
             status_text="Success",
             bodyy=b"Response body",
         )
-        message.counterparty = incoming_message.counterparty
+        message.to = incoming_message.sender
         assert dialogue.update(message)
         response_envelope = Envelope(
-            to=envelope.sender,
+            to=message.to,
             sender=envelope.to,
             protocol_id=envelope.protocol_id,
             context=envelope.context,
@@ -262,10 +262,10 @@ class TestHTTPServer:
             status_text="Created",
             bodyy=b"Response body",
         )
-        message.counterparty = incoming_message.counterparty
+        message.to = incoming_message.sender
         assert dialogue.update(message)
         response_envelope = Envelope(
-            to=envelope.sender,
+            to=message.to,
             sender=envelope.to,
             protocol_id=envelope.protocol_id,
             context=envelope.context,
@@ -342,10 +342,10 @@ class TestHTTPServer:
             status_text="Success",
             bodyy=b"",
         )
-        message.counterparty = "to_key"
+        message.to = "to_key"
         message.sender = "from_key"
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
@@ -390,10 +390,10 @@ class TestHTTPServer:
             status_text="Created",
             bodyy=b"Response body",
         )
-        message.counterparty = incoming_message.counterparty
+        message.to = incoming_message.sender
         assert dialogue.update(message)
         response_envelope = Envelope(
-            to=envelope.sender,
+            to=message.to,
             sender=envelope.to,
             protocol_id=envelope.protocol_id,
             context=envelope.context,

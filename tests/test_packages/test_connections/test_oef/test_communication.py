@@ -21,7 +21,6 @@
 """This test module contains the tests for the OEF communication using an OEF."""
 
 import asyncio
-import copy
 import logging
 import sys
 import time
@@ -178,12 +177,12 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=search_query_empty_model,
             )
-            oef_search_request.counterparty = str(self.connection.connection_id)
+            oef_search_request.to = str(self.connection.connection_id)
             sending_dialogue = self.oef_search_dialogues.update(oef_search_request)
             assert sending_dialogue is not None
             self.multiplexer.put(
                 Envelope(
-                    to=str(self.connection.connection_id),
+                    to=oef_search_request.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
@@ -191,10 +190,7 @@ class TestOEF(UseOef):
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response_original = envelope.message
-            oef_search_response = copy.copy(oef_search_response_original)
-            oef_search_response.is_incoming = True
-            oef_search_response.counterparty = oef_search_response_original.sender
+            oef_search_response = envelope.message
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -218,12 +214,12 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=search_query,
             )
-            oef_search_request.counterparty = str(self.connection.connection_id)
+            oef_search_request.to = str(self.connection.connection_id)
             sending_dialogue = self.oef_search_dialogues.update(oef_search_request)
             assert sending_dialogue is not None
             self.multiplexer.put(
                 Envelope(
-                    to=str(self.connection.connection_id),
+                    to=oef_search_request.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
@@ -231,10 +227,7 @@ class TestOEF(UseOef):
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response_original = envelope.message
-            oef_search_response = copy.copy(oef_search_response_original)
-            oef_search_response.is_incoming = True
-            oef_search_response.counterparty = oef_search_response_original.sender
+            oef_search_response = envelope.message
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -265,22 +258,19 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=search_query,
             )
-            oef_search_request.counterparty = str(self.connection.connection_id)
+            oef_search_request.to = str(self.connection.connection_id)
             sending_dialogue = self.oef_search_dialogues.update(oef_search_request)
             assert sending_dialogue is not None
             self.multiplexer.put(
                 Envelope(
-                    to=str(self.connection.connection_id),
+                    to=oef_search_request.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
                 )
             )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response_original = envelope.message
-            oef_search_response = copy.copy(oef_search_response_original)
-            oef_search_response.is_incoming = True
-            oef_search_response.counterparty = oef_search_response_original.sender
+            oef_search_response = envelope.message
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -319,14 +309,14 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 service_description=desc,
             )
-            oef_search_registration.counterparty = str(self.connection.connection_id)
+            oef_search_registration.to = str(self.connection.connection_id)
             sending_dialogue_1 = self.oef_search_dialogues.update(
                 oef_search_registration
             )
             assert sending_dialogue_1 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=str(self.connection.connection_id),
+                    to=oef_search_registration.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_registration,
@@ -341,22 +331,19 @@ class TestOEF(UseOef):
                     [Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel
                 ),
             )
-            oef_search_request.counterparty = str(self.connection.connection_id)
+            oef_search_request.to = str(self.connection.connection_id)
             sending_dialogue_2 = self.oef_search_dialogues.update(oef_search_request)
             assert sending_dialogue_2 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=str(self.connection.connection_id),
+                    to=oef_search_request.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
                 )
             )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response_original = envelope.message
-            oef_search_response = copy.copy(oef_search_response_original)
-            oef_search_response.is_incoming = True
-            oef_search_response.counterparty = oef_search_response_original.sender
+            oef_search_response = envelope.message
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -400,14 +387,14 @@ class TestOEF(UseOef):
                 dialogue_reference=cls.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 service_description=cls.desc,
             )
-            oef_search_registration.counterparty = str(cls.connection.connection_id)
+            oef_search_registration.to = str(cls.connection.connection_id)
             sending_dialogue_1 = cls.oef_search_dialogues.update(
                 oef_search_registration
             )
             assert sending_dialogue_1 is not None
             cls.multiplexer.put(
                 Envelope(
-                    to=str(cls.connection.connection_id),
+                    to=oef_search_registration.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_registration,
@@ -424,22 +411,19 @@ class TestOEF(UseOef):
                     model=cls.foo_datamodel,
                 ),
             )
-            oef_search_request.counterparty = str(cls.connection.connection_id)
+            oef_search_request.to = str(cls.connection.connection_id)
             sending_dialogue_2 = cls.oef_search_dialogues.update(oef_search_request)
             assert sending_dialogue_2 is not None
             cls.multiplexer.put(
                 Envelope(
-                    to=str(cls.connection.connection_id),
+                    to=oef_search_request.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
                 )
             )
             envelope = cls.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response_original = envelope.message
-            oef_search_response = copy.copy(oef_search_response_original)
-            oef_search_response.is_incoming = True
-            oef_search_response.counterparty = oef_search_response_original.sender
+            oef_search_response = envelope.message
             oef_search_dialogue = cls.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -463,14 +447,14 @@ class TestOEF(UseOef):
                 dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 service_description=self.desc,
             )
-            oef_search_deregistration.counterparty = str(self.connection.connection_id)
+            oef_search_deregistration.to = str(self.connection.connection_id)
             sending_dialogue_1 = self.oef_search_dialogues.update(
                 oef_search_deregistration
             )
             assert sending_dialogue_1 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=str(self.connection.connection_id),
+                    to=oef_search_deregistration.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_deregistration,
@@ -487,12 +471,12 @@ class TestOEF(UseOef):
                     model=self.foo_datamodel,
                 ),
             )
-            oef_search_request.counterparty = str(self.connection.connection_id)
+            oef_search_request.to = str(self.connection.connection_id)
             sending_dialogue_2 = self.oef_search_dialogues.update(oef_search_request)
             assert sending_dialogue_2 is not None
             self.multiplexer.put(
                 Envelope(
-                    to=str(self.connection.connection_id),
+                    to=oef_search_request.to,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_request,
@@ -500,10 +484,7 @@ class TestOEF(UseOef):
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            oef_search_response_original = envelope.message
-            oef_search_response = copy.copy(oef_search_response_original)
-            oef_search_response.is_incoming = True
-            oef_search_response.counterparty = oef_search_response_original.sender
+            oef_search_response = envelope.message
             oef_search_dialogue = self.oef_search_dialogues.update(oef_search_response)
             assert (
                 oef_search_response.performative
@@ -544,10 +525,10 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_message.counterparty = FETCHAI_ADDRESS_TWO
+        cfp_message.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=cfp_message.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=cfp_message,
@@ -555,7 +536,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_message = FipaMessage.serializer.decode(envelope.message)
-        expected_cfp_message.counterparty = FETCHAI_ADDRESS_TWO
+        expected_cfp_message.to = FETCHAI_ADDRESS_TWO
 
         assert expected_cfp_message == cfp_message
 
@@ -566,10 +547,10 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_none.counterparty = FETCHAI_ADDRESS_TWO
+        cfp_none.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=cfp_none.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=cfp_none,
@@ -577,7 +558,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_none = FipaMessage.serializer.decode(envelope.message)
-        expected_cfp_none.counterparty = FETCHAI_ADDRESS_TWO
+        expected_cfp_none.to = FETCHAI_ADDRESS_TWO
         assert expected_cfp_none == cfp_none
 
     def test_propose(self):
@@ -589,10 +570,10 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.PROPOSE,
             proposal=Description({"foo": "bar"}),
         )
-        propose_empty.counterparty = FETCHAI_ADDRESS_TWO
+        propose_empty.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=propose_empty.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=propose_empty,
@@ -600,7 +581,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_empty = FipaMessage.serializer.decode(envelope.message)
-        expected_propose_empty.counterparty = FETCHAI_ADDRESS_TWO
+        expected_propose_empty.to = FETCHAI_ADDRESS_TWO
         assert expected_propose_empty == propose_empty
 
         propose_descriptions = FipaMessage(
@@ -613,10 +594,10 @@ class TestFIPA(UseOef):
             ),
         )
 
-        propose_descriptions.counterparty = FETCHAI_ADDRESS_TWO
+        propose_descriptions.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=propose_descriptions.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=propose_descriptions,
@@ -624,7 +605,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_descriptions = FipaMessage.serializer.decode(envelope.message)
-        expected_propose_descriptions.counterparty = FETCHAI_ADDRESS_TWO
+        expected_propose_descriptions.to = FETCHAI_ADDRESS_TWO
         assert expected_propose_descriptions == propose_descriptions
 
     def test_accept(self):
@@ -635,10 +616,10 @@ class TestFIPA(UseOef):
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        accept.counterparty = FETCHAI_ADDRESS_TWO
+        accept.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=accept.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=accept,
@@ -646,7 +627,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_accept = FipaMessage.serializer.decode(envelope.message)
-        expected_accept.counterparty = FETCHAI_ADDRESS_TWO
+        expected_accept.to = FETCHAI_ADDRESS_TWO
         assert expected_accept == accept
 
     def test_match_accept(self):
@@ -658,10 +639,10 @@ class TestFIPA(UseOef):
             target=3,
             performative=FipaMessage.Performative.MATCH_ACCEPT,
         )
-        match_accept.counterparty = FETCHAI_ADDRESS_TWO
+        match_accept.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=match_accept.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=match_accept,
@@ -669,7 +650,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_match_accept = FipaMessage.serializer.decode(envelope.message)
-        expected_match_accept.counterparty = FETCHAI_ADDRESS_TWO
+        expected_match_accept.to = FETCHAI_ADDRESS_TWO
         assert expected_match_accept == match_accept
 
     def test_decline(self):
@@ -680,10 +661,10 @@ class TestFIPA(UseOef):
             target=0,
             performative=FipaMessage.Performative.DECLINE,
         )
-        decline.counterparty = FETCHAI_ADDRESS_TWO
+        decline.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=decline.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=decline,
@@ -691,7 +672,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_decline = FipaMessage.serializer.decode(envelope.message)
-        expected_decline.counterparty = FETCHAI_ADDRESS_TWO
+        expected_decline.to = FETCHAI_ADDRESS_TWO
         assert expected_decline == decline
 
     def test_match_accept_w_inform(self):
@@ -703,10 +684,10 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             info={"address": "my_address"},
         )
-        match_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
+        match_accept_w_inform.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=match_accept_w_inform.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=match_accept_w_inform,
@@ -714,7 +695,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_match_accept_w_inform = FipaMessage.serializer.decode(envelope.message)
-        returned_match_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
+        returned_match_accept_w_inform.to = FETCHAI_ADDRESS_TWO
         assert returned_match_accept_w_inform == match_accept_w_inform
 
     def test_accept_w_inform(self):
@@ -726,10 +707,10 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             info={"address": "my_address"},
         )
-        accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
+        accept_w_inform.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=accept_w_inform.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=accept_w_inform,
@@ -737,7 +718,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_accept_w_inform = FipaMessage.serializer.decode(envelope.message)
-        returned_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
+        returned_accept_w_inform.to = FETCHAI_ADDRESS_TWO
         assert returned_accept_w_inform == accept_w_inform
 
     def test_inform(self):
@@ -750,10 +731,10 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.INFORM,
             info=payload,
         )
-        inform.counterparty = FETCHAI_ADDRESS_TWO
+        inform.to = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=FETCHAI_ADDRESS_TWO,
+                to=inform.to,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=inform,
@@ -761,7 +742,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_inform = FipaMessage.serializer.decode(envelope.message)
-        returned_inform.counterparty = FETCHAI_ADDRESS_TWO
+        returned_inform.to = FETCHAI_ADDRESS_TWO
         assert returned_inform == inform
 
     def test_serialisation_fipa(self):
@@ -845,8 +826,7 @@ class TestFIPA(UseOef):
             dialogue_reference=dialogue_reference,
             query=query,
         )
-        oef_search_msg.is_incoming = True
-        oef_search_msg.counterparty = "agent"
+        oef_search_msg.to = "agent"
         dialogue._incoming_messages = [oef_search_msg]
         oef_channel.oef_msg_id_to_dialogue[oef_channel.oef_msg_id] = dialogue
         oef_channel.on_oef_error(
@@ -1044,10 +1024,10 @@ class TestSendWithOEF(UseOef):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
         )
-        msg.counterparty = str(oef_connection.connection_id)
+        msg.to = str(oef_connection.connection_id)
         sending_dialogue = oef_search_dialogues.update(msg)
         envelope = Envelope(
-            to=str(oef_connection.connection_id),
+            to=msg.to,
             sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
@@ -1067,20 +1047,17 @@ class TestSendWithOEF(UseOef):
             dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        msg.counterparty = str(oef_connection.connection_id)
+        msg.to = str(oef_connection.connection_id)
         sending_dialogue = oef_search_dialogues.update(msg)
         envelope = Envelope(
-            to=str(oef_connection.connection_id),
+            to=msg.to,
             sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg,
         )
         await oef_connection.send(envelope)
         envelope = await oef_connection.receive()
-        search_result_original = envelope.message
-        search_result = copy.copy(search_result_original)
-        search_result.counterparty = search_result_original.sender
-        search_result.is_incoming = True
+        search_result = envelope.message
         response_dialogue = oef_search_dialogues.update(search_result)
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
         assert sending_dialogue == response_dialogue

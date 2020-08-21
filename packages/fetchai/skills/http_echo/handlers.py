@@ -131,7 +131,7 @@ class HttpHandler(Handler):
         )
         self.context.logger.info("responding with: {}".format(http_response))
         http_response.to = http_msg.sender
-        assert http_dialogue.update(http_response)
+        http_dialogue.update(http_response)
         self.context.outbox.put_message(message=http_response)
 
     def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
@@ -155,7 +155,7 @@ class HttpHandler(Handler):
         )
         self.context.logger.info("responding with: {}".format(http_response))
         http_response.to = http_msg.sender
-        assert http_dialogue.update(http_response)
+        http_dialogue.update(http_response)
         self.context.outbox.put_message(message=http_response)
 
     def _handle_invalid(

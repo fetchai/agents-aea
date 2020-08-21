@@ -64,9 +64,7 @@ class TestMessageProperties:
             assert self.message.get(key) == value
         assert self.message.get("kwarg") == self.kwarg
         assert not self.message.has_sender
-        assert not self.message.has_counterparty
         assert not self.message.has_to
-        assert not self.message.is_incoming
 
 
 class TestBaseSerializations:

@@ -19,7 +19,6 @@
 """Tests for the webhook connection and channel."""
 
 import asyncio
-import copy
 import json
 import logging
 from traceback import print_exc
@@ -110,10 +109,7 @@ class TestWebhookConnection:
 
         assert envelope
 
-        orig_message = cast(HttpMessage, envelope.message)
-        message = copy.copy(orig_message)
-        message.counterparty = orig_message.sender
-        message.is_incoming = True
+        message = cast(HttpMessage, envelope.message)
         dialogue = self.dialogues.update(message)
         assert dialogue is not None
         assert message.method.upper() == "POST"

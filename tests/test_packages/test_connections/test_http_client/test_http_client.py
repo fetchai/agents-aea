@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """Tests for the HTTP Client connection and channel."""
 import asyncio
-import copy
 import logging
 from asyncio import CancelledError
 from unittest.mock import Mock, patch
@@ -117,7 +116,7 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = self.connection_address
+        request_http_message.to = self.connection_address
         sending_dialogue = self.http_dialogs.update(request_http_message)
         assert sending_dialogue is not None
         request_envelope = Envelope(
@@ -164,7 +163,7 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = self.connection_address
+        request_http_message.to = self.connection_address
         sending_dialogue = self.http_dialogs.update(request_http_message)
         assert sending_dialogue is not None
         request_envelope = Envelope(
@@ -213,7 +212,7 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = self.connection_address
+        request_http_message.to = self.connection_address
         sending_dialogue = self.http_dialogs.update(request_http_message)
         assert sending_dialogue is not None
         request_envelope = Envelope(
@@ -262,7 +261,7 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = self.connection_address
+        request_http_message.to = self.connection_address
         sending_dialogue = self.http_dialogs.update(request_http_message)
         assert sending_dialogue is not None
         request_envelope = Envelope(
@@ -293,11 +292,9 @@ class TestHTTPClientConnect:
             )
 
         assert envelope is not None and envelope.message is not None
-        response = copy.copy(envelope.message)
-        response.is_incoming = True
-        response.counterparty = envelope.message.sender
-        response_dialogue = self.http_dialogs.update(response)
-        assert response.status_code == response_mock.status, response.bodyy.decode(
+        message = envelope.message
+        response_dialogue = self.http_dialogs.update(message)
+        assert message.status_code == response_mock.status, message.bodyy.decode(
             "utf-8"
         )
         assert sending_dialogue == response_dialogue
@@ -317,12 +314,12 @@ class TestHTTPClientConnect:
             bodyy=b"",
             version="",
         )
-        http_message.counterparty = self.connection_address
+        http_message.to = self.connection_address
         http_dialogue = self.http_dialogs.update(http_message)
         http_message.sender = self.agent_address
         assert http_dialogue is None
         envelope = Envelope(
-            to=http_message.counterparty,
+            to=http_message.to,
             sender=http_message.sender,
             protocol_id=http_message.protocol_id,
             message=http_message,

@@ -144,8 +144,7 @@ class TestEndToEndGenerator(UseOef):
             content_bool=True,
             content_str="some string",
         )
-        message_1.counterparty = aea_2.identity.address
-        message_1.is_incoming = False
+        message_1.to = aea_2.identity.address
 
         # message 2
         message_2 = TProtocolMessage(
@@ -159,8 +158,7 @@ class TestEndToEndGenerator(UseOef):
             content_bool=False,
             content_str="some other string",
         )
-        message_2.counterparty = aea_1.identity.address
-        message_2.is_incoming = False
+        message_2.to = aea_1.identity.address
 
         # add handlers to AEA resources
         skill_context_1 = SkillContext(aea_1.context)
@@ -360,7 +358,6 @@ class Agent2Handler(Handler):
         """
         self.dialogue.update(message)
         self.handled_message = message
-        message.counterparty = self.dialogue.dialogue_label.dialogue_opponent_addr
         self.dialogue.update(self.message_2)
         self.context.outbox.put_message(self.message_2)
 

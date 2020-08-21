@@ -48,12 +48,9 @@ def test_fipa_cfp_serialization():
         performative=FipaMessage.Performative.CFP,
         query=query,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -65,7 +62,7 @@ def test_fipa_cfp_serialization():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -80,12 +77,9 @@ def test_fipa_cfp_serialization_bytes():
         performative=FipaMessage.Performative.CFP,
         query=query,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -97,7 +91,7 @@ def test_fipa_cfp_serialization_bytes():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -112,12 +106,9 @@ def test_fipa_propose_serialization():
         performative=FipaMessage.Performative.PROPOSE,
         proposal=proposal,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -129,7 +120,7 @@ def test_fipa_propose_serialization():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -142,12 +133,9 @@ def test_fipa_accept_serialization():
         target=0,
         performative=FipaMessage.Performative.ACCEPT,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -159,7 +147,7 @@ def test_fipa_accept_serialization():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -172,14 +160,10 @@ def test_performative_match_accept():
         target=0,
         performative=FipaMessage.Performative.MATCH_ACCEPT,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
-    msg.counterparty = "receiver"
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -190,7 +174,7 @@ def test_performative_match_accept():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -204,12 +188,9 @@ def test_performative_accept_with_inform():
         performative=FipaMessage.Performative.ACCEPT_W_INFORM,
         info={"address": "dummy_address"},
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -221,7 +202,7 @@ def test_performative_accept_with_inform():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -235,12 +216,9 @@ def test_performative_match_accept_with_inform():
         performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
         info={"address": "dummy_address", "signature": "my_signature"},
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -252,7 +230,7 @@ def test_performative_match_accept_with_inform():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -266,12 +244,9 @@ def test_performative_inform():
         performative=FipaMessage.Performative.INFORM,
         info={"foo": "bar"},
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -283,7 +258,7 @@ def test_performative_inform():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -419,7 +394,7 @@ class TestDialogues:
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_msg.counterparty = self.seller_addr
+        cfp_msg.to = self.seller_addr
 
         # Extends the outgoing list of messages.
         buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
@@ -435,10 +410,6 @@ class TestDialogues:
         ), "The dialogue_reference is not set correctly."
 
         # MESSAGE BEING SENT BETWEEN AGENTS
-
-        # change the incoming message field & counterparty
-        cfp_msg.is_incoming = True
-        cfp_msg.counterparty = self.buyer_addr
 
         # Creates a new dialogue for the seller side based on the income message.
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
@@ -458,7 +429,7 @@ class TestDialogues:
             performative=FipaMessage.Performative.PROPOSE,
             proposal=proposal,
         )
-        proposal_msg.counterparty = self.buyer_addr
+        proposal_msg.to = self.buyer_addr
 
         assert (
             proposal_msg.dialogue_reference[0] != ""
@@ -469,12 +440,6 @@ class TestDialogues:
         seller_dialogue.update(proposal_msg)
 
         # MESSAGE BEING SENT BETWEEN AGENTS
-
-        # change the incoming message field
-        proposal_msg.is_incoming = True
-
-        # change message counterparty field
-        proposal_msg.counterparty = self.seller_addr
 
         # Client received the message and we extend the incoming messages list.
         buyer_dialogue = self.buyer_dialogues.update(proposal_msg)
@@ -497,18 +462,12 @@ class TestDialogues:
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             info={"address": "dummy_address"},
         )
-        accept_msg.counterparty = self.seller_addr
+        accept_msg.to = self.seller_addr
 
         # Adds the message to the buyer outgoing list.
         buyer_dialogue.update(accept_msg)
 
         # MESSAGE BEING SENT BETWEEN AGENTS
-
-        # change the incoming message field
-        accept_msg.is_incoming = True
-
-        # change message counterparty field
-        accept_msg.counterparty = self.buyer_addr
 
         # Adds the message to the seller incoming message list.
         seller_dialogue = self.seller_dialogues.update(accept_msg)
@@ -525,7 +484,7 @@ class TestDialogues:
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_msg.counterparty = self.seller_addr
+        cfp_msg.to = self.seller_addr
         buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
 
         assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing message."
@@ -544,8 +503,6 @@ class TestDialogues:
         ]
 
         # message arrives at counterparty
-        cfp_msg.is_incoming = True
-        cfp_msg.counterparty = self.buyer_addr
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
 
         assert len(seller_dialogue._outgoing_messages) == 0, "Some outgoing message."
@@ -568,7 +525,7 @@ class TestDialogues:
             performative=FipaMessage.Performative.PROPOSE,
             proposal=Description({"foo1": 1, "bar1": 2}),
         )
-        proposal_msg.counterparty = self.buyer_addr
+        proposal_msg.to = self.buyer_addr
 
         self.seller_dialogues.update(proposal_msg)
 
@@ -579,8 +536,6 @@ class TestDialogues:
         ), "Wrong outgoing message."
 
         # message arrives at counterparty
-        proposal_msg.counterparty = self.seller_addr
-        proposal_msg.is_incoming = True
         self.buyer_dialogues.update(proposal_msg)
 
         assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing messages."

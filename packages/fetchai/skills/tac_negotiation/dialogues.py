@@ -127,7 +127,11 @@ class FipaDialogues(Model, BaseFipaDialogues):
                     SUPPLY_DATAMODEL_NAME, DEMAND_DATAMODEL_NAME
                 )
             )
-        if message.sender != self.agent_address:  # message is by other
+        if (
+            message.is_incoming
+        ):  # ToDo fix: this is wrong after removing is_incoming from Message
+            # alternatively (should also make the method non-static):
+            # if message.sender != self.agent_address:  # message is by other
             is_seller = (
                 query.model.name == SUPPLY_DATAMODEL_NAME
             )  # the counterparty is querying for supply/sellers (this agent is receiving their CFP so is the seller)

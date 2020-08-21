@@ -522,7 +522,7 @@ class TestFilter:
             # crypto_id="ledger_id",
             signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
-        t.counterparty = "skill"
+        t.to = "skill"
         t.sender = "decision_maker"
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea._filter.handle_internal_messages()

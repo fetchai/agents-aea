@@ -558,7 +558,10 @@ class Dialogue(ABC):
         return result
 
     def reply(
-        self, performative, target_message: Optional[Message] = None, **kwargs
+        self,
+        performative: Message.Performative,
+        target_message: Optional[Message] = None,
+        **kwargs,
     ) -> Message:
         """
         Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
@@ -575,10 +578,10 @@ class Dialogue(ABC):
 
         if target_message is None:
             target_message = self.last_message
-
-        assert self.has_message(
-            target_message  # type: ignore
-        ), "The target message does not exist in this dialogue."
+        else:
+            assert self.has_message(
+                target_message  # type: ignore
+            ), "The target message does not exist in this dialogue."
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
@@ -607,8 +610,8 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: Boolean result, and associated message.
         """
-        result_basic_validation, msg_basic_validation = self._basic_validation(message)
-        if not result_basic_validation:
+        is_basic_validated, msg_basic_validation = self._basic_validation(message)
+        if not is_basic_validated:
             return False, msg_basic_validation
 
         (

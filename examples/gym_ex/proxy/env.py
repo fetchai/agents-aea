@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This contains the proxy gym environment."""
 
-import copy
 import sys
 import time
 from queue import Queue
@@ -155,7 +154,7 @@ class ProxyEnv(gym.Env):
             dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
             performative=GymMessage.Performative.RESET,
         )
-        gym_msg.counterparty = self.gym_address
+        gym_msg.to = self.gym_address
         gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
         assert gym_dialogue is not None
         self._active_dialogue = gym_dialogue
@@ -180,7 +179,7 @@ class ProxyEnv(gym.Env):
             message_id=last_msg.message_id + 1,
             target=last_msg.message_id,
         )
-        gym_msg.counterparty = self.gym_address
+        gym_msg.to = self.gym_address
         assert self.active_dialogue.update(gym_msg)
         self._agent.outbox.put_message(message=gym_msg)
 
@@ -225,7 +224,7 @@ class ProxyEnv(gym.Env):
             message_id=last_msg.message_id + 1,
             target=last_msg.message_id,
         )
-        gym_msg.counterparty = self.gym_address
+        gym_msg.to = self.gym_address
         assert self.active_dialogue.update(gym_msg)
         # Send the message via the proxy agent and to the environment
         self._agent.outbox.put_message(message=gym_msg)
@@ -242,10 +241,7 @@ class ProxyEnv(gym.Env):
         """
         if envelope is not None:
             if envelope.protocol_id == GymMessage.protocol_id:
-                orig_gym_msg = cast(GymMessage, envelope.message)
-                gym_msg = copy.copy(orig_gym_msg)
-                gym_msg.counterparty = orig_gym_msg.sender
-                gym_msg.is_incoming = True
+                gym_msg = cast(GymMessage, envelope.message)
                 if not self.active_dialogue.update(gym_msg):
                     raise ValueError("Could not udpate dialogue.")
                 if (
@@ -275,10 +271,7 @@ class ProxyEnv(gym.Env):
         """
         if envelope is not None:
             if envelope.protocol_id == GymMessage.protocol_id:
-                orig_gym_msg = cast(GymMessage, envelope.message)
-                gym_msg = copy.copy(orig_gym_msg)
-                gym_msg.counterparty = orig_gym_msg.sender
-                gym_msg.is_incoming = True
+                gym_msg = cast(GymMessage, envelope.message)
                 if not self.active_dialogue.update(gym_msg):
                     raise ValueError("Could not udpate dialogue.")
                 if (

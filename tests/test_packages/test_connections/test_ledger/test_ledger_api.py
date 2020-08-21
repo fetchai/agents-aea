@@ -283,7 +283,7 @@ async def test_no_balance():
         ledger_id=ETHEREUM,
         address="test",
     )
-    message.counterparty = "test"
+    message.to = "test"
     dialogue = dispatcher.dialogues.update(message)
     mock_api.get_balance.return_value = None
     msg = dispatcher.get_balance(mock_api, message, dialogue)
@@ -311,7 +311,7 @@ async def test_no_raw_tx():
             chain_id=3,
         ),
     )
-    message.counterparty = "test"
+    message.to = "test"
     dialogue = dispatcher.dialogues.update(message)
     mock_api.get_transfer_transaction.return_value = None
     msg = dispatcher.get_raw_transaction(mock_api, message, dialogue)
@@ -329,7 +329,7 @@ async def test_attempts_get_transaction_receipt():
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         transaction_digest=TransactionDigest("asdad", "sdfdsf"),
     )
-    message.counterparty = "test"
+    message.to = "test"
     dialogue = dispatcher.dialogues.update(message)
     assert dialogue is not None
     mock_api.get_transaction.return_value = None

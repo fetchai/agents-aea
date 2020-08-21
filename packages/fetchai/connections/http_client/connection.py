@@ -305,7 +305,7 @@ class HTTPClientAsyncChannel:
             message_id=http_request_message.message_id + 1,
         )
         http_message.to = http_request_message.sender
-        assert dialogue.update(http_message)
+        dialogue.update(http_message)
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",

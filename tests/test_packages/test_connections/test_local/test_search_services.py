@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the search feature of the local OEF node."""
-import copy
 import unittest.mock
 from typing import Optional, cast
 
@@ -80,14 +79,14 @@ class TestNoValidDialogue:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        search_services_request.counterparty = str(OEFLocalConnection.connection_id)
+        search_services_request.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(
             Optional[OefSearchDialogue], self.dialogues.update(search_services_request)
         )
         assert sending_dialogue is None
         search_services_request.sender = self.address_1
         envelope = Envelope(
-            to=search_services_request.counterparty,
+            to=search_services_request.to,
             sender=search_services_request.sender,
             protocol_id=search_services_request.protocol_id,
             message=search_services_request,
@@ -136,13 +135,13 @@ class TestEmptySearch:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        search_services_request.counterparty = str(OEFLocalConnection.connection_id)
+        search_services_request.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(
             Optional[OefSearchDialogue], self.dialogues.update(search_services_request)
         )
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=search_services_request.counterparty,
+            to=search_services_request.to,
             sender=search_services_request.sender,
             protocol_id=search_services_request.protocol_id,
             message=search_services_request,
@@ -152,10 +151,7 @@ class TestEmptySearch:
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
         assert response_envelope.protocol_id == OefSearchMessage.protocol_id
-        search_result_orig = cast(OefSearchMessage, response_envelope.message)
-        search_result = copy.copy(search_result_orig)
-        search_result.is_incoming = True
-        search_result.counterparty = search_result_orig.sender
+        search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
@@ -198,13 +194,13 @@ class TestSimpleSearchResult:
             dialogue_reference=cls.dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        register_service_request.counterparty = str(OEFLocalConnection.connection_id)
+        register_service_request.to = str(OEFLocalConnection.connection_id)
         cls.sending_dialogue = cast(
             Optional[OefSearchDialogue], cls.dialogues.update(register_service_request)
         )
         assert cls.sending_dialogue is not None
         envelope = Envelope(
-            to=register_service_request.counterparty,
+            to=register_service_request.to,
             sender=register_service_request.sender,
             protocol_id=register_service_request.protocol_id,
             message=register_service_request,
@@ -224,13 +220,13 @@ class TestSimpleSearchResult:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        search_services_request.counterparty = str(OEFLocalConnection.connection_id)
+        search_services_request.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(
             Optional[OefSearchDialogue], self.dialogues.update(search_services_request)
         )
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=search_services_request.counterparty,
+            to=search_services_request.to,
             sender=search_services_request.sender,
             protocol_id=search_services_request.protocol_id,
             message=search_services_request,
@@ -240,10 +236,7 @@ class TestSimpleSearchResult:
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
         assert response_envelope.protocol_id == OefSearchMessage.protocol_id
-        search_result_orig = cast(OefSearchMessage, response_envelope.message)
-        search_result = copy.copy(search_result_orig)
-        search_result.is_incoming = True
-        search_result.counterparty = search_result_orig.sender
+        search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
@@ -291,24 +284,18 @@ class TestUnregister:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        msg.counterparty = str(OEFLocalConnection.connection_id)
+        msg.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(Optional[OefSearchDialogue], self.dialogues.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         self.multiplexer1.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OefSearchMessage.protocol_id
-        response_orig = cast(OefSearchMessage, response_envelope.message)
-        response = copy.copy(response_orig)
-        response.is_incoming = True
-        response.counterparty = response_orig.sender
+        response = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(response)
         assert response_dialogue == sending_dialogue
         assert response.performative == OefSearchMessage.Performative.OEF_ERROR
@@ -318,14 +305,11 @@ class TestUnregister:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        msg.counterparty = str(OEFLocalConnection.connection_id)
+        msg.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(Optional[OefSearchDialogue], self.dialogues.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         self.multiplexer1.put(envelope)
 
@@ -335,22 +319,16 @@ class TestUnregister:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
-        msg.counterparty = str(OEFLocalConnection.connection_id)
+        msg.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(Optional[OefSearchDialogue], self.dialogues.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         self.multiplexer1.put(envelope)
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        search_result_orig = cast(OefSearchMessage, response_envelope.message)
-        search_result = copy.copy(search_result_orig)
-        search_result.is_incoming = True
-        search_result.counterparty = search_result_orig.sender
+        search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
@@ -362,14 +340,11 @@ class TestUnregister:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        msg.counterparty = str(OEFLocalConnection.connection_id)
+        msg.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(Optional[OefSearchDialogue], self.dialogues.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         self.multiplexer1.put(envelope)
 
@@ -380,22 +355,16 @@ class TestUnregister:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
-        msg.counterparty = str(OEFLocalConnection.connection_id)
+        msg.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(Optional[OefSearchDialogue], self.dialogues.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         self.multiplexer1.put(envelope)
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        search_result_orig = cast(OefSearchMessage, response_envelope.message)
-        search_result = copy.copy(search_result_orig)
-        search_result.is_incoming = True
-        search_result.counterparty = search_result_orig.sender
+        search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
@@ -432,14 +401,11 @@ class TestAgentMessage:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        msg.counterparty = str(OEFLocalConnection.connection_id)
+        msg.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(Optional[FipaDialogue], self.dialogues.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         with pytest.raises(ConnectionError):
             await _make_local_connection(self.address_1, self.node,).send(envelope)
@@ -450,14 +416,11 @@ class TestAgentMessage:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        msg.counterparty = "this_address_does_not_exist"
+        msg.to = "this_address_does_not_exist"
         sending_dialogue = cast(Optional[FipaDialogue], self.dialogues.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         self.multiplexer1.put(envelope)
 
@@ -510,13 +473,13 @@ class TestFilteredSearchResult:
             dialogue_reference=cls.dialogues1.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        register_service_request.counterparty = str(OEFLocalConnection.connection_id)
+        register_service_request.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(
             Optional[OefSearchDialogue], cls.dialogues1.update(register_service_request)
         )
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=register_service_request.counterparty,
+            to=register_service_request.to,
             sender=register_service_request.sender,
             protocol_id=register_service_request.protocol_id,
             message=register_service_request,
@@ -537,13 +500,13 @@ class TestFilteredSearchResult:
             dialogue_reference=cls.dialogues1.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        register_service_request.counterparty = str(OEFLocalConnection.connection_id)
+        register_service_request.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(
             Optional[OefSearchDialogue], cls.dialogues2.update(register_service_request)
         )
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=register_service_request.counterparty,
+            to=register_service_request.to,
             sender=register_service_request.sender,
             protocol_id=register_service_request.protocol_id,
             message=register_service_request,
@@ -565,14 +528,11 @@ class TestFilteredSearchResult:
             dialogue_reference=cls.dialogues1.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        msg.counterparty = str(OEFLocalConnection.connection_id)
+        msg.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(Optional[OefSearchDialogue], cls.dialogues1.update(msg))
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         cls.multiplexer1.put(envelope)
         # ensure one service stays registered
@@ -588,13 +548,13 @@ class TestFilteredSearchResult:
             dialogue_reference=self.dialogues1.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        search_services_request.counterparty = str(OEFLocalConnection.connection_id)
+        search_services_request.to = str(OEFLocalConnection.connection_id)
         sending_dialogue = cast(
             Optional[OefSearchDialogue], self.dialogues1.update(search_services_request)
         )
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=search_services_request.counterparty,
+            to=search_services_request.to,
             sender=search_services_request.sender,
             protocol_id=search_services_request.protocol_id,
             message=search_services_request,
@@ -603,10 +563,7 @@ class TestFilteredSearchResult:
 
         # check the result
         response_envelope = InBox(self.multiplexer1).get(block=True, timeout=5.0)
-        search_result_orig = cast(OefSearchMessage, response_envelope.message)
-        search_result = copy.copy(search_result_orig)
-        search_result.is_incoming = True
-        search_result.counterparty = search_result_orig.sender
+        search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues1.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT

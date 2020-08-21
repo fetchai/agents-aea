@@ -250,7 +250,7 @@ class LocalNode:
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 )
                 msg.to = oef_search_msg.sender
-                assert dialogue.update(msg)
+                dialogue.update(msg)
                 envelope = Envelope(
                     to=msg.to,
                     sender=msg.sender,
@@ -295,7 +295,7 @@ class LocalNode:
                 agents=tuple(sorted(set(result))),
             )
             msg.to = oef_search_msg.sender
-            assert dialogue.update(msg)
+            dialogue.update(msg)
 
             envelope = Envelope(
                 to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,

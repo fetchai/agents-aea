@@ -147,7 +147,7 @@ class TacHandler(Handler):
                 target=tac_msg.message_id,
             )
             error_msg.to = tac_msg.sender
-            assert tac_dialogue.update(error_msg)
+            tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
@@ -166,7 +166,7 @@ class TacHandler(Handler):
                 target=tac_msg.message_id,
             )
             error_msg.to = tac_msg.sender
-            assert tac_dialogue.update(error_msg)
+            tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
@@ -182,7 +182,7 @@ class TacHandler(Handler):
                 target=tac_msg.message_id,
             )
             error_msg.to = tac_msg.sender
-            assert tac_dialogue.update(error_msg)
+            tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
             return
 
@@ -220,7 +220,7 @@ class TacHandler(Handler):
                 target=tac_msg.message_id,
             )
             error_msg.to = tac_msg.sender
-            assert tac_dialogue.update(error_msg)
+            tac_dialogue.update(error_msg)
             self.context.outbox.put_message(message=error_msg)
         else:
             self.context.logger.debug(
@@ -286,7 +286,7 @@ class TacHandler(Handler):
             target=tac_msg.message_id,
         )
         sender_tac_msg.to = transaction.sender_address
-        assert tac_dialogue.update(sender_tac_msg)
+        tac_dialogue.update(sender_tac_msg)
         self.context.outbox.put_message(message=sender_tac_msg)
 
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
@@ -306,7 +306,7 @@ class TacHandler(Handler):
             target=last_msg.message_id,
         )
         counterparty_tac_msg.to = transaction.counterparty_address
-        assert recovered_tac_dialogue.update(counterparty_tac_msg)
+        recovered_tac_dialogue.update(counterparty_tac_msg)
         self.context.outbox.put_message(message=counterparty_tac_msg)
 
         # log messages
@@ -331,7 +331,7 @@ class TacHandler(Handler):
             target=tac_msg.message_id,
         )
         error_msg.to = tac_msg.sender
-        assert tac_dialogue.update(error_msg)
+        tac_dialogue.update(error_msg)
         self.context.outbox.put_message(message=error_msg)
 
     def _handle_invalid(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:

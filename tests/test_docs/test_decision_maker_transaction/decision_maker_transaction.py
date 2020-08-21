@@ -121,7 +121,7 @@ def run():
         terms=terms,
         skill_callback_info={"some_info_key": "some_info_value"},
     )
-    signing_msg.counterparty = "decision_maker"
+    signing_msg.to = "decision_maker"
     signing_dialogue = cast(
         Optional[SigningDialogue], signing_dialogues.update(signing_msg)
     )

@@ -206,7 +206,7 @@ class TestDecisionMaker:
             exchange_params_by_currency_id=exchange_params,
             utility_params_by_good_id=utility_params,
         )
-        state_update_message_1.counterparty = "decision_maker"
+        state_update_message_1.to = "decision_maker"
         state_update_dialogue = cast(
             Optional[StateUpdateDialogue],
             state_update_dialogues.update(state_update_message_1),
@@ -238,7 +238,7 @@ class TestDecisionMaker:
             amount_by_currency_id=currency_deltas,
             quantities_by_good_id=good_deltas,
         )
-        state_update_message_2.counterparty = "decision_maker"
+        state_update_message_2.to = "decision_maker"
         assert state_update_dialogue.update(state_update_message_2)
         self.decision_maker.handle(state_update_message_2)
         expected_amount_by_currency_id = {
@@ -350,13 +350,12 @@ class TestDecisionMaker2:
             ),
             raw_transaction=RawTransaction(FETCHAI, tx),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_msg_response.is_incoming = True
+        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -386,13 +385,12 @@ class TestDecisionMaker2:
             ),
             raw_transaction=RawTransaction(ETHEREUM, tx),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_msg_response.is_incoming = True
+        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -425,13 +423,12 @@ class TestDecisionMaker2:
             ),
             raw_transaction=RawTransaction("unknown", tx),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_msg_response.is_incoming = True
+        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR
@@ -461,13 +458,12 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage(FETCHAI, message),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_msg_response.is_incoming = True
+        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -497,13 +493,12 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage(ETHEREUM, message),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_msg_response.is_incoming = True
+        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -533,13 +528,12 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage(ETHEREUM, message, is_deprecated_mode=True),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_msg_response.is_incoming = True
+        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -570,13 +564,12 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_msg_response.is_incoming = True
+        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR
@@ -607,7 +600,7 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
@@ -630,7 +623,7 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         with pytest.raises(Exception):
@@ -654,7 +647,7 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.counterparty = "decision_maker"
+        signing_msg.to = "decision_maker"
         signing_dialogue = signing_dialogues.update(signing_msg)
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
