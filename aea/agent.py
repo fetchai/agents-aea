@@ -309,4 +309,4 @@ class Agent(ABC):
 
         :return: dict of callable with period specified
         """
-        return {self.act: (self.tick, None)}
+        return {self.act: (self._timeout, None)}

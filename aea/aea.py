@@ -130,8 +130,6 @@ class AEA(Agent, WithLogger):
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
-        assert self.runtime.decision_maker  # for type check, it's set already
-
         self._context = AgentContext(
             self.identity,
             self.runtime.multiplexer.connection_status,

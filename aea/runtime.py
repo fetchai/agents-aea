@@ -134,8 +134,10 @@ class BaseRuntime(ABC):
         return self.RUN_LOOPS[loop_mode]
 
     @property
-    def decision_maker(self) -> Optional[DecisionMaker]:
+    def decision_maker(self) -> DecisionMaker:
         """Return decision maker if set."""
+        if self._decision_maker is None:
+            raise ValueError("call `set_decision_maker` first!")
         return self._decision_maker
 
     def set_decision_maker(self, decision_maker_handler: DecisionMakerHandler) -> None:
@@ -186,7 +188,7 @@ class BaseRuntime(ABC):
     def _teardown(self) -> None:
         """Tear down runtime."""
         logger.debug("[{}]: Runtime teardown...".format(self._agent.name))
-        if self.decision_maker:
+        if self._decision_maker is not None:
             self.decision_maker.stop()
         self.task_manager.stop()
         self._agent.teardown()
@@ -313,7 +315,7 @@ class AsyncRuntime(BaseRuntime):
         """Start agent main loop asynchronous way."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self.task_manager.start()
-        if self.decision_maker:
+        if self._decision_maker is not None:
             self.decision_maker.start()
         self._agent.start_setup()
         self._state.set(RuntimeStates.running)
@@ -398,6 +400,8 @@ class ThreadedRuntime(BaseRuntime):
         """Start aget's main loop."""
         logger.debug("[{}]: Runtime started".format(self._agent.name))
         self.task_manager.start()
+        if self._decision_maker is not None:
+            self.decision_maker.start()
         try:
             self._state.set(RuntimeStates.running)
             self.main_loop.start()
