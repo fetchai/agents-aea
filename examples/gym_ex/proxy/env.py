@@ -157,7 +157,8 @@ class ProxyEnv(gym.Env):
         )
         gym_msg.counterparty = self.gym_address
         gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
-        assert gym_dialogue is not None
+        if gym_dialogue is None:
+            raise ValueError("Could not construct gym dialogue.")
         self._active_dialogue = gym_dialogue
         self._agent.outbox.put_message(message=gym_msg)
 
@@ -173,7 +174,8 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         last_msg = self.active_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
         gym_msg = GymMessage(
             dialogue_reference=self.active_dialogue.dialogue_label.dialogue_reference,
             performative=GymMessage.Performative.CLOSE,
@@ -192,7 +194,8 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        assert not self._agent_thread.is_alive(), "Agent already running."
+        if self._agent_thread.is_alive():
+            raise ValueError("Agent already running.")
         self._agent_thread.start()
         while not self._agent.multiplexer.is_connected:
             time.sleep(0.1)
@@ -216,7 +219,8 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         last_msg = self.active_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
         gym_msg = GymMessage(
             dialogue_reference=self.active_dialogue.dialogue_label.dialogue_reference,
             performative=GymMessage.Performative.ACT,

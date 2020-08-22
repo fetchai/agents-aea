@@ -87,7 +87,8 @@ class BanditEnv(gym.Env):
         :param action: the id of the bandit chosen
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
         """
-        assert self.action_space.contains(action), "This is not a valid action."
+        if not self.action_space.contains(action):
+            raise ValueError("This is not a valid action.")
 
         bandit = action[0]
         offered_price = action[1]
