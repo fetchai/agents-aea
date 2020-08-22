@@ -31,7 +31,6 @@ from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
     AEAConnectionError,
-    Address,
     Empty,
     Envelope,
     EnvelopeContext,
@@ -688,16 +687,14 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer, default_address: Address):
+    def __init__(self, multiplexer: Multiplexer):
         """
         Initialize the outbox.
 
         :param multiplexer: the multiplexer
-        :param default_address: the default address of the agent
         """
         super().__init__()
         self._multiplexer = multiplexer
-        self._default_address = default_address
 
     def empty(self) -> bool:
         """

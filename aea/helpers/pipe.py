@@ -207,7 +207,6 @@ class PosixNamedPipe(LocalPortablePipe):
         os.mkfifo(self._out_path)
 
         self._stream_reader = None  # type: Optional[asyncio.StreamReader]
-        self._log_file_desc = None  # type: Optional[IO[str]]
         self._reader_protocol = None  # type: Optional[asyncio.StreamReaderProtocol]
         self._fileobj = None  # type: Optional[IO[str]]
 

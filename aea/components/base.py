@@ -19,10 +19,9 @@
 
 """This module contains definitions of agent components."""
 import logging
-import types
 from abc import ABC
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -54,10 +53,6 @@ class Component(ABC, WithLogger):
         self._configuration = configuration
         self._directory = None  # type: Optional[Path]
         self._is_vendor = is_vendor
-
-        # mapping from import path to module object
-        # the keys are dotted paths of Python modules.
-        self.importpath_to_module = {}  # type: Dict[str, types.ModuleType]
 
     @property
     def component_type(self) -> ComponentType:

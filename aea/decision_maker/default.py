@@ -51,7 +51,6 @@ GoodHoldings = Dict[str, int]  # a map from identifier to quantity
 UtilityParams = Dict[str, float]  # a map from identifier to quantity
 ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
-SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
 
 logger = logging.getLogger(__name__)

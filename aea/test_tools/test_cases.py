@@ -64,7 +64,6 @@ from tests.conftest import ROOT_DIR
 logger = logging.getLogger(__name__)
 
 CLI_LOG_OPTION = ["-v", "OFF"]
-PROJECT_ROOT_DIR = "."
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
