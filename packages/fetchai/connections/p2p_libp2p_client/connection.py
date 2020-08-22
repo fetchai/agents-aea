@@ -61,7 +61,6 @@ class Uri:
         else:
             self._host = "127.0.0.1"
             self._port = randint(5000, 10000)  # nosec
-            # raise ValueError("Either 'uri' or both 'host' and 'port' must be set")
 
     def __str__(self):
         return "{}:{}".format(self._host, self._port)
@@ -139,7 +138,6 @@ class P2PLibp2pClientConnection(Connection):
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
         self.node_uri = self.delegate_uris[index]
-        # self.node_cert = self.delegate_certs[index]
         logger.debug("Node to use as delegate: {}".format(self.node_uri))
 
         # tcp connection
@@ -205,14 +203,12 @@ class P2PLibp2pClientConnection(Connection):
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
             # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
-            # self._process_messages_task = None
+            # self._process_messages_task = None # noqa: E800
 
         self.logger.debug("disconnecting libp2p client connection...")
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
-        # TOFIX(LR) requires python 3.7 minimum
-        # await self._writer.wait_closed()
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)

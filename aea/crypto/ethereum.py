@@ -138,7 +138,7 @@ class EthereumCrypto(Crypto[Account]):
         :return: signed transaction
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
-        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction
+        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
         return signed_transaction
 
     @classmethod

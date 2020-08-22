@@ -358,56 +358,6 @@ def test_get_from_multiplexer_when_empty():
         multiplexer.get()
 
 
-# TODO: fix test; doesn't make sense to use same multiplexer for different agents
-# def test_multiple_connection():
-#     """Test that we can send a message with two different connections."""
-#     with LocalNode() as node:
-#         identity_1 = Identity("", address="address_1")
-#         identity_2 = Identity("", address="address_2")
-
-#         connection_1 = _make_local_connection(identity_1.address, node)
-
-#         connection_2 = _make_dummy_connection()
-
-#         multiplexer = Multiplexer([connection_1, connection_2])
-
-#         assert not connection_1.is_connected
-#         assert not connection_2.is_connected
-
-#         multiplexer.connect()
-
-#         assert connection_1.is_connected
-#         assert connection_2.is_connected
-#         message = DefaultMessage(
-#             dialogue_reference=("", ""),
-#             message_id=1,
-#             target=0,
-#             performative=DefaultMessage.Performative.BYTES,
-#             content=b"hello",
-#         )
-#         envelope_from_1_to_2 = Envelope(
-#             to=identity_2.address,
-#             sender=identity_1.address,
-#             protocol_id=DefaultMessage.protocol_id,
-#             message=DefaultSerializer().encode(message),
-#             context=EnvelopeContext(connection_id=connection_1.connection_id),
-#         )
-#         multiplexer.put(envelope_from_1_to_2)
-#         actual_envelope = multiplexer.get(block=True, timeout=2.0)
-#         assert envelope_from_1_to_2 == actual_envelope
-#         envelope_from_2_to_1 = Envelope(
-#             to=identity_1.address,
-#             sender=identity_2.address,
-#             protocol_id=DefaultMessage.protocol_id,
-#             message=DefaultSerializer().encode(message),
-#             context=EnvelopeContext(connection_id=connection_2.connection_id),
-#         )
-#         multiplexer.put(envelope_from_2_to_1)
-#         actual_envelope = multiplexer.get(block=True, timeout=2.0)
-#         assert envelope_from_2_to_1 == actual_envelope
-#         multiplexer.disconnect()
-
-
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:

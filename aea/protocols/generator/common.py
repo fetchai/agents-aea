@@ -364,7 +364,6 @@ def try_run_protoc(path_to_generated_protocol_package, name) -> None:
 
     :return: A completed process object.
     """
-    # command: "protoc -I={} --python_out={} {}/{}.proto"
     subprocess.run(  # nosec
         [
             "protoc",

@@ -100,9 +100,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         )
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
-        # stdout = self.get_wealth(ETHEREUM)
-        # if int(stdout) < 100000000000000000:
-        #     pytest.skip("The agent needs more funds for the test to pass.")
         self.run_install()
 
         # replace location
@@ -144,9 +141,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        # stdout = self.get_wealth(ETHEREUM)
-        # if int(stdout) < 100000000000000000:
-        #     pytest.skip("The agent needs more funds for the test to pass.")
         self.run_install()
 
         # replace location

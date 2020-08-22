@@ -343,7 +343,7 @@ def test_agent_configuration_loading_multipage_validation_error():
 
     with pytest.raises(
         ValueError,
-        match=fr"Configuration of component \(skill, dummy_author/dummy:0.1.0\) is not valid.",
+        match=r"Configuration of component \(skill, dummy_author/dummy:0.1.0\) is not valid.",
     ):
         loader = ConfigLoaders.from_package_type(PackageType.AGENT)
         loader.load(modified_file)

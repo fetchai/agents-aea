@@ -229,7 +229,6 @@ class TestResources:
         cls.resources.add_component(
             Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
         )
-        # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
         cls.resources.add_component(
             Skill.from_dir(
                 Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
@@ -519,7 +518,6 @@ class TestFilter:
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
             skill_callback_ids=(str(PublicId("dummy_author", "dummy", "0.1.0")),),
             skill_callback_info={},
-            # crypto_id="ledger_id",
             signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
         t.counterparty = "skill"

@@ -120,9 +120,6 @@ def setup_search_ctx(ctx: Context, local: bool) -> None:
         # otherwise, use the default path (i.e. 'packages/' in the current directory.)
         try:
             try_to_load_agent_config(ctx, is_exit_on_except=False)
-            # path = Path(DEFAULT_AEA_CONFIG_FILE)
-            # fp = open(str(path), mode="r", encoding="utf-8")
-            # agent_config = ctx.agent_loader.load(fp)
             registry_directory = ctx.agent_config.registry_path
         except Exception:  # pylint: disable=broad-except
             registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)

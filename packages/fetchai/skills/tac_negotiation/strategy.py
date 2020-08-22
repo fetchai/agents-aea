@@ -135,38 +135,6 @@ class Strategy(Model):
             result.append((False, "buyers"))
         return result
 
-    # @property
-    # def is_registering_as_seller(self) -> bool:
-    #     """Check if the agent registers as a seller on the OEF service directory."""
-    #     return (
-    #         self._register_as == Strategy.RegisterAs.SELLER
-    #         or self._register_as == Strategy.RegisterAs.BUYER
-    #     )
-
-    # @property
-    # def is_searching_for_sellers(self) -> bool:
-    #     """Check if the agent searches for sellers on the OEF service directory."""
-    #     return (
-    #         self._search_for == Strategy.SearchFor.SELLERS
-    #         or self._search_for == Strategy.SearchFor.BOTH
-    #     )
-
-    # @property
-    # def is_registering_as_buyer(self) -> bool:
-    #     """Check if the agent registers as a buyer on the OEF service directory."""
-    #     return (
-    #         self._register_as == Strategy.RegisterAs.BUYER
-    #         or self._register_as == Strategy.RegisterAs.BOTH
-    #     )
-
-    # @property
-    # def is_searching_for_buyers(self) -> bool:
-    #     """Check if the agent searches for buyers on the OEF service directory."""
-    #     return (
-    #         self._search_for == Strategy.SearchFor.BUYERS
-    #         or self._search_for == Strategy.SearchFor.BOTH
-    #     )
-
     @property
     def is_contract_tx(self) -> bool:
         """Check if tx are made against the ERC1155 or not."""

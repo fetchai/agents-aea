@@ -155,10 +155,10 @@ def ipfs_hashing(
     :return: the identifier of the hash (e.g. 'fetchai/protocols/default')
            | and the hash of the whole package.
     """
-    # hash again to get outer hash (this time all files):
+    # hash again to get outer hash (this time all files)
     # TODO we still need to ignore some files
     #      use ignore patterns somehow
-    # ignore_patterns = configuration.fingerprint_ignore_patterns
+    # ignore_patterns = configuration.fingerprint_ignore_patterns # noqa: E800
     assert configuration.directory is not None
     result_list = client.add(configuration.directory, recursive=True)
     key = os.path.join(
@@ -463,8 +463,8 @@ def check_same_ipfs_hash(
     #     "p2p_libp2p",
     #     "Agent0",
     #     "dummy",
-    # ]:
-    #     return True  # packages with nested dirs or symlinks, kept for reference
+    # ]: # noqa: E800
+    #     return True  # packages with nested dirs or symlinks, kept for reference # noqa: E800
     key, actual_hash, result_list = ipfs_hashing(client, configuration, package_type)
     expected_hash = all_expected_hashes[key]
     result = actual_hash == expected_hash

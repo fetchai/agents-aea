@@ -109,7 +109,6 @@ class DetectionDatabase:
             "moving_count INTEGER, free_spaces INTEGER, lat TEXT, lon TEXT)"
         )
 
-        # self.execute_single_sql("DROP TABLE fet_table")
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS fet_table (id INTEGER PRIMARY KEY, amount BIGINT, last_updated TEXT)"
         )
@@ -122,12 +121,10 @@ class DetectionDatabase:
             "CREATE TABLE IF NOT EXISTS name_lookup2 (oef_key TEXT PRIMARY KEY, friendly_name TEXT, epoch INT, is_self BIT)"
         )
 
-        # self.execute_single_sql("DROP TABLE transaction_history")
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS transaction_history (tx TEXT PRIMARY KEY, epoch INT, oef_key_payer TEXT, oef_key_payee TEXT, amount BIGINT, status TEXT)"
         )
 
-        # self.execute_single_sql("DROP TABLE dialogue_statuses")
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS dialogue_statuses (dialogue_id TEXT, epoch DECIMAL, other_agent_key TEXT, received_msg TEXT, sent_msg TEXT)"
         )
