@@ -135,8 +135,7 @@ def _checks(
             raise PackageIdNotFound(
                 file, package_id, match, "Package {} not found.".format(package_id)
             )
-        else:
-            print(str(package_id), "OK!")
+        print(str(package_id), "OK!")
 
 
 def check_add_commands(file: Path):

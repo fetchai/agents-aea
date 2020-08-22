@@ -61,8 +61,7 @@ class Location:
         """Compare equality of two locations."""
         if not isinstance(other, Location):
             return False  # pragma: nocover
-        else:
-            return self.latitude == other.latitude and self.longitude == other.longitude
+        return self.latitude == other.latitude and self.longitude == other.longitude
 
 
 """
@@ -258,7 +257,7 @@ class Description:
                         attribute.name, attribute.type
                     )
                 )
-            elif not type(value) in ALLOWED_ATTRIBUTE_TYPES:
+            if not type(value) in ALLOWED_ATTRIBUTE_TYPES:
                 # value type matches data model, but it is not an allowed type
                 raise AttributeInconsistencyException(
                     "Attribute {} has unallowed type: {}. Allowed types: {}".format(
@@ -455,31 +454,30 @@ class ConstraintType:
         """
         if self.type == ConstraintTypes.EQUAL:
             return self.value == value
-        elif self.type == ConstraintTypes.NOT_EQUAL:
+        if self.type == ConstraintTypes.NOT_EQUAL:
             return self.value != value
-        elif self.type == ConstraintTypes.LESS_THAN:
+        if self.type == ConstraintTypes.LESS_THAN:
             return self.value < value
-        elif self.type == ConstraintTypes.LESS_THAN_EQ:
+        if self.type == ConstraintTypes.LESS_THAN_EQ:
             return self.value <= value
-        elif self.type == ConstraintTypes.GREATER_THAN:
+        if self.type == ConstraintTypes.GREATER_THAN:
             return self.value > value
-        elif self.type == ConstraintTypes.GREATER_THAN_EQ:
+        if self.type == ConstraintTypes.GREATER_THAN_EQ:
             return self.value >= value
-        elif self.type == ConstraintTypes.WITHIN:
+        if self.type == ConstraintTypes.WITHIN:
             low = self.value[0]
             high = self.value[1]
             return low <= value <= high
-        elif self.type == ConstraintTypes.IN:
+        if self.type == ConstraintTypes.IN:
             return value in self.value
-        elif self.type == ConstraintTypes.NOT_IN:
+        if self.type == ConstraintTypes.NOT_IN:
             return value not in self.value
-        elif self.type == ConstraintTypes.DISTANCE:
+        if self.type == ConstraintTypes.DISTANCE:
             assert isinstance(value, Location), "Value must be of type Location."
             location = cast(Location, self.value[0])
             distance = self.value[1]
             return location.distance(value) <= distance
-        else:  # pragma: nocover
-            raise ValueError("Constraint type not recognized.")
+        raise ValueError("Constraint type not recognized.")  # pragma: nocover
 
     def __eq__(self, other):
         """Check equality with another object."""

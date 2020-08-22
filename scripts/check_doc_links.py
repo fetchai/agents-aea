@@ -55,10 +55,9 @@ def is_url_reachable(url: str) -> bool:
         response = requests.head(url)
         if response.status_code == 200:
             return True
-        elif response.status_code in [403, 405]:
+        if response.status_code in [403, 405]:
             return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405]
-        else:
-            return False
+        return False
     except Exception as e:  # pylint: disable=broad-except
         print(e)
         return False
@@ -175,13 +174,12 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
                     "Image path={} in file={} not found!".format(img_path, str(file))
                 )
             return
-        elif result.startswith("https") or result.startswith("http"):
+        if result.startswith("https") or result.startswith("http"):
             if not is_url_reachable(result):
                 raise ValueError(
                     "Could not reach url={} in file={}!".format(result, str(file))
                 )
-        else:
-            raise ValueError("Image path={} in file={} not `.png`!")
+        raise ValueError("Image path={} in file={} not `.png`!")
 
 
 def check_file(file: Path, all_files: Set[Path]) -> None:

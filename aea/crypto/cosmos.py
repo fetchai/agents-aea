@@ -210,10 +210,9 @@ class CosmosCrypto(Crypto[SigningKey]):
             return self.format_wasm_transaction(
                 transaction, signed_transaction, base64_pbk
             )
-        else:
-            return self.format_default_transaction(
-                transaction, signed_transaction, base64_pbk
-            )
+        return self.format_default_transaction(
+            transaction, signed_transaction, base64_pbk
+        )
 
     @classmethod
     def generate_private_key(cls) -> SigningKey:

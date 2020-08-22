@@ -173,8 +173,7 @@ class ConfigLoader(Generic[T]):
         """
         if self.configuration_class.package_type == PackageType.AGENT:
             return cast(T, self._load_agent_config(file_pointer))
-        else:
-            return self._load_component_config(file_pointer)
+        return self._load_component_config(file_pointer)
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.

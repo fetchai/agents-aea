@@ -252,5 +252,4 @@ class AEALauncher(AbstractMultipleRunner):
                 AEADirMultiprocessTask(agent_dir, log_level=self._log_level)
                 for agent_dir in self._agent_dirs
             ]
-        else:
-            return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
+        return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]

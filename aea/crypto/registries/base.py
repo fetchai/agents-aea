@@ -45,10 +45,6 @@ class ItemId(RegexConstrainedString):
 
     REGEX = re.compile(r"^({})$".format(ITEM_ID_REGEX))
 
-    def __init__(self, seq):
-        """Initialize the item id."""
-        super().__init__(seq)
-
     @property
     def name(self):
         """Get the id name."""

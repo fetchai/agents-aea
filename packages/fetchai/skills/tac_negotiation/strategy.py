@@ -303,8 +303,7 @@ class Strategy(Model):
             proposals.append(proposal)
         if not proposals:
             return None
-        else:
-            return random.choice(proposals)  # nosec
+        return random.choice(proposals)  # nosec
 
     def get_proposal_for_query(
         self, query: Query, role: FipaDialogue.Role
@@ -323,15 +322,12 @@ class Strategy(Model):
         if not query.check(own_service_description):
             self.context.logger.debug("current holdings do not satisfy CFP query.")
             return None
-        else:
-            proposal_description = self._get_proposal_for_query(
-                query, is_seller=is_seller
+        proposal_description = self._get_proposal_for_query(query, is_seller=is_seller)
+        if proposal_description is None:
+            self.context.logger.debug(
+                "current strategy does not generate proposal that satisfies CFP query."
             )
-            if proposal_description is None:
-                self.context.logger.debug(
-                    "current strategy does not generate proposal that satisfies CFP query."
-                )
-            return proposal_description
+        return proposal_description
 
     def _generate_candidate_proposals(self, is_seller: bool):
         """
@@ -433,7 +429,4 @@ class Strategy(Model):
         proposal_delta_score = preferences.utility_diff_from_transaction(
             ownership_state_after_locks, signing_msg.terms
         )
-        if proposal_delta_score >= 0:
-            return True
-        else:
-            return False
+        return proposal_delta_score >= 0

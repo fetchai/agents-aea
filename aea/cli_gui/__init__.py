@@ -329,28 +329,24 @@ def start_agent(agent_id: str, connection_id: PublicId):
             {"detail": "Failed to run agent {}".format(agent_id)},
             400,
         )  # 400 Bad request
-    else:
-        app_context.agent_processes[agent_id] = agent_process
-        app_context.agent_tty[agent_id] = []
-        app_context.agent_error[agent_id] = []
+    app_context.agent_processes[agent_id] = agent_process
+    app_context.agent_tty[agent_id] = []
+    app_context.agent_error[agent_id] = []
 
-        tty_read_thread = threading.Thread(
-            target=read_tty,
-            args=(
-                app_context.agent_processes[agent_id],
-                app_context.agent_tty[agent_id],
-            ),
-        )
-        tty_read_thread.start()
+    tty_read_thread = threading.Thread(
+        target=read_tty,
+        args=(app_context.agent_processes[agent_id], app_context.agent_tty[agent_id],),
+    )
+    tty_read_thread.start()
 
-        error_read_thread = threading.Thread(
-            target=read_error,
-            args=(
-                app_context.agent_processes[agent_id],
-                app_context.agent_error[agent_id],
-            ),
-        )
-        error_read_thread.start()
+    error_read_thread = threading.Thread(
+        target=read_error,
+        args=(
+            app_context.agent_processes[agent_id],
+            app_context.agent_error[agent_id],
+        ),
+    )
+    error_read_thread.start()
 
     return agent_id, 201  # 200 (OK)
 

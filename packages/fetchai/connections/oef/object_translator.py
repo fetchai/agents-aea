@@ -148,19 +148,18 @@ class OEFObjectTranslator:
             return OEFAnd(
                 [cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints]
             )
-        elif isinstance(constraint_expr, Or):
+        if isinstance(constraint_expr, Or):
             return OEFOr(
                 [cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints]
             )
-        elif isinstance(constraint_expr, Not):
+        if isinstance(constraint_expr, Not):
             return OEFNot(cls.to_oef_constraint_expr(constraint_expr.constraint))
-        elif isinstance(constraint_expr, Constraint):
+        if isinstance(constraint_expr, Constraint):
             oef_constraint_type = cls.to_oef_constraint_type(
                 constraint_expr.constraint_type
             )
             return OEFConstraint(constraint_expr.attribute_name, oef_constraint_type)
-        else:
-            raise ValueError("Constraint expression not supported.")
+        raise ValueError("Constraint expression not supported.")
 
     @classmethod
     def to_oef_constraint_type(
@@ -259,22 +258,21 @@ class OEFObjectTranslator:
                     for c in oef_constraint_expr.constraints
                 ]
             )
-        elif isinstance(oef_constraint_expr, OEFOr):
+        if isinstance(oef_constraint_expr, OEFOr):
             return Or(
                 [
                     cls.from_oef_constraint_expr(c)
                     for c in oef_constraint_expr.constraints
                 ]
             )
-        elif isinstance(oef_constraint_expr, OEFNot):
+        if isinstance(oef_constraint_expr, OEFNot):
             return Not(cls.from_oef_constraint_expr(oef_constraint_expr.constraint))
-        elif isinstance(oef_constraint_expr, OEFConstraint):
+        if isinstance(oef_constraint_expr, OEFConstraint):
             constraint_type = cls.from_oef_constraint_type(
                 oef_constraint_expr.constraint
             )
             return Constraint(oef_constraint_expr.attribute_name, constraint_type)
-        else:
-            raise ValueError("OEF Constraint not supported.")
+        raise ValueError("OEF Constraint not supported.")
 
     @classmethod
     def from_oef_constraint_type(
@@ -283,28 +281,27 @@ class OEFObjectTranslator:
         """From OEF constraint type to our constraint type."""
         if isinstance(constraint_type, Eq):
             return ConstraintType(ConstraintTypes.EQUAL, constraint_type.value)
-        elif isinstance(constraint_type, NotEq):
+        if isinstance(constraint_type, NotEq):
             return ConstraintType(ConstraintTypes.NOT_EQUAL, constraint_type.value)
-        elif isinstance(constraint_type, Lt):
+        if isinstance(constraint_type, Lt):
             return ConstraintType(ConstraintTypes.LESS_THAN, constraint_type.value)
-        elif isinstance(constraint_type, LtEq):
+        if isinstance(constraint_type, LtEq):
             return ConstraintType(ConstraintTypes.LESS_THAN_EQ, constraint_type.value)
-        elif isinstance(constraint_type, Gt):
+        if isinstance(constraint_type, Gt):
             return ConstraintType(ConstraintTypes.GREATER_THAN, constraint_type.value)
-        elif isinstance(constraint_type, GtEq):
+        if isinstance(constraint_type, GtEq):
             return ConstraintType(
                 ConstraintTypes.GREATER_THAN_EQ, constraint_type.value
             )
-        elif isinstance(constraint_type, Range):
+        if isinstance(constraint_type, Range):
             return ConstraintType(ConstraintTypes.WITHIN, constraint_type.values)
-        elif isinstance(constraint_type, In):
+        if isinstance(constraint_type, In):
             return ConstraintType(ConstraintTypes.IN, constraint_type.values)
-        elif isinstance(constraint_type, NotIn):
+        if isinstance(constraint_type, NotIn):
             return ConstraintType(ConstraintTypes.NOT_IN, constraint_type.values)
-        elif isinstance(constraint_type, Distance):
+        if isinstance(constraint_type, Distance):
             location = cls.from_oef_location(constraint_type.center)
             return ConstraintType(
                 ConstraintTypes.DISTANCE, (location, constraint_type.distance)
             )
-        else:
-            raise ValueError("Constraint type not recognized.")
+        raise ValueError("Constraint type not recognized.")

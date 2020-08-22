@@ -240,7 +240,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
         logger.info(f"Exception raised during {task.id} running.")
         if self._task_fail_policy == ExecutorExceptionPolicies.propagate:
             raise exc
-        elif self._task_fail_policy == ExecutorExceptionPolicies.log_only:
+        if self._task_fail_policy == ExecutorExceptionPolicies.log_only:
             pass
         elif self._task_fail_policy == ExecutorExceptionPolicies.stop_all:
             logger.info(

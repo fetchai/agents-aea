@@ -232,8 +232,7 @@ class PosixNamedPipe(LocalPortablePipe):
                 self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
                 await asyncio.sleep(self._connection_timeout)
                 return await self.connect(timeout)
-            else:
-                raise e  # pragma: no cover
+            raise e  # pragma: no cover
 
         # setup reader
         assert (
@@ -317,7 +316,8 @@ def make_pipe(logger: logging.Logger = _default_logger) -> LocalPortablePipe:
 
     if os.name == "posix":
         return PosixNamedPipe(logger=logger)
-    elif os.name == "nt":  # pragma: nocover
+    if os.name == "nt":  # pragma: nocover
         return TCPSocketPipe(logger=logger)
-    else:  # pragma: nocover
-        raise Exception("make pipe is not supported on platform {}".format(os.name))
+    raise Exception(
+        "make pipe is not supported on platform {}".format(os.name)
+    )  # pragma: nocover

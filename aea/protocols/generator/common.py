@@ -285,10 +285,7 @@ def is_installed(programme: str) -> bool:
     :return: True if installed, False otherwise
     """
     res = shutil.which(programme)
-    if res is None:
-        return False
-    else:
-        return True
+    return res is not None
 
 
 def check_prerequisites() -> None:

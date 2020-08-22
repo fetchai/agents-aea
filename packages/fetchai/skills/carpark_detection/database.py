@@ -147,8 +147,7 @@ class DetectionDatabase:
         result = self.execute_single_sql("SELECT amount FROM fet_table WHERE id=0")
         if len(result) != 0:
             return result[0][0]
-        else:
-            return -99
+        return -99
 
     def save_max_capacity(self, max_capacity):
         """Record the maximum number of spaces we can report on."""
@@ -160,8 +159,7 @@ class DetectionDatabase:
 
         if max_capacity == "UNKNOWN":
             return None
-        else:
-            return int(max_capacity)
+        return int(max_capacity)
 
     def save_lat_lon(self, lat, lon):
         """Record the longitude and latitude of our device."""
@@ -174,8 +172,7 @@ class DetectionDatabase:
         lon = self.get_system_status("lon")
         if lat == "UNKNOWN" or lon == "UNKNOWN":
             return None, None
-        else:
-            return float(lat), float(lon)
+        return float(lat), float(lon)
 
     def set_system_status(self, system_name, status):
         """Record the status of one of the systems."""
@@ -192,8 +189,7 @@ class DetectionDatabase:
         result = self.execute_single_sql(command, variables, print_exceptions)
         if len(result) != 0:
             return result[0][0]
-        else:
-            return "UNKNOWN"
+        return "UNKNOWN"
 
     def set_dialogue_status(self, dialogue_id, other_agent_key, received_msg, sent_msg):
         """Record the status of a dialog we are having."""
@@ -236,10 +232,8 @@ class DetectionDatabase:
             )
             if len(uncleared_fet_result) == 0 or uncleared_fet_result[0][0] is None:
                 return cleared_fet_result[0][0]
-            else:
-                return cleared_fet_result[0][0] + uncleared_fet_result[0][0]
-        else:
-            return -99
+            return cleared_fet_result[0][0] + uncleared_fet_result[0][0]
+        return -99
 
     def add_friendly_name(self, oef_key, friendly_name, is_self=False):
         """Record the friendly name of one the agents we are dealing with (including ourselves)."""
@@ -314,8 +308,7 @@ class DetectionDatabase:
         results = self.execute_single_sql(command, variables)
         if len(results) == 0:
             return None
-        else:
-            return results[0][1]
+        return results[0][1]
 
     def lookup_self_names(self):
         """Return out own name and key."""
@@ -324,8 +317,7 @@ class DetectionDatabase:
         )
         if len(results) == 0:
             return None, None
-        else:
-            return results[0][0], results[0][1]
+        return results[0][0], results[0][1]
 
     def add_entry_no_save(
         self, raw_path, processed_path, total_count, moving_count, free_spaces, lat, lon

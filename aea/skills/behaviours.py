@@ -357,10 +357,9 @@ class FSMBehaviour(CompositeBehaviour, ABC):
                 # we reached a final state - return.
                 self.current = None
                 return
-            else:
-                event = current_state.event
-                next_state = self.transitions.get(self.current, {}).get(event, None)
-                self.current = next_state
+            event = current_state.event
+            next_state = self.transitions.get(self.current, {}).get(event, None)
+            self.current = next_state
 
     def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""

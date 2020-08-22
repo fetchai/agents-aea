@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 # flake8: noqa
 # type: ignore
+# pylint: skip-file
 # To update; run: vulture aea --exclude "*_pb2.py" --make-whitelist > tests/whitelist.py
 _.dependencies_highest_version  # unused property (aea/aea_builder.py:116)
 _.set_search_service_address  # unused method (aea/aea_builder.py:484)

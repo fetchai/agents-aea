@@ -601,7 +601,7 @@ class SigningHandler(Handler):
             self.context.logger.warning(
                 "signed message handler only for non-contract case."
             )
-            return None
+            return
         self.context.logger.info("message signed by decision maker.")
         dialogue_label = DialogueLabel.from_str(
             cast(str, signing_msg.skill_callback_info.get("dialogue_label"))
@@ -676,7 +676,7 @@ class SigningHandler(Handler):
             self.context.logger.warning(
                 "signed transaction handler only for contract case."
             )
-            return None
+            return
         self.context.logger.info("transaction signed by decision maker.")
         dialogue_label = DialogueLabel.from_str(
             cast(str, signing_msg.skill_callback_info.get("dialogue_label"))

@@ -292,8 +292,7 @@ class BaseAEATestCase(ABC):
             )
             if result:
                 return result, {}, {}
-            else:
-                return result, content1, content2
+            return result, content1, content2
 
         path_to_manually_created_aea = os.path.join(cls.t, agent_name)
         new_cwd = os.path.join(cls.t, "fetch_dir")
@@ -540,10 +539,9 @@ class BaseAEATestCase(ABC):
                 "--connection",
                 cwd=cls._get_cwd(),
             )
-        else:
-            return cls.run_cli_command(
-                "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
-            )
+        return cls.run_cli_command(
+            "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
+        )
 
     @classmethod
     def replace_private_key_in_file(
