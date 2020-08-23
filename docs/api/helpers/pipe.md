@@ -63,7 +63,7 @@ Close the communication channel
  | in_path() -> str
 ```
 
-Returns the rendezvous point for incoming communication
+Rendezvous point for incoming communication
 
 <a name="aea.helpers.pipe.LocalPortablePipe.out_path"></a>
 #### out`_`path
@@ -74,7 +74,7 @@ Returns the rendezvous point for incoming communication
  | out_path() -> str
 ```
 
-Returns the rendezvous point for outgoing communication
+Rendezvous point for outgoing communication
 
 <a name="aea.helpers.pipe.TCPSocketPipe"></a>
 ## TCPSocketPipe Objects

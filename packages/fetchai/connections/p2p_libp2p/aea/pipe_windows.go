@@ -28,12 +28,12 @@ import (
 	"strconv"
 )
 
-type TCPSocketPipe struct {
+type TCPSocketChannel struct {
 	port uint16
 	conn net.Conn
 }
 
-func (sock *TCPSocketPipe) Connect() error {
+func (sock *TCPSocketChannel) Connect() error {
 	// open tcp connection
 	var err error
 	sock.conn, err = net.Dial("tcp", "127.0.0.1:"+strconv.FormatInt(int64(sock.port), 10))
@@ -45,7 +45,7 @@ func (sock *TCPSocketPipe) Connect() error {
 	return nil
 }
 
-func (sock *TCPSocketPipe) Read() ([]byte, error) {
+func (sock *TCPSocketChannel) Read() ([]byte, error) {
 	// TOFIX(LR) duplicated code to avoid circular dep
 	//           utils.ReadBytesConn(sock.conn)
 	buf := make([]byte, 4)
@@ -60,7 +60,7 @@ func (sock *TCPSocketPipe) Read() ([]byte, error) {
 	return buf, err
 }
 
-func (sock *TCPSocketPipe) Write(data []byte) error {
+func (sock *TCPSocketChannel) Write(data []byte) error {
 	// TOFIX(LR) duplicated code to avoid circular dep
 	//    		 utils.WriteBytesConn(sock.conn, data)
 	size := uint32(len(data))
@@ -72,11 +72,11 @@ func (sock *TCPSocketPipe) Write(data []byte) error {
 	return err
 }
 
-func (sock *TCPSocketPipe) Close() error {
+func (sock *TCPSocketChannel) Close() error {
 	return sock.conn.Close()
 }
 
 func NewPipe(msgin_path string, msgout_path string) Pipe {
 	port, _ := strconv.ParseUint(msgin_path, 10, 16)
-	return &TCPSocketPipe{port: uint16(port)}
+	return &TCPSocketChannel{port: uint16(port)}
 }
