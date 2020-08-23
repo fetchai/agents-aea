@@ -160,9 +160,9 @@ def _get_default_configuration_file_name_from_type(
         return DEFAULT_SKILL_CONFIG_FILE
     if item_type == PackageType.CONTRACT:
         return DEFAULT_CONTRACT_CONFIG_FILE
-    raise ValueError(
+    raise ValueError(  # pragma: no cover
         "Item type not valid: {}".format(str(item_type))
-    )  # pragma: no cover
+    )
 
 
 class ComponentType(Enum):
