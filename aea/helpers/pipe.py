@@ -151,15 +151,8 @@ class PosixNamedPipeProtocol:
         self.logger.debug(
             "Attempt opening pipes {}, {}...".format(self._in_path, self._out_path)
         )
-<<<<<<< HEAD
-        if self._server.sockets is None:
-            raise ValueError("Sockets is not set on server.")
-        self._port = self._server.sockets[0].getsockname()[1]
-        self.logger.debug("socket pipe setup {}".format(self._port))
-=======
 
         self._in = os.open(self._in_path, os.O_RDONLY | os.O_NONBLOCK | os.O_SYNC)
->>>>>>> develop
 
         try:
             self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK)
@@ -261,11 +254,6 @@ class TCPSocketProtocol:
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
     ):
-<<<<<<< HEAD
-        if self._connected is None:
-            raise ValueError("Not connected!")
-        self._connected.set()
-=======
         """
         Initialize the tcp socket protocol
 
@@ -275,15 +263,10 @@ class TCPSocketProtocol:
 
         self.logger = logger
         self.loop = loop if loop is not None else asyncio.get_event_loop()
->>>>>>> develop
         self._reader = reader
         self._writer = writer
 
     async def write(self, data: bytes) -> None:
-<<<<<<< HEAD
-        if self._writer is None:
-            raise ValueError("Writer not set.")
-=======
         """
         Write to socket.
 
@@ -291,23 +274,16 @@ class TCPSocketProtocol:
         """
         assert self._writer is not None
         self.logger.debug("writing {}...".format(len(data)))
->>>>>>> develop
         size = struct.pack("!I", len(data))
         self._writer.write(size + data)
         await self._writer.drain()
 
     async def read(self) -> Optional[bytes]:
-<<<<<<< HEAD
-        self.logger.debug("Reading pipes...")
-        if self._reader is None:
-            raise ValueError("Reader not set.")
-=======
         """
         Read from socket.
 
         :return: read bytes
         """
->>>>>>> develop
         try:
             self.logger.debug("waiting for messages...")
             buf = await self._reader.readexactly(4)
@@ -329,12 +305,7 @@ class TCPSocketProtocol:
             return None
 
     async def close(self) -> None:
-<<<<<<< HEAD
-        if self._writer is None:
-            raise ValueError("Writer not set.")
-=======
         """ Disconnect socket """
->>>>>>> develop
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
@@ -473,38 +444,13 @@ class PosixNamedPipeChannel(IPCChannel):
         """
         Setup communication channel and wait for other end to connect
 
-<<<<<<< HEAD
-        # setup reader
-        enforce(
-            self._in != -1 and self._out != -1 and self._loop is not None,
-            "Incomplete initialization.",
-        )
-        self._stream_reader = asyncio.StreamReader(loop=self._loop)
-        self._reader_protocol = asyncio.StreamReaderProtocol(
-            self._stream_reader, loop=self._loop
-        )
-        self._fileobj = os.fdopen(self._in, "r")
-        await self._loop.connect_read_pipe(
-            lambda: self.__reader_protocol, self._fileobj
-        )
-=======
         :param timeout: timeout for connection to be established
         """
->>>>>>> develop
 
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
-<<<<<<< HEAD
-    @property
-    def __reader_protocol(self) -> asyncio.StreamReaderProtocol:
-        """Get reader protocol."""
-        if self._reader_protocol is None:
-            raise ValueError("reader protocol not set!")
-        return self._reader_protocol
-=======
         return await self._pipe.connect(timeout)
->>>>>>> develop
 
     async def write(self, data: bytes) -> None:
         """
@@ -520,35 +466,6 @@ class PosixNamedPipeChannel(IPCChannel):
 
         :return: read bytes
         """
-<<<<<<< HEAD
-        self.logger.debug("reading {}...".format(""))
-        if self._stream_reader is None:
-            raise ValueError("StreamReader not set, call connect first!")
-        try:
-            self.logger.debug("Waiting for messages...")
-            buf = await self._stream_reader.readexactly(4)
-            if not buf:  # pragma: no cover
-                return None
-            size = struct.unpack("!I", buf)[0]
-            data = await self._stream_reader.readexactly(size)
-            if not data:  # pragma: no cover
-                return None
-            return data
-        except asyncio.IncompleteReadError as e:  # pragma: no cover
-            self.logger.info(
-                "Connection disconnected while reading from pipe ({}/{})".format(
-                    len(e.partial), e.expected
-                )
-            )
-            return None
-
-    async def close(self) -> None:
-        if self._fileobj is None:
-            raise ValueError("Pipe not connected")
-        self._fileobj.close()
-        os.close(self._out)
-        await asyncio.sleep(0)
-=======
         return await self._pipe.read()
 
     async def close(self) -> None:
@@ -557,7 +474,6 @@ class PosixNamedPipeChannel(IPCChannel):
         """
         await self._pipe.close()
         rmtree(self._pipe_dir)
->>>>>>> develop
 
     @property
     def in_path(self) -> str:
