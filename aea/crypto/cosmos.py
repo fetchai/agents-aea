@@ -386,7 +386,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_deploy_transaction(
+    def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,

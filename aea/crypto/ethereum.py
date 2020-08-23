@@ -455,7 +455,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         instance = cast(EthereumContract, instance)
         return instance
 
-    def get_deploy_transaction(
+    def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,

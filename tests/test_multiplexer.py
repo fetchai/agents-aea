@@ -453,7 +453,7 @@ async def test_inbox_outbox():
     try:
         await multiplexer.connect()
         inbox = InBox(multiplexer)
-        outbox = OutBox(multiplexer, "default_address")
+        outbox = OutBox(multiplexer)
 
         assert inbox.empty()
         assert outbox.empty()
@@ -492,7 +492,7 @@ async def test_outbox_negative():
 
     try:
         await multiplexer.connect()
-        outbox = OutBox(multiplexer, "default_address")
+        outbox = OutBox(multiplexer)
 
         assert outbox.empty()
 

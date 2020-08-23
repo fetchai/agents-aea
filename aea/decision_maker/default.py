@@ -179,7 +179,7 @@ class OwnershipState(BaseOwnershipState):
         self._amount_by_currency_id = None  # type: Optional[CurrencyHoldings]
         self._quantities_by_good_id = None  # type: Optional[GoodHoldings]
 
-    def set(
+    def set(  # pylint: disable=arguments-differ
         self,
         amount_by_currency_id: CurrencyHoldings = None,
         quantities_by_good_id: GoodHoldings = None,
@@ -201,7 +201,7 @@ class OwnershipState(BaseOwnershipState):
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
         self._quantities_by_good_id = copy.copy(quantities_by_good_id)
 
-    def apply_delta(
+    def apply_delta(  # pylint: disable=arguments-differ
         self,
         delta_amount_by_currency_id: Dict[str, int] = None,
         delta_quantities_by_good_id: Dict[str, int] = None,
@@ -362,7 +362,7 @@ class Preferences(BasePreferences):
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
         self._quantity_shift = QUANTITY_SHIFT
 
-    def set(
+    def set(  # pylint: disable=arguments-differ
         self,
         exchange_params_by_currency_id: ExchangeParams = None,
         utility_params_by_good_id: UtilityParams = None,
@@ -454,7 +454,7 @@ class Preferences(BasePreferences):
         score = goods_score + currency_score
         return score
 
-    def marginal_utility(
+    def marginal_utility(  # pylint: disable=arguments-differ
         self,
         ownership_state: BaseOwnershipState,
         delta_quantities_by_good_id: Optional[GoodHoldings] = None,

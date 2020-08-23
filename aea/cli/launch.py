@@ -62,7 +62,7 @@ def _launch_agents(
             failed = _launch_threads(agents_directories)
         else:
             failed = _launch_subprocesses(click_context, agents_directories)
-    except BaseException:  # pragma: no cover
+    except BaseException:  # pragma: no cover # pylint: disable=broad-except
         logger.exception("Exception in launch agents.")
         failed = -1
     finally:

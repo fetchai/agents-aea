@@ -1,14 +1,12 @@
 [MASTER]
-ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py,transaction.py
+ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0221,W0511,W0613,W0621,W1202,W1203,R0902,R0913,R0914,R0801,R0904,R0903,R0911,R0912,R0901,R0916,R1702,R0915,R0401
+disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0511,W0613,W1202,W1203,R0902,R0913,R0914,R0801,R0904,R0903,R0911,R0912,R0901,R0916,R1702,R0915,R0401
 
 ## Resolve these:
-# R0401: cyclic-import
-# W0221: arguments-differ
+# R0401: cyclic-import > mostly caused by Address
 # W0613: unused-argument
-# W0621: redefined-outer-name
 # W0511: fixme
 
 ## Eventually resolve these:
@@ -23,6 +21,9 @@ disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0221,W0511,W0613,W0621,W1202,
 # R0916: too-many-boolean-expressions
 # R1702: too-many-nested-blocks
 # R0915: too-many-statements
+# decide on a logging policy:
+# W1202: logging-format-interpolation
+# W1203: logging-fstring-interpolation
 
 ## Keep the following:
 # C0103: invalid-name
@@ -32,8 +33,6 @@ disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0221,W0511,W0613,W0621,W1202,
 # C0330: Wrong hanging indentation
 # W0105: pointless-string-statement, # kept as no harm
 # W0107: unnecessary-pass, # kept as no harm
-# W1202: logging-format-interpolation
-# W1203: logging-fstring-interpolation
 # R0801: similar lines, # too granular
 
 [IMPORTS]

@@ -22,7 +22,6 @@ import logging
 import os
 import random
 import shutil
-import signal  # pylint: disable=unused-import
 import string
 import subprocess  # nosec
 import sys
@@ -379,10 +378,7 @@ class BaseAEATestCase(ABC):
 
     @classmethod
     def terminate_agents(
-        cls,
-        *subprocesses: subprocess.Popen,
-        signal: signal.Signals = signal.SIGINT,
-        timeout: int = 10,
+        cls, *subprocesses: subprocess.Popen, timeout: int = 10,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -390,7 +386,6 @@ class BaseAEATestCase(ABC):
         Run from agent's directory.
 
         :param subprocesses: the subprocesses running the agents
-        :param signal: the signal for interruption
         :param timeout: the timeout for interruption
         """
         if not subprocesses:

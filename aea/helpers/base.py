@@ -346,9 +346,9 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
     if callable(logger_method):  # pragma: nocover
         return logger_method
 
-    logger = fn.__globals__.get("logger", logging.getLogger(fn.__globals__["__name__"]))  # type: ignore
+    logger_ = fn.__globals__.get("logger", logging.getLogger(fn.__globals__["__name__"]))  # type: ignore
 
-    return getattr(logger, logger_method)
+    return getattr(logger_, logger_method)
 
 
 def try_decorator(error_message: str, default_return=None, logger_method="error"):

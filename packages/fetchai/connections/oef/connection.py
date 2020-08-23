@@ -502,7 +502,9 @@ class OEFChannel(OEFAgent):
         assert self.in_queue is not None
         assert self.loop is not None
 
-    async def connect(self) -> None:  # pylint: disable=invalid-overridden-method
+    async def connect(  # pylint: disable=invalid-overridden-method,arguments-differ
+        self,
+    ) -> None:
         """Connect channel."""
         await self._set_loop_and_queue()
         self.core.__init__(loop=self._loop, logger=logger)

@@ -210,9 +210,9 @@ if __name__ == "__main__":
     docs_files = Path("docs").glob("*.md")
 
     try:
-        for file in docs_files:
-            print("Processing " + str(file))
-            check_file(file, all_docs_files)
+        for file_ in docs_files:
+            print("Processing " + str(file_))
+            check_file(file_, all_docs_files)
     except Exception as e:  # pylint: disable=broad-except
         print(e)
         sys.exit(1)
