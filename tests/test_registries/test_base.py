@@ -542,6 +542,8 @@ class TestFilter:
 
 
 class TestAgentComponentRegistry:
+    """Test agent component registry."""
+
     def setup_class(self):
         """Set up the test."""
         self.registry = AgentComponentRegistry()

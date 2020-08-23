@@ -38,7 +38,10 @@ OUTPUT_FILE = "output_file"
 
 
 class MyAgent(Agent):
+    """A simple agent."""
+
     def __init__(self, identity: Identity, connections: List[Connection]):
+        """Initialise the agent."""
         super().__init__(identity, connections)
 
     def setup(self):

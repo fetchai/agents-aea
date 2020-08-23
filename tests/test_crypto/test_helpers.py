@@ -50,9 +50,12 @@ logger = logging.getLogger(__name__)
 
 
 class ResponseMock:
+    """Mock for response class."""
+
     text = "some text"
 
     def __init__(self, status_code=200):
+        """Initialise response mock."""
         self.status_code = status_code
 
 

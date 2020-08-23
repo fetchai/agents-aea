@@ -157,6 +157,8 @@ After the completion of the signing, we get the signed transaction.
 To be able to register a handler that reads the internal messages, we have to create a class at the end of the file which processes the signing messages.
 ``` python
 class SigningDialogues(Model, BaseSigningDialogues):
+    """Signing dialogues model."""
+
     def __init__(self, **kwargs) -> None:
         """
         Initialize dialogues.
@@ -423,6 +425,8 @@ def run():
 
 
 class SigningDialogues(Model, BaseSigningDialogues):
+    """Signing dialogues model."""
+
     def __init__(self, **kwargs) -> None:
         """
         Initialize dialogues.

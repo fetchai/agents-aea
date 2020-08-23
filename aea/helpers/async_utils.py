@@ -395,6 +395,7 @@ class AwaitableProc:
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialise awaitable proc."""
         self.args = args
         self.kwargs = kwargs
         self.proc = None

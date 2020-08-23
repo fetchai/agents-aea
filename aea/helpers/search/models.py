@@ -443,7 +443,7 @@ class ConstraintType:
                 )
             else:  # pragma: nocover
                 raise ValueError("Type not recognized.")
-        except (ValueError):
+        except ValueError:
             return False
 
         return True

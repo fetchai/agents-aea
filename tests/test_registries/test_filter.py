@@ -33,6 +33,8 @@ from tests.data.dummy_skill.handlers import DummyHandler
 
 
 class TestFilter:
+    """Test class for filter."""
+
     @classmethod
     def setup_class(cls):
         """Set the tests up."""

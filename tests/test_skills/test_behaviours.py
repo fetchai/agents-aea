@@ -38,6 +38,8 @@ def test_sequence_behaviour():
     outputs = []
 
     class MySequenceBehaviour(SequenceBehaviour):
+        """Custom sequence behaviour."""
+
         def setup(self) -> None:
             pass
 
@@ -45,6 +47,8 @@ def test_sequence_behaviour():
             pass
 
     class SimpleOneShotBehaviour(OneShotBehaviour):
+        """Custom simple behaviour."""
+
         def __init__(self, name, **kwargs):
             super().__init__(name=name, **kwargs)
 
@@ -102,6 +106,7 @@ class SimpleStateBehaviour(State):
     """A simple state behaviour to be added in a FSMBehaviour."""
 
     def __init__(self, shared_list, event_to_trigger=None, **kwargs):
+        """Initialise simple behaviour."""
         super().__init__(**kwargs)
         self.shared_list = shared_list
         self.event_to_trigger = event_to_trigger
@@ -150,6 +155,8 @@ def test_fms_behaviour():
 
 
 class TestFSMBehaviourCreation:
+    """Test FSMBehaviour creation."""
+
     @classmethod
     def setup_class(cls):
         """Set the test up."""

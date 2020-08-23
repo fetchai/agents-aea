@@ -201,6 +201,7 @@ class IPFSDaemon:
     """
 
     def __init__(self, timeout: float = 10.0):
+        """Initialise IPFS daemon."""
         # check we have ipfs
         self.timeout = timeout
         res = shutil.which("ipfs")

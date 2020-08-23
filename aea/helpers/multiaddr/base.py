@@ -120,9 +120,9 @@ class MultiAddr:
         return base58.b58encode(key_mh.encode()).decode()
 
     def format(self) -> str:
-        """ Canonical representation of a multiaddress """
+        """Canonical representation of a multiaddress."""
         return f"/dns/{self._host}/tcp/{str(self._port)}/p2p/{self._peerid}"
 
     def __str__(self) -> str:
-        """ default string representation of a mutliaddress """
+        """Default string representation of a mutliaddress."""
         return self.format()

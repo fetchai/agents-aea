@@ -320,7 +320,7 @@ def test_behaviour():
 
 
 def test_behaviour_parse_module_without_configs():
-    """call Behaviour.parse_module without configurations."""
+    """Call Behaviour.parse_module without configurations."""
     assert Behaviour.parse_module(MagicMock(), {}, MagicMock()) == {}
 
 
@@ -350,7 +350,7 @@ def test_behaviour_parse_module_missing_class():
 
 
 def test_handler_parse_module_without_configs():
-    """call Handler.parse_module without configurations."""
+    """Call Handler.parse_module without configurations."""
     assert Handler.parse_module(MagicMock(), {}, MagicMock()) == {}
 
 
@@ -378,7 +378,7 @@ def test_handler_parse_module_missing_class():
 
 
 def test_model_parse_module_without_configs():
-    """call Model.parse_module without configurations."""
+    """Call Model.parse_module without configurations."""
     assert Model.parse_module(MagicMock(), {}, MagicMock()) == {}
 
 

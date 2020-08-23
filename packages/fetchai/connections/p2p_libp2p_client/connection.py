@@ -51,6 +51,7 @@ class Uri:
         host: Optional[str] = None,
         port: Optional[int] = None,
     ):
+        """Initialise Uri."""
         if uri is not None:
             split = uri.split(":", 1)
             self._host = split[0]
