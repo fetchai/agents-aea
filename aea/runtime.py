@@ -76,7 +76,6 @@ class BaseRuntime(ABC):
         self._loop: AbstractEventLoop = ensure_loop(loop)
         self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
         self._state.add_callback(self._log_runtime_state)
-        self._was_started = False
 
         self._multiplexer: Multiplexer = self._get_multiplexer_instance()
         self._task_manager = TaskManager()
@@ -170,7 +169,6 @@ class BaseRuntime(ABC):
                 )
             )
             return
-        self._was_started = True
         self._start()
 
     def stop(self) -> None:

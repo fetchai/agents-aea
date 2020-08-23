@@ -62,6 +62,11 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
         super().__init__(**kwargs)
         self._number_of_executions = 0
 
+    @property
+    def number_of_executions(self) -> int:
+        """Get the number of executions."""
+        return self._number_of_executions
+
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
         if not self.is_done():
@@ -352,10 +357,9 @@ class FSMBehaviour(CompositeBehaviour, ABC):
                 # we reached a final state - return.
                 self.current = None
                 return
-            else:
-                event = current_state.event
-                next_state = self.transitions.get(self.current, {}).get(event, None)
-                self.current = next_state
+            event = current_state.event
+            next_state = self.transitions.get(self.current, {}).get(event, None)
+            self.current = next_state
 
     def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""

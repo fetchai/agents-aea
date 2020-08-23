@@ -79,24 +79,6 @@ class TestStandaloneTransaction(BaseAEATestCase):
         except RuntimeError:
             test_logger.info("RuntimeError: Some transactions have failed")
 
-    # def test_run_mocked_digest(self):
-    #     """Run the transaction from the file."""
-    #     try:
-    #         with patch(
-    #             "aea.crypto.helpers.try_generate_testnet_wealth", return_value=Mock()
-    #         ):
-    #             with patch(
-    #                 "aea.crypto.fetchai.FetchAIApi.send_transaction",
-    #                 return_value="cdbea3c61cf243416b3a479f3262b972f544370acd8cb36448f077d67cd2936c",
-    #             ):
-    #                 run()
-    #                 self.mocked_logger_info.assert_any_call(
-    #                     "The transaction digest is cdbea3c61cf243416b3a479f3262b972f544370acd8cb36448f077d67cd2936c"
-    #                 )
-    #                 self.mocked_logger_info.assert_any_call("Transaction complete.")
-    #     except RuntimeError:
-    #         test_logger.info("RuntimeError: Some transactions have failed")
-
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
         for blocks in self.code_blocks:

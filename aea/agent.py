@@ -76,7 +76,7 @@ class Agent(ABC):
         )
 
         self._inbox = InBox(self.runtime.multiplexer)
-        self._outbox = OutBox(self.runtime.multiplexer, self._identity.address)
+        self._outbox = OutBox(self.runtime.multiplexer)
 
     @property
     def connections(self) -> List[Connection]:

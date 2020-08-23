@@ -42,6 +42,7 @@ clean-test:
 lint:
 	black aea benchmark examples packages scripts tests
 	flake8 aea benchmark examples packages scripts tests
+	vulture aea scripts/whitelist.py --exclude "*_pb2.py"
 
 .PHONY: pylint
 pylint:

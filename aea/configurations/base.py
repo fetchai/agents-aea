@@ -152,18 +152,17 @@ def _get_default_configuration_file_name_from_type(
     item_type = PackageType(item_type)
     if item_type == PackageType.AGENT:
         return DEFAULT_AEA_CONFIG_FILE
-    elif item_type == PackageType.PROTOCOL:
+    if item_type == PackageType.PROTOCOL:
         return DEFAULT_PROTOCOL_CONFIG_FILE
-    elif item_type == PackageType.CONNECTION:
+    if item_type == PackageType.CONNECTION:
         return DEFAULT_CONNECTION_CONFIG_FILE
-    elif item_type == PackageType.SKILL:
+    if item_type == PackageType.SKILL:
         return DEFAULT_SKILL_CONFIG_FILE
-    elif item_type == PackageType.CONTRACT:
+    if item_type == PackageType.CONTRACT:
         return DEFAULT_CONTRACT_CONFIG_FILE
-    else:
-        raise ValueError(
-            "Item type not valid: {}".format(str(item_type))
-        )  # pragma: no cover
+    raise ValueError(  # pragma: no cover
+        "Item type not valid: {}".format(str(item_type))
+    )
 
 
 class ComponentType(Enum):
@@ -281,8 +280,7 @@ class CRUDCollection(Generic[T]):
         """
         if item_id in self._items_by_id:
             raise ValueError("Item with name {} already present!".format(item_id))
-        else:
-            self._items_by_id[item_id] = item
+        self._items_by_id[item_id] = item
 
     def read(self, item_id: str) -> Optional[T]:
         """
@@ -356,10 +354,9 @@ class PublicId(JSONSerializable):
     def _process_version(version_like: PackageVersionLike) -> Tuple[Any, Any]:
         if isinstance(version_like, str):
             return version_like, semver.VersionInfo.parse(version_like)
-        elif isinstance(version_like, semver.VersionInfo):
+        if isinstance(version_like, semver.VersionInfo):
             return str(version_like), version_like
-        else:
-            raise ValueError("Version type not valid.")
+        raise ValueError("Version type not valid.")
 
     @property
     def author(self) -> str:
@@ -408,11 +405,10 @@ class PublicId(JSONSerializable):
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_string)
             )
-        else:
-            username, package_name, version = re.findall(
-                cls.PUBLIC_ID_REGEX, public_id_string
-            )[0][:3]
-            return PublicId(username, package_name, version)
+        username, package_name, version = re.findall(
+            cls.PUBLIC_ID_REGEX, public_id_string
+        )[0][:3]
+        return PublicId(username, package_name, version)
 
     @classmethod
     def from_uri_path(cls, public_id_uri_path: str) -> "PublicId":
@@ -436,11 +432,10 @@ class PublicId(JSONSerializable):
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_uri_path)
             )
-        else:
-            username, package_name, version = re.findall(
-                cls.PUBLIC_ID_URI_REGEX, public_id_uri_path
-            )[0][:3]
-            return PublicId(username, package_name, version)
+        username, package_name, version = re.findall(
+            cls.PUBLIC_ID_URI_REGEX, public_id_uri_path
+        )[0][:3]
+        return PublicId(username, package_name, version)
 
     @property
     def to_uri_path(self) -> str:
@@ -510,12 +505,11 @@ class PublicId(JSONSerializable):
             and self.name == other.name
         ):
             return self.version_info < other.version_info
-        else:
-            raise ValueError(
-                "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
-                    self, other
-                )
+        raise ValueError(
+            "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
+                self, other
             )
+        )
 
 
 class PackageId:
@@ -594,13 +588,12 @@ class PackageId:
             raise ValueError(
                 "Input '{}' is not well formatted.".format(package_id_uri_path)
             )
-        else:
-            package_type_str, username, package_name, version = re.findall(
-                cls.PACKAGE_ID_URI_REGEX, package_id_uri_path
-            )[0][:4]
-            package_type = PackageType(package_type_str)
-            public_id = PublicId(username, package_name, version)
-            return PackageId(package_type, public_id)
+        package_type_str, username, package_name, version = re.findall(
+            cls.PACKAGE_ID_URI_REGEX, package_id_uri_path
+        )[0][:4]
+        package_type = PackageType(package_type_str)
+        public_id = PublicId(username, package_name, version)
+        return PackageId(package_type, public_id)
 
     @property
     def to_uri_path(self) -> str:
@@ -1967,19 +1960,18 @@ def _compare_fingerprints(
                     package_configuration.public_id,
                 )
             )
-        else:
-            raise ValueError(
-                (
-                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
-                    "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
-                ).format(
-                    package_directory,
-                    pprint.pformat(expected_fingerprints),
-                    pprint.pformat(actual_fingerprints),
-                    str(item_type),
-                    package_configuration.public_id,
-                )
+        raise ValueError(
+            (
+                "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
+            ).format(
+                package_directory,
+                pprint.pformat(expected_fingerprints),
+                pprint.pformat(actual_fingerprints),
+                str(item_type),
+                package_configuration.public_id,
             )
+        )
 
 
 def _check_aea_version(package_configuration: PackageConfiguration):

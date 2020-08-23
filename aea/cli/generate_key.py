@@ -57,16 +57,13 @@ def _generate_private_key(type_: str, file: Optional[str] = None) -> None:
     """
     if type_ == "all" and file is not None:
         raise click.ClickException("Type all cannot be used in combination with file.")
-    elif type_ == "all":
-        types = list(crypto_registry.supported_ids)
-    else:
-        types = [type_]
-    for type_ in types:
+    types = list(crypto_registry.supported_ids) if type_ == "all" else [type_]
+    for type__ in types:
         private_key_file = (
-            PRIVATE_KEY_PATH_SCHEMA.format(type_) if file is None else file
+            PRIVATE_KEY_PATH_SCHEMA.format(type__) if file is None else file
         )
         if _can_write(private_key_file):
-            create_private_key(type_, private_key_file)
+            create_private_key(type__, private_key_file)
 
 
 def _can_write(path) -> bool:
@@ -76,5 +73,4 @@ def _can_write(path) -> bool:
             default=False,
         )
         return value
-    else:
-        return True
+    return True

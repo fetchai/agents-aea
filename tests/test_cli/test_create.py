@@ -152,10 +152,6 @@ class TestCreate:
             self.agent_config["license"] == aea.configurations.constants.DEFAULT_LICENSE
         )
 
-    # def test_private_key_pem_path_field_is_empty_string(self):
-    #     """Check that the 'private_key_pem_path' is the empty string."""
-    #         #     assert self.agent_config["private_key_pem_path"] == ""
-
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
         assert self.agent_config["protocols"] == [str(DEFAULT_PROTOCOL)]

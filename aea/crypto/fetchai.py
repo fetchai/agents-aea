@@ -35,7 +35,8 @@ from fetchai.ledger.api.token import TokenTxFactory
 from fetchai.ledger.api.tx import TxContents
 from fetchai.ledger.crypto import Address as FetchaiAddress
 from fetchai.ledger.crypto import Entity, Identity
-from fetchai.ledger.serialisation import sha256_hash, transaction
+from fetchai.ledger.serialisation import sha256_hash
+from fetchai.ledger.serialisation import transaction as fetchai_transaction
 
 import requests
 
@@ -328,7 +329,7 @@ class FetchAIApi(LedgerApi, FetchAIHelper):
 
         :param tx_signed: the signed transaction
         """
-        encoded_tx = transaction.encode_transaction(tx_signed)
+        encoded_tx = fetchai_transaction.encode_transaction(tx_signed)
         endpoint = "transfer" if tx_signed.transfers is not None else "create"
         return self.api.tokens._post_tx_json(  # pylint: disable=protected-access
             encoded_tx, endpoint

@@ -279,7 +279,6 @@ class AEA(Agent, WithLogger):
                 msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
             msg.sender = envelope.sender
-            # msg.to = envelope.to
             msg.is_incoming = True
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
             self.logger.warning("Decoding error. Exception: {}".format(str(e)))
@@ -347,7 +346,7 @@ class AEA(Agent, WithLogger):
 
         :return: same as function
         """
-        # docstyle: ignore
+        # docstyle: ignore # noqa: E800
         def log_exception(e, fn):
             self.logger.exception(f"<{e}> raised during `{fn}`")
 
@@ -363,14 +362,14 @@ class AEA(Agent, WithLogger):
         except Exception as e:  # pylint: disable=broad-except
             if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
                 raise
-            elif self._skills_exception_policy == ExceptionPolicyEnum.just_log:
-                log_exception(e, fn)
-            elif self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
+            if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
                 log_exception(e, fn)
                 self.stop()
                 raise AEAException(
                     f"AEA was terminated cause exception `{e}` in skills {fn}! Please check logs."
                 )
+            if self._skills_exception_policy == ExceptionPolicyEnum.just_log:
+                log_exception(e, fn)
             else:
                 raise AEAException(
                     f"Unsupported exception policy: {self._skills_exception_policy}"

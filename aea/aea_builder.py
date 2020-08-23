@@ -1311,8 +1311,7 @@ class AEABuilder:
         )
         builder = AEABuilder(with_default_packages=False)
 
-        # TODO isolate environment
-        # load_env_file(str(aea_config_path / ".env"))
+        # TODO isolate environment: load_env_file(str(aea_config_path / ".env"))
 
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE

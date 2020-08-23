@@ -22,7 +22,6 @@ import logging
 import os
 import random
 import shutil
-import signal  # pylint: disable=unused-import
 import string
 import subprocess  # nosec
 import sys
@@ -64,7 +63,6 @@ from tests.conftest import ROOT_DIR
 logger = logging.getLogger(__name__)
 
 CLI_LOG_OPTION = ["-v", "OFF"]
-PROJECT_ROOT_DIR = "."
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
@@ -293,8 +291,7 @@ class BaseAEATestCase(ABC):
             )
             if result:
                 return result, {}, {}
-            else:
-                return result, content1, content2
+            return result, content1, content2
 
         path_to_manually_created_aea = os.path.join(cls.t, agent_name)
         new_cwd = os.path.join(cls.t, "fetch_dir")
@@ -381,10 +378,7 @@ class BaseAEATestCase(ABC):
 
     @classmethod
     def terminate_agents(
-        cls,
-        *subprocesses: subprocess.Popen,
-        signal: signal.Signals = signal.SIGINT,
-        timeout: int = 10,
+        cls, *subprocesses: subprocess.Popen, timeout: int = 10,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -392,7 +386,6 @@ class BaseAEATestCase(ABC):
         Run from agent's directory.
 
         :param subprocesses: the subprocesses running the agents
-        :param signal: the signal for interruption
         :param timeout: the timeout for interruption
         """
         if not subprocesses:
@@ -541,10 +534,9 @@ class BaseAEATestCase(ABC):
                 "--connection",
                 cwd=cls._get_cwd(),
             )
-        else:
-            return cls.run_cli_command(
-                "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
-            )
+        return cls.run_cli_command(
+            "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
+        )
 
     @classmethod
     def replace_private_key_in_file(

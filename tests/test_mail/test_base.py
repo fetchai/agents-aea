@@ -178,7 +178,7 @@ def test_outbox_put():
     msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
-    outbox = OutBox(multiplexer, agent_address)
+    outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
     envelope = Envelope(
@@ -208,7 +208,7 @@ def test_outbox_put_message():
     msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
-    outbox = OutBox(multiplexer, agent_address)
+    outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
     outbox.put_message(msg)
@@ -219,11 +219,10 @@ def test_outbox_put_message():
 
 def test_outbox_empty():
     """Test thet the outbox queue is empty."""
-    agent_address = "Agent0"
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
     multiplexer.connect()
-    outbox = OutBox(multiplexer, agent_address)
+    outbox = OutBox(multiplexer)
     assert outbox.empty(), "The outbox is not empty"
     multiplexer.disconnect()
 

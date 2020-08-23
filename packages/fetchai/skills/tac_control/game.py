@@ -324,8 +324,6 @@ class Transaction(Terms):
 
         :return: True if the transaction has been signed by both parties
         """
-
-        # singable_message = LedgerApis.sign_message(self.sender_hash)
         result = (
             self.sender_address
             in LedgerApis.recover_message(  # pylint: disable=no-member
@@ -334,7 +332,6 @@ class Transaction(Terms):
                 signature=self.sender_signature,
             )
         )
-        # counterparty_signable_message = LedgerApis.sign_message(self.counterparty_hash)
         result = (
             result
             and self.counterparty_address

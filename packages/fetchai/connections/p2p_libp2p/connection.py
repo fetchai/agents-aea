@@ -158,7 +158,6 @@ class Uri:
         else:
             self._host = "127.0.0.1"
             self._port = randint(5000, 10000)  # nosec
-            # raise ValueError("Either 'uri' or both 'host' and 'port' must be set")
 
     def __str__(self):
         return "{}:{}".format(self._host, self._port)

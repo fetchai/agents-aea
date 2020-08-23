@@ -300,8 +300,8 @@ def upload_new_packages(runner: CliRunner) -> None:
 
 
 if __name__ == "__main__":
-    runner = CliRunner()
-    check_correct_author(runner)
-    upload_new_packages(runner)
+    runner_ = CliRunner()
+    check_correct_author(runner_)
+    upload_new_packages(runner_)
     print("Done!")
     sys.exit(0)

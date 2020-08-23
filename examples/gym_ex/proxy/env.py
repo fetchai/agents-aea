@@ -253,16 +253,13 @@ class ProxyEnv(gym.Env):
                     and gym_msg.step_id == expected_step_id
                 ):
                     return gym_msg
-                else:
-                    raise ValueError(
-                        "Unexpected performative or no step_id: {}".format(
-                            gym_msg.performative
-                        )
+                raise ValueError(
+                    "Unexpected performative or no step_id: {}".format(
+                        gym_msg.performative
                     )
-            else:
-                raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
-        else:
-            raise ValueError("Missing envelope.")
+                )
+            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
 
@@ -287,16 +284,13 @@ class ProxyEnv(gym.Env):
                 ):
 
                     return None
-                else:
-                    raise ValueError(
-                        "Unexpected performative or no step_id: {}".format(
-                            gym_msg.performative
-                        )
+                raise ValueError(
+                    "Unexpected performative or no step_id: {}".format(
+                        gym_msg.performative
                     )
-            else:
-                raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
-        else:
-            raise ValueError("Missing envelope.")
+                )
+            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        raise ValueError("Missing envelope.")
 
     @staticmethod
     def _message_to_percept(message: GymMessage) -> Feedback:

@@ -272,8 +272,10 @@ class CyclicBehaviourTestCase(TestCase):
         """Test for act_wrapper positive result."""
         obj = self.TestCyclicBehaviour(skill_context="skill_context", name="name")
         obj.act = mock.Mock()
+        assert obj.number_of_executions == 0
         obj.act_wrapper()
         obj.act.assert_called_once()
+        assert obj.number_of_executions == 1
 
 
 class TickerBehaviourTestCase(TestCase):

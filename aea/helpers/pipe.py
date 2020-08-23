@@ -37,7 +37,6 @@ PIPE_CONN_TIMEOUT = 10.0
 PIPE_CONN_ATTEMPTS = 10
 
 TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS = 5
-TCP_SOCKET_PIPE_CLIENT_CONN_TIMEOUT = 0.1
 
 
 class IPCChannelClient(ABC):
@@ -125,10 +124,8 @@ class PosixNamedPipeProtocol:
         self._out = -1
 
         self._stream_reader = None  # type: Optional[asyncio.StreamReader]
-        self._log_file_desc = None  # type: Optional[IO[str]]
         self._reader_protocol = None  # type: Optional[asyncio.StreamReaderProtocol]
         self._fileobj = None  # type: Optional[IO[str]]
-        # self._out_fo = None
 
         self._connection_attempts = PIPE_CONN_ATTEMPTS
         self._connection_timeout = PIPE_CONN_TIMEOUT
@@ -162,8 +159,7 @@ class PosixNamedPipeProtocol:
                 self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
                 await asyncio.sleep(self._connection_timeout)
                 return await self.connect(timeout)
-            else:
-                raise e  # pragma: no cover
+            raise e  # pragma: no cover
 
         # setup reader
         assert (
@@ -177,7 +173,6 @@ class PosixNamedPipeProtocol:
         await self._loop.connect_read_pipe(
             lambda: self.__reader_protocol, self._fileobj
         )
-        # self._out_fo = os.fdopen(self._out, "wb")
 
         return True
 
@@ -197,8 +192,6 @@ class PosixNamedPipeProtocol:
         size = struct.pack("!I", len(data))
         os.write(self._out, size + data)
         asyncio.sleep(0.0)
-        # self._out_fo.write(size + data)
-        # self._out_fo.flush()
 
     async def read(self) -> Optional[bytes]:
         """
@@ -654,15 +647,13 @@ def make_ipc_channel(
     """
     Build a portable bidirectional InterProcess Communication channel
     """
-
     if os.name == "posix":
         return PosixNamedPipeChannel(logger=logger, loop=loop)
-    elif os.name == "nt":  # pragma: nocover
+    if os.name == "nt":  # pragma: nocover
         return TCPSocketChannel(logger=logger, loop=loop)
-    else:  # pragma: nocover
-        raise Exception(
-            "make ipc channel is not supported on platform {}".format(os.name)
-        )
+    raise Exception(  # pragma: nocover
+        "make ipc channel is not supported on platform {}".format(os.name)
+    )
 
 
 def make_ipc_channel_client(
@@ -677,12 +668,10 @@ def make_ipc_channel_client(
     :param in_path: rendezvous point for incoming communication
     :param out_path: rendezvous point for outgoing outgoing
     """
-
     if os.name == "posix":
         return PosixNamedPipeChannelClient(in_path, out_path, logger=logger, loop=loop)
-    elif os.name == "nt":  # pragma: nocover
+    if os.name == "nt":  # pragma: nocover
         return TCPSocketChannelClient(in_path, out_path, logger=logger, loop=loop)
-    else:  # pragma: nocover
-        raise Exception(
-            "make ip channel client is not supported on platform {}".format(os.name)
-        )
+    raise Exception(  # pragma: nocover
+        "make ip channel client is not supported on platform {}".format(os.name)
+    )

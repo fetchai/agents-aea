@@ -293,9 +293,6 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
 
         # fund key
         self.generate_wealth(COSMOS)
-        # self.replace_private_key_in_file(
-        #     FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE
-        # )
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

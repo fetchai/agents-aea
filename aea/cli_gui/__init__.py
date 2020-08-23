@@ -199,10 +199,10 @@ def add_item(agent_id: str, item_type: str, item_id: str):
 def fetch_agent(agent_id: str):
     """Fetch an agent."""
     ctx = Context(cwd=app_context.agents_dir)
-    fetch_agent = cli_fetch_agent_locally if app_context.local else cli_fetch_agent
+    fetch_agent_ = cli_fetch_agent_locally if app_context.local else cli_fetch_agent
     try:
         agent_public_id = PublicId.from_str(agent_id)
-        fetch_agent(ctx, agent_public_id)
+        fetch_agent_(ctx, agent_public_id)
     except ClickException as e:
         return (
             {"detail": "Failed to fetch an agent {}. {}".format(agent_id, str(e))},
@@ -329,28 +329,24 @@ def start_agent(agent_id: str, connection_id: PublicId):
             {"detail": "Failed to run agent {}".format(agent_id)},
             400,
         )  # 400 Bad request
-    else:
-        app_context.agent_processes[agent_id] = agent_process
-        app_context.agent_tty[agent_id] = []
-        app_context.agent_error[agent_id] = []
+    app_context.agent_processes[agent_id] = agent_process
+    app_context.agent_tty[agent_id] = []
+    app_context.agent_error[agent_id] = []
 
-        tty_read_thread = threading.Thread(
-            target=read_tty,
-            args=(
-                app_context.agent_processes[agent_id],
-                app_context.agent_tty[agent_id],
-            ),
-        )
-        tty_read_thread.start()
+    tty_read_thread = threading.Thread(
+        target=read_tty,
+        args=(app_context.agent_processes[agent_id], app_context.agent_tty[agent_id],),
+    )
+    tty_read_thread.start()
 
-        error_read_thread = threading.Thread(
-            target=read_error,
-            args=(
-                app_context.agent_processes[agent_id],
-                app_context.agent_error[agent_id],
-            ),
-        )
-        error_read_thread.start()
+    error_read_thread = threading.Thread(
+        target=read_error,
+        args=(
+            app_context.agent_processes[agent_id],
+            app_context.agent_error[agent_id],
+        ),
+    )
+    error_read_thread.start()
 
     return agent_id, 201  # 200 (OK)
 

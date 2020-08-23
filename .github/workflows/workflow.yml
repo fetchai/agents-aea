@@ -53,6 +53,8 @@ jobs:
         run: |
           tox -e black-check
           tox -e flake8
+      - name: Unused code check
+        run: tox -e vulture
       - name: Static type check
         run: tox -e mypy
       - name: Golang code style check

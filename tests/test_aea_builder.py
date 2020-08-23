@@ -658,7 +658,7 @@ class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmp
         aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
         configuration = aea_config_file.read_text()
         configuration += dedent(
-            f"""
+            """
         ---
         name: non_existing_package
         author: some_author
@@ -676,7 +676,7 @@ class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmp
         self._add_stub_connection_config()
         with pytest.raises(
             AssertionError,
-            match=fr"Component \(protocol, some_author/non_existing_package:0.1.0\) not declared in the agent configuration.",
+            match=r"Component \(protocol, some_author/non_existing_package:0.1.0\) not declared in the agent configuration.",
         ):
             with cd(self._get_cwd()):
                 AEABuilder.from_aea_project(Path(self._get_cwd()))

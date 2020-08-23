@@ -1,68 +1,39 @@
 [MASTER]
-ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,launch.py,transaction.py
+ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0330,C0301,C0302,W1202,W1203,W0511,W0107,W0105,W0621,W0235,W0613,W0221,R0902,R0913,R0914,R1720,R1705,R0801,R0904,R0903,R0911,R0912,R0901,R1704,R0916,R1702,R0915,R1710,R1703,R0401
-
-ENABLED:
-# W0703: broad-except 
-# W0212: protected-access
-# W0706: try-except-raise
-# W0108: unnecessary-lambda
-# W0622: redefined-builtin
-# W0163: unused-argument
-# W0201: attribute-defined-outside-init
-# W0222: signature-differs
-# W0223: abstract-method
-# W0611: unused-import
-# W0612: unused-variable
-# W1505: deprecated-method
-# W0106: expression-not-assigned
-# R0201: no-self-use
-# R0205: useless-object-inheritance
-# R1723: no-else-break
-# R1721: unnecessary-comprehension
-# R1718: consider-using-set-comprehension
-# R1716: chained-comparison
-# R1714: consider-using-in
-# R0123: literal-comparison
-# R1711: useless-return
-# R1722: consider-using-sys-exit
+disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0511,W0613,W1202,W1203,R0902,R0913,R0914,R0801,R0904,R0903,R0911,R0912,R0901,R0916,R1702,R0915,R0401
 
 ## Resolve these:
 # R0401: cyclic-import
-# W0221: arguments-differ
+# W0613: unused-argument
+# W0511: fixme
+
+## Eventually resolve these:
 # R0902: too-many-instance-attributes
 # R0913: too-many-arguments
 # R0914: too-many-locals
-# R1720: no-else-raise
-# R1705: no-else-return
 # R0904: too-many-public-methods
 # R0903: too-few-public-methods
 # R0911: too-many-return-statements
 # R0912: too-many-branches
 # R0901: too-many-ancestors
-# R1704: redefined-argument-from-local
 # R0916: too-many-boolean-expressions
 # R1702: too-many-nested-blocks
 # R0915: too-many-statements
-# R1710: inconsistent-return-statements
-# R1703: simplifiable-if-statement
+# decide on a logging policy:
+# W1202: logging-format-interpolation
+# W1203: logging-fstring-interpolation
 
 ## Keep the following:
 # C0103: invalid-name
 # C0201: consider-iterating-dictionary
-# C0330: Wrong haning indentation
-# http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s)
-# http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s)
-# W1202: logging-format-interpolation
-# W1203: logging-fstring-interpolation
-# W0511: fixme
-# W0107: unnecessary-pass
-# W0105: pointless-string-statement
-# W0621: redefined-outer-name
-# W0235: useless-super-delegation
-# R0801: similar lines
+# C0301: http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s)
+# C0302: http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s)
+# C0330: Wrong hanging indentation
+# W0105: pointless-string-statement, # kept as no harm
+# W0107: unnecessary-pass, # kept as no harm
+# R0801: similar lines, # too granular
 
 [IMPORTS]
 ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3

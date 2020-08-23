@@ -67,11 +67,11 @@ def _set_logger(
         default_logging_config,  # pylint: disable=import-outside-toplevel
     )
 
-    logger = logging.getLogger("aea")
-    logger = default_logging_config(logger)
+    logger_ = logging.getLogger("aea")
+    logger_ = default_logging_config(logger_)
     if log_level is not None:
         level = logging.getLevelName(log_level)
-        logger.setLevel(level)
+        logger_.setLevel(level)
 
 
 def _run_agent(
@@ -252,5 +252,4 @@ class AEALauncher(AbstractMultipleRunner):
                 AEADirMultiprocessTask(agent_dir, log_level=self._log_level)
                 for agent_dir in self._agent_dirs
             ]
-        else:
-            return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
+        return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]

@@ -213,8 +213,7 @@ class LocalNode:
             )
             await self._send(error_envelope)
             return
-        else:
-            await self._send(envelope)
+        await self._send(envelope)
 
     async def _register_service(
         self, address: Address, service_description: Description

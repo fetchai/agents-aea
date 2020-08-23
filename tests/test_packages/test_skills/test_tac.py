@@ -230,7 +230,7 @@ class TestTacSkills(AEATestCaseMany):
             "message signed by decision maker.",
             "sending transaction to controller.",
             "sending match accept to",
-            # "Received transaction confirmation from the controller: transaction_id=",
+            # "Received transaction confirmation from the controller: transaction_id=", # noqa: E800
             "Applying state update!",
             "found potential buyers agents=",
             "sending CFP to agent=",
@@ -276,9 +276,6 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.7.0")
         self.set_config("agent.default_ledger", ETHEREUM)
-        # stdout = self.get_wealth(ETHEREUM)
-        # if int(stdout) < 100000000000000000:
-        #     pytest.skip("The agent needs more funds for the test to pass.")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -418,7 +415,6 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.terminate_agents(
             tac_controller_process, tac_aea_one_process, tac_aea_two_process
         )
-        # TODO; add in future when while loops removed in skills
-        # assert (
-        #     self.is_successfully_terminated()
-        # ), "Agents weren't successfully terminated."
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."

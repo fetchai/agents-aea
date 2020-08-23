@@ -150,7 +150,6 @@ class PeerToPeerChannel:
         with self.lock:
             if not self.stopped:
                 self._httpCall.unregister(self.address)
-                # self._httpCall.disconnect()
                 self.stopped = True
                 self.thread.join()
 

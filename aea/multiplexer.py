@@ -31,7 +31,6 @@ from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
     AEAConnectionError,
-    Address,
     Empty,
     Envelope,
     EnvelopeContext,
@@ -364,7 +363,6 @@ class AsyncMultiplexer(WithLogger):
 
         while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
-                # self.self.logger.debug("Waiting for incoming envelopes...")
                 done, _pending = await asyncio.wait(
                     task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
                 )
@@ -689,16 +687,14 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer, default_address: Address):
+    def __init__(self, multiplexer: Multiplexer):
         """
         Initialize the outbox.
 
         :param multiplexer: the multiplexer
-        :param default_address: the default address of the agent
         """
         super().__init__()
         self._multiplexer = multiplexer
-        self._default_address = default_address
 
     def empty(self) -> bool:
         """

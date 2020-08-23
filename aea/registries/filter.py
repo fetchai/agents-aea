@@ -183,7 +183,6 @@ class Filter:
                 )  # we do a shallow copy as we only need the message object to be copied; not its referenced objects
                 copy_signing_message.counterparty = signing_message.sender
                 copy_signing_message.sender = signing_message.sender
-                # copy_signing_message.to = signing_message.to
                 copy_signing_message.is_incoming = True
                 handler.handle(cast(Message, copy_signing_message))
             else:
