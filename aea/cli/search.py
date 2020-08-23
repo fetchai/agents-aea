@@ -120,9 +120,6 @@ def setup_search_ctx(ctx: Context, local: bool) -> None:
         # otherwise, use the default path (i.e. 'packages/' in the current directory.)
         try:
             try_to_load_agent_config(ctx, is_exit_on_except=False)
-            # path = Path(DEFAULT_AEA_CONFIG_FILE)
-            # fp = open(str(path), mode="r", encoding="utf-8")
-            # agent_config = ctx.agent_loader.load(fp)
             registry_directory = ctx.agent_config.registry_path
         except Exception:  # pylint: disable=broad-except
             registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
@@ -215,10 +212,7 @@ def search_items(ctx: Context, item_type: str, query: str) -> List:
     item_type_plural = item_type + "s"
     if ctx.config.get("is_local"):
         return _search_items_locally(ctx, item_type_plural)
-    else:
-        return request_api(
-            "GET", "/{}".format(item_type_plural), params={"search": query}
-        )
+    return request_api("GET", "/{}".format(item_type_plural), params={"search": query})
 
 
 def _output_search_results(item_type: str, results: List[Dict]) -> None:

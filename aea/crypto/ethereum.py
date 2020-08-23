@@ -139,7 +139,7 @@ class EthereumCrypto(Crypto[Account]):
         :return: signed transaction
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
-        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction
+        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
         return signed_transaction
 
     @classmethod
@@ -456,7 +456,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         instance = cast(EthereumContract, instance)
         return instance
 
-    def get_deploy_transaction(
+    def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,

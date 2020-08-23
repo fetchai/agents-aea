@@ -16,18 +16,32 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of an autonomous economic agent (AEA)."""
+import datetime
 import logging
 from asyncio import AbstractEventLoop
-from typing import Any, Callable, Collection, Dict, List, Optional, Sequence, Type, cast
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    cast,
+)
 
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SKILL
+from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
+from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
@@ -41,9 +55,8 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.skills.base import Behaviour, Handler, SkillComponent
+from aea.skills.base import Behaviour, Handler
 from aea.skills.error.handlers import ErrorHandler
-from aea.skills.tasks import TaskManager
 
 
 class AEA(Agent, WithLogger):
@@ -112,20 +125,18 @@ class AEA(Agent, WithLogger):
         WithLogger.__init__(self, logger=cast(logging.Logger, aea_logger))
 
         self.max_reactions = max_reactions
-        self._task_manager = TaskManager()
         decision_maker_handler = decision_maker_handler_class(
             identity=identity, wallet=wallet
         )
-        self._decision_maker = DecisionMaker(
-            decision_maker_handler=decision_maker_handler
-        )
+        self.runtime.set_decision_maker(decision_maker_handler)
+
         self._context = AgentContext(
             self.identity,
-            self.multiplexer.connection_status,
+            self.runtime.multiplexer.connection_status,
             self.outbox,
-            self.decision_maker.message_in_queue,
+            self.runtime.decision_maker.message_in_queue,
             decision_maker_handler.context,
-            self.task_manager,
+            self.runtime.task_manager,
             default_connection,
             default_routing if default_routing is not None else {},
             search_service_address,
@@ -134,16 +145,13 @@ class AEA(Agent, WithLogger):
         self._execution_timeout = execution_timeout
         self._connection_ids = connection_ids
         self._resources = resources
-        self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
+        self._filter = Filter(
+            self.resources, self.runtime.decision_maker.message_out_queue
+        )
 
         self._skills_exception_policy = skill_exception_policy
 
         self._setup_loggers()
-
-    @property
-    def decision_maker(self) -> DecisionMaker:
-        """Get decision maker."""
-        return self._decision_maker
 
     @property
     def context(self) -> AgentContext:
@@ -159,24 +167,6 @@ class AEA(Agent, WithLogger):
     def resources(self, resources: "Resources") -> None:
         """Set resources."""
         self._resources = resources
-
-    @property
-    def task_manager(self) -> TaskManager:
-        """Get the task manager."""
-        return self._task_manager
-
-    def setup_multiplexer(self) -> None:
-        """Set up the multiplexer."""
-        connections = self.resources.get_all_connections()
-        if self._connection_ids is not None:
-            connections = [
-                c for c in connections if c.connection_id in self._connection_ids
-            ]
-        self.multiplexer.setup(
-            connections,
-            default_routing=self.context.default_routing,
-            default_connection=self.context.default_connection,
-        )
 
     @property
     def filter(self) -> Filter:
@@ -195,14 +185,10 @@ class AEA(Agent, WithLogger):
         Performs the following:
 
         - loads the resources (unless in programmatic mode)
-        - starts the task manager
-        - starts the decision maker
         - calls setup() on the resources
 
         :return: None
         """
-        self.task_manager.start()
-        self.decision_maker.start()
         self.resources.setup()
         ExecTimeoutThreadGuard.start()
 
@@ -237,6 +223,23 @@ class AEA(Agent, WithLogger):
             counter += 1
             self._react_one()
 
+    @property
+    def active_connections(self) -> List[Connection]:
+        """Return list of active connections."""
+        connections = self.resources.get_all_connections()
+        if self._connection_ids is not None:
+            connections = [
+                c for c in connections if c.connection_id in self._connection_ids
+            ]
+        return connections
+
+    def _get_multiplexer_setup_options(self) -> Optional[Dict]:
+        return dict(
+            connections=self.active_connections,
+            default_routing=self.context.default_routing,
+            default_connection=self.context.default_connection,
+        )
+
     def _react_one(self) -> None:
         """
         Get and process one envelop from inbox.
@@ -245,20 +248,15 @@ class AEA(Agent, WithLogger):
         """
         envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
         if envelope is not None:
-            self._handle(envelope)
+            self._handle_envelope(envelope)
 
     def _get_error_handler(self) -> Optional[Handler]:
-        """Get error hadnler."""
+        """Get error handler."""
         return self.resources.get_handler(DefaultMessage.protocol_id, DEFAULT_SKILL)
 
-    def _handle(self, envelope: Envelope) -> None:
-        """
-        Handle an envelope.
-
-        :param envelope: the envelope to handle.
-        :return: None
-        """
-        self.logger.debug("Handling envelope: {}".format(envelope))
+    def _get_msg_and_handlers_for_envelope(
+        self, envelope: Envelope
+    ) -> Tuple[Optional[Message], List[Handler]]:
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
         # TODO specify error handler in config and make this work for different skill/protocol versions.
@@ -267,12 +265,12 @@ class AEA(Agent, WithLogger):
         if error_handler is None:
             self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
             self.stop()
-            return
+            return None, []
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
             error_handler.send_unsupported_protocol(envelope)
-            return
+            return None, []
 
         try:
             if isinstance(envelope.message, Message):
@@ -281,12 +279,11 @@ class AEA(Agent, WithLogger):
                 msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
             msg.sender = envelope.sender
-            # msg.to = envelope.to
             msg.is_incoming = True
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
             self.logger.warning("Decoding error. Exception: {}".format(str(e)))
             error_handler.send_decoding_error(envelope)
-            return
+            return None, []
 
         handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.skill_id
@@ -294,6 +291,21 @@ class AEA(Agent, WithLogger):
 
         if len(handlers) == 0:
             error_handler.send_unsupported_skill(envelope)
+            return None, []
+
+        return msg, handlers
+
+    def _handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle an envelope.
+
+        :param envelope: the envelope to handle.
+        :return: None
+        """
+        self.logger.debug("Handling envelope: {}".format(envelope))
+        msg, handlers = self._get_msg_and_handlers_for_envelope(envelope)
+
+        if msg is None:
             return
 
         for handler in handlers:
@@ -306,7 +318,7 @@ class AEA(Agent, WithLogger):
         :param message: message to be handled.
         :param handler: handler suitable for this message protocol.
         """
-        self._execution_control(handler.handle, handler, [message])
+        self._execution_control(handler.handle, [message])
 
     def _behaviour_act(self, behaviour: Behaviour) -> None:
         """
@@ -315,12 +327,11 @@ class AEA(Agent, WithLogger):
         :param behaviour: behaviour already defined
         :return: None
         """
-        self._execution_control(behaviour.act_wrapper, behaviour)
+        self._execution_control(behaviour.act_wrapper)
 
     def _execution_control(
         self,
         fn: Callable,
-        component: SkillComponent,
         args: Optional[Sequence] = None,
         kwargs: Optional[Dict] = None,
     ) -> Any:
@@ -330,36 +341,35 @@ class AEA(Agent, WithLogger):
         Logs error, stop agent or propagate excepion depends on policy defined.
 
         :param fn: function to call
-        :param component: skill component function belongs to
         :param args: optional sequence of arguments to pass to function on call
         :param kwargs: optional dict of keyword arguments to pass to function on call
 
         :return: same as function
         """
-        # docstyle: ignore
-        def log_exception(e, fn, component):
-            self.logger.exception(f"<{e}> raised during `{fn}` call of `{component}`")
+        # docstyle: ignore # noqa: E800
+        def log_exception(e, fn):
+            self.logger.exception(f"<{e}> raised during `{fn}`")
 
         try:
             with ExecTimeoutThreadGuard(self._execution_timeout):
                 return fn(*(args or []), **(kwargs or {}))
         except TimeoutException:
             self.logger.warning(
-                "`{}` of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
-                    fn, component, self._execution_timeout
+                "`{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
+                    fn, self._execution_timeout
                 )
             )
         except Exception as e:  # pylint: disable=broad-except
             if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
                 raise
-            elif self._skills_exception_policy == ExceptionPolicyEnum.just_log:
-                log_exception(e, fn, component)
-            elif self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
-                log_exception(e, fn, component)
+            if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
+                log_exception(e, fn)
                 self.stop()
                 raise AEAException(
-                    f"AEA was terminated cause exception `{e}` in skills {component} {fn}! Please check logs."
+                    f"AEA was terminated cause exception `{e}` in skills {fn}! Please check logs."
                 )
+            if self._skills_exception_policy == ExceptionPolicyEnum.just_log:
+                log_exception(e, fn)
             else:
                 raise AEAException(
                     f"Unsupported exception policy: {self._skills_exception_policy}"
@@ -381,24 +391,20 @@ class AEA(Agent, WithLogger):
 
         Performs the following:
 
-        - stops the decision maker
-        - stops the task manager
         - tears down the resources.
 
         :return: None
         """
         self.logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.decision_maker.stop()
-        self.task_manager.stop()
         self.resources.teardown()
         ExecTimeoutThreadGuard.stop()
 
     def _setup_loggers(self):
         """Set up logger with agent name."""
         for element in [
-            self.main_loop,
-            self.multiplexer,
-            self.task_manager,
+            self.runtime.main_loop,
+            self.runtime.multiplexer,
+            self.runtime.task_manager,
             self.resources.component_registry,
             self.resources.behaviour_registry,
             self.resources.handler_registry,
@@ -407,3 +413,26 @@ class AEA(Agent, WithLogger):
             element.logger = AgentLoggerAdapter(
                 element.logger, agent_name=self._identity.name
             )
+
+    def get_periodic_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        """
+        Get all periodic tasks for agent.
+
+        :return: dict of callable with period specified
+        """
+        return self._get_behaviours_tasks()
+
+    def _get_behaviours_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        """
+        Get all periodic tasks for AEA behaviours.
+
+        :return: dict of callable with period specified
+        """
+        tasks = {}
+        for behaviour in self.active_behaviours:
+            tasks[behaviour.act_wrapper] = (behaviour.tick_interval, behaviour.start_at)
+        return tasks

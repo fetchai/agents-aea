@@ -356,7 +356,7 @@ class Behaviour(AbstractBehaviour, ABC):
         self.act()
 
     @classmethod
-    def parse_module(
+    def parse_module(  # pylint: disable=arguments-differ
         cls,
         path: str,
         behaviour_configs: Dict[str, SkillComponentConfiguration],
@@ -445,7 +445,7 @@ class Handler(SkillComponent, ABC):
         """
 
     @classmethod
-    def parse_module(
+    def parse_module(  # pylint: disable=arguments-differ
         cls,
         path: str,
         handler_configs: Dict[str, SkillComponentConfiguration],
@@ -521,7 +521,7 @@ class Model(SkillComponent, ABC):
         """Tear the class down."""
 
     @classmethod
-    def parse_module(
+    def parse_module(  # pylint: disable=arguments-differ
         cls,
         path: str,
         model_configs: Dict[str, SkillComponentConfiguration],

@@ -43,7 +43,7 @@ class MLModel(Model):
         # TODO this at the moment does not work - need to compile the model according to the network configuration
         #      A better alternative is to save/load in HDF5 format, but that might require some system level dependencies
         #      https://keras.io/getting-started/faq/#how-can-i-install-hdf5-or-h5py-to-save-my-models-in-keras
-        # self._model = keras.Model.from_config(json.load(open(self._model_config_path)))
+        # self._model = keras.Model.from_config(json.load(open(self._model_config_path))) # noqa: E800
         self._lock = threading.RLock()
         self._weights = None
 

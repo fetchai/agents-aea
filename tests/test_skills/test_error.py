@@ -29,7 +29,7 @@ from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.mail.base import Envelope, EnvelopeContext, URI
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
@@ -84,7 +84,7 @@ class TestSkillError:
         )
         self.my_aea.resources.add_connection(self.connection)
 
-        self.my_aea._inbox = InboxWithHistory(self.my_aea.multiplexer)
+        self.my_aea._inbox = InboxWithHistory(self.my_aea.runtime.multiplexer)
         self.skill_context = SkillContext(self.my_aea._context)
         logger_name = "aea.{}.skills.{}.{}".format(
             self.my_aea._context.agent_name, "fetchai", "error"
@@ -96,7 +96,7 @@ class TestSkillError:
         self.t = Thread(target=self.my_aea.start)
         self.t.start()
         wait_for_condition(
-            lambda: self.my_aea._main_loop and self.my_aea._main_loop.is_running, 10
+            lambda: self.my_aea.runtime and self.my_aea.runtime.is_running, 10
         )
 
     def test_error_handler_handle(self):
@@ -195,7 +195,7 @@ class TestSkillError:
             sender="",
             protocol_id=protocol_id,
             message=b"",
-            context=EnvelopeContext(uri=URI(skill_id.to_uri_path)),
+            context=EnvelopeContext(skill_id=skill_id),
         )
         with unittest.mock.patch.object(self.skill_context.outbox, "put_message"):
             with unittest.mock.patch.object(

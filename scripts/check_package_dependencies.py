@@ -148,14 +148,14 @@ def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId
 
 
 if __name__ == "__main__":
-    all_packages_ids = find_all_packages_ids()
+    all_packages_ids_ = find_all_packages_ids()
     failed: bool = False
     for file in find_all_configuration_files():
         try:
             print("Processing " + str(file))
-            check_dependencies(file, all_packages_ids)
-        except DependencyNotFound as e:
-            handle_dependency_not_found(e)
+            check_dependencies(file, all_packages_ids_)
+        except DependencyNotFound as e_:
+            handle_dependency_not_found(e_)
             failed = True
 
     if failed:

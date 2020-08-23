@@ -146,18 +146,19 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
             "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
         )
         existing_ids.add(PublicId(author_name, item_name, DEFAULT_VERSION))
-        ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-        )
+        with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+            ctx.agent_loader.dump(ctx.agent_config, fp)
 
         # ensure the name in the yaml and the name of the folder are the same
         config_filepath = Path(
             ctx.cwd, item_type_plural, item_name, default_config_filename
         )
-        config = loader.load(config_filepath.open())
+        with config_filepath.open() as fp:
+            config = loader.load(fp)
         config.name = item_name
         config.author = author_name
-        loader.dump(config, open(config_filepath, "w"))
+        with config_filepath.open("w") as fp:
+            loader.dump(config, fp)
 
     except ValidationError:
         raise click.ClickException(

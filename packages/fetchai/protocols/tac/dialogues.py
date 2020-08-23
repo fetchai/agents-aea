@@ -57,7 +57,13 @@ class TacDialogue(Dialogue):
                 TacMessage.Performative.CANCELLED,
             }
         ),
-        TacMessage.Performative.TAC_ERROR: frozenset(),
+        TacMessage.Performative.TAC_ERROR: frozenset(
+            {
+                TacMessage.Performative.TRANSACTION,
+                TacMessage.Performative.TRANSACTION_CONFIRMATION,
+                TacMessage.Performative.CANCELLED,
+            }
+        ),
         TacMessage.Performative.TRANSACTION: frozenset(
             {
                 TacMessage.Performative.TRANSACTION_CONFIRMATION,
@@ -69,6 +75,7 @@ class TacDialogue(Dialogue):
             {
                 TacMessage.Performative.TRANSACTION,
                 TacMessage.Performative.TRANSACTION_CONFIRMATION,
+                TacMessage.Performative.CANCELLED,
             }
         ),
         TacMessage.Performative.UNREGISTER: frozenset(

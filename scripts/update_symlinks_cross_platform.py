@@ -133,7 +133,8 @@ def do_symlink(link_path: Path, target_path: Path):
     return 0
 
 
-if __name__ == "__main__":
+def main():
+    """Run main script."""
     failed = False
     for link_name, target in SYMLINKS:
         print("Linking {} to {}".format(link_name, target))
@@ -155,3 +156,7 @@ if __name__ == "__main__":
             failed = True
 
     sys.exit(1 if failed else 0)
+
+
+if __name__ == "__main__":
+    main()

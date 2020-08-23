@@ -19,8 +19,6 @@
 
 """This module contains the tests of the messages module."""
 
-# import base64
-# import json
 from unittest import mock
 from unittest.mock import patch
 
@@ -66,22 +64,6 @@ def test_default_error_serialization():
     actual_msg = DefaultMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
-
-    # msg = DefaultMessage(
-    #     performative=DefaultMessage.Performative.BYTES, content=b"hello", dialogue_reference=("", ""), message_id=1, target=0,
-    # )
-    # with pytest.raises(ValueError):
-    #     with mock.patch(
-    #         "aea.protocols.default.message.DefaultMessage.Performative"
-    #     ) as mock_type_enum:
-    #         mock_type_enum.BYTES.value = "unknown"
-    #         body = {}  # Dict[str, Any]
-    #         body["performative"] = str(msg.performative.value)
-    #         content = msg.content
-    #         body["content"] = base64.b64encode(content).decode("utf-8")
-    #         bytes_msg = json.dumps(body).encode("utf-8")
-    #         returned_msg = DefaultMessage.serializer.decode(bytes_msg)
-    #         assert msg != returned_msg, "Messages must be different"
 
 
 def test_default_message_str_values():

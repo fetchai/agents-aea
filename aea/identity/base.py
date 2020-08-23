@@ -67,7 +67,6 @@ class Identity:
         if addresses is None:
             addresses = {default_address_key: address}
         self._addresses = addresses
-        self._default_address_key = default_address_key
 
     @property
     def name(self) -> str:

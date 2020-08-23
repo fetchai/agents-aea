@@ -120,12 +120,12 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
-    def register(
+    def register(  # pylint: disable=arguments-differ
         self,
         component_id: ComponentId,
         component: Component,
         is_dynamically_added: bool = False,
-    ) -> None:  # pylint: disable=arguments-differ
+    ) -> None:
         """
         Register a component.
 
@@ -174,9 +174,9 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
                 "Component '{}' has been removed.".format(item.component_id)
             )
 
-    def unregister(
+    def unregister(  # pylint: disable=arguments-differ
         self, component_id: ComponentId
-    ) -> None:  # pylint: disable=arguments-differ
+    ) -> None:
         """
         Unregister a component.
 
@@ -188,9 +188,9 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
             )
         self._unregister(component_id)
 
-    def fetch(
+    def fetch(  # pylint: disable=arguments-differ
         self, component_id: ComponentId
-    ) -> Optional[Component]:  # pylint: disable=arguments-differ
+    ) -> Optional[Component]:
         """
         Fetch the component by id.
 

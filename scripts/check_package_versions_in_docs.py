@@ -135,8 +135,7 @@ def _checks(
             raise PackageIdNotFound(
                 file, package_id, match, "Package {} not found.".format(package_id)
             )
-        else:
-            print(str(package_id), "OK!")
+        print(str(package_id), "OK!")
 
 
 def check_add_commands(file: Path):
@@ -201,11 +200,11 @@ if __name__ == "__main__":
     docs_files = Path("docs").glob("**/*.md")
 
     try:
-        for file in docs_files:
-            print("Processing " + str(file))
-            check_file(file)
-    except PackageIdNotFound as e:
-        handle_package_not_found(e)
+        for file_ in docs_files:
+            print("Processing " + str(file_))
+            check_file(file_)
+    except PackageIdNotFound as e_:
+        handle_package_not_found(e_)
         sys.exit(1)
 
     print("Done!")

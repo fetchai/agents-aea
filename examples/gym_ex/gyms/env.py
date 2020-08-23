@@ -109,7 +109,9 @@ class BanditEnv(gym.Env):
 
         return observation, reward, done, info
 
-    def render(self, mode: str = "human", close: int = False) -> None:
+    def render(  # pylint: disable=arguments-differ
+        self, mode: str = "human", close: int = False
+    ) -> None:
         """
         Render the environment to the screen.
 

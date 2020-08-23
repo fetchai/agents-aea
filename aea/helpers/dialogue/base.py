@@ -538,8 +538,7 @@ class Dialogue(ABC):
 
         if result:
             return reply
-        else:
-            raise Exception("Invalid message from performative and contents.")
+        raise Exception("Invalid message from performative and contents.")
 
     def is_valid_next_message(self, message: Message) -> bool:
         """

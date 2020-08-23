@@ -835,9 +835,9 @@ class TestFIPA(UseOef):
         query = Query(
             constraints=[Constraint("foo", ConstraintType("==", "bar"))], model=None,
         )
-        dialogue = OefSearchDialogue(
+        dialogues = oef_channel.oef_search_dialogues
+        dialogue = dialogues.create_dialogue(
             BaseDialogueLabel(dialogue_reference, "agent", "agent"),
-            "agent",
             OefSearchDialogue.Role.OEF_NODE,
         )
         oef_search_msg = OefSearchMessage(

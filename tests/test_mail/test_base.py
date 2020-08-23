@@ -178,7 +178,7 @@ def test_outbox_put():
     msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
-    outbox = OutBox(multiplexer, agent_address)
+    outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
     envelope = Envelope(
@@ -208,7 +208,7 @@ def test_outbox_put_message():
     msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
-    outbox = OutBox(multiplexer, agent_address)
+    outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
     outbox.put_message(msg)
@@ -219,11 +219,10 @@ def test_outbox_put_message():
 
 def test_outbox_empty():
     """Test thet the outbox queue is empty."""
-    agent_address = "Agent0"
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
     multiplexer.connect()
-    outbox = OutBox(multiplexer, agent_address)
+    outbox = OutBox(multiplexer)
     assert outbox.empty(), "The outbox is not empty"
     multiplexer.disconnect()
 
@@ -290,7 +289,7 @@ def test_envelope_message_bytes():
 
 def test_envelope_skill_id():
     """Test the property Envelope.skill_id."""
-    envelope_context = EnvelopeContext(uri=URI("author/skill_name/0.1.0"))
+    envelope_context = EnvelopeContext(uri=URI("skill/author/skill_name/0.1.0"))
     envelope = Envelope(
         to="to",
         sender="sender",
@@ -302,13 +301,28 @@ def test_envelope_skill_id():
     assert envelope.skill_id == PublicId("author", "skill_name", "0.1.0")
 
 
+def test_envelope_connection_id():
+    """Test the property Envelope.connection_id."""
+    envelope_context = EnvelopeContext(
+        uri=URI("connection/author/connection_name/0.1.0")
+    )
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=PublicId("author", "name", "0.1.0"),
+        message=b"message",
+        context=envelope_context,
+    )
+
+    assert envelope.connection_id == PublicId("author", "connection_name", "0.1.0")
+
+
 def test_envelope_skill_id_raises_value_error():
-    """Test the property Envelope.skill_id raises ValueError if the URI is not a public id.."""
+    """Test the property Envelope.skill_id raises ValueError if the URI is not a package id.."""
     with unittest.mock.patch.object(
         aea.mail.base.logger, "debug"
     ) as mock_logger_method:
-        # with caplog.at_level(logging.DEBUG, logger="aea.mail.base"):
-        bad_uri = "author/skill_name/bad_version"
+        bad_uri = "skill/author/skill_name/bad_version"
         envelope_context = EnvelopeContext(uri=URI(bad_uri))
         envelope = Envelope(
             to="to",
@@ -319,9 +333,45 @@ def test_envelope_skill_id_raises_value_error():
         )
 
         assert envelope.skill_id is None
-        # assert (
-        #     f"URI - {bad_uri} - not a valid skill id." in caplog.text
-        # ), f"Cannot find message in output: {caplog.text}"
         mock_logger_method.assert_called_with(
-            f"URI - {bad_uri} - not a valid skill id."
+            f"URI - {bad_uri} - not a valid package_id id. Error: Input '{bad_uri}' is not well formatted."
+        )
+
+
+def test_envelope_skill_id_raises_value_error_wrong_package_type():
+    """Test the property Envelope.skill_id raises ValueError if the URI is not a valid package type."""
+    with unittest.mock.patch.object(
+        aea.mail.base.logger, "debug"
+    ) as mock_logger_method:
+        invalid_uri = "protocol/author/skill_name/0.1.0"
+        envelope_context = EnvelopeContext(uri=URI(invalid_uri))
+        envelope = Envelope(
+            to="to",
+            sender="sender",
+            protocol_id=PublicId("author", "name", "0.1.0"),
+            message=b"message",
+            context=envelope_context,
+        )
+
+        assert envelope.skill_id is None
+        mock_logger_method.assert_called_with(
+            f"URI - {invalid_uri} - not a valid package_id id. Error: Invalid package type protocol in uri for envelope context."
+        )
+
+
+def test_envelope_context_raises_with_public_id_specified_twice():
+    """Test the EnvelopeContext constructor, negative"""
+    with pytest.raises(
+        ValueError, match="Cannot define connection_id explicitly and in URI."
+    ):
+        EnvelopeContext(
+            uri=URI("connection/author/connection_name/0.1.0"),
+            connection_id=PublicId("author", "connection_name", "0.1.0"),
+        )
+    with pytest.raises(
+        ValueError, match="Cannot define skill_id explicitly and in URI."
+    ):
+        EnvelopeContext(
+            uri=URI("skill/author/skill_name/0.1.0"),
+            skill_id=PublicId("author", "skill_name", "0.1.0"),
         )

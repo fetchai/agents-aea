@@ -72,7 +72,7 @@ def _run_interaction_channel():
     )
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
-    outbox = OutBox(multiplexer, default_address=identity_stub.address)
+    outbox = OutBox(multiplexer)
     dialogues = DefaultDialogues(identity_stub.name)
 
     try:

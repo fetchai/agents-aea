@@ -10,9 +10,9 @@ fingerprint:
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmeJhvrP7GhLPLpQVFHeyXFiaGdcTzF9Cwe8BUZS1SuRbB
   dialogues.py: QmYYvm4fKUxceKc9CzkZXKZbmRegoVdBFkXqAj5YhKN8eb
-  game.py: QmdCQRC8NU9aEYqEUC1A3Lji2bNdJtAVw5mhbM27nCdnZ3
-  handlers.py: QmQ689PT7b1BxRVuVHggPUxtrHPp5wfp54pcTw7aLnMrTh
-  helpers.py: QmdhGNhBwn5Zn4yacQEo3EAU74kSkhMR7icvPoj6ZVAJfV
+  game.py: QmQJk98PBSz7pAH1rSgzaUQPF2o5mF4mZKxVH8jrD3UcY5
+  handlers.py: QmdZeCRSKpPuh85kvMuJw96t78sMPeb43BJa8s1q7xnz1f
+  helpers.py: QmTzB9xRnHv5QAH1P8NdLEZiJwKNxiz2VesJ9jVA4YPyh4
   parameters.py: QmR7EcnmmQstPKwpT7D5HjbfqWYN7cNEYsKWUE5Dvgn1LG
 fingerprint_ignore_patterns: []
 contracts: []
