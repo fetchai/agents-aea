@@ -721,7 +721,7 @@ class PackageConfiguration(Configuration, ABC):
         """
         super().__init__()
         if name is None or author is None:  # pragma: nocover
-            ValueError("Name and author must be set on the configuration!")
+            raise ValueError("Name and author must be set on the configuration!")
         self.name = name
         self.author = author
         self.version = version if version != "" else DEFAULT_VERSION
@@ -746,7 +746,7 @@ class PackageConfiguration(Configuration, ABC):
     def directory(self, directory: Path) -> None:
         """Set directory if not already set."""
         if self._directory is not None:  # pragma: nocover
-            ValueError("Directory already set")
+            raise ValueError("Directory already set")
         self._directory = directory
 
     @staticmethod
@@ -1854,7 +1854,7 @@ class ContractConfig(ComponentConfiguration):
                     }
                     contract_interfaces[identifier] = contract_interface
             else:
-                ValueError(  # pragma: nocover
+                raise ValueError(  # pragma: nocover
                     "Identifier {} is not supported for contracts."
                 )
         return contract_interfaces

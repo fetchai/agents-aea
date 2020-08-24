@@ -54,7 +54,9 @@ class Identity:
         """
         self._name = name
         if default_address_key is None:
-            ValueError("Provide a key for the default address.")  # pragma: nocover
+            raise ValueError(
+                "Provide a key for the default address."
+            )  # pragma: nocover
         if (address is None) == (addresses is None):
             raise ValueError(
                 "Either provide a single address or a dictionary of addresses, not both."

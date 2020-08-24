@@ -336,7 +336,7 @@ class ThreadedAsyncRunner(Thread):
         """
         self._loop = loop or asyncio.new_event_loop()
         if self._loop.is_closed():
-            ValueError("Event loop closed.")  # pragma: nocover
+            raise ValueError("Event loop closed.")  # pragma: nocover
         super().__init__(daemon=True)
 
     def start(self) -> None:

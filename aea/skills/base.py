@@ -277,7 +277,7 @@ class SkillComponent(ABC):
     def configuration(self) -> SkillComponentConfiguration:
         """Get the skill component configuration."""
         if self._configuration is None:
-            ValueError("Configuration not set.")  # pragma: nocover
+            raise ValueError("Configuration not set.")  # pragma: nocover
         return self._configuration
 
     # TODO consider rename this property
