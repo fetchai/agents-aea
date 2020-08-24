@@ -9,8 +9,8 @@ fingerprint:
   README.md: QmPtJwd9ApR8N6pYdC5ddetPF7tEn6EPmnqiU1NZNmz5EU
   __init__.py: QmXZMVdsBXUJxLZvwwhWBx58xfxMSyoGxdYp5Aeqmzqhzt
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
-  dialogues.py: QmUV1KiKgdAak1UHe3me7kRUNonhZY1FC57SLnpSCgYpvX
-  message.py: QmT1fi4MCYTFFP1zSvemywbEWQFjUyXRcckHjeAbzg2D4K
+  dialogues.py: QmVBfHJQYjkjcZNiuqLM2cAMeKBNCeML6mzR1YNLQVmkd2
+  message.py: QmZ4SqYvj5uMd631CWLJLH1fTzebNLZRNtaK2CKNr2HvpV
   ml_trade.proto: QmeB21MQduEGQCrtiYZQzPpRqHL4CWEkvvcaKZ9GsfE8f6
   ml_trade_pb2.py: QmZVvugPysR1og6kWCJkvo3af2s9pQRHfuj4BptE7gU1EU
   serialization.py: QmSHywy12uQkzakU1RHnnkaPuTzaFTALsKisyYF8dPc8ns
