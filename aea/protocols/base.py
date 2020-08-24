@@ -90,7 +90,7 @@ class Message:
         :return the address
         """
         if self._sender is None:
-            raise ValueError("Sender must not be None.")
+            raise ValueError("Sender must not be None.")  # pragma: nocover
         return self._sender
 
     @sender.setter
@@ -130,7 +130,7 @@ class Message:
         :return the address
         """
         if self._counterparty is None:
-            raise ValueError("Counterparty must not be None.")
+            raise ValueError("Counterparty must not be None.")  # pragma: nocover
         return self._counterparty
 
     @counterparty.setter
@@ -175,28 +175,28 @@ class Message:
     def dialogue_reference(self) -> Tuple[str, str]:
         """Get the dialogue_reference of the message."""
         if not self.is_set("dialogue_reference"):
-            raise ValueError("dialogue_reference is not set.")
+            raise ValueError("dialogue_reference is not set.")  # pragma: nocover
         return cast(Tuple[str, str], self.get("dialogue_reference"))
 
     @property
     def message_id(self) -> int:
         """Get the message_id of the message."""
         if not self.is_set("message_id"):
-            raise ValueError("message_id is not set.")
+            raise ValueError("message_id is not set.")  # pragma: nocover
         return cast(int, self.get("message_id"))
 
     @property
     def performative(self) -> "Performative":
         """Get the performative of the message."""
         if not self.is_set("performative"):
-            raise ValueError("performative is not set.")
+            raise ValueError("performative is not set.")  # pragma: nocover
         return cast(Message.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
         """Get the target of the message."""
         if not self.is_set("target"):
-            raise ValueError("target is not set.")
+            raise ValueError("target is not set.")  # pragma: nocover
         return cast(int, self.get("target"))
 
     def set(self, key: str, value: Any) -> None:
@@ -383,7 +383,7 @@ class Protocol(Component):
         :param configuration: the protocol configuration.
         :return: the protocol object.
         """
-        if configuration.directory is None:
+        if configuration.directory is None:  # pragma: nocover
             raise ValueError("Configuration must be associated with a directory.")
         load_aea_package(configuration)
         class_module = importlib.import_module(

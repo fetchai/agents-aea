@@ -370,7 +370,7 @@ class TCPSocketChannel(IPCChannel):
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     ):
         if self._connected is None:
-            raise ValueError("Connected is None!")
+            raise ValueError("Connected is None!")  # pragma: nocover
         self._connected.set()
         self._sock = TCPSocketProtocol(
             reader, writer, logger=self.logger, loop=self._loop

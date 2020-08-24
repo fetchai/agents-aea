@@ -482,7 +482,7 @@ class Dialogue(ABC):
             # assume message belongs to dialogue
             message.counterparty = self.dialogue_label.dialogue_opponent_addr
 
-        if counterparty is not None:
+        if counterparty is not None:  # pragma: nocover
             enforce(
                 message.counterparty == self.dialogue_label.dialogue_opponent_addr,
                 "The counterparty specified in the message is different from the opponent in this dialogue.",
