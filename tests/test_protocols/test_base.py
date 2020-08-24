@@ -30,6 +30,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.configurations.constants import DEFAULT_PROTOCOL
+from aea.exceptions import AEAEnforceError
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.mail.base import Envelope
 from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
@@ -179,7 +180,7 @@ class TestMessageAttributes:
         message.to = "to"
         assert message.to == "to"
 
-        with pytest.raises(ValueError, match="To already set."):
+        with pytest.raises(AEAEnforceError, match="To already set."):
             message.to = "to"
 
     def test_dialogue_reference(self):

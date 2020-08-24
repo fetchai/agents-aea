@@ -96,7 +96,7 @@ class Message:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
-        # assert self._sender is None, "Sender already set."
+        enforce(self._sender is None, "Sender already set.")
         self._sender = sender
 
     @property
@@ -114,8 +114,7 @@ class Message:
     @to.setter
     def to(self, to: Address) -> None:
         """Set address of receiver."""
-        if self._to is None:
-            raise ValueError("To already set.")
+        enforce(self._to is None, "To already set.")
         self._to = to
 
     @property
