@@ -355,7 +355,6 @@ class TestDecisionMaker2:
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -390,7 +389,6 @@ class TestDecisionMaker2:
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -428,7 +426,6 @@ class TestDecisionMaker2:
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR
@@ -463,7 +460,6 @@ class TestDecisionMaker2:
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -498,7 +494,6 @@ class TestDecisionMaker2:
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -533,7 +528,6 @@ class TestDecisionMaker2:
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert (
@@ -569,7 +563,6 @@ class TestDecisionMaker2:
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
-        signing_msg_response.to = signing_msg.sender
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR

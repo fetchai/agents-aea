@@ -1108,7 +1108,7 @@ class ProtocolGenerator:
             self.indent
             + "role_from_first_message: Callable[[Message], Dialogue.Role],\n"
         )
-        cls_str += self.indent + "dialogue_class: Type[FipaDialogue] = FipaDialogue,\n"
+        cls_str += self.indent + "dialogue_class: Type[{}Dialogue] = {}Dialogue,\n".format(self.protocol_specification_in_camel_case, self.protocol_specification_in_camel_case)
         self._change_indent(-1)
         cls_str += self.indent + ") -> None:\n"
         self._change_indent(1)

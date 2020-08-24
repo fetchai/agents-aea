@@ -574,7 +574,7 @@ class Dialogue(ABC):
 
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
-        assert not self.is_empty, "Cannot reply in an empty dialogue!"
+        assert self.last_message is not None, "Cannot reply in an empty dialogue!"
 
         if target_message is None:
             target_message = self.last_message
