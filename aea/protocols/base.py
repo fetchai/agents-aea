@@ -96,7 +96,7 @@ class Message:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
-        # enforce(self._sender is None, "Sender already set.")  # TODO: check if we can enable
+        # enforce(self._sender is None, "Sender already set.")  # TODO: check if we can enable # noqa: E800
         self._sender = sender
 
     @property
