@@ -49,13 +49,9 @@ class TestThermometerSkill(AEATestCaseMany):
         thermometer_client_aea_name = "my_thermometer_client"
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
-        protocol_ledger_api_public_id = "fetchai/ledger_api:0.3.0"
-        connection_ledger_public_id = "fetchai/ledger:0.4.0"
-        protocol_oef_search_public_id = "fetchai/oef_search:0.5.0"
-        connection_soef_public_id = "fetchai/soef:0.7.0"
         default_routing = {
-            protocol_ledger_api_public_id: connection_ledger_public_id,
-            protocol_oef_search_public_id: connection_soef_public_id,
+            "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.4.0",
+            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
         }
 
         # generate random location

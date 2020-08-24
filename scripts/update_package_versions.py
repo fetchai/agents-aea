@@ -315,7 +315,7 @@ def inplace_change(fp: Path, old_string: str, new_string: str, type_: str) -> No
         if old_string not in line:
             continue
         if re.match(f"{type_}.*{old_string}", line):
-            lines[idx].replace(old_string, new_string)
+            lines[idx] = line.replace(old_string, new_string)
         else:
             _ask_to_user_and_replace_if_allowed(
                 idx, line, old_string, new_string, lines
