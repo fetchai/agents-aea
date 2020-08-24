@@ -1106,9 +1106,15 @@ class ProtocolGenerator:
         cls_str += self.indent + "agent_address: Address,\n"
         cls_str += (
             self.indent
-            + "role_from_first_message: Callable[[Message], Dialogue.Role],\n"
+            + "role_from_first_message: Callable[[Message, Address], Dialogue.Role],\n"
         )
-        cls_str += self.indent + "dialogue_class: Type[{}Dialogue] = {}Dialogue,\n".format(self.protocol_specification_in_camel_case, self.protocol_specification_in_camel_case)
+        cls_str += (
+            self.indent
+            + "dialogue_class: Type[{}Dialogue] = {}Dialogue,\n".format(
+                self.protocol_specification_in_camel_case,
+                self.protocol_specification_in_camel_case,
+            )
+        )
         self._change_indent(-1)
         cls_str += self.indent + ") -> None:\n"
         self._change_indent(1)

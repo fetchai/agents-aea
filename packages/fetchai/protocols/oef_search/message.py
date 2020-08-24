@@ -20,7 +20,6 @@
 """This module contains oef_search's message definition."""
 
 import logging
-from enum import Enum
 from typing import Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -50,7 +49,7 @@ class OefSearchMessage(Message):
 
     Query = CustomQuery
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the oef_search protocol."""
 
         OEF_ERROR = "oef_error"

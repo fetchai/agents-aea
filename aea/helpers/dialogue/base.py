@@ -896,7 +896,7 @@ class Dialogues(ABC):
         end_states: FrozenSet[Dialogue.EndState],
         message_class: Type[Message],
         dialogue_class: Type[Dialogue],
-        role_from_first_message: Callable[[Message], Dialogue.Role],
+        role_from_first_message: Callable[[Message, Address], Dialogue.Role],
     ) -> None:
         """
         Initialize dialogues.
@@ -928,15 +928,21 @@ class Dialogues(ABC):
         sig = signature(role_from_first_message)
         parameter_length = len(sig.parameters.keys())
         assert (
-            parameter_length == 1
-        ), "Invalid number of parameters for role_from_first_message. Expected 1. Found {}.".format(
+            parameter_length == 2
+        ), "Invalid number of parameters for role_from_first_message. Expected 2. Found {}.".format(
             parameter_length
         )
-        parameter_type = list(sig.parameters.values())[0].annotation
+        parameter_1_type = list(sig.parameters.values())[0].annotation
         assert (
-            parameter_type == Message
-        ), "Invalid type for the parameter of role_from_first_message. Expected 'Message'. Found {}.".format(
-            parameter_type
+            parameter_1_type == Message
+        ), "Invalid type for the first parameter of role_from_first_message. Expected 'Message'. Found {}.".format(
+            parameter_1_type
+        )
+        parameter_2_type = list(sig.parameters.values())[1].annotation
+        assert (
+            parameter_2_type == Address
+        ), "Invalid type for the second parameter of role_from_first_message. Expected 'Address'. Found {}.".format(
+            parameter_2_type
         )
         return_type = sig.return_annotation
         assert (
@@ -1029,7 +1035,7 @@ class Dialogues(ABC):
         dialogue = self._create_self_initiated(
             dialogue_opponent_addr=counterparty,
             dialogue_reference=initial_message.dialogue_reference,
-            role=self._role_from_first_message(initial_message),
+            role=self._role_from_first_message(initial_message, self.agent_address),
         )
 
         try:
@@ -1077,7 +1083,7 @@ class Dialogues(ABC):
             dialogue = self._create_opponent_initiated(
                 dialogue_opponent_addr=message.sender,
                 dialogue_reference=dialogue_reference,
-                role=self._role_from_first_message(message),
+                role=self._role_from_first_message(message, self.agent_address),
             )
         else:  # non-initial message for existing dialogue
             self._complete_dialogue_reference(message)

@@ -20,7 +20,6 @@
 """This module contains ledger_api's message definition."""
 
 import logging
-from enum import Enum
 from typing import Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -60,7 +59,7 @@ class LedgerApiMessage(Message):
 
     TransactionReceipt = CustomTransactionReceipt
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the ledger_api protocol."""
 
         BALANCE = "balance"

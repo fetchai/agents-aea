@@ -38,7 +38,6 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
@@ -46,7 +45,7 @@ from aea.helpers.transaction.base import (
     Terms,
 )
 from aea.identity.base import Identity
-from aea.protocols.base import Message
+from aea.protocols.base import Address, Message
 from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
@@ -76,32 +75,23 @@ class SigningDialogues(BaseSigningDialogues):
         :param agent_address: the address of the agent for whom dialogues are maintained
         :return: None
         """
-        BaseSigningDialogues.__init__(self, agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return SigningDialogue.Role.SKILL
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return SigningDialogue.Role.SKILL
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> SigningDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = SigningDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseSigningDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class StateUpdateDialogues(BaseStateUpdateDialogues):
@@ -114,32 +104,23 @@ class StateUpdateDialogues(BaseStateUpdateDialogues):
         :param agent_address: the address of the agent for whom dialogues are maintained
         :return: None
         """
-        BaseStateUpdateDialogues.__init__(self, agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return StateUpdateDialogue.Role.DECISION_MAKER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return StateUpdateDialogue.Role.DECISION_MAKER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> StateUpdateDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = StateUpdateDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseStateUpdateDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class TestDecisionMaker:

@@ -47,7 +47,7 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -81,33 +81,23 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         :param agent_address: the address of the agent for whom dialogues are maintained
         :return: None
         """
-        BaseOefSearchDialogues.__init__(self, agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming/outgoing first message.
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return OefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return OefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class TestDefault(UseOef):

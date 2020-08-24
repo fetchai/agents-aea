@@ -20,7 +20,6 @@
 """This module contains contract_api's message definition."""
 
 import logging
-from enum import Enum
 from typing import Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -53,7 +52,7 @@ class ContractApiMessage(Message):
 
     State = CustomState
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the contract_api protocol."""
 
         ERROR = "error"

@@ -134,7 +134,7 @@ class FipaDialogues(Dialogues, ABC):
     def __init__(
         self,
         agent_address: Address,
-        role_from_first_message: Callable[[Message], Dialogue.Role],
+        role_from_first_message: Callable[[Message, Address], Dialogue.Role],
         dialogue_class: Type[FipaDialogue] = FipaDialogue,
     ) -> None:
         """

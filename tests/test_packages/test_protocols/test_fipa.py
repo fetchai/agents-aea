@@ -590,32 +590,24 @@ class BuyerDialogues(FipaDialogues):
 
         :return: None
         """
-        FipaDialogues.__init__(self, agent_address)
 
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
-    ) -> BuyerDialogue:
-        """
-        Create an instance of fipa dialogue.
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.BUYER
 
-        :return: the created dialogue
-        """
-        dialogue = BuyerDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        FipaDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=BuyerDialogue,
         )
-        return dialogue
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return FipaDialogue.Role.BUYER
 
 
 class SellerDialogue(FipaDialogue):
@@ -651,29 +643,21 @@ class SellerDialogues(FipaDialogues):
 
         :return: None
         """
-        FipaDialogues.__init__(self, agent_address)
 
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
-    ) -> SellerDialogue:
-        """
-        Create an instance of fipa dialogue.
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.SELLER
 
-        :return: the created dialogue
-        """
-        dialogue = SellerDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        FipaDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=SellerDialogue,
         )
-        return dialogue
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return FipaDialogue.Role.SELLER

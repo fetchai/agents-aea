@@ -63,32 +63,23 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseDefaultDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return DefaultDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> DefaultDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = DefaultDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseDefaultDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class FipaDialogue(BaseFipaDialogue):
@@ -138,33 +129,24 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseFipaDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming or outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: the agent's role
-        """
-        return FipaDialogue.Role.SELLER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.SELLER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> FipaDialogue:
-        """
-        Create an instance of dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = FipaDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseFipaDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=FipaDialogue,
         )
-        return dialogue
 
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
@@ -213,32 +195,24 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseLedgerApiDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseLedgerApiDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseLedgerApiDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> LedgerApiDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = LedgerApiDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseLedgerApiDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=LedgerApiDialogue,
         )
-        return dialogue
 
 
 OefSearchDialogue = BaseOefSearchDialogue
@@ -255,29 +229,20 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseOefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue

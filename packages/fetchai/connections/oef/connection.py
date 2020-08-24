@@ -33,7 +33,6 @@ from oef.messages import CFP_TYPES, PROPOSE_TYPES
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.mail.base import Address, Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -67,35 +66,23 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         :return: None
         """
-        BaseOefSearchDialogues.__init__(self, str(OEFConnection.connection_id))
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming/outgoing first message.
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return OefSearchDialogue.Role.OEF_NODE
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return OefSearchDialogue.Role.OEF_NODE
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label,
+        BaseOefSearchDialogues.__init__(
+            self,
             agent_address=str(OEFConnection.connection_id),
-            role=role,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class OEFChannel(OEFAgent):

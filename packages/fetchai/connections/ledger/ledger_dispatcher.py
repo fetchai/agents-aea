@@ -24,11 +24,10 @@ from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
 from aea.helpers.dialogue.base import (
     Dialogue as BaseDialogue,
-    DialogueLabel as BaseDialogueLabel,
     Dialogues as BaseDialogues,
 )
 from aea.helpers.transaction.base import RawTransaction, TransactionDigest
-from aea.protocols.base import Message
+from aea.protocols.base import Address, Message
 
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID,
@@ -51,33 +50,23 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 
         :return: None
         """
-        BaseLedgerApiDialogues.__init__(self, str(CONNECTION_ID))
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming/outgoing first message.
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return LedgerApiDialogue.Role.LEDGER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return LedgerApiDialogue.Role.LEDGER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> LedgerApiDialogue:
-        """
-        Create an instance of ledger API dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = LedgerApiDialogue(
-            dialogue_label=dialogue_label, agent_address=str(CONNECTION_ID), role=role,
+        BaseLedgerApiDialogues.__init__(
+            self,
+            agent_address=str(CONNECTION_ID),
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class LedgerApiRequestDispatcher(RequestDispatcher):

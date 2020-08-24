@@ -73,32 +73,23 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseDefaultDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return DefaultDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> DefaultDialogue:
-        """
-        Create an instance of default dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = DefaultDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseDefaultDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 MlTradeDialogue = BaseMlTradeDialogue
@@ -114,32 +105,23 @@ class MlTradeDialogues(Model, BaseMlTradeDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseMlTradeDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseMlTradeDialogue.Role.BUYER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseMlTradeDialogue.Role.BUYER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> MlTradeDialogue:
-        """
-        Create an instance of ml_trade dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = MlTradeDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseMlTradeDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
@@ -192,32 +174,24 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseLedgerApiDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseLedgerApiDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseLedgerApiDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> LedgerApiDialogue:
-        """
-        Create an instance of ledger_api dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = LedgerApiDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseLedgerApiDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=LedgerApiDialogue,
         )
-        return dialogue
 
 
 OefSearchDialogue = BaseOefSearchDialogue
@@ -234,32 +208,22 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of oef_search dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class SigningDialogue(BaseSigningDialogue):
@@ -315,29 +279,21 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseSigningDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseSigningDialogue.Role.SKILL
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseSigningDialogue.Role.SKILL
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> SigningDialogue:
-        """
-        Create an instance of signing dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = SigningDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseSigningDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=SigningDialogue,
         )
-        return dialogue

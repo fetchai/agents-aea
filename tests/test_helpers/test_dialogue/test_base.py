@@ -19,7 +19,7 @@
 
 """This module contains the tests for the dialogue/base.py module."""
 
-from typing import Dict, FrozenSet, Tuple, Type, cast
+from typing import FrozenSet, Tuple, Type, cast
 
 import pytest
 
@@ -36,18 +36,14 @@ from aea.protocols.state_update.message import StateUpdateMessage
 class Dialogue(BaseDialogue):
     """This concrete class defines a dialogue."""
 
-    INITIAL_PERFORMATIVES = frozenset(
-        {DefaultMessage.Performative.BYTES}
-    )  # type: FrozenSet[DefaultMessage.Performative]
-    TERMINAL_PERFORMATIVES = frozenset(
-        {DefaultMessage.Performative.ERROR}
-    )  # type: FrozenSet[DefaultMessage.Performative]
+    INITIAL_PERFORMATIVES = frozenset({DefaultMessage.Performative.BYTES})
+    TERMINAL_PERFORMATIVES = frozenset({DefaultMessage.Performative.ERROR})
     VALID_REPLIES = {
         DefaultMessage.Performative.BYTES: frozenset(
             {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
         ),
         DefaultMessage.Performative.ERROR: frozenset(),
-    }  # type: Dict[DefaultMessage.Performative, FrozenSet[DefaultMessage.Performative]]
+    }
 
     class Role(BaseDialogue.Role):
         """This class defines the agent's role in this dialogue."""
@@ -105,12 +101,14 @@ class Dialogues(BaseDialogues):
         :return: None
         """
 
-        def role_from_first_message(message: Message) -> BaseDialogue.Role:
-            """
-            Infer the role of the agent from an incoming or outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
             :param message: an incoming/outgoing first message
-            :return: the agent's role
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
             """
             return Dialogue.Role.ROLE1
 
