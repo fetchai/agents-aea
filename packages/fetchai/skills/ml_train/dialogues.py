@@ -218,6 +218,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
+            return BaseOefSearchDialogue.Role.AGENT
 
         BaseOefSearchDialogues.__init__(
             self,
