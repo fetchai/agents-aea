@@ -12,12 +12,12 @@ ENV PYTHONPATH "$PYTHONPATH:/usr/lib/python3.7/site-packages"
 RUN pip install --upgrade pip
 # other oef dependences
 RUN pip install protobuf colorlog graphviz
-RUN pip install aea[all]
+RUN pip install aea[all] --upgrade --force-reinstall
 
 # golang
 RUN apk add --no-cache go
 
-COPY ./packages /home/packages
+# COPY ./packages /home/packages # enable to add packages dir
 WORKDIR home
 
 WORKDIR /home/myagent
