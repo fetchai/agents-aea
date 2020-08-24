@@ -574,10 +574,11 @@ class Dialogue(ABC):
 
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
-        assert self.last_message is not None, "Cannot reply in an empty dialogue!"
+        last_message = self.last_message
+        assert last_message is not None, "Cannot reply in an empty dialogue!"
 
         if target_message is None:
-            target_message = self.last_message
+            target_message = last_message
         else:
             assert self.has_message(
                 target_message  # type: ignore
@@ -585,8 +586,8 @@ class Dialogue(ABC):
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
-            message_id=self.last_message.message_id + 1,  # type: ignore
-            target=target_message.message_id,  # type: ignore
+            message_id=last_message.message_id + 1,
+            target=target_message.message_id,
             performative=performative,
             **kwargs,
         )
@@ -639,8 +640,8 @@ class Dialogue(ABC):
         """
         if self.is_empty:  # initial message
             return self._basic_validation_initial_message(message)
-        else:  # non_initial message
-            return self._basic_validation_non_initial_message(message)
+
+        return self._basic_validation_non_initial_message(message)
 
     def _basic_validation_initial_message(self, message: Message) -> Tuple[bool, str]:
         """

@@ -36,6 +36,7 @@ import requests
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
