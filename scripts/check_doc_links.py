@@ -162,7 +162,7 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
     :param all_files: all the doc file paths
     :param regex: the regex to check for in the file.
     """
-    if file == Path('docs/version.md'):
+    if file == Path("docs/version.md"):
         return
     matches = regex.finditer(file.read_text())
     for match in matches:
