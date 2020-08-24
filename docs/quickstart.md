@@ -9,7 +9,7 @@ This example will take you through the simplest AEA in order to make you familia
 
 The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
-You need <a href="https://www.python.org/downloads/" target=_blank>Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target=_blank>Go 1.14.2</a> or higher installed.
+You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
 ## Preliminaries
 
@@ -22,13 +22,13 @@ cd my_aea_projects/
 
 We highly recommend using a virtual environment to ensure consistency across dependencies.
 
-Check that you have <a href="https://github.com/pypa/pipenv">`pipenv`</a>.
+Check that you have <a href="https://github.com/pypa/pipenv" target="_blank">`pipenv`</a>.
 
 ``` bash
 which pipenv
 ```
 
-If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target=_blank>here</a>.
+If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target="_blank">here</a>.
 
 Once installed, create a new environment and open it (here we use Python 3.7 but the AEA framework supports any Python >= 3.6).
 
@@ -60,7 +60,7 @@ The following hints can help:
 sudo apt-get install python3.7-dev
 ```
 
-- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target=_blank>tools for Visual Studio</a>.
+- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
 ## Setup author name
 

@@ -1,4 +1,4 @@
-The AEA framework supports flexible logging capabilities with the standard <a href="https://docs.python.org/3/library/logging.html" target=_blank>Python logging library</a>.
+The AEA framework supports flexible logging capabilities with the standard <a href="https://docs.python.org/3/library/logging.html" target="_blank">Python logging library</a>.
 
 In this tutorial, we configure logging for an AEA.
 
@@ -39,9 +39,9 @@ registry_path: ../packages
 
 By updating the `logging_config` section, you can configure the loggers of your application.
 
-The format of this section is specified in the <a href="https://docs.python.org/3/library/logging.config.html" target=_blank>`logging.config`</a> module.
+The format of this section is specified in the <a href="https://docs.python.org/3/library/logging.config.html" target="_blank">`logging.config`</a> module.
 
-At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target=_blank>this section</a>
+At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target="_blank">this section</a>
 you'll find the definition of the configuration dictionary schema.
 
 Below is an example of the `logging_config` value.

@@ -4,7 +4,7 @@ These instructions will take you through building an AEA and running the AEA - a
 
 ## Preliminaries
 
-Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
+Follow the Preliminaries and Installation instructions <a href="../quickstart" target="_blank">here</a>.
 
 Install the extra dependencies for the CLI GUI.
 
@@ -20,7 +20,7 @@ Start the local web-server.
 ``` bash
 aea gui
 ```
-Open this page in a browser: <a href="http://127.0.0.1:8001">http://127.0.0.1:8001</a>
+Open this page in a browser: <a href="http://127.0.0.1:8001" target="_blank">http://127.0.0.1:8001</a>
 
 You should see the following page.
 

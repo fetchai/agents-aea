@@ -60,4 +60,4 @@ end_states: [successful, declined_cfp, declined_propose, declined_accept]
 
 ## Links
 
-* <a href="http://www.fipa.org" target=_blank>FIPA Foundation</a>
+* <a href="http://www.fipa.org" target="_blank">FIPA Foundation</a>
