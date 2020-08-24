@@ -798,7 +798,9 @@ class Dialogue(ABC):
         ), "Dialogue label cannot be updated."
         self._dialogue_label = final_dialogue_label
 
-    def _custom_validation(self, message: Message) -> Tuple[bool, str]:
+    def _custom_validation(  # pylint: disable=no-self-use
+        self, message: Message
+    ) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in the dialogue.
 
