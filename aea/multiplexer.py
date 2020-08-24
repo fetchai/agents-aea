@@ -138,7 +138,7 @@ class AsyncMultiplexer(WithLogger):
         Do some consistency checks on the multiplexer connections.
 
         :return: None
-        :raise AssertionError: if an inconsistency is found.
+        :raise AEAEnforceError: if an inconsistency is found.
         """
         enforce(len(self.connections) > 0, "List of connections cannot be empty.")
 
@@ -161,7 +161,7 @@ class AsyncMultiplexer(WithLogger):
     @property
     def out_queue(self) -> asyncio.Queue:
         """Get the out queue."""
-        if self._out_queue is None:
+        if self._out_queue is None:  # pragma: nocover
             raise ValueError("Accessing out queue before loop is started.")
         return self._out_queue
 

@@ -301,7 +301,7 @@ class CosmosHelper(Helper):
         s = hashlib.new("sha256", public_key_bytes).digest()
         r = hashlib.new("ripemd160", s).digest()
         five_bit_r = convertbits(r, 8, 5)
-        if five_bit_r is None:
+        if five_bit_r is None:  # pragma: no cover
             raise ValueError("Unsuccessful bech32.convertbits call.")
         address = bech32_encode(_COSMOS, five_bit_r)
         return address

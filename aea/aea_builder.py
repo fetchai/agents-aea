@@ -768,7 +768,7 @@ class AEABuilder:
         :param wallet: the wallet
         :return: the identity
         """
-        if self._name is None:
+        if self._name is None:  # pragma: nocover
             raise ValueError("You must set the name of the agent.")
 
         if not wallet.addresses:

@@ -191,7 +191,7 @@ class ProcessEnvelopesTestCase(TestCase):
         outbox = mock.Mock()
         dialogues = mock.Mock()
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
 
 

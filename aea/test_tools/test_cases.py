@@ -584,7 +584,7 @@ class BaseAEATestCase(ABC):
         """
         cls.run_cli_command("get-wealth", ledger_api_id, cwd=cls._get_cwd())
         if cls.last_cli_runner_result is None:
-            raise ValueError("Runner result not set!")
+            raise ValueError("Runner result not set!")  # pragma: nocover
         return str(cls.last_cli_runner_result.stdout_bytes, "utf-8")
 
     @classmethod

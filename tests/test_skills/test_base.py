@@ -197,7 +197,7 @@ class SkillContextTestCase(TestCase):
         agent_context = mock.Mock()
         agent_context.task_manager = "task_manager"
         obj = SkillContext(agent_context)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             obj.task_manager
         obj._skill = mock.Mock()
         obj.task_manager
@@ -206,7 +206,7 @@ class SkillContextTestCase(TestCase):
     def test_handlers_positive(self, *mocks):
         """Test handlers property positive result"""
         obj = SkillContext("agent_context")
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             obj.handlers
         obj._skill = mock.Mock()
         obj._skill.handlers = {}
@@ -216,7 +216,7 @@ class SkillContextTestCase(TestCase):
     def test_behaviours_positive(self, *mocks):
         """Test behaviours property positive result"""
         obj = SkillContext("agent_context")
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             obj.behaviours
         obj._skill = mock.Mock()
         obj._skill.behaviours = {}
@@ -256,9 +256,9 @@ class SkillComponentTestCase(TestCase):
     def test_init_no_ctx(self):
         """Test init method no context provided."""
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             self.TestComponent(name="some_name", skill_context=None)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             self.TestComponent(name=None, skill_context="skill_context")
 
     def test_skill_id_positive(self):

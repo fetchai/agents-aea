@@ -192,9 +192,9 @@ class OwnershipState(BaseOwnershipState):
         :param amount_by_currency_id: the currency endowment of the agent in this state.
         :param quantities_by_good_id: the good endowment of the agent in this state.
         """
-        if amount_by_currency_id is None:
+        if amount_by_currency_id is None:  # pragma: nocover
             raise ValueError("Must provide amount_by_currency_id.")
-        if quantities_by_good_id is None:
+        if quantities_by_good_id is None:  # pragma: nocover
             raise ValueError("Must provide quantities_by_good_id.")
         enforce(
             not self.is_initialized,
@@ -219,12 +219,12 @@ class OwnershipState(BaseOwnershipState):
         :param delta_quantities_by_good_id: the delta in the quantities by good
         :return: None
         """
-        if delta_amount_by_currency_id is None:
+        if delta_amount_by_currency_id is None:  # pragma: nocover
             raise ValueError("Must provide delta_amount_by_currency_id.")
-        if delta_quantities_by_good_id is None:
+        if delta_quantities_by_good_id is None:  # pragma: nocover
             raise ValueError("Must provide delta_quantities_by_good_id.")
         if self._amount_by_currency_id is None or self._quantities_by_good_id is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Cannot apply state update, current state is not initialized!"
             )
         enforce(
@@ -333,7 +333,7 @@ class OwnershipState(BaseOwnershipState):
         :return: None
         """
         if self._amount_by_currency_id is None or self._quantities_by_good_id is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Cannot apply state update, current state is not initialized!"
             )
         for currency_id, amount_delta in terms.amount_by_currency_id.items():
@@ -385,9 +385,9 @@ class Preferences(BasePreferences):
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
         """
-        if exchange_params_by_currency_id is None:
+        if exchange_params_by_currency_id is None:  # pragma: nocover
             raise ValueError("Must provide exchange_params_by_currency_id.")
-        if utility_params_by_good_id is None:
+        if utility_params_by_good_id is None:  # pragma: nocover
             raise ValueError("Must provide utility_params_by_good_id.")
         enforce(
             not self.is_initialized,

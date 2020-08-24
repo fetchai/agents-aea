@@ -720,7 +720,7 @@ class PackageConfiguration(Configuration, ABC):
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         """
         super().__init__()
-        if name is None or author is None:
+        if name is None or author is None:  # pragma: nocover
             ValueError("Name and author must be set on the configuration!")
         self.name = name
         self.author = author
@@ -745,7 +745,7 @@ class PackageConfiguration(Configuration, ABC):
     @directory.setter
     def directory(self, directory: Path) -> None:
         """Set directory if not already set."""
-        if self._directory is not None:
+        if self._directory is not None:  # pragma: nocover
             ValueError("Directory already set")
         self._directory = directory
 
@@ -1428,9 +1428,11 @@ class AgentConfig(PackageConfiguration):
         }
         # TODO add validation of dict values.
         for component_id, _ in d.items():
-            assert (
-                component_id.public_id in package_type_to_set[component_id.package_type]
-            ), f"Component {component_id} not declared in the agent configuration."
+            enforce(
+                component_id.public_id
+                in package_type_to_set[component_id.package_type],
+                f"Component {component_id} not declared in the agent configuration.",
+            )
         self._component_configurations = d
 
     @property
@@ -1472,7 +1474,7 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_connection(self) -> str:
         """Get the default connection."""
-        if self._default_connection is None:
+        if self._default_connection is None:  # pragma: nocover
             raise ValueError("Default connection not set yet.")
         return str(self._default_connection)
 
@@ -1494,7 +1496,7 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_ledger(self) -> str:
         """Get the default ledger."""
-        if self._default_ledger is None:
+        if self._default_ledger is None:  # pragma: nocover
             raise ValueError("Default ledger not set yet.")
         return self._default_ledger
 
@@ -1832,7 +1834,7 @@ class ContractConfig(ComponentConfiguration):
 
     def _get_contract_interfaces(self) -> Dict[str, str]:
         """Get the contract interfaces."""
-        if self.directory is None:
+        if self.directory is None:  # pragma: nocover
             raise ValueError("Set directory before calling.")
         contract_interfaces = {}  # type: Dict[str, str]
         for identifier, path in self.contract_interface_paths.items():

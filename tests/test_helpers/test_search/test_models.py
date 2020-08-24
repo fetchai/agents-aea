@@ -22,6 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import (
     And,
     Attribute,
@@ -164,7 +165,7 @@ def test_constraint_type():
             Attribute("test", int, True)
         )
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         ConstraintType(ConstraintTypes.GREATER_THAN, str)
 
     assert ConstraintType(ConstraintTypes.IN, [1, 2]) == ConstraintType(

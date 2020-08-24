@@ -323,7 +323,7 @@ class Dialogue(ABC):
 
         :return: the agent address
         """
-        if self._agent_address is None:
+        if self._agent_address is None:  # pragma: nocover
             raise ValueError("agent_address is not set.")
         return self._agent_address
 
@@ -343,7 +343,7 @@ class Dialogue(ABC):
 
         :return: the agent's role
         """
-        if self._role is None:
+        if self._role is None:  # pragma: nocover
             raise ValueError("Role is not set.")
         return self._role
 
@@ -364,7 +364,7 @@ class Dialogue(ABC):
 
         :return: the rules
         """
-        if self._rules is None:
+        if self._rules is None:  # pragma: nocover
             raise ValueError("Rules is not set.")
         return self._rules
 
@@ -520,11 +520,11 @@ class Dialogue(ABC):
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
         if self._message_class is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "No 'message_class' argument was provided to this class on construction."
             )
         if self.last_message is None:
-            raise ValueError("Cannot reply in an empty dialogue!")
+            raise ValueError("Cannot reply in an empty dialogue!")  # pragma: nocover
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
@@ -811,7 +811,7 @@ class Dialogues(ABC):
         :return: the initial message and the dialogue.
         """
         if self._message_class is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "No 'message_class' argument was provided to this class on construction."
             )
 

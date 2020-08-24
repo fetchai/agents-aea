@@ -23,6 +23,7 @@ from typing import Dict, FrozenSet, Optional, Type, cast
 
 import pytest
 
+from aea.exceptions import AEAEnforceError
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel, DialogueStats
 from aea.helpers.dialogue.base import Dialogues as BaseDialogues
@@ -306,6 +307,7 @@ class TestDialogueBase:
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
+        valid_initial_msg.counterparty = self.opponent_address
 
         assert self.dialogue.update(valid_initial_msg)
         assert self.dialogue.last_outgoing_message == valid_initial_msg
@@ -740,7 +742,7 @@ class TestDialogueBase:
         new_label = DialogueLabel(
             (str(1), str(2)), valid_initial_msg.counterparty, self.agent_address
         )
-        with pytest.raises(AssertionError):
+        with pytest.raises(AEAEnforceError):
             self.dialogue.update_dialogue_label(new_label)
 
         assert self.dialogue.dialogue_label != new_label
@@ -765,7 +767,7 @@ class TestDialogueBase:
         try:
             self.dialogue.update_dialogue_label(new_label)
             result = True
-        except AssertionError:
+        except AEAEnforceError:
             result = False
 
         assert not result
@@ -1434,7 +1436,7 @@ class TestDialoguesBase:
                 self.opponent_address, ("", str(1)), Dialogue.Role.ROLE2
             )
             result = True
-        except AssertionError:
+        except AEAEnforceError:
             result = False
 
         assert not result

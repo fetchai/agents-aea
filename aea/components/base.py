@@ -82,7 +82,7 @@ class Component(ABC, WithLogger):
     @property
     def configuration(self) -> ComponentConfiguration:
         """Get the component configuration."""
-        if self._configuration is None:
+        if self._configuration is None:  # pragma: nocover
             raise ValueError("The component is not associated with a configuration.")
         return self._configuration
 
@@ -96,6 +96,6 @@ class Component(ABC, WithLogger):
     @directory.setter
     def directory(self, path: Path) -> None:
         """Set the directory. Raise error if already set."""
-        if self._directory is not None:
+        if self._directory is not None:  # pragma: nocover
             raise ValueError("Directory already set.")
         self._directory = path

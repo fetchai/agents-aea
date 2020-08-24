@@ -47,4 +47,4 @@ def enforce(
     :param exception_class: the class of exception
     """
     if not is_valid_condition:
-        exception_class(exception_text)
+        raise exception_class(exception_text)

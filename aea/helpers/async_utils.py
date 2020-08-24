@@ -268,10 +268,10 @@ def ensure_loop(loop: Optional[AbstractEventLoop] = None) -> AbstractEventLoop:
     try:
         loop = loop or asyncio.new_event_loop()
         if loop.is_closed():
-            ValueError("Event loop closed.")
+            ValueError("Event loop closed.")  # pragma: nocover
         if loop.is_running():
-            ValueError("Event loop running.")
-    except (RuntimeError, AssertionError):
+            ValueError("Event loop running.")  # pragma: nocover
+    except (RuntimeError, ValueError):
         loop = asyncio.new_event_loop()
 
     return loop
@@ -334,7 +334,9 @@ class ThreadedAsyncRunner(Thread):
 
         :param loop: optional event loop. is it's running loop, threaded runner will use it.
         """
-        self._loop = ensure_loop(loop)
+        self._loop = loop or asyncio.new_event_loop()
+        if self._loop.is_closed():
+            ValueError("Event loop closed.")  # pragma: nocover
         super().__init__(daemon=True)
 
     def start(self) -> None:

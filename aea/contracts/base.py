@@ -59,7 +59,7 @@ class Contract(Component):
     @property
     def configuration(self) -> ContractConfig:
         """Get the configuration."""
-        if self._configuration is None:
+        if self._configuration is None:  # pragma: nocover
             raise ValueError("Configuration not set.")
         return cast(ContractConfig, super().configuration)
 
@@ -103,7 +103,7 @@ class Contract(Component):
         :param configuration: the contract configuration.
         :return: the contract object.
         """
-        if configuration.directory is None:
+        if configuration.directory is None:  # pragma: nocover
             raise ValueError("Configuration must be associated with a directory.")
         directory = configuration.directory
         load_aea_package(configuration)

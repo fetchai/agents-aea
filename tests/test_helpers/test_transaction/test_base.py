@@ -22,6 +22,7 @@
 import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.exceptions import AEAEnforceError
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
@@ -86,7 +87,7 @@ def test_init_terms():
         kwargs,
     )
     assert terms == terms
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         terms.fee
 
 
@@ -190,7 +191,7 @@ def test_init_terms_strict_negative():
     quantities_by_good_id = {"good_1": 20}
     is_sender_payable_tx_fee = True
     nonce = "somestring"
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         Terms(
             ledger_id=ledger_id,
             sender_address=sender_addr,

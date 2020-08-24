@@ -444,7 +444,7 @@ class ConstraintType:
             else:  # pragma: nocover
                 raise ValueError("Type not recognized.")
         except ValueError:
-            return False
+            return False  # pragma: nocover
 
         return True
 
@@ -524,7 +524,7 @@ class ConstraintType:
         if self.type == ConstraintTypes.NOT_IN:
             return value not in self.value
         if self.type == ConstraintTypes.DISTANCE:
-            if not isinstance(value, Location):
+            if not isinstance(value, Location):  # pragma: nocover
                 raise ValueError("Value must be of type Location.")
             location = cast(Location, self.value[0])
             distance = self.value[1]

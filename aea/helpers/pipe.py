@@ -183,7 +183,7 @@ class PosixNamedPipeProtocol:
     def __reader_protocol(self) -> asyncio.StreamReaderProtocol:
         """Get reader protocol."""
         if self._reader_protocol is None:
-            raise ValueError("reader protocol not set!")
+            raise ValueError("reader protocol not set!")  # pragma: nocover
         return self._reader_protocol
 
     async def write(self, data: bytes) -> None:
@@ -203,7 +203,7 @@ class PosixNamedPipeProtocol:
 
         :return: read bytes
         """
-        if self._stream_reader is None:
+        if self._stream_reader is None:  # pragma: nocover
             raise ValueError("StreamReader not set, call connect first!")
         try:
             self.logger.debug("waiting for messages (in={})...".format(self._in_path))
@@ -231,7 +231,7 @@ class PosixNamedPipeProtocol:
         """ Disconnect pipe """
         self.logger.debug("closing pipe (in={})...".format(self._in_path))
         if self._fileobj is None:
-            raise ValueError("Pipe not connected")
+            raise ValueError("Pipe not connected")  # pragma: nocover
         try:
             # TOFIX(LR) Hack for MacOSX
             size = struct.pack("!I", 0)
@@ -275,7 +275,7 @@ class TCPSocketProtocol:
         :param data: bytes to write
         """
         if self._writer is None:
-            raise ValueError("writer not set!")
+            raise ValueError("writer not set!")  # pragma: nocover
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
         self._writer.write(size + data)
@@ -352,7 +352,7 @@ class TCPSocketChannel(IPCChannel):
             self._handle_connection, host="127.0.0.1", port=self._port
         )
         if self._server.sockets is None:
-            raise ValueError("Server sockets is None!")
+            raise ValueError("Server sockets is None!")  # pragma: nocover
         self._port = self._server.sockets[0].getsockname()[1]
         self.logger.debug("socket pipe rdv point: {}".format(self._port))
 
@@ -383,7 +383,7 @@ class TCPSocketChannel(IPCChannel):
         :param data: bytes to write
         """
         if self._sock is None:
-            raise ValueError("Socket pipe not connected.")
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -393,13 +393,13 @@ class TCPSocketChannel(IPCChannel):
         :param data: read bytes
         """
         if self._sock is None:
-            raise ValueError("Socket pipe not connected.")
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         return await self._sock.read()
 
     async def close(self) -> None:
         """ Disconnect from channel and clean it up """
         if self._sock is None:
-            raise ValueError("Socket pipe not connected.")
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.close()
 
     @property
@@ -563,7 +563,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         :param data: bytes to write
         """
         if self._sock is None:
-            raise ValueError("Socket pipe not connected.")
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -573,13 +573,13 @@ class TCPSocketChannelClient(IPCChannelClient):
         :return: read bytes
         """
         if self._sock is None:
-            raise ValueError("Socket pipe not connected.")
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         return await self._sock.read()
 
     async def close(self) -> None:
         """ Disconnect from communication channel """
         if self._sock is None:
-            raise ValueError("Socket pipe not connected.")
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.close()
 
 
@@ -631,7 +631,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         :param data: bytes to write
         """
         if self._pipe is None:
-            raise ValueError("Pipe not connected.")
+            raise ValueError("Pipe not connected.")  # pragma: nocover
         await self._pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -641,13 +641,13 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         :return: read bytes
         """
         if self._pipe is None:
-            raise ValueError("Pipe not connected.")
+            raise ValueError("Pipe not connected.")  # pragma: nocover
         return await self._pipe.read()
 
     async def close(self) -> None:
         """ Disconnect from communication channel """
         if self._pipe is None:
-            raise ValueError("Pipe not connected.")
+            raise ValueError("Pipe not connected.")  # pragma: nocover
         return await self._pipe.close()
 
 

@@ -84,13 +84,12 @@ class SkillContext:
 
     @logger.setter
     def logger(self, logger_: Logger) -> None:
-        if self._logger is None:
-            raise ValueError("Logger already set.")
+        """Set the logger."""
         self._logger = logger_
 
     def _get_agent_context(self) -> AgentContext:
         """Get the agent context."""
-        if self._agent_context is None:
+        if self._agent_context is None:  # pragma: nocover
             raise ValueError("Agent context not set yet.")
         return self._agent_context
 
@@ -112,7 +111,7 @@ class SkillContext:
     def skill_id(self) -> PublicId:
         """Get the skill id of the skill context."""
         if self._skill is None:
-            raise ValueError("Skill not set yet.")
+            raise ValueError("Skill not set yet.")  # pragma: nocover
         return self._skill.configuration.public_id
 
     @property
@@ -278,7 +277,7 @@ class SkillComponent(ABC):
     def configuration(self) -> SkillComponentConfiguration:
         """Get the skill component configuration."""
         if self._configuration is None:
-            ValueError("Configuration not set.")
+            ValueError("Configuration not set.")  # pragma: nocover
         return self._configuration
 
     # TODO consider rename this property
@@ -674,7 +673,7 @@ class Skill(Component):
     def skill_context(self) -> SkillContext:
         """Get the skill context."""
         if self._skill_context is None:
-            raise ValueError("Skill context not set.")
+            raise ValueError("Skill context not set.")  # pragma: nocover
         return self._skill_context
 
     @property
@@ -734,7 +733,7 @@ class Skill(Component):
         :param agent_context: the agent context.
         :return: the skill.
         """
-        if configuration.directory is None:
+        if configuration.directory is None:  # pragma: nocover
             raise ValueError("Configuration must be associated with a directory.")
 
         # we put the initialization here because some skill components

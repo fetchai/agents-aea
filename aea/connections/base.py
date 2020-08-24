@@ -152,7 +152,7 @@ class Connection(Component, ABC):
     @property
     def configuration(self) -> ConnectionConfig:
         """Get the connection configuration."""
-        if self._configuration is None:
+        if self._configuration is None:  # pragma: nocover
             raise ValueError("Configuration not set.")
         return cast(ConnectionConfig, super().configuration)
 
