@@ -50,8 +50,8 @@ def verify_or_create_private_keys(
     for identifier, _ in aea_conf.private_key_paths.read_all():
         if identifier not in crypto_registry.supported_ids:  # pragma: nocover
             raise ValueError(
-                "Unsupported identifier `{}` in private key paths. Supported identifier: {}".format(
-                    identifier, crypto_registry.supported_ids
+                "Unsupported identifier `{}` in private key paths. Supported identifiers: {}.".format(
+                    identifier, sorted(crypto_registry.supported_ids)
                 )
             )
 
