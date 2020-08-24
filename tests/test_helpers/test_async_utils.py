@@ -25,6 +25,7 @@ import pytest
 
 from aea.helpers.async_utils import (
     AsyncState,
+    HandlerItemGetter,
     PeriodicCaller,
     ThreadedAsyncRunner,
     cancel_and_wait,
@@ -231,3 +232,36 @@ async def test_cancel_and_wait():
     assert task.done()
     r = await cancel_and_wait(task)
     assert r is None
+
+
+@pytest.mark.asyncio
+async def test_handler_item_getter():
+    """Test item getter."""
+    q1, q2 = asyncio.Queue(), asyncio.Queue()
+    item1 = "item1"
+    item2 = "item2"
+    q1.put_nowait(item1)
+    q2.put_nowait(item2)
+    handler1_called = False
+    handler2_called = False
+
+    def handler1(item):
+        nonlocal handler1_called
+        handler1_called = item
+
+    def handler2(item):
+        nonlocal handler2_called
+        handler2_called = item
+
+    getter = HandlerItemGetter([(handler1, q1.get), (handler2, q2.get)])
+
+    handler, item = await getter.get()
+    handler(item)
+
+    handler, item = await getter.get()
+    handler(item)
+    assert handler1_called == item1
+    assert handler2_called == item2
+
+    with pytest.raises(asyncio.TimeoutError):
+        handler, item = await asyncio.wait_for(getter.get(), timeout=1)

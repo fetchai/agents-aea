@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of a generic agent."""
 import datetime
 import logging
@@ -28,6 +26,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
 from aea.connections.base import Connection
 from aea.identity.base import Identity
+from aea.mail.base import Envelope
 from aea.multiplexer import InBox, OutBox
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
@@ -310,3 +309,20 @@ class Agent(ABC):
         :return: dict of callable with period specified
         """
         return {self.act: (self._timeout, None)}
+
+    def _handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle an envelope.
+
+        :param envelope: the envelope to handle.
+        :return: None
+        """
+        raise NotImplementedError
+
+    def get_message_handlers(self) -> List[Tuple[Callable[[Any], None], Callable]]:
+        """
+        Get handlers with message getters.
+
+        :return: List of tuples of callables: handler and coroutine to get a message
+        """
+        return [(self._handle_envelope, self.inbox.async_get)]

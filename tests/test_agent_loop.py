@@ -19,12 +19,14 @@
 """This module contains tests of the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
+import logging
 from queue import Empty
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 from unittest.mock import MagicMock
 
 import pytest
 
+from aea.aea import AEA
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail.base import Envelope
@@ -94,7 +96,7 @@ class FailBehaviour(TickerBehaviour):
         )
 
 
-class AsyncFakeAgent:
+class AsyncFakeAgent(AEA):
     """Fake agent form testing."""
 
     name = "fake_agent"
@@ -104,16 +106,16 @@ class AsyncFakeAgent:
         self.handlers = handlers or []
         self.behaviours = behaviours or []
         self._inbox = AsyncFriendlyQueue()
-        self.inbox = self._inbox
-        self.filter = MagicMock()
+        self._filter = MagicMock()
         self.filter._process_internal_message = MagicMock()
         self.filter._handle_new_behaviours = MagicMock()
-        self.runtime = MagicMock()
+        self._runtime = MagicMock()
         self.runtime.decision_maker.message_out_queue = AsyncFriendlyQueue()
         self.filter.decision_maker_out_queue = (
             self.runtime.decision_maker.message_out_queue
         )
-        self.timeout = 0.001
+        self._logger = logging.getLogger("fake agent")
+        self._timeout = 0.001
 
     def get_periodic_tasks(
         self,
@@ -145,7 +147,7 @@ class AsyncFakeAgent:
 
     def put_inbox(self, msg: Any) -> None:
         """Add a message to inbox."""
-        self._inbox.put_nowait(msg)
+        self._inbox.put_nowait(msg)  # type: ignore
 
     def put_internal_message(self, msg: Any) -> None:
         """Add a message to internal queue."""
@@ -167,7 +169,7 @@ class AsyncFakeAgent:
 
     def update(self) -> None:
         """Call internal messages handle and add behaviours handler."""
-        self.filter._process_internal_message()
+        self.filter._process_internal_message()  # type: ignore
         self.filter._handle_new_behaviours()
 
     def _execution_control(
@@ -190,13 +192,17 @@ class AsyncFakeAgent:
         """
         return fn(*(args or []), **(kwargs or {}))
 
+    def _handle_envelope(self, envelope: Envelope) -> None:
+        for handler in self.handlers:
+            handler.handle(envelope)
+
 
 class SyncFakeAgent(AsyncFakeAgent):
     """Fake agent for sync loop."""
 
     def put_inbox(self, msg: Any) -> None:
         """Add a message to inbox."""
-        self._inbox.put_nowait(msg)
+        self._inbox.put_nowait(msg)  # type: ignore
 
     def put_internal_message(self, msg: Any) -> None:
         """Add a message to internal queue."""

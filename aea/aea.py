@@ -435,3 +435,24 @@ class AEA(Agent, WithLogger):
         for behaviour in self.active_behaviours:
             tasks[behaviour.act_wrapper] = (behaviour.tick_interval, behaviour.start_at)
         return tasks
+
+    def _handle_internal_message(self, message: Any) -> None:
+        """Process AEA internal messages."""
+        self.logger.debug("Handling internal message: {}".format(message))
+        self.filter._process_internal_message(  # pylint: disable=protected-access
+            message
+        )
+
+    def get_message_handlers(self) -> List[Tuple[Callable[[Any], None], Callable]]:
+        """
+        Get handlers with message getters.
+
+        :return: List of tuples of callables: handler and coroutine to get a message
+        """
+        return [
+            (self._handle_envelope, self.inbox.async_get),
+            (
+                self._handle_internal_message,
+                self.filter.decision_maker_out_queue.async_get,
+            ),
+        ]

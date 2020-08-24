@@ -37,11 +37,11 @@ from typing import (
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import (
     AsyncState,
+    HandlerItemGetter,
     PeriodicCaller,
     ensure_loop,
 )
 from aea.helpers.logging import WithLogger
-from aea.multiplexer import InBox
 
 
 logger = logging.getLogger(__name__)
@@ -259,30 +259,20 @@ class AsyncAgentLoop(BaseAgentLoop):
         :return: list of asyncio Tasks
         """
         tasks = [
-            self._task_process_inbox(),
-            self._task_process_internal_messages(),
+            self._process_messages(HandlerItemGetter(self._message_handlers())),
             self._task_process_new_skill_components(),
             self._task_wait_for_error(),
         ]
         return list(map(self._loop.create_task, tasks))  # type: ignore  # some issue with map and create_task
 
-    async def _task_process_inbox(self) -> None:
-        """Process incoming messages."""
-        inbox: InBox = self._agent.inbox
+    def _message_handlers(self):
+        return self._agent.get_message_handlers()
+
+    async def _process_messages(self, getter: HandlerItemGetter):
         self.logger.info("Start processing messages...")
         while self.is_running:
-            await inbox.async_wait()
-            self._agent.react()
-
-    async def _task_process_internal_messages(self) -> None:
-        """Process decision maker's internal messages."""
-        queue = self._agent.filter.decision_maker_out_queue
-        while self.is_running:
-            msg = await queue.async_get()
-            # TODO: better interaction with agent's internal messages
-            self._agent.filter._process_internal_message(  # pylint: disable=protected-access # TODO: refactoring!
-                msg
-            )
+            handler, item = await getter.get()
+            handler(item)
 
     async def _task_process_new_skill_components(self) -> None:
         """Process new behaviours added to skills in runtime."""
