@@ -78,9 +78,9 @@ class Forecast:
         :param tagged_data: the data dictionary
         :return: None
         """
-        con = sqlite3.connect(DB_SOURCE)
-        cur = con.cursor()
-        cur.execute(
+        con_ = sqlite3.connect(DB_SOURCE)
+        cur_ = con_.cursor()
+        cur_.execute(
             """INSERT INTO data(abs_pressure,
                                        delay,
                                        hum_in,
@@ -107,9 +107,9 @@ class Forecast:
             ),
         )
         logger.info("Wheather station: I added data in the db!")
-        cur.close()
-        con.commit()
-        con.close()
+        cur_.close()
+        con_.commit()
+        con_.close()
 
     def generate(self):
         """Generate weather data."""

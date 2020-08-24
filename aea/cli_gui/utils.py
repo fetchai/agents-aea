@@ -66,8 +66,7 @@ def is_agent_dir(dir_name: str) -> bool:
     """Return true if this directory contains an AEA project (an agent)."""
     if not os.path.isdir(dir_name):
         return False
-    else:
-        return os.path.isfile(os.path.join(dir_name, "aea-config.yaml"))
+    return os.path.isfile(os.path.join(dir_name, "aea-config.yaml"))
 
 
 def call_aea_async(param_list: List[str], dir_arg: str) -> subprocess.Popen:
@@ -170,7 +169,6 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
     return_code = process_id.poll()
     if return_code is None:
         return ProcessState.RUNNING
-    elif return_code <= 0:
+    if return_code <= 0:
         return ProcessState.FINISHED
-    else:
-        return ProcessState.FAILED
+    return ProcessState.FAILED

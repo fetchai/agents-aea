@@ -169,10 +169,6 @@ class Message:
         """Get value for key."""
         return self._body.get(key, None)
 
-    def unset(self, key: str) -> None:
-        """Unset valye for key."""
-        self._body.pop(key, None)
-
     def is_set(self, key: str) -> bool:
         """Check value is set for key."""
         return key in self._body

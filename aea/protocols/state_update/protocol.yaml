@@ -6,7 +6,7 @@ description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmQ2sQno2YXxkHx9copJsb9wwhwfryz3oJmnXnarP4Pcsb
+  README.md: QmVFmJMyfFbDaYU5Jsjqec1wMU5zramzdPWNwuhsvWsKdF
   __init__.py: Qma2opyN54gwTpkVV1E14jjeMmMfoqgE6XMM9LsvGuTdkm
   dialogues.py: QmZJsSs6kc6QCFbPtCBDL7wfYCbGNTaGGEnbgbB6UCUPGg
   message.py: QmbPcpdHay7xVb5DC2tn6i7usrw4W7K9RbFWyuVVAobmn1

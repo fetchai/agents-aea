@@ -31,7 +31,6 @@ from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
     AEAConnectionError,
-    Address,
     Empty,
     Envelope,
     EnvelopeContext,
@@ -364,7 +363,6 @@ class AsyncMultiplexer(WithLogger):
 
         while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
-                # self.self.logger.debug("Waiting for incoming envelopes...")
                 done, _pending = await asyncio.wait(
                     task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
                 )
@@ -419,6 +417,7 @@ class AsyncMultiplexer(WithLogger):
                 "No connection registered with id: {}.".format(connection_id)
             )
 
+        # third, if no other option route by default connection
         if connection_id is None:
             self.logger.debug(
                 "Using default connection: {}".format(self.default_connection)
@@ -581,7 +580,7 @@ class Multiplexer(AsyncMultiplexer):
     def setup(
         self,
         connections: Collection[Connection],
-        default_routing: Dict[PublicId, PublicId],
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
     ) -> None:
         """
@@ -592,7 +591,7 @@ class Multiplexer(AsyncMultiplexer):
         :param default_connection: the default connection.
         :return: None.
         """
-        self.default_routing = default_routing
+        self.default_routing = default_routing or {}
         self._connections = []
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)
@@ -688,16 +687,14 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer, default_address: Address):
+    def __init__(self, multiplexer: Multiplexer):
         """
         Initialize the outbox.
 
         :param multiplexer: the multiplexer
-        :param default_address: the default address of the agent
         """
         super().__init__()
         self._multiplexer = multiplexer
-        self._default_address = default_address
 
     def empty(self) -> bool:
         """
@@ -715,7 +712,7 @@ class OutBox:
         :return: None
         """
         self._multiplexer.logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'...".format(
+            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'.".format(
                 envelope.to,
                 envelope.sender,
                 envelope.protocol_id,
@@ -735,17 +732,12 @@ class OutBox:
         self._multiplexer.put(envelope)
 
     def put_message(
-        self,
-        message: Message,
-        context: Optional[EnvelopeContext] = None,
-        sender: Optional[str] = None,
+        self, message: Message, context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
 
         This constructs an envelope with the input arguments.
-
-        "sender" is a deprecated kwarg and will be removed in the next version
 
         :param message: the message
         :param context: the envelope context
@@ -755,11 +747,11 @@ class OutBox:
             raise ValueError("Provided message not of type Message.")
         if not message.has_to:
             raise ValueError("Provided message has message.to not set.")
-        if not message.has_sender and sender is None:
+        if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
             to=message.to,
-            sender=sender or message.sender,  # TODO: remove "sender"
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=context,

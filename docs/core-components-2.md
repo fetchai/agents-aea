@@ -10,7 +10,7 @@ In <a href="../core-components-1">Core Components - Part 1</a> we discussed the 
 
 The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the wallet's private keys.
 
-You can learn more about the decision maker <a href="../decision-maker">here</a>.
+You can learn more about the decision maker <a href="../decision-maker">here</a>. In the simplest form, it acts like a `Handler` with a `Wallet`.
 
 ### Wallet
 

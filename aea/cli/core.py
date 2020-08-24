@@ -101,8 +101,8 @@ def _init_gui() -> None:
     :return: None
     :raisees: ClickException if author is not set up.
     """
-    config = get_or_create_cli_config()
-    author = config.get(AUTHOR_KEY, None)
+    config_ = get_or_create_cli_config()
+    author = config_.get(AUTHOR_KEY, None)
     if author is None:
         raise click.ClickException(
             "Author is not set up. Please run 'aea init' and then restart."

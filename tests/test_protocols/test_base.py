@@ -121,11 +121,6 @@ class TestBaseSerializations:
         self.message.set(key, value)
         assert self.message.get(key) == value
 
-    def test_unset(self):
-        """Test the unset function of the message."""
-        self.message2.unset("content")
-        assert "content" not in self.message2.body.keys()
-
     def test_body_setter(self):
         """Test the body setter."""
         m_dict = {"Hello": "World"}

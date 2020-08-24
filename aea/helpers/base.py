@@ -34,7 +34,7 @@ import types
 from collections import OrderedDict, UserString
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, TextIO, Union
+from typing import Any, Callable, Dict, List, TextIO, Union
 
 from dotenv import load_dotenv
 
@@ -45,15 +45,11 @@ from aea.configurations.base import ComponentConfiguration
 logger = logging.getLogger(__name__)
 
 
-def yaml_load(stream: TextIO) -> Dict[str, str]:
-    """
-    Load a yaml from a file pointer in an ordered way.
-
-    :param stream: the file pointer
-    :return: the yaml
-    """
+def _ordered_loading(fun: Callable):
     # for pydocstyle
-    def ordered_load(stream: TextIO, object_pairs_hook=OrderedDict):
+    def ordered_load(stream: TextIO):
+        object_pairs_hook = OrderedDict
+
         class OrderedLoader(yaml.SafeLoader):
             """A wrapper for safe yaml loader."""
 
@@ -66,18 +62,12 @@ def yaml_load(stream: TextIO) -> Dict[str, str]:
         OrderedLoader.add_constructor(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
         )
-        return yaml.load(stream, OrderedLoader)  # nosec
+        return fun(stream, Loader=OrderedLoader)  # nosec
 
-    return ordered_load(stream)
+    return ordered_load
 
 
-def yaml_dump(data, stream: TextIO) -> None:
-    """
-    Dump data to a yaml file in an ordered way.
-
-    :param data: the data to be dumped
-    :param stream: the file pointer
-    """
+def _ordered_dumping(fun: Callable):
     # for pydocstyle
     def ordered_dump(data, stream=None, **kwds):
         class OrderedDumper(yaml.SafeDumper):
@@ -91,9 +81,49 @@ def yaml_dump(data, stream: TextIO) -> None:
             )
 
         OrderedDumper.add_representer(OrderedDict, _dict_representer)
-        return yaml.dump(data, stream, OrderedDumper, **kwds)  # nosec
+        return fun(data, stream, Dumper=OrderedDumper, **kwds)  # nosec
 
-    ordered_dump(data, stream)
+    return ordered_dump
+
+
+@_ordered_loading
+def yaml_load(*args, **kwargs) -> Dict[str, Any]:
+    """
+    Load a yaml from a file pointer in an ordered way.
+
+    :return: the yaml
+    """
+    return yaml.load(*args, **kwargs)  # nosec
+
+
+@_ordered_loading
+def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
+    """
+    Load a multi-paged yaml from a file pointer in an ordered way.
+
+    :return: the yaml
+    """
+    return list(yaml.load_all(*args, **kwargs))  # nosec
+
+
+@_ordered_dumping
+def yaml_dump(*args, **kwargs) -> None:
+    """
+    Dump multi-paged yaml data to a yaml file in an ordered way.
+
+    :return None
+    """
+    yaml.dump(*args, **kwargs)  # nosec
+
+
+@_ordered_dumping
+def yaml_dump_all(*args, **kwargs) -> None:
+    """
+    Dump multi-paged yaml data to a yaml file in an ordered way.
+
+    :return None
+    """
+    yaml.dump_all(*args, **kwargs)  # nosec
 
 
 def _get_module(spec):
@@ -316,9 +346,9 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
     if callable(logger_method):  # pragma: nocover
         return logger_method
 
-    logger = fn.__globals__.get("logger", logging.getLogger(fn.__globals__["__name__"]))  # type: ignore
+    logger_ = fn.__globals__.get("logger", logging.getLogger(fn.__globals__["__name__"]))  # type: ignore
 
-    return getattr(logger, logger_method)
+    return getattr(logger_, logger_method)
 
 
 def try_decorator(error_message: str, default_return=None, logger_method="error"):
@@ -331,6 +361,7 @@ def try_decorator(error_message: str, default_return=None, logger_method="error"
     :param default_return: value to return on exception, by default None
     :param logger_method: name of the logger method or callable to print logs
     """
+
     # for pydocstyle
     def decorator(fn):
         @wraps(fn)
@@ -365,6 +396,7 @@ def retry_decorator(
     :param delay: num of seconds to sleep between retries. default 0
     :param logger_method: name of the logger method or callable to print logs
     """
+
     # for pydocstyle
     def decorator(fn):
         @wraps(fn)

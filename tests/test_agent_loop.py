@@ -18,8 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains tests of the implementation of an agent loop using asyncio."""
 import asyncio
+import datetime
 from queue import Empty
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 from unittest.mock import MagicMock
 
 import pytest
@@ -28,7 +29,7 @@ from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.skills.base import Behaviour, Handler, SkillComponent, SkillContext
+from aea.skills.base import Behaviour, Handler, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 
 from tests.common.utils import run_in_thread, wait_for_condition
@@ -107,10 +108,25 @@ class AsyncFakeAgent:
         self.filter = MagicMock()
         self.filter._process_internal_message = MagicMock()
         self.filter._handle_new_behaviours = MagicMock()
-        self.decision_maker = MagicMock()
-
-        self.decision_maker.message_out_queue = AsyncFriendlyQueue()
+        self.runtime = MagicMock()
+        self.runtime.decision_maker.message_out_queue = AsyncFriendlyQueue()
+        self.filter.decision_maker_out_queue = (
+            self.runtime.decision_maker.message_out_queue
+        )
         self.timeout = 0.001
+
+    def get_periodic_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        return self._get_behaviours_tasks()
+
+    def _get_behaviours_tasks(
+        self,
+    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
+        tasks = {}
+        for behaviour in self.active_behaviours:
+            tasks[behaviour.act_wrapper] = (behaviour.tick_interval, behaviour.start_at)
+        return tasks
 
     @property
     def active_behaviours(self) -> List[Behaviour]:
@@ -133,7 +149,7 @@ class AsyncFakeAgent:
 
     def put_internal_message(self, msg: Any) -> None:
         """Add a message to internal queue."""
-        self.decision_maker.message_out_queue.put_nowait(msg)
+        self.runtime.decision_maker.message_out_queue.put_nowait(msg)
 
     def act(self) -> None:
         """Call all acts of behaviours."""
@@ -157,7 +173,6 @@ class AsyncFakeAgent:
     def _execution_control(
         self,
         fn: Callable,
-        component: SkillComponent,
         args: Optional[Sequence] = None,
         kwargs: Optional[Dict] = None,
     ) -> Any:
@@ -185,7 +200,7 @@ class SyncFakeAgent(AsyncFakeAgent):
 
     def put_internal_message(self, msg: Any) -> None:
         """Add a message to internal queue."""
-        self.decision_maker.message_out_queue.put_nowait(msg)
+        self.runtime.decision_maker.message_out_queue.put_nowait(msg)
 
 
 class TestAsyncAgentLoop:

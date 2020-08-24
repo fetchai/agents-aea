@@ -6,7 +6,7 @@ description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmQknY2SSJqEHU6K4Wzm8NQovtCCkJ78DuNLg2wWNq18hB
+  README.md: Qmc1bho2YF4z9Szh23Sya1TM5Mn7UVukwsxBQQma3RE3Rz
   __init__.py: QmZuv8RGegxunYaJ7sHLwj2oLLCFCAGF139b8DxEY68MRT
   custom_types.py: Qmb7bzEUAW74ZeSFqL7sTccNCjudStV63K4CFNZtibKUHB
   dialogues.py: QmW3ErudV8DdNcfK8pFXZBFpvZV6VFFRbMBMMDUWeZDt2Z

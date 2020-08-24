@@ -23,8 +23,10 @@ import inspect
 import json
 import os
 import re
+from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union
+from typing import Dict, Generic, List, TextIO, Tuple, Type, TypeVar, Union, cast
+
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -34,14 +36,17 @@ from yaml import SafeLoader
 
 from aea.configurations.base import (
     AgentConfig,
+    ComponentId,
+    ComponentType,
     ConnectionConfig,
     ContractConfig,
     PackageType,
     ProtocolConfig,
     ProtocolSpecification,
+    PublicId,
     SkillConfig,
 )
-from aea.helpers.base import yaml_dump, yaml_load
+from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
@@ -145,22 +150,30 @@ class ConfigLoader(Generic[T]):
         protocol_specification.dialogue_config = dialogue_configuration
         return protocol_specification
 
+    def validate(self, json_data: Dict) -> None:
+        """
+        Validate a JSON object.
+
+        :param json_data: the JSON data.
+        :return: None.
+        """
+        if self.configuration_class.package_type == PackageType.AGENT:
+            json_data_copy = deepcopy(json_data)
+            json_data_copy.pop("component_configurations", None)
+            self._validator.validate(instance=json_data_copy)
+        else:
+            self._validator.validate(instance=json_data)
+
     def load(self, file_pointer: TextIO) -> T:
         """
-        Load an agent configuration file.
+        Load a configuration file.
 
         :param file_pointer: the file pointer to the configuration file
         :return: the configuration object.
-        :raises
         """
-        configuration_file_json = yaml_load(file_pointer)
-
-        self._validate(configuration_file_json)
-
-        key_order = list(configuration_file_json.keys())
-        configuration_obj = self.configuration_class.from_json(configuration_file_json)
-        configuration_obj._key_order = key_order  # pylint: disable=protected-access
-        return configuration_obj
+        if self.configuration_class.package_type == PackageType.AGENT:
+            return cast(T, self._load_agent_config(file_pointer))
+        return self._load_component_config(file_pointer)
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.
@@ -169,9 +182,10 @@ class ConfigLoader(Generic[T]):
         :param file_pointer: the file pointer to the configuration file
         :return: None
         """
-        result = configuration.ordered_json
-        self.validator.validate(instance=result)
-        yaml_dump(result, file_pointer)
+        if self.configuration_class.package_type == PackageType.AGENT:
+            self._dump_agent_config(cast(AgentConfig, configuration), file_pointer)
+        else:
+            self._dump_component_config(configuration, file_pointer)
 
     @classmethod
     def from_configuration_type(
@@ -191,7 +205,7 @@ class ConfigLoader(Generic[T]):
               | ValueError: if other consistency checks fail.
         """
         # this might raise ValidationError.
-        self.validator.validate(instance=json_data)
+        self.validate(json_data)
 
         expected_type = self.configuration_class.package_type
         # TODO 'type' is optional for backward compatibility
@@ -201,6 +215,183 @@ class ConfigLoader(Generic[T]):
                 raise ValueError(
                     f"The field type is not correct: expected {expected_type}, found {actual_type}."
                 )
+
+    def _load_component_config(self, file_pointer: TextIO) -> T:
+        """Load a component configuration."""
+        configuration_file_json = yaml_load(file_pointer)
+        return self._load_from_json(configuration_file_json)
+
+    def _load_from_json(self, configuration_file_json: Dict) -> T:
+        """Load component configuration from JSON object."""
+        self._validate(configuration_file_json)
+        key_order = list(configuration_file_json.keys())
+        configuration_obj = self.configuration_class.from_json(configuration_file_json)
+        configuration_obj._key_order = key_order  # pylint: disable=protected-access
+        return configuration_obj
+
+    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
+        """Load an agent configuration."""
+        configuration_file_jsons = yaml_load_all(file_pointer)
+
+        if len(configuration_file_jsons) == 0:
+            raise ValueError("Agent configuration file was empty.")
+        agent_config_json = configuration_file_jsons[0]
+        self._validate(agent_config_json)
+        key_order = list(agent_config_json.keys())
+        agent_configuration_obj = cast(
+            AgentConfig, self.configuration_class.from_json(agent_config_json)
+        )
+        agent_configuration_obj._key_order = (  # pylint: disable=protected-access
+            key_order
+        )
+
+        component_configurations: Dict[ComponentId, Dict] = {}
+        # load the other components.
+        for i, component_configuration_json in enumerate(configuration_file_jsons[1:]):
+            component_id, component_config = self._process_component_section(
+                i, component_configuration_json
+            )
+            if component_id in component_configurations:
+                raise ValueError(
+                    f"Configuration of component {component_id} occurs more than once."
+                )
+            component_configurations[component_id] = component_config
+
+        agent_configuration_obj.component_configurations = component_configurations
+        return agent_configuration_obj
+
+    def _dump_agent_config(
+        self, configuration: AgentConfig, file_pointer: TextIO
+    ) -> None:
+        """Dump agent configuration."""
+        agent_config_part = configuration.ordered_json
+        agent_config_part.pop("component_configurations")
+        self.validator.validate(instance=agent_config_part)
+        result = [agent_config_part] + configuration.component_configurations_json()
+        yaml_dump_all(result, file_pointer)
+
+    def _dump_component_config(self, configuration: T, file_pointer: TextIO) -> None:
+        """Dump component configuration."""
+        result = configuration.ordered_json
+        self.validator.validate(instance=result)
+        yaml_dump(result, file_pointer)
+
+    def _process_component_section(
+        self, i: int, component_configuration_json: Dict
+    ) -> Tuple[ComponentId, Dict]:
+        """
+        Process a component configuration in an agent configuration file.
+
+        It breaks down in:
+        - extract the component id
+        - validate the component configuration
+        - check that there are only configurable fields
+
+        :param i: the index of the component in the file.
+        :param component_configuration_json: the JSON object.
+        :return: the processed component configuration.
+        """
+        component_id, result = self._split_component_id_and_config(
+            i, component_configuration_json
+        )
+        self._validate_component_configuration(component_id, result)
+        self._check_only_configurable_fields(component_id, result)
+        return component_id, result
+
+    @staticmethod
+    def _split_component_id_and_config(
+        i: int, component_configuration_json: Dict
+    ) -> Tuple[ComponentId, Dict]:
+        """
+        Split component id and configuration.
+
+        :param i: the position of the component configuration in the agent config file..
+        :param component_configuration_json: the JSON object to process.
+        :return: the component id and the configuration object.
+        :raises ValueError: if the component id cannot be extracted.
+        """
+        result = deepcopy(component_configuration_json)
+        # author, name, version, type are mandatory fields
+        missing_fields = {"author", "name", "version", "type"}.difference(
+            component_configuration_json.keys()
+        )
+        if len(missing_fields) > 0:
+            raise ValueError(
+                f"There are missing fields in component id {i + 1}: {missing_fields}."
+            )
+        component_name = result.pop("name")
+        component_author = result.pop("author")
+        component_version = result.pop("version")
+        component_type = ComponentType(result.pop("type"))
+        component_public_id = PublicId(
+            component_author, component_name, component_version
+        )
+        component_id = ComponentId(component_type, component_public_id)
+        return component_id, result
+
+    @staticmethod
+    def _validate_component_configuration(
+        component_id: ComponentId, configuration: Dict
+    ) -> None:
+        """
+        Validate the component configuration of an agent configuration file.
+
+        This check is to detect inconsistencies in the specified fields.
+
+        :param component_id: the component id.
+        :param configuration: the configuration dictionary.
+        :return: None
+        :raises ValueError: if the configuration is not valid.
+        """
+        # we need to populate the required fields to validate the configurations.
+        temporary_config = deepcopy(configuration)
+        # common to every package
+        temporary_config["name"] = component_id.name
+        temporary_config["author"] = component_id.author
+        temporary_config["version"] = component_id.version
+        temporary_config["license"] = "some_license"
+        temporary_config["aea_version"] = "0.1.0"
+        if component_id.component_type == ComponentType.PROTOCOL:
+            pass  # no other required field
+        elif component_id.component_type == ComponentType.CONNECTION:
+            temporary_config["class_name"] = "SomeClassName"
+            temporary_config["protocols"] = []
+            temporary_config.setdefault("config", {})
+        elif component_id.component_type == ComponentType.CONTRACT:
+            temporary_config["class_name"] = "SomeClassName"
+        elif component_id.component_type == ComponentType.SKILL:
+            temporary_config["protocols"] = []
+            temporary_config["contracts"] = []
+            temporary_config["skills"] = []
+        loader = ConfigLoaders.from_package_type(component_id.package_type)
+        try:
+            loader._load_from_json(temporary_config)  # pylint: disable=protected-access
+        except jsonschema.ValidationError as e:
+            raise ValueError(
+                f"Configuration of component {component_id} is not valid."
+            ) from e
+        # all good!
+
+    @staticmethod
+    def _check_only_configurable_fields(
+        component_id: ComponentId, configuration: Dict
+    ) -> None:
+        """
+        Check that there are only configurable fields.
+
+        :param component_id: the component id.
+        :param configuration: the configuration object.
+        :return: None
+        """
+        configurable_fields = (
+            component_id.package_type.configuration_class().configurable_fields
+        )
+        non_configurable_fields = set(configuration.keys()).difference(
+            configurable_fields
+        )
+        assert (
+            len(non_configurable_fields) == 0
+        ), f"Bad configuration for component {component_id}: {non_configurable_fields} are non-configurable fields."
 
 
 class ConfigLoaders:

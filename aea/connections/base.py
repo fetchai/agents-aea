@@ -156,16 +156,14 @@ class Connection(Component, ABC):
         """Get the ids of the protocols this connection is restricted to."""
         if self._configuration is None:
             return self._restricted_to_protocols
-        else:
-            return self.configuration.restricted_to_protocols
+        return self.configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:  # pragma: nocover
         """Get the ids of the excluded protocols for this connection."""
         if self._configuration is None:
             return self._excluded_protocols
-        else:
-            return self.configuration.excluded_protocols
+        return self.configuration.excluded_protocols
 
     @property
     def state(self) -> ConnectionStates:

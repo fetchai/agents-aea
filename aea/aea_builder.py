@@ -326,24 +326,27 @@ class AEABuilder:
         :param is_full_reset: whether it is a full reset or not.
         :return: None.
         """
-        self._name = None  # type: Optional[str]
-        self._private_key_paths = {}  # type: Dict[str, Optional[str]]
-        self._connection_private_key_paths = {}  # type: Dict[str, Optional[str]]
+        self._name: Optional[str] = None
+        self._private_key_paths: Dict[str, Optional[str]] = {}
+        self._connection_private_key_paths: Dict[str, Optional[str]] = {}
         if not is_full_reset:
             self._remove_components_from_dependency_manager()
-        self._component_instances = {
+        self._component_instances: Dict[
+            ComponentType, Dict[ComponentConfiguration, Component]
+        ] = {
             ComponentType.CONNECTION: {},
             ComponentType.CONTRACT: {},
             ComponentType.PROTOCOL: {},
             ComponentType.SKILL: {},
-        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
+        }
+        self._custom_component_configurations: Dict[ComponentId, Dict] = {}
         self._to_reset: bool = False
         self._build_called: bool = False
         if not is_full_reset:
             return
         self._default_ledger = DEFAULT_LEDGER
         self._default_connection: PublicId = DEFAULT_CONNECTION
-        self._context_namespace = {}  # type: Dict[str, Any]
+        self._context_namespace: Dict[str, Any] = {}
         self._timeout: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
@@ -1216,6 +1219,9 @@ class AEABuilder:
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+        self._custom_component_configurations = (
+            agent_configuration.component_configurations
+        )
 
     def _find_import_order(
         self,
@@ -1305,8 +1311,7 @@ class AEABuilder:
         )
         builder = AEABuilder(with_default_packages=False)
 
-        # TODO isolate environment
-        # load_env_file(str(aea_config_path / ".env"))
+        # TODO isolate environment: load_env_file(str(aea_config_path / ".env"))
 
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
@@ -1350,6 +1355,11 @@ class AEABuilder:
                     )
             else:
                 configuration = deepcopy(configuration)
+                configuration.update(
+                    self._custom_component_configurations.get(
+                        configuration.component_id, {}
+                    )
+                )
                 _logger = make_logger(configuration, agent_name)
                 component = load_component_from_config(
                     configuration, logger=_logger, **kwargs

@@ -214,7 +214,6 @@ def generate_equilibrium_prices_and_holdings(
     good_endowments_l = []  # type: List[List[int]]
     utility_params_l = []  # type: List[List[float]]
     currency_endowment_l = []  # type: List[int]
-    # exchange_params_l = []  # type: List[float]
     count = 0
     for agent_addr, good_endowment in agent_addr_to_good_endowments.items():
         agent_addresses.append(agent_addr)

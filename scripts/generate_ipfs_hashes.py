@@ -54,7 +54,7 @@ from aea.configurations.base import (
     SkillConfig,
     _compute_fingerprint,
 )
-from aea.helpers.base import yaml_dump
+from aea.helpers.base import yaml_dump, yaml_dump_all
 
 AUTHOR = "fetchai"
 CORE_PATH = Path("aea")
@@ -131,7 +131,14 @@ def sort_configuration_file(config: PackageConfiguration):
     # load config file to get ignore patterns, dump again immediately to impose ordering
     assert config.directory is not None
     configuration_filepath = config.directory / config.default_configuration_filename
-    yaml_dump(config.ordered_json, configuration_filepath.open("w"))
+    if config.package_type == PackageType.AGENT:
+        json_data = config.ordered_json
+        component_configurations = json_data.pop("component_configurations")
+        yaml_dump_all(
+            [json_data] + component_configurations, configuration_filepath.open("w")
+        )
+    else:
+        yaml_dump(config.ordered_json, configuration_filepath.open("w"))
 
 
 def ipfs_hashing(
@@ -148,10 +155,10 @@ def ipfs_hashing(
     :return: the identifier of the hash (e.g. 'fetchai/protocols/default')
            | and the hash of the whole package.
     """
-    # hash again to get outer hash (this time all files):
+    # hash again to get outer hash (this time all files)
     # TODO we still need to ignore some files
     #      use ignore patterns somehow
-    # ignore_patterns = configuration.fingerprint_ignore_patterns
+    # ignore_patterns = configuration.fingerprint_ignore_patterns # noqa: E800
     assert configuration.directory is not None
     result_list = client.add(configuration.directory, recursive=True)
     key = os.path.join(
@@ -387,8 +394,8 @@ def parse_arguments() -> argparse.Namespace:
         help="Time to wait before IPFS daemon is up and running.",
     )
 
-    arguments = parser.parse_args()
-    return arguments
+    arguments_ = parser.parse_args()
+    return arguments_
 
 
 def update_hashes(timeout: float = 10.0) -> int:
@@ -397,7 +404,7 @@ def update_hashes(timeout: float = 10.0) -> int:
 
     :return exit code. 0 for success, 1 if an exception occurred.
     """
-    return_code = 0
+    return_code_ = 0
     package_hashes = {}  # type: Dict[str, str]
     test_package_hashes = {}  # type: Dict[str, str]
     # run the ipfs daemon
@@ -433,9 +440,9 @@ def update_hashes(timeout: float = 10.0) -> int:
             print("Done!")
         except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
-            return_code = 1
+            return_code_ = 1
 
-    return return_code
+    return return_code_
 
 
 def check_same_ipfs_hash(
@@ -456,8 +463,8 @@ def check_same_ipfs_hash(
     #     "p2p_libp2p",
     #     "Agent0",
     #     "dummy",
-    # ]:
-    #     return True  # packages with nested dirs or symlinks, kept for reference
+    # ]: # noqa: E800
+    #     return True  # packages with nested dirs or symlinks, kept for reference # noqa: E800
     key, actual_hash, result_list = ipfs_hashing(client, configuration, package_type)
     expected_hash = all_expected_hashes[key]
     result = actual_hash == expected_hash
@@ -478,7 +485,7 @@ def check_hashes(timeout: float = 10.0) -> int:
     :return: exit code. 1 if some fingerprint/hash don't match or if an exception occurs,
            | 0 in case of success.
     """
-    return_code = 0
+    return_code_ = 0
     failed = False
     expected_package_hashes = from_csv(PACKAGE_HASHES_PATH)  # type: Dict[str, str]
     expected_test_package_hashes = from_csv(
@@ -504,11 +511,11 @@ def check_hashes(timeout: float = 10.0) -> int:
             failed = True
 
     if failed:
-        return_code = 1
+        return_code_ = 1
     else:
         print("OK!")
 
-    return return_code
+    return return_code_
 
 
 def clean_directory() -> None:

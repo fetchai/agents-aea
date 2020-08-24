@@ -147,7 +147,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        if not self._agent.multiplexer.is_connected:
+        if not self._agent.runtime.multiplexer.is_connected:
             self._connect()
         gym_msg = GymMessage(
             dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
@@ -192,7 +192,7 @@ class ProxyEnv(gym.Env):
         """
         assert not self._agent_thread.is_alive(), "Agent already running."
         self._agent_thread.start()
-        while not self._agent.multiplexer.is_connected:
+        while not self._agent.runtime.multiplexer.is_connected:
             time.sleep(0.1)
 
     def _disconnect(self):
@@ -248,16 +248,13 @@ class ProxyEnv(gym.Env):
                     and gym_msg.step_id == expected_step_id
                 ):
                     return gym_msg
-                else:
-                    raise ValueError(
-                        "Unexpected performative or no step_id: {}".format(
-                            gym_msg.performative
-                        )
+                raise ValueError(
+                    "Unexpected performative or no step_id: {}".format(
+                        gym_msg.performative
                     )
-            else:
-                raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
-        else:
-            raise ValueError("Missing envelope.")
+                )
+            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
 
@@ -279,16 +276,13 @@ class ProxyEnv(gym.Env):
                 ):
 
                     return None
-                else:
-                    raise ValueError(
-                        "Unexpected performative or no step_id: {}".format(
-                            gym_msg.performative
-                        )
+                raise ValueError(
+                    "Unexpected performative or no step_id: {}".format(
+                        gym_msg.performative
                     )
-            else:
-                raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
-        else:
-            raise ValueError("Missing envelope.")
+                )
+            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        raise ValueError("Missing envelope.")
 
     @staticmethod
     def _message_to_percept(message: GymMessage) -> Feedback:

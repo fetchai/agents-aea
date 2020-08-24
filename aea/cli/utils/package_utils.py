@@ -168,8 +168,7 @@ def get_package_path(
         return os.path.join(
             ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
         )
-    else:
-        return os.path.join(ctx.cwd, item_type_plural, public_id.name)
+    return os.path.join(ctx.cwd, item_type_plural, public_id.name)
 
 
 def copy_package_directory(src: Path, dst: str) -> Path:

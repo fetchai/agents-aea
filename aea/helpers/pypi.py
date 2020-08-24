@@ -174,14 +174,13 @@ def _handle_range_constraints(
     version_greater_than = Version(greatest_greater_than.version)
     if version_less_than < version_greater_than:
         return False
-    elif version_greater_than == version_less_than:
+    if version_greater_than == version_less_than:
         # check if one of them has NOT the equality
         one_of_them_is_a_strict_comparison = (
             greatest_greater_than.operator == ">"
         ) or (lowest_less_than.operator == "<")
         return not one_of_them_is_a_strict_comparison
-    else:
-        return True
+    return True
 
 
 def is_simple_dep(dep: Dependency) -> bool:

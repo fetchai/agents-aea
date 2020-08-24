@@ -16,18 +16,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains registries."""
 
 import logging
 import queue
-from queue import Queue
 from typing import List, Optional, cast
 
 from aea.configurations.base import (
     PublicId,
     SkillId,
 )
+from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.protocols.base import Message
 from aea.protocols.signing.message import SigningMessage
 from aea.registries.resources import Resources
@@ -39,7 +38,9 @@ logger = logging.getLogger(__name__)
 class Filter:
     """This class implements the filter of an AEA."""
 
-    def __init__(self, resources: Resources, decision_maker_out_queue: Queue):
+    def __init__(
+        self, resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue
+    ):
         """
         Instantiate the filter.
 
@@ -55,7 +56,7 @@ class Filter:
         return self._resources
 
     @property
-    def decision_maker_out_queue(self) -> Queue:
+    def decision_maker_out_queue(self) -> AsyncFriendlyQueue:
         """Get decision maker (out) queue."""
         return self._decision_maker_out_queue
 
@@ -175,7 +176,6 @@ class Filter:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)
                 )
-                # TODO: remove next three lines
                 handler.handle(cast(Message, signing_message))
             else:
                 logger.warning(

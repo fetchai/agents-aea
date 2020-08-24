@@ -61,5 +61,4 @@ def register(
         raise ClickException(
             "Errors occured during registration.\n" + "\n".join(errors)
         )
-    else:
-        return resp_json["key"]
+    return resp_json["key"]

@@ -23,8 +23,8 @@ import logging
 import sys
 from pathlib import Path
 
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.loader import ConfigLoaders
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
@@ -38,10 +38,12 @@ def verify_or_create_private_keys(
     """
     Verify or create private keys.
 
-    :param ctx: Context
+    :param aea_project_path: path to an AEA project.
+    :param exit_on_error: whether we should exit the program on error.
+    :return: the agent configuration.
     """
     path_to_aea_config = aea_project_path / DEFAULT_AEA_CONFIG_FILE
-    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    agent_loader = ConfigLoaders.from_package_type(PackageType.AGENT)
     fp = path_to_aea_config.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 

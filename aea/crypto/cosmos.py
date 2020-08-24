@@ -210,10 +210,9 @@ class CosmosCrypto(Crypto[SigningKey]):
             return self.format_wasm_transaction(
                 transaction, signed_transaction, base64_pbk
             )
-        else:
-            return self.format_default_transaction(
-                transaction, signed_transaction, base64_pbk
-            )
+        return self.format_default_transaction(
+            transaction, signed_transaction, base64_pbk
+        )
 
     @classmethod
     def generate_private_key(cls) -> SigningKey:
@@ -387,7 +386,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_deploy_transaction(
+    def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,

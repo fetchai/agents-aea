@@ -43,11 +43,13 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Address, Envelope, EnvelopeContext
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
-from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue as BaseOefSearchDialogue,
+)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
@@ -116,6 +118,41 @@ class SOEFException(Exception):
         """Construct exception and write log."""
         logger.exception(msg)
         return cls(msg)
+
+
+class OefSearchDialogue(BaseOefSearchDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseOefSearchDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        self._envelope_context = None  # type: Optional[EnvelopeContext]
+
+    @property
+    def envelope_context(self) -> Optional[EnvelopeContext]:
+        """Get envelope_context."""
+        return self._envelope_context
+
+    @envelope_context.setter
+    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
+        """Set envelope_context."""
+        assert self._envelope_context is None, "envelope_context already set!"
+        self._envelope_context = envelope_context
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -368,6 +405,7 @@ class SOEFChannel:
             raise ValueError(
                 "Could not create dialogue for message={}".format(oef_message)
             )
+        oef_search_dialogue.envelope_context = envelope.context
 
         err_ops = OefSearchMessage.OefErrorOperation
         oef_error_operation = err_ops.OTHER
@@ -721,6 +759,7 @@ class SOEFChannel:
             sender=SOEFConnection.connection_id.latest,
             protocol_id=message.protocol_id,
             message=message,
+            context=oef_search_dialogue.envelope_context,
         )
         await self.in_queue.put(envelope)
 
@@ -928,6 +967,7 @@ class SOEFChannel:
             sender=SOEFConnection.connection_id.latest,
             protocol_id=message.protocol_id,
             message=message,
+            context=oef_search_dialogue.envelope_context,
         )
         await self.in_queue.put(envelope)
 

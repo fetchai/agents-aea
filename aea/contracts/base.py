@@ -119,8 +119,7 @@ class Contract(Component):
             contract_class_name
         )
 
-        # TODO: load interfaces here
-        # contract_interface = configuration.contract_interfaces
+        # TODO: load interfaces here: contract_interface = configuration.contract_interfaces
 
         return contract_class(configuration, **kwargs)
 

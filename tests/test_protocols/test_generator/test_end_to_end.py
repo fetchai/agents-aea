@@ -233,7 +233,7 @@ class TestEndToEndGenerator(UseOef):
                 agent_2_handler.handled_message.content_int == message_1.content_int
             ), "Message from Agent 1 to 2: content_int do not match"
             # assert (
-            #     agent_2_handler.handled_message.content_float == message_1.content_float
+            #     agent_2_handler.handled_message.content_float == message_1.content_float # noqa: E800
             # ), "Message from Agent 1 to 2: content_float do not match"
             assert (
                 agent_2_handler.handled_message.content_bool == message_1.content_bool
@@ -270,7 +270,7 @@ class TestEndToEndGenerator(UseOef):
                 agent_1_handler.handled_message.content_int == message_2.content_int
             ), "Message from Agent 2 to 1: content_int do not match"
             # assert (
-            #     agent_1_handler.handled_message.content_float == message_2.content_float
+            #     agent_1_handler.handled_message.content_float == message_2.content_float # noqa: E800
             # ), "Message from Agent 2 to 1: content_float do not match"
             assert (
                 agent_1_handler.handled_message.content_bool == message_2.content_bool

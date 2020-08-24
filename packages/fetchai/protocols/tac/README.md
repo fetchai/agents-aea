@@ -1,15 +1,5 @@
 # TAC Protocol
 
-**Name:** tac
-
-**Author**: fetchai
-
-**Version**: 0.4.0
-
-**Short Description**: The tac protocol implements the messages an AEA needs to participate in a Trading Agent Competition (TAC).
-
-**License**: Apache-2.0
-
 ## Description
 
 This is a protocol for participating in a Trading Agent Competition (TAC). 
@@ -20,7 +10,7 @@ This is a protocol for participating in a Trading Agent Competition (TAC).
 ---
 name: tac
 author: fetchai
-version: 0.4.0
+version: 0.6.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
@@ -84,8 +74,8 @@ reply:
   transaction: [transaction_confirmation, tac_error, cancelled]
   cancelled: []
   game_data: [transaction, transaction_confirmation, cancelled]
-  transaction_confirmation: [transaction, transaction_confirmation]
-  tac_error: []
+  transaction_confirmation: [transaction, transaction_confirmation, cancelled]
+  tac_error: [transaction, transaction_confirmation, cancelled]
 termination: [cancelled, tac_error]
 roles: {participant, controller}
 end_states: [successful, failed]

@@ -1438,7 +1438,6 @@ class ProtocolGenerator:
                     self.protocol_specification.name, performative, content_name
                 )
                 self._change_indent(1)
-                # no_indents += 1
             decoding_str += self._decoding_message_content_from_protobuf_to_python(
                 performative, content_name, sub_type
             )
@@ -1813,7 +1812,6 @@ class ProtocolGenerator:
                 self._change_indent(-1)
                 proto_buff_schema_str += self.indent + "}\n\n"
         proto_buff_schema_str += "\n"
-        # self._change_indent(-1)
 
         # meta-data
         proto_buff_schema_str += self.indent + "// Standard {}Message fields\n".format(
