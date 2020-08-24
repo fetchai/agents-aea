@@ -73,8 +73,8 @@ class TestBaseSerializations:
     @classmethod
     def setup_class(cls):
         """Set up the use case."""
-        cls.message = Message(content="hello")
-        cls.message2 = Message(body={"content": "hello"})
+        cls.message = Message(dialogue_reference=("", ""), content="hello")
+        cls.message2 = Message(dialogue_reference=("", ""), body={"content": "hello"})
 
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
@@ -171,13 +171,13 @@ class TestMessageAttributes:
     def test_to(self):
         """Test the 'to' attribute getter and setter."""
         message = Message()
-        with pytest.raises(AssertionError, match="To must not be None."):
+        with pytest.raises(AssertionError, match="Message's 'To' field must be set."):
             message.to
 
         message.to = "to"
         assert message.to == "to"
 
-        with pytest.raises(AssertionError, match="To already set."):
+        with pytest.raises(AssertionError, match="To is already set."):
             message.to = "to"
 
     def test_dialogue_reference(self):
@@ -194,24 +194,3 @@ class TestMessageAttributes:
         """Test the 'target' attribute."""
         message = Message(target=1)
         assert message.target == 1
-
-
-@pytest.mark.parametrize("dialogue_classes", DIALOGUE_CLASSES)
-def test_dialogue(dialogue_classes):
-    """Test dialogue initialization."""
-    dialogue_class, _ = dialogue_classes
-    dialogue = dialogue_class(DialogueLabel(("x", "y"), "opponent_addr", "starer_addr"))
-    assert dialogue.is_valid(MagicMock())
-
-
-@pytest.mark.parametrize("dialogues_classes", DIALOGUE_CLASSES)
-def test_default_dialogues(dialogues_classes):
-    """Test default dialogues initialization."""
-    dialogue_class, dialogues_class = dialogues_classes
-    dialogues = dialogues_class("agent_address")
-
-    dialogue = dialogues.create_dialogue(
-        DialogueLabel(("x", "y"), "opponent_addr", "starter_addr"),
-        next(iter(dialogue_class.Role)),
-    )
-    assert isinstance(dialogue, dialogue_class)
