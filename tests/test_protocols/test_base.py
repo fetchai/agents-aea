@@ -173,13 +173,13 @@ class TestMessageAttributes:
     def test_to(self):
         """Test the 'to' attribute getter and setter."""
         message = Message()
-        with pytest.raises(AssertionError, match="To must not be None."):
+        with pytest.raises(ValueError, match="To must not be None."):
             message.to
 
         message.to = "to"
         assert message.to == "to"
 
-        with pytest.raises(AssertionError, match="To already set."):
+        with pytest.raises(ValueError, match="To already set."):
             message.to = "to"
 
     def test_dialogue_reference(self):
