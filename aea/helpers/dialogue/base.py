@@ -982,10 +982,7 @@ class Dialogues(ABC):
         :param counterparty: the counterparty
         :return: The dialogue is one exists with the counterparty, None otherwise.
         """
-        if counterparty in self._dialogue_by_address:
-            return self._dialogue_by_address[counterparty]
-        else:
-            return None
+        return self._dialogue_by_address.get(counterparty, None)
 
     def is_message_by_self(self, message: Message) -> bool:
         """
