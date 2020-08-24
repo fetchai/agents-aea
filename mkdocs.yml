@@ -133,10 +133,6 @@ nav:
         - Decision Maker:
           - Base: 'api/decision_maker/base.md'
           - Default: 'api/decision_maker/default.md'
-          - Messages:
-            - Base: 'api/decision_maker/messages/base.md'
-            - State Update: 'api/decision_maker/messages/state_update.md'
-            - Transaction: 'api/decision_maker/messages/transaction.md'
         - Helpers:
           - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
           - Async Utils: 'api/helpers/async_utils.md'
@@ -194,6 +190,7 @@ nav:
           - Behaviors: 'api/skills/behaviours.md'
           - Task: 'api/skills/tasks.md'
         - Test Tools: 'api/test_tools/generic.md'
+    - Glossary: 'glossary.md'
     - Q&A: 'questions-and-answers.md'
 
 plugins:

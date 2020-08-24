@@ -52,7 +52,7 @@ def is_url_reachable(url: str) -> bool:
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
         return True
     try:
-        response = requests.head(url)
+        response = requests.head(url, timeout=3)
         if response.status_code == 200:
             return True
         if response.status_code in [403, 405]:
@@ -162,6 +162,8 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
     :param all_files: all the doc file paths
     :param regex: the regex to check for in the file.
     """
+    if file == Path("docs/version.md"):
+        return
     matches = regex.finditer(file.read_text())
     for match in matches:
         result = match.group(1)
