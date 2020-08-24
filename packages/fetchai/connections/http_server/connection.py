@@ -55,10 +55,12 @@ from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel
-from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+from aea.mail.base import Address, Envelope, EnvelopeContext, Message, URI
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
@@ -70,6 +72,34 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_serve
 
 RequestId = DialogueLabel
 PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.7.0")
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, agent_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.SERVER
+
+        BaseHttpDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 def headers_to_string(headers: Dict):

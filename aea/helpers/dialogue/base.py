@@ -906,6 +906,7 @@ class Dialogues(ABC):
         :return: None
         """
         self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_by_address = {}  # type: Dict[Address, Dialogue]
         self._incomplete_to_complete_dialogue_labels = (
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
@@ -971,6 +972,20 @@ class Dialogues(ABC):
         :return: dialogue stats object
         """
         return self._dialogue_stats
+
+    def get_dialogue_with_counterparty(
+        self, counterparty: Address
+    ) -> Optional[Dialogue]:
+        """
+        Get the dialogue by address.
+
+        :param counterparty: the counterparty
+        :return: The dialogue is one exists with the counterparty, None otherwise.
+        """
+        if counterparty in self._dialogue_by_address:
+            return self._dialogue_by_address[counterparty]
+        else:
+            return None
 
     def is_message_by_self(self, message: Message) -> bool:
         """
@@ -1297,6 +1312,7 @@ class Dialogues(ABC):
             role=role,
         )
         self.dialogues.update({dialogue_label: dialogue})
+        self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = dialogue
         return dialogue
 
     @staticmethod

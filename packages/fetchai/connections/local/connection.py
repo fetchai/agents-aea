@@ -27,13 +27,14 @@ from typing import Dict, List, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.search.models import Description
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Address, Envelope, Message
 from aea.protocols.default.message import DefaultMessage
 
+from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
 from packages.fetchai.protocols.oef_search.dialogues import (
-    OefSearchDialogue,
-    OefSearchDialogues,
+    OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
@@ -45,6 +46,34 @@ RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
 PUBLIC_ID = PublicId.from_str("fetchai/local:0.7.0")
+
+
+class OefSearchDialogues(BaseOefSearchDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return OefSearchDialogue.Role.OEF_NODE
+
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=str(OEFLocalConnection.connection_id),
+            role_from_first_message=role_from_first_message,
+        )
 
 
 class LocalNode:
@@ -109,9 +138,7 @@ class LocalNode:
         self._out_queues[address] = writer
 
         self.address = address
-        self._dialogues = OefSearchDialogues(
-            agent_address=str(OEFLocalConnection.connection_id)
-        )
+        self._dialogues = OefSearchDialogues()
         return q
 
     def start(self):

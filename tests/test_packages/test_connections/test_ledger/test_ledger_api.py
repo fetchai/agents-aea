@@ -31,6 +31,7 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.helpers.async_utils import AsyncState
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
@@ -38,13 +39,16 @@ from aea.helpers.transaction.base import (
     TransactionDigest,
     TransactionReceipt,
 )
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope, Message
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
-from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogues
+from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
@@ -71,6 +75,34 @@ ledger_ids = pytest.mark.parametrize(
         (COSMOS, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
+
+
+class LedgerApiDialogues(BaseLedgerApiDialogues):
+    """The dialogues class keeps track of all ledger_api dialogues."""
+
+    def __init__(self, agent_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return LedgerApiDialogue.Role.AGENT
+
+        BaseLedgerApiDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 @pytest.mark.integration

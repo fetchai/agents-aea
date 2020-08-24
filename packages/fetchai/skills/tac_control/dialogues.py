@@ -28,8 +28,6 @@ This module contains the classes required for dialogue management.
 - TacDialogues: The dialogues class keeps track of all dialogues of type tac.
 """
 
-from typing import Dict
-
 from aea.helpers.dialogue.base import Dialogue
 from aea.protocols.base import Address, Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
@@ -141,28 +139,3 @@ class TacDialogues(Model, BaseTacDialogues):
             agent_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
-        self._dialogue_by_address = {}  # type: Dict[str, Dialogue]
-
-    # ToDo replace the dialogue_by_address functionality if required with a method that dynamically
-    # loops through all dialogues and constructs the dialogue_by_address dict
-    # @property
-    # def dialogue_by_address(self) -> Dict[str, Dialogue]:
-    #     """Get the dialogue by address."""
-    #     return self._dialogue_by_address
-    #
-    # def create_dialogue(
-    #     self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    # ) -> TacDialogue:
-    #     """
-    #     Create an instance of fipa dialogue.
-    #
-    #     :param dialogue_label: the identifier of the dialogue
-    #     :param role: the role of the agent this dialogue is maintained for
-    #
-    #     :return: the created dialogue
-    #     """
-    #     dialogue = TacDialogue(
-    #         dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-    #     )
-    #     self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = dialogue
-    #     return dialogue

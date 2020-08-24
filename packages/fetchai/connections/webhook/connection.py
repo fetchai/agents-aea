@@ -28,9 +28,12 @@ from aiohttp import web  # type: ignore
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+from aea.protocols.base import Message
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
@@ -42,6 +45,34 @@ PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.6.0")
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
 RequestId = str
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.CLIENT
+
+        BaseHttpDialogues.__init__(
+            self,
+            agent_address=str(WebhookConnection.connection_id),
+            role_from_first_message=role_from_first_message,
+        )
 
 
 class WebhookChannel:
@@ -81,7 +112,7 @@ class WebhookChannel:
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self.logger = logger
         self.logger.info("Initialised a webhook channel")
-        self._dialogues = HttpDialogues(str(WebhookConnection.connection_id))
+        self._dialogues = HttpDialogues()
 
     async def connect(self) -> None:
         """

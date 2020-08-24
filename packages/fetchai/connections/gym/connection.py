@@ -31,15 +31,45 @@ import gym
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.base import locate
-from aea.mail.base import Address, Envelope
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.mail.base import Address, Envelope, Message
 
-from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
+from packages.fetchai.protocols.gym.dialogues import GymDialogue
+from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
 PUBLIC_ID = PublicId.from_str("fetchai/gym:0.6.0")
+
+
+class GymDialogues(BaseGymDialogues):
+    """The dialogues class keeps track of all gym dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return GymDialogue.Role.ENVIRONMENT
+
+        BaseGymDialogues.__init__(
+            self,
+            agent_address=str(PUBLIC_ID),
+            role_from_first_message=role_from_first_message,
+        )
 
 
 class GymChannel:
@@ -57,7 +87,7 @@ class GymChannel:
             self.THREAD_POOL_SIZE
         )
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = logger
-        self._dialogues = GymDialogues(str(PUBLIC_ID))
+        self._dialogues = GymDialogues()
 
     def _get_message_and_dialogue(
         self, envelope: Envelope

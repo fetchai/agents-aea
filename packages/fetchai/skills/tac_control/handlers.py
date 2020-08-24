@@ -290,8 +290,8 @@ class TacHandler(Handler):
         self.context.outbox.put_message(message=sender_tac_msg)
 
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
-        recovered_tac_dialogue = tac_dialogues.dialogue_by_address.get(
-            transaction.counterparty_address, None
+        recovered_tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(
+            transaction.counterparty_address
         )
         assert recovered_tac_dialogue is not None, "Error when retrieving dialogue."
         last_msg = recovered_tac_dialogue.last_message

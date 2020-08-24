@@ -38,10 +38,11 @@ from aea.connections.stub.connection import (
     DEFAULT_OUTPUT_FILE_NAME,
     StubConnection,
 )
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
-from aea.protocols.default.dialogues import DefaultDialogues
+from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 
 
@@ -72,7 +73,19 @@ def _run_interaction_channel():
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
     outbox = OutBox(multiplexer, default_address=identity_stub.address)
-    dialogues = DefaultDialogues(identity_stub.name)
+
+    def role_from_first_message(
+        message: Message, receiver_address: Address
+    ) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :param receiver_address: the address of the receiving agent
+        :return: The role of the agent
+        """
+        return DefaultDialogue.Role.AGENT
+
+    dialogues = DefaultDialogues(identity_stub.name, role_from_first_message)
 
     try:
         multiplexer.connect()
