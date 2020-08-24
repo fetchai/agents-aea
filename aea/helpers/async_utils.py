@@ -268,9 +268,9 @@ def ensure_loop(loop: Optional[AbstractEventLoop] = None) -> AbstractEventLoop:
     try:
         loop = loop or asyncio.new_event_loop()
         if loop.is_closed():
-            ValueError("Event loop closed.")  # pragma: nocover
+            raise ValueError("Event loop closed.")  # pragma: nocover
         if loop.is_running():
-            ValueError("Event loop running.")  # pragma: nocover
+            raise ValueError("Event loop running.")
     except (RuntimeError, ValueError):
         loop = asyncio.new_event_loop()
 
