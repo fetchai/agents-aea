@@ -138,7 +138,7 @@ def is_external_url(url: str) -> bool:
     :param url: the URL
     :return: true if it is external, false otherwise.
     """
-    return url.startswith("https") or url.startswith("http")
+    return url.startswith("https://") or url.startswith("http://")
 
 
 def validate_external_url(url, file):
