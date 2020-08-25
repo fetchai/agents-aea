@@ -63,6 +63,7 @@ class GymDialogues(BaseGymDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
+            # The gym connection maintains the dialogue on behalf of the environment
             return GymDialogue.Role.ENVIRONMENT
 
         BaseGymDialogues.__init__(

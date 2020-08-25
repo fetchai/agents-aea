@@ -71,6 +71,7 @@ class HttpDialogues(BaseHttpDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
+            # The client connection maintains the dialogue on behalf of the server
             return HttpDialogue.Role.SERVER
 
         BaseHttpDialogues.__init__(

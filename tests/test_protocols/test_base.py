@@ -101,6 +101,16 @@ class TestMessageProperties:
         assert self.message.get("kwarg") == self.kwarg
         assert not self.message.has_sender
         assert not self.message.has_to
+        to = "to"
+        sender = "sender"
+        self.message.to = to
+        self.message.sender = sender
+        assert self.message.sender == sender
+        assert self.message.to == to
+        assert (
+            str(self.message)
+            == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
+        )
 
 
 class TestBaseSerializations:
@@ -161,6 +171,7 @@ class TestProtocolFromDir:
         assert str(default_protocol.public_id) == str(
             DEFAULT_PROTOCOL
         ), "Protocol not loaded correctly."
+        assert default_protocol.serializer is not None
 
     @classmethod
     def teardown_class(cls):

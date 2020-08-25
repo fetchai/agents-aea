@@ -303,7 +303,7 @@ class TestDialogueBase:
             self.dialogue.try_get_message(self.valid_message_1_by_self.message_id)
             is None
         )
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
         assert (
             self.dialogue.try_get_message(self.valid_message_1_by_self.message_id)
             == self.valid_message_1_by_self
@@ -313,7 +313,7 @@ class TestDialogueBase:
             self.dialogue.try_get_message(self.valid_message_2_by_other.message_id)
             is None
         )
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_2_by_other)
         assert (
             self.dialogue.try_get_message(self.valid_message_2_by_other.message_id)
             == self.valid_message_2_by_other
@@ -325,7 +325,7 @@ class TestDialogueBase:
             self.dialogue.get_message(self.valid_message_1_by_self.message_id)
         assert str(cm.value) == "Message not present."
 
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
         assert (
             self.dialogue.get_message(self.valid_message_1_by_self.message_id)
             == self.valid_message_1_by_self
@@ -335,7 +335,7 @@ class TestDialogueBase:
             self.dialogue.get_message(self.valid_message_2_by_other.message_id)
         assert str(cm.value) == "Message not present."
 
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_2_by_other)
         assert (
             self.dialogue.get_message(self.valid_message_2_by_other.message_id)
             == self.valid_message_2_by_other
@@ -345,7 +345,7 @@ class TestDialogueBase:
         """Test the 'has_message' method."""
         assert self.dialogue.has_message(self.valid_message_1_by_self) is False
 
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
         assert self.dialogue.has_message(self.valid_message_1_by_self) is True
 
         assert self.dialogue.has_message(self.valid_message_2_by_other) is False
@@ -354,19 +354,19 @@ class TestDialogueBase:
         """Test the 'has_message_id' method."""
         assert self.dialogue.has_message_id(1) is False
 
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
         assert self.dialogue.has_message_id(1) is True
 
         assert self.dialogue.has_message_id(2) is False
 
     def test_update_positive(self):
         """Positive test for the 'update' method."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
         assert self.dialogue.last_outgoing_message == self.valid_message_1_by_self
 
     def test_update_positive_multiple_messages_by_self(self):
         """Positive test for the 'update' method: multiple messages by self is sent to the dialogue."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         valid_message_2_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
@@ -378,7 +378,7 @@ class TestDialogueBase:
         valid_message_2_by_self.sender = self.agent_address
         valid_message_2_by_self.to = self.opponent_address
 
-        self.dialogue.update(valid_message_2_by_self)
+        self.dialogue._update(valid_message_2_by_self)
 
         assert self.dialogue.last_message.message_id == 2
 
@@ -395,7 +395,7 @@ class TestDialogueBase:
         invalid_message_1_by_self.to = self.opponent_address
 
         with pytest.raises(InvalidDialogueMessage) as cm:
-            self.dialogue.update(invalid_message_1_by_self)
+            self.dialogue._update(invalid_message_1_by_self)
         assert (
             str(cm.value)
             == "Message 2 is invalid with respect to this dialogue. Error: "
@@ -415,7 +415,7 @@ class TestDialogueBase:
         invalid_message_1_by_self.to = self.opponent_address
 
         with pytest.raises(InvalidDialogueMessage) as cm:
-            self.dialogue.update(invalid_message_1_by_self)
+            self.dialogue._update(invalid_message_1_by_self)
         assert str(cm.value) == (
             "The message 1 does not belong to this dialogue."
             "The dialogue reference of the message is {}, while the dialogue reference of the dialogue is {}".format(
@@ -440,7 +440,7 @@ class TestDialogueBase:
 
     def test_reply_positive(self):
         """Positive test for the 'reply' method."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         self.dialogue.reply(
             target_message=self.valid_message_1_by_self,
@@ -463,7 +463,7 @@ class TestDialogueBase:
 
     def test_reply_negative_invalid_target(self):
         """Negative test for the 'reply' method: target message is not in the dialogue."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
         assert self.dialogue.last_message.message_id == 1
 
         invalid_message_1_by_self = DefaultMessage(
@@ -487,8 +487,8 @@ class TestDialogueBase:
 
     def test_is_valid_next_message_positive(self):
         """Positive test for the 'validate_next_message' method"""
-        self.dialogue.update(self.valid_message_1_by_self)
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_2_by_other)
 
         result, msg = self.dialogue.validate_next_message(self.valid_message_3_by_self)
         assert result is True
@@ -512,8 +512,8 @@ class TestDialogueBase:
 
     def test_is_valid_next_message_negative_additional_validation_fails(self):
         """Negative test for the 'validate_next_message' method: additional_validation method fails"""
-        self.dialogue.update(self.valid_message_1_by_self)
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_2_by_other)
 
         invalid_message_3_by_self = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -547,7 +547,7 @@ class TestDialogueBase:
         assert result is True
         assert msg == "The initial message passes basic validation."
 
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         result, msg = self.dialogue._basic_validation(self.valid_message_2_by_other)
         assert result is True
@@ -571,7 +571,7 @@ class TestDialogueBase:
 
     def test_basic_validation_negative_non_initial_message_invalid(self):
         """Negative test for the '_basic_validation' method: non-initial message is invalid."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -675,7 +675,7 @@ class TestDialogueBase:
 
     def test_basic_validation_non_initial_message_positive(self):
         """Positive test for the '_basic_validation_non_initial_message' method."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         result, msg = self.dialogue._basic_validation_non_initial_message(
             self.valid_message_2_by_other
@@ -687,7 +687,7 @@ class TestDialogueBase:
         self,
     ):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has invalid dialogue reference."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(2), str(1)),
@@ -707,7 +707,7 @@ class TestDialogueBase:
 
     def test_basic_validation_non_initial_message_negative_invalid_message_id(self):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has invalid message id."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -727,7 +727,7 @@ class TestDialogueBase:
 
     def test_basic_validation_non_initial_message_negative_invalid_target_1(self):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has target less than 1."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -750,7 +750,7 @@ class TestDialogueBase:
 
     def test_basic_validation_non_initial_message_negative_invalid_target_2(self):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has target greater than the id of the last existing message."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -772,7 +772,7 @@ class TestDialogueBase:
 
     def test_basic_validation_non_initial_message_negative_invalid_performative(self):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has invalid performative."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = StateUpdateMessage(
             dialogue_reference=(str(1), str(1)),
@@ -802,8 +802,8 @@ class TestDialogueBase:
         assert result is True
         assert msg == "The message passes additional validation."
 
-        self.dialogue.update(self.valid_message_1_by_self)
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_2_by_other)
 
         result, msg = self.dialogue._additional_validation(self.valid_message_3_by_self)
         assert result is True
@@ -811,8 +811,8 @@ class TestDialogueBase:
 
     def test_additional_validation_negative_invalid_target(self):
         """Negative test for the '_additional_rules' method: input message has invalid target (its target is not the last message of the dialogue)."""
-        self.dialogue.update(self.valid_message_1_by_self)
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_2_by_other)
 
         invalid_message_3_by_self = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -830,7 +830,7 @@ class TestDialogueBase:
 
     def test_update_dialogue_label_positive(self):
         """Positive test for the 'update_dialogue_label' method."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         new_label = DialogueLabel(
             (str(1), str(1)), self.valid_message_1_by_self.to, self.agent_address
@@ -841,8 +841,8 @@ class TestDialogueBase:
 
     def test_update_dialogue_label_negative_invalid_existing_label(self):
         """Negative test for the 'update_dialogue_label' method: existing dialogue reference is invalid."""
-        self.dialogue.update(self.valid_message_1_by_self)
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_2_by_other)
 
         new_label = DialogueLabel(
             (str(1), str(1)), self.valid_message_1_by_self.to, self.agent_address
@@ -861,7 +861,7 @@ class TestDialogueBase:
 
     def test_update_dialogue_label_negative_invalid_input_label(self):
         """Negative test for the 'update_dialogue_label' method: input dialogue label's dialogue reference is invalid."""
-        self.dialogue.update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_1_by_self)
 
         new_label = DialogueLabel(
             (str(2), ""), self.valid_message_1_by_self.to, self.agent_address
@@ -883,10 +883,10 @@ class TestDialogueBase:
 
     def test___str__1(self):
         """Test the '__str__' method: dialogue is self initiated"""
-        self.dialogue.update(self.valid_message_1_by_self)
-        self.dialogue.update(self.valid_message_2_by_other)
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue._update(self.valid_message_2_by_other)
 
-        self.dialogue.update(self.valid_message_3_by_self)
+        self.dialogue._update(self.valid_message_3_by_self)
 
         dialogue_str = (
             "Dialogue Label: 1__agent 2_agent 1\nbytes( )\nbytes( )\nbytes( )"
@@ -904,7 +904,7 @@ class TestDialogueBase:
         valid_message_1_by_other.sender = self.opponent_address
         valid_message_1_by_other.to = self.agent_address
 
-        self.dialogue_opponent_started.update(valid_message_1_by_other)
+        self.dialogue_opponent_started._update(valid_message_1_by_other)
 
         valid_message_2_by_self = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -916,7 +916,7 @@ class TestDialogueBase:
         valid_message_2_by_self.sender = self.agent_address
         valid_message_2_by_self.to = self.opponent_address
 
-        self.dialogue_opponent_started.update(valid_message_2_by_self)
+        self.dialogue_opponent_started._update(valid_message_2_by_self)
 
         valid_message_3_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
@@ -928,7 +928,7 @@ class TestDialogueBase:
         valid_message_3_by_other.sender = self.opponent_address
         valid_message_3_by_other.to = self.agent_address
 
-        self.dialogue_opponent_started.update(valid_message_3_by_other)
+        self.dialogue_opponent_started._update(valid_message_3_by_other)
 
         dialogue_str = (
             "Dialogue Label: 1_1_agent 2_agent 2\nbytes( )\nbytes( )\nbytes( )"

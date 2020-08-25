@@ -175,6 +175,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
+            # The soef connection maintains the dialogue on behalf of the node
             return OefSearchDialogue.Role.OEF_NODE
 
         BaseOefSearchDialogues.__init__(

@@ -33,8 +33,8 @@ from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope, Message
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
-from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import AnyStringWith

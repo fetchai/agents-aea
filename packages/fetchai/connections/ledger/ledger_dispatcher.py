@@ -60,6 +60,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
+            # The ledger connection maintains the dialogue on behalf of the ledger
             return LedgerApiDialogue.Role.LEDGER
 
         BaseLedgerApiDialogues.__init__(
