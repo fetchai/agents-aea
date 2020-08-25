@@ -31,7 +31,9 @@ from aea.configurations.base import (
     ContractConfig,
     ContractId,
 )
+from aea.contracts import contract_registry
 from aea.crypto.base import LedgerApi
+from aea.exceptions import AEAException
 from aea.helpers.base import load_aea_package, load_module
 
 logger = logging.getLogger(__name__)
@@ -119,8 +121,7 @@ class Contract(Component):
             contract_class_name
         )
 
-        # TODO: load interfaces here: contract_interface = configuration.contract_interfaces
-
+        _try_to_register_contract(configuration)
         return contract_class(configuration, **kwargs)
 
     @classmethod
@@ -191,3 +192,25 @@ class Contract(Component):
         :return: the tx
         """
         raise NotImplementedError
+
+
+def _try_to_register_contract(configuration: ContractConfig):
+    """Register a contract to the registry."""
+    if str(configuration.public_id) in contract_registry.specs:
+        logger.warning(
+            f"Skipping registration of contract {configuration.public_id} since already registered."
+        )
+        return
+    logger.debug(f"Registering contract {configuration.public_id}")  # pragma: nocover
+    try:  # pragma: nocover
+        contract_registry.register(
+            id_=str(configuration.public_id),
+            entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+            class_kwargs={"contract_interface": configuration.contract_interfaces},
+            contract_config=configuration,
+        )
+    except AEAException as e:  # pragma: nocover
+        if "Cannot re-register id:" in str(e):
+            logger.warning("Already registered: {}".format(configuration.class_name))
+        else:
+            raise e

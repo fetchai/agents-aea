@@ -70,7 +70,6 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.contracts import contract_registry
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
@@ -890,7 +889,6 @@ class AEABuilder:
             ComponentType.SKILL, resources, identity.name, agent_context=aea.context
         )
         self._build_called = True
-        self._populate_contract_registry()
         return aea
 
     def _get_agent_loop_timeout(self) -> float:
@@ -1366,37 +1364,6 @@ class AEABuilder:
                 )
 
             resources.add_component(component)
-
-    def _populate_contract_registry(self):
-        """Populate contract registry."""
-        for configuration in self._package_dependency_manager.get_components_by_type(
-            ComponentType.CONTRACT
-        ).values():
-            configuration = cast(ContractConfig, configuration)
-            if str(configuration.public_id) in contract_registry.specs:
-                logger.warning(
-                    f"Skipping registration of contract {configuration.public_id} since already registered."
-                )
-                continue
-            logger.debug(  # pragma: nocover
-                f"Registering contract {configuration.public_id}"
-            )
-            try:  # pragma: nocover
-                contract_registry.register(
-                    id_=str(configuration.public_id),
-                    entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-                    class_kwargs={
-                        "contract_interface": configuration.contract_interfaces
-                    },
-                    contract_config=configuration,  # TODO: resolve configuration being applied globally
-                )
-            except AEAException as e:  # pragma: nocover
-                if "Cannot re-register id:" in str(e):
-                    logger.warning(
-                        "Already registered: {}".format(configuration.class_name)
-                    )
-                else:
-                    raise e
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:
