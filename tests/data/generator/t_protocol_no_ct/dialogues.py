@@ -67,6 +67,7 @@ class TProtocolNoCtDialogue(Dialogue):
         ),
         TProtocolNoCtMessage.Performative.PERFORMATIVE_PT: frozenset(
             {
+                TProtocolNoCtMessage.Performative.PERFORMATIVE_PT,
                 TProtocolNoCtMessage.Performative.PERFORMATIVE_PCT,
                 TProtocolNoCtMessage.Performative.PERFORMATIVE_PMT,
             }
