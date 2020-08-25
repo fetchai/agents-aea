@@ -272,17 +272,17 @@ class AEA(Agent, WithLogger):
             error_handler.send_unsupported_protocol(envelope)
             return None, []
 
-        try:
-            if isinstance(envelope.message, Message):
-                msg = envelope.message
-            else:
+        if isinstance(envelope.message, Message):
+            msg = envelope.message
+        else:
+            try:
                 msg = protocol.serializer.decode(envelope.message)
-            msg.sender = envelope.sender
-            msg.to = envelope.to
-        except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
-            self.logger.warning("Decoding error. Exception: {}".format(str(e)))
-            error_handler.send_decoding_error(envelope)
-            return None, []
+                msg.sender = envelope.sender
+                msg.to = envelope.to
+            except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
+                self.logger.warning("Decoding error. Exception: {}".format(str(e)))
+                error_handler.send_decoding_error(envelope)
+                return None, []
 
         handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.skill_id

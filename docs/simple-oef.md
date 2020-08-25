@@ -12,7 +12,7 @@ The work-flow is:
 
 When an agent registers with the soef, it is issued with a _unique reference_ which is quoted in all subsequent transactions. This way, the soef knows who its talking to. The soef is transaction based, so it does not need a permanent connection to be maintained in order to work with it. If it does not hear from an agent for a period of time, that agent will be timed out and automatically unregistered. This period of time is typically about one hour, but you can see the soef's configuration at:
 
-<a href="http://soef.fetch.ai:9002">http://soef.fetch.ai:9002</a>
+<a href="http://soef.fetch.ai:9002" target="_blank">http://soef.fetch.ai:9002</a>
 
 Agents identify themselves in a number of ways. These include their address, their given name, their classification and their genus. They can also describe how they "look" in other ways, and specify the services that they provide. 
 
@@ -58,7 +58,7 @@ A genus is a coarse agent class. It is the roughest description of what an agent
 | `building`  | Large fixed location item such as house, railway station, school |
 | `buyer`     | Indicates the agent is a buyer _only_ and does not have value to deliver |
 
-The best way to use genus is to pick the *best fit* choice. If there isn't one for you, then do not specify it. If you feel that a high-level genus is missing, please make the suggestion in our Developer Slack (see <a href="https://community.fetch.ai">here</a> for the instructions on joining, or the "Further Information" section below). 
+The best way to use genus is to pick the *best fit* choice. If there isn't one for you, then do not specify it. If you feel that a high-level genus is missing, please make the suggestion in our Developer Slack (see <a href="https://community.fetch.ai" target="_blank">here</a> for the instructions on joining, or the "Further Information" section below). 
 
 #### Architectures
 
@@ -105,7 +105,7 @@ The soef is designed for **geographic searches** where agents are able to find o
 
 Some limits apply to the maximum number of filters or range. This may vary from soef instance to soef instance. You can see (and parse if required) these by getting the soef status at:
 
-<a href="http://soef.fetch.ai:9002">http://soef.fetch.ai:9002</a>
+<a href="http://soef.fetch.ai:9002" target="_blank">http://soef.fetch.ai:9002</a>
 
 The soef returns XML that includes information about all found agents. An example of that, unparsed, looks like this:
 
@@ -212,6 +212,6 @@ The soef has a number of commands that can be used to set or update personality 
 
 ## Further information
 
-You can find further information, or talk to us, in the #s-oef channel on our official developer Slack. You can find that <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY">here</a>.
+You can find further information, or talk to us, in the #s-oef channel on our official developer Slack. You can find that <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY" target="_blank">here</a>.
 
 We welcome your feedback and strive to deliver the best decentralised search and discovery service for agents that is possible. There are many upcoming features, including the operation incentive mechanisms, additional security and encryption, active searches (where results happen without `find_around_me` being issued), non-geographic searches across one and many soef nodes and dimensional-reduction based approximate searches. 

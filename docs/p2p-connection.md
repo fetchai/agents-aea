@@ -107,7 +107,7 @@ The entries can be described as follow:
 - `AEA_P2P_ID`: the agent's private key
 - `AEA_P2P_URI`: the URI under which the peer is reachable locally
 - `AEA_P2P_ENTRY_URIS`: an optionally supplied list of entry URIs for the peer to bootstrap
-- `NODE_TO_AEA`: the <a href="https://en.wikipedia.org/wiki/Pipeline_(Unix)">pipe</a> for the peer to agent comms
+- `NODE_TO_AEA`: the <a href="https://en.wikipedia.org/wiki/Pipeline_(Unix)" target="_blank">pipe</a> for the peer to agent comms
 - `AEA_TO_NODE`: the pipe for the agent to peer comms
 - `AEA_P2P_URI_PUBLIC`: the URI under which the peer is reachable publicly
 - `AEA_P2P_DELEGATE_URI`: the URI under which the peer receives delegate connections
