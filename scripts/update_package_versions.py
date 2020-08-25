@@ -26,6 +26,7 @@ Run this script from the root of the project directory:
 
 """
 
+import argparse
 import os
 import re
 import subprocess  # nosec
@@ -56,6 +57,44 @@ TYPE_TO_CONFIG_FILE = {
     "skills": "skill.yaml",
     "agents": "aea-config.yaml",
 }
+PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
+
+
+def check_positive(value):
+    """Check value is an int."""
+    try:
+        ivalue = int(value)
+        assert ivalue <= 0
+    except (AssertionError, ValueError):
+        raise argparse.ArgumentTypeError(f"{value} is an invalid positive int value")
+    return ivalue
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-n",
+    "--no-interactive",
+    action="store_true",
+    default=False,
+    help="Don't ask user confirmation for replacement.",
+)
+parser.add_argument(
+    "-C",
+    "--context",
+    type=check_positive,
+    default=3,
+    help="The number of above/below rows to display",
+)
+
+parser.add_argument(
+    "-r",
+    "--replace-by-default",
+    action="store_true",
+    default=False,
+    help="If --no-interactive is set, apply the replacement (default: False).",
+)
+
+arguments: argparse.Namespace = None  # type: ignore
 
 
 def check_if_running_allowed() -> None:
@@ -232,21 +271,113 @@ def bump_package_version(
     for rootdir in DIRECTORIES:
         for path in Path(rootdir).glob("**/*"):
             if path.is_file() and str(path).endswith((".py", ".yaml", ".md")):
-                inplace_change(path, str(current_public_id), str(new_public_id))
+                inplace_change(path, str(current_public_id), str(new_public_id), type_)
 
     bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
 
 
-def inplace_change(fp: Path, old_string: str, new_string: str) -> None:
-    """Replace the occurence of a string with a new one in the provided file."""
-    with open(fp) as f:
-        s = f.read()
-        if old_string not in s:
-            return
+def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) -> str:
+    """
+    Ask to user if the line should be replaced or not, If the script arguments allow that.
 
-    with open(fp, "w") as f:
-        s = s.replace(old_string, new_string)
-        f.write(s)
+    :param content: the content.
+    :param old_string: the old string.
+    :param new_string: the new string.
+    :param type_: the type of the package.
+    :return: the updated content.
+    """
+    if arguments.no_interactive and arguments.replace_by_default:
+        content = content.replace(old_string, new_string)
+        return content
+
+    lines = content.splitlines()
+    for idx, line in enumerate(lines[:]):
+        if old_string not in line:
+            continue
+        above_rows = lines[idx - arguments.context : idx]
+        below_rows = lines[idx + 1 : idx + arguments.context]
+        print("\n".join(above_rows))
+        print(line.replace(old_string, "\033[91m" + old_string + "\033[0m"))
+        print("\n".join(below_rows))
+        answer = input(  # nosec
+            f"Replace for component ({type_}, {old_string})? [y/N]: ",
+        )
+        if answer == "y":
+            lines[idx] = line.replace(old_string, new_string)
+    return "\n".join(lines)
+
+
+def replace_aea_fetch_statements(content, old_string, new_string, type_) -> str:
+    """Replace statements of the type: 'aea fetch <old_string>'."""
+    if type_ == "agent":
+        content = re.sub(
+            fr"aea +fetch +{old_string}", f"aea fetch {new_string}", content
+        )
+    return content
+
+
+def replace_type_and_public_id_occurrences(
+    content, old_string, new_string, type_
+) -> str:
+    """Replace the public id whenever the type and the id occur in the same row."""
+    lines = content.splitlines(keepends=False)
+    for idx, line in enumerate(lines[:]):
+        if old_string not in line:
+            continue
+        if re.match(f"{type_}.*{old_string}", line):
+            lines[idx] = line.replace(old_string, new_string)
+    return "\n".join(lines)
+
+
+def replace_in_yamls(content, old_string, new_string, type_) -> str:
+    """
+    Replace the public id in configuration files (also nested in .md files).
+
+    1) replace in cases like:
+        |protocols:
+        |- author/name:version
+        |...
+        |- old_string
+    2) replace in cases like:
+        |name: package_name
+        |author: package_author
+        |version: package_version -> bump up
+        |type: package_type
+    """
+
+    # case 1:
+    regex = re.compile(f"({type_}:\n(-.*\n)*)(- *{old_string})", re.MULTILINE)
+    content = regex.sub(rf"\g<1>- {new_string}", content)
+
+    # case 1:
+    old_public_id = PublicId.from_str(old_string)
+    new_public_id = PublicId.from_str(new_string)
+    regex = re.compile(
+        rf"(name: {old_public_id.name}\nauthor: {old_public_id.author}\n)version: {old_public_id.version}\n(type: {type_[:-1]})",
+        re.MULTILINE,
+    )
+    content = regex.sub(rf"\g<1>version: {new_public_id.version}\n\g<2>", content)
+    return content
+
+
+def inplace_change(fp: Path, old_string: str, new_string: str, type_: str) -> None:
+    """Replace the occurrence of a string with a new one in the provided file."""
+
+    content = fp.read_text()
+    if old_string not in content:
+        return
+
+    content = replace_aea_fetch_statements(content, old_string, new_string, type_)
+    content = replace_type_and_public_id_occurrences(
+        content, old_string, new_string, type_
+    )
+    content = replace_in_yamls(content, old_string, new_string, type_)
+    content = _ask_to_user_and_replace_if_allowed(
+        content, old_string, new_string, type_
+    )
+
+    with fp.open(mode="w") as f:
+        f.write(content)
 
 
 def bump_version_in_yaml(
@@ -308,6 +439,7 @@ if __name__ == "__main__":
     First, check all hashes are up to date, exit if not.
     Then, run the bumping algo, re-hashing upon each bump.
     """
+    arguments = parser.parse_args()
     run_hashing()
     check_if_running_allowed()
     while run_once():
