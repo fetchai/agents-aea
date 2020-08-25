@@ -22,17 +22,17 @@
 import os
 import shutil
 import tempfile
+from enum import Enum
 from pathlib import Path
-from typing import List, Tuple, Type
-from unittest.mock import MagicMock
+from typing import Callable, List, Tuple, Type
 
 import pytest
 
 from aea import AEA_DIR
 from aea.configurations.constants import DEFAULT_PROTOCOL
-from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.dialogue.base import Dialogue, DialogueLabel
 from aea.mail.base import Envelope
-from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
+from aea.protocols.base import Message, ProtobufSerializer, Protocol
 from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.signing.dialogues import SigningDialogue, SigningDialogues
 from aea.protocols.state_update.dialogues import (
@@ -43,10 +43,46 @@ from aea.protocols.state_update.dialogues import (
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 
-DIALOGUE_CLASSES: List[Tuple[Type, Type]] = [
-    (DefaultDialogue, DefaultDialogues),
-    (SigningDialogue, SigningDialogues),
-    (StateUpdateDialogue, StateUpdateDialogues),
+def role_from_first_message_dd(
+    message: Message, receiver_address: str
+) -> Dialogue.Role:
+    """Role from first message."""
+    return DefaultDialogue.Role.AGENT
+
+
+def role_from_first_message_sd(
+    message: Message, receiver_address: str
+) -> Dialogue.Role:
+    """Role from first message."""
+    return SigningDialogue.Role.SKILL
+
+
+def role_from_first_message_sud(
+    message: Message, receiver_address: str
+) -> Dialogue.Role:
+    """Role from first message."""
+    return StateUpdateDialogue.Role.SKILL
+
+
+DIALOGUE_CLASSES: List[Tuple[Type, Type, Enum, Callable]] = [
+    (
+        DefaultDialogue,
+        DefaultDialogues,
+        DefaultDialogue.Role.AGENT,
+        role_from_first_message_dd,
+    ),
+    (
+        SigningDialogue,
+        SigningDialogues,
+        SigningDialogue.Role.SKILL,
+        role_from_first_message_sd,
+    ),
+    (
+        StateUpdateDialogue,
+        StateUpdateDialogues,
+        StateUpdateDialogue.Role.SKILL,
+        role_from_first_message_sud,
+    ),
 ]
 
 
@@ -73,8 +109,8 @@ class TestBaseSerializations:
     @classmethod
     def setup_class(cls):
         """Set up the use case."""
-        cls.message = Message(dialogue_reference=("", ""), content="hello")
-        cls.message2 = Message(dialogue_reference=("", ""), body={"content": "hello"})
+        cls.message = Message(content="hello")
+        cls.message2 = Message(body={"content": "hello"})
 
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
@@ -92,25 +128,6 @@ class TestBaseSerializations:
         assert expected_envelope == actual_envelope
 
         expected_msg = ProtobufSerializer().decode(expected_envelope.message)
-        actual_msg = self.message
-        assert expected_msg == actual_msg
-
-    def test_default_json_serialization(self):
-        """Test that the default JSON serialization works."""
-        message_bytes = JSONSerializer().encode(self.message)
-        envelope = Envelope(
-            to="receiver",
-            sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=message_bytes,
-        )
-        envelope_bytes = envelope.encode()
-
-        expected_envelope = Envelope.decode(envelope_bytes)
-        actual_envelope = envelope
-        assert expected_envelope == actual_envelope
-
-        expected_msg = JSONSerializer().decode(expected_envelope.message)
         actual_msg = self.message
         assert expected_msg == actual_msg
 
@@ -194,3 +211,19 @@ class TestMessageAttributes:
         """Test the 'target' attribute."""
         message = Message(target=1)
         assert message.target == 1
+
+
+@pytest.mark.parametrize("dialogue_classes", DIALOGUE_CLASSES)
+def test_dialogue(dialogue_classes):
+    """Test dialogue initialization."""
+    dialogue_class, _, role, _ = dialogue_classes
+    dialogue_class(
+        DialogueLabel(("x", "y"), "opponent_addr", "starer_addr"), "agent_address", role
+    )
+
+
+@pytest.mark.parametrize("dialogues_classes", DIALOGUE_CLASSES)
+def test_dialogues(dialogues_classes):
+    """Test dialogues initialization."""
+    dialogue_class, dialogues_class, _, role_from_first_message = dialogues_classes
+    dialogues_class("agent_address", role_from_first_message, dialogue_class)

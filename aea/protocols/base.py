@@ -20,7 +20,6 @@
 """This module contains the base message and serialization definition."""
 import importlib
 import inspect
-import json
 import logging
 import re
 from abc import ABC, abstractmethod
@@ -183,10 +182,10 @@ class Message:
             isinstance(other, Message)
             and self._sender == other._sender
             and self._to == other._to
-            and self.dialogue_reference == other.dialogue_reference
-            and self.message_id == other.message_id
-            and self.target == other.target
-            and self.performative == other.performative
+            # and self.dialogue_reference == other.dialogue_reference  # noqa: E800
+            # and self.message_id == other.message_id  # noqa: E800
+            # and self.target == other.target  # noqa: E800
+            # and self.performative == other.performative  # noqa: E800
             and self.body == other.body
         )
 
@@ -264,36 +263,6 @@ class ProtobufSerializer(Serializer):
         body = dict(body_json)
         msg = Message(body=body)
         return msg
-
-
-class JSONSerializer(Serializer):
-    """
-    Default serialization in JSON for the Message object.
-
-    It assumes that the Message contains a JSON-serializable body.
-    """
-
-    @staticmethod
-    def encode(msg: Message) -> bytes:
-        """
-        Encode a message into bytes using JSON format.
-
-        :param msg: the message to be encoded.
-        :return: the serialized message.
-        """
-        bytes_msg = json.dumps(msg.body).encode("utf-8")
-        return bytes_msg
-
-    @staticmethod
-    def decode(obj: bytes) -> Message:
-        """
-        Decode bytes into a message using JSON.
-
-        :param obj: the serialized message.
-        :return: the decoded message.
-        """
-        json_msg = json.loads(obj.decode("utf-8"))
-        return Message(json_msg)
 
 
 class Protocol(Component):
