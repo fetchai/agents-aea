@@ -101,6 +101,7 @@ class FipaDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[FipaMessage] = FipaMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -113,7 +114,7 @@ class FipaDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=FipaMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

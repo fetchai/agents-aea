@@ -65,6 +65,7 @@ class DefaultDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[DefaultMessage] = DefaultMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -77,7 +78,7 @@ class DefaultDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=DefaultMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

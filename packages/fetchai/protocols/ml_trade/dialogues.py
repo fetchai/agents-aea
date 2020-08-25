@@ -66,6 +66,7 @@ class MlTradeDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[MlTradeMessage] = MlTradeMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -78,7 +79,7 @@ class MlTradeDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=MlTradeMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )
