@@ -149,13 +149,10 @@ class ProxyEnv(gym.Env):
         """
         if not self._agent.runtime.multiplexer.is_connected:
             self._connect()
-        gym_msg = GymMessage(
-            dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
-            performative=GymMessage.Performative.RESET,
+        gym_msg, gym_dialogue = self.gym_dialogues.create(
+            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
         )
-        gym_msg.to = self.gym_address
-        gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
-        assert gym_dialogue is not None
+        gym_dialogue = cast(GymDialogue, gym_dialogue)
         self._active_dialogue = gym_dialogue
         self._agent.outbox.put_message(message=gym_msg)
 
@@ -172,14 +169,9 @@ class ProxyEnv(gym.Env):
         """
         last_msg = self.active_dialogue.last_message
         assert last_msg is not None, "Cannot retrieve last message."
-        gym_msg = GymMessage(
-            dialogue_reference=self.active_dialogue.dialogue_label.dialogue_reference,
-            performative=GymMessage.Performative.CLOSE,
-            message_id=last_msg.message_id + 1,
-            target=last_msg.message_id,
+        gym_msg = self.active_dialogue.reply(
+            performative=GymMessage.Performative.CLOSE, target_message=last_msg,
         )
-        gym_msg.to = self.gym_address
-        assert self.active_dialogue.update(gym_msg)
         self._agent.outbox.put_message(message=gym_msg)
 
         self._disconnect()
@@ -215,16 +207,12 @@ class ProxyEnv(gym.Env):
         """
         last_msg = self.active_dialogue.last_message
         assert last_msg is not None, "Cannot retrieve last message."
-        gym_msg = GymMessage(
-            dialogue_reference=self.active_dialogue.dialogue_label.dialogue_reference,
+        gym_msg = self.active_dialogue.reply(
             performative=GymMessage.Performative.ACT,
+            target_message=last_msg,
             action=GymMessage.AnyObject(action),
             step_id=step_id,
-            message_id=last_msg.message_id + 1,
-            target=last_msg.message_id,
         )
-        gym_msg.to = self.gym_address
-        assert self.active_dialogue.update(gym_msg)
         # Send the message via the proxy agent and to the environment
         self._agent.outbox.put_message(message=gym_msg)
 
@@ -241,8 +229,11 @@ class ProxyEnv(gym.Env):
         if envelope is not None:
             if envelope.protocol_id == GymMessage.protocol_id:
                 gym_msg = cast(GymMessage, envelope.message)
-                if not self.active_dialogue.update(gym_msg):
+                gym_dialogue = self.gym_dialogues.update(gym_msg)
+                if not gym_dialogue:
                     raise ValueError("Could not udpate dialogue.")
+                if not gym_dialogue == self.active_dialogue:
+                    raise ValueError("Dialogue does not match.")
                 if (
                     gym_msg.performative == GymMessage.Performative.PERCEPT
                     and gym_msg.step_id == expected_step_id
@@ -268,8 +259,11 @@ class ProxyEnv(gym.Env):
         if envelope is not None:
             if envelope.protocol_id == GymMessage.protocol_id:
                 gym_msg = cast(GymMessage, envelope.message)
-                if not self.active_dialogue.update(gym_msg):
+                gym_dialogue = self.gym_dialogues.update(gym_msg)
+                if not gym_dialogue:
                     raise ValueError("Could not udpate dialogue.")
+                if not gym_dialogue == self.active_dialogue:
+                    raise ValueError("Dialogue does not match.")
                 if (
                     gym_msg.performative == GymMessage.Performative.STATUS
                     and gym_msg.content.get("reset", "failure") == "success"

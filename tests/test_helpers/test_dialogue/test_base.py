@@ -279,85 +279,85 @@ class TestDialogueBase:
     def test_counterparty_from_message(self):
         """Test the 'counterparty_from_message' method."""
         assert (
-            self.dialogue.counterparty_from_message(self.valid_message_1_by_self)
+            self.dialogue._counterparty_from_message(self.valid_message_1_by_self)
             == self.opponent_address
         )
         assert (
-            self.dialogue.counterparty_from_message(self.valid_message_2_by_other)
+            self.dialogue._counterparty_from_message(self.valid_message_2_by_other)
             == self.opponent_address
         )
 
     def test_is_message_by_self(self):
         """Test the 'is_message_by_self' method."""
-        assert self.dialogue.is_message_by_self(self.valid_message_1_by_self)
-        assert not self.dialogue.is_message_by_self(self.valid_message_2_by_other)
+        assert self.dialogue._is_message_by_self(self.valid_message_1_by_self)
+        assert not self.dialogue._is_message_by_self(self.valid_message_2_by_other)
 
     def test_is_message_by_other(self):
         """Test the 'is_message_by_other' method."""
-        assert not self.dialogue.is_message_by_other(self.valid_message_1_by_self)
-        assert self.dialogue.is_message_by_other(self.valid_message_2_by_other)
+        assert not self.dialogue._is_message_by_other(self.valid_message_1_by_self)
+        assert self.dialogue._is_message_by_other(self.valid_message_2_by_other)
 
     def test_try_get_message(self):
         """Test the 'try_get_message' method."""
         assert (
-            self.dialogue.try_get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue._try_get_message(self.valid_message_1_by_self.message_id)
             is None
         )
         self.dialogue._update(self.valid_message_1_by_self)
         assert (
-            self.dialogue.try_get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue._try_get_message(self.valid_message_1_by_self.message_id)
             == self.valid_message_1_by_self
         )
 
         assert (
-            self.dialogue.try_get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue._try_get_message(self.valid_message_2_by_other.message_id)
             is None
         )
         self.dialogue._update(self.valid_message_2_by_other)
         assert (
-            self.dialogue.try_get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue._try_get_message(self.valid_message_2_by_other.message_id)
             == self.valid_message_2_by_other
         )
 
     def test_get_message(self):
         """Test the 'get_message' method."""
         with pytest.raises(AssertionError) as cm:
-            self.dialogue.get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue._get_message(self.valid_message_1_by_self.message_id)
         assert str(cm.value) == "Message not present."
 
         self.dialogue._update(self.valid_message_1_by_self)
         assert (
-            self.dialogue.get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue._get_message(self.valid_message_1_by_self.message_id)
             == self.valid_message_1_by_self
         )
 
         with pytest.raises(AssertionError) as cm:
-            self.dialogue.get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue._get_message(self.valid_message_2_by_other.message_id)
         assert str(cm.value) == "Message not present."
 
         self.dialogue._update(self.valid_message_2_by_other)
         assert (
-            self.dialogue.get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue._get_message(self.valid_message_2_by_other.message_id)
             == self.valid_message_2_by_other
         )
 
     def test_has_message(self):
         """Test the 'has_message' method."""
-        assert self.dialogue.has_message(self.valid_message_1_by_self) is False
+        assert self.dialogue._has_message(self.valid_message_1_by_self) is False
 
         self.dialogue._update(self.valid_message_1_by_self)
-        assert self.dialogue.has_message(self.valid_message_1_by_self) is True
+        assert self.dialogue._has_message(self.valid_message_1_by_self) is True
 
-        assert self.dialogue.has_message(self.valid_message_2_by_other) is False
+        assert self.dialogue._has_message(self.valid_message_2_by_other) is False
 
     def test_has_message_id(self):
         """Test the 'has_message_id' method."""
-        assert self.dialogue.has_message_id(1) is False
+        assert self.dialogue._has_message_id(1) is False
 
         self.dialogue._update(self.valid_message_1_by_self)
-        assert self.dialogue.has_message_id(1) is True
+        assert self.dialogue._has_message_id(1) is True
 
-        assert self.dialogue.has_message_id(2) is False
+        assert self.dialogue._has_message_id(2) is False
 
     def test_update_positive(self):
         """Positive test for the 'update' method."""
@@ -426,7 +426,7 @@ class TestDialogueBase:
         assert self.dialogue.is_empty
 
     def test_is_belonging_to_dialogue(self):
-        """Test for the 'is_belonging_to_dialogue' method"""
+        """Test for the '_is_belonging_to_dialogue' method"""
         valid_message_2_by_self = DefaultMessage(
             dialogue_reference=(str(2), ""),
             performative=DefaultMessage.Performative.BYTES,
@@ -435,8 +435,8 @@ class TestDialogueBase:
         valid_message_2_by_self.sender = self.agent_address
         valid_message_2_by_self.to = self.opponent_address
 
-        assert self.dialogue.is_belonging_to_dialogue(self.valid_message_1_by_self)
-        assert not self.dialogue.is_belonging_to_dialogue(valid_message_2_by_self)
+        assert self.dialogue._is_belonging_to_dialogue(self.valid_message_1_by_self)
+        assert not self.dialogue._is_belonging_to_dialogue(valid_message_2_by_self)
 
     def test_reply_positive(self):
         """Positive test for the 'reply' method."""
@@ -490,7 +490,7 @@ class TestDialogueBase:
         self.dialogue._update(self.valid_message_1_by_self)
         self.dialogue._update(self.valid_message_2_by_other)
 
-        result, msg = self.dialogue.validate_next_message(self.valid_message_3_by_self)
+        result, msg = self.dialogue._validate_next_message(self.valid_message_3_by_self)
         assert result is True
         assert msg == "Message is valid with respect to this dialogue."
 
@@ -506,7 +506,7 @@ class TestDialogueBase:
         invalid_message_1_by_self.sender = self.agent_address
         invalid_message_1_by_self.to = self.opponent_address
 
-        result, msg = self.dialogue.validate_next_message(invalid_message_1_by_self)
+        result, msg = self.dialogue._validate_next_message(invalid_message_1_by_self)
         assert result is False
         assert msg == "Invalid message_id. Expected 1. Found 2."
 
@@ -525,7 +525,7 @@ class TestDialogueBase:
         invalid_message_3_by_self.sender = self.agent_address
         invalid_message_3_by_self.to = self.opponent_address
 
-        result, msg = self.dialogue.validate_next_message(invalid_message_3_by_self)
+        result, msg = self.dialogue._validate_next_message(invalid_message_3_by_self)
         assert result is False
         assert msg == "Invalid target. Expected 2. Found 1."
 
@@ -537,7 +537,7 @@ class TestDialogueBase:
 
         self.dialogue._custom_validation = failing_custom_validation
 
-        result, msg = self.dialogue.validate_next_message(self.valid_message_1_by_self)
+        result, msg = self.dialogue._validate_next_message(self.valid_message_1_by_self)
         assert result is False
         assert msg == "some reason"
 
@@ -835,7 +835,7 @@ class TestDialogueBase:
         new_label = DialogueLabel(
             (str(1), str(1)), self.valid_message_1_by_self.to, self.agent_address
         )
-        self.dialogue.update_dialogue_label(new_label)
+        self.dialogue._update_dialogue_label(new_label)
 
         assert self.dialogue.dialogue_label == new_label
 
@@ -847,14 +847,14 @@ class TestDialogueBase:
         new_label = DialogueLabel(
             (str(1), str(1)), self.valid_message_1_by_self.to, self.agent_address
         )
-        self.dialogue.update_dialogue_label(new_label)
+        self.dialogue._update_dialogue_label(new_label)
         assert self.dialogue.dialogue_label == new_label
 
         new_label = DialogueLabel(
             (str(1), str(2)), self.valid_message_1_by_self.to, self.agent_address
         )
         with pytest.raises(AssertionError) as cm:
-            self.dialogue.update_dialogue_label(new_label)
+            self.dialogue._update_dialogue_label(new_label)
         assert str(cm.value) == "Dialogue label cannot be updated."
 
         assert self.dialogue.dialogue_label != new_label
@@ -867,7 +867,7 @@ class TestDialogueBase:
             (str(2), ""), self.valid_message_1_by_self.to, self.agent_address
         )
         with pytest.raises(AssertionError) as cm:
-            self.dialogue.update_dialogue_label(new_label)
+            self.dialogue._update_dialogue_label(new_label)
         assert str(cm.value) == "Dialogue label cannot be updated."
         assert self.dialogue.dialogue_label != new_label
 
@@ -1052,23 +1052,23 @@ class TestDialoguesBase:
     def test_counterparty_from_message(self):
         """Test the 'counterparty_from_message' method."""
         assert (
-            self.own_dialogues.counterparty_from_message(self.valid_message_1_by_self)
+            self.own_dialogues._counterparty_from_message(self.valid_message_1_by_self)
             == self.opponent_address
         )
         assert (
-            self.own_dialogues.counterparty_from_message(self.valid_message_2_by_other)
+            self.own_dialogues._counterparty_from_message(self.valid_message_2_by_other)
             == self.opponent_address
         )
 
     def test_is_message_by_self(self):
         """Test the 'is_message_by_self' method."""
-        assert self.own_dialogues.is_message_by_self(self.valid_message_1_by_self)
-        assert not self.own_dialogues.is_message_by_self(self.valid_message_2_by_other)
+        assert self.own_dialogues._is_message_by_self(self.valid_message_1_by_self)
+        assert not self.own_dialogues._is_message_by_self(self.valid_message_2_by_other)
 
     def test_is_message_by_other(self):
         """Test the 'is_message_by_other' method."""
-        assert not self.own_dialogues.is_message_by_other(self.valid_message_1_by_self)
-        assert self.own_dialogues.is_message_by_other(self.valid_message_2_by_other)
+        assert not self.own_dialogues._is_message_by_other(self.valid_message_1_by_self)
+        assert self.own_dialogues._is_message_by_other(self.valid_message_2_by_other)
 
     def test_new_self_initiated_dialogue_reference(self):
         """Test the 'new_self_initiated_dialogue_reference' method."""
@@ -1220,7 +1220,10 @@ class TestDialoguesBase:
 
         with pytest.raises(AssertionError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
-        assert str(cm.value) == "Message's 'Sender' field must be set."
+        assert (
+            str(cm.value)
+            == "Invalid 'update' usage. Update must only be used with a message by another agent."
+        )
 
         assert len(self.own_dialogues.dialogues) == 0
 
@@ -1454,7 +1457,7 @@ class TestDialoguesBase:
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
         )
 
-        retrieved_dialogue = self.own_dialogues.get_dialogue_from_label(
+        retrieved_dialogue = self.own_dialogues._get_dialogue_from_label(
             dialogue.dialogue_label
         )
         assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
@@ -1469,7 +1472,9 @@ class TestDialoguesBase:
             (str(1), "error"), self.opponent_address, self.agent_address
         )
 
-        retrieved_dialogue = self.own_dialogues.get_dialogue_from_label(incorrect_label)
+        retrieved_dialogue = self.own_dialogues._get_dialogue_from_label(
+            incorrect_label
+        )
         assert retrieved_dialogue is None
 
     def test_create_self_initiated_positive(self):
