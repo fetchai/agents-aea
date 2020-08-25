@@ -16,11 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """Tests for the HTTP Client and Server connections together."""
 import asyncio
 import logging
+import urllib
 from typing import cast
 
 import pytest
@@ -163,6 +162,31 @@ class TestClientServer:
             cast(HttpMessage, initial_request.message).bodyy
             == cast(HttpMessage, response.message).bodyy
         )
+        assert (
+            initial_request.message.dialogue_reference[0]
+            == response.message.dialogue_reference[0]
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_with_query(self):
+        """Test client and server with url query."""
+        query = {"key": "value"}
+        path = "/test?{}".format(urllib.parse.urlencode(query))
+        initial_request = self._make_request(path, "GET")
+        await self.client.send(initial_request)
+        request = await asyncio.wait_for(self.server.receive(), timeout=5)
+        # this is "inside" the server agent
+
+        parsed_query = dict(
+            urllib.parse.parse_qsl(
+                urllib.parse.splitquery(cast(HttpMessage, request.message).url)[1]
+            )
+        )
+        assert parsed_query == query
+        initial_response = self._make_response(request)
+        await self.server.send(initial_response)
+        response = await asyncio.wait_for(self.client.receive(), timeout=5)
+
         assert (
             initial_request.message.dialogue_reference[0]
             == response.message.dialogue_reference[0]

@@ -49,4 +49,4 @@ end_states: [successful]
 
 ## Links
 
-* <a href="https://gym.openai.com" target=_blank>OpenAI Gym</a>
+* <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>

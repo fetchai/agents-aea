@@ -11,4 +11,4 @@ Building an AEA step by step (ensure you have followed the <a href="../quickstar
 <li>Now, run your AEA: `aea run --connections [public_id]`</li> 
 </ol>
 
-See information on the CLI tool <a href="../cli-how-to/" target=_blank>here</a> for all the available commands.</li>
+See information on the CLI tool <a href="../cli-how-to/" target="_blank">here</a> for all the available commands.</li>

@@ -1,11 +1,11 @@
-The original TAC has its own <a href="https://github.com/fetchai/agents-tac" target=_blank>repo</a>. 
+The original TAC has its own <a href="https://github.com/fetchai/agents-tac" target="_blank">repo</a>. 
 
 Follow the instructions below to build and run the TAC demo.
 
 
 ## Requirements
 
-Make sure you are running <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
+Make sure you are running <a href="https://docs.docker.com/install/" target="_blank">Docker</a> and <a href="https://docs.docker.com/compose/install/" target="_blank">Docker Compose</a>.
 
 
 ## Quick start
@@ -22,7 +22,7 @@ Check you have `pipenv`.
 which pipenv
 ```
 
-If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target=_blank>here</a>.
+If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target="_blank">here</a>.
 
 
 Create and launch a virtual environment.
@@ -52,7 +52,7 @@ python scripts/launch.py
 
 The <a href="https://github.com/facebookresearch/visdom" target="_blank">visdom</a> server is now running.
 
-The controller GUI at <a href="http://localhost:8097" target=_blank>http://localhost:8097</a> provides real time insights.
+The controller GUI at <a href="http://localhost:8097" target="_blank">http://localhost:8097</a> provides real time insights.
 
 In the Environment tab, make sure you have the `tac_controller` environment selected.
 
