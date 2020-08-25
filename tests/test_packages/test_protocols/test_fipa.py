@@ -20,7 +20,7 @@
 """This module contains the tests for the FIPA protocol."""
 
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Type
 from unittest import mock
 
 import pytest
@@ -375,17 +375,11 @@ class TestDialogues:
         """Test an end to end scenario of client-seller dialogue."""
 
         # Create a message destined for the seller.
-        cfp_msg = FipaMessage(
-            message_id=1,
-            dialogue_reference=self.buyer_dialogues.new_self_initiated_dialogue_reference(),
-            target=0,
+        cfp_msg, buyer_dialogue = self.buyer_dialogues.create(
+            counterparty=self.seller_addr,
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_msg.to = self.seller_addr
-
-        # Extends the outgoing list of messages.
-        buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
 
         # Checking that I can retrieve the dialogue.
         retrieved_dialogue = self.buyer_dialogues.get_dialogue(cfp_msg)
@@ -465,15 +459,11 @@ class TestDialogues:
 
     def test_update(self):
         """Test the `update` functionality."""
-        cfp_msg = FipaMessage(
-            message_id=1,
-            dialogue_reference=self.buyer_dialogues.new_self_initiated_dialogue_reference(),
-            target=0,
+        cfp_msg, buyer_dialogue = self.buyer_dialogues.create(
+            counterparty=self.seller_addr,
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_msg.to = self.seller_addr
-        buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
 
         assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing message."
         assert len(buyer_dialogue._incoming_messages) == 0, "Some incoming messages."
@@ -506,16 +496,11 @@ class TestDialogues:
         ), "Dialogue reference incorrect."
 
         # seller creates response message
-        proposal_msg = FipaMessage(
-            message_id=cfp_msg.message_id + 1,
-            dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
-            target=cfp_msg.message_id,
+        proposal_msg = seller_dialogue.reply(
+            target_message=cfp_msg,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=Description({"foo1": 1, "bar1": 2}),
         )
-        proposal_msg.to = self.buyer_addr
-
-        self.seller_dialogues.update(proposal_msg)
 
         assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing messages."
         assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
@@ -554,6 +539,7 @@ class BuyerDialogue(FipaDialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[FipaMessage],
     ) -> None:
         """
         Initialize a dialogue.
@@ -565,7 +551,11 @@ class BuyerDialogue(FipaDialogue):
         :return: None
         """
         FipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
 
 
@@ -606,6 +596,7 @@ class SellerDialogue(FipaDialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[FipaMessage],
     ) -> None:
         """
         Initialize a dialogue.
@@ -617,7 +608,11 @@ class SellerDialogue(FipaDialogue):
         :return: None
         """
         FipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self.some_object = None  # type: Optional[Any]
 

@@ -97,7 +97,7 @@ class GymChannel:
 
         :param envelope: incoming envelope
 
-        :return: Tuple[MEssage, Optional[Dialogue]]
+        :return: Tuple[Message, Optional[Dialogue]]
         """
         message = cast(GymMessage, envelope.message)
         dialogue = cast(GymDialogue, self._dialogues.update(message))
