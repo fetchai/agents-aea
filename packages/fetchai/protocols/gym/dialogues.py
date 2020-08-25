@@ -75,6 +75,7 @@ class GymDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[GymMessage] = GymMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -87,7 +88,7 @@ class GymDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=GymMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

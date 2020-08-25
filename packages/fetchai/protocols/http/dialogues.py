@@ -62,6 +62,7 @@ class HttpDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[HttpMessage] = HttpMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -74,7 +75,7 @@ class HttpDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=HttpMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

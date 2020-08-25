@@ -100,6 +100,7 @@ class ContractApiDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[ContractApiMessage] = ContractApiMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -112,7 +113,7 @@ class ContractApiDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=ContractApiMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

@@ -91,6 +91,7 @@ class SigningDialogues(BaseSigningDialogues):
             self,
             agent_address=agent_address,
             role_from_first_message=role_from_first_message,
+            dialogue_class=SigningDialogue,
         )
 
 
@@ -187,10 +188,11 @@ class TestDecisionMaker:
             exchange_params_by_currency_id=exchange_params,
             utility_params_by_good_id=utility_params,
         )
-        state_update_message_1.to = "decision_maker"
         state_update_dialogue = cast(
             Optional[StateUpdateDialogue],
-            state_update_dialogues.update(state_update_message_1),
+            state_update_dialogues.create_with_message(
+                "decision_maker", state_update_message_1
+            ),
         )
         assert state_update_dialogue is not None, "StateUpdateDialogue not created"
         self.decision_maker.handle(state_update_message_1)
@@ -211,16 +213,11 @@ class TestDecisionMaker:
             is not None
         )
 
-        state_update_message_2 = StateUpdateMessage(
+        state_update_message_2 = state_update_dialogue.reply(
             performative=StateUpdateMessage.Performative.APPLY,
-            dialogue_reference=state_update_dialogue.dialogue_label.dialogue_reference,
-            message_id=state_update_message_1.message_id + 1,
-            target=state_update_message_1.message_id,
             amount_by_currency_id=currency_deltas,
             quantities_by_good_id=good_deltas,
         )
-        state_update_message_2.to = "decision_maker"
-        assert state_update_dialogue.update(state_update_message_2)
         self.decision_maker.handle(state_update_message_2)
         expected_amount_by_currency_id = {
             key: currency_holdings.get(key, 0) + currency_deltas.get(key, 0)
@@ -331,8 +328,9 @@ class TestDecisionMaker2:
             ),
             raw_transaction=RawTransaction(FETCHAI, tx),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -365,8 +363,9 @@ class TestDecisionMaker2:
             ),
             raw_transaction=RawTransaction(ETHEREUM, tx),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -402,8 +401,9 @@ class TestDecisionMaker2:
             ),
             raw_transaction=RawTransaction("unknown", tx),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -436,8 +436,9 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage(FETCHAI, message),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -470,8 +471,9 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage(ETHEREUM, message),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -504,8 +506,9 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage(ETHEREUM, message, is_deprecated_mode=True),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -539,8 +542,9 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -574,8 +578,9 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
@@ -597,8 +602,9 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         with pytest.raises(Exception):
             # Exception occurs because the same counterparty sends two identical dialogue references
@@ -621,8 +627,9 @@ class TestDecisionMaker2:
             ),
             raw_message=RawMessage("unknown", message),
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = signing_dialogues.update(signing_msg)
+        signing_dialogue = signing_dialogues.create_with_message(
+            "decision_maker", signing_msg
+        )
         assert signing_dialogue is not None
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)

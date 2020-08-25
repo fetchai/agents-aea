@@ -84,6 +84,7 @@ class SigningDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[SigningMessage] = SigningMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -96,7 +97,7 @@ class SigningDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=SigningMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

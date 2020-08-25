@@ -63,6 +63,7 @@ class StateUpdateDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[StateUpdateMessage] = StateUpdateMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -75,7 +76,7 @@ class StateUpdateDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=StateUpdateMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

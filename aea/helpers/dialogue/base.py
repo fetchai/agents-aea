@@ -1047,6 +1047,39 @@ class Dialogues(ABC):
         initial_message.sender = self.agent_address
         initial_message.to = counterparty
 
+        dialogue = self._create_dialogue(counterparty, initial_message)
+
+        return initial_message, dialogue
+
+    def create_with_message(
+        self, counterparty: Address, initial_message: Message
+    ) -> Dialogue:
+        """
+        Create a dialogue with 'counterparty', with an initial message provided.
+
+        :param counterparty: the counterparty of the dialogue.
+        :param initial_message: the initial_message.
+
+        :return: the initial message and the dialogue.
+        """
+        initial_message.sender = self.agent_address
+        initial_message.to = counterparty
+
+        dialogue = self._create_dialogue(counterparty, initial_message)
+
+        return dialogue
+
+    def _create_dialogue(
+        self, counterparty: Address, initial_message: Message
+    ) -> Dialogue:
+        """
+        Create a dialogue from an initial message provided.
+
+        :param counterparty: the counterparty of the dialogue.
+        :param initial_message: the initial_message.
+
+        :return: the dialogue.
+        """
         dialogue = self._create_self_initiated(
             dialogue_opponent_addr=counterparty,
             dialogue_reference=initial_message.dialogue_reference,
@@ -1060,8 +1093,7 @@ class Dialogues(ABC):
             raise SyntaxError(
                 "Cannot create a dialogue with the specified performative and contents."
             ) from e
-
-        return initial_message, dialogue
+        return dialogue
 
     def update(self, message: Message) -> Optional[Dialogue]:
         """
@@ -1091,6 +1123,11 @@ class Dialogues(ABC):
             and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and message.message_id == 1
         )
+        is_incomplete_label_and_non_initial_msg = (
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and message.message_id > 1
+        )
 
         if is_invalid_label:
             dialogue = None  # type: Optional[Dialogue]
@@ -1100,6 +1137,10 @@ class Dialogues(ABC):
                 dialogue_reference=dialogue_reference,
                 role=self._role_from_first_message(message, self.agent_address),
             )
+        elif is_incomplete_label_and_non_initial_msg:
+            # we can allow a dialogue to have incomplete reference
+            # as multiple messages can be sent before one is received with complete reference
+            dialogue = self.get_dialogue(message)
         else:  # non-initial message for existing dialogue
             self._complete_dialogue_reference(message)
             dialogue = self.get_dialogue(message)

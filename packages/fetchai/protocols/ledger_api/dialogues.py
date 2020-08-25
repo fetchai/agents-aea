@@ -100,6 +100,7 @@ class LedgerApiDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[LedgerApiMessage] = LedgerApiMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -112,7 +113,7 @@ class LedgerApiDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=LedgerApiMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )
