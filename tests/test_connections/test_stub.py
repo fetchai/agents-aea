@@ -92,9 +92,11 @@ class TestStubConnectionReception:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.to = "any"
         expected_envelope = Envelope(
-            to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
+            to="any",
+            sender="anys",
+            protocol_id=DefaultMessage.protocol_id,
+            message=msg,
         )
 
         with open(self.input_file_path, "ab+") as f:
@@ -106,6 +108,7 @@ class TestStubConnectionReception:
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
         msg.to = actual_envelope.to
+        msg.sender = actual_envelope.sender
         assert expected_envelope.message == msg
 
     def test_reception_b(self):
@@ -232,9 +235,11 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.to = "any"
         expected_envelope = Envelope(
-            to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
+            to="any",
+            sender="anys",
+            protocol_id=DefaultMessage.protocol_id,
+            message=msg,
         )
 
         self.multiplexer.put(expected_envelope)
@@ -261,6 +266,7 @@ class TestStubConnectionSending:
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
         msg.to = actual_envelope.to
+        msg.sender = actual_envelope.sender
         assert expected_envelope.message == msg
 
     @classmethod
