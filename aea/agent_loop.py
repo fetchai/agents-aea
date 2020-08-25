@@ -74,7 +74,6 @@ class BaseAgentLoop(WithLogger, ABC):
     async def run_loop(self) -> None:
         """Run agent loop."""
         self.logger.debug("agent loop started")
-        self._state.set(AgentLoopStates.started)
         self._set_tasks()
         try:
             await self._gather_tasks()
@@ -266,6 +265,7 @@ class AsyncAgentLoop(BaseAgentLoop):
     async def _process_messages(self, getter: HandlerItemGetter) -> None:
         """Process message from ItemGetter."""
         self.logger.info("Start processing messages...")
+        self._state.set(AgentLoopStates.started)
         while self.is_running:
             handler, item = await getter.get()
             handler(item)
