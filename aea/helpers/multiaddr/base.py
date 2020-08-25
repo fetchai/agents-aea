@@ -137,7 +137,7 @@ class MultiAddr:
 
     def format(self) -> str:
         """ Canonical representation of a multiaddress """
-        return f"/dns/{self._host}/tcp/{str(self._port)}/p2p/{self._peerid}"
+        return f"/dns/{self._host}/tcp/{self._port}/p2p/{self._peerid}"
 
     def __str__(self) -> str:
         """ default string representation of a mutliaddress """
