@@ -24,8 +24,10 @@ from pathlib import Path
 
 import pytest
 
+from aea.helpers.dialogue.base import Dialogue
 from aea.mail.base import Envelope
-from aea.protocols.default.dialogues import DefaultDialogues
+from aea.protocols.base import Message
+from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
@@ -223,7 +225,13 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
         # add sending and receiving envelope from input/output files
         sender = "sender"
-        default_dialogues = DefaultDialogues(sender)
+
+        def role_from_first_message(
+            message: Message, receiver_address: str
+        ) -> Dialogue.Role:
+            return DefaultDialogue.Role.AGENT
+
+        default_dialogues = DefaultDialogues(sender, role_from_first_message)
         message_content = b"hello"
         message = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES,
