@@ -25,9 +25,10 @@ import click
 from click import ClickException
 
 from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import get_path_to_package_configuration
+from aea.cli.utils.package_utils import get_package_path_unified
 from aea.configurations.base import (
     ConnectionConfig,
     PublicId,
@@ -147,11 +148,10 @@ def _try_get_connection_multiaddress(
     if connection_id not in ctx.agent_config.connections:
         raise ValueError(f"Cannot find connection with the public id {connection_id}.")
 
-    configuration_path = Path(
-        get_path_to_package_configuration(ctx, "connection", connection_id)
+    package_path = Path(get_package_path_unified(ctx, "connection", connection_id))
+    connection_config = cast(
+        ConnectionConfig, load_item_config("connection", package_path)
     )
-    with configuration_path.open() as fp:
-        connection_config = cast(ConnectionConfig, ctx.connection_loader.load(fp))
 
     if host_field not in connection_config.config:
         raise ValueError(

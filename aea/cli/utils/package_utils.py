@@ -194,23 +194,6 @@ def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) 
     return vendor_path
 
 
-def get_path_to_package_configuration(
-    ctx: Context, item_type: str, public_id: PublicId
-) -> str:
-    """
-    Get the package configuration.
-
-    :param ctx: the context.
-    :param item_type: the item type.
-    :param public_id: the public id.
-    :return: the path to the configuration file.
-    """
-    return os.path.join(
-        get_package_path_unified(ctx, item_type, public_id),
-        _get_default_configuration_file_name_from_type(item_type),
-    )
-
-
 def copy_package_directory(src: Path, dst: str) -> Path:
     """
      Copy a package directory to the agent vendor resources.

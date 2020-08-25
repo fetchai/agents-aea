@@ -27,6 +27,8 @@ from click import BadParameter, ClickException
 
 from jsonschema import ValidationError
 
+import pytest
+
 from yaml import YAMLError
 
 from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
@@ -42,7 +44,9 @@ from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
+    get_package_path_unified,
     is_fingerprint_correct,
+    is_item_present_unified,
     try_get_balance,
     try_get_item_source_path,
     try_get_item_target_path,
@@ -424,3 +428,40 @@ class IsReadmePresentTestCase(TestCase):
     def test_is_readme_present_positive(self, *mocks):
         """Test is_readme_present for positive result."""
         self.assertTrue(is_readme_present("readme/path"))
+
+
+@mock.patch("aea.cli.utils.package_utils.get_package_path", return_value="some_path")
+@pytest.mark.parametrize("vendor", [True, False])
+def test_get_package_path_unified_vendor_author(mock_, vendor):
+    """Test 'get_package_path_unified' with vendor author."""
+    contex_mock = mock.MagicMock()
+    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    public_id_mock = mock.MagicMock(author="some_author")
+    result = get_package_path_unified(
+        contex_mock, "some_component_type", public_id_mock
+    )
+    assert result == "some_path"
+
+
+@mock.patch("aea.cli.utils.package_utils.get_package_path", return_value="some_path")
+@pytest.mark.parametrize("vendor", [True, False])
+def test_get_package_path_unified(mock_, vendor):
+    """Test 'get_package_path_unified'."""
+    contex_mock = mock.MagicMock()
+    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    public_id_mock = mock.MagicMock(author="some_author")
+    result = get_package_path_unified(
+        contex_mock, "some_component_type", public_id_mock
+    )
+    assert result == "some_path"
+
+
+@mock.patch("aea.cli.utils.package_utils.is_item_present", return_value=False)
+@pytest.mark.parametrize("vendor", [True, False])
+def test_is_item_present_unified(mock_, vendor):
+    """Test 'is_item_present_unified'."""
+    contex_mock = mock.MagicMock()
+    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    public_id_mock = mock.MagicMock(author="some_author")
+    result = is_item_present_unified(contex_mock, "some_component_type", public_id_mock)
+    assert not result
