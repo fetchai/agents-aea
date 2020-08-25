@@ -100,15 +100,13 @@ class GenericFipaHandler(Handler):
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.to = fipa_msg.sender
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_cfp(self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
@@ -136,28 +134,19 @@ class GenericFipaHandler(Handler):
                     proposal.values, fipa_msg.sender[-5:]
                 )
             )
-            proposal_msg = FipaMessage(
+            proposal_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.PROPOSE,
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
+                target_message=fipa_msg,
                 proposal=proposal,
             )
-            proposal_msg.to = fipa_msg.sender
-            fipa_dialogue.update(proposal_msg)
             self.context.outbox.put_message(message=proposal_msg)
         else:
             self.context.logger.info(
                 "declined the CFP from sender={}".format(fipa_msg.sender[-5:])
             )
-            decline_msg = FipaMessage(
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
-                performative=FipaMessage.Performative.DECLINE,
+            decline_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.DECLINE, target_message=fipa_msg,
             )
-            decline_msg.to = fipa_msg.sender
-            fipa_dialogue.update(decline_msg)
             self.context.outbox.put_message(message=decline_msg)
 
     def _handle_decline(
@@ -197,20 +186,17 @@ class GenericFipaHandler(Handler):
         self.context.logger.info(
             "received ACCEPT from sender={}".format(fipa_msg.sender[-5:])
         )
-        match_accept_msg = FipaMessage(
+        info = {"address": fipa_dialogue.terms.sender_address}
+        match_accept_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            message_id=fipa_msg.message_id + 1,
-            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-            target=fipa_msg.message_id,
-            info={"address": fipa_dialogue.terms.sender_address},
+            target_message=fipa_msg,
+            info=info,
         )
         self.context.logger.info(
             "sending MATCH_ACCEPT_W_INFORM to sender={} with info={}".format(
-                fipa_msg.sender[-5:], match_accept_msg.info,
+                fipa_msg.sender[-5:], info,
             )
         )
-        match_accept_msg.to = fipa_msg.sender
-        fipa_dialogue.update(match_accept_msg)
         self.context.outbox.put_message(message=match_accept_msg)
 
     def _handle_inform(
@@ -226,8 +212,6 @@ class GenericFipaHandler(Handler):
         :param fipa_dialogue: the dialogue object
         :return: None
         """
-        new_message_id = fipa_msg.message_id + 1
-        new_target = fipa_msg.message_id
         self.context.logger.info(
             "received INFORM from sender={}".format(fipa_msg.sender[-5:])
         )
@@ -242,20 +226,14 @@ class GenericFipaHandler(Handler):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 transaction_digest=TransactionDigest(
                     fipa_dialogue.terms.ledger_id, fipa_msg.info["transaction_digest"]
                 ),
             )
-            ledger_api_msg.to = LEDGER_API_ADDRESS
-            ledger_api_dialogue = cast(
-                Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
-            )
-            assert (
-                ledger_api_dialogue is not None
-            ), "LedgerApiDialogue construction failed."
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
         elif strategy.is_ledger_tx:
@@ -265,15 +243,11 @@ class GenericFipaHandler(Handler):
                 )
             )
         elif not strategy.is_ledger_tx and "Done" in fipa_msg.info.keys():
-            inform_msg = FipaMessage(
-                message_id=new_message_id,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=new_target,
+            inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
                 info=fipa_dialogue.data_for_sale,
             )
-            inform_msg.to = fipa_msg.sender
-            fipa_dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -411,15 +385,11 @@ class GenericLedgerApiHandler(Handler):
                 Optional[FipaMessage], fipa_dialogue.last_incoming_message
             )
             assert last_message is not None, "Cannot retrieve last fipa message."
-            inform_msg = FipaMessage(
-                message_id=last_message.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=last_message.message_id,
+            inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
+                target_message=last_message,
                 info=fipa_dialogue.data_for_sale,
             )
-            inform_msg.to = last_message.sender
-            fipa_dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(

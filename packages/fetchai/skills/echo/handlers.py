@@ -83,15 +83,14 @@ class EchoHandler(Handler):
             )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        reply = DefaultMessage(
+        reply, _ = default_dialogues.create(
+            counterparty=message.sender,
             performative=DefaultMessage.Performative.ERROR,
             dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"default_message": message.encode()},
         )
-        reply.to = message.sender
-        default_dialogues.update(reply)
         self.context.outbox.put_message(message=reply)
 
     def _handle_error(self, message: DefaultMessage, dialogue: DefaultDialogue) -> None:
@@ -118,15 +117,11 @@ class EchoHandler(Handler):
         self.context.logger.info(
             "Echo Handler: message={}, sender={}".format(message, message.sender)
         )
-        reply = DefaultMessage(
+        reply = dialogue.reply(
             performative=DefaultMessage.Performative.BYTES,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            message_id=message.message_id + 1,
-            target=message.message_id,
+            target_message=message,
             content=message.content,
         )
-        reply.to = message.sender
-        dialogue.update(reply)
         self.context.outbox.put_message(message=reply)
 
     def _handle_invalid(self, message: DefaultMessage, dialogue: DefaultDialogue):

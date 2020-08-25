@@ -97,15 +97,13 @@ class MlTradeHandler(Handler):
             )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=ml_trade_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"ml_trade_message": ml_trade_msg.encode()},
         )
-        default_msg.to = ml_trade_msg.sender
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_cft(
@@ -132,15 +130,11 @@ class MlTradeHandler(Handler):
                 ml_trade_msg.sender[-5:], terms.values
             )
         )
-        terms_msg = MlTradeMessage(
+        terms_msg = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.TERMS,
-            dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-            message_id=ml_trade_msg.message_id + 1,
-            target=ml_trade_msg.message_id,
+            target_message=ml_trade_msg,
             terms=terms,
         )
-        terms_msg.to = ml_trade_msg.sender
-        ml_trade_dialogue.update(terms_msg)
         self.context.outbox.put_message(message=terms_msg)
 
     def _handle_accept(
@@ -168,16 +162,12 @@ class MlTradeHandler(Handler):
             )
         )
         payload = pickle.dumps(data)  # nosec
-        data_msg = MlTradeMessage(
+        data_msg = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.DATA,
-            dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-            message_id=ml_trade_msg.message_id + 1,
-            target=ml_trade_msg.message_id,
+            target_message=ml_trade_msg,
             terms=terms,
             payload=payload,
         )
-        data_msg.to = ml_trade_msg.sender
-        ml_trade_dialogue.update(data_msg)
         self.context.outbox.put_message(message=data_msg)
 
     def _handle_invalid(

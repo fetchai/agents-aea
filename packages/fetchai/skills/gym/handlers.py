@@ -87,15 +87,13 @@ class GymHandler(Handler):
             "received invalid gym message={}, unidentified dialogue.".format(gym_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=gym_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"gym_message": gym_msg.encode()},
         )
-        default_msg.to = gym_msg.sender
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_percept(self, gym_msg: GymMessage, gym_dialogue: GymDialogue) -> None:

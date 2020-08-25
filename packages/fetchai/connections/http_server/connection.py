@@ -188,17 +188,8 @@ class Request(OpenAPIRequest):
         )
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
-        # http_message, dialogue = dialogues.create(
-        #     counterparty=agent_address,
-        #     performative=HttpMessage.Performative.REQUEST,
-        #     method=self.method,
-        #     url=url,
-        #     headers=self.parameters.header,
-        #     bodyy=self.body if self.body is not None else b"",
-        #     version="",
-        # )
-        http_message = HttpMessage(
-            dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
+        http_message, http_dialogue = dialogues.create(
+            counterparty=agent_address,
             performative=HttpMessage.Performative.REQUEST,
             method=self.method,
             url=url,
@@ -206,16 +197,11 @@ class Request(OpenAPIRequest):
             bodyy=self.body if self.body is not None else b"",
             version="",
         )
-        http_message.to = agent_address
-        http_message.sender = str(connection_id)
-        dialogue = cast(Optional[HttpDialogue], dialogues.update(http_message))
-        assert dialogue is not None, "Could not create dialogue for message={}".format(
-            http_message
-        )
+        dialogue = cast(HttpDialogue, http_dialogue)
         self.id = dialogue.incomplete_dialogue_label
         envelope = Envelope(
-            to=agent_address,
-            sender=str(connection_id),
+            to=http_message.to,
+            sender=http_message.sender,
             protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,

@@ -1087,7 +1087,7 @@ class Dialogues(ABC):
         )
 
         try:
-            dialogue._update(initial_message)
+            dialogue._update(initial_message)  # pylint: disable=protected-access
         except InvalidDialogueMessage as e:
             self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
             raise SyntaxError(
@@ -1147,7 +1147,7 @@ class Dialogues(ABC):
 
         if dialogue is not None:
             try:
-                dialogue._update(message)
+                dialogue._update(message)  # pylint: disable=protected-access
                 result = dialogue  # type: Optional[Dialogue]
             except InvalidDialogueMessage:
                 # invalid message for the dialogue found

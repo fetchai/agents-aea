@@ -52,14 +52,12 @@ class GenericSearchBehaviour(TickerBehaviour):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, _ = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_BALANCE,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
                 address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
-            ledger_api_msg.to = LEDGER_API_ADDRESS
-            ledger_api_dialogues.update(ledger_api_msg)
             self.context.outbox.put_message(message=ledger_api_msg)
         else:
             strategy.is_searching = True
@@ -76,13 +74,11 @@ class GenericSearchBehaviour(TickerBehaviour):
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )
-            oef_search_msg = OefSearchMessage(
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            oef_search_msg.to = self.context.search_service_address
-            oef_search_dialogues.update(oef_search_msg)
             self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:

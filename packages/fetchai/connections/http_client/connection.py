@@ -300,8 +300,8 @@ class HTTPClientAsyncChannel:
         except CancelledError:  # pragma: nocover
             return None
 
+    @staticmethod
     def to_envelope(
-        self,
         connection_id: PublicId,
         http_request_message: HttpMessage,
         status_code: int,

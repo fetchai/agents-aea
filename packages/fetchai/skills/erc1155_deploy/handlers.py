@@ -104,15 +104,13 @@ class FipaHandler(Handler):
             "unidentified dialogue for message={}.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.to = fipa_msg.sender
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_cfp(self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
@@ -135,15 +133,11 @@ class FipaHandler(Handler):
 
         # simply send the same proposal, independent of the query
         fipa_dialogue.proposal = strategy.get_proposal()
-        proposal_msg = FipaMessage(
-            message_id=fipa_msg.message_id + 1,
-            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-            target=fipa_msg.message_id,
+        proposal_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.PROPOSE,
+            target_message=fipa_msg,
             proposal=fipa_dialogue.proposal,
         )
-        proposal_msg.to = fipa_msg.sender
-        fipa_dialogue.update(proposal_msg)
         self.context.logger.info(
             "sending PROPOSE to agent={}: proposal={}".format(
                 fipa_msg.sender[-5:], fipa_dialogue.proposal.values,
@@ -174,9 +168,9 @@ class FipaHandler(Handler):
             contract_api_dialogues = cast(
                 ContractApiDialogues, self.context.contract_api_dialogues
             )
-            contract_api_msg = ContractApiMessage(
+            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
-                dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
                 contract_id="fetchai/erc1155:0.9.0",
                 contract_address=strategy.contract_address,
@@ -198,14 +192,7 @@ class FipaHandler(Handler):
                     }
                 ),
             )
-            contract_api_msg.to = LEDGER_API_ADDRESS
-            contract_api_dialogue = cast(
-                Optional[ContractApiDialogue],
-                contract_api_dialogues.update(contract_api_msg),
-            )
-            assert (
-                contract_api_dialogue is not None
-            ), "Contract api dialogue not created."
+            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
             contract_api_dialogue.terms = strategy.get_single_swap_terms(
                 fipa_dialogue.proposal, fipa_msg.sender
             )
@@ -331,15 +318,11 @@ class LedgerApiHandler(Handler):
                 ledger_api_msg.transaction_digest
             )
         )
-        msg = LedgerApiMessage(
+        msg = ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-            message_id=ledger_api_msg.message_id + 1,
-            dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-            target=ledger_api_msg.message_id,
+            target_message=ledger_api_msg,
             transaction_digest=ledger_api_msg.transaction_digest,
         )
-        msg.to = ledger_api_msg.sender
-        ledger_api_dialogue.update(msg)
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 
@@ -494,19 +477,15 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.info("received raw transaction={}".format(contract_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        signing_msg = SigningMessage(
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=contract_api_msg.raw_transaction,
             terms=contract_api_dialogue.terms,
             skill_callback_info={},
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = cast(
-            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-        )
-        assert signing_dialogue is not None, "Error when creating signing dialogue."
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
@@ -617,16 +596,12 @@ class SigningHandler(Handler):
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
         )
-        ledger_api_msg = LedgerApiMessage(
+        ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-            dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
             signed_transaction=signing_msg.signed_transaction,
         )
-        ledger_api_msg.to = LEDGER_API_ADDRESS
-        ledger_api_dialogue = cast(
-            Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
-        )
-        assert ledger_api_dialogue is not None, "Error when creating signing dialogue."
+        ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
         ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")

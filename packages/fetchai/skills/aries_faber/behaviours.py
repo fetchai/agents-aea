@@ -64,8 +64,8 @@ class FaberBehaviour(TickerBehaviour):
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
 
         # http request message
-        request_http_message = HttpMessage(
-            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
+        request_http_message, _ = http_dialogues.create(
+            counterparty=HTTP_COUNTERPARTY,
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,
@@ -73,14 +73,6 @@ class FaberBehaviour(TickerBehaviour):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        request_http_message.to = HTTP_COUNTERPARTY
-
-        # http dialogue
-        http_dialogue = http_dialogues.update(request_http_message)
-        assert (
-            http_dialogue is not None
-        ), "faber -> behaviour -> send_http_request_message(): something went wrong when sending a HTTP message."
-
         # send
         self.context.outbox.put_message(message=request_http_message)
 
@@ -105,16 +97,12 @@ class FaberBehaviour(TickerBehaviour):
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )
-            oef_search_msg = OefSearchMessage(
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
                 dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            oef_search_msg.to = self.context.search_service_address
-            oef_dialogue = oef_search_dialogues.update(oef_search_msg)
-            assert (
-                oef_dialogue is not None
-            ), "faber -> behaviour -> act(): something went wrong when searching for Alice on SOEF."
             self.context.outbox.put_message(message=oef_search_msg)
             self.context.logger.info("Searching for Alice on SOEF...")
 

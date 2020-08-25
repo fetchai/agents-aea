@@ -19,7 +19,7 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from typing import Optional, cast
+from typing import cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -99,14 +99,11 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.to = self.context.search_service_address
-        oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
-        assert oef_search_dialogue is not None, "OefSearchDialogue not created."
         envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
         self.context.outbox.put_message(
             message=oef_search_msg, context=envelope_context
@@ -132,16 +129,15 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             "updating service directory as {}.".format(strategy.registering_as)
         )
         description = strategy.get_register_service_description()
-        oef_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_msg.to = self.context.search_service_address
-        oef_dialogue = oef_search_dialogues.update(oef_msg)
-        assert oef_dialogue is not None, "OefSearchDialogue not created."
         envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(message=oef_msg, context=envelope_context)
+        self.context.outbox.put_message(
+            message=oef_search_msg, context=envelope_context
+        )
 
     def _unregister_service(self) -> None:
         """
@@ -159,16 +155,15 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             )
         )
         description = strategy.get_unregister_service_description()
-        oef_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_msg.to = self.context.search_service_address
-        oef_dialogue = oef_search_dialogues.update(oef_msg)
-        assert oef_dialogue is not None, "OefSearchDialogue not created."
         envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(message=oef_msg, context=envelope_context)
+        self.context.outbox.put_message(
+            message=oef_search_msg, context=envelope_context
+        )
 
     def _unregister_agent(self) -> None:
         """
@@ -181,14 +176,11 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.to = self.context.search_service_address
-        oef_search_dialogue = oef_search_dialogues.update(oef_search_msg)
-        assert oef_search_dialogue is not None, "OefSearchDialogue not created."
         envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
         self.context.outbox.put_message(
             message=oef_search_msg, context=envelope_context
@@ -212,22 +204,20 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         )
         query = strategy.get_location_and_service_query()
         for (is_seller_search, searching_for) in strategy.searching_for_types:
-            oef_msg = OefSearchMessage(
+            oef_search_msg, oef_search_dialogue = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            oef_msg.to = self.context.search_service_address
-            oef_search_dialogue = cast(
-                Optional[OefSearchDialogue], oef_search_dialogues.update(oef_msg)
-            )
-            assert oef_search_dialogue is not None, "OefSearchDialogue not created."
+            oef_search_dialogue = cast(OefSearchDialogue, oef_search_dialogue)
             oef_search_dialogue.is_seller_search = is_seller_search
             envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-            self.context.outbox.put_message(message=oef_msg, context=envelope_context)
+            self.context.outbox.put_message(
+                message=oef_search_msg, context=envelope_context
+            )
             self.context.logger.info(
                 "searching for {}, search_id={}.".format(
-                    searching_for, oef_msg.dialogue_reference
+                    searching_for, oef_search_msg.dialogue_reference
                 )
             )
 
