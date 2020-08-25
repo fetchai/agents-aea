@@ -27,9 +27,8 @@ from click import ClickException
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.package_utils import get_path_to_package_configuration
 from aea.configurations.base import (
-    ComponentId,
-    ComponentType,
     ConnectionConfig,
     PublicId,
 )
@@ -93,6 +92,8 @@ def _try_get_multiaddress(
     :return: address.
     """
     ctx = cast(Context, click_context.obj)
+    # connection_id not None implies is_connection
+    is_connection = connection_id is not None or is_connection
 
     private_key_paths = (
         ctx.agent_config.private_key_paths
@@ -109,7 +110,7 @@ def _try_get_multiaddress(
     path_to_key = Path(private_key_path)
     crypto = crypto_registry.make(ledger_id, private_key_path=path_to_key)
 
-    if not is_connection:
+    if connection_id is None:
         return _try_get_peerid(crypto)
     return _try_get_connection_multiaddress(
         click_context, crypto, cast(PublicId, connection_id), host_field, port_field
@@ -146,24 +147,26 @@ def _try_get_connection_multiaddress(
     if connection_id not in ctx.agent_config.connections:
         raise ValueError(f"Cannot find connection with the public id {connection_id}.")
 
-    connection_config = cast(
-        ConnectionConfig,
-        ctx.agent_config.component_configurations[
-            ComponentId(ComponentType.CONNECTION, connection_id)
-        ],
+    configuration_path = Path(
+        get_path_to_package_configuration(ctx, "connection", connection_id)
     )
+    with configuration_path.open() as fp:
+        connection_config = cast(ConnectionConfig, ctx.connection_loader.load(fp))
 
     if host_field not in connection_config.config:
         raise ValueError(
-            f"Host field {host_field} not present in connection configuration {connection_id}"
+            f"Host field '{host_field}' not present in connection configuration {connection_id}"
         )
     if port_field not in connection_config.config:
         raise ValueError(
-            f"Port field {port_field} not present in connection configuration {connection_id}"
+            f"Port field '{port_field}' not present in connection configuration {connection_id}"
         )
 
     host = connection_config.config[host_field]
-    port = connection_config.config[port_field]
+    port = int(connection_config.config[port_field])
 
-    multiaddr = MultiAddr(host, port, crypto.public_key)
-    return multiaddr.format()
+    try:
+        multiaddr = MultiAddr(host, port, crypto.public_key)
+        return multiaddr.format()
+    except Exception as e:
+        raise ClickException(f"An error occurred while creating the multiaddress: {e}")
