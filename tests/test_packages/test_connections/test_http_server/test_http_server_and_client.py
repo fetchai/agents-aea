@@ -31,8 +31,8 @@ from aea.mail.base import Address, Envelope, Message
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
-from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.conftest import (

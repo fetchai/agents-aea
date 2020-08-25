@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the search feature of the local OEF node."""
 import unittest.mock
-from typing import Optional, cast
+from typing import cast
 
 import pytest
 
@@ -384,19 +384,27 @@ class TestAgentMessage:
         cls.multiplexer1 = Multiplexer(
             [_make_local_connection(cls.address_1, cls.node,)]
         )
-        cls.dialogues = FipaDialogues(cls.address_1)
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.SELLER
+        cls.dialogues = FipaDialogues(cls.address_1, role_from_first_message)
 
     @pytest.mark.asyncio
     async def test_messages(self):
         """Test that at the beginning, the search request returns an empty search result."""
-        msg = FipaMessage(
+        msg, sending_dialogue = self.dialogues.create(
+            counterparty=str(OEFLocalConnection.connection_id),
             performative=FipaMessage.Performative.CFP,
-            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        msg.to = str(OEFLocalConnection.connection_id)
-        sending_dialogue = cast(Optional[FipaDialogue], self.dialogues.update(msg))
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
@@ -404,14 +412,11 @@ class TestAgentMessage:
             await _make_local_connection(self.address_1, self.node,).send(envelope)
 
         self.multiplexer1.connect()
-        msg = FipaMessage(
+        msg, sending_dialogue = self.dialogues.create(
+            counterparty="this_address_does_not_exist",
             performative=FipaMessage.Performative.CFP,
-            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        msg.to = "this_address_does_not_exist"
-        sending_dialogue = cast(Optional[FipaDialogue], self.dialogues.update(msg))
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
@@ -461,16 +466,11 @@ class TestFilteredSearchResult:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_foobar
         )
-        register_service_request = OefSearchMessage(
+        register_service_request, sending_dialogue = cls.dialogues1.create(
+            counterparty=str(OEFLocalConnection.connection_id),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=cls.dialogues1.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        register_service_request.to = str(OEFLocalConnection.connection_id)
-        sending_dialogue = cast(
-            Optional[OefSearchDialogue], cls.dialogues1.update(register_service_request)
-        )
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
@@ -488,16 +488,11 @@ class TestFilteredSearchResult:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_barfoo
         )
-        register_service_request = OefSearchMessage(
+        register_service_request, sending_dialogue = cls.dialogues2.create(
+            counterparty=str(OEFLocalConnection.connection_id),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=cls.dialogues1.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        register_service_request.to = str(OEFLocalConnection.connection_id)
-        sending_dialogue = cast(
-            Optional[OefSearchDialogue], cls.dialogues2.update(register_service_request)
-        )
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
@@ -516,14 +511,11 @@ class TestFilteredSearchResult:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )
-        msg = OefSearchMessage(
+        msg, sending_dialogue = cls.dialogues1.create(
+            counterparty=str(OEFLocalConnection.connection_id),
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=cls.dialogues1.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        msg.to = str(OEFLocalConnection.connection_id)
-        sending_dialogue = cast(Optional[OefSearchDialogue], cls.dialogues1.update(msg))
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
@@ -534,16 +526,6 @@ class TestFilteredSearchResult:
     def test_filtered_search_result(self):
         """Test that the search result contains only the entries matching the query."""
         # build and send the request
-        # search_services_request = OefSearchMessage(
-        #     performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-        #     dialogue_reference=self.dialogues1.new_self_initiated_dialogue_reference(),
-        #     query=query,
-        # )
-        # search_services_request.to = str(OEFLocalConnection.connection_id)
-        # sending_dialogue = cast(
-        #     Optional[OefSearchDialogue], self.dialogues1.update(search_services_request)
-        # )
-        # assert sending_dialogue is not None
         search_services_request, sending_dialogue = self.dialogues1.create(
             counterparty=str(OEFLocalConnection.connection_id),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,

@@ -318,7 +318,7 @@ class Agent1Handler(Handler):
         :param message: the message
         :return: None
         """
-        self.dialogue.update(message)
+        self.dialogue._update(message)
         self.handled_message = message
 
     def teardown(self) -> None:
@@ -356,9 +356,9 @@ class Agent2Handler(Handler):
         :param message: the message
         :return: None
         """
-        self.dialogue.update(message)
+        self.dialogue._update(message)
         self.handled_message = message
-        self.dialogue.update(self.message_2)
+        self.dialogue._update(self.message_2)
         self.context.outbox.put_message(self.message_2)
 
     def teardown(self) -> None:
