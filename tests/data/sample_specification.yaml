@@ -86,7 +86,7 @@ ct:DataModel: |
 initiation: [performative_ct, performative_pt]
 reply:
   performative_ct: [performative_pct]
-  performative_pt: [performative_pmt]
+  performative_pt: [performative_pt, performative_pmt]
   performative_pct: [performative_mt, performative_o]
   performative_pmt: [performative_mt, performative_o]
   performative_mt: []
