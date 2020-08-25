@@ -111,17 +111,13 @@ class FipaNegotiationHandler(Handler):
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.to = fipa_msg.sender
-        assert (
-            default_dialogues.update(default_msg) is not None
-        ), "DefaultDialogue not constructed."
         self.context.outbox.put_message(message=default_msg)
 
     def _on_cfp(self, cfp: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
@@ -368,15 +364,6 @@ class FipaNegotiationHandler(Handler):
                 #     }, # noqa: E800
                 # ) # noqa: E800
             else:
-                signing_dialogues = cast(
-                    SigningDialogues, self.context.signing_dialogues
-                )
-                signing_dialogue = cast(
-                    Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-                )
-                assert (
-                    signing_dialogue is not None
-                ), "Could not construct sigining dialogue."
                 self.context.logger.info(
                     "sending signing_msg={} to decison maker following ACCEPT.".format(
                         signing_msg
@@ -485,15 +472,6 @@ class FipaNegotiationHandler(Handler):
                         **{"counterparty_signature": counterparty_signature},
                     },
                 )
-                signing_dialogues = cast(
-                    SigningDialogues, self.context.signing_dialogues
-                )
-                signing_dialogue = cast(
-                    Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-                )
-                assert (
-                    signing_dialogue is not None
-                ), "Could not construct sigining dialogue."
                 self.context.logger.info(
                     "sending signing_msg={} to decison maker following MATCH_ACCEPT.".format(
                         signing_msg
@@ -890,13 +868,11 @@ class OefSearchHandler(Handler):
                 self.context.logger.info(
                     "sending CFP to agent={}".format(opponent_addr[-5:])
                 )
-                fipa_msg = FipaMessage(
-                    dialogue_reference=fipa_dialogues.new_self_initiated_dialogue_reference(),
+                fipa_msg, _ = fipa_dialogues.create(
+                    counterparty=opponent_addr,
                     performative=FipaMessage.Performative.CFP,
                     query=query,
                 )
-                fipa_msg.to = opponent_addr
-                fipa_dialogues.update(fipa_msg)
                 self.context.outbox.put_message(message=fipa_msg)
         else:
             self.context.logger.info(

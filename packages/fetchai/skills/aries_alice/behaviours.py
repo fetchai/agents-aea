@@ -69,8 +69,8 @@ class AliceBehaviour(TickerBehaviour):
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
 
         # http request message
-        request_http_message = HttpMessage(
-            dialogue_reference=http_dialogues.new_self_initiated_dialogue_reference(),
+        request_http_message, _ = http_dialogues.create(
+            counterparty=HTTP_COUNTERPARTY,
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,
@@ -78,14 +78,6 @@ class AliceBehaviour(TickerBehaviour):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        request_http_message.to = HTTP_COUNTERPARTY
-
-        # http dialogue
-        http_dialogue = http_dialogues.update(request_http_message)
-        assert (
-            http_dialogue is not None
-        ), "alice -> behaviour -> send_http_request_message(): something went wrong when sending a HTTP message."
-
         # send
         self.context.outbox.put_message(
             message=request_http_message,
@@ -129,16 +121,11 @@ class AliceBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.to = self.context.search_service_address
-        oef_dialogue = oef_search_dialogues.update(oef_search_msg)
-        assert (
-            oef_dialogue is not None
-        ), "alice -> behaviour -> _register_agent(): something went wrong when registering Alice on SOEF."
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering Alice on SOEF.")
 
@@ -153,16 +140,11 @@ class AliceBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.to = self.context.search_service_address
-        oef_dialogue = oef_search_dialogues.update(oef_search_msg)
-        assert (
-            oef_dialogue is not None
-        ), "alice -> behaviour -> _register_service(): something went wrong when registering Alice service on SOEF."
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering Alice service on SOEF.")
 
@@ -177,16 +159,11 @@ class AliceBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.to = self.context.search_service_address
-        oef_dialogue = oef_search_dialogues.update(oef_search_msg)
-        assert (
-            oef_dialogue is not None
-        ), "alice -> behaviour -> _unregister_service(): something went wrong when unregistering Alice service on SOEF."
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering service from SOEF.")
 
@@ -201,15 +178,10 @@ class AliceBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.to = self.context.search_service_address
-        oef_dialogue = oef_search_dialogues.update(oef_search_msg)
-        assert (
-            oef_dialogue is not None
-        ), "alice -> behaviour -> _unregister_agent(): something went wrong when unregistering Alice on SOEF."
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")

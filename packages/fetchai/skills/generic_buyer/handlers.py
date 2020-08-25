@@ -106,15 +106,13 @@ class GenericFipaHandler(Handler):
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.to = fipa_msg.sender
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_propose(
@@ -203,18 +201,12 @@ class GenericFipaHandler(Handler):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 terms=fipa_dialogue.terms,
             )
-            ledger_api_msg.to = LEDGER_API_ADDRESS
-            ledger_api_dialogue = cast(
-                Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
-            )
-            assert (
-                ledger_api_dialogue is not None
-            ), "Error when creating ledger api dialogue."
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
@@ -377,13 +369,11 @@ class GenericOefSearchHandler(Handler):
         for idx, counterparty in enumerate(oef_search_msg.agents):
             if idx >= strategy.max_negotiations:
                 continue
-            cfp_msg = FipaMessage(
+            cfp_msg, _ = fipa_dialogues.create(
+                counterparty=counterparty,
                 performative=FipaMessage.Performative.CFP,
-                dialogue_reference=fipa_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            cfp_msg.to = counterparty
-            fipa_dialogues.update(cfp_msg)
             self.context.outbox.put_message(message=cfp_msg)
             self.context.logger.info(
                 "sending CFP to agent={}".format(counterparty[-5:])
@@ -620,19 +610,15 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        signing_msg = SigningMessage(
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
             skill_callback_info={},
         )
-        signing_msg.to = "decision_maker"
-        signing_dialogue = cast(
-            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-        )
-        assert signing_dialogue is not None, "Error when creating signing dialogue"
+        signing_dialogue = cast(SigningDialogue, signing_dialogues)
         signing_dialogue.associated_fipa_dialogue = (
             ledger_api_dialogue.associated_fipa_dialogue
         )

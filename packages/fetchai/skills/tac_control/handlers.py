@@ -103,15 +103,13 @@ class TacHandler(Handler):
             "received invalid tac message={}, unidentified dialogue.".format(tac_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=tac_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"tac_message": tac_msg.encode()},
         )
-        default_msg.to = tac_msg.sender
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _on_register(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:

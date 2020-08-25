@@ -195,18 +195,15 @@ class WebhookChannel:
         version = str(request.version[0]) + "." + str(request.version[1])
 
         context = EnvelopeContext(uri=URI("aea/mail/base.py"))
-        http_message = HttpMessage(
+        http_message, _ = self._dialogues.create(
+            counterparty=self.agent_address,
             performative=HttpMessage.Performative.REQUEST,
             method=request.method,
             url=str(request.url),
             version=version,
             headers=json.dumps(dict(request.headers)),
             bodyy=payload_bytes if payload_bytes is not None else b"",
-            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
         )
-        http_message.to = self.agent_address
-        http_dialogue = self._dialogues.update(http_message)
-        assert http_dialogue is not None, "Could not create dialogue."
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,

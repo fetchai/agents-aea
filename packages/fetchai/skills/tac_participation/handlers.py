@@ -189,14 +189,12 @@ class OefSearchHandler(Handler):
         game.update_expected_controller_addr(controller_addr)
         game.update_game_phase(Phase.GAME_REGISTRATION)
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
-        tac_msg = TacMessage(
+        tac_msg, tac_dialogue = tac_dialogues.create(
+            counterparty=controller_addr,
             performative=TacMessage.Performative.REGISTER,
-            dialogue_reference=tac_dialogues.new_self_initiated_dialogue_reference(),
             agent_name=self.context.agent_name,
         )
-        tac_msg.to = controller_addr
-        tac_dialogue = cast(Optional[TacDialogue], tac_dialogues.update(tac_msg))
-        assert tac_dialogue is not None, "TacDialogue not created."
+        tac_dialogue = cast(TacDialogue, tac_dialogue)
         game.tac_dialogue = tac_dialogue
         self.context.outbox.put_message(message=tac_msg)
         self.context.behaviours.tac_search.is_active = False
@@ -350,21 +348,16 @@ class TacHandler(Handler):
         state_update_dialogues = cast(
             StateUpdateDialogues, self.context.state_update_dialogues
         )
-        state_update_msg = StateUpdateMessage(
+        state_update_msg, state_update_dialogue = state_update_dialogues.create(
+            counterparty="decision_maker",
             performative=StateUpdateMessage.Performative.INITIALIZE,
-            dialogue_reference=state_update_dialogues.new_self_initiated_dialogue_reference(),
             amount_by_currency_id=tac_msg.amount_by_currency_id,
             quantities_by_good_id=tac_msg.quantities_by_good_id,
             exchange_params_by_currency_id=tac_msg.exchange_params_by_currency_id,
             utility_params_by_good_id=tac_msg.utility_params_by_good_id,
         )
         self.context.shared_state["fee_by_currency_id"] = tac_msg.fee_by_currency_id
-        state_update_msg.to = "decision_maker"
-        state_update_dialogue = cast(
-            Optional[StateUpdateDialogue],
-            state_update_dialogues.update(state_update_msg),
-        )
-        assert state_update_dialogue is not None, "StateUpdateDialogue not created."
+        state_update_dialogue = cast(StateUpdateDialogue, state_update_dialogue)
         game = cast(Game, self.context.game)
         game.state_update_dialogue = state_update_dialogue
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)

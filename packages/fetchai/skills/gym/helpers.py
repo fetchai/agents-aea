@@ -139,13 +139,10 @@ class ProxyEnv(gym.Env):
         """
         self._step_count = 0
         self._is_rl_agent_trained = False
-        gym_msg = GymMessage(
-            dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
-            performative=GymMessage.Performative.RESET,
+        gym_msg, gym_dialogue = self.gym_dialogues.create(
+            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
         )
-        gym_msg.to = self.gym_address
-        gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
-        assert gym_dialogue is not None
+        gym_dialogue = cast(GymDialogue, gym_dialogue)
         self._active_dialogue = gym_dialogue
         self._skill_context.outbox.put_message(message=gym_msg)
 

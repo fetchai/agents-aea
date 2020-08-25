@@ -100,15 +100,13 @@ class GenericFipaHandler(Handler):
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.to = fipa_msg.sender
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_cfp(self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
@@ -228,20 +226,14 @@ class GenericFipaHandler(Handler):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 transaction_digest=TransactionDigest(
                     fipa_dialogue.terms.ledger_id, fipa_msg.info["transaction_digest"]
                 ),
             )
-            ledger_api_msg.to = LEDGER_API_ADDRESS
-            ledger_api_dialogue = cast(
-                Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
-            )
-            assert (
-                ledger_api_dialogue is not None
-            ), "LedgerApiDialogue construction failed."
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
         elif strategy.is_ledger_tx:
