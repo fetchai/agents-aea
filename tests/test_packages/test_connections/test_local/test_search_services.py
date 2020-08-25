@@ -395,6 +395,7 @@ class TestAgentMessage:
             :return: The role of the agent
             """
             return FipaDialogue.Role.SELLER
+
         cls.dialogues = FipaDialogues(cls.address_1, role_from_first_message)
 
     @pytest.mark.asyncio

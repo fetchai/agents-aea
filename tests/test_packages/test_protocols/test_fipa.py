@@ -63,6 +63,7 @@ def test_fipa_cfp_serialization():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -92,6 +93,7 @@ def test_fipa_cfp_serialization_bytes():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -121,6 +123,7 @@ def test_fipa_propose_serialization():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -148,6 +151,7 @@ def test_fipa_accept_serialization():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -175,6 +179,7 @@ def test_performative_match_accept():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -203,6 +208,7 @@ def test_performative_accept_with_inform():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -231,6 +237,7 @@ def test_performative_match_accept_with_inform():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -259,6 +266,7 @@ def test_performative_inform():
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -402,24 +410,11 @@ class TestDialogues:
 
         # Generate a proposal message to send to the buyer.
         proposal = Description({"foo1": 1, "bar1": 2})
-        message_id = cfp_msg.message_id + 1
-        target = cfp_msg.message_id
-        proposal_msg = FipaMessage(
-            message_id=message_id,
-            dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
-            target=target,
+        proposal_msg = seller_dialogue.reply(
+            target_message=cfp_msg,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=proposal,
         )
-        proposal_msg.to = self.buyer_addr
-
-        assert (
-            proposal_msg.dialogue_reference[0] != ""
-            and proposal_msg.dialogue_reference[1] != ""
-        ), "The dialogue_reference is not setup properly."
-
-        # Extends the outgoing list of messages.
-        seller_dialogue.update(proposal_msg)
 
         # MESSAGE BEING SENT BETWEEN AGENTS
 
@@ -435,20 +430,11 @@ class TestDialogues:
         assert retrieved_dialogue == buyer_dialogue, "Should have found dialogue"
 
         # Create an accept_w_inform message to send seller.
-        message_id = proposal_msg.message_id + 1
-        target = proposal_msg.message_id
-        accept_msg = FipaMessage(
-            message_id=message_id,
-            dialogue_reference=buyer_dialogue.dialogue_label.dialogue_reference,
-            target=target,
+        accept_msg = buyer_dialogue.reply(
+            target_message=proposal_msg,
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             info={"address": "dummy_address"},
         )
-        accept_msg.to = self.seller_addr
-
-        # Adds the message to the buyer outgoing list.
-        buyer_dialogue.update(accept_msg)
-
         # MESSAGE BEING SENT BETWEEN AGENTS
 
         # Adds the message to the seller incoming message list.
