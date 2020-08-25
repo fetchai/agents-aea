@@ -1,7 +1,7 @@
 An Autonomous Economic Agent is, in technical terms, defined by the following characteristics:
 
 <ul>
-<li> It MUST be capable of receiving and sending `Envelopes` which satisfy the following <a href="https://developers.google.com/protocol-buffers" target=_blank>protobuf</a> schema:
+<li> It MUST be capable of receiving and sending `Envelopes` which satisfy the following <a href="https://developers.google.com/protocol-buffers" target="_blank">protobuf</a> schema:
 
 ``` proto
 syntax = "proto3";
@@ -17,13 +17,13 @@ message Envelope{
 }
 ```
 
-The format for the above fields, except `message`, is specified below. For those with `regexp`, the format is described in <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target=_blank>regular expression</a>.
+The format for the above fields, except `message`, is specified below. For those with `regexp`, the format is described in <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target="_blank">regular expression</a>.
 
 <ul>
-<li>to and sender: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target=_blank>secp256k1</a>-compatible elliptic curve</li>
+<li>to and sender: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">secp256k1</a>-compatible elliptic curve</li>
 <li>protocol_id: (`regexp`) `^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`</li>
 <li>bytes: a bytes string representing a serialized message in the specified  <a href="../protocol">protocol</a></li>
-<li>URI: <a href="https://tools.ietf.org/html/rfc3986" target=_blank>this syntax</a></li>
+<li>URI: <a href="https://tools.ietf.org/html/rfc3986" target="_blank">this syntax</a></li>
 </ul>
 </li>
 
@@ -98,7 +98,7 @@ message DefaultMessage{
 </li>
 <li> It is recommended that it processes `Envelopes` asynchronously. Note, the specification regarding the processing of messages does not impose any particular implementation choice/constraint; for example, the AEA can process envelopes either synchronously and asynchronously. However, due to the high level of activity that an AEA might be subject to, other AEAs expect a certain minimum level of responsiveness and reactivity of an AEA's implementation, especially in the case of many concurrent dialogues with other peers. That could imply the need for asynchronous programming to make the AEA's implementation scalable.
 </li>
-<li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the eliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1">SECP256k1</a>).
+<li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the eliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
 </li>
 <li> It SHOULD implement handling of errors using the `fetchai/default:0.5.0` protocol. The protobuf schema is given above.
 </li>

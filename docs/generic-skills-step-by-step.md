@@ -1,4 +1,4 @@
-This guide is a step-by-step introduction to building an AEA that represents static, and dynamic data to be advertised on the <a href=../oef-ledger>Open Economic Framework</a>.
+This guide is a step-by-step introduction to building an AEA that represents static, and dynamic data to be advertised on the <a href="../oef-ledger">Open Economic Framework</a>.
 
 If you simply want to run the resulting AEAs <a href="../generic-skills">go here</a>.
 
@@ -20,7 +20,7 @@ If you simply want to follow the software part of the guide then you only requir
 
 ### Setup the environment (Optional)
 
-You can follow the guide <a href=../raspberry-set-up> here </a> in order to setup your environment and prepare your Raspberry Pi.
+You can follow the guide <a href="../raspberry-set-up"> here </a> in order to setup your environment and prepare your Raspberry Pi.
 
 Once you setup your Raspberry Pi, open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there  (I named mine `99-hidraw-permissions.rules`)
 ``` bash
@@ -3081,6 +3081,6 @@ You have completed the "Getting Started" series. Congratulations!
 
 ### Recommended
 
-We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://fetch-ai.slack.com">Slack</a>. Speak to you there!
+We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://fetch-ai.slack.com" target="_blank">Slack</a>. Speak to you there!
 
 <br />

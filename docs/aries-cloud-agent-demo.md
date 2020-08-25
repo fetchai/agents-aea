@@ -8,7 +8,7 @@ Demonstrating an entire decentralised identity scenario involving AEAs and insta
 
 ## Discussion
 
-This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target=_blank>here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target=_blank> aries cloud agent repository </a>.
+This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target="_blank">here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target="_blank"> aries cloud agent repository </a>.
 
 The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining all of their capabilities, such as issuing and requesting verifiable credentials, selective disclosure and zero knowledge proofs.
 
@@ -81,7 +81,7 @@ All messages from an AEA to another AEA utilise the p2p communication network ac
 
 All messages initiated from an ACA to an AEA are webhooks (using `webhook` connection).
 
-This is the extent of the demo at this point. The rest of the interactions require an instance of the <a href="https://github.com/bcgov/von-network" target=_blank>Indy ledger</a> to run. This is what will be implemented next.
+This is the extent of the demo at this point. The rest of the interactions require an instance of the <a href="https://github.com/bcgov/von-network" target="_blank">Indy ledger</a> to run. This is what will be implemented next.
 
 The rest of the interactions are broadly as follows:
 
@@ -101,7 +101,7 @@ At this point, the two ACAs are connected to each other.
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start. 
 
-Install Aries cloud-agents (for more info see <a href="https://github.com/hyperledger/aries-cloudagent-python#install" target=_blank>here</a>) if you do not have it on your machine:
+Install Aries cloud-agents (for more info see <a href="https://github.com/hyperledger/aries-cloudagent-python#install" target="_blank">here</a>) if you do not have it on your machine:
 
 ``` bash
 pip install aries-cloudagent
@@ -109,7 +109,7 @@ pip install aries-cloudagent
 
 This demo has been successfully tested with aca-py version 0.4.5.
 
-This demo requires an instance of von network running in docker locally (for more info see <a href="https://github.com/bcgov/von-network#running-the-network-locally" target=_blank>here</a>)
+This demo requires an instance of von network running in docker locally (for more info see <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">here</a>)
 
 This demo has been successfully tested with the von-network git repository pulled on 07 Aug 2020 (commit number `ad1f84f64d4f4c106a81462f5fbff496c5fbf10e`). 
 
@@ -121,13 +121,13 @@ Open five terminals. The first terminal is used to run an instance of von-networ
 
 In the first terminal move to the `von-network` directory and run an instance of `von-network` locally in docker.
 
-This <a href="https://github.com/bcgov/von-network#running-the-network-locally" target=_blank>tutorial</a> has information on starting (and stopping) the network locally.
+This <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">tutorial</a> has information on starting (and stopping) the network locally.
 
 ``` bash
 ./manage build
 ./manage start --logs
 ``` 
-Once the ledger is running, you can see the ledger by going to the web server running on port 9000. On localhost, that means going to <a href="http://localhost:9000" target=_blank>http://localhost:9000</a>.  
+Once the ledger is running, you can see the ledger by going to the web server running on port 9000. On localhost, that means going to <a href="http://localhost:9000" target="_blank">http://localhost:9000</a>.  
 
 ## Alice and Faber ACAs
 
@@ -371,6 +371,6 @@ aea delete aries_alice
 
 In the next update to this demo, the remaining interactions between AEAs and ACAs must be implemented. This means:
 
-* An instance of Indy ledger must be installed and running. See <a href="https://github.com/bcgov/von-network#running-the-network-locally" target=_blank>here</a> for more detail.
+* An instance of Indy ledger must be installed and running. See <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">here</a> for more detail.
 * The commands for running the ACAs need to be adjusted. Additional options relating to a wallet (wallet-name, type, key, storage-type, config, creds) need to be fed to the ACAs as well as the ledger's genesis file so the ACAs can connect to the ledger.
 * The remaining interactions between the AEAs and ACAs as described <a href="../aries-cloud-agent-demo/#discussion">here</a> need to be implemented.
