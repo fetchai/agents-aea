@@ -160,7 +160,7 @@ class AEATestWrapper:
             message=DefaultSerializer().encode(message),
         )
 
-    def set_loop_timeout(self, timeout: float) -> None:
+    def set_loop_timeout(self, period: float) -> None:
         """
         Set agent's loop timeout.
 
@@ -168,7 +168,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea._timeout = timeout  # pylint: disable=protected-access
+        self.aea._period = period  # pylint: disable=protected-access
 
     def setup(self) -> None:
         """
@@ -203,14 +203,6 @@ class AEATestWrapper:
         :return: None
         """
         return self.aea.runtime.multiplexer.in_queue.empty()
-
-    def react(self) -> None:
-        """
-        One time process of react for incoming message.
-
-        :return: None
-        """
-        self.aea.react()
 
     def __enter__(self) -> None:
         """Contenxt manager enter."""

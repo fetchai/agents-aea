@@ -26,7 +26,7 @@ from contextlib import suppress
 from enum import Enum
 from typing import Dict, Optional, TYPE_CHECKING, Type, cast
 
-from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
+from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import ensure_loop
 from aea.multiplexer import AsyncMultiplexer, Multiplexer
@@ -53,10 +53,9 @@ class BaseRuntime(ABC):
     """Abstract runtime class to create implementations."""
 
     RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
-        "sync": SyncAgentLoop,
         "async": AsyncAgentLoop,
     }
-    DEFAULT_RUN_LOOP: str = "sync"
+    DEFAULT_RUN_LOOP: str = "async"
 
     def __init__(
         self,

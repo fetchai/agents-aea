@@ -20,17 +20,18 @@
 import asyncio
 import datetime
 import logging
-from queue import Empty
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 from unittest.mock import MagicMock
 
 import pytest
 
 from aea.aea import AEA
-from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
+from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.registries.filter import Filter
+from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 
@@ -105,22 +106,16 @@ class AsyncFakeAgent(AEA):
         """Init agent."""
         self.handlers = handlers or []
         self.behaviours = behaviours or []
-        self._inbox = AsyncFriendlyQueue()
-        self._filter = MagicMock()
-        self.filter._process_internal_message = MagicMock()
-        self.filter._handle_new_behaviours = MagicMock()
         self._runtime = MagicMock()
         self.runtime.decision_maker.message_out_queue = AsyncFriendlyQueue()
-        self.filter.decision_maker_out_queue = (
-            self.runtime.decision_maker.message_out_queue
+        self._inbox = AsyncFriendlyQueue()
+        self._filter = Filter(
+            Resources(), self.runtime.decision_maker.message_out_queue
         )
         self._logger = logging.getLogger("fake agent")
-        self._timeout = 0.001
-
-    def get_periodic_tasks(
-        self,
-    ) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]:
-        return self._get_behaviours_tasks()
+        self._period = 0.001
+        self.filter.handle_internal_message = MagicMock()
+        self.filter.handle_new_handlers_and_behaviours = MagicMock()
 
     def _get_behaviours_tasks(
         self,
@@ -153,24 +148,10 @@ class AsyncFakeAgent(AEA):
         """Add a message to internal queue."""
         self.runtime.decision_maker.message_out_queue.put_nowait(msg)
 
-    def act(self) -> None:
-        """Call all acts of behaviours."""
-        for behaviour in self.behaviours:
-            behaviour.act_wrapper()
-
-    def react(self) -> None:
-        """Process one incoming message."""
-        try:
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if envelope is not None:
-                self._handle(envelope)
-        except Empty:
-            pass
-
-    def update(self) -> None:
-        """Call internal messages handle and add behaviours handler."""
-        self.filter._process_internal_message()  # type: ignore
-        self.filter._handle_new_behaviours()
+    def _get_msg_and_handlers_for_envelope(
+        self, envelope: Envelope
+    ) -> Tuple[Optional[Message], List[Handler]]:
+        return envelope, self.handlers  # type: ignore
 
     def _execution_control(
         self,
@@ -263,8 +244,7 @@ class TestAsyncAgentLoop:
             wait_for_condition(lambda: agent_loop.is_running, timeout=10)
             agent.put_internal_message("msg")
             wait_for_condition(
-                lambda: agent.filter._process_internal_message.called is True,
-                timeout=5,
+                lambda: agent.filter.handle_internal_message.called is True, timeout=5,
             )
             agent_loop.stop()
 
@@ -277,7 +257,7 @@ class TestAsyncAgentLoop:
         with run_in_thread(agent_loop.start, timeout=5):
             wait_for_condition(lambda: agent_loop.is_running, timeout=10)
             wait_for_condition(
-                lambda: agent.filter._handle_new_behaviours.call_count >= 2,
+                lambda: agent.filter.handle_new_handlers_and_behaviours.call_count >= 2,
                 timeout=agent_loop.NEW_BEHAVIOURS_PROCESS_SLEEP * 3,
             )
             agent_loop.stop()
@@ -308,10 +288,3 @@ class TestAsyncAgentLoop:
         agent_loop.stop()
         loop.run_until_complete(asyncio.sleep(0.1))
         assert loop_task.done()
-
-
-class TestSyncAgentLoop(TestAsyncAgentLoop):
-    """Tests for synchronous loop."""
-
-    AGENT_LOOP_CLASS = SyncAgentLoop
-    FAKE_AGENT_CLASS = SyncFakeAgent

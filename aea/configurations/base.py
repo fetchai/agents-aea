@@ -1349,7 +1349,7 @@ class AgentConfig(PackageConfiguration):
         registry_path: str = DEFAULT_REGISTRY_PATH,
         description: str = "",
         logging_config: Optional[Dict] = None,
-        timeout: Optional[float] = None,
+        period: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
         decision_maker_handler: Optional[Dict] = None,
@@ -1387,7 +1387,7 @@ class AgentConfig(PackageConfiguration):
             self.logging_config["version"] = 1
             self.logging_config["disable_existing_loggers"] = False
 
-        self.timeout: Optional[float] = timeout
+        self.period: Optional[float] = period
         self.execution_timeout: Optional[float] = execution_timeout
         self.max_reactions: Optional[int] = max_reactions
         self.skill_exception_policy: Optional[str] = skill_exception_policy
@@ -1549,8 +1549,8 @@ class AgentConfig(PackageConfiguration):
                 "connection_private_key_paths"
             ] = self.connection_private_key_paths_dict
 
-        if self.timeout is not None:
-            config["timeout"] = self.timeout
+        if self.period is not None:
+            config["period"] = self.period
         if self.execution_timeout is not None:
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
@@ -1587,7 +1587,7 @@ class AgentConfig(PackageConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             logging_config=cast(Dict, obj.get("logging_config", {})),
-            timeout=cast(float, obj.get("timeout")),
+            period=cast(float, obj.get("period")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),

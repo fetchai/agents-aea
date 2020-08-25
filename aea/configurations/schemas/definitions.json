@@ -117,9 +117,10 @@
       "type": ["integer", "null"],
       "minimum": 1
     },
-    "timeout": {
+    "period": {
       "type": ["number", "null"],
-      "minimum": 0
+      "minimum": 0,
+      "exclusiveMinimum": true
     },
     "execution_timeout": {
       "type": ["number", "null"],
@@ -131,7 +132,7 @@
     },
     "loop_mode": {
       "type": "string",
-      "enum": ["sync", "async"]
+      "enum": ["async"]
     },
     "runtime_mode": {
       "type": "string",

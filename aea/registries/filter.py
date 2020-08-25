@@ -19,7 +19,6 @@
 """This module contains registries."""
 
 import logging
-import queue
 from typing import List, Optional, cast
 
 from aea.configurations.base import (
@@ -94,30 +93,21 @@ class Filter:
         )
         return active_behaviour
 
-    def handle_internal_messages(self) -> None:
+    def handle_new_handlers_and_behaviours(self) -> None:
         """
         Handle the messages from the decision maker.
 
         :return: None
         """
-        self._handle_decision_maker_out_queue()
-        # get new behaviours and handlers from the agent skills
         self._handle_new_behaviours()
         self._handle_new_handlers()
 
-    def _handle_decision_maker_out_queue(self) -> None:
-        """Process descision maker's messages."""
-        while not self.decision_maker_out_queue.empty():
-            try:
-                internal_message = (
-                    self.decision_maker_out_queue.get_nowait()
-                )  # type: Optional[Message]
-                self._process_internal_message(internal_message)
-            except queue.Empty:
-                logger.warning("The decision maker out queue is unexpectedly empty.")
-                continue
+    async def get_internal_message(self) -> Optional[Message]:
+        """Get a message from decision_maker_out_queue."""
+        return await self.decision_maker_out_queue.async_get()
 
-    def _process_internal_message(self, internal_message: Optional[Message]) -> None:
+    def handle_internal_message(self, internal_message: Optional[Message]) -> None:
+        """Handlle internal message."""
         if internal_message is None:
             logger.warning("Got 'None' while processing internal messages.")
         elif isinstance(

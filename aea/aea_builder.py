@@ -282,7 +282,7 @@ class AEABuilder:
 
     """
 
-    DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+    DEFAULT_AGENT_ACT_PERIOD = 1
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
     DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
@@ -347,7 +347,7 @@ class AEABuilder:
         self._default_ledger = DEFAULT_LEDGER
         self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace: Dict[str, Any] = {}
-        self._timeout: Optional[float] = None
+        self._period: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
@@ -369,15 +369,15 @@ class AEABuilder:
                     component_config.component_id
                 )
 
-    def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
+    def set_period(self, period: Optional[float]) -> "AEABuilder":
         """
-        Set agent loop idle timeout in seconds.
+        Set agent act period.
 
-        :param timeout: timeout in seconds
+        :param period: period in seconds
 
         :return: self
         """
-        self._timeout = timeout
+        self._period = period
         return self
 
     def set_execution_timeout(self, execution_timeout: Optional[float]) -> "AEABuilder":
@@ -872,7 +872,7 @@ class AEABuilder:
             wallet,
             resources,
             loop=None,
-            timeout=self._get_agent_loop_timeout(),
+            period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
             is_debug=False,
             max_reactions=self._get_max_reactions(),
@@ -893,17 +893,13 @@ class AEABuilder:
         self._populate_contract_registry()
         return aea
 
-    def _get_agent_loop_timeout(self) -> float:
+    def _get_agent_act_period(self) -> float:
         """
-        Return agent loop idle timeout.
+        Return agent act period.
 
-        :return: timeout in seconds if set else default value.
+        :return: period in seconds if set else default value.
         """
-        return (
-            self._timeout
-            if self._timeout is not None
-            else self.DEFAULT_AGENT_LOOP_TIMEOUT
-        )
+        return self._period or self.DEFAULT_AGENT_ACT_PERIOD
 
     def _get_execution_timeout(self) -> float:
         """
@@ -1134,7 +1130,7 @@ class AEABuilder:
         self.set_default_connection(
             PublicId.from_str(agent_configuration.default_connection)
         )
-        self.set_timeout(agent_configuration.timeout)
+        self.set_period(agent_configuration.period)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
         if agent_configuration.decision_maker_handler != {}:

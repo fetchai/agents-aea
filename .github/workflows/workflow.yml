@@ -142,7 +142,7 @@ jobs:
         sudo apt-get install -y protobuf-compiler
     - name: Sync AEA loop integration tests
       run: |
-        tox -e py3.8 -- --aea-loop sync -m 'sync'
+        tox -e py3.8 -- -m 'sync'
     - name: Async integration tests
       run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
 
@@ -219,34 +219,6 @@ jobs:
       run: |
         tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
 
-  platform_checks_sync_aea_loop:
-    continue-on-error: True
-    needs:
-    - common_checks_1
-    - common_checks_2
-    - common_checks_3
-    - common_checks_4
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: 3.8
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
-    - name: Install dependencies (ubuntu-latest)
-      run: |
-        sudo apt-get update --fix-missing
-        sudo apt-get autoremove
-        sudo apt-get autoclean
-        pip install tox
-        sudo apt-get install -y protobuf-compiler
-    - name: Unit tests
-      run: |
-        tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
-
   golang_checks:
     continue-on-error: True
     needs:
@@ -279,7 +251,6 @@ jobs:
     - integration_checks
     - integration_checks_ledger
     - platform_checks
-    - platform_checks_sync_aea_loop
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

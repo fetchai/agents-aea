@@ -26,13 +26,7 @@ from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from enum import Enum
 from functools import partial
-from typing import (
-    Callable,
-    Dict,
-    List,
-    Optional,
-    TYPE_CHECKING,
-)
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import (
@@ -242,12 +236,12 @@ class AsyncAgentLoop(BaseAgentLoop):
         await self._state.wait(AgentLoopStates.error)
         raise self._exceptions[0]
 
-    def _stop_tasks(self):
+    def _stop_tasks(self) -> None:
         """Cancel all tasks and stop behaviours registered."""
         BaseAgentLoop._stop_tasks(self)
         self._stop_all_behaviours()
 
-    def _set_tasks(self):
+    def _set_tasks(self) -> None:
         """Set run loop tasks."""
         self._tasks = self._create_tasks()
         self.logger.debug("tasks created!")
@@ -260,56 +254,25 @@ class AsyncAgentLoop(BaseAgentLoop):
         """
         tasks = [
             self._process_messages(HandlerItemGetter(self._message_handlers())),
-            self._task_process_new_skill_components(),
+            self._task_register_periodic_tasks(),
             self._task_wait_for_error(),
         ]
         return list(map(self._loop.create_task, tasks))  # type: ignore  # some issue with map and create_task
 
-    def _message_handlers(self):
+    def _message_handlers(self) -> List[Tuple[Callable[[Any], None], Callable]]:
+        """Get all agent's message handlers."""
         return self._agent.get_message_handlers()
 
-    async def _process_messages(self, getter: HandlerItemGetter):
+    async def _process_messages(self, getter: HandlerItemGetter) -> None:
+        """Process message from ItemGetter."""
         self.logger.info("Start processing messages...")
         while self.is_running:
             handler, item = await getter.get()
             handler(item)
 
-    async def _task_process_new_skill_components(self) -> None:
+    async def _task_register_periodic_tasks(self) -> None:
         """Process new behaviours added to skills in runtime."""
         while self.is_running:
             # TODO: better handling internal messages for skills internal updates
-            self._agent.filter._handle_new_behaviours()  # pylint: disable=protected-access # TODO: refactoring!
-            self._agent.filter._handle_new_handlers()  # pylint: disable=protected-access # TODO: refactoring!
             self._register_periodic_tasks()  # re register, cause new may appear
             await asyncio.sleep(self.NEW_BEHAVIOURS_PROCESS_SLEEP)
-
-
-class SyncAgentLoop(BaseAgentLoop):
-    """Synchronous agent loop."""
-
-    def __init__(self, agent: "Agent", loop: AbstractEventLoop = None):
-        """
-        Init agent loop.
-
-        :param agent: AEA instance
-        :param loop: asyncio loop to use. optional
-        """
-        super().__init__(agent=agent, loop=loop)
-        self._agent: "AEA" = self._agent
-        asyncio.set_event_loop(self._loop)
-
-    async def _agent_loop(self) -> None:
-        """Run loop inside coroutine but call synchronous callbacks from agent."""
-        while self.is_running:
-            await self._spin_main_loop()
-            await asyncio.sleep(self._agent.timeout)
-
-    async def _spin_main_loop(self) -> None:
-        """Run one spin of agent loop: act, react, update."""
-        self._agent.act()
-        self._agent.react()
-        self._agent.update()
-
-    def _set_tasks(self) -> None:
-        """Set run loop tasks."""
-        self._tasks = [self._loop.create_task(self._agent_loop())]

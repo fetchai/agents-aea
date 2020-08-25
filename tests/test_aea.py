@@ -518,7 +518,7 @@ def test_error_handler_is_not_set():
     )
 
     with patch.object(agent, "stop") as mocked_stop:
-        agent._handle_envelope(envelope)
+        agent.handle_envelope(envelope)
 
     mocked_stop.assert_called()
 
@@ -550,7 +550,7 @@ def test_no_handlers_registered():
             message=msg,
         )
         with patch.object(aea.filter, "get_active_handlers", return_value=[]):
-            aea._handle_envelope(envelope)
+            aea.handle_envelope(envelope)
             mock_logger.assert_any_call(
                 f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
             )
@@ -812,25 +812,21 @@ class BaseTimeExecutionCase(TestCase):
         handler_cls = make_handler_cls_from_funcion(handler_func)
 
         behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
-
+        self.behaviour = behaviour_cls(name="behaviour1", skill_context=skill_context)
         test_skill = Skill(
             SkillConfig(name="test_skill", author="fetchai"),
             skill_context=skill_context,
             handlers={
                 "handler1": handler_cls(name="handler1", skill_context=skill_context)
             },
-            behaviours={
-                "behaviour1": behaviour_cls(
-                    name="behaviour1", skill_context=skill_context
-                )
-            },
+            behaviours={"behaviour1": self.behaviour},
         )
         skill_context._skill = test_skill  # weird hack
 
         builder.add_component_instance(test_skill)
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
-        self.aea_tool.put_inbox(AeaTool.dummy_envelope())
+        self.envelope = AeaTool.dummy_envelope()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
@@ -888,11 +884,11 @@ class BaseTimeExecutionCase(TestCase):
 
 
 class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
-    """Test react timeout."""
+    """Test handle envelope timeout."""
 
     def aea_action(self):
         """Spin react on AEA."""
-        self.aea_tool.react_one()
+        self.aea_tool.handle_envelope(self.envelope)
 
 
 class ActTimeoutExecutionCase(BaseTimeExecutionCase):
@@ -900,4 +896,4 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin act on AEA."""
-        self.aea_tool.act_one()
+        self.aea_tool.aea._execution_control(self.behaviour.act_wrapper)
