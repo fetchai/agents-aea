@@ -323,23 +323,19 @@ class HTTPClientAsyncChannel:
         :return: Envelope with http response data.
         """
         context = EnvelopeContext(connection_id=connection_id)
-        http_message = HttpMessage(
+        http_message = dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
+            target_message=http_request_message,
             status_code=status_code,
             headers=json.dumps(dict(headers.items())),
             status_text=status_text,
             bodyy=bodyy,
             version="",
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            target=http_request_message.message_id,
-            message_id=http_request_message.message_id + 1,
         )
-        http_message.to = http_request_message.sender
-        dialogue.update(http_message)
         envelope = Envelope(
-            to=self.agent_address,
-            sender="HTTP Server",
-            protocol_id=PublicId.from_str("fetchai/http:0.5.0"),
+            to=http_message.to,
+            sender=http_message.sender,
+            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )

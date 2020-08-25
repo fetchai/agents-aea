@@ -268,15 +268,11 @@ class LocalNode:
         address = oef_search_msg.sender
         async with self._lock:
             if address not in self.services:
-                msg = OefSearchMessage(
+                msg = dialogue.reply(
                     performative=OefSearchMessage.Performative.OEF_ERROR,
-                    target=oef_search_msg.message_id,
-                    message_id=oef_search_msg.message_id + 1,
+                    target_message=oef_search_msg,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
-                    dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 )
-                msg.to = oef_search_msg.sender
-                dialogue.update(msg)
                 envelope = Envelope(
                     to=msg.to,
                     sender=msg.sender,
@@ -313,15 +309,11 @@ class LocalNode:
                         if description.data_model == query.model:
                             result.append(agent_address)
 
-            msg = OefSearchMessage(
+            msg = dialogue.reply(
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                target=oef_search_msg.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                message_id=oef_search_msg.message_id + 1,
+                target_message=oef_search_msg,
                 agents=tuple(sorted(set(result))),
             )
-            msg.to = oef_search_msg.sender
-            dialogue.update(msg)
 
             envelope = Envelope(
                 to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,

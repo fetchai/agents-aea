@@ -622,15 +622,12 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        signing_msg_response = SigningMessage(
-            performative=SigningMessage.Performative.ERROR,
-            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-            target=signing_msg.message_id,
-            message_id=signing_msg.message_id + 1,
-            skill_callback_ids=signing_msg.skill_callback_ids,
-            skill_callback_info=signing_msg.skill_callback_info,
-            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
-        )
+        performative = SigningMessage.Performative.ERROR
+        kwargs = {
+            "skill_callback_ids": signing_msg.skill_callback_ids,
+            "skill_callback_info": signing_msg.skill_callback_info,
+            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+        }
         if self._is_acceptable_for_signing(signing_msg):
             signed_message = self.wallet.sign_message(
                 signing_msg.raw_message.ledger_id,
@@ -638,21 +635,16 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 signing_msg.raw_message.is_deprecated_mode,
             )
             if signed_message is not None:
-                signing_msg_response = SigningMessage(
-                    performative=SigningMessage.Performative.SIGNED_MESSAGE,
-                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-                    target=signing_msg.message_id,
-                    message_id=signing_msg.message_id + 1,
-                    skill_callback_ids=signing_msg.skill_callback_ids,
-                    skill_callback_info=signing_msg.skill_callback_info,
-                    signed_message=SignedMessage(
-                        signing_msg.raw_message.ledger_id,
-                        signed_message,
-                        signing_msg.raw_message.is_deprecated_mode,
-                    ),
+                performative = SigningMessage.Performative.SIGNED_MESSAGE
+                kwargs.pop("error_code")
+                kwargs["signed_message"] = SignedMessage(
+                    signing_msg.raw_message.ledger_id,
+                    signed_message,
+                    signing_msg.raw_message.is_deprecated_mode,
                 )
-        signing_msg_response.to = signing_msg.sender
-        signing_dialogue.update(signing_msg_response)
+        signing_msg_response = signing_dialogue.reply(
+            performative=performative, target_message=signing_msg, **kwargs,
+        )
         self.message_out_queue.put(signing_msg_response)
 
     def _handle_transaction_signing(
@@ -665,33 +657,25 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        signing_msg_response = SigningMessage(
-            performative=SigningMessage.Performative.ERROR,
-            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-            target=signing_msg.message_id,
-            message_id=signing_msg.message_id + 1,
-            skill_callback_ids=signing_msg.skill_callback_ids,
-            skill_callback_info=signing_msg.skill_callback_info,
-            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
-        )
+        performative = SigningMessage.Performative.ERROR
+        kwargs = {
+            "skill_callback_ids": signing_msg.skill_callback_ids,
+            "skill_callback_info": signing_msg.skill_callback_info,
+            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
+        }
         if self._is_acceptable_for_signing(signing_msg):
             signed_tx = self.wallet.sign_transaction(
                 signing_msg.raw_transaction.ledger_id, signing_msg.raw_transaction.body
             )
             if signed_tx is not None:
-                signing_msg_response = SigningMessage(
-                    performative=SigningMessage.Performative.SIGNED_TRANSACTION,
-                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-                    target=signing_msg.message_id,
-                    message_id=signing_msg.message_id + 1,
-                    skill_callback_ids=signing_msg.skill_callback_ids,
-                    skill_callback_info=signing_msg.skill_callback_info,
-                    signed_transaction=SignedTransaction(
-                        signing_msg.raw_transaction.ledger_id, signed_tx
-                    ),
+                performative = SigningMessage.Performative.SIGNED_TRANSACTION
+                kwargs.pop("error_code")
+                kwargs["signed_transaction"] = SignedTransaction(
+                    signing_msg.raw_transaction.ledger_id, signed_tx
                 )
-        signing_msg_response.to = signing_msg.sender
-        signing_dialogue.update(signing_msg_response)
+        signing_msg_response = signing_dialogue.reply(
+            performative=performative, target_message=signing_msg, **kwargs,
+        )
         self.message_out_queue.put(signing_msg_response)
 
     def _is_acceptable_for_signing(self, signing_msg: SigningMessage) -> bool:

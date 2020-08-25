@@ -121,9 +121,9 @@ def run():
         terms=terms,
         skill_callback_info={"some_info_key": "some_info_value"},
     )
-    signing_msg.to = "decision_maker"
     signing_dialogue = cast(
-        Optional[SigningDialogue], signing_dialogues.update(signing_msg)
+        Optional[SigningDialogue],
+        signing_dialogues.create_with_message("decision_maker", signing_msg),
     )
     assert signing_dialogue is not None
     my_aea.context.decision_maker_message_queue.put_nowait(signing_msg)

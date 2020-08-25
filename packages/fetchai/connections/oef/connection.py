@@ -308,19 +308,15 @@ class OEFChannel(OEFAgent):
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
-        msg = OefSearchMessage(
+        msg = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=last_msg.message_id,
-            message_id=last_msg.message_id + 1,
+            target_message=last_msg,
             agents=tuple(agents),
         )
-        msg.to = last_msg.sender
-        oef_search_dialogue.update(msg)
         envelope = Envelope(
-            to=self.address,
-            sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
             context=oef_search_dialogue.envelope_context,
         )
@@ -351,19 +347,15 @@ class OEFChannel(OEFAgent):
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
-        msg = OefSearchMessage(
+        msg = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.OEF_ERROR,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=last_msg.message_id,
-            message_id=last_msg.message_id + 1,
+            target_message=last_msg,
             oef_error_operation=operation,
         )
-        msg.to = last_msg.sender
-        oef_search_dialogue.update(msg)
         envelope = Envelope(
-            to=self.address,
-            sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
             context=oef_search_dialogue.envelope_context,
         )
