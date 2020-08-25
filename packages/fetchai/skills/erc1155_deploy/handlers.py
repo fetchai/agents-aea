@@ -135,15 +135,11 @@ class FipaHandler(Handler):
 
         # simply send the same proposal, independent of the query
         fipa_dialogue.proposal = strategy.get_proposal()
-        proposal_msg = FipaMessage(
-            message_id=fipa_msg.message_id + 1,
-            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-            target=fipa_msg.message_id,
+        proposal_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.PROPOSE,
+            target_message=fipa_msg,
             proposal=fipa_dialogue.proposal,
         )
-        proposal_msg.to = fipa_msg.sender
-        fipa_dialogue.update(proposal_msg)
         self.context.logger.info(
             "sending PROPOSE to agent={}: proposal={}".format(
                 fipa_msg.sender[-5:], fipa_dialogue.proposal.values,
@@ -331,15 +327,11 @@ class LedgerApiHandler(Handler):
                 ledger_api_msg.transaction_digest
             )
         )
-        msg = LedgerApiMessage(
+        msg = ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-            message_id=ledger_api_msg.message_id + 1,
-            dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-            target=ledger_api_msg.message_id,
+            target_message=ledger_api_msg,
             transaction_digest=ledger_api_msg.transaction_digest,
         )
-        msg.to = ledger_api_msg.sender
-        ledger_api_dialogue.update(msg)
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 

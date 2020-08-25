@@ -118,15 +118,11 @@ class EchoHandler(Handler):
         self.context.logger.info(
             "Echo Handler: message={}, sender={}".format(message, message.sender)
         )
-        reply = DefaultMessage(
+        reply = dialogue.reply(
             performative=DefaultMessage.Performative.BYTES,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            message_id=message.message_id + 1,
-            target=message.message_id,
+            target_message=message,
             content=message.content,
         )
-        reply.to = message.sender
-        dialogue.update(reply)
         self.context.outbox.put_message(message=reply)
 
     def _handle_invalid(self, message: DefaultMessage, dialogue: DefaultDialogue):

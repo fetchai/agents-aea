@@ -419,16 +419,12 @@ class TacHandler(Handler):
         state_update_dialogue = game.state_update_dialogue
         last_msg = state_update_dialogue.last_message
         assert last_msg is not None, "Could not retrieve last message."
-        state_update_msg = StateUpdateMessage(
+        state_update_msg = state_update_dialogue.reply(
             performative=StateUpdateMessage.Performative.APPLY,
-            dialogue_reference=state_update_dialogue.dialogue_label.dialogue_reference,
-            message_id=last_msg.message_id + 1,
-            target=last_msg.message_id,
+            target_message=last_msg,
             amount_by_currency_id=tac_msg.amount_by_currency_id,
             quantities_by_good_id=tac_msg.quantities_by_good_id,
         )
-        state_update_msg.to = "decision_maker"
-        state_update_dialogue.update(state_update_msg)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
         if "confirmed_tx_ids" not in self.context.shared_state.keys():
             self.context.shared_state["confirmed_tx_ids"] = []

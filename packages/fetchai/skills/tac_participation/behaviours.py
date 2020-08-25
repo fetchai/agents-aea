@@ -141,11 +141,9 @@ class TransactionProcessBehaviour(TickerBehaviour):
             terms = tx_content["terms"]
             sender_signature = tx_content["sender_signature"]
             counterparty_signature = tx_content["counterparty_signature"]
-            msg = TacMessage(
+            msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.TRANSACTION,
-                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
-                message_id=last_msg.message_id + 1,
-                target=last_msg.message_id,
+                target_message=last_msg,
                 transaction_id=tx_id,
                 ledger_id=terms.ledger_id,
                 sender_address=terms.sender_address,
@@ -157,6 +155,4 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 counterparty_signature=counterparty_signature,
                 nonce=terms.nonce,
             )
-            msg.to = game.conf.controller_addr
-            tac_dialogue.update(msg)
             self.context.outbox.put_message(message=msg)

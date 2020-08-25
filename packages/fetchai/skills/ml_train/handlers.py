@@ -184,16 +184,12 @@ class MlTradeHandler(Handler):
             )
         else:
             # accept directly with a dummy transaction digest, no settlement
-            ml_accept = MlTradeMessage(
+            ml_accept = ml_trade_dialogue.reply(
                 performative=MlTradeMessage.Performative.ACCEPT,
-                dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-                message_id=ml_trade_msg.message_id + 1,
-                target=ml_trade_msg.message_id,
+                target_message=ml_trade_msg,
                 tx_digest=DUMMY_DIGEST,
                 terms=terms,
             )
-            ml_accept.to = ml_trade_msg.sender
-            ml_trade_dialogue.update(ml_accept)
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info("sending dummy transaction digest ...")
 
@@ -510,16 +506,12 @@ class LedgerApiHandler(Handler):
             Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message
         )
         assert ml_trade_msg is not None, "Could not retrieve ml_trade message"
-        ml_accept = MlTradeMessage(
+        ml_accept = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.ACCEPT,
-            message_id=ml_trade_msg.message_id + 1,
-            dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-            target=ml_trade_msg.message_id,
+            target_message=ml_trade_msg,
             tx_digest=ledger_api_msg.transaction_digest.body,
             terms=ml_trade_msg.terms,
         )
-        ml_accept.to = ml_trade_msg.sender
-        ml_trade_dialogue.update(ml_accept)
         self.context.outbox.put_message(message=ml_accept)
         self.context.logger.info(
             "informing counterparty={} of transaction digest={}.".format(
@@ -631,15 +623,11 @@ class SigningHandler(Handler):
         assert (
             last_ledger_api_msg is not None
         ), "Could not retrieve last message in ledger api dialogue"
-        ledger_api_msg = LedgerApiMessage(
+        ledger_api_msg = ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-            dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-            target=last_ledger_api_msg.message_id,
-            message_id=last_ledger_api_msg.message_id + 1,
+            target_message=last_ledger_api_msg,
             signed_transaction=signing_msg.signed_transaction,
         )
-        ledger_api_msg.to = LEDGER_API_ADDRESS
-        ledger_api_dialogue.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")
 

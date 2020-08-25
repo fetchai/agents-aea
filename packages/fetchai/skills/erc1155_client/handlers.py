@@ -548,20 +548,16 @@ class SigningHandler(Handler):
         )
         last_fipa_msg = fipa_dialogue.last_incoming_message
         assert last_fipa_msg is not None, "Could not retrieve last fipa message."
-        inform_msg = FipaMessage(
-            message_id=last_fipa_msg.message_id + 1,
-            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-            target=last_fipa_msg.message_id,
+        inform_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
+            target_message=last_fipa_msg,
             info={"tx_signature": signing_msg.signed_message.body},
         )
-        inform_msg.to = last_fipa_msg.sender
         self.context.logger.info(
             "sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(
                 last_fipa_msg.sender[-5:], signing_msg.signed_message,
             )
         )
-        fipa_dialogue.update(inform_msg)
         self.context.outbox.put_message(message=inform_msg)
 
     def _handle_error(

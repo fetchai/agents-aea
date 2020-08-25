@@ -118,11 +118,9 @@ class HttpHandler(Handler):
         :param http_dialogue: the http dialogue
         :return: None
         """
-        http_response = HttpMessage(
-            dialogue_reference=http_dialogue.dialogue_label.dialogue_reference,
-            target=http_msg.message_id,
-            message_id=http_msg.message_id + 1,
+        http_response = http_dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
+            target_message=http_msg,
             version=http_msg.version,
             status_code=200,
             status_text="Success",
@@ -130,8 +128,6 @@ class HttpHandler(Handler):
             bodyy=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
         )
         self.context.logger.info("responding with: {}".format(http_response))
-        http_response.to = http_msg.sender
-        http_dialogue.update(http_response)
         self.context.outbox.put_message(message=http_response)
 
     def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
@@ -142,11 +138,9 @@ class HttpHandler(Handler):
         :param http_dialogue: the http dialogue
         :return: None
         """
-        http_response = HttpMessage(
-            dialogue_reference=http_dialogue.dialogue_label.dialogue_reference,
-            target=http_msg.message_id,
-            message_id=http_msg.message_id + 1,
+        http_response = http_dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
+            target_message=http_msg,
             version=http_msg.version,
             status_code=200,
             status_text="Success",
@@ -154,8 +148,6 @@ class HttpHandler(Handler):
             bodyy=b"",
         )
         self.context.logger.info("responding with: {}".format(http_response))
-        http_response.to = http_msg.sender
-        http_dialogue.update(http_response)
         self.context.outbox.put_message(message=http_response)
 
     def _handle_invalid(
