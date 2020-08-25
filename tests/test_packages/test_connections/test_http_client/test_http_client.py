@@ -28,11 +28,13 @@ import aiohttp
 import pytest
 
 from aea.configurations.base import ConnectionConfig
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope, Message
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
-from packages.fetchai.protocols.http.dialogues import HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import AnyStringWith
@@ -61,6 +63,34 @@ class _MockRequest:
         return None
 
 
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, agent_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.CLIENT
+
+        BaseHttpDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+        )
+
+
 @pytest.mark.asyncio
 class TestHTTPClientConnect:
     """Tests the http client connection's 'connect' functionality."""
@@ -80,7 +110,7 @@ class TestHTTPClientConnect:
             configuration=configuration, identity=self.agent_identity
         )
         self.connection_address = str(HTTPClientConnection.connection_id)
-        self.http_dialogs = HttpDialogues(self.connection_address)
+        self.http_dialogs = HttpDialogues(self.agent_address)
 
     @pytest.mark.asyncio
     async def test_initialization(self):
@@ -106,9 +136,8 @@ class TestHTTPClientConnect:
     async def test_http_send_error(self):
         """Test request fails and send back result with code 600."""
         await self.http_client_connection.connect()
-
-        request_http_message = HttpMessage(
-            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
+        request_http_message, _ = self.http_dialogs.create(
+            counterparty=self.connection_address,
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="bad url",
@@ -116,9 +145,6 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.to = self.connection_address
-        sending_dialogue = self.http_dialogs.update(request_http_message)
-        assert sending_dialogue is not None
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
@@ -154,8 +180,8 @@ class TestHTTPClientConnect:
     @pytest.mark.asyncio
     async def test_send_envelope_excluded_protocol_fail(self):
         """Test send error if protocol not supported."""
-        request_http_message = HttpMessage(
-            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
+        request_http_message, _ = self.http_dialogs.create(
+            counterparty=self.connection_address,
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="bad url",
@@ -163,9 +189,6 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.to = self.connection_address
-        sending_dialogue = self.http_dialogs.update(request_http_message)
-        assert sending_dialogue is not None
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
@@ -202,9 +225,8 @@ class TestHTTPClientConnect:
     async def test_channel_cancel_tasks_on_disconnect(self):
         """Test requests tasks cancelled on disconnect."""
         await self.http_client_connection.connect()
-
-        request_http_message = HttpMessage(
-            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
+        request_http_message, _ = self.http_dialogs.create(
+            counterparty=self.connection_address,
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="https://not-a-google.com",
@@ -212,9 +234,6 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.to = self.connection_address
-        sending_dialogue = self.http_dialogs.update(request_http_message)
-        assert sending_dialogue is not None
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
@@ -251,9 +270,8 @@ class TestHTTPClientConnect:
     async def test_http_send_ok(self):
         """Test request is ok cause mocked."""
         await self.http_client_connection.connect()
-
-        request_http_message = HttpMessage(
-            dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
+        request_http_message, sending_dialogue = self.http_dialogs.create(
+            counterparty=self.connection_address,
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="https://not-a-google.com",
@@ -261,9 +279,6 @@ class TestHTTPClientConnect:
             version="",
             bodyy=b"",
         )
-        request_http_message.to = self.connection_address
-        sending_dialogue = self.http_dialogs.update(request_http_message)
-        assert sending_dialogue is not None
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
@@ -305,7 +320,7 @@ class TestHTTPClientConnect:
         """Test dialogue not properly constructed."""
         await self.http_client_connection.connect()
 
-        http_message = HttpMessage(
+        incorrect_http_message = HttpMessage(
             dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.RESPONSE,
             status_code=500,
@@ -314,15 +329,16 @@ class TestHTTPClientConnect:
             bodyy=b"",
             version="",
         )
-        http_message.to = self.connection_address
-        http_dialogue = self.http_dialogs.update(http_message)
-        http_message.sender = self.agent_address
-        assert http_dialogue is None
+        incorrect_http_message.to = self.connection_address
+        incorrect_http_message.sender = self.agent_address
+
+        # the incorrect message cannot be sent into a dialogue, so this is omitted.
+
         envelope = Envelope(
-            to=http_message.to,
-            sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
-            message=http_message,
+            to=incorrect_http_message.to,
+            sender=incorrect_http_message.sender,
+            protocol_id=incorrect_http_message.protocol_id,
+            message=incorrect_http_message,
         )
         with patch.object(
             self.http_client_connection.channel.logger, "warning"

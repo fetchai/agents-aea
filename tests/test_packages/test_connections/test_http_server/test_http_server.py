@@ -32,15 +32,17 @@ from aiohttp.client_reqrep import ClientResponse
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope, Message
 
 from packages.fetchai.connections.http_server.connection import (
     APISpec,
     HTTPServerConnection,
     Response,
 )
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
@@ -53,6 +55,34 @@ from tests.conftest import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, agent_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.SERVER
+
+        BaseHttpDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 @pytest.mark.asyncio
@@ -127,19 +157,28 @@ class TestHTTPServer:
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
-        message = HttpMessage(
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+        # message = HttpMessage(
+        #     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+        #     performative=HttpMessage.Performative.RESPONSE,
+        #     version=incoming_message.version,
+        #     headers=incoming_message.headers,
+        #     message_id=incoming_message.message_id + 1,
+        #     target=incoming_message.message_id,
+        #     status_code=200,
+        #     status_text="Success",
+        #     bodyy=b"Response body",
+        # )
+        # message.to = incoming_message.sender
+        # assert dialogue.update(message)
+        message = dialogue.reply(
+            target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
             version=incoming_message.version,
             headers=incoming_message.headers,
-            message_id=incoming_message.message_id + 1,
-            target=incoming_message.message_id,
             status_code=200,
             status_text="Success",
             bodyy=b"Response body",
         )
-        message.to = incoming_message.sender
-        assert dialogue.update(message)
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,

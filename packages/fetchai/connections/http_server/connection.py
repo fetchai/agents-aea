@@ -93,7 +93,7 @@ class HttpDialogues(BaseHttpDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
-            return HttpDialogue.Role.SERVER
+            return HttpDialogue.Role.CLIENT
 
         BaseHttpDialogues.__init__(
             self,
@@ -188,6 +188,15 @@ class Request(OpenAPIRequest):
         )
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
+        # http_message, dialogue = dialogues.create(
+        #     counterparty=agent_address,
+        #     performative=HttpMessage.Performative.REQUEST,
+        #     method=self.method,
+        #     url=url,
+        #     headers=self.parameters.header,
+        #     bodyy=self.body if self.body is not None else b"",
+        #     version="",
+        # )
         http_message = HttpMessage(
             dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
             performative=HttpMessage.Performative.REQUEST,
@@ -198,6 +207,7 @@ class Request(OpenAPIRequest):
             version="",
         )
         http_message.to = agent_address
+        http_message.sender = str(connection_id)
         dialogue = cast(Optional[HttpDialogue], dialogues.update(http_message))
         assert dialogue is not None, "Could not create dialogue for message={}".format(
             http_message

@@ -185,20 +185,28 @@ class TestGymConnection:
     @pytest.mark.asyncio
     async def test_send_close_negative(self):
         """Test send close message with invalid reference and message id and target."""
-        msg = GymMessage(
+        incorrect_msg = GymMessage(
             performative=GymMessage.Performative.CLOSE,
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
         )
-        msg.to = self.gym_address
-        msg.sender = self.agent_address
+        incorrect_msg.to = self.gym_address
+        incorrect_msg.sender = self.agent_address
+
+        # the incorrect message cannot be sent into a dialogue, so this is omitted.
+
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=incorrect_msg.to,
+            sender=incorrect_msg.sender,
+            protocol_id=incorrect_msg.protocol_id,
+            message=incorrect_msg,
         )
         await self.gym_con.connect()
 
         with patch.object(self.gym_con.channel.logger, "warning") as mock_logger:
             await self.gym_con.send(envelope)
-            mock_logger.assert_any_call(f"Could not create dialogue from message={msg}")
+            mock_logger.assert_any_call(
+                f"Could not create dialogue from message={incorrect_msg}"
+            )
 
     async def send_reset(self) -> GymDialogue:
         """Send a reset."""
