@@ -187,11 +187,11 @@ def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) 
     :return: vendorized estenation path for package.
     """
     vendor_path = get_package_path(ctx, item_type, public_id, is_vendor=True)
-    if ctx.agent_config.author != public_id.author:
+    if ctx.agent_config.author != public_id.author or not is_item_present(
+        ctx, item_type, public_id, is_vendor=False
+    ):
         return vendor_path
-    if is_item_present(ctx, item_type, public_id, is_vendor=False):
-        return get_package_path(ctx, item_type, public_id, is_vendor=False)
-    return vendor_path
+    return get_package_path(ctx, item_type, public_id, is_vendor=False)
 
 
 def copy_package_directory(src: Path, dst: str) -> Path:

@@ -153,7 +153,7 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
         # this will cause exception because no host configuration is in stub connection by default.
         with pytest.raises(
             Exception,
-            match="Host field 'host' not present in connection configuration fetchai/stub:0.9.0",
+            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.9.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
@@ -161,6 +161,61 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
+                "--host-field",
+                "some_host",
+                cwd=self.current_agent_context,
+            )
+
+
+class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
+    """Test case for CLI get-multiaddress when the port field is missing."""
+
+    def test_run(self, *mocks):
+        """Run the test."""
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, connection=True)
+
+        self.force_set_config(
+            "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
+        )
+
+        # this will cause exception because no port configuration is in stub connection by default.
+        with pytest.raises(
+            Exception,
+            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.9.0",
+        ):
+            self.run_cli_command(
+                "get-multiaddress",
+                COSMOS,
+                "--connection",
+                "--connection-id",
+                "fetchai/stub:0.9.0",
+                "--port-field",
+                "some_port",
+                cwd=self.current_agent_context,
+            )
+
+
+class TestGetMultiAddressCommandNegativeBadConnectionId(AEATestCaseEmpty):
+    """Test case for CLI get-multiaddress when the connection id is missing."""
+
+    def test_run(self, *mocks):
+        """Run the test."""
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, connection=True)
+
+        # this will cause exception because a bad public id is provided.
+        connection_id = "some_author/some_connection:0.1.0"
+        with pytest.raises(
+            Exception,
+            match=f"Cannot find connection with the public id {connection_id}",
+        ):
+            self.run_cli_command(
+                "get-multiaddress",
+                COSMOS,
+                "--connection",
+                "--connection-id",
+                connection_id,
                 cwd=self.current_agent_context,
             )
 

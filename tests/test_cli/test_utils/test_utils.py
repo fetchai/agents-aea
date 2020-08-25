@@ -431,24 +431,13 @@ class IsReadmePresentTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.package_utils.get_package_path", return_value="some_path")
+@mock.patch("aea.cli.utils.package_utils.is_item_present")
 @pytest.mark.parametrize("vendor", [True, False])
-def test_get_package_path_unified_vendor_author(mock_, vendor):
-    """Test 'get_package_path_unified' with vendor author."""
-    contex_mock = mock.MagicMock()
-    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
-    public_id_mock = mock.MagicMock(author="some_author")
-    result = get_package_path_unified(
-        contex_mock, "some_component_type", public_id_mock
-    )
-    assert result == "some_path"
-
-
-@mock.patch("aea.cli.utils.package_utils.get_package_path", return_value="some_path")
-@pytest.mark.parametrize("vendor", [True, False])
-def test_get_package_path_unified(mock_, vendor):
+def test_get_package_path_unified(mock_present, mock_path, vendor):
     """Test 'get_package_path_unified'."""
     contex_mock = mock.MagicMock()
     contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    mock_present.return_value = vendor
     public_id_mock = mock.MagicMock(author="some_author")
     result = get_package_path_unified(
         contex_mock, "some_component_type", public_id_mock
