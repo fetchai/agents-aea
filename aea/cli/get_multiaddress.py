@@ -18,16 +18,19 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea get_multiaddress' subcommand."""
-
+from pathlib import Path
 from typing import cast, Optional
 
 import click
+from click import ClickException
 
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
+from aea.crypto.base import Crypto
 from aea.crypto.registries import crypto_registry
+from aea.helpers.multiaddr.base import MultiAddr
 
 
 @click.command()
@@ -38,26 +41,101 @@ from aea.crypto.registries import crypto_registry
     required=True,
 )
 @click.option(
-    "--connection", type=PublicIdParameter(), required=False, default=None,
+    "-c", "--connection", type=bool, required=False, default=False,
+)
+@click.option(
+    "-i", "--connection-id", type=PublicIdParameter(), required=False, default=None,
+)
+@click.option(
+    "-h", "--host-field", type=str, required=False, default="host",
+)
+@click.option(
+    "-p", "--port-field", type=str, required=False, default="port",
 )
 @click.pass_context
 @check_aea_project
-def get_multiaddress(click_context, ledger_id, connection: Optional[PublicId]):
+def get_multiaddress(
+    click_context,
+    ledger_id: str,
+    connection: bool,
+    connection_id: Optional[PublicId],
+    host_field: str,
+    port_field: str,
+):
     """Get the address associated with the private key."""
-    address = _try_get_multiaddress(click_context, ledger_id, connection)
+    address = _try_get_multiaddress(
+        click_context, ledger_id, connection, connection_id, host_field, port_field
+    )
     click.echo(address)
 
 
 def _try_get_multiaddress(
-    click_context, ledger_id: str, connection_id: Optional[PublicId]
+    click_context,
+    ledger_id: str,
+    is_connection: bool,
+    connection_id: Optional[PublicId],
+    host_field: str,
+    port_field: str,
 ):
     """
     Try to get the multi-address.
 
     :param click_context: click context object.
     :param ledger_id: the ledger id.
+    :param is_connection: whether the key to load is from the wallet or from connections.
     :param connection_id: the connection id.
+    :param host_field: if connection_id specified, the config field to retrieve the host
+    :param port_field: if connection_id specified, the config field to retrieve the port
 
     :return: address.
     """
     ctx = cast(Context, click_context.obj)
+
+    private_key_paths = (
+        ctx.agent_config.private_key_paths
+        if not is_connection
+        else ctx.agent_config.connection_private_key_paths
+    )
+    private_key_path = private_key_paths.read(ledger_id)
+
+    if private_key_path is None:
+        raise ClickException(
+            f"Cannot find '{ledger_id}'. Please check {'private_key_path' if not is_connection else 'connection_private_key_paths'}."
+        )
+
+    path_to_key = Path(private_key_path)
+    crypto = crypto_registry.make(ledger_id, private_key_path=path_to_key)
+
+    if not is_connection:
+        return _try_get_peerid(crypto)
+    return _try_get_connection_multiaddress(
+        crypto, connection_id, host_field, port_field
+    )
+
+
+def _try_get_peerid(crypto: Crypto) -> str:
+    """Try to get the peer id."""
+    try:
+        peer_id = MultiAddr("", 0, crypto.public_key).peer_id
+        return peer_id
+    except Exception as e:
+        raise ClickException(str(e))
+
+
+def _try_get_connection_multiaddress(
+    click_context,
+    crypto: Crypto,
+    connection_id: PublicId,
+    host_field: str,
+    port_field: str,
+) -> str:
+    """
+    Try to get the connection multiaddress.
+
+    :param click_context: the click context object.
+    :param crypto: the crypto.
+    :param connection_id: the connection id.
+    :param host_field: the host field.
+    :param port_field: the port field.
+    :return: the multiaddress.
+    """
