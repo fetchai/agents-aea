@@ -65,7 +65,7 @@ def get_multiaddress(
     host_field: str,
     port_field: str,
 ):
-    """Get the address associated with the private key."""
+    """Get the multiaddress associated with a private key or connection."""
     address = _try_get_multiaddress(
         click_context, ledger_id, connection, connection_id, host_field, port_field
     )
