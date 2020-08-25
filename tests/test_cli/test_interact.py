@@ -118,7 +118,10 @@ class TryConstructEnvelopeTestCase(TestCase):
     @mock.patch("builtins.input", return_value="Inputed value")
     def test__try_construct_envelope_positive(self, *mocks):
         """Test _try_construct_envelope for positive result."""
-        envelope = _try_construct_envelope("agent_name", mock.Mock())
+        dialogues_mock = mock.Mock()
+        msg_mock = mock.Mock()
+        dialogues_mock.create.return_value = msg_mock, None
+        envelope = _try_construct_envelope("agent_name", dialogues_mock)
         self.assertIsInstance(envelope, Envelope)
 
     @mock.patch("builtins.input", return_value="")
