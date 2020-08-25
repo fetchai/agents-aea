@@ -202,18 +202,17 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert response_message.raw_transaction.ledger_id == request.terms.ledger_id
 
     signed_transaction = crypto1.sign_transaction(response_message.raw_transaction.body)
-    request = LedgerApiMessage(
-        performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-        message_id=response_message.message_id + 1,
-        target=response_message.message_id,
-        dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-        signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
+    request = cast(
+        LedgerApiMessage,
+        ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+            target_message=response_message,
+            signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
+        ),
     )
-    request.to = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue.update(request)
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=crypto1.address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )
@@ -241,18 +240,17 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     )
     assert type(response_message.transaction_digest.body.startswith("0x"))
 
-    request = LedgerApiMessage(
-        performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-        dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-        message_id=response_message.message_id + 1,
-        target=response_message.message_id,
-        transaction_digest=response_message.transaction_digest,
+    request = cast(
+        LedgerApiMessage,
+        ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=response_message,
+            transaction_digest=response_message.transaction_digest,
+        ),
     )
-    request.to = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue.update(request)
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=crypto1.address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )

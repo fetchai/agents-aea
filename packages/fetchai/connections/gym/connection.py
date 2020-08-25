@@ -161,31 +161,26 @@ class GymChannel:
             observation, reward, done, info = await self._run_in_executor(
                 self.gym_env.step, action
             )
-            msg = GymMessage(
+
+            msg = dialogue.reply(
                 performative=GymMessage.Performative.PERCEPT,
+                target_message=gym_message,
                 observation=GymMessage.AnyObject(observation),
                 reward=reward,
                 done=done,
                 info=GymMessage.AnyObject(info),
                 step_id=step_id,
-                target=gym_message.message_id,
-                message_id=gym_message.message_id + 1,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             )
         elif gym_message.performative == GymMessage.Performative.RESET:
             await self._run_in_executor(self.gym_env.reset)
-            msg = GymMessage(
+            msg = dialogue.reply(
                 performative=GymMessage.Performative.STATUS,
+                target_message=gym_message,
                 content={"reset": "success"},
-                target=gym_message.message_id,
-                message_id=gym_message.message_id + 1,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             )
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        msg.to = gym_message.sender
-        dialogue.update(msg)
         envelope = Envelope(
             to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )

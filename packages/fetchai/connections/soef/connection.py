@@ -746,18 +746,14 @@ class SOEFChannel:
         :return: None
         """
         assert self.in_queue is not None, "Inqueue not set!"
-        message = OefSearchMessage(
+        message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.OEF_ERROR,
+            target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=oef_search_message.message_id,
-            message_id=oef_search_message.message_id + 1,
         )
-        message.to = oef_search_message.sender
-        oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.to,
-            sender=SOEFConnection.connection_id.latest,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
@@ -954,18 +950,14 @@ class SOEFChannel:
                 agents[chain_identifier][agent_address] = agent_distance
                 agents_l.append(agent_address)
 
-        message = OefSearchMessage(
+        message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
+            target_message=oef_message,
             agents=tuple(agents_l),
-            target=oef_message.message_id,
-            message_id=oef_message.message_id + 1,
         )
-        message.to = oef_message.sender
-        oef_search_dialogue.update(message)
         envelope = Envelope(
             to=message.to,
-            sender=SOEFConnection.connection_id.latest,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,

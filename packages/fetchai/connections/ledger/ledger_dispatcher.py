@@ -120,16 +120,15 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 ValueError("No balance returned"), api, message, dialogue
             )
         else:
-            response = LedgerApiMessage(
-                performative=LedgerApiMessage.Performative.BALANCE,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                balance=balance,
-                ledger_id=message.ledger_id,
+            response = cast(
+                LedgerApiMessage,
+                dialogue.reply(
+                    performative=LedgerApiMessage.Performative.BALANCE,
+                    target_message=message,
+                    balance=balance,
+                    ledger_id=message.ledger_id,
+                ),
             )
-            response.to = message.sender
-            dialogue.update(response)
         return response
 
     def get_raw_transaction(
@@ -155,17 +154,16 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 ValueError("No raw transaction returned"), api, message, dialogue
             )
         else:
-            response = LedgerApiMessage(
-                performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                raw_transaction=RawTransaction(
-                    message.terms.ledger_id, raw_transaction
+            response = cast(
+                LedgerApiMessage,
+                dialogue.reply(
+                    performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
+                    target_message=message,
+                    raw_transaction=RawTransaction(
+                        message.terms.ledger_id, raw_transaction
+                    ),
                 ),
             )
-            response.to = message.sender
-            dialogue.update(response)
         return response
 
     def get_transaction_receipt(
@@ -217,19 +215,18 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 ValueError("No tx returned"), api, message, dialogue
             )
         else:
-            response = LedgerApiMessage(
-                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                transaction_receipt=TransactionReceipt(
-                    message.transaction_digest.ledger_id,
-                    transaction_receipt,
-                    transaction,
+            response = cast(
+                LedgerApiMessage,
+                dialogue.reply(
+                    performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                    target_message=message,
+                    transaction_receipt=TransactionReceipt(
+                        message.transaction_digest.ledger_id,
+                        transaction_receipt,
+                        transaction,
+                    ),
                 ),
             )
-            response.to = message.sender
-            dialogue.update(response)
         return response
 
     def send_signed_transaction(
@@ -250,17 +247,16 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 ValueError("No transaction_digest returned"), api, message, dialogue
             )
         else:
-            response = LedgerApiMessage(
-                performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                transaction_digest=TransactionDigest(
-                    message.signed_transaction.ledger_id, transaction_digest
+            response = cast(
+                LedgerApiMessage,
+                dialogue.reply(
+                    performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
+                    target_message=message,
+                    transaction_digest=TransactionDigest(
+                        message.signed_transaction.ledger_id, transaction_digest
+                    ),
                 ),
             )
-            response.to = message.sender
-            dialogue.update(response)
         return response
 
     def get_error_message(
@@ -276,15 +272,14 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         """
         message = cast(LedgerApiMessage, message)
         dialogue = cast(LedgerApiDialogue, dialogue)
-        response = LedgerApiMessage(
-            performative=LedgerApiMessage.Performative.ERROR,
-            message_id=message.message_id + 1,
-            target=message.message_id,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            code=500,
-            message=str(e),
-            data=b"",
+        response = cast(
+            LedgerApiMessage,
+            dialogue.reply(
+                performative=LedgerApiMessage.Performative.ERROR,
+                target_message=message,
+                code=500,
+                message=str(e),
+                data=b"",
+            ),
         )
-        response.to = message.sender
-        dialogue.update(response)
         return response

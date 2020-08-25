@@ -497,7 +497,7 @@ class Dialogue(ABC):
 
         return self.STARTING_MESSAGE_ID <= message_id <= self.last_message.message_id  # type: ignore
 
-    def update(self, message: Message) -> None:
+    def _update(self, message: Message) -> None:
         """
         Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
 
@@ -594,7 +594,7 @@ class Dialogue(ABC):
         reply.sender = self.agent_address
         reply.to = self.dialogue_label.dialogue_opponent_addr
 
-        self.update(reply)
+        self._update(reply)
 
         return reply
 
@@ -1087,7 +1087,7 @@ class Dialogues(ABC):
         )
 
         try:
-            dialogue.update(initial_message)
+            dialogue._update(initial_message)
         except InvalidDialogueMessage as e:
             self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
             raise SyntaxError(
@@ -1147,7 +1147,7 @@ class Dialogues(ABC):
 
         if dialogue is not None:
             try:
-                dialogue.update(message)
+                dialogue._update(message)
                 result = dialogue  # type: Optional[Dialogue]
             except InvalidDialogueMessage:
                 # invalid message for the dialogue found
