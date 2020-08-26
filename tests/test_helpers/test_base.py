@@ -31,8 +31,6 @@ from unittest.mock import patch
 
 import pytest
 
-from aea.components.base import load_aea_package
-from aea.configurations.base import ConnectionConfig
 from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
@@ -117,13 +115,6 @@ def test_yaml_dump_load():
     stream.seek(0)
     loaded_data = yaml_load(stream)
     assert loaded_data == data
-
-
-def test_load_aea_package():
-    """Test aea package load."""
-    config = ConnectionConfig("http_client", "fetchai", "0.5.0")
-    config.directory = Path(ROOT_DIR) / "packages"
-    load_aea_package(config)
 
 
 def test_load_module():
