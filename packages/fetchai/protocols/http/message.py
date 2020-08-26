@@ -20,7 +20,6 @@
 """This module contains http's message definition."""
 
 import logging
-from enum import Enum
 from typing import Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -36,7 +35,7 @@ class HttpMessage(Message):
 
     protocol_id = ProtocolId.from_str("fetchai/http:0.5.0")
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the http protocol."""
 
         REQUEST = "request"

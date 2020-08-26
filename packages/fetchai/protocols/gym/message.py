@@ -20,7 +20,6 @@
 """This module contains gym's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -40,7 +39,7 @@ class GymMessage(Message):
 
     AnyObject = CustomAnyObject
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the gym protocol."""
 
         ACT = "act"

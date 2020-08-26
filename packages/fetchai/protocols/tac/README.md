@@ -84,4 +84,4 @@ end_states: [successful, failed]
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/tac-skills/" target=_blank>TAC skill in the AEA framework</a>
+* <a href="https://docs.fetch.ai/aea/tac-skills/" target="_blank">TAC skill in the AEA framework</a>

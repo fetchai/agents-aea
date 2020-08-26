@@ -25,7 +25,7 @@ from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
-from typing import Callable, Dict, List, Optional, Set, Union, cast
+from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
 
@@ -129,6 +129,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -140,7 +141,11 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         :return: None
         """
         BaseOefSearchDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._envelope_context = None  # type: Optional[EnvelopeContext]
 
@@ -165,35 +170,25 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         :return: None
         """
-        BaseOefSearchDialogues.__init__(self, SOEFConnection.connection_id.latest)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming/outgoing first message.
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return OefSearchDialogue.Role.OEF_NODE
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The soef connection maintains the dialogue on behalf of the node
+            return OefSearchDialogue.Role.OEF_NODE
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label,
+        BaseOefSearchDialogues.__init__(
+            self,
             agent_address=SOEFConnection.connection_id.latest,
-            role=role,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=OefSearchDialogue,
         )
-        return dialogue
 
 
 class SOEFChannel:
@@ -410,14 +405,7 @@ class SOEFChannel:
         assert isinstance(envelope.message, OefSearchMessage), ValueError(
             "Message not of type OefSearchMessage"
         )
-        oef_message_orig = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.copy(
-            oef_message_orig
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        oef_message.is_incoming = True  # TODO: fix; should be done by framework
-        oef_message.counterparty = (
-            oef_message_orig.sender
-        )  # TODO: fix; should be done by framework
+        oef_message = cast(OefSearchMessage, envelope.message)
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )
@@ -765,18 +753,14 @@ class SOEFChannel:
         :return: None
         """
         assert self.in_queue is not None, "Inqueue not set!"
-        message = OefSearchMessage(
+        message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.OEF_ERROR,
+            target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=oef_search_message.message_id,
-            message_id=oef_search_message.message_id + 1,
         )
-        message.counterparty = oef_search_message.counterparty
-        assert oef_search_dialogue.update(message)
         envelope = Envelope(
-            to=message.counterparty,
-            sender=SOEFConnection.connection_id.latest,
+            to=message.to,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
@@ -973,18 +957,14 @@ class SOEFChannel:
                 agents[chain_identifier][agent_address] = agent_distance
                 agents_l.append(agent_address)
 
-        message = OefSearchMessage(
+        message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
+            target_message=oef_message,
             agents=tuple(agents_l),
-            target=oef_message.message_id,
-            message_id=oef_message.message_id + 1,
         )
-        message.counterparty = oef_message.counterparty
-        assert oef_search_dialogue.update(message)
         envelope = Envelope(
-            to=message.counterparty,
-            sender=SOEFConnection.connection_id.latest,
+            to=message.to,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,

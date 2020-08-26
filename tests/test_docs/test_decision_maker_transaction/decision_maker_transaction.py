@@ -30,10 +30,10 @@ from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel
+from aea.helpers.dialogue.base import Dialogue
 from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
-from aea.protocols.base import Message
+from aea.protocols.base import Address, Message
 from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
@@ -121,9 +121,9 @@ def run():
         terms=terms,
         skill_callback_info={"some_info_key": "some_info_value"},
     )
-    signing_msg.counterparty = "decision_maker"
     signing_dialogue = cast(
-        Optional[SigningDialogue], signing_dialogues.update(signing_msg)
+        Optional[SigningDialogue],
+        signing_dialogues.create_with_message("decision_maker", signing_msg),
     )
     assert signing_dialogue is not None
     my_aea.context.decision_maker_message_queue.put_nowait(signing_msg)
@@ -153,32 +153,23 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseSigningDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> Dialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return SigningDialogue.Role.SKILL
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return SigningDialogue.Role.SKILL
 
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> SigningDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = SigningDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseSigningDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class SigningHandler(Handler):

@@ -107,7 +107,7 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = "a_counterparty"
+        msg.to = "a_counterparty"
         self.my_error_handler.handle(message=msg)
 
     def test_error_skill_unsupported_protocol(self):
@@ -119,9 +119,9 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = self.address
+        msg.to = self.address
         envelope = Envelope(
-            to=self.address,
+            to=msg.to,
             sender=self.address,
             protocol_id=FipaMessage.protocol_id,
             message=msg,
@@ -144,9 +144,9 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = self.address
+        msg.to = self.address
         envelope = Envelope(
-            to=self.address,
+            to=msg.to,
             sender=self.address,
             protocol_id=DefaultMessage.protocol_id,
             message=msg,
@@ -168,13 +168,10 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = self.address
+        msg.to = self.address
         msg.sender = self.address
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)

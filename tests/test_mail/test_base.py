@@ -68,7 +68,7 @@ def test_envelope_initialisation():
     agent_address = "Agent0"
     receiver_address = "Agent1"
     msg = Message(content="hello")
-    msg.counterparty = receiver_address
+    msg.to = receiver_address
     assert Envelope(
         to=receiver_address,
         sender=agent_address,
@@ -109,7 +109,7 @@ def test_inbox_nowait():
     agent_address = "Agent0"
     receiver_address = "Agent1"
     msg = Message(content="hello")
-    msg.counterparty = receiver_address
+    msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
     envelope = Envelope(
         to=receiver_address,
@@ -129,7 +129,7 @@ def test_inbox_get():
     agent_address = "Agent0"
     receiver_address = "Agent1"
     msg = Message(content="hello")
-    msg.counterparty = receiver_address
+    msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
     envelope = Envelope(
         to=receiver_address,
@@ -174,7 +174,7 @@ def test_outbox_put():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = receiver_address
+    msg.to = receiver_address
     msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
@@ -204,7 +204,7 @@ def test_outbox_put_message():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = receiver_address
+    msg.to = receiver_address
     msg.sender = agent_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])

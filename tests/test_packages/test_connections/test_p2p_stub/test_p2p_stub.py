@@ -36,7 +36,7 @@ from packages.fetchai.connections.p2p_stub.connection import P2PStubConnection
 SEPARATOR = ","
 
 
-def make_test_envelope(to_="any") -> Envelope:
+def make_test_envelope(to_="any", sender_="sender") -> Envelope:
     """Create a test envelope."""
     msg = DefaultMessage(
         dialogue_reference=("", ""),
@@ -45,9 +45,10 @@ def make_test_envelope(to_="any") -> Envelope:
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = "any"
+    msg.to = to_
+    msg.sender = sender_
     envelope = Envelope(
-        to=to_, sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
+        to=to_, sender=sender_, protocol_id=DefaultMessage.protocol_id, message=msg,
     )
     return envelope
 

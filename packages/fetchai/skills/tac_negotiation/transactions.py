@@ -138,16 +138,15 @@ class Transactions(Model):
         raw_message = RawMessage(
             ledger_id=ledger_id, body=terms.sender_hash.encode("utf-8")
         )
-        signing_msg = SigningMessage(
+        signing_msg, _ = signing_dialogues.create(
+            counterparty="decision_maker",
             performative=performative,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=skill_callback_ids,
             terms=terms,
             skill_callback_info=skill_callback_info,
             raw_message=raw_message,
         )
-        signing_msg.counterparty = "decision_maker"
-        return signing_msg
+        return cast(SigningMessage, signing_msg)
 
     def update_confirmed_transactions(self) -> None:
         """

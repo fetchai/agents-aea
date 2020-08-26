@@ -144,7 +144,7 @@ There can be one or more `Task` classes per skill. The developer subclasses abst
 
 * `execute(self)`: is how the framework calls a `Task`. 
 
-The `Task` class implements the <a href="https://en.wikipedia.org/wiki/Function_object">functor pattern</a>.
+The `Task` class implements the <a href="https://en.wikipedia.org/wiki/Function_object" target="_blank">functor pattern</a>.
 An instance of the `Task` class can be invoked as if it 
 were an ordinary function. Once completed, it will store the
 result in the property `result`. Raises error if the task has not been executed yet,

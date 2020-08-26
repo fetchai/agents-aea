@@ -73,7 +73,7 @@ speech_acts:
 ---
 initiation: [performative_pt]
 reply:
-  performative_pt: [performative_pct, performative_pmt]
+  performative_pt: [performative_pt, performative_pct, performative_pmt]
   performative_pct: [performative_mt, performative_o]
   performative_pmt: [performative_mt, performative_o]
   performative_mt: []

@@ -20,7 +20,6 @@
 """This module contains signing's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -56,7 +55,7 @@ class SigningMessage(Message):
 
     Terms = CustomTerms
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the signing protocol."""
 
         ERROR = "error"

@@ -1,5 +1,5 @@
 ## Prerequisites
-Raspberry Pi 4  <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE">link</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)
+Raspberry Pi 4  <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE" target="_blank">link</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)
 
 I use a wireless network because, once your Raspberry Pi is set up, you want as few wires going to it as possible.
 

@@ -20,7 +20,6 @@
 """This module contains ml_trade's message definition."""
 
 import logging
-from enum import Enum
 from typing import Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -45,7 +44,7 @@ class MlTradeMessage(Message):
 
     Query = CustomQuery
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the ml_trade protocol."""
 
         ACCEPT = "accept"

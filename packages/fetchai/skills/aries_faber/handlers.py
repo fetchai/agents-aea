@@ -92,19 +92,11 @@ class FaberHTTPHandler(Handler):
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
 
         # default message
-        message = DefaultMessage(
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
+        message, _ = default_dialogues.create(
+            counterparty=strategy.alice_aea_address,
             performative=DefaultMessage.Performative.BYTES,
             content=json.dumps(content).encode("utf-8"),
         )
-        message.counterparty = strategy.alice_aea_address
-
-        # default dialogue
-        default_dialogue = default_dialogues.update(message)
-        assert (
-            default_dialogue is not None
-        ), "faber -> http_handler -> _send_default_message(): something went wrong when sending a default message."
-
         # send
         context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
         self.context.outbox.put_message(message=message, context=context)

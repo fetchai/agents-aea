@@ -728,8 +728,8 @@ class OutBox:
                 "Only Message type allowed in envelope message field when putting into outbox."
             )
         message = cast(Message, envelope.message)
-        if not message.has_counterparty:  # pragma: nocover
-            raise ValueError("Provided message has message.counterparty not set.")
+        if not message.has_to:  # pragma: nocover
+            raise ValueError("Provided message has message.to not set.")
         if not message.has_sender:  # pragma: nocover
             raise ValueError("Provided message has message.sender not set.")
         self._multiplexer.put(envelope)
@@ -748,12 +748,12 @@ class OutBox:
         """
         if not isinstance(message, Message):
             raise ValueError("Provided message not of type Message.")
-        if not message.has_counterparty:
-            raise ValueError("Provided message has message.counterparty not set.")
+        if not message.has_to:
+            raise ValueError("Provided message has message.to not set.")
         if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,

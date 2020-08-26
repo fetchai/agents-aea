@@ -1,4 +1,4 @@
-This guide is a step-by-step introduction to building an AEA that represents static, and dynamic data to be advertised on the <a href=../oef-ledger>Open Economic Framework</a>.
+This guide is a step-by-step introduction to building an AEA that represents static, and dynamic data to be advertised on the <a href="../oef-ledger">Open Economic Framework</a>.
 
 If you simply want to run the resulting AEAs <a href="../generic-skills">go here</a>.
 
@@ -20,7 +20,7 @@ If you simply want to follow the software part of the guide then you only requir
 
 ### Setup the environment (Optional)
 
-You can follow the guide <a href=../raspberry-set-up> here </a> in order to setup your environment and prepare your Raspberry Pi.
+You can follow the guide <a href="../raspberry-set-up"> here </a> in order to setup your environment and prepare your Raspberry Pi.
 
 Once you setup your Raspberry Pi, open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there  (I named mine `99-hidraw-permissions.rules`)
 ``` bash
@@ -129,14 +129,12 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, _ = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_BALANCE,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
                 address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
-            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-            ledger_api_dialogues.update(ledger_api_msg)
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
         self._register_service()
@@ -169,13 +167,11 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
@@ -190,13 +186,11 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
 
@@ -211,13 +205,11 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering service from SOEF.")
 
@@ -232,15 +224,12 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("unregistering agent from SOEF.")
 ```
 
 This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the <a href="../simple-oef">SOEF search node</a> at regular tick intervals (here 60 seconds). By registering, the AEA becomes discoverable to possible clients.
@@ -388,15 +377,13 @@ Below the unused `teardown` function, we continue by adding the following code:
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.counterparty = fipa_msg.counterparty
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 ```
 
@@ -416,42 +403,33 @@ The next code block handles the `CFP` message, paste the code below the `_handle
         :return: None
         """
         self.context.logger.info(
-            "received CFP from sender={}".format(fipa_msg.counterparty[-5:])
+            "received CFP from sender={}".format(fipa_msg.sender[-5:])
         )
         strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_matching_supply(fipa_msg.query):
             proposal, terms, data_for_sale = strategy.generate_proposal_terms_and_data(
-                fipa_msg.query, fipa_msg.counterparty
+                fipa_msg.query, fipa_msg.sender
             )
             fipa_dialogue.data_for_sale = data_for_sale
             fipa_dialogue.terms = terms
             self.context.logger.info(
                 "sending a PROPOSE with proposal={} to sender={}".format(
-                    proposal.values, fipa_msg.counterparty[-5:]
+                    proposal.values, fipa_msg.sender[-5:]
                 )
             )
-            proposal_msg = FipaMessage(
+            proposal_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.PROPOSE,
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
+                target_message=fipa_msg,
                 proposal=proposal,
             )
-            proposal_msg.counterparty = fipa_msg.counterparty
-            fipa_dialogue.update(proposal_msg)
             self.context.outbox.put_message(message=proposal_msg)
         else:
             self.context.logger.info(
-                "declined the CFP from sender={}".format(fipa_msg.counterparty[-5:])
+                "declined the CFP from sender={}".format(fipa_msg.sender[-5:])
             )
-            decline_msg = FipaMessage(
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
-                performative=FipaMessage.Performative.DECLINE,
+            decline_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.DECLINE, target_message=fipa_msg,
             )
-            decline_msg.counterparty = fipa_msg.counterparty
-            fipa_dialogue.update(decline_msg)
             self.context.outbox.put_message(message=decline_msg)
 ```
 
@@ -476,7 +454,7 @@ The next code-block  handles the decline message we receive from the buyer. Add 
         :return: None
         """
         self.context.logger.info(
-            "received DECLINE from sender={}".format(fipa_msg.counterparty[-5:])
+            "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
         )
         fipa_dialogues.dialogue_stats.add_dialogue_endstate(
             FipaDialogue.EndState.DECLINED_PROPOSE, fipa_dialogue.is_self_initiated
@@ -500,22 +478,19 @@ Alternatively, we might receive an `ACCEPT` message. In order to handle this opt
         :return: None
         """
         self.context.logger.info(
-            "received ACCEPT from sender={}".format(fipa_msg.counterparty[-5:])
+            "received ACCEPT from sender={}".format(fipa_msg.sender[-5:])
         )
-        match_accept_msg = FipaMessage(
+        info = {"address": fipa_dialogue.terms.sender_address}
+        match_accept_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            message_id=fipa_msg.message_id + 1,
-            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-            target=fipa_msg.message_id,
-            info={"address": fipa_dialogue.terms.sender_address},
+            target_message=fipa_msg,
+            info=info,
         )
         self.context.logger.info(
             "sending MATCH_ACCEPT_W_INFORM to sender={} with info={}".format(
-                fipa_msg.counterparty[-5:], match_accept_msg.info,
+                fipa_msg.sender[-5:], info,
             )
         )
-        match_accept_msg.counterparty = fipa_msg.counterparty
-        fipa_dialogue.update(match_accept_msg)
         self.context.outbox.put_message(message=match_accept_msg)
 ```
 When the `my_generic_buyer` accepts the `Proposal` we send it, and therefores sends us an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the buyer about the address we would like it to send the funds to.
@@ -536,10 +511,8 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
         :param fipa_dialogue: the dialogue object
         :return: None
         """
-        new_message_id = fipa_msg.message_id + 1
-        new_target = fipa_msg.message_id
         self.context.logger.info(
-            "received INFORM from sender={}".format(fipa_msg.counterparty[-5:])
+            "received INFORM from sender={}".format(fipa_msg.sender[-5:])
         )
 
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -552,38 +525,28 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 transaction_digest=TransactionDigest(
                     fipa_dialogue.terms.ledger_id, fipa_msg.info["transaction_digest"]
                 ),
             )
-            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-            ledger_api_dialogue = cast(
-                Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
-            )
-            assert (
-                ledger_api_dialogue is not None
-            ), "LedgerApiDialogue construction failed."
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
         elif strategy.is_ledger_tx:
             self.context.logger.warning(
                 "did not receive transaction digest from sender={}.".format(
-                    fipa_msg.counterparty[-5:]
+                    fipa_msg.sender[-5:]
                 )
             )
         elif not strategy.is_ledger_tx and "Done" in fipa_msg.info.keys():
-            inform_msg = FipaMessage(
-                message_id=new_message_id,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=new_target,
+            inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
                 info=fipa_dialogue.data_for_sale,
             )
-            inform_msg.counterparty = fipa_msg.counterparty
-            fipa_dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -591,13 +554,13 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
             )
             self.context.logger.info(
                 "transaction confirmed, sending data={} to buyer={}.".format(
-                    fipa_dialogue.data_for_sale, fipa_msg.counterparty[-5:],
+                    fipa_dialogue.data_for_sale, fipa_msg.sender[-5:],
                 )
             )
         else:
             self.context.logger.warning(
                 "did not receive transaction confirmation from sender={}.".format(
-                    fipa_msg.counterparty[-5:]
+                    fipa_msg.sender[-5:]
                 )
             )
 ```
@@ -725,15 +688,11 @@ class GenericLedgerApiHandler(Handler):
                 Optional[FipaMessage], fipa_dialogue.last_incoming_message
             )
             assert last_message is not None, "Cannot retrieve last fipa message."
-            inform_msg = FipaMessage(
-                message_id=last_message.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=last_message.message_id,
+            inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
+                target_message=last_message,
                 info=fipa_dialogue.data_for_sale,
             )
-            inform_msg.counterparty = last_message.counterparty
-            fipa_dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -741,7 +700,7 @@ class GenericLedgerApiHandler(Handler):
             )
             self.context.logger.info(
                 "transaction confirmed, sending data={} to buyer={}.".format(
-                    fipa_dialogue.data_for_sale, last_message.counterparty[-5:],
+                    fipa_dialogue.data_for_sale, last_message.sender[-5:],
                 )
             )
         else:
@@ -1085,7 +1044,7 @@ Before the creation of the actual proposal, we have to check if the sale generat
 When we are negotiating with other AEAs we would like to keep track of the state of these negotiations. To this end we create a new file in the skill folder (`my_generic_seller/skills/generic_seller/`) and name it `dialogues.py`. Inside this file add the following code:
 
 ``` python
-from typing import Dict, Optional
+from typing import Dict, Optional, Type
 
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
@@ -1098,12 +1057,14 @@ from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
+from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue as BaseLedgerApiDialogue,
 )
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -1124,32 +1085,23 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseDefaultDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return DefaultDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> DefaultDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = DefaultDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseDefaultDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class FipaDialogue(BaseFipaDialogue):
@@ -1160,6 +1112,7 @@ class FipaDialogue(BaseFipaDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[FipaMessage] = FipaMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -1171,7 +1124,11 @@ class FipaDialogue(BaseFipaDialogue):
         :return: None
         """
         BaseFipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self.data_for_sale = None  # type: Optional[Dict[str, str]]
         self._terms = None  # type: Optional[Terms]
@@ -1199,33 +1156,24 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseFipaDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming or outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: the agent's role
-        """
-        return FipaDialogue.Role.SELLER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.SELLER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> FipaDialogue:
-        """
-        Create an instance of dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = FipaDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseFipaDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=FipaDialogue,
         )
-        return dialogue
 
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
@@ -1236,6 +1184,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[LedgerApiMessage] = LedgerApiMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -1247,7 +1196,11 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         :return: None
         """
         BaseLedgerApiDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._associated_fipa_dialogue = None  # type: Optional[FipaDialogue]
 
@@ -1274,32 +1227,24 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseLedgerApiDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseLedgerApiDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseLedgerApiDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> LedgerApiDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = LedgerApiDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseLedgerApiDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=LedgerApiDialogue,
         )
-        return dialogue
 
 
 OefSearchDialogue = BaseOefSearchDialogue
@@ -1316,32 +1261,23 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseOefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 ```
 
 The `FipaDialogues` class stores dialogue with each `my_generic_buyer` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
@@ -1499,14 +1435,12 @@ class GenericSearchBehaviour(TickerBehaviour):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, _ = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_BALANCE,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
                 address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
-            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-            ledger_api_dialogues.update(ledger_api_msg)
             self.context.outbox.put_message(message=ledger_api_msg)
         else:
             strategy.is_searching = True
@@ -1523,13 +1457,11 @@ class GenericSearchBehaviour(TickerBehaviour):
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )
-            oef_search_msg = OefSearchMessage(
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            oef_search_msg.counterparty = self.context.search_service_address
-            oef_search_dialogues.update(oef_search_msg)
             self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
@@ -1640,15 +1572,13 @@ You will see that we are following similar logic to the `generic_seller` when we
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.counterparty = fipa_msg.counterparty
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 ```
 The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the `PROPOSE` message that we receive from the `my_generic_seller` AEA:
@@ -1666,7 +1596,7 @@ The above code handles the unidentified dialogues. And responds with an error me
         """
         self.context.logger.info(
             "received proposal={} from sender={}".format(
-                fipa_msg.proposal.values, fipa_msg.counterparty[-5:],
+                fipa_msg.proposal.values, fipa_msg.sender[-5:],
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -1674,37 +1604,21 @@ The above code handles the unidentified dialogues. And responds with an error me
         affordable = strategy.is_affordable_proposal(fipa_msg.proposal)
         if acceptable and affordable:
             self.context.logger.info(
-                "accepting the proposal from sender={}".format(
-                    fipa_msg.counterparty[-5:]
-                )
+                "accepting the proposal from sender={}".format(fipa_msg.sender[-5:])
             )
-            terms = strategy.terms_from_proposal(
-                fipa_msg.proposal, fipa_msg.counterparty
-            )
+            terms = strategy.terms_from_proposal(fipa_msg.proposal, fipa_msg.sender)
             fipa_dialogue.terms = terms
-            accept_msg = FipaMessage(
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
-                performative=FipaMessage.Performative.ACCEPT,
+            accept_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.ACCEPT, target_message=fipa_msg,
             )
-            accept_msg.counterparty = fipa_msg.counterparty
-            fipa_dialogue.update(accept_msg)
             self.context.outbox.put_message(message=accept_msg)
         else:
             self.context.logger.info(
-                "declining the proposal from sender={}".format(
-                    fipa_msg.counterparty[-5:]
-                )
+                "declining the proposal from sender={}".format(fipa_msg.sender[-5:])
             )
-            decline_msg = FipaMessage(
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
-                performative=FipaMessage.Performative.DECLINE,
+            decline_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.DECLINE, target_message=fipa_msg,
             )
-            decline_msg.counterparty = fipa_msg.counterparty
-            fipa_dialogue.update(decline_msg)
             self.context.outbox.put_message(message=decline_msg)
 ```
 When we receive a proposal we have to check if we have the funds to complete the transaction and if the proposal is acceptable based on our strategy. If the proposal is not affordable or acceptable we respond with a `DECLINE` message. Otherwise, we send an `ACCEPT` message to the seller.
@@ -1727,7 +1641,7 @@ The next code-block handles the `DECLINE` message that we may receive from the b
         :return: None
         """
         self.context.logger.info(
-            "received DECLINE from sender={}".format(fipa_msg.counterparty[-5:])
+            "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
         )
         if fipa_msg.target == 1:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
@@ -1755,7 +1669,7 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
         """
         self.context.logger.info(
             "received MATCH_ACCEPT_W_INFORM from sender={} with info={}".format(
-                fipa_msg.counterparty[-5:], fipa_msg.info
+                fipa_msg.sender[-5:], fipa_msg.info
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -1766,18 +1680,12 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 terms=fipa_dialogue.terms,
             )
-            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-            ledger_api_dialogue = cast(
-                Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
-            )
-            assert (
-                ledger_api_dialogue is not None
-            ), "Error when creating ledger api dialogue."
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
@@ -1785,20 +1693,14 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 "requesting transfer transaction from ledger api..."
             )
         else:
-            inform_msg = FipaMessage(
-                message_id=fipa_msg.message_id + 1,
-                dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-                target=fipa_msg.message_id,
+            inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
                 info={"Done": "Sending payment via bank transfer"},
             )
-            inform_msg.counterparty = fipa_msg.counterparty
-            fipa_dialogue.update(inform_msg)
             self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
-                "informing counterparty={} of payment.".format(
-                    fipa_msg.counterparty[-5:]
-                )
+                "informing counterparty={} of payment.".format(fipa_msg.sender[-5:])
             )
 ```
 The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a `LedgerApiMessage` of performative `GET_RAW_TRANSACTION` and send it to the ledger connection. The ledger connection will construct a raw transaction for us, using the relevant ledger api.
@@ -1821,7 +1723,7 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
         :return: None
         """
         self.context.logger.info(
-            "received INFORM from sender={}".format(fipa_msg.counterparty[-5:])
+            "received INFORM from sender={}".format(fipa_msg.sender[-5:])
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
@@ -1833,7 +1735,7 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
             )
         else:
             self.context.logger.info(
-                "received no data from sender={}".format(fipa_msg.counterparty[-5:])
+                "received no data from sender={}".format(fipa_msg.sender[-5:])
             )
 
     def _handle_invalid(
@@ -1957,13 +1859,11 @@ class GenericOefSearchHandler(Handler):
         for idx, counterparty in enumerate(oef_search_msg.agents):
             if idx >= strategy.max_negotiations:
                 continue
-            cfp_msg = FipaMessage(
+            cfp_msg, _ = fipa_dialogues.create(
+                counterparty=counterparty,
                 performative=FipaMessage.Performative.CFP,
-                dialogue_reference=fipa_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            cfp_msg.counterparty = counterparty
-            fipa_dialogues.update(cfp_msg)
             self.context.outbox.put_message(message=cfp_msg)
             self.context.logger.info(
                 "sending CFP to agent={}".format(counterparty[-5:])
@@ -2062,15 +1962,11 @@ class GenericSigningHandler(Handler):
         assert (
             last_ledger_api_msg is not None
         ), "Could not retrieve last message in ledger api dialogue"
-        ledger_api_msg = LedgerApiMessage(
+        ledger_api_msg = ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-            dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-            target=last_ledger_api_msg.message_id,
-            message_id=last_ledger_api_msg.message_id + 1,
+            target_message=last_ledger_api_msg,
             signed_transaction=signing_msg.signed_transaction,
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-        ledger_api_dialogue.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")
 
@@ -2208,19 +2104,15 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        signing_msg = SigningMessage(
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
             skill_callback_info={},
         )
-        signing_msg.counterparty = "decision_maker"
-        signing_dialogue = cast(
-            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-        )
-        assert signing_dialogue is not None, "Error when creating signing dialogue"
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_fipa_dialogue = (
             ledger_api_dialogue.associated_fipa_dialogue
         )
@@ -2246,15 +2138,11 @@ class GenericLedgerApiHandler(Handler):
         )
         fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
         assert fipa_msg is not None, "Could not retrieve fipa message"
-        inform_msg = FipaMessage(
+        inform_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.INFORM,
-            message_id=fipa_msg.message_id + 1,
-            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-            target=fipa_msg.message_id,
+            target_message=fipa_msg,
             info={"transaction_digest": ledger_api_msg.transaction_digest.body},
         )
-        inform_msg.counterparty = fipa_dialogue.dialogue_label.dialogue_opponent_addr
-        fipa_dialogue.update(inform_msg)
         self.context.outbox.put_message(message=inform_msg)
         self.context.logger.info(
             "informing counterparty={} of transaction digest.".format(
@@ -2520,7 +2408,7 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
 As mentioned, when we are negotiating with other AEA we would like to keep track of these negotiations for various reasons. Create a new file and name it `dialogues.py` (in `my_generic_buyer/skills/generic_buyer/`). Inside this file add the following code:
 
 ``` python
-from typing import Optional
+from typing import Optional, Type
 
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
@@ -2531,17 +2419,20 @@ from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialog
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
+from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue as BaseLedgerApiDialogue,
 )
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -2562,32 +2453,23 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseDefaultDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return DefaultDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> DefaultDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = DefaultDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseDefaultDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class FipaDialogue(BaseFipaDialogue):
@@ -2598,6 +2480,7 @@ class FipaDialogue(BaseFipaDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[FipaMessage] = FipaMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -2609,7 +2492,11 @@ class FipaDialogue(BaseFipaDialogue):
         :return: None
         """
         BaseFipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._terms = None  # type: Optional[Terms]
         self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
@@ -2655,32 +2542,24 @@ class FipaDialogues(Model, BaseFipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseFipaDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseFipaDialogue.Role.BUYER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseFipaDialogue.Role.BUYER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> FipaDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = FipaDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseFipaDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=FipaDialogue,
         )
-        return dialogue
 
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
@@ -2691,6 +2570,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[LedgerApiMessage] = LedgerApiMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -2702,7 +2582,11 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         :return: None
         """
         BaseLedgerApiDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._associated_fipa_dialogue = None  # type: Optional[FipaDialogue]
 
@@ -2729,32 +2613,24 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseLedgerApiDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseLedgerApiDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseLedgerApiDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> LedgerApiDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = LedgerApiDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseLedgerApiDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=LedgerApiDialogue,
         )
-        return dialogue
 
 
 OefSearchDialogue = BaseOefSearchDialogue
@@ -2771,32 +2647,23 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseOefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 
 
 class SigningDialogue(BaseSigningDialogue):
@@ -2807,6 +2674,7 @@ class SigningDialogue(BaseSigningDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[SigningMessage] = SigningMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -2818,7 +2686,11 @@ class SigningDialogue(BaseSigningDialogue):
         :return: None
         """
         BaseSigningDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._associated_fipa_dialogue = None  # type: Optional[FipaDialogue]
 
@@ -2846,32 +2718,24 @@ class SigningDialogues(Model, BaseSigningDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseSigningDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseSigningDialogue.Role.SKILL
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseSigningDialogue.Role.SKILL
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> SigningDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = SigningDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseSigningDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=SigningDialogue,
         )
-        return dialogue
 ```
 
 The dialogues class stores dialogue with each AEA and other AEA components so we can have access to previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
@@ -3081,6 +2945,6 @@ You have completed the "Getting Started" series. Congratulations!
 
 ### Recommended
 
-We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://fetch-ai.slack.com">Slack</a>. Speak to you there!
+We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://fetch-ai.slack.com" target="_blank">Slack</a>. Speak to you there!
 
 <br />

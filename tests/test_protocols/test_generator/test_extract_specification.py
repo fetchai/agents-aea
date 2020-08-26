@@ -481,7 +481,7 @@ class TestExtractSpecification(TestCase):
         assert spec.initial_performatives == ["PERFORMATIVE_CT", "PERFORMATIVE_PT"]
         assert spec.reply == {
             "performative_ct": ["performative_pct"],
-            "performative_pt": ["performative_pmt"],
+            "performative_pt": ["performative_pt", "performative_pmt"],
             "performative_pct": ["performative_mt", "performative_o"],
             "performative_pmt": ["performative_mt", "performative_o"],
             "performative_mt": [],

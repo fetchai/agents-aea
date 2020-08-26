@@ -520,7 +520,7 @@ class TestFilter:
             skill_callback_info={},
             signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
-        t.counterparty = "skill"
+        t.to = "skill"
         t.sender = "decision_maker"
         self.aea.runtime.decision_maker.message_out_queue.put(t)
         self.aea._filter.handle_internal_messages()
