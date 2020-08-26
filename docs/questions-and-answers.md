@@ -88,5 +88,5 @@ The `URI` in the `EnvelopeContext` can be used to route envelopes of a given pro
 </details>
 
 <details><summary>Why does the AEA framework use its own package registry?</summary>
-AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library and therefore not suitable for distribution via <a href='https://pypi.org/'>PyPI</a>.
+AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library and therefore not suitable for distribution via <a href='https://pypi.org/' target="_blank">PyPI</a>.
 </details>

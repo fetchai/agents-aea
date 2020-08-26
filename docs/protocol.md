@@ -247,7 +247,7 @@ class OefErrorOperation(Enum):
 
 ## `fetchai/fipa:0.6.0` protocol
 
-This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="http://www.fipa.org/repository/aclspecs.html">FIPA</a> Agent Communication Language.
+This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="http://www.fipa.org/repository/aclspecs.html" target="_blank">FIPA</a> Agent Communication Language.
 
 The `fetchai/fipa:0.6.0` protocol definition includes a `FipaMessage` with the following performatives:
 
@@ -284,7 +284,7 @@ def __init__(
 
 The `fetchai/fipa:0.6.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.6.0` protocol check out the <a href="../generic-skills-step-by-step" target=_blank> generic skills step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.6.0` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
 
 
 ### Fipa dialogue
