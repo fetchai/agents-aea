@@ -173,6 +173,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
             chain_id=3,
         ),
     )
+    request = cast(LedgerApiMessage, request)
     envelope = Envelope(
         to=request.to,
         sender=request.sender,
