@@ -23,7 +23,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Optional, cast
+from typing import Optional, Type, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel
 from aea.mail.base import Address
@@ -43,6 +43,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.helpers import (
     DEMAND_DATAMODEL_NAME,
     SUPPLY_DATAMODEL_NAME,
@@ -145,6 +146,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -156,7 +158,11 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         :return: None
         """
         BaseOefSearchDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._is_seller_search = None  # type: Optional[bool]
 

@@ -24,7 +24,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Optional
+from typing import Optional, Type
 
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
@@ -35,6 +35,7 @@ from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialog
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.contract_api.dialogues import (
@@ -43,6 +44,7 @@ from packages.fetchai.protocols.contract_api.dialogues import (
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.ledger_api.dialogues import (
@@ -67,6 +69,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[ContractApiMessage] = ContractApiMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -78,7 +81,11 @@ class ContractApiDialogue(BaseContractApiDialogue):
         :return: None
         """
         BaseContractApiDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._terms = None  # type: Optional[Terms]
         self._associated_fipa_dialogue = None  # type: Optional[BaseFipaDialogue]
@@ -297,6 +304,7 @@ class SigningDialogue(BaseSigningDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[SigningMessage] = SigningMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -308,7 +316,11 @@ class SigningDialogue(BaseSigningDialogue):
         :return: None
         """
         BaseSigningDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._associated_contract_api_dialogue = (
             None
