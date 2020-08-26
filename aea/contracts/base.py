@@ -24,18 +24,20 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
     ContractConfig,
     ContractId,
 )
-from aea.contracts import contract_registry
 from aea.crypto.base import LedgerApi
+from aea.crypto.registries import Registry
 from aea.exceptions import AEAException
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 
+
+contract_registry: Registry["Contract"] = Registry["Contract"]()
 logger = logging.getLogger(__name__)
 
 

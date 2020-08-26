@@ -38,6 +38,7 @@ from aea.contracts.scaffold.contract import MyScaffoldContract
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 
 from tests.conftest import COSMOS, ETHEREUM, ROOT_DIR
+from tests.data.dummy_contract.contract import DummyContract
 
 
 def test_from_dir():
@@ -101,17 +102,8 @@ def dummy_contract(request):
     if str(configuration.public_id) in contract_registry.specs:
         contract_registry.specs.pop(str(configuration.public_id))
 
-    # load into sys modules
-    Contract.from_config(configuration)
-
-    # load into registry
-    contract_registry.register(
-        id_=str(configuration.public_id),
-        entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-        class_kwargs={"contract_interface": configuration.contract_interfaces},
-        contract_config=configuration,
-    )
-    contract = contract_registry.make(str(configuration.public_id))
+    # load into sys modules and register into contract registry
+    contract = DummyContract.from_config(configuration)
     yield contract
     contract_registry.specs.pop(str(configuration.public_id))
 

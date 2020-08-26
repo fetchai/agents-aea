@@ -1848,7 +1848,7 @@ class ContractConfig(ComponentConfiguration):
                     }
                     contract_interfaces[identifier] = contract_interface
             else:
-                ValueError(  # pragma: nocover
+                raise ValueError(  # pragma: nocover
                     "Identifier {} is not supported for contracts."
                 )
         return contract_interfaces

@@ -61,7 +61,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
-from aea.contracts import Contract, contract_registry
+from aea.contracts.base import Contract, contract_registry
 from aea.crypto.cosmos import _COSMOS
 from aea.crypto.ethereum import _ETHEREUM
 from aea.crypto.fetchai import _FETCHAI
@@ -1029,12 +1029,6 @@ def erc1155_contract():
     if str(configuration.public_id) not in contract_registry.specs:
         # load contract into sys modules
         Contract.from_config(configuration)
-        contract_registry.register(
-            id_=str(configuration.public_id),
-            entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-            class_kwargs={"contract_interface": configuration.contract_interfaces},
-            contract_config=configuration,
-        )
 
     contract = contract_registry.make(str(configuration.public_id))
     yield contract
