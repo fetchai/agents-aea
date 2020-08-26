@@ -202,9 +202,9 @@ class P2PLibp2pClientConnection(Connection):
         if self.is_disconnected:  # pragma: nocover
             return
         if self._process_messages_task is None:
-            raise ValueError("Message task is not set.")
+            raise ValueError("Message task is not set.")  # pragma: nocover
         if self._writer is None:
-            raise ValueError("Writer is not set.")
+            raise ValueError("Writer is not set.")  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
@@ -230,7 +230,7 @@ class P2PLibp2pClientConnection(Connection):
         """
         try:
             if self._in_queue is None:
-                raise ValueError("Input queue not initialized.")
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
@@ -264,14 +264,14 @@ class P2PLibp2pClientConnection(Connection):
         while True:
             data = await self._receive()
             if self._in_queue is None:
-                raise ValueError("Input queue not initialized.")
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             self._in_queue.put_nowait(data)
             if data is None:
                 break
 
     async def _send(self, data: bytes) -> None:
         if self._writer is None:
-            raise ValueError("Writer is not set.")
+            raise ValueError("Writer is not set.")  # pragma: nocover
         size = struct.pack("!I", len(data))
         self._writer.write(size)
         self._writer.write(data)
@@ -279,7 +279,7 @@ class P2PLibp2pClientConnection(Connection):
 
     async def _receive(self) -> Optional[bytes]:
         if self._reader is None:
-            raise ValueError("Reader is not set.")
+            raise ValueError("Reader is not set.")  # pragma: nocover
         try:
             self.logger.debug("Waiting for messages...")
             buf = await self._reader.readexactly(4)

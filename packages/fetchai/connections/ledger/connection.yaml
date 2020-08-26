@@ -8,10 +8,10 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   README.md: QmeQEMV9BacQgKMKTJRpcKqxerCwyZYMAmUTv25wJKyD7Y
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmPuM1rJ4ku54gBeubqbsWEcZh8cMwZTAArgd4n21wYb5e
-  connection.py: QmYPo7dfjhCjW6b2VQPf13B47qexfiQoMX9GMc9pH42zZ5
-  contract_dispatcher.py: QmYCyQCkxLsiJdMorsHE1hv1C9EYW1YjhxGPaoNnbwLEBY
-  ledger_dispatcher.py: QmT6dSMNL7tAcZdiskzXTa39dYbtEZ7GYCX9Fo3Rtgbxm2
+  base.py: QmbSKuxssev8CxNCSFCp3Kr34omYo5oe5Lf7R13LBStpUj
+  connection.py: QmS3CJwjgzZ5SrAeJjCnC5ChZDfTsDuV6ndgMsGV1bidnf
+  contract_dispatcher.py: QmfMwocNRjkKKMdjJV8XKK4TSaL7DdgTbw64ABgyd3fFYp
+  ledger_dispatcher.py: QmQFFLnYGaj5HqheEyjVhmvwaRCeP8cyf4z6xxWxk4gyGR
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/contract_api:0.3.0

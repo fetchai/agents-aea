@@ -378,7 +378,7 @@ class HTTPClientConnection(Connection):
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
-        if host is None or port is None:
+        if host is None or port is None:  # pragma: nocover
             raise ValueError("host and port must be set!")
         self.channel = HTTPClientAsyncChannel(
             self.address,

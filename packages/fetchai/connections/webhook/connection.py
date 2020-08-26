@@ -144,7 +144,9 @@ class WebhookChannel:
         :return: None
         """
         if self.webhook_site is None or self.runner is None or self.app is None:
-            raise ValueError("Application not connected, call connect first!")
+            raise ValueError(
+                "Application not connected, call connect first!"
+            )  # pragma: nocover
 
         if not self.is_stopped:
             await self.webhook_site.stop()
@@ -224,7 +226,7 @@ class WebhookConnection(Connection):
         webhook_port = cast(int, self.configuration.config.get("webhook_port"))
         webhook_url_path = cast(str, self.configuration.config.get("webhook_url_path"))
         if webhook_address is None or webhook_port is None or webhook_url_path is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "webhook_address, webhook_port and webhook_url_path must be set!"
             )
         self.channel = WebhookChannel(
@@ -272,7 +274,7 @@ class WebhookConnection(Connection):
         """
         self._ensure_connected()
         if self.channel.in_queue is None:
-            raise ValueError("Channel in queue not set.")
+            raise ValueError("Channel in queue not set.")  # pragma: nocover
         await self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
@@ -283,7 +285,7 @@ class WebhookConnection(Connection):
         """
         self._ensure_connected()
         if self.channel.in_queue is None:
-            raise ValueError("Channel in queue not set.")
+            raise ValueError("Channel in queue not set.")  # pragma: nocover
         try:
             envelope = await self.channel.in_queue.get()
             if envelope is None:

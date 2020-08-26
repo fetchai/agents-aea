@@ -287,7 +287,7 @@ class SOEFChannel:
     def loop(self) -> asyncio.AbstractEventLoop:
         """Get event loop."""
         if self._loop is None:
-            raise ValueError("Loop not set!")
+            raise ValueError("Loop not set!")  # pragma: nocover
         return self._loop
 
     @staticmethod
@@ -756,7 +756,7 @@ class SOEFChannel:
         :return: None
         """
         if self.in_queue is None:
-            raise ValueError("Inqueue not set!")
+            raise ValueError("Inqueue not set!")  # pragma: nocover
         message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.OEF_ERROR,
             target_message=oef_search_message,
@@ -848,7 +848,7 @@ class SOEFChannel:
         await self._stop_periodic_ping_task()
 
         if self.in_queue is None:
-            raise ValueError("Queue is not set, use connect first!")
+            raise ValueError("Queue is not set, use connect first!")  # pragma: nocover
         await self._unregister_agent()
 
         if self._find_around_me_processor_task:
@@ -939,7 +939,7 @@ class SOEFChannel:
         :return: None
         """
         if self.in_queue is None:
-            raise ValueError("Inqueue not set!")
+            raise ValueError("Inqueue not set!")  # pragma: nocover
         self.logger.debug("Searching in radius={} of myself".format(radius))
 
         response_text = await self._generic_oef_command(
@@ -999,7 +999,7 @@ class SOEFConnection(Connection):
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
-        if api_key is None or soef_addr is None or soef_port is None:
+        if api_key is None or soef_addr is None or soef_port is None:  # pragma: nocover
             raise ValueError("api_key, soef_addr and soef_port must be set!")
 
         self.api_key = api_key
@@ -1042,7 +1042,7 @@ class SOEFConnection(Connection):
         if self.is_disconnected:  # pragma: nocover
             return
         if self.in_queue is None:
-            raise ValueError("In queue not set.")
+            raise ValueError("In queue not set.")  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         await self.channel.disconnect()
         self._state.set(ConnectionStates.disconnected)
@@ -1055,7 +1055,7 @@ class SOEFConnection(Connection):
         """
         try:
             if self.in_queue is None:
-                raise ValueError("In queue not set.")
+                raise ValueError("In queue not set.")  # pragma: nocover
             envelope = await self.in_queue.get()
             if envelope is None:  # pragma: nocover
                 self.logger.debug("Received None.")

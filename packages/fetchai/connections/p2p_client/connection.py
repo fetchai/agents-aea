@@ -86,7 +86,7 @@ class PeerToPeerChannel:
         """Try to register to the provider."""
         try:
             if self._httpCall is None:
-                raise ValueError("http call is not set.")
+                raise ValueError("http call is not set.")  # pragma: nocover
             self.logger.info(self.address)
             query = self._httpCall.register(sender_address=self.address, mailbox=True)
             return query["status"] == "OK"
@@ -102,7 +102,7 @@ class PeerToPeerChannel:
         :return: None
         """
         if self._httpCall is None:
-            raise ValueError("http call is not set.")
+            raise ValueError("http call is not set.")  # pragma: nocover
 
         if self.excluded_protocols is not None:
             if envelope.protocol_id in self.excluded_protocols:  # pragma: nocover
@@ -124,11 +124,11 @@ class PeerToPeerChannel:
     def receiving_loop(self) -> None:
         """Receive the messages from the provider."""
         if self._httpCall is None:
-            raise ValueError("http call is not set.")
+            raise ValueError("http call is not set.")  # pragma: nocover
         if self.in_queue is None:
-            raise ValueError("in queue is not set.")
+            raise ValueError("in queue is not set.")  # pragma: nocover
         if self.loop is None:
-            raise ValueError("loop is not set.")
+            raise ValueError("loop is not set.")  # pragma: nocover
         while not self.stopped:
             messages = self._httpCall.get_messages(
                 sender_address=self.address
@@ -152,7 +152,7 @@ class PeerToPeerChannel:
         :return: None
         """
         if self._httpCall is None:
-            raise ValueError("http call is not set.")
+            raise ValueError("http call is not set.")  # pragma: nocover
         with self.lock:
             if not self.stopped:
                 self._httpCall.unregister(self.address)
@@ -171,7 +171,7 @@ class PeerToPeerClientConnection(Connection):
         addr = cast(str, self.configuration.config.get("addr"))
         port = cast(int, self.configuration.config.get("port"))
         if addr is None and port is None:
-            raise ValueError("addr and port must be set!")
+            raise ValueError("addr and port must be set!")  # pragma: nocover
         self.channel = PeerToPeerChannel(self.address, addr, port, excluded_protocols=self.excluded_protocols)  # type: ignore
 
     async def connect(self) -> None:
@@ -225,7 +225,7 @@ class PeerToPeerClientConnection(Connection):
                 "Connection not established yet. Please use 'connect()'."
             )
         if self.channel.in_queue is None:
-            raise ValueError("Channel in queue is not set.")
+            raise ValueError("Channel in queue is not set.")  # pragma: nocover
         try:
             envelope = await self.channel.in_queue.get()
             if envelope is None:

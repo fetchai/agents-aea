@@ -127,11 +127,11 @@ class LedgerConnection(Connection):
         """
         dispatcher: RequestDispatcher
         if envelope.protocol_id == LedgerApiMessage.protocol_id:
-            if self._ledger_dispatcher is None:
+            if self._ledger_dispatcher is None:  # pragma: nocover
                 raise ValueError("No ledger dispatcher set.")
             dispatcher = self._ledger_dispatcher
         elif envelope.protocol_id == ContractApiMessage.protocol_id:
-            if self._contract_dispatcher is None:
+            if self._contract_dispatcher is None:  # pragma: nocover
                 raise ValueError("No contract dispatcher set.")
             dispatcher = self._contract_dispatcher
         else:

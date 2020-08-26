@@ -552,7 +552,7 @@ class OEFConnection(Connection):
         addr = cast(str, self.configuration.config.get("addr"))
         port = cast(int, self.configuration.config.get("port"))
         if addr is None or port is None:
-            raise ValueError("addr and port must be set!")
+            raise ValueError("addr and port must be set!")  # pragma: nocover
         self.oef_addr = addr
         self.oef_port = port
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port)  # type: ignore

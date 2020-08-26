@@ -226,7 +226,7 @@ class GymConnection(Connection):
         super().__init__(**kwargs)
         if gym_env is None:
             gym_env_package = cast(str, self.configuration.config.get("env"))
-            if gym_env_package is None:
+            if gym_env_package is None:  # pragma: nocover
                 raise ValueError("`env` must be set in configuration!")
             gym_env_class = locate(gym_env_package)
             gym_env = gym_env_class()

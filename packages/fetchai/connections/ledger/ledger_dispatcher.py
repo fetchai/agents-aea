@@ -80,7 +80,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
     def get_ledger_id(self, message: Message) -> str:
         """Get the ledger id from message."""
-        if not isinstance(message, LedgerApiMessage):
+        if not isinstance(message, LedgerApiMessage):  # pragma: nocover
             raise ValueError("argument is not a LedgerApiMessage instance.")
         message = cast(LedgerApiMessage, message)
         if message.performative is LedgerApiMessage.Performative.GET_RAW_TRANSACTION:

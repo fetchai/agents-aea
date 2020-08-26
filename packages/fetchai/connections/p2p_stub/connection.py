@@ -54,7 +54,7 @@ class P2PStubConnection(StubConnection):
             configuration.config.get("namespace_dir", tempfile.mkdtemp()),
         )
         if namespace_dir_path is None:
-            raise ValueError("namespace_dir_path must be set!")
+            raise ValueError("namespace_dir_path must be set!")  # pragma: nocover
         self.namespace = os.path.abspath(namespace_dir_path)
 
         input_file_path = os.path.join(self.namespace, "{}.in".format(identity.address))
@@ -72,7 +72,7 @@ class P2PStubConnection(StubConnection):
         :return: None
         """
         if self.loop is None:
-            raise ValueError("Loop not initialized.")
+            raise ValueError("Loop not initialized.")  # pragma: nocover
         target_file = Path(os.path.join(self.namespace, "{}.in".format(envelope.to)))
 
         with open(target_file, "ab") as file:
@@ -83,7 +83,7 @@ class P2PStubConnection(StubConnection):
     async def disconnect(self) -> None:
         """Disconnect the connection."""
         if self.loop is None:
-            raise ValueError("Loop not initialized.")
+            raise ValueError("Loop not initialized.")  # pragma: nocover
         await self.loop.run_in_executor(self._write_pool, self._cleanup)
         await super().disconnect()
 

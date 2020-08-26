@@ -134,7 +134,7 @@ class LocalNode:
         if address in self._out_queues.keys():
             return None
 
-        if self._in_queue is None:
+        if self._in_queue is None:  # pragma: nocover
             raise ValueError("In queue not set.")
         q = self._in_queue  # type: asyncio.Queue
         self._out_queues[address] = writer
@@ -189,7 +189,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if not isinstance(envelope.message, OefSearchMessage):
+        if not isinstance(envelope.message, OefSearchMessage):  # pragma: nocover
             raise ValueError("Message not of type OefSearchMessage.")
         oef_message, dialogue = self._get_message_and_dialogue(envelope)
 
@@ -331,7 +331,7 @@ class LocalNode:
 
         :return: Tuple[Message, Optional[Dialogue]]
         """
-        if self._dialogues is None:
+        if self._dialogues is None:  # pragma: nocover
             raise ValueError("Call connect before!")
         message = cast(OefSearchMessage, envelope.message)
         dialogue = cast(OefSearchDialogue, self._dialogues.update(message))
@@ -381,7 +381,7 @@ class OEFLocalConnection(Connection):
 
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
-        if self._local_node is None:
+        if self._local_node is None:  # pragma: nocover
             raise ValueError("No local node set!")
 
         if self.is_connected:  # pragma: nocover
@@ -394,12 +394,12 @@ class OEFLocalConnection(Connection):
     async def disconnect(self) -> None:
         """Disconnect from the local OEF Node."""
         if self._local_node is None:
-            raise ValueError("No local node set!")
+            raise ValueError("No local node set!")  # pragma: nocover
         if self.is_disconnected:
             return  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         if self._reader is None:
-            raise ValueError("No reader set!")
+            raise ValueError("No reader set!")  # pragma: nocover
         await self._local_node.disconnect(self.address)
         await self._reader.put(None)
         self._reader, self._writer = None, None
@@ -419,7 +419,7 @@ class OEFLocalConnection(Connection):
         self._ensure_connected()
         try:
             if self._reader is None:
-                raise ValueError("No reader set!")
+                raise ValueError("No reader set!")  # pragma: nocover
             envelope = await self._reader.get()
             if envelope is None:
                 self.logger.debug("Receiving task terminated.")

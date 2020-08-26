@@ -426,7 +426,7 @@ class HTTPChannel(BaseAsyncChannel):
         :return: a tuple of response code and response description
         """
         request = await Request.create(http_request)
-        if self._in_queue is None:
+        if self._in_queue is None:  # pragma: nocover
             raise ValueError("Channel not connected!")
 
         is_valid_request = self.api_spec.verify(request)
@@ -479,7 +479,7 @@ class HTTPChannel(BaseAsyncChannel):
         :param envelope: the envelope
         :return: None
         """
-        if self.http_server is None:
+        if self.http_server is None:  # pragma: nocover
             raise ValueError("Server not connected, call connect first!")
 
         if envelope.protocol_id not in self.restricted_to_protocols:
@@ -516,7 +516,7 @@ class HTTPChannel(BaseAsyncChannel):
 
         Shut-off the HTTP Server.
         """
-        if self.http_server is None:
+        if self.http_server is None:  # pragma: nocover
             raise ValueError("Server not connected, call connect first!")
 
         if not self.is_stopped:
@@ -536,7 +536,7 @@ class HTTPServerConnection(Connection):
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
-        if host is None or port is None:
+        if host is None or port is None:  # pragma: nocover
             raise ValueError("host and port must be set!")
         api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))
         self.channel = HTTPChannel(
