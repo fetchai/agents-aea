@@ -10,8 +10,8 @@ fingerprint:
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
   base.py: QmRu7RYvTQuXvzM8mj8LQ8d3XtaHKLRdnMo7AvX2X76npe
   connection.py: QmcQnyUagAhE7UsSBxiBSqsuF4mTMdU26LZLhUhdq5QygR
-  tcp_client.py: QmTXs6z3rvxB59FmGuu46CeY1eHRPBNQ4CPZm1y7hRpusp
-  tcp_server.py: QmTv4hNxEBy7iG5YGemy6ugDcRfNV4JGpCR6ngigNB9jbq
+  tcp_client.py: QmdjpDNk6UCgrr9KJ1wiAuG9iSX5yD4xp6giPLhUtRyM8U
+  tcp_server.py: QmS9Y6EvaqKRMhaT3H2FckkMNkzpTCmQ8i8dt1R3GXaU77
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: TCPClientConnection

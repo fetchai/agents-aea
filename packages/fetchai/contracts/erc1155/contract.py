@@ -234,18 +234,22 @@ class ERC1155Contract(Contract):
         """Validate the mint quantities."""
         for token_id, mint_quantity in zip(token_ids, mint_quantities):
             decoded_type = cls.decode_id(token_id)
-            assert decoded_type in [
+            if decoded_type not in [
                 1,
                 2,
-            ], "The token type must be 1 or 2. Found type={} for token_id={}".format(
-                decoded_type, token_id
-            )
-            if decoded_type == 1:
-                assert (
-                    mint_quantity == 1
-                ), "Cannot mint NFT (token_id={}) with mint_quantity more than 1 (found={})".format(
-                    token_id, mint_quantity
+            ]:
+                raise ValueError(
+                    "The token type must be 1 or 2. Found type={} for token_id={}".format(
+                        decoded_type, token_id
+                    )
                 )
+            if decoded_type == 1:
+                if mint_quantity != 1:
+                    raise ValueError(
+                        "Cannot mint NFT (token_id={}) with mint_quantity more than 1 (found={})".format(
+                            token_id, mint_quantity
+                        )
+                    )
 
     @staticmethod
     def decode_id(token_id: int) -> int:
@@ -546,9 +550,9 @@ class ERC1155Contract(Contract):
             _value_eth_wei=value_eth_wei,
             _nonce=trade_nonce,
         )
-        assert (
+        if (
             tx_hash
-            == instance.functions.getSingleHash(
+            != instance.functions.getSingleHash(
                 from_address,
                 to_address,
                 token_id,
@@ -557,7 +561,8 @@ class ERC1155Contract(Contract):
                 value_eth_wei,
                 trade_nonce,
             ).call()
-        )
+        ):
+            raise ValueError("On-chain and off-chain hash computation do not agree!")
         return tx_hash
 
     @staticmethod
@@ -636,9 +641,9 @@ class ERC1155Contract(Contract):
             _value_eth_wei=value_eth_wei,
             _nonce=trade_nonce,
         )
-        assert (
+        if (
             tx_hash
-            == instance.functions.getHash(
+            != instance.functions.getHash(
                 from_address,
                 to_address,
                 token_ids,
@@ -647,7 +652,8 @@ class ERC1155Contract(Contract):
                 value_eth_wei,
                 trade_nonce,
             ).call()
-        )
+        ):
+            raise ValueError("On-chain and off-chain hash computation do not agree!")
         return tx_hash
 
     @staticmethod

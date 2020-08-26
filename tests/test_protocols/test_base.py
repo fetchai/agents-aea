@@ -206,7 +206,7 @@ class TestMessageAttributes:
         message.to = "to"
         assert message.to == "to"
 
-        with pytest.raises(AEAEnforceError, match="To is already set."):
+        with pytest.raises(AEAEnforceError, match="To already set."):
             message.to = "to"
 
     def test_dialogue_reference(self):
