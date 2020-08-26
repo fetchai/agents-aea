@@ -47,7 +47,8 @@ def test_from_dir():
         os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
     )
     assert contract is not None
-    assert contract.contract_interface is None
+    assert contract.contract_interface is not None
+    assert isinstance(contract.contract_interface, dict)
 
 
 def test_from_config_and_registration():
@@ -63,21 +64,13 @@ def test_from_config_and_registration():
 
     contract = Contract.from_config(configuration)
     assert contract is not None
-    assert contract.contract_interface is None
+    assert contract.contract_interface is not None
+    assert isinstance(contract.contract_interface, dict)
     assert contract.configuration == configuration
     assert contract.id == configuration.public_id
 
-    contract_registry.register(
-        id_=str(configuration.public_id),
-        entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-        class_kwargs={"contract_interface": configuration.contract_interfaces},
-        contract_config=configuration,
-    )
-
-    contract = contract_registry.make(str(configuration.public_id))
-    assert contract is not None
-    assert contract.configuration == configuration
-    assert contract.contract_interface is not None
+    # the contract is registered as side-effect
+    assert str(contract.public_id) in contract_registry.specs
 
 
 def test_non_implemented_class_methods():

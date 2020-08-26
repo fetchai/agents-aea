@@ -117,14 +117,14 @@ class Contract(Component):
             filter(lambda x: re.match(contract_class_name, x[0]), classes)
         )
         name_to_class = dict(contract_classes)
-        logger.debug("Processing contract {}".format(contract_class_name))
+        logger.debug(f"Processing contract {contract_class_name}")
         contract_class = name_to_class.get(contract_class_name, None)
-        assert contract_class_name is not None, "Contract class '{}' not found.".format(
-            contract_class_name
-        )
+        assert (
+            contract_class is not None
+        ), f"Contract class '{contract_class_name}' not found."
 
         _try_to_register_contract(configuration)
-        return contract_class(configuration, **kwargs)
+        return contract_registry.make(str(configuration.public_id))
 
     @classmethod
     def get_deploy_transaction(
