@@ -71,8 +71,9 @@ class AliceStrategy(Model):
         enforce(
             len(self._set_service_data) == 2
             and "key" in self._set_service_data
-            and "value" in self._set_service_data
-        , "service_data must contain keys `key` and `value`")
+            and "value" in self._set_service_data,
+            "service_data must contain keys `key` and `value`",
+        )
         self._remove_service_data = {"key": self._set_service_data["key"]}
 
         super().__init__(**kwargs)

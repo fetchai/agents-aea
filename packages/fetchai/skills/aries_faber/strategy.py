@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+from aea.exceptions import enforce
 from aea.helpers.search.models import (
     Constraint,
     ConstraintType,
@@ -118,7 +119,7 @@ class FaberStrategy(Model):
     @is_searching.setter
     def is_searching(self, is_searching: bool) -> None:
         """Check if the agent is searching."""
-        assert isinstance(is_searching, bool), "Can only set bool on is_searching!"
+        enforce(isinstance(is_searching, bool), "Can only set bool on is_searching!")
         self._is_searching = is_searching
 
     def get_location_and_service_query(self) -> Query:

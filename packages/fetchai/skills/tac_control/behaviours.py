@@ -184,9 +184,11 @@ class TacBehaviour(Behaviour):
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.conf.agent_addr_to_name.keys():
             tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(agent_address)
-            assert tac_dialogue is not None, "Error when retrieving dialogue."
+            if tac_dialogue is None:
+                raise ValueError("Error when retrieving dialogue.")
             last_msg = tac_dialogue.last_message
-            assert last_msg is not None, "Error when retrieving last message."
+            if last_msg is None:
+                raise ValueError("Error when retrieving last message.")
             agent_state = game.current_agent_states[agent_address]
             tac_msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.GAME_DATA,
@@ -212,9 +214,11 @@ class TacBehaviour(Behaviour):
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.registration.agent_addr_to_name.keys():
             tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(agent_address)
-            assert tac_dialogue is not None, "Error when retrieving dialogue."
+            if tac_dialogue is None:
+                raise ValueError("Error when retrieving dialogue.")
             last_msg = tac_dialogue.last_message
-            assert last_msg is not None, "Error when retrieving last message."
+            if last_msg is None:
+                raise ValueError("Error when retrieving last message.")
             tac_msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.CANCELLED,
             )

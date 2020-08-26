@@ -593,9 +593,8 @@ class SigningHandler(Handler):
                 last_signing_msg = cast(
                     Optional[SigningMessage], signing_dialogue.last_outgoing_message
                 )
-                assert (
-                    last_signing_msg is not None
-                ), "Could not recover last signing message."
+                if last_signing_msg is None:
+                    raise ValueError("Could not recover last signing message.")
                 tx_id = last_signing_msg.terms.sender_hash
                 if "transactions" not in self.context.shared_state.keys():
                     self.context.shared_state["transactions"] = {}
@@ -666,7 +665,8 @@ class SigningHandler(Handler):
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
-            assert tx_digest is not None, "Error when submitting tx."
+            if tx_digest is None:
+                raise ValueError("Error when submitting tx.")
             self.context.logger.info("tx_digest={}.".format(tx_digest))
             count = 0
             while (

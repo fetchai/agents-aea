@@ -149,9 +149,9 @@ class FipaHandler(Handler):
             contract_api_dialogues = cast(
                 ContractApiDialogues, self.context.contract_api_dialogues
             )
-            contract_api_msg = ContractApiMessage(
+            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
-                dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
                 contract_id="fetchai/erc1155:0.9.0",
                 contract_address=fipa_msg.proposal.values["contract_address"],
@@ -182,14 +182,7 @@ class FipaHandler(Handler):
                 is_sender_payable_tx_fee=False,
                 nonce=str(fipa_msg.proposal.values["trade_nonce"]),
             )
-            contract_api_msg.to = LEDGER_API_ADDRESS
-            contract_api_dialogue = cast(
-                Optional[ContractApiDialogue],
-                contract_api_dialogues.update(contract_api_msg),
-            )
-            assert (
-                contract_api_dialogue is not None
-            ), "Error when creating contract api dialogue."
+            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
             contract_api_dialogue.terms = terms
             contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             self.context.outbox.put_message(message=contract_api_msg)
@@ -539,7 +532,8 @@ class SigningHandler(Handler):
             signing_dialogue.associated_contract_api_dialogue.associated_fipa_dialogue
         )
         last_fipa_msg = fipa_dialogue.last_incoming_message
-        assert last_fipa_msg is not None, "Could not retrieve last fipa message."
+        if last_fipa_msg is None:
+            raise ValueError("Could not retrieve last fipa message.")
         inform_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             target_message=last_fipa_msg,

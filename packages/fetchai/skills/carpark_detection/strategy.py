@@ -22,6 +22,8 @@
 import os
 from typing import Dict
 
+from aea.exceptions import enforce
+
 from packages.fetchai.skills.carpark_detection.database import DetectionDatabase
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
@@ -62,9 +64,9 @@ class Strategy(GenericStrategy):
 
         :return: the data
         """
-        assert self.db.is_db_exits()
+        enforce(self.db.is_db_exits(), "Db doesn't exist.")
         data = self.db.get_latest_detection_data(1)
-        assert len(data) > 0
+        enforce(len(data) > 0, "Did not find any data.")
         free_spaces = data[0]["free_spaces"]
         return {"free_spaces": str(free_spaces)}
 

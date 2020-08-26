@@ -133,9 +133,11 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 "sending transaction {} to controller.".format(tx_id)
             )
             last_msg = tac_dialogue.last_message
-            assert last_msg is not None, "No last message available."
+            if last_msg is None:
+                raise ValueError("No last message available.")
             tx_content = transactions.pop(tx_id, None)
-            assert tx_content is not None, "Tx for id={} not found.".format(tx_id)
+            if tx_content is None:
+                raise ValueError("Tx for id={} not found.".format(tx_id))
             terms = tx_content["terms"]
             sender_signature = tx_content["sender_signature"]
             counterparty_signature = tx_content["counterparty_signature"]

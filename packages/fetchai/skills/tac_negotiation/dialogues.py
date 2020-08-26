@@ -25,6 +25,7 @@ This module contains the classes required for dialogue management.
 
 from typing import Optional, Type, cast
 
+from aea.exceptions import enforce
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel
 from aea.mail.base import Address
 from aea.protocols.base import Message
@@ -169,13 +170,14 @@ class OefSearchDialogue(BaseOefSearchDialogue):
     @property
     def is_seller_search(self) -> bool:
         """Get if it is a seller search."""
-        assert self._is_seller_search is not None, "is_seller_search not set!"
+        if self._is_seller_search is None:
+            raise ValueError("is_seller_search not set!")
         return self._is_seller_search
 
     @is_seller_search.setter
     def is_seller_search(self, is_seller_search: bool) -> None:
         """Set is_seller_search."""
-        assert self._is_seller_search is None, "is_seller_search already set!"
+        enforce(self._is_seller_search is None, "is_seller_search already set!")
         self._is_seller_search = is_seller_search
 
 

@@ -25,6 +25,8 @@ from typing import Dict, List, Tuple, cast
 
 import numpy as np
 
+from aea.exceptions import enforce
+
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
@@ -54,7 +56,9 @@ def generate_good_ids(nb_goods: int) -> List[int]:
     :param contract: the instance of the contract
     """
     good_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_goods)
-    assert len(good_ids) == nb_goods
+    enforce(
+        len(good_ids) == nb_goods, "Length of good ids and number of goods must match."
+    )
     return good_ids
 
 
@@ -80,7 +84,10 @@ def generate_currency_ids(nb_currencies: int) -> List[int]:
     :param contract: the instance of the contract.
     """
     currency_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_currencies)
-    assert len(currency_ids) == nb_currencies
+    enforce(
+        len(currency_ids) == nb_currencies,
+        "Length of currency ids and number of currencies must match.",
+    )
     return currency_ids
 
 
@@ -250,15 +257,18 @@ def generate_equilibrium_prices_and_holdings(
     count = 0
     for agent_addr, good_endowment in agent_addr_to_good_endowments.items():
         agent_addresses.append(agent_addr)
-        assert (
-            len(agent_addr_to_currency_endowments[agent_addr].values()) == 1
-        ), "Cannot have more than one currency."
+        enforce(
+            len(agent_addr_to_currency_endowments[agent_addr].values()) == 1,
+            "Cannot have more than one currency.",
+        )
         currency_endowment_l.append(
             list(agent_addr_to_currency_endowments[agent_addr].values())[0]
         )
-        assert len(good_endowment.keys()) == len(
-            agent_addr_to_utility_params[agent_addr].keys()
-        ), "Good endowments and utility params inconsistent."
+        enforce(
+            len(good_endowment.keys())
+            == len(agent_addr_to_utility_params[agent_addr].keys()),
+            "Good endowments and utility params inconsistent.",
+        )
         temp_g_e = [0] * len(good_endowment.keys())
         temp_u_p = [0.0] * len(agent_addr_to_utility_params[agent_addr].keys())
         idx = 0

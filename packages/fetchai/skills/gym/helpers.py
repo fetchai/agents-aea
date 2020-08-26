@@ -69,7 +69,8 @@ class ProxyEnv(gym.Env):
     @property
     def active_gym_dialogue(self) -> GymDialogue:
         """Get the active gym dialogue."""
-        assert self._active_dialogue is not None, "GymDialogue not set yet."
+        if self._active_dialogue is None:
+            raise ValueError("GymDialogue not set yet.")
         return self._active_dialogue
 
     @property
@@ -164,7 +165,8 @@ class ProxyEnv(gym.Env):
         """
         self._is_rl_agent_trained = True
         last_msg = self.active_gym_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_gym_dialogue.reply(
             performative=GymMessage.Performative.CLOSE, target_message=last_msg,
         )
@@ -179,7 +181,8 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         last_msg = self.active_gym_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_gym_dialogue.reply(
             performative=GymMessage.Performative.ACT,
             target_message=last_msg,

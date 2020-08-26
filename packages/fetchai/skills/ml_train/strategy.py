@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_DATA_MODEL
 from aea.helpers.search.models import (
     Constraint,
@@ -91,7 +92,7 @@ class Strategy(Model):
     @is_searching.setter
     def is_searching(self, is_searching: bool) -> None:
         """Check if the agent is searching."""
-        assert isinstance(is_searching, bool), "Can only set bool on is_searching!"
+        enforce(isinstance(is_searching, bool), "Can only set bool on is_searching!")
         self._is_searching = is_searching
 
     @property

@@ -271,9 +271,11 @@ class TacHandler(Handler):
         recovered_tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(
             transaction.counterparty_address
         )
-        assert recovered_tac_dialogue is not None, "Error when retrieving dialogue."
+        if recovered_tac_dialogue is None:
+            raise ValueError("Error when retrieving dialogue.")
         last_msg = recovered_tac_dialogue.last_message
-        assert last_msg is not None, "Error when retrieving last message."
+        if last_msg is None:
+            raise ValueError("Error when retrieving last message.")
         counterparty_tac_msg = recovered_tac_dialogue.reply(
             performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
             target_message=last_msg,

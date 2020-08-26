@@ -50,8 +50,8 @@ pylint:
 
 .PHONY: security
 security:
-	bandit -r aea benchmark examples packages scripts
-	bandit -s B101 -r tests
+	bandit -r aea benchmark examples packages
+	bandit -s B101 -r tests scripts
 	safety check -i 37524 -i 38038 -i 37776 -i 38039
 
 .PHONY: static

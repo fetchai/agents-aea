@@ -26,6 +26,8 @@ from typing import Dict, List, Tuple, cast
 
 import numpy as np
 
+from aea.exceptions import enforce
+
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 DEFAULT_CURRENCY_ID_TO_NAME = {"0": "FET"}
 
@@ -217,15 +219,18 @@ def generate_equilibrium_prices_and_holdings(
     count = 0
     for agent_addr, good_endowment in agent_addr_to_good_endowments.items():
         agent_addresses.append(agent_addr)
-        assert (
-            len(agent_addr_to_currency_endowments[agent_addr].values()) == 1
-        ), "Cannot have more than one currency."
+        enforce(
+            len(agent_addr_to_currency_endowments[agent_addr].values()) == 1,
+            "Cannot have more than one currency.",
+        )
         currency_endowment_l.append(
             list(agent_addr_to_currency_endowments[agent_addr].values())[0]
         )
-        assert len(good_endowment.keys()) == len(
-            agent_addr_to_utility_params[agent_addr].keys()
-        ), "Good endowments and utility params inconsistent."
+        enforce(
+            len(good_endowment.keys())
+            == len(agent_addr_to_utility_params[agent_addr].keys()),
+            "Good endowments and utility params inconsistent.",
+        )
         temp_g_e = [0] * len(good_endowment.keys())
         temp_u_p = [0.0] * len(agent_addr_to_utility_params[agent_addr].keys())
         idx = 0

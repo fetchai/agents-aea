@@ -457,7 +457,8 @@ class LedgerApiHandler(Handler):
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         last_msg = cast(LedgerApiMessage, ledger_api_dialogue.last_outgoing_message)
-        assert last_msg is not None, "Could not retrive last outgoing ledger_api_msg."
+        if last_msg is None:
+            raise ValueError("Could not retrive last outgoing ledger_api_msg.")
         signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
@@ -491,7 +492,8 @@ class LedgerApiHandler(Handler):
         ml_trade_msg = cast(
             Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message
         )
-        assert ml_trade_msg is not None, "Could not retrieve ml_trade message"
+        if ml_trade_msg is None:
+            raise ValueError("Could not retrieve ml_trade message")
         ml_accept = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.ACCEPT,
             target_message=ml_trade_msg,
@@ -606,9 +608,8 @@ class SigningHandler(Handler):
         last_ledger_api_msg = cast(
             Optional[LedgerApiMessage], ledger_api_dialogue.last_incoming_message
         )
-        assert (
-            last_ledger_api_msg is not None
-        ), "Could not retrieve last message in ledger api dialogue"
+        if last_ledger_api_msg is None:
+            raise ValueError("Could not retrieve last message in ledger api dialogue")
         ledger_api_msg = ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             target_message=last_ledger_api_msg,
