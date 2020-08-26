@@ -20,7 +20,6 @@
 """This module contains t_protocol's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.configurations.base import ProtocolId
@@ -40,7 +39,7 @@ class TProtocolMessage(Message):
 
     DataModel = CustomDataModel
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the t_protocol protocol."""
 
         PERFORMATIVE_CT = "performative_ct"

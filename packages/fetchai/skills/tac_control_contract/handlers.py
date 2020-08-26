@@ -93,22 +93,22 @@ class TACHandler(Handler):
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST,
             )
-            tac_msg.counterparty = message.counterparty
+            tac_msg.to = message.sender
             self.context.outbox.put_message(message=tac_msg)
             return
 
         game = cast(Game, self.context.game)
-        if message.counterparty in game.registration.agent_addr_to_name:
+        if message.sender in game.registration.agent_addr_to_name:
             self.context.logger.warning(
                 "agent already registered: '{}'".format(
-                    game.registration.agent_addr_to_name[message.counterparty],
+                    game.registration.agent_addr_to_name[message.sender],
                 )
             )
             tac_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED,
             )
-            tac_msg.counterparty = message.counterparty
+            tac_msg.to = message.sender
             self.context.outbox.put_message(message=tac_msg)
 
         if agent_name in game.registration.agent_addr_to_name.values():
@@ -119,9 +119,9 @@ class TACHandler(Handler):
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED,
             )
-            tac_msg.counterparty = message.counterparty
+            tac_msg.to = message.sender
             self.context.outbox.put_message(message=tac_msg)
-        game.registration.register_agent(message.counterparty, agent_name)
+        game.registration.register_agent(message.sender, agent_name)
         self.context.logger.info("agent registered: '{}'".format(agent_name))
 
     def _on_unregister(self, message: TacMessage) -> None:
@@ -134,23 +134,23 @@ class TACHandler(Handler):
         :return: None
         """
         game = cast(Game, self.context.game)
-        if message.counterparty not in game.registration.agent_addr_to_name:
+        if message.sender not in game.registration.agent_addr_to_name:
             self.context.logger.warning(
-                "agent not registered: '{}'".format(message.counterparty)
+                "agent not registered: '{}'".format(message.sender)
             )
             tac_msg = TacMessage(
                 performative=TacMessage.Performative.TAC_ERROR,
                 error_code=TacMessage.ErrorCode.AGENT_NOT_REGISTERED,
             )
-            tac_msg.counterparty = message.counterparty
+            tac_msg.to = message.sender
             self.context.outbox.put_message(message=tac_msg)
         else:
             self.context.logger.debug(
                 "agent unregistered: '{}'".format(
-                    game.conf.agent_addr_to_name[message.counterparty],
+                    game.conf.agent_addr_to_name[message.sender],
                 )
             )
-            game.registration.unregister_agent(message.counterparty)
+            game.registration.unregister_agent(message.sender)
 
     def teardown(self) -> None:
         """

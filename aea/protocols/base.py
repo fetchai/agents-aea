@@ -20,7 +20,6 @@
 """This module contains the base message and serialization definition."""
 import importlib
 import inspect
-import json
 import logging
 import re
 from abc import ABC, abstractmethod
@@ -67,10 +66,8 @@ class Message:
         """
         self._to = None  # type: Optional[Address]
         self._sender = None  # type: Optional[Address]
-        self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
-        self._is_incoming = False
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
@@ -88,7 +85,7 @@ class Message:
 
         :return the address
         """
-        assert self._sender is not None, "Sender must not be None."
+        assert self._sender is not None, "Message's 'Sender' field must be set."
         return self._sender
 
     @sender.setter
@@ -105,48 +102,14 @@ class Message:
     @property
     def to(self) -> Address:
         """Get address of receiver."""
-        assert self._to is not None, "To must not be None."
+        assert self._to is not None, "Message's 'To' field must be set."
         return self._to
 
     @to.setter
     def to(self, to: Address) -> None:
         """Set address of receiver."""
-        assert self._to is None, "To already set."
+        assert not self.has_to, "To is already set."
         self._to = to
-
-    @property
-    def has_counterparty(self) -> bool:
-        """Check if the counterparty is set."""
-        return self._counterparty is not None
-
-    @property
-    def counterparty(self) -> Address:
-        """
-        Get the counterparty of the message in Address form.
-
-        :return the address
-        """
-        assert self._counterparty is not None, "Counterparty must not be None."
-        return self._counterparty
-
-    @counterparty.setter
-    def counterparty(self, counterparty: Address) -> None:
-        """Set the counterparty of the message."""
-        self._counterparty = counterparty
-
-    @property
-    def is_incoming(self) -> bool:
-        """
-        Get the is_incoming value of the message.
-
-        :return whether the message is incoming or is out going
-        """
-        return self._is_incoming
-
-    @is_incoming.setter
-    def is_incoming(self, is_incoming: bool) -> None:
-        """Set the is_incoming of the message."""
-        self._is_incoming = is_incoming
 
     @property
     def body(self) -> Dict:
@@ -217,15 +180,20 @@ class Message:
         """Compare with another object."""
         return (
             isinstance(other, Message)
+            and self._sender == other._sender
+            and self._to == other._to
+            # and self.dialogue_reference == other.dialogue_reference  # noqa: E800
+            # and self.message_id == other.message_id  # noqa: E800
+            # and self.target == other.target  # noqa: E800
+            # and self.performative == other.performative  # noqa: E800
             and self.body == other.body
-            and self._counterparty == other._counterparty
         )
 
     def __str__(self):
         """Get the string representation of the message."""
         return (
-            "Message("
-            + " ".join(
+            "Message(sender={},to={},".format(self._sender, self._to)
+            + ",".join(
                 map(
                     lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
                     self.body.items(),
@@ -295,36 +263,6 @@ class ProtobufSerializer(Serializer):
         body = dict(body_json)
         msg = Message(body=body)
         return msg
-
-
-class JSONSerializer(Serializer):
-    """
-    Default serialization in JSON for the Message object.
-
-    It assumes that the Message contains a JSON-serializable body.
-    """
-
-    @staticmethod
-    def encode(msg: Message) -> bytes:
-        """
-        Encode a message into bytes using JSON format.
-
-        :param msg: the message to be encoded.
-        :return: the serialized message.
-        """
-        bytes_msg = json.dumps(msg.body).encode("utf-8")
-        return bytes_msg
-
-    @staticmethod
-    def decode(obj: bytes) -> Message:
-        """
-        Decode bytes into a message using JSON.
-
-        :param obj: the serialized message.
-        :return: the decoded message.
-        """
-        json_msg = json.loads(obj.decode("utf-8"))
-        return Message(json_msg)
 
 
 class Protocol(Component):

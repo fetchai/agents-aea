@@ -184,3 +184,7 @@ _._is_teardown_class_called  # unused attribute (aea/test_tools/test_cases.py:80
 UseOef  # unused class (aea/test_tools/test_cases.py:804)
 _._start_oef_node  # unused method (aea/test_tools/test_cases.py:808)
 network_node  # unused variable (aea/test_tools/test_cases.py:809)
+_.get_dialogue_with_counterparty  # unused method (aea/helpers/dialogue/base.py:977)
+receiver_address  # unused variable (aea/decision_maker/default.py:70)
+receiver_address  # unused variable (aea/decision_maker/default.py:99)
+create_with_message  # unused method (aea/helpers/dialogue/base.py:1054)

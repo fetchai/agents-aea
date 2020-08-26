@@ -136,6 +136,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message != envelope.message
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        msg.to = delivered_envelope.to
+        msg.sender = delivered_envelope.sender
         assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
@@ -171,8 +173,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.sender == original_envelope.to
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message != original_envelope.message
-        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-        assert original_envelope.message == msg
+        assert original_envelope.message_bytes == delivered_envelope.message_bytes
 
     @classmethod
     def teardown_class(cls):
@@ -231,18 +232,17 @@ class TestP2PLibp2pConnectionRouting:
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-
         for source in range(len(self.multiplexers)):
             for destination in range(len(self.multiplexers)):
                 if destination == source:
                     continue
+                msg = DefaultMessage(
+                    dialogue_reference=("", ""),
+                    message_id=1,
+                    target=0,
+                    performative=DefaultMessage.Performative.BYTES,
+                    content=b"hello",
+                )
                 envelope = Envelope(
                     to=addrs[destination],
                     sender=addrs[source],
@@ -261,6 +261,8 @@ class TestP2PLibp2pConnectionRouting:
                 assert delivered_envelope.protocol_id == envelope.protocol_id
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                msg.to = delivered_envelope.to
+                msg.sender = delivered_envelope.sender
                 assert envelope.message == msg
 
     @classmethod
@@ -343,6 +345,8 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message != envelope.message
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        msg.to = delivered_envelope.to
+        msg.sender = delivered_envelope.sender
         assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
@@ -378,8 +382,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert delivered_envelope.sender == original_envelope.to
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message != original_envelope.message
-        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-        assert original_envelope.message == msg
+        assert original_envelope.message_bytes == delivered_envelope.message_bytes
 
     @classmethod
     def teardown_class(cls):
@@ -462,18 +465,17 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
     def test_star_routing_connectivity(self):
         addrs = [conn.node.address for conn in self.connections]
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-
         for source in range(len(self.multiplexers)):
             for destination in range(len(self.multiplexers)):
                 if destination == source:
                     continue
+                msg = DefaultMessage(
+                    dialogue_reference=("", ""),
+                    message_id=1,
+                    target=0,
+                    performative=DefaultMessage.Performative.BYTES,
+                    content=b"hello",
+                )
                 envelope = Envelope(
                     to=addrs[destination],
                     sender=addrs[source],
@@ -492,6 +494,8 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                 assert delivered_envelope.protocol_id == envelope.protocol_id
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                msg.sender = delivered_envelope.sender
+                msg.to = delivered_envelope.to
                 assert envelope.message == msg
 
     @classmethod

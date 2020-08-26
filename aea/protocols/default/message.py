@@ -20,7 +20,6 @@
 """This module contains default's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -39,7 +38,7 @@ class DefaultMessage(Message):
 
     ErrorCode = CustomErrorCode
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the default protocol."""
 
         BYTES = "bytes"

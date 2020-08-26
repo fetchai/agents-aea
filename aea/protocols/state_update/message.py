@@ -20,7 +20,6 @@
 """This module contains state_update's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -36,7 +35,7 @@ class StateUpdateMessage(Message):
 
     protocol_id = ProtocolId.from_str("fetchai/state_update:0.3.0")
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the state_update protocol."""
 
         APPLY = "apply"

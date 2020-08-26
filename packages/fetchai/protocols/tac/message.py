@@ -20,7 +20,6 @@
 """This module contains tac's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -40,7 +39,7 @@ class TacMessage(Message):
 
     ErrorCode = CustomErrorCode
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the tac protocol."""
 
         CANCELLED = "cancelled"

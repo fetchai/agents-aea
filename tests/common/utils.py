@@ -178,7 +178,8 @@ class AeaTool:
         :return: Envelope
         """
         message = message or cls.dummy_default_message()
-        message.counterparty = to
+        message.sender = sender
+        message.to = to
         return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
 
     def put_inbox(self, envelope: Envelope) -> None:

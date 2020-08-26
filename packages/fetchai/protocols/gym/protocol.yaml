@@ -9,10 +9,10 @@ fingerprint:
   README.md: QmTgSiLAMkxfjGRUvKWpX4NkQNKQDTe5q1VnUr8vKp1Gnr
   __init__.py: QmWBvruqGuU2BVCq8cuP1S3mgvuC78yrG4TdtSvKhCT8qX
   custom_types.py: QmfDaswopanUqsETQXMatKfwwDSSo7q2Edz9MXGimT5jbf
-  dialogues.py: Qmd7n1c7wWacCkTx1kxsuo73QhxN6e4uufPYmF775cYqVx
+  dialogues.py: QmRJ7bagveHkZDgVCyUYRZPGesUZP4Q6mEL7CyWcryvKfb
   gym.proto: QmQGF9Xz4Z93wmhdKoztzxjo5pS4SsAWe2TQdvZCLuzdGC
   gym_pb2.py: QmSTz7xrL8ryqzR1Sgu1NpR6PmW7GUhBGnN2qYc8m8NCcN
-  message.py: QmNuadnwLSwPRyB488jM1JW7RfJNgDQmvH13iNWaNmJjPs
+  message.py: QmTMePXrEv8Pqt3NcT7WDfxY8hcaGzSo4yZ4o2bogYqu9E
   serialization.py: QmaZd7YMHrHZvbeMMb1JfnkUZRHk7zKy45M7kDvG5wbY9C
 fingerprint_ignore_patterns: []
 dependencies:

@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the decision maker class."""
 
-import copy
 import hashlib
 import logging
 import threading
@@ -379,9 +378,4 @@ class DecisionMaker:
         :param message: the internal message
         :return: None
         """
-        # TODO: remove next three lines
-        copy_message = copy.copy(message)
-        copy_message.counterparty = message.sender
-        copy_message.sender = message.sender
-        copy_message.is_incoming = True
-        self.decision_maker_handler.handle(copy_message)
+        self.decision_maker_handler.handle(message)

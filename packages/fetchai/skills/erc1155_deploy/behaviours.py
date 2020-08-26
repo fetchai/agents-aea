@@ -19,7 +19,7 @@
 
 """This package contains the behaviour of a erc1155 deploy skill AEA."""
 
-from typing import Optional, cast
+from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -107,14 +107,12 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
         )
-        ledger_api_msg = LedgerApiMessage(
+        ledger_api_msg, _ = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
-            dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
             ledger_id=strategy.ledger_id,
             address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-        ledger_api_dialogues.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
 
     def _request_contract_deploy_transaction(self) -> None:
@@ -128,9 +126,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
-        contract_api_msg = ContractApiMessage(
+        contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
-            dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
             ledger_id=strategy.ledger_id,
             contract_id="fetchai/erc1155:0.9.0",
             callable="get_deploy_transaction",
@@ -138,12 +136,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 {"deployer_address": self.context.agent_address}
             ),
         )
-        contract_api_msg.counterparty = LEDGER_API_ADDRESS
-        contract_api_dialogue = cast(
-            Optional[ContractApiDialogue],
-            contract_api_dialogues.update(contract_api_msg),
-        )
-        assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
+        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
         contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
@@ -159,9 +152,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
-        contract_api_msg = ContractApiMessage(
+        contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
-            dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
             ledger_id=strategy.ledger_id,
             contract_id="fetchai/erc1155:0.9.0",
             contract_address=strategy.contract_address,
@@ -173,12 +166,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 }
             ),
         )
-        contract_api_msg.counterparty = LEDGER_API_ADDRESS
-        contract_api_dialogue = cast(
-            Optional[ContractApiDialogue],
-            contract_api_dialogues.update(contract_api_msg),
-        )
-        assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
+        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_create_token_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting create batch transaction...")
@@ -194,9 +182,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
-        contract_api_msg = ContractApiMessage(
+        contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
-            dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
             ledger_id=strategy.ledger_id,
             contract_id="fetchai/erc1155:0.9.0",
             contract_address=strategy.contract_address,
@@ -210,12 +198,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 }
             ),
         )
-        contract_api_msg.counterparty = LEDGER_API_ADDRESS
-        contract_api_dialogue = cast(
-            Optional[ContractApiDialogue],
-            contract_api_dialogues.update(contract_api_msg),
-        )
-        assert contract_api_dialogue is not None, "ContractApiDialogue not generated"
+        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_mint_token_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting mint batch transaction...")
@@ -231,13 +214,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
@@ -252,13 +233,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
 
@@ -273,13 +252,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering service from SOEF.")
 
@@ -294,12 +271,10 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")

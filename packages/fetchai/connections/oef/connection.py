@@ -19,12 +19,11 @@
 """Extension to the OEF Python SDK."""
 
 import asyncio
-import copy
 import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
-from typing import Dict, List, Optional, Set, cast
+from typing import Dict, List, Optional, Set, Type, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -69,6 +68,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -105,35 +105,25 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         :return: None
         """
-        BaseOefSearchDialogues.__init__(self, str(OEFConnection.connection_id))
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming/outgoing first message.
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return OefSearchDialogue.Role.OEF_NODE
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The oef connection maintains the dialogue on behalf of the node
+            return OefSearchDialogue.Role.OEF_NODE
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label,
+        BaseOefSearchDialogues.__init__(
+            self,
             agent_address=str(OEFConnection.connection_id),
-            role=role,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=OefSearchDialogue,
         )
-        return dialogue
 
 
 class OEFChannel(OEFAgent):
@@ -321,19 +311,15 @@ class OEFChannel(OEFAgent):
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
-        msg = OefSearchMessage(
+        msg = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=last_msg.message_id,
-            message_id=last_msg.message_id + 1,
+            target_message=last_msg,
             agents=tuple(agents),
         )
-        msg.counterparty = last_msg.counterparty
-        oef_search_dialogue.update(msg)
         envelope = Envelope(
-            to=self.address,
-            sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
             context=oef_search_dialogue.envelope_context,
         )
@@ -364,19 +350,15 @@ class OEFChannel(OEFAgent):
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
-        msg = OefSearchMessage(
+        msg = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.OEF_ERROR,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=last_msg.message_id,
-            message_id=last_msg.message_id + 1,
+            target_message=last_msg,
             oef_error_operation=operation,
         )
-        msg.counterparty = last_msg.counterparty
-        oef_search_dialogue.update(msg)
         envelope = Envelope(
-            to=self.address,
-            sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
             context=oef_search_dialogue.envelope_context,
         )
@@ -448,10 +430,7 @@ class OEFChannel(OEFAgent):
         assert isinstance(
             envelope.message, OefSearchMessage
         ), "Message not of type OefSearchMessage"
-        oef_message_original = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.copy(oef_message_original)
-        oef_message.counterparty = oef_message_original.sender
-        oef_message.is_incoming = True  # TODO: fix
+        oef_message = cast(OefSearchMessage, envelope.message)
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )

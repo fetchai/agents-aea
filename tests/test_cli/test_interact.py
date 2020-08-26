@@ -118,25 +118,28 @@ class TryConstructEnvelopeTestCase(TestCase):
     @mock.patch("builtins.input", return_value="Inputed value")
     def test__try_construct_envelope_positive(self, *mocks):
         """Test _try_construct_envelope for positive result."""
-        envelope = _try_construct_envelope("agent_name", "sender", mock.Mock())
+        dialogues_mock = mock.Mock()
+        msg_mock = mock.Mock()
+        dialogues_mock.create.return_value = msg_mock, None
+        envelope = _try_construct_envelope("agent_name", dialogues_mock)
         self.assertIsInstance(envelope, Envelope)
 
     @mock.patch("builtins.input", return_value="")
     def test__try_construct_envelope_positive_no_input_message(self, *mocks):
         """Test _try_construct_envelope for no input message result."""
-        envelope = _try_construct_envelope("agent_name", "sender", "dialogues")
+        envelope = _try_construct_envelope("agent_name", "dialogues")
         self.assertEqual(envelope, None)
 
     @mock.patch("builtins.input", _raise_keyboard_interrupt)
     def test__try_construct_envelope_keyboard_interrupt(self, *mocks):
         """Test _try_construct_envelope for keyboard interrupt result."""
         with self.assertRaises(KeyboardInterrupt):
-            _try_construct_envelope("agent_name", "sender", "dialogues")
+            _try_construct_envelope("agent_name", "dialogues")
 
     @mock.patch("builtins.input", _raise_exception)
     def test__try_construct_envelope_exception_raised(self, *mocks):
         """Test _try_construct_envelope for exception raised result."""
-        envelope = _try_construct_envelope("agent_name", "sender", "dialogues")
+        envelope = _try_construct_envelope("agent_name", "dialogues")
         self.assertEqual(envelope, None)
 
 
@@ -164,18 +167,18 @@ class ProcessEnvelopesTestCase(TestCase):
         construct_message_mock.return_value = constructed_message
 
         # no envelope and inbox not empty behaviour
-        _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
+        _process_envelopes(agent_name, inbox, outbox, dialogues)
         click_echo_mock.assert_called_once_with(constructed_message)
 
         # no envelope and inbox empty behaviour
         inbox.empty = lambda: True
-        _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
+        _process_envelopes(agent_name, inbox, outbox, dialogues)
         click_echo_mock.assert_called_with("Received no new envelope!")
 
         # present envelope behaviour
         try_construct_envelope_mock.return_value = "Not None envelope"
         outbox.put = mock.Mock()
-        _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
+        _process_envelopes(agent_name, inbox, outbox, dialogues)
         outbox.put.assert_called_once_with("Not None envelope")
         click_echo_mock.assert_called_with(constructed_message)
 
@@ -192,7 +195,7 @@ class ProcessEnvelopesTestCase(TestCase):
         dialogues = mock.Mock()
 
         with self.assertRaises(AssertionError):
-            _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
+            _process_envelopes(agent_name, inbox, outbox, dialogues)
 
 
 class TestInteractEcho(AEATestCaseEmpty):
@@ -232,14 +235,14 @@ class TestInteractEcho(AEATestCaseEmpty):
             f"to: {self.agent_name}",
             f"sender: {self.agent_name}_interact",
             "protocol_id: fetchai/default:0.5.0",
-            "message_id=1 target=0 performative=bytes content=b'hello')",
+            "message_id=1,target=0,performative=bytes,content=b'hello')",
             "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
             "Interrupting input, checking inbox ...",
             "Received envelope:",
             f"to: {self.agent_name}_interact",
             f"sender: {self.agent_name}",
             "protocol_id: fetchai/default:0.5.0",
-            "message_id=2 target=1 performative=bytes content=b'hello')",
+            "message_id=2,target=1,performative=bytes,content=b'hello')",
             "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
             "Interrupting input, checking inbox ...",
             "Received no new envelope!",

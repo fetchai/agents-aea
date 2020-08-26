@@ -19,7 +19,6 @@
 """Extension to the Local Node."""
 
 import asyncio
-import copy
 import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
@@ -28,13 +27,14 @@ from typing import Dict, List, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.search.models import Description
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Address, Envelope, Message
 from aea.protocols.default.message import DefaultMessage
 
+from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
 from packages.fetchai.protocols.oef_search.dialogues import (
-    OefSearchDialogue,
-    OefSearchDialogues,
+    OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
@@ -46,6 +46,35 @@ RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
 PUBLIC_ID = PublicId.from_str("fetchai/local:0.7.0")
+
+
+class OefSearchDialogues(BaseOefSearchDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The local connection maintains the dialogue on behalf of the node
+            return OefSearchDialogue.Role.OEF_NODE
+
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=str(OEFLocalConnection.connection_id),
+            role_from_first_message=role_from_first_message,
+        )
 
 
 class LocalNode:
@@ -110,9 +139,7 @@ class LocalNode:
         self._out_queues[address] = writer
 
         self.address = address
-        self._dialogues = OefSearchDialogues(
-            agent_address=str(OEFLocalConnection.connection_id)
-        )
+        self._dialogues = OefSearchDialogues()
         return q
 
     def start(self):
@@ -242,17 +269,13 @@ class LocalNode:
         address = oef_search_msg.sender
         async with self._lock:
             if address not in self.services:
-                msg = OefSearchMessage(
+                msg = dialogue.reply(
                     performative=OefSearchMessage.Performative.OEF_ERROR,
-                    target=oef_search_msg.message_id,
-                    message_id=oef_search_msg.message_id + 1,
+                    target_message=oef_search_msg,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
-                    dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 )
-                msg.counterparty = oef_search_msg.sender
-                assert dialogue.update(msg)
                 envelope = Envelope(
-                    to=msg.counterparty,
+                    to=msg.to,
                     sender=msg.sender,
                     protocol_id=msg.protocol_id,
                     message=msg,
@@ -287,21 +310,14 @@ class LocalNode:
                         if description.data_model == query.model:
                             result.append(agent_address)
 
-            msg = OefSearchMessage(
+            msg = dialogue.reply(
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                target=oef_search_msg.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                message_id=oef_search_msg.message_id + 1,
+                target_message=oef_search_msg,
                 agents=tuple(sorted(set(result))),
             )
-            msg.counterparty = oef_search_msg.sender
-            assert dialogue.update(msg)
 
             envelope = Envelope(
-                to=msg.counterparty,
-                sender=msg.sender,
-                protocol_id=msg.protocol_id,
-                message=msg,
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
             )
             await self._send(envelope)
 
@@ -313,17 +329,10 @@ class LocalNode:
 
         :param envelope: incoming envelope
 
-        :return: Tuple[MEssage, Optional[Dialogue]]
+        :return: Tuple[Message, Optional[Dialogue]]
         """
         assert self._dialogues is not None, "Call connect before!"
-        message_orig = cast(OefSearchMessage, envelope.message)
-        message = copy.copy(
-            message_orig
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = (
-            message_orig.sender
-        )  # TODO: fix; should be done by framework
+        message = cast(OefSearchMessage, envelope.message)
         dialogue = cast(OefSearchDialogue, self._dialogues.update(message))
         return message, dialogue
 

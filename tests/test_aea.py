@@ -178,13 +178,10 @@ def test_react():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = agent.identity.address
+        msg.to = agent.identity.address
         msg.sender = agent.identity.address
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
@@ -233,10 +230,10 @@ def test_handle():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = aea.identity.address
+        msg.to = aea.identity.address
         msg.sender = aea.identity.address
         envelope = Envelope(
-            to=msg.counterparty,
+            to=msg.to,
             sender=msg.sender,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=msg,
@@ -273,13 +270,10 @@ def test_handle():
                 dialogue_reference=(str(0), ""),
                 target=0,
             )
-            msg.counterparty = aea.identity.address
+            msg.to = aea.identity.address
             msg.sender = aea.identity.address
             envelope = Envelope(
-                to=msg.counterparty,
-                sender=msg.sender,
-                protocol_id=msg.protocol_id,
-                message=msg,
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
@@ -317,10 +311,10 @@ def test_initialize_aea_programmatically():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_message.counterparty = aea.identity.address
+        expected_message.to = aea.identity.address
         expected_message.sender = aea.identity.address
         envelope = Envelope(
-            to=expected_message.counterparty,
+            to=expected_message.to,
             sender=expected_message.sender,
             protocol_id=expected_message.protocol_id,
             message=expected_message,
@@ -408,7 +402,7 @@ def test_initialize_aea_programmatically_build_resources():
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"hello",
             )
-            expected_message.counterparty = agent_name
+            expected_message.to = agent_name
             expected_message.sender = agent_name
 
             with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
@@ -515,7 +509,7 @@ def test_error_handler_is_not_set():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = agent.identity.address
+    msg.to = agent.identity.address
     envelope = Envelope(
         to=agent.identity.address,
         sender=agent.identity.address,
@@ -548,7 +542,7 @@ def test_no_handlers_registered():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = aea.identity.address
+        msg.to = aea.identity.address
         envelope = Envelope(
             to=aea.identity.address,
             sender=aea.identity.address,

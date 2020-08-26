@@ -322,6 +322,8 @@ class Envelope:
         :param message: the protocol-specific message.
         :param context: the optional envelope context.
         """
+        if isinstance(message, Message):
+            message = self._check_consistency(message, to, sender)
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id
@@ -403,6 +405,21 @@ class Envelope:
         if self.context is not None:
             connection_id = self.context.connection_id
         return connection_id
+
+    @staticmethod
+    def _check_consistency(message: Message, to: str, sender: str) -> Message:
+        """Check consistency of sender and to."""
+        if message.has_to:
+            assert message.to == to, "To specified on message does not match envelope."
+        else:
+            message.to = to
+        if message.has_sender:
+            assert (
+                message.sender == sender
+            ), "Sender specified on message does not match envelope."
+        else:
+            message.sender = sender
+        return message
 
     def __eq__(self, other):
         """Compare with another object."""

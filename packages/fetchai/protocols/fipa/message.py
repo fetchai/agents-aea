@@ -20,7 +20,6 @@
 """This module contains fipa's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
@@ -45,7 +44,7 @@ class FipaMessage(Message):
 
     Query = CustomQuery
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the fipa protocol."""
 
         ACCEPT = "accept"

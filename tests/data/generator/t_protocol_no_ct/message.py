@@ -20,7 +20,6 @@
 """This module contains t_protocol_no_ct's message definition."""
 
 import logging
-from enum import Enum
 from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.configurations.base import ProtocolId
@@ -36,7 +35,7 @@ class TProtocolNoCtMessage(Message):
 
     protocol_id = ProtocolId.from_str("fetchai/t_protocol_no_ct:0.1.0")
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the t_protocol_no_ct protocol."""
 
         PERFORMATIVE_EMPTY_CONTENTS = "performative_empty_contents"

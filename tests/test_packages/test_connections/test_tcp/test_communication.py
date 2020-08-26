@@ -100,6 +100,8 @@ class TestTCPCommunication:
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         assert expected_envelope.message != actual_envelope.message
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        msg.to = actual_envelope.to
+        msg.sender = actual_envelope.sender
         assert expected_envelope.message == msg
 
     def test_communication_server_client(self):
@@ -125,8 +127,17 @@ class TestTCPCommunication:
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         assert expected_envelope.message != actual_envelope.message
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        msg.to = actual_envelope.to
+        msg.sender = actual_envelope.sender
         assert expected_envelope.message == msg
 
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         expected_envelope = Envelope(
             to=self.client_addr_2,
             sender=self.server_addr,
@@ -141,6 +152,8 @@ class TestTCPCommunication:
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         assert expected_envelope.message != actual_envelope.message
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        msg.to = actual_envelope.to
+        msg.sender = actual_envelope.sender
         assert expected_envelope.message == msg
 
     @classmethod
