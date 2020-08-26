@@ -2112,7 +2112,7 @@ class GenericLedgerApiHandler(Handler):
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
             skill_callback_info={},
         )
-        signing_dialogue = cast(SigningDialogue, signing_dialogues)
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_fipa_dialogue = (
             ledger_api_dialogue.associated_fipa_dialogue
         )
