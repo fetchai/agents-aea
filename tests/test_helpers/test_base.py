@@ -31,12 +31,12 @@ from unittest.mock import patch
 
 import pytest
 
+from aea.components.base import load_aea_package
 from aea.configurations.base import ConnectionConfig
 from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
     exception_log_and_reraise,
-    load_aea_package,
     load_env_file,
     load_module,
     locate,
