@@ -143,15 +143,14 @@ class TestOEF(UseOef):
     class TestSearchServices:
         """Tests related to service search functionality."""
 
-        @classmethod
-        def setup_class(cls):
+        def setup(self):
             """Set the test up."""
-            cls.connection = _make_oef_connection(
+            self.connection = _make_oef_connection(
                 FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
-            cls.multiplexer = Multiplexer([cls.connection])
-            cls.multiplexer.connect()
-            cls.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            self.multiplexer = Multiplexer([self.connection])
+            self.multiplexer.connect()
+            self.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
 
         def test_search_services_with_query_without_model(self):
             """Test that a search services request can be sent correctly.
@@ -260,10 +259,9 @@ class TestOEF(UseOef):
             assert oef_search_dialogue == sending_dialogue
             assert oef_search_response.agents == ()
 
-        @classmethod
-        def teardown_class(cls):
+        def teardown(self):
             """Teardowm the test."""
-            cls.multiplexer.disconnect()
+            self.multiplexer.disconnect()
 
     class TestRegisterService:
         """Tests related to service registration functionality."""
@@ -993,11 +991,13 @@ class TestSendWithOEF(UseOef):
         )
         await oef_connection.connect()
         oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
-        msg, _ = oef_search_dialogues.create(
-            counterparty=str(oef_connection.connection_id),
+        msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.OEF_ERROR,
+            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
         )
+        msg.to = str(oef_connection.connection_id)
+        msg.sender = FETCHAI_ADDRESS_ONE
         envelope = Envelope(
             to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )

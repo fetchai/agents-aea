@@ -199,7 +199,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         ) -> ContractApiMessage:
             return cast(
                 ContractApiMessage,
-                ContractApiMessage(
+                dialogue.reply(
                     performative=ContractApiMessage.Performative.RAW_TRANSACTION,
                     raw_transaction=RawTransaction(message.ledger_id, tx),
                 ),
@@ -227,7 +227,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         ) -> ContractApiMessage:
             return cast(
                 ContractApiMessage,
-                ContractApiMessage(
+                dialogue.reply(
                     performative=ContractApiMessage.Performative.RAW_TRANSACTION,
                     raw_transaction=RawTransaction(message.ledger_id, tx),
                 ),
@@ -255,7 +255,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         ) -> ContractApiMessage:
             return cast(
                 ContractApiMessage,
-                ContractApiMessage(
+                dialogue.reply(
                     performative=ContractApiMessage.Performative.RAW_MESSAGE,
                     raw_message=RawMessage(message.ledger_id, rm),
                 ),

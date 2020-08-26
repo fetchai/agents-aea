@@ -53,7 +53,7 @@ ct:TransactionReceipt: |
 ---
 initiation: [get_balance, get_raw_transaction, send_signed_transaction, get_transaction_receipt]
 reply:
-  get_balance: [balance]
+  get_balance: [balance, error]
   balance: []
   get_raw_transaction: [raw_transaction, error]
   raw_transaction: [send_signed_transaction]
