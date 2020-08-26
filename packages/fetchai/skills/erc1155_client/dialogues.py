@@ -150,22 +150,6 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
             dialogue_class=ContractApiDialogue,
         )
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> ContractApiDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = ContractApiDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
-        return dialogue
-
 
 DefaultDialogue = BaseDefaultDialogue
 
