@@ -218,7 +218,7 @@ class TestSoef:
         service_description = Description(
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
-        message, _ = OefSearchMessage(
+        message, _ = self.oef_search_dialogues.create(
             counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
@@ -379,8 +379,6 @@ class TestSoef:
             service_description=service_description,
         )
         message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message)
-        assert sending_dialogue is None
         message.sender = self.crypto.address
         envelope = Envelope(
             to=message.to,
@@ -396,17 +394,14 @@ class TestSoef:
         """Test fail on invalid query for search."""
         await self.test_register_service()
         closeness_query = Query([], model=models.AGENT_LOCATION_MODEL)
-        message = OefSearchMessage(
+        message, sending_dialogue = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
-            sender=self.crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -446,17 +441,14 @@ class TestSoef:
         closeness_query = Query(
             [close_to_my_service] + personality_filters + service_key_filters
         )
-        message = OefSearchMessage(
+        message, sending_dialogue = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
-            sender=self.crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )
@@ -499,42 +491,33 @@ class TestSoef:
             [close_to_my_service] + personality_filters + service_key_filters
         )
 
-        message_1 = OefSearchMessage(
+        message_1, sending_dialogue = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message_1.to = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message_1)
-        assert sending_dialogue is not None
 
         internal_dialogue_1 = self.connection.channel.oef_search_dialogues.update(
             message_1
         )
         assert internal_dialogue_1 is not None
 
-        message_2 = OefSearchMessage(
+        message_2, sending_dialogue = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message_2.to = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message_2)
-        assert sending_dialogue is not None
 
         internal_dialogue_2 = self.connection.channel.oef_search_dialogues.update(
             message_2
         )
         assert internal_dialogue_2 is not None
 
-        message_3 = OefSearchMessage(
+        message_3, sending_dialogue = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message_3.to = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message_3)
-        assert sending_dialogue is not None
 
         internal_dialogue_3 = self.connection.channel.oef_search_dialogues.update(
             message_3
@@ -708,17 +691,14 @@ class TestSoef:
     async def test_ping_command(self):
         """Test set service key."""
         service_description = Description({}, data_model=models.PING_MODEL)
-        message = OefSearchMessage(
+        message, _ = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = self.oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
-            sender=self.crypto.address,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
         )

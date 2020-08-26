@@ -84,14 +84,11 @@ def test_soef():
         service_description = Description(
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
-        message = OefSearchMessage(
+        message, _ = oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
@@ -110,14 +107,11 @@ def test_soef():
         service_description = Description(
             service_instance, data_model=models.AGENT_PERSONALITY_MODEL
         )
-        message = OefSearchMessage(
+        message, _ = oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
@@ -132,14 +126,11 @@ def test_soef():
         service_description = Description(
             service_instance, data_model=models.SET_SERVICE_KEY_MODEL
         )
-        message = OefSearchMessage(
+        message, _ = oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
@@ -157,14 +148,11 @@ def test_soef():
         closeness_query = Query(
             [close_to_my_service], model=models.AGENT_LOCATION_MODEL
         )
-        message = OefSearchMessage(
+        message, sending_dialogue = oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         search_envelope = Envelope(
             to=message.to,
             sender=message.sender,
@@ -188,14 +176,11 @@ def test_soef():
         assert sending_dialogue == receiving_dialogue
 
         # double send to check issue with too many requests
-        message = OefSearchMessage(
+        message, _ = oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         search_envelope = Envelope(
             to=message.to,
             sender=message.sender,
@@ -229,14 +214,11 @@ def test_soef():
 
         closeness_query = Query(constraints)
 
-        message = OefSearchMessage(
+        message, sending_dialogue = oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=closeness_query,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
@@ -261,14 +243,11 @@ def test_soef():
 
         # test ping command
         service_description = Description({}, data_model=models.PING_MODEL)
-        message = OefSearchMessage(
+        message, _ = oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.to = SOEFConnection.connection_id.latest
-        sending_dialogue = oef_search_dialogues.update(message)
-        assert sending_dialogue is not None
         envelope = Envelope(
             to=message.to,
             sender=crypto.address,

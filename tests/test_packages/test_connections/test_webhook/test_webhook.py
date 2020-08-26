@@ -31,12 +31,14 @@ from aiohttp.client_reqrep import ClientResponse
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
+from aea.helpers.dialogue.base import Dialogue
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
-
+from aea.mail.base import Address, Envelope
+from aea.protocols.base import Message
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection
-from packages.fetchai.protocols.http.dialogues import HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
@@ -46,6 +48,34 @@ from tests.conftest import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, agent_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.CLIENT
+
+        BaseHttpDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 @pytest.mark.asyncio

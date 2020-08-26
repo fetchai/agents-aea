@@ -25,7 +25,7 @@ from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
-from typing import Callable, Dict, List, Optional, Set, Union, cast
+from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
 
@@ -129,6 +129,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -182,6 +183,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
             self,
             agent_address=SOEFConnection.connection_id.latest,
             role_from_first_message=role_from_first_message,
+            dialogue_class=OefSearchDialogue,
         )
 
 
