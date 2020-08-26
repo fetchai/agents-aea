@@ -33,6 +33,7 @@ from aiohttp.client_reqrep import ClientResponse
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.mail.base import Address, Envelope, EnvelopeContext, Message
 
@@ -256,9 +257,10 @@ class HTTPClientAsyncChannel:
             )
             raise ValueError("Cannot send message.")
 
-        assert isinstance(
-            request_envelope.message, HttpMessage
-        ), "Message not of type HttpMessage"
+        enforce(
+            isinstance(request_envelope.message, HttpMessage),
+            "Message not of type HttpMessage",
+        )
 
         request_http_message = cast(HttpMessage, request_envelope.message)
 
@@ -376,7 +378,8 @@ class HTTPClientConnection(Connection):
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
-        assert host is not None and port is not None, "host and port must be set!"
+        if host is None or port is None:
+            raise ValueError("host and port must be set!")
         self.channel = HTTPClientAsyncChannel(
             self.address,
             host,

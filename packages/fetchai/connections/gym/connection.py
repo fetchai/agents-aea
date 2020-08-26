@@ -30,6 +30,7 @@ import gym
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.base import locate
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.mail.base import Address, Envelope, Message
@@ -144,9 +145,9 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        assert isinstance(
-            envelope.message, GymMessage
-        ), "Message not of type GymMessage"
+        enforce(
+            isinstance(envelope.message, GymMessage), "Message not of type GymMessage"
+        )
         gym_message, dialogue = self._get_message_and_dialogue(envelope)
 
         if dialogue is None:
@@ -225,7 +226,8 @@ class GymConnection(Connection):
         super().__init__(**kwargs)
         if gym_env is None:
             gym_env_package = cast(str, self.configuration.config.get("env"))
-            assert gym_env_package is not None, "env must be set!"
+            if gym_env_package is None:
+                raise ValueError("`env` must be set in configuration!")
             gym_env_class = locate(gym_env_package)
             gym_env = gym_env_class()
         self.channel = GymChannel(self.address, gym_env)
