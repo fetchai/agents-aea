@@ -73,6 +73,7 @@ class MlTradeMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
+        self._performatives = {"accept", "cfp", "data", "terms"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -80,7 +81,6 @@ class MlTradeMessage(Message):
             performative=MlTradeMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"accept", "cfp", "data", "terms"}
 
     @property
     def valid_performatives(self) -> Set[str]:

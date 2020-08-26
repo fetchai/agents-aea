@@ -79,13 +79,6 @@ class OefSearchMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=OefSearchMessage.Performative(performative),
-            **kwargs,
-        )
         self._performatives = {
             "oef_error",
             "register_service",
@@ -93,6 +86,13 @@ class OefSearchMessage(Message):
             "search_services",
             "unregister_service",
         }
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=OefSearchMessage.Performative(performative),
+            **kwargs,
+        )
 
     @property
     def valid_performatives(self) -> Set[str]:

@@ -69,6 +69,7 @@ class GymMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
+        self._performatives = {"act", "close", "percept", "reset", "status"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -76,7 +77,6 @@ class GymMessage(Message):
             performative=GymMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"act", "close", "percept", "reset", "status"}
 
     @property
     def valid_performatives(self) -> Set[str]:

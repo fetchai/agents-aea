@@ -71,13 +71,6 @@ class TProtocolMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=TProtocolMessage.Performative(performative),
-            **kwargs,
-        )
         self._performatives = {
             "performative_ct",
             "performative_empty_contents",
@@ -87,6 +80,13 @@ class TProtocolMessage(Message):
             "performative_pmt",
             "performative_pt",
         }
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=TProtocolMessage.Performative(performative),
+            **kwargs,
+        )
 
     @property
     def valid_performatives(self) -> Set[str]:

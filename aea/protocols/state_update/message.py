@@ -62,6 +62,7 @@ class StateUpdateMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
+        self._performatives = {"apply", "initialize"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -69,7 +70,6 @@ class StateUpdateMessage(Message):
             performative=StateUpdateMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"apply", "initialize"}
 
     @property
     def valid_performatives(self) -> Set[str]:

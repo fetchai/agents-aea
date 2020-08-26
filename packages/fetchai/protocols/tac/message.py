@@ -71,13 +71,6 @@ class TacMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=TacMessage.Performative(performative),
-            **kwargs,
-        )
         self._performatives = {
             "cancelled",
             "game_data",
@@ -87,6 +80,13 @@ class TacMessage(Message):
             "transaction_confirmation",
             "unregister",
         }
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=TacMessage.Performative(performative),
+            **kwargs,
+        )
 
     @property
     def valid_performatives(self) -> Set[str]:

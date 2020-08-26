@@ -66,13 +66,6 @@ class TProtocolNoCtMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=TProtocolNoCtMessage.Performative(performative),
-            **kwargs,
-        )
         self._performatives = {
             "performative_empty_contents",
             "performative_mt",
@@ -81,6 +74,13 @@ class TProtocolNoCtMessage(Message):
             "performative_pmt",
             "performative_pt",
         }
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=TProtocolNoCtMessage.Performative(performative),
+            **kwargs,
+        )
 
     @property
     def valid_performatives(self) -> Set[str]:

@@ -62,6 +62,7 @@ class HttpMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
+        self._performatives = {"request", "response"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -69,7 +70,6 @@ class HttpMessage(Message):
             performative=HttpMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"request", "response"}
 
     @property
     def valid_performatives(self) -> Set[str]:

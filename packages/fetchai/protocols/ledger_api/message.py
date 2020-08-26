@@ -93,13 +93,6 @@ class LedgerApiMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=LedgerApiMessage.Performative(performative),
-            **kwargs,
-        )
         self._performatives = {
             "balance",
             "error",
@@ -111,6 +104,13 @@ class LedgerApiMessage(Message):
             "transaction_digest",
             "transaction_receipt",
         }
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=LedgerApiMessage.Performative(performative),
+            **kwargs,
+        )
 
     @property
     def valid_performatives(self) -> Set[str]:

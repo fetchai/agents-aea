@@ -65,6 +65,7 @@ class DefaultMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
+        self._performatives = {"bytes", "error"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -72,7 +73,6 @@ class DefaultMessage(Message):
             performative=DefaultMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"bytes", "error"}
 
     @property
     def valid_performatives(self) -> Set[str]:

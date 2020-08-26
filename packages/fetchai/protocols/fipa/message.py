@@ -77,13 +77,6 @@ class FipaMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=FipaMessage.Performative(performative),
-            **kwargs,
-        )
         self._performatives = {
             "accept",
             "accept_w_inform",
@@ -94,6 +87,13 @@ class FipaMessage(Message):
             "match_accept_w_inform",
             "propose",
         }
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=FipaMessage.Performative(performative),
+            **kwargs,
+        )
 
     @property
     def valid_performatives(self) -> Set[str]:

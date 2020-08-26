@@ -664,6 +664,9 @@ class ProtocolGenerator:
         cls_str += self.indent + ":param target: the message target.\n"
         cls_str += self.indent + ":param performative: the message performative.\n"
         cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "self._performatives = {}\n".format(
+            self._performatives_str()
+        )
         cls_str += self.indent + "super().__init__(\n"
         self._change_indent(1)
         cls_str += self.indent + "dialogue_reference=dialogue_reference,\n"
@@ -678,9 +681,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "**kwargs,\n"
         self._change_indent(-1)
         cls_str += self.indent + ")\n"
-        cls_str += self.indent + "self._performatives = {}\n".format(
-            self._performatives_str()
-        )
+
         self._change_indent(-1)
 
         # Instance properties
