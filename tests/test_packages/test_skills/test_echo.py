@@ -38,6 +38,7 @@ class DefaultDialogues(BaseDefaultDialogues):
 
         :return: None
         """
+
         def role_from_first_message(
             message: Message, receiver_address: Address
         ) -> Dialogue.Role:
