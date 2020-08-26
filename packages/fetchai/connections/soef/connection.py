@@ -141,7 +141,11 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         :return: None
         """
         BaseOefSearchDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            agent_address=agent_address,
+            role=role,
+            message_class=message_class,
         )
         self._envelope_context = None  # type: Optional[EnvelopeContext]
 

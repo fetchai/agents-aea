@@ -36,7 +36,6 @@ import pytest
 
 from aea.helpers.async_utils import cancel_and_wait
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -789,22 +788,20 @@ class TestFIPA(UseOef):
         oef_channel = oef_connection.channel
 
         oef_channel.oef_msg_id += 1
-        dialogue_reference = ("1", "2")
+        dialogue_reference = ("1", "")
         query = Query(
             constraints=[Constraint("foo", ConstraintType("==", "bar"))], model=None,
         )
         dialogues = oef_channel.oef_search_dialogues
-        dialogue = dialogues.create_dialogue(
-            BaseDialogueLabel(dialogue_reference, "agent", "agent"),
-            OefSearchDialogue.Role.OEF_NODE,
-        )
         oef_search_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             dialogue_reference=dialogue_reference,
             query=query,
         )
-        oef_search_msg.to = "agent"
-        dialogue._incoming_messages = [oef_search_msg]
+        oef_search_msg.to = str(oef_connection.connection_id)
+        oef_search_msg.sender = "agent"
+        dialogue = dialogues.update(oef_search_msg)
+        assert dialogue is not None
         oef_channel.oef_msg_id_to_dialogue[oef_channel.oef_msg_id] = dialogue
         oef_channel.on_oef_error(
             answer_id=oef_channel.oef_msg_id,
@@ -812,7 +809,7 @@ class TestFIPA(UseOef):
         )
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = envelope.message
-        assert dec_msg.dialogue_reference == dialogue_reference
+        assert dec_msg.dialogue_reference[0] == dialogue_reference[0]
         assert (
             dec_msg.performative is OefSearchMessage.Performative.OEF_ERROR
         ), "It should be an error message"

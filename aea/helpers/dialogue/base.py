@@ -1199,7 +1199,9 @@ class Dialogues(ABC):
                 incomplete_dialogue_label.dialogue_opponent_addr,
                 incomplete_dialogue_label.dialogue_starter_addr,
             )
-            dialogue._update_dialogue_label(final_dialogue_label)
+            dialogue._update_dialogue_label(  # pylint: disable=_update_dialogue_label
+                final_dialogue_label
+            )
             self.dialogues.update({dialogue.dialogue_label: dialogue})
             self._incomplete_to_complete_dialogue_labels[
                 incomplete_dialogue_label

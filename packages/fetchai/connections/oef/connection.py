@@ -23,7 +23,7 @@ import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
-from typing import Dict, List, Optional, Set, cast
+from typing import Dict, List, Optional, Set, Type, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -68,6 +68,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         dialogue_label: BaseDialogueLabel,
         agent_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -121,6 +122,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
             self,
             agent_address=str(OEFConnection.connection_id),
             role_from_first_message=role_from_first_message,
+            dialogue_class=OefSearchDialogue,
         )
 
 
