@@ -474,7 +474,8 @@ class Dialogue(ABC):
         :raises: AssertionError if message is not present
         """
         message = self._try_get_message(message_id)
-        assert message is not None, "Message not present."
+        if message is None:
+            raise ValueError("Message not present.")
         return message
 
     def _has_message(self, message: Message) -> bool:
@@ -583,14 +584,18 @@ class Dialogue(ABC):
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
         last_message = self.last_message
-        assert last_message is not None, "Cannot reply in an empty dialogue!"
+        if last_message is None:
+            raise ValueError("Cannot reply in an empty dialogue!")
 
         if target_message is None:
             target_message = last_message
         else:
-            assert self._has_message(
-                target_message  # type: ignore
-            ), "The target message does not exist in this dialogue."
+            enforce(
+                self._has_message(
+                    target_message  # type: ignore
+                ),
+                "The target message does not exist in this dialogue.",
+            )
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
@@ -925,14 +930,16 @@ class Dialogues(ABC):
         self._agent_address = agent_address
         self._dialogue_stats = DialogueStats(end_states)
 
-        assert issubclass(
-            message_class, Message
-        ), "message_class is not a subclass of Message."
+        enforce(
+            issubclass(message_class, Message),
+            "message_class is not a subclass of Message.",
+        )
         self._message_class = message_class
 
-        assert issubclass(
-            dialogue_class, Dialogue
-        ), "dialogue_class is not a subclass of Dialogue."
+        enforce(
+            issubclass(dialogue_class, Dialogue),
+            "dialogue_class is not a subclass of Dialogue.",
+        )
         self._dialogue_class = dialogue_class
 
         # Note the following might be too restrictive; if the supplied role_from_first_message function
@@ -940,28 +947,32 @@ class Dialogues(ABC):
         # below would fail.
         sig = signature(role_from_first_message)
         parameter_length = len(sig.parameters.keys())
-        assert (
-            parameter_length == 2
-        ), "Invalid number of parameters for role_from_first_message. Expected 2. Found {}.".format(
-            parameter_length
+        enforce(
+            parameter_length == 2,
+            "Invalid number of parameters for role_from_first_message. Expected 2. Found {}.".format(
+                parameter_length
+            ),
         )
         parameter_1_type = list(sig.parameters.values())[0].annotation
-        assert (
-            parameter_1_type == Message
-        ), "Invalid type for the first parameter of role_from_first_message. Expected 'Message'. Found {}.".format(
-            parameter_1_type
+        enforce(
+            parameter_1_type == Message,
+            "Invalid type for the first parameter of role_from_first_message. Expected 'Message'. Found {}.".format(
+                parameter_1_type
+            ),
         )
         parameter_2_type = list(sig.parameters.values())[1].annotation
-        assert (
-            parameter_2_type == Address
-        ), "Invalid type for the second parameter of role_from_first_message. Expected 'Address'. Found {}.".format(
-            parameter_2_type
+        enforce(
+            parameter_2_type == Address,
+            "Invalid type for the second parameter of role_from_first_message. Expected 'Address'. Found {}.".format(
+                parameter_2_type
+            ),
         )
         return_type = sig.return_annotation
-        assert (
-            return_type == Dialogue.Role
-        ), "Invalid return type for role_from_first_message. Expected 'Dialogue.Role'. Found {}.".format(
-            return_type
+        enforce(
+            return_type == Dialogue.Role,
+            "Invalid return type for role_from_first_message. Expected 'Dialogue.Role'. Found {}.".format(
+                return_type
+            ),
         )
         self._role_from_first_message = role_from_first_message
 
@@ -1071,12 +1082,14 @@ class Dialogues(ABC):
 
         :return: the initial message and the dialogue.
         """
-        assert (
-            not initial_message.has_sender
-        ), "The message's 'sender' field is already set {}".format(initial_message)
-        assert (
-            not initial_message.has_to
-        ), "The message's 'to' field is already set {}".format(initial_message)
+        enforce(
+            not initial_message.has_sender,
+            "The message's 'sender' field is already set {}".format(initial_message),
+        )
+        enforce(
+            not initial_message.has_to,
+            "The message's 'to' field is already set {}".format(initial_message),
+        )
         initial_message.sender = self.agent_address
         initial_message.to = counterparty
 
@@ -1121,10 +1134,13 @@ class Dialogues(ABC):
         :param message: a new incoming message
         :return: the new or existing dialogue the message is intended for, or None in case of any errors.
         """
-        assert message.has_sender and self._is_message_by_other(
-            message
-        ), "Invalid 'update' usage. Update must only be used with a message by another agent."
-        assert message.has_to, "The message's 'to' field is not set {}".format(message)
+        enforce(
+            message.has_sender and self._is_message_by_other(message),
+            "Invalid 'update' usage. Update must only be used with a message by another agent.",
+        )
+        enforce(
+            message.has_to, "The message's 'to' field is not set {}".format(message)
+        )
 
         dialogue_reference = message.dialogue_reference
 
@@ -1184,10 +1200,12 @@ class Dialogues(ABC):
         :return: None
         """
         complete_dialogue_reference = message.dialogue_reference
-        assert (
+        enforce(
             complete_dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-            and complete_dialogue_reference[1] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-        ), "Only complete dialogue references allowed."
+            and complete_dialogue_reference[1]
+            != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            "Only complete dialogue references allowed.",
+        )
 
         incomplete_dialogue_reference = (
             complete_dialogue_reference[0],

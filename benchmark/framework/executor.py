@@ -145,7 +145,8 @@ class Executor:
         process = Process(target=func, args=(control, *args))
         process.start()
         msg = control.wait_msg()
-        assert msg == control.START_MSG
+        if msg != control.START_MSG:
+            raise ValueError("Msg does not match control start message.")
         return process
 
     def _measure(
