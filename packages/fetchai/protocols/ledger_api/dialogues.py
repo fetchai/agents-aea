@@ -55,10 +55,7 @@ class LedgerApiDialogue(Dialogue):
         LedgerApiMessage.Performative.BALANCE: frozenset(),
         LedgerApiMessage.Performative.ERROR: frozenset(),
         LedgerApiMessage.Performative.GET_BALANCE: frozenset(
-            {
-                LedgerApiMessage.Performative.BALANCE,
-                LedgerApiMessage.Performative.ERROR,
-            }
+            {LedgerApiMessage.Performative.BALANCE, LedgerApiMessage.Performative.ERROR}
         ),
         LedgerApiMessage.Performative.GET_RAW_TRANSACTION: frozenset(
             {

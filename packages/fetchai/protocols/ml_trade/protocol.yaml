@@ -6,11 +6,10 @@ description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmXKxNepjkriETgKKJufvzo53F25wYgJNT98qRtH7hFEwH
   __init__.py: QmXZMVdsBXUJxLZvwwhWBx58xfxMSyoGxdYp5Aeqmzqhzt
-  custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
+  custom_types.py: QmVLEUB75PK8jC3FE7i4bCYWpS25CcTtrt9yJGY9YEJR5B
   dialogues.py: QmQi7P8p2zsFGc7R3G956SXH8sbedmqH9Mq1N2u4UdJf84
-  message.py: QmZ4SqYvj5uMd631CWLJLH1fTzebNLZRNtaK2CKNr2HvpV
+  message.py: QmakAGr2Gk9xUriDEJ9skTkAmyZLTv8YzZmgR4h7zr9aw7
   ml_trade.proto: QmeB21MQduEGQCrtiYZQzPpRqHL4CWEkvvcaKZ9GsfE8f6
   ml_trade_pb2.py: QmZVvugPysR1og6kWCJkvo3af2s9pQRHfuj4BptE7gU1EU
   serialization.py: QmSHywy12uQkzakU1RHnnkaPuTzaFTALsKisyYF8dPc8ns

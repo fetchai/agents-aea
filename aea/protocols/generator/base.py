@@ -357,7 +357,7 @@ class ProtocolGenerator:
                         check_str += "'{}'".format(
                             self._to_custom_custom(frozen_set_element_type)
                         )
-                    check_str += '."\n'
+                    check_str += '.")\n'
                 else:
                     check_str += (
                         self.indent
@@ -407,7 +407,7 @@ class ProtocolGenerator:
                         check_str += "'{}'".format(
                             self._to_custom_custom(tuple_element_type)
                         )
-                    check_str += '."\n'
+                    check_str += '.")\n'
                 else:
                     check_str += (
                         self.indent
@@ -465,7 +465,7 @@ class ProtocolGenerator:
                     )
                     for key in sorted(dict_key_value_types.keys()):
                         check_str += "'{}', '{}'".format(key, dict_key_value_types[key])
-                    check_str += '."\n'
+                    check_str += '.")\n'
                 else:
                     check_str += (
                         self.indent
@@ -497,7 +497,7 @@ class ProtocolGenerator:
             self._change_indent(-1)
             check_str += (
                 self.indent
-                + ", \"Invalid type for frozenset elements in content '{}'. Expected '{}'.\")\n".format(
+                + "), \"Invalid type for frozenset elements in content '{}'. Expected '{}'.\")\n".format(
                     content_name, element_type
                 )
             )
@@ -518,7 +518,7 @@ class ProtocolGenerator:
             self._change_indent(-1)
             check_str += (
                 self.indent
-                + ", \"Invalid type for tuple elements in content '{}'. Expected '{}'.\")\n".format(
+                + "), \"Invalid type for tuple elements in content '{}'. Expected '{}'.\")\n".format(
                     content_name, element_type
                 )
             )
@@ -604,6 +604,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "import logging\n"
         cls_str += self._import_from_typing_module() + "\n\n"
         cls_str += self.indent + "from aea.configurations.base import ProtocolId\n"
+        cls_str += self.indent + "from aea.exceptions import AEAEnforceError, enforce\n"
         cls_str += MESSAGE_IMPORT + "\n"
         if self._import_from_custom_types_module() != "":
             cls_str += "\n" + self._import_from_custom_types_module() + "\n"

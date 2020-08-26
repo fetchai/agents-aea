@@ -6,11 +6,10 @@ description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmVFmJMyfFbDaYU5Jsjqec1wMU5zramzdPWNwuhsvWsKdF
-  __init__.py: Qma2opyN54gwTpkVV1E14jjeMmMfoqgE6XMM9LsvGuTdkm
-  dialogues.py: QmZNqSnqzGyouCeyVg2U3x18kUczM1AAizA9TckRCnV49L
-  message.py: QmbPcpdHay7xVb5DC2tn6i7usrw4W7K9RbFWyuVVAobmn1
-  serialization.py: QmQDdbN4pgfdL1LUhV4J7xMUhdqUJ2Tamz7Nheca3yGw2G
+  __init__.py: QmVScGq9kcrDLjUMdtojKQMeQ7JXafDajeUHYmJARaTPkD
+  dialogues.py: QmcTESZULjd8GCRYe93GmxyUgYoV2eRhDbPm4NJ7jhgBVE
+  message.py: QmXUt538BErqsLxpxUdD5ijHHQW1gbT7agu7VxNE6Ugdj7
+  serialization.py: Qmf2cM4X94H5TCq1sTTiQUy2hesvj3QRYFFvKnceJJ3ZXi
   state_update.proto: QmdmEUSa7PDxJ98ZmGE7bLFPmUJv8refgbkHPejw6uDdwD
   state_update_pb2.py: QmQr5KXhapRv9AnfQe7Xbr5bBqYWp9DEMLjxX8UWmK75Z4
 fingerprint_ignore_patterns: []

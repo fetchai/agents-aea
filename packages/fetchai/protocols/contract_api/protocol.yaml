@@ -6,13 +6,12 @@ description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmXyqeagUfSiJMW6czSPLvDkwwCKWiv1aXPqTJ3ac1nL7y
   __init__.py: QmZodYjNqoMgGAGKfkCU4zU9t1Cx9MAownqSy4wyVdwaHF
   contract_api.proto: QmNwngtcYFSuqL8yeTGVXmrHjfebCybdUa9BnTDKXn8odk
   contract_api_pb2.py: QmVT6Fv53KyFhshNFEo38seHypd7Y62psBaF8NszV8iRHK
-  custom_types.py: QmZsFfRJNQ9grP5FpNeY8683uDGNTAL97Wfcx7VaLR1cSe
+  custom_types.py: QmdLcJepuuzfM4Yx6wET2hwbV3QLGStQmWt4Y5k8gkK2z8
   dialogues.py: QmcMNCVk7WumccFSBTpMYMi4bYupnkB634gYuHmSYnYSt3
-  message.py: QmToQpJVYS8ohyrqBunixgfgXuDjbXvLdXPP5sGzYY5CGJ
+  message.py: QmRMUtzLTmxeDvNCupeQWNc2AnYup6BiUpJjxS5wCaesNm
   serialization.py: QmdJZ6GBrURgzJCfYSZzLhWirfm5bDJxumz7ieAELC9juw
 fingerprint_ignore_patterns: []
 dependencies:
