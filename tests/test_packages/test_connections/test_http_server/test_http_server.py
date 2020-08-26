@@ -133,7 +133,7 @@ class TestHTTPServer:
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.http_connection.connect())
         self.connection_address = str(HTTPServerConnection.connection_id)
-        self._dialogues = HttpDialogues(self.connection_address)
+        self._dialogues = HttpDialogues(self.agent_address)
         self.original_timeout = self.http_connection.channel.RESPONSE_TIMEOUT
 
     @pytest.mark.asyncio
@@ -157,19 +157,6 @@ class TestHTTPServer:
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
-        # message = HttpMessage(
-        #     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-        #     performative=HttpMessage.Performative.RESPONSE,
-        #     version=incoming_message.version,
-        #     headers=incoming_message.headers,
-        #     message_id=incoming_message.message_id + 1,
-        #     target=incoming_message.message_id,
-        #     status_code=200,
-        #     status_text="Success",
-        #     bodyy=b"Response body",
-        # )
-        # message.to = incoming_message.sender
-        # assert dialogue.update(message)
         message = dialogue.reply(
             target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
@@ -204,7 +191,7 @@ class TestHTTPServer:
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=10)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
-        message = HttpMessage(
+        incorrect_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=incoming_message.message_id,
@@ -215,19 +202,21 @@ class TestHTTPServer:
             headers=incoming_message.headers,
             bodyy=b"Request body",
         )
-        message.to = incoming_message.sender
-        assert not dialogue.update(message)
+        incorrect_message.to = incoming_message.sender
+
+        # the incorrect message cannot be sent into a dialogue, so this is omitted.
+
         response_envelope = Envelope(
-            to=message.to,
+            to=incorrect_message.to,
             sender=envelope.to,
             protocol_id=envelope.protocol_id,
             context=envelope.context,
-            message=message,
+            message=incorrect_message,
         )
         with patch.object(self.http_connection.logger, "warning") as mock_logger:
             await self.http_connection.send(response_envelope)
             mock_logger.assert_any_call(
-                f"Could not create dialogue for message={message}"
+                f"Could not create dialogue for message={incorrect_message}"
             )
 
         response = await asyncio.wait_for(request_task, timeout=10)
@@ -246,19 +235,15 @@ class TestHTTPServer:
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=10)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
-        message = HttpMessage(
+        message = dialogue.reply(
+            target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            target=incoming_message.message_id,
-            message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
             headers=incoming_message.headers,
             status_code=200,
             status_text="Success",
             bodyy=b"Response body",
         )
-        message.to = incoming_message.sender
-        assert dialogue.update(message)
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
@@ -290,19 +275,15 @@ class TestHTTPServer:
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
-        message = HttpMessage(
+        message = dialogue.reply(
+            target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            target=incoming_message.message_id,
-            message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
             headers=incoming_message.headers,
             status_code=201,
             status_text="Created",
             bodyy=b"Response body",
         )
-        message.to = incoming_message.sender
-        assert dialogue.update(message)
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
@@ -418,19 +399,15 @@ class TestHTTPServer:
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
-        message = HttpMessage(
+        message = dialogue.reply(
+            target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            target=incoming_message.message_id,
-            message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
             headers=incoming_message.headers,
             status_code=201,
             status_text="Created",
             bodyy=b"Response body",
         )
-        message.to = incoming_message.sender
-        assert dialogue.update(message)
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,

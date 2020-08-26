@@ -70,8 +70,8 @@ class TestClientServer:
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.server.connect())
-        # skill side dialogues
 
+        # skill side dialogues
         def role_from_first_message(
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
@@ -129,7 +129,7 @@ class TestClientServer:
     ) -> Envelope:
         """Make request envelope."""
         request_http_message, _ = self._client_dialogues.create(
-            counterparty=str(HTTPServerConnection.connection_id),
+            counterparty=str(HTTPClientConnection.connection_id),
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=f"http://{self.host}:{self.port}{path}",
@@ -150,6 +150,7 @@ class TestClientServer:
     ) -> Envelope:
         """Make response envelope."""
         incoming_message = cast(HttpMessage, request_envelope.message)
+        incoming_message.sender = str(HTTPServerConnection.connection_id)
         dialogue = self._server_dialogues.update(incoming_message)
         assert dialogue is not None
         message = dialogue.reply(

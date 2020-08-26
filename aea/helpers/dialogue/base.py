@@ -1199,7 +1199,7 @@ class Dialogues(ABC):
                 incomplete_dialogue_label.dialogue_opponent_addr,
                 incomplete_dialogue_label.dialogue_starter_addr,
             )
-            dialogue._update_dialogue_label(  # pylint: disable=_update_dialogue_label
+            dialogue._update_dialogue_label(  # pylint: disable=protected-access
                 final_dialogue_label
             )
             self.dialogues.update({dialogue.dialogue_label: dialogue})

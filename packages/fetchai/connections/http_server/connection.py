@@ -384,7 +384,7 @@ class HTTPChannel(BaseAsyncChannel):
         self.timeout_window = timeout_window
         self.http_server: Optional[web.TCPSite] = None
         self.pending_requests: Dict[RequestId, Future] = {}
-        self._dialogues = HttpDialogues(self.address)
+        self._dialogues = HttpDialogues(str(HTTPServerConnection.connection_id))
         self.logger = logger
 
     @property
