@@ -28,6 +28,7 @@ import pytest
 from aea.aea import AEA
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.registries.filter import Filter
@@ -101,6 +102,7 @@ class AsyncFakeAgent(AEA):
     """Fake agent form testing."""
 
     name = "fake_agent"
+    _skills_exception_policy = ExceptionPolicyEnum.just_log
 
     def __init__(self, handlers=None, behaviours=None):
         """Init agent."""
@@ -273,8 +275,7 @@ class TestAsyncAgentLoop:
         agent_loop.set_loop(loop)
         loop_task = loop.create_task(agent_loop.run_loop())
         await asyncio.sleep(tick_interval * 2)
-        loop_task.cancel()
-        await asyncio.sleep(tick_interval * 2)
+        agent._skills_exception_policy = ExceptionPolicyEnum.propagate
         with pytest.raises(ValueError, match="expected!"):
             await loop_task
 

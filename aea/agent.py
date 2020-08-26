@@ -19,11 +19,11 @@
 """This module contains the implementation of a generic agent."""
 import datetime
 import logging
-from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from multiprocessing.pool import AsyncResult
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
+from aea.abstract_agent import AbstractAgent
 from aea.connections.base import Connection
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -32,43 +32,6 @@ from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntim
 
 
 logger = logging.getLogger(__name__)
-
-
-class AbstractAgent(ABC):
-    """This class provides an abstract base  interface for an agent!"""
-
-    @abstractmethod
-    def setup(self) -> None:
-        """
-        Set up the agent.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def act(self) -> None:
-        """
-        Perform actions on period.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Handle an envelope.
-
-        :param envelope: the envelope to handle.
-        :return: None
-        """
 
 
 class Agent(AbstractAgent):
@@ -142,23 +105,6 @@ class Agent(AbstractAgent):
             )
         return self.RUNTIMES[self._runtime_mode]
 
-    def _execution_control(  # pylint: disable=no-self-use  # cause  overrided in AEA
-        self,
-        fn: Callable,
-        args: Optional[Sequence] = None,
-        kwargs: Optional[Dict] = None,
-    ) -> Any:
-        """
-        Execute function within wrapper.
-
-        :param fn: function to call
-        :param args: optional sequence of arguments to pass to function on call
-        :param kwargs: optional dict of keyword arguments to pass to function on call
-
-        :return: same as function does
-        """
-        return fn(*(args or []), **(kwargs or {}))
-
     def enqueue_task(
         self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
     ) -> int:
@@ -181,11 +127,11 @@ class Agent(AbstractAgent):
         """
         return self.runtime.task_manager.get_task_result(task_id)
 
-    def _get_multiplexer_setup_options(self,) -> Optional[Dict]:
+    def get_multiplexer_setup_options(self) -> Optional[Dict]:
         """
-        Get dict of multiplexer setup options.
+        Get options to pass to Multiplexer.setup.
 
-        :return: dict of kwargs for Multipelxer.setup
+        :return: dict of kwargs
         """
         return {"connections": self.active_connections}
 
@@ -270,19 +216,6 @@ class Agent(AbstractAgent):
         """
         self.runtime.start()
 
-    def start_setup(self) -> None:
-        """
-        Set up Agent on start.
-
-        - connect Multiplexer
-        - call agent.setup
-        - set liveness to started
-
-        :return: None
-        """
-        logger.debug("[{}]: Calling setup method...".format(self.name))
-        self.setup()
-
     def stop(self) -> None:
         """
         Stop the agent.
@@ -323,3 +256,17 @@ class Agent(AbstractAgent):
         :return: List of tuples of callables: handler and coroutine to get a message
         """
         return [(self.handle_envelope, self.inbox.async_get)]
+
+    def exception_handler(self, exception: Exception, function: Callable) -> bool:
+        """
+        Handle exception raised during agent main loop execution.
+
+        :param exception: exception raised
+        :param function: a callable exception raised in.
+
+        :return: bool, propagate exception if True otherwise skip it.
+        """
+        logger.exception(
+            f"Exception {repr(exception)} raised during {repr(function)} call."
+        )
+        return True

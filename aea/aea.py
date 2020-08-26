@@ -27,7 +27,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Sequence,
     Tuple,
     Type,
     cast,
@@ -46,7 +45,7 @@ from aea.decision_maker.default import (
 )
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
+from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -210,7 +209,12 @@ class AEA(Agent, WithLogger):
             ]
         return connections
 
-    def _get_multiplexer_setup_options(self) -> Optional[Dict]:
+    def get_multiplexer_setup_options(self) -> Optional[Dict]:
+        """
+        Get options to pass to Multiplexer.setup.
+
+        :return: dict of kwargs
+        """
         return dict(
             connections=self.active_connections,
             default_routing=self.context.default_routing,
@@ -275,62 +279,7 @@ class AEA(Agent, WithLogger):
             return
 
         for handler in handlers:
-            self._handle_message_with_handler(msg, handler)
-
-    def _handle_message_with_handler(self, message: Message, handler: Handler) -> None:
-        """
-        Handle one message with one predefined handler.
-
-        :param message: message to be handled.
-        :param handler: handler suitable for this message protocol.
-        """
-        self._execution_control(handler.handle, [message])
-
-    def _execution_control(
-        self,
-        fn: Callable,
-        args: Optional[Sequence] = None,
-        kwargs: Optional[Dict] = None,
-    ) -> Any:
-        """
-        Execute skill function in exception handling environment.
-
-        Logs error, stop agent or propagate excepion depends on policy defined.
-
-        :param fn: function to call
-        :param args: optional sequence of arguments to pass to function on call
-        :param kwargs: optional dict of keyword arguments to pass to function on call
-
-        :return: same as function
-        """
-        # docstyle: ignore # noqa: E800
-        def log_exception(e, fn):
-            self.logger.exception(f"<{e}> raised during `{fn}`")
-
-        try:
-            with ExecTimeoutThreadGuard(self._execution_timeout):
-                return fn(*(args or []), **(kwargs or {}))
-        except TimeoutException:
-            self.logger.warning(
-                "`{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
-                    fn, self._execution_timeout
-                )
-            )
-        except Exception as e:  # pylint: disable=broad-except
-            if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
-                raise
-            if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
-                log_exception(e, fn)
-                self.stop()
-                raise AEAException(
-                    f"AEA was terminated cause exception `{e}` in skills {fn}! Please check logs."
-                )
-            if self._skills_exception_policy == ExceptionPolicyEnum.just_log:
-                log_exception(e, fn)
-            else:
-                raise AEAException(
-                    f"Unsupported exception policy: {self._skills_exception_policy}"
-                )
+            handler.handle(msg)
 
     def teardown(self) -> None:
         """
@@ -397,3 +346,34 @@ class AEA(Agent, WithLogger):
         return super(AEA, self).get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
         ]
+
+    def exception_handler(self, exception: Exception, function: Callable) -> bool:
+        """
+        Handle exception raised during agent main loop execution.
+
+        :param exception: exception raised
+        :param function: a callable exception raised in.
+
+        :return: bool, propagate exception if True otherwise skip it.
+        """
+        # docstyle: ignore # noqa: E800
+        def log_exception(e, fn):
+            self.logger.exception(f"<{e}> raised during `{fn}`")
+
+        if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
+            return True
+
+        if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
+            log_exception(exception, function)
+            self.stop()
+            raise AEAException(
+                f"AEA was terminated cause exception `{exception}` in skills {function}! Please check logs."
+            )
+
+        if self._skills_exception_policy == ExceptionPolicyEnum.just_log:
+            log_exception(exception, function)
+            return False
+
+        raise AEAException(
+            f"Unsupported exception policy: {self._skills_exception_policy}"
+        )

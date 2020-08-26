@@ -739,7 +739,7 @@ class TestAeaExceptionPolicy:
         self.aea._skills_exception_policy = ExceptionPolicyEnum.just_log
         self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        with patch.object(self.aea._logger, "exception") as patched:
+        with patch.object(self.aea.logger, "exception") as patched:
             t = Thread(target=self.aea.start)
             t.start()
 
@@ -888,7 +888,9 @@ class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin react on AEA."""
-        self.aea_tool.handle_envelope(self.envelope)
+        self.aea_tool.aea.runtime.main_loop._execution_control(
+            self.aea_tool.handle_envelope, [self.envelope]
+        )
 
 
 class ActTimeoutExecutionCase(BaseTimeExecutionCase):
@@ -896,4 +898,6 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin act on AEA."""
-        self.aea_tool.aea._execution_control(self.behaviour.act_wrapper)
+        self.aea_tool.aea.runtime.main_loop._execution_control(
+            self.behaviour.act_wrapper
+        )

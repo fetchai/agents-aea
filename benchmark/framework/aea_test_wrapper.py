@@ -176,7 +176,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea.start_setup()
+        self.aea.setup()
 
     def stop(self) -> None:
         """
