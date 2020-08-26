@@ -116,19 +116,15 @@ async def test_get_balance(
     import aea  # noqa # to load registries
 
     ledger_api_dialogues = LedgerApiDialogues(address)
-    request = LedgerApiMessage(
+    request, ledger_api_dialogue = ledger_api_dialogues.create(
+        counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_BALANCE,
-        dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ledger_id,
         address=address,
     )
-
-    request.to = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue = ledger_api_dialogues.update(request)
-    assert ledger_api_dialogue is not None
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )
@@ -162,9 +158,9 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     amount = 40000
     fee = 30000
 
-    request = LedgerApiMessage(
+    request, ledger_api_dialogue = ledger_api_dialogues.create(
+        counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-        dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
             ledger_id=ETHEREUM,
             sender_address=crypto1.address,
@@ -177,12 +173,9 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
             chain_id=3,
         ),
     )
-    request.to = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue = ledger_api_dialogues.update(request)
-    assert ledger_api_dialogue is not None
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=crypto1.address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )
@@ -313,8 +306,10 @@ async def test_no_balance():
         ledger_id=ETHEREUM,
         address="test",
     )
-    message.to = "test"
+    message.to = dispatcher.dialogues.agent_address
+    message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
+    assert dialogue is not None
     mock_api.get_balance.return_value = None
     msg = dispatcher.get_balance(mock_api, message, dialogue)
 
@@ -341,8 +336,10 @@ async def test_no_raw_tx():
             chain_id=3,
         ),
     )
-    message.to = "test"
+    message.to = dispatcher.dialogues.agent_address
+    message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
+    assert dialogue is not None
     mock_api.get_transfer_transaction.return_value = None
     msg = dispatcher.get_raw_transaction(mock_api, message, dialogue)
 
@@ -359,7 +356,8 @@ async def test_attempts_get_transaction_receipt():
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         transaction_digest=TransactionDigest("asdad", "sdfdsf"),
     )
-    message.to = "test"
+    message.to = dispatcher.dialogues.agent_address
+    message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
     assert dialogue is not None
     mock_api.get_transaction.return_value = None
