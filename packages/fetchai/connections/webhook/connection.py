@@ -143,11 +143,8 @@ class WebhookChannel:
 
         :return: None
         """
-        assert (
-            self.webhook_site is not None
-            and self.runner is not None
-            and self.app is not None
-        ), "Application not connected, call connect first!"
+        if self.webhook_site is None or self.runner is None or self.app is None:
+            raise ValueError("Application not connected, call connect first!")
 
         if not self.is_stopped:
             await self.webhook_site.stop()
@@ -226,11 +223,10 @@ class WebhookConnection(Connection):
         webhook_address = cast(str, self.configuration.config.get("webhook_address"))
         webhook_port = cast(int, self.configuration.config.get("webhook_port"))
         webhook_url_path = cast(str, self.configuration.config.get("webhook_url_path"))
-        assert (
-            webhook_address is not None
-            and webhook_port is not None
-            and webhook_url_path is not None
-        ), "webhook_address, webhook_port and webhook_url_path must be set!"
+        if webhook_address is None or webhook_port is None or webhook_url_path is None:
+            raise ValueError(
+                "webhook_address, webhook_port and webhook_url_path must be set!"
+            )
         self.channel = WebhookChannel(
             agent_address=self.address,
             webhook_address=webhook_address,
@@ -275,7 +271,8 @@ class WebhookConnection(Connection):
         :return: None
         """
         self._ensure_connected()
-        assert self.channel.in_queue is not None
+        if self.channel.in_queue is None:
+            raise ValueError("Channel in queue not set.")
         await self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
@@ -285,7 +282,8 @@ class WebhookConnection(Connection):
         :return: the envelope received, or None.
         """
         self._ensure_connected()
-        assert self.channel.in_queue is not None
+        if self.channel.in_queue is None:
+            raise ValueError("Channel in queue not set.")
         try:
             envelope = await self.channel.in_queue.get()
             if envelope is None:
