@@ -708,7 +708,8 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += self.indent + '"""Get the message_id of the message."""\n'
         cls_str += (
-            self.indent + 'enforce(self.is_set("message_id"), "message_id is not set.")\n'
+            self.indent
+            + 'enforce(self.is_set("message_id"), "message_id is not set.")\n'
         )
         cls_str += self.indent + 'return cast(int, self.get("message_id"))\n\n'
         self._change_indent(-1)
@@ -734,7 +735,9 @@ class ProtocolGenerator:
         cls_str += self.indent + "def target(self) -> int:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""Get the target of the message."""\n'
-        cls_str += self.indent + 'enforce(self.is_set("target"), "target is not set.")\n'
+        cls_str += (
+            self.indent + 'enforce(self.is_set("target"), "target is not set.")\n'
+        )
         cls_str += self.indent + 'return cast(int, self.get("target"))\n\n'
         self._change_indent(-1)
 
@@ -866,7 +869,9 @@ class ProtocolGenerator:
             ".format(self.message_id - 1, self.target,))\n"
         )
         self._change_indent(-2)
-        cls_str += self.indent + "except (AEAEnforceError, ValueError, KeyError) as e:\n"
+        cls_str += (
+            self.indent + "except (AEAEnforceError, ValueError, KeyError) as e:\n"
+        )
         self._change_indent(1)
         cls_str += self.indent + "logger.error(str(e))\n"
         cls_str += self.indent + "return False\n\n"
