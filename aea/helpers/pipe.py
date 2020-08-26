@@ -191,7 +191,7 @@ class PosixNamedPipeProtocol:
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
         os.write(self._out, size + data)
-        asyncio.sleep(0.0)
+        await asyncio.sleep(0.0)
 
     async def read(self) -> Optional[bytes]:
         """
