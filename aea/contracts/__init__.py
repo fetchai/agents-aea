@@ -19,4 +19,4 @@
 
 """This module contains the contract modules."""
 
-from aea.contracts.base import Contract, contract_registry
+from aea.contracts.base import Contract, contract_registry  # noqa: F401
