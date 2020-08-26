@@ -97,6 +97,7 @@ class TProtocolDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         agent_address: Address,
         role: Dialogue.Role,
+        message_class: Type[TProtocolMessage] = TProtocolMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -109,7 +110,7 @@ class TProtocolDialogue(Dialogue):
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            message_class=TProtocolMessage,
+            message_class=message_class,
             agent_address=agent_address,
             role=role,
         )

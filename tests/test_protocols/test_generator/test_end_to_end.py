@@ -24,7 +24,7 @@ import tempfile
 import time
 from pathlib import Path
 from threading import Thread
-from typing import Optional
+from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import (
@@ -35,13 +35,16 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.helpers import create_private_key
-from aea.helpers.dialogue.base import DialogueLabel
-from aea.protocols.base import Message
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.base import Address, Message
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
 
 from tests.conftest import ROOT_DIR
-from tests.data.generator.t_protocol.dialogues import TProtocolDialogue
+from tests.data.generator.t_protocol.dialogues import (
+    TProtocolDialogue,
+    TProtocolDialogues,
+)
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
 )
@@ -119,24 +122,41 @@ class TestEndToEndGenerator(UseOef):
         aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.8.0")])
 
         # dialogues
-        dialogue_label_1 = DialogueLabel(
-            (str(1), ""), aea_2.identity.address, aea_1.identity.address
-        )
-        aea_1_dialogue = TProtocolDialogue(
-            dialogue_label_1, aea_1.identity.address, TProtocolDialogue.Role.ROLE_1
-        )
-        dialogue_label_2 = DialogueLabel(
-            (str(1), str(1)), aea_1.identity.address, aea_1.identity.address
-        )
-        aea_2_dialogue = TProtocolDialogue(
-            dialogue_label_2, aea_2.identity.address, TProtocolDialogue.Role.ROLE_2
+        def role_from_first_message_1(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return TProtocolDialogue.Role.ROLE_1
+
+        agent_1_dialogues = TProtocolDialogues(
+            agent_address=aea_1.identity.address,
+            role_from_first_message=role_from_first_message_1,
         )
 
-        # message 1
-        message_1 = TProtocolMessage(
-            message_id=1,
-            dialogue_reference=(str(1), ""),
-            target=0,
+        def role_from_first_message_1(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return TProtocolDialogue.Role.ROLE_2
+
+        agent_2_dialogues = TProtocolDialogues(
+            agent_address=aea_2.identity.address,
+            role_from_first_message=role_from_first_message_1,
+        )
+
+        # messages
+        message_1, aea_1_dialogue = agent_1_dialogues.create(
+            counterparty=aea_2.identity.address,
             performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some bytes",
             content_int=42,
@@ -144,13 +164,10 @@ class TestEndToEndGenerator(UseOef):
             content_bool=True,
             content_str="some string",
         )
-        message_1.to = aea_2.identity.address
+        message_1 = cast(TProtocolMessage, message_1)
 
-        # message 2
-        message_2 = TProtocolMessage(
-            message_id=2,
-            dialogue_reference=(str(1), str(1)),
-            target=1,
+        message_2, aea_2_dialogue = agent_2_dialogues.create(
+            counterparty=aea_1.identity.address,
             performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some other bytes",
             content_int=43,
@@ -158,7 +175,7 @@ class TestEndToEndGenerator(UseOef):
             content_bool=False,
             content_str="some other string",
         )
-        message_2.to = aea_1.identity.address
+        message_2 = cast(TProtocolMessage, message_2)
 
         # add handlers to AEA resources
         skill_context_1 = SkillContext(aea_1.context)
@@ -168,7 +185,7 @@ class TestEndToEndGenerator(UseOef):
         agent_1_handler = Agent1Handler(
             skill_context=skill_context_1,
             name="fake_handler_1",
-            dialogue=aea_1_dialogue,
+            dialogues=agent_1_dialogues,
         )
         aea_1.resources._handler_registry.register(
             (
@@ -183,7 +200,7 @@ class TestEndToEndGenerator(UseOef):
 
         agent_2_handler = Agent2Handler(
             message=message_2,
-            dialogue=aea_2_dialogue,
+            dialogues=agent_2_dialogues,
             skill_context=skill_context_2,
             name="fake_handler_2",
         )
@@ -202,7 +219,6 @@ class TestEndToEndGenerator(UseOef):
             t_1.start()
             t_2.start()
             time.sleep(1.0)
-            aea_1_dialogue.update(message_1)
             aea_1.outbox.put_message(message_1)
             time.sleep(5.0)
             assert (
@@ -300,12 +316,12 @@ class Agent1Handler(Handler):
 
     SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, dialogue: TProtocolDialogue, **kwargs):
+    def __init__(self, dialogues: TProtocolDialogues, **kwargs):
         """Initialize the handler."""
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_message = None  # type: Optional[Message]
-        self.dialogue = dialogue
+        self.handled_message = None  # type: Optional[TProtocolMessage]
+        self.dialogues = dialogues
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -318,7 +334,8 @@ class Agent1Handler(Handler):
         :param message: the message
         :return: None
         """
-        self.dialogue._update(message)
+        message = cast(TProtocolMessage, message)
+        self.dialogues.update(message)
         self.handled_message = message
 
     def teardown(self) -> None:
@@ -335,15 +352,15 @@ class Agent2Handler(Handler):
     SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(
-        self, message: TProtocolMessage, dialogue: TProtocolDialogue, **kwargs
+        self, message: TProtocolMessage, dialogues: TProtocolDialogues, **kwargs
     ):
         """Initialize the handler."""
         print("inside handler's initialisation method for agent 2")
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_message = None  # type: Optional[Message]
+        self.handled_message = None  # type: Optional[TProtocolMessage]
         self.message_2 = message
-        self.dialogue = dialogue
+        self.dialogues = dialogues
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -356,9 +373,23 @@ class Agent2Handler(Handler):
         :param message: the message
         :return: None
         """
-        self.dialogue._update(message)
+        message = cast(TProtocolMessage, message)
+        dialogue = self.dialogues.update(message)
         self.handled_message = message
-        self.dialogue._update(self.message_2)
+        assert (
+            dialogue is not None
+        ), "Agent 2 didn't update dialogue with incoming message {}".format(
+            str(message)
+        )
+        dialogue.reply(
+            target_message=message,
+            performative=self.message_2.performative,
+            content_bytes=self.message_2.content_bytes,
+            content_int=self.message_2.content_int,
+            content_float=self.message_2.content_float,
+            content_bool=self.message_2.content_bool,
+            content_str=self.message_2.content_str,
+        )
         self.context.outbox.put_message(self.message_2)
 
     def teardown(self) -> None:
