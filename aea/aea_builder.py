@@ -70,6 +70,7 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.contracts import contract_registry
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
@@ -81,8 +82,6 @@ from aea.exceptions import AEAException
 from aea.helpers.base import load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
-from aea.helpers.pypi import is_satisfiable
-from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 

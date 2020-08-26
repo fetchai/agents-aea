@@ -19,7 +19,7 @@
 """This module contains tests for the aea.helpers.pypi module."""
 from packaging.specifiers import SpecifierSet
 
-from aea.helpers.pypi import (
+from aea.configurations.pypi import (
     is_satisfiable,
     is_simple_dep,
     merge_dependencies,
