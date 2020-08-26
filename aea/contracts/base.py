@@ -124,7 +124,11 @@ class Contract(Component):
         ), f"Contract class '{contract_class_name}' not found."
 
         _try_to_register_contract(configuration)
-        return contract_registry.make(str(configuration.public_id))
+        # override contract configuration
+        contract = contract_registry.make(
+            str(configuration.public_id), contract_config=configuration
+        )
+        return contract
 
     @classmethod
     def get_deploy_transaction(
@@ -209,7 +213,6 @@ def _try_to_register_contract(configuration: ContractConfig):
             id_=str(configuration.public_id),
             entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
             class_kwargs={"contract_interface": configuration.contract_interfaces},
-            contract_config=configuration,
         )
     except AEAException as e:  # pragma: nocover
         if "Cannot re-register id:" in str(e):
