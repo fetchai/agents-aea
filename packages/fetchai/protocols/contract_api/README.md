@@ -1,4 +1,3 @@
-
 # Contract API Protocol
 
 ## Description
