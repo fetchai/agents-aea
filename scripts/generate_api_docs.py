@@ -56,7 +56,7 @@ MODULES_TO_PATH = {
     "aea.crypto.registries.base": "api/crypto/registries/base.md",
     "aea.decision_maker.base": "api/decision_maker/base.md",
     "aea.decision_maker.default": "api/decision_maker/default.md",
-    "aea.helpers.dialogue.base": "api/helpers/dialogue/base.md",
+    "aea.protocols.dialogue.base": "api/helpers/dialogue/base.md",
     "aea.helpers.ipfs.base": "api/helpers/ipfs/base.md",
     "aea.helpers.preference_representations.base": "api/helpers/preference_representations/base.md",
     "aea.helpers.search.generic": "api/helpers/search/generic.md",

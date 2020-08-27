@@ -24,11 +24,11 @@ from pathlib import Path
 
 import pytest
 
-from aea.helpers.dialogue.base import Dialogue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 

@@ -27,9 +27,9 @@ This module contains the classes required for t_protocol_no_ct dialogue manageme
 from abc import ABC
 from typing import Callable, FrozenSet, Type, cast
 
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
 from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 

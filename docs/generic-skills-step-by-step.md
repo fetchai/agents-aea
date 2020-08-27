@@ -1052,8 +1052,8 @@ When we are negotiating with other AEAs we would like to keep track of the state
 from typing import Dict, Optional, Type
 
 from aea.exceptions import AEAEnforceError, enforce
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.protocols.base import Message
@@ -2420,8 +2420,8 @@ As mentioned, when we are negotiating with other AEA we would like to keep track
 from typing import Optional, Type
 
 from aea.exceptions import AEAEnforceError, enforce
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.protocols.base import Message

@@ -35,7 +35,6 @@ from oef.query import ConstraintExpr
 import pytest
 
 from aea.helpers.async_utils import cancel_and_wait
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -50,6 +49,7 @@ from aea.mail.base import Address, Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.test_tools.test_cases import UseOef
 
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator

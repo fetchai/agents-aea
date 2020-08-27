@@ -26,10 +26,10 @@ from typing import Deque, Dict, List, Tuple, cast
 
 from aea.decision_maker.default import OwnershipState
 from aea.exceptions import enforce
-from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import RawMessage, Terms
 from aea.mail.base import Address
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 

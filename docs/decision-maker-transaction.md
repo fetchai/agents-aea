@@ -14,7 +14,7 @@ from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.helpers.dialogue.base import Dialogue
+from aea.protocols.dialogue.base import Dialogue
 from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Address, Message
@@ -302,7 +302,7 @@ from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.helpers.dialogue.base import Dialogue
+from aea.protocols.dialogue.base import Dialogue
 from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Address, Message

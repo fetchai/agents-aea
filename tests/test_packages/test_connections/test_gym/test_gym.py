@@ -28,9 +28,9 @@ import gym
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 
 from packages.fetchai.connections.gym.connection import GymConnection

@@ -27,7 +27,6 @@ import pytest
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -40,6 +39,7 @@ from aea.helpers.search.models import (
 from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.soef.connection import SOEFConnection, SOEFException
 from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue

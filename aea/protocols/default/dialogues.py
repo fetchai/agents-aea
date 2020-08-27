@@ -27,10 +27,10 @@ This module contains the classes required for default dialogue management.
 from abc import ABC
 from typing import Callable, FrozenSet, Type, cast
 
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
 
 class DefaultDialogue(Dialogue):

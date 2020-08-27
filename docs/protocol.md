@@ -293,8 +293,8 @@ Below, we give an example of a dialogue between two agents. In practice; both di
 
 We first create concrete implementations of `FipaDialogue` and `FipaDialogues` for the buyer and seller:
 ``` python
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Address, Envelope
 from aea.protocols.base import Message

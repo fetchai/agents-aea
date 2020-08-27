@@ -31,7 +31,6 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.helpers.async_utils import AsyncState
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
@@ -40,6 +39,7 @@ from aea.helpers.transaction.base import (
     TransactionReceipt,
 )
 from aea.mail.base import Address, Envelope, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (

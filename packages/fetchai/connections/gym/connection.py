@@ -32,8 +32,8 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.base import locate
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.mail.base import Address, Envelope, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.protocols.gym.dialogues import GymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
