@@ -28,6 +28,7 @@ This module contains the classes required for dialogue management.
 
 from typing import Optional, Type
 
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
@@ -122,21 +123,21 @@ class FipaDialogue(BaseFipaDialogue):
     @property
     def terms(self) -> Terms:
         """Get terms."""
-        assert self._terms is not None, "Terms not set!"
+        if self._terms is None:
+            raise AEAEnforceError("Terms not set!")
         return self._terms
 
     @terms.setter
     def terms(self, terms: Terms) -> None:
         """Set terms."""
-        assert self._terms is None, "Terms already set!"
+        enforce(self._terms is None, "Terms already set!")
         self._terms = terms
 
     @property
     def associated_ledger_api_dialogue(self) -> "LedgerApiDialogue":
         """Get associated_ledger_api_dialogue."""
-        assert (
-            self._associated_ledger_api_dialogue is not None
-        ), "LedgerApiDialogue not set!"
+        if self._associated_ledger_api_dialogue is None:
+            raise AEAEnforceError("LedgerApiDialogue not set!")
         return self._associated_ledger_api_dialogue
 
     @associated_ledger_api_dialogue.setter
@@ -144,9 +145,10 @@ class FipaDialogue(BaseFipaDialogue):
         self, ledger_api_dialogue: "LedgerApiDialogue"
     ) -> None:
         """Set associated_ledger_api_dialogue"""
-        assert (
-            self._associated_ledger_api_dialogue is None
-        ), "LedgerApiDialogue already set!"
+        enforce(
+            self._associated_ledger_api_dialogue is None,
+            "LedgerApiDialogue already set!",
+        )
         self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
@@ -211,13 +213,14 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
         """Get associated_fipa_dialogue."""
-        assert self._associated_fipa_dialogue is not None, "FipaDialogue not set!"
+        if self._associated_fipa_dialogue is None:
+            raise AEAEnforceError("FipaDialogue not set!")
         return self._associated_fipa_dialogue
 
     @associated_fipa_dialogue.setter
     def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
         """Set associated_fipa_dialogue"""
-        assert self._associated_fipa_dialogue is None, "FipaDialogue already set!"
+        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
         self._associated_fipa_dialogue = fipa_dialogue
 
 
@@ -315,13 +318,14 @@ class SigningDialogue(BaseSigningDialogue):
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
         """Get associated_fipa_dialogue."""
-        assert self._associated_fipa_dialogue is not None, "FipaDialogue not set!"
+        if self._associated_fipa_dialogue is None:
+            raise AEAEnforceError("FipaDialogue not set!")
         return self._associated_fipa_dialogue
 
     @associated_fipa_dialogue.setter
     def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
         """Set associated_fipa_dialogue"""
-        assert self._associated_fipa_dialogue is None, "FipaDialogue already set!"
+        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
         self._associated_fipa_dialogue = fipa_dialogue
 
 
