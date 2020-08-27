@@ -24,16 +24,14 @@ from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from contextlib import suppress
 from enum import Enum
-from typing import Dict, Optional, TYPE_CHECKING, Type, cast
+from typing import Dict, Optional, Type, cast
 
+from aea.abstract_agent import AbstractAgent
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import ensure_loop
 from aea.multiplexer import AsyncMultiplexer, Multiplexer
 from aea.skills.tasks import TaskManager
-
-if TYPE_CHECKING:  # pragma: nocover
-    from aea.agent import Agent
 
 
 logger = logging.getLogger(__name__)
@@ -53,14 +51,14 @@ class BaseRuntime(ABC):
     """Abstract runtime class to create implementations."""
 
     RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
-        "sync": SyncAgentLoop,
         "async": AsyncAgentLoop,
+        "sync": SyncAgentLoop,
     }
-    DEFAULT_RUN_LOOP: str = "sync"
+    DEFAULT_RUN_LOOP: str = "async"
 
     def __init__(
         self,
-        agent: "Agent",
+        agent: AbstractAgent,
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
     ) -> None:
@@ -72,7 +70,7 @@ class BaseRuntime(ABC):
         :param loop: optional event loop. if not provided a new one will be created.
         :return: None
         """
-        self._agent: "Agent" = agent
+        self._agent: AbstractAgent = agent
         self._loop: AbstractEventLoop = ensure_loop(loop)
         self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
         self._state.add_callback(self._log_runtime_state)
@@ -91,9 +89,7 @@ class BaseRuntime(ABC):
 
     def setup_multiplexer(self) -> None:
         """Set up the multiplexer."""
-        setup_options = (
-            self._agent._get_multiplexer_setup_options()  # pylint: disable=protected-access
-        )
+        setup_options = self._agent.get_multiplexer_setup_options()
         if setup_options:
             self.multiplexer.setup(**setup_options)
 
@@ -114,9 +110,7 @@ class BaseRuntime(ABC):
 
     def _get_multiplexer_instance(self) -> Multiplexer:
         """Create multiplexer instance."""
-        return Multiplexer(
-            self._agent.connections, loop=self.loop  # pylint: disable=protected-access
-        )
+        return Multiplexer(self._agent.connections, loop=self.loop)
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
         """
@@ -236,7 +230,7 @@ class AsyncRuntime(BaseRuntime):
 
     def __init__(
         self,
-        agent: "Agent",
+        agent: AbstractAgent,
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
     ) -> None:
@@ -315,8 +309,10 @@ class AsyncRuntime(BaseRuntime):
         self.task_manager.start()
         if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.start()
-        self._agent.start_setup()
+        logger.debug("[{}]: Calling setup method...".format(self._agent.name))
+        self._agent.setup()
         self._state.set(RuntimeStates.running)
+        logger.debug("[{}]: Run main loop...".format(self._agent.name))
         await self.main_loop.run_loop()
 
     async def _stop_runtime(self) -> None:
@@ -391,7 +387,7 @@ class ThreadedRuntime(BaseRuntime):
 
         self.setup_multiplexer()
         self.multiplexer.connect()
-        self._agent.start_setup()
+        self._agent.setup()
         self._start_agent_loop()
 
     def _start_agent_loop(self) -> None:

@@ -100,8 +100,8 @@
     "description": {
       "$ref": "definitions.json#/definitions/description"
     },
-    "timeout": {
-      "$ref": "definitions.json#/definitions/timeout"
+    "period": {
+      "$ref": "definitions.json#/definitions/period"
     },
     "execution_timeout": {
       "$ref": "definitions.json#/definitions/execution_timeout"

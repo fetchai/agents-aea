@@ -85,4 +85,5 @@ class AsyncFriendlyQueue(queue.Queue):
             await self.async_wait()
 
             with suppress(queue.Empty):
-                return self.get_nowait()
+                item = self.get_nowait()
+                return item

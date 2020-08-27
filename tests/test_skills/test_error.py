@@ -59,6 +59,12 @@ class InboxWithHistory(InBox):
         self._history.append(item)
         return item
 
+    async def async_get(self, *args, **kwargs) -> Envelope:
+        """Get envelope."""
+        item = await super().async_get()
+        self._history.append(item)
+        return item
+
 
 class TestSkillError:
     """Test the skill: Error."""
@@ -78,7 +84,7 @@ class TestSkillError:
         self.my_aea = AEA(
             self.identity,
             self.wallet,
-            timeout=0.1,
+            period=0.1,
             resources=Resources(),
             default_connection=self.connection.public_id,
         )

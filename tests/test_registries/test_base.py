@@ -522,8 +522,7 @@ class TestFilter:
         )
         t.to = "skill"
         t.sender = "decision_maker"
-        self.aea.runtime.decision_maker.message_out_queue.put(t)
-        self.aea._filter.handle_internal_messages()
+        self.aea._filter.handle_internal_message(t)
 
         internal_handlers_list = self.aea.resources.get_handlers(t.protocol_id)
         assert len(internal_handlers_list) == 1
