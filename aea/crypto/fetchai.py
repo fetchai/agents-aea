@@ -28,7 +28,7 @@ FETCHAI_TESTNET_FAUCET_URL = "https://rest-agent-land.sandbox.fetch-ai.com:443/c
 TESTNET_NAME = "testnet"
 DEFAULT_ADDRESS = "https://rest-agent-land.sandbox.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
-DEFAULT_CHAIN_ID = "agent-land"
+DEFAULT_CHAIN_ID = "sandbox-agent-land"
 
 
 class FetchAIHelper(CosmosHelper):
