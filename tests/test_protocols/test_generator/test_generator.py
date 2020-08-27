@@ -213,10 +213,8 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         pb2_file_generated = Path(
             self.t, protocol_name, "{}_pb2.py".format(protocol_name)
         )
-        pb2_file_original = Path(
-            path_to_protocol, "{}_pb2.py".format(protocol_name),
-        )
-        assert filecmp.cmp(pb2_file_generated, pb2_file_original)
+        pb2_file_original = Path(path_to_protocol, "{}_pb2.py".format(protocol_name),)
+        assert _match_files(pb2_file_generated, pb2_file_original)
 
     @classmethod
     def teardown_class(cls):
