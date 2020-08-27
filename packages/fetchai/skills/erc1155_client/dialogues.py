@@ -26,6 +26,7 @@ This module contains the classes required for dialogue management.
 
 from typing import Optional, Type
 
+from aea.exceptions import enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
@@ -93,21 +94,21 @@ class ContractApiDialogue(BaseContractApiDialogue):
     @property
     def terms(self) -> Terms:
         """Get the terms."""
-        assert self._terms is not None, "Terms not set!"
+        if self._terms is None:
+            raise ValueError("Terms not set!")
         return self._terms
 
     @terms.setter
     def terms(self, terms: Terms) -> None:
         """Set the terms."""
-        assert self._terms is None, "Terms already set!"
+        enforce(self._terms is None, "Terms already set!")
         self._terms = terms
 
     @property
     def associated_fipa_dialogue(self) -> BaseFipaDialogue:
         """Get the associated fipa dialogue."""
-        assert (
-            self._associated_fipa_dialogue is not None
-        ), "Associated fipa dialogue not set!"
+        if self._associated_fipa_dialogue is None:
+            raise ValueError("Associated fipa dialogue not set!")
         return self._associated_fipa_dialogue
 
     @associated_fipa_dialogue.setter
@@ -115,9 +116,10 @@ class ContractApiDialogue(BaseContractApiDialogue):
         self, associated_fipa_dialogue: BaseFipaDialogue
     ) -> None:
         """Set the associated  fipa dialogue."""
-        assert (
-            self._associated_fipa_dialogue is None
-        ), "Associated fipa dialogue already set!"
+        enforce(
+            self._associated_fipa_dialogue is None,
+            "Associated fipa dialogue already set!",
+        )
         self._associated_fipa_dialogue = associated_fipa_dialogue
 
 
@@ -313,9 +315,8 @@ class SigningDialogue(BaseSigningDialogue):
     @property
     def associated_contract_api_dialogue(self) -> ContractApiDialogue:
         """Get the associated contract api dialogue."""
-        assert (
-            self._associated_contract_api_dialogue is not None
-        ), "Associated contract api dialogue not set!"
+        if self._associated_contract_api_dialogue is None:
+            raise ValueError("Associated contract api dialogue not set!")
         return self._associated_contract_api_dialogue
 
     @associated_contract_api_dialogue.setter
@@ -323,9 +324,10 @@ class SigningDialogue(BaseSigningDialogue):
         self, associated_contract_api_dialogue: ContractApiDialogue
     ) -> None:
         """Set the associated contract api dialogue."""
-        assert (
-            self._associated_contract_api_dialogue is None
-        ), "Associated contract api dialogue already set!"
+        enforce(
+            self._associated_contract_api_dialogue is None,
+            "Associated contract api dialogue already set!",
+        )
         self._associated_contract_api_dialogue = associated_contract_api_dialogue
 
 

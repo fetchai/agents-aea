@@ -144,6 +144,8 @@ def run():
 
 
 class SigningDialogues(Model, BaseSigningDialogues):
+    """Signing dialogues model."""
+
     def __init__(self, **kwargs) -> None:
         """
         Initialize dialogues.

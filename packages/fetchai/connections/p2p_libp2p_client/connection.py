@@ -31,6 +31,7 @@ from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.registries import make_crypto
+from aea.exceptions import enforce
 from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
@@ -51,6 +52,7 @@ class Uri:
         host: Optional[str] = None,
         port: Optional[int] = None,
     ):
+        """Initialise Uri."""
         if uri is not None:
             split = uri.split(":", 1)
             self._host = split[0]
@@ -106,13 +108,15 @@ class P2PLibp2pClientConnection(Connection):
         key_file = self.configuration.config.get("client_key_file")  # Optional[str]
         nodes = self.configuration.config.get("nodes")
 
-        assert nodes is not None, "At least one node should be provided"
+        if nodes is None:
+            raise ValueError("At least one node should be provided")
         nodes = list(cast(List, nodes))
 
         nodes_uris = [node["uri"] for node in nodes]
-        assert len(nodes_uris) == len(
-            nodes
-        ), "Delegate Uri should be provided for each node"
+        enforce(
+            len(nodes_uris) == len(nodes),
+            "Delegate Uri should be provided for each node",
+        )
 
         if (
             self.has_crypto_store
@@ -197,8 +201,10 @@ class P2PLibp2pClientConnection(Connection):
         """
         if self.is_disconnected:  # pragma: nocover
             return
-        assert self._process_messages_task is not None
-        assert self._writer is not None
+        if self._process_messages_task is None:
+            raise ValueError("Message task is not set.")  # pragma: nocover
+        if self._writer is None:
+            raise ValueError("Writer is not set.")  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
@@ -223,7 +229,8 @@ class P2PLibp2pClientConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
@@ -256,20 +263,23 @@ class P2PLibp2pClientConnection(Connection):
         """
         while True:
             data = await self._receive()
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             self._in_queue.put_nowait(data)
             if data is None:
                 break
 
     async def _send(self, data: bytes) -> None:
-        assert self._writer is not None
+        if self._writer is None:
+            raise ValueError("Writer is not set.")  # pragma: nocover
         size = struct.pack("!I", len(data))
         self._writer.write(size)
         self._writer.write(data)
         await self._writer.drain()
 
     async def _receive(self) -> Optional[bytes]:
-        assert self._reader is not None
+        if self._reader is None:
+            raise ValueError("Reader is not set.")  # pragma: nocover
         try:
             self.logger.debug("Waiting for messages...")
             buf = await self._reader.readexactly(4)

@@ -35,6 +35,7 @@ import requests
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
@@ -157,7 +158,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
     @envelope_context.setter
     def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
         """Set envelope_context."""
-        assert self._envelope_context is None, "envelope_context already set!"
+        enforce(self._envelope_context is None, "envelope_context already set!")
         self._envelope_context = envelope_context
 
 
@@ -285,7 +286,8 @@ class SOEFChannel:
     @property
     def loop(self) -> asyncio.AbstractEventLoop:
         """Get event loop."""
-        assert self._loop is not None, "Loop not set!"
+        if self._loop is None:
+            raise ValueError("Loop not set!")  # pragma: nocover
         return self._loop
 
     @staticmethod
@@ -402,8 +404,9 @@ class SOEFChannel:
         :param envelope: the envelope.
         :return: None
         """
-        assert isinstance(envelope.message, OefSearchMessage), ValueError(
-            "Message not of type OefSearchMessage"
+        enforce(
+            isinstance(envelope.message, OefSearchMessage),
+            "Message not of type OefSearchMessage",
         )
         oef_message = cast(OefSearchMessage, envelope.message)
         oef_search_dialogue = cast(
@@ -557,11 +560,11 @@ class SOEFChannel:
         )
         try:
             root = ET.fromstring(response_text)
-            assert root.tag == "response"
+            enforce(root.tag == "response", "Not a response")
             if check_success:
                 el = root.find("./success")
-                assert el is not None, "No success element"
-                assert str(el.text).strip() == "1", "Success is not 1"
+                enforce(el is not None, "No success element")
+                enforce(str(el.text).strip() == "1", "Success is not 1")
             self.logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
@@ -752,7 +755,8 @@ class SOEFChannel:
         :param oef_error_operation: the error code to send back
         :return: None
         """
-        assert self.in_queue is not None, "Inqueue not set!"
+        if self.in_queue is None:
+            raise ValueError("Inqueue not set!")  # pragma: nocover
         message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.OEF_ERROR,
             target_message=oef_search_message,
@@ -810,7 +814,10 @@ class SOEFChannel:
             return
 
         response = await self._generic_oef_command("unregister", check_success=False)
-        assert "<response><message>Goodbye!</message></response>" in response
+        enforce(
+            "<response><message>Goodbye!</message></response>" in response,
+            "No Goodbye response.",
+        )
         self.unique_page_address = None
 
     async def _stop_periodic_ping_task(self) -> None:
@@ -840,7 +847,8 @@ class SOEFChannel:
         """
         await self._stop_periodic_ping_task()
 
-        assert self.in_queue, ValueError("Queue is not set, use connect first!")
+        if self.in_queue is None:
+            raise ValueError("Queue is not set, use connect first!")  # pragma: nocover
         await self._unregister_agent()
 
         if self._find_around_me_processor_task:
@@ -930,7 +938,8 @@ class SOEFChannel:
         :param params: the parameters for the query
         :return: None
         """
-        assert self.in_queue is not None, "Inqueue not set!"
+        if self.in_queue is None:
+            raise ValueError("Inqueue not set!")  # pragma: nocover
         self.logger.debug("Searching in radius={} of myself".format(radius))
 
         response_text = await self._generic_oef_command(
@@ -990,9 +999,8 @@ class SOEFConnection(Connection):
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
-        assert (
-            api_key is not None and soef_addr is not None and soef_port is not None
-        ), "api_key, soef_addr and soef_port must be set!"
+        if api_key is None or soef_addr is None or soef_port is None:  # pragma: nocover
+            raise ValueError("api_key, soef_addr and soef_port must be set!")
 
         self.api_key = api_key
         self.soef_addr = soef_addr
@@ -1033,7 +1041,8 @@ class SOEFConnection(Connection):
         """
         if self.is_disconnected:  # pragma: nocover
             return
-        assert self.in_queue is not None
+        if self.in_queue is None:
+            raise ValueError("In queue not set.")  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         await self.channel.disconnect()
         self._state.set(ConnectionStates.disconnected)
@@ -1045,7 +1054,8 @@ class SOEFConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
-            assert self.in_queue is not None
+            if self.in_queue is None:
+                raise ValueError("In queue not set.")  # pragma: nocover
             envelope = await self.in_queue.get()
             if envelope is None:  # pragma: nocover
                 self.logger.debug("Received None.")

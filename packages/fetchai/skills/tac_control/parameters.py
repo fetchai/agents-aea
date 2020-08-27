@@ -22,6 +22,7 @@
 import datetime
 from typing import Dict, Set
 
+from aea.exceptions import enforce
 from aea.helpers.search.models import Location
 from aea.skills.base import Model
 
@@ -51,11 +52,12 @@ class Parameters(Model):
         self._whitelist = set(kwargs.pop("whitelist", []))  # type: Set[str]
         self._location = kwargs.pop("location", DEFAULT_LOCATION)
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        assert (
+        enforce(
             len(self._service_data) == 2
             and "key" in self._service_data
-            and "value" in self._service_data
-        ), "service_data must contain keys `key` and `value`"
+            and "value" in self._service_data,
+            "service_data must contain keys `key` and `value`",
+        )
         self._version_id = self._service_data["value"]  # type: str
 
         self._agent_location = {

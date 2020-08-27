@@ -297,7 +297,7 @@ def test_run_unknown_private_key():
         standalone_mode=False,
     )
 
-    s = "Item not registered with id 'fetchai_not'."
+    s = "Unsupported identifier `fetchai_not` in private key paths. Supported identifiers: ['cosmos', 'ethereum', 'fetchai']."
     assert result.exception.message == s
 
     os.chdir(cwd)

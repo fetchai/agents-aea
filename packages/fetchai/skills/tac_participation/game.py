@@ -21,6 +21,7 @@
 from enum import Enum
 from typing import Dict, List, Optional
 
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.mail.base import Address
 from aea.skills.base import Model
@@ -100,7 +101,9 @@ class Configuration:
     @property
     def tx_fee(self) -> int:
         """Transaction fee for the TAC instance."""
-        assert len(self._fee_by_currency_id) == 1, "More than one currency id present!"
+        enforce(
+            len(self._fee_by_currency_id) == 1, "More than one currency id present!"
+        )
         value = next(iter(self._fee_by_currency_id.values()))
         return value
 
@@ -149,26 +152,29 @@ class Configuration:
         Check the consistency of the game configuration.
 
         :return: None
-        :raises: AssertionError: if some constraint is not satisfied.
+        :raises: AEAEnforceError: if some constraint is not satisfied.
         """
-        assert self.version_id is not None, "A version id must be set."
-        assert (
-            len(self.fee_by_currency_id) == 1 and self.tx_fee >= 0
-        ), "Tx fee must be non-negative."
-        assert self.nb_agents > 1, "Must have at least two agents."
-        assert self.nb_goods > 1, "Must have at least two goods."
-        assert (
-            len(self.agent_addresses) == self.nb_agents
-        ), "There must be one address for each agent."
-        assert (
-            len(set(self.agent_names)) == self.nb_agents
-        ), "Agents' names must be unique."
-        assert (
-            len(self.good_ids) == self.nb_goods
-        ), "There must be one id for each good."
-        assert (
-            len(set(self.good_names)) == self.nb_goods
-        ), "Goods' names must be unique."
+        enforce(self.version_id is not None, "A version id must be set.")
+        enforce(
+            len(self.fee_by_currency_id) == 1 and self.tx_fee >= 0,
+            "Tx fee must be non-negative.",
+        )
+        enforce(self.nb_agents > 1, "Must have at least two agents.")
+        enforce(self.nb_goods > 1, "Must have at least two goods.")
+        enforce(
+            len(self.agent_addresses) == self.nb_agents,
+            "There must be one address for each agent.",
+        )
+        enforce(
+            len(set(self.agent_names)) == self.nb_agents,
+            "Agents' names must be unique.",
+        )
+        enforce(
+            len(self.good_ids) == self.nb_goods, "There must be one id for each good."
+        )
+        enforce(
+            len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
+        )
 
 
 class Game(Model):
@@ -218,51 +224,54 @@ class Game(Model):
     @property
     def contract_address(self) -> str:
         """Get the contract address."""
-        assert self._contract_address is not None, "Contract address not set!"
+        if self._contract_address is None:
+            raise AEAEnforceError("Contract address not set!")
         return self._contract_address
 
     @contract_address.setter
     def contract_address(self, contract_address: str) -> None:
         """Set the contract address."""
-        assert self._contract_address is None, "Contract address already set!"
+        enforce(self._contract_address is None, "Contract address already set!")
         self._contract_address = contract_address
 
     @property
     def tac_dialogue(self) -> TacDialogue:
         """Retrieve the tac dialogue."""
-        assert self._tac_dialogue is not None, "TacDialogue not set!"
+        if self._tac_dialogue is None:
+            raise AEAEnforceError("TacDialogue not set!")
         return self._tac_dialogue
 
     @tac_dialogue.setter
     def tac_dialogue(self, tac_dialogue: TacDialogue) -> None:
         """Set the tac dialogue."""
-        assert self._tac_dialogue is None, "TacDialogue already set!"
+        enforce(self._tac_dialogue is None, "TacDialogue already set!")
         self._tac_dialogue = tac_dialogue
 
     @property
     def state_update_dialogue(self) -> StateUpdateDialogue:
         """Retrieve the state_update dialogue."""
-        assert self._state_update_dialogue is not None, "StateUpdateDialogue not set!"
+        if self._state_update_dialogue is None:
+            raise AEAEnforceError("StateUpdateDialogue not set!")
         return self._state_update_dialogue
 
     @state_update_dialogue.setter
     def state_update_dialogue(self, state_update_dialogue: StateUpdateDialogue) -> None:
         """Set the state_update dialogue."""
-        assert self._state_update_dialogue is None, "StateUpdateDialogue already set!"
+        enforce(self._state_update_dialogue is None, "StateUpdateDialogue already set!")
         self._state_update_dialogue = state_update_dialogue
 
     @property
     def expected_controller_addr(self) -> Address:
         """Get the expected controller pbk."""
-        assert (
-            self._expected_controller_addr is not None
-        ), "Expected controller address not assigned!"
+        if self._expected_controller_addr is None:
+            raise AEAEnforceError("Expected controller address not assigned!")
         return self._expected_controller_addr
 
     @property
     def conf(self) -> Configuration:
         """Get the game configuration."""
-        assert self._conf is not None, "Game configuration not assigned!"
+        if self._conf is None:
+            raise AEAEnforceError("Game configuration not assigned!")
         return self._conf
 
     def init(self, tac_message: TacMessage, controller_addr: Address) -> None:
@@ -274,15 +283,18 @@ class Game(Model):
 
         :return: None
         """
-        assert (
-            tac_message.performative == TacMessage.Performative.GAME_DATA
-        ), "Wrong TacMessage for initialization of TAC game."
-        assert (
-            controller_addr == self.expected_controller_addr
-        ), "TacMessage from unexpected controller."
-        assert (
-            tac_message.version_id == self.expected_version_id
-        ), "TacMessage for unexpected game."
+        enforce(
+            tac_message.performative == TacMessage.Performative.GAME_DATA,
+            "Wrong TacMessage for initialization of TAC game.",
+        )
+        enforce(
+            controller_addr == self.expected_controller_addr,
+            "TacMessage from unexpected controller.",
+        )
+        enforce(
+            tac_message.version_id == self.expected_version_id,
+            "TacMessage for unexpected game.",
+        )
         self._conf = Configuration(
             tac_message.version_id,
             tac_message.fee_by_currency_id,

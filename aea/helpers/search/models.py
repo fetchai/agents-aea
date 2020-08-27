@@ -27,6 +27,8 @@ from enum import Enum
 from math import asin, cos, radians, sin, sqrt
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
 
+from aea.exceptions import enforce
+
 logger = logging.getLogger(__name__)
 
 
@@ -348,7 +350,7 @@ class ConstraintType:
         """
         self.type = ConstraintTypes(type_)
         self.value = value
-        assert self.check_validity(), "ConstraintType initialization inconsistent."
+        enforce(self.check_validity(), "ConstraintType initialization inconsistent.")
 
     def check_validity(self):
         """
@@ -359,41 +361,90 @@ class ConstraintType:
         """
         try:
             if self.type == ConstraintTypes.EQUAL:
-                assert isinstance(self.value, (int, float, str, bool))
+                enforce(
+                    isinstance(self.value, (int, float, str, bool)),
+                    f"Expected one of type in (int, float, str, bool), got {self.value}",
+                )
             elif self.type == ConstraintTypes.NOT_EQUAL:
-                assert isinstance(self.value, (int, float, str, bool))
+                enforce(
+                    isinstance(self.value, (int, float, str, bool)),
+                    f"Expected one of type in (int, float, str, bool), got {self.value}",
+                )
             elif self.type == ConstraintTypes.LESS_THAN:
-                assert isinstance(self.value, (int, float, str))
+                enforce(
+                    isinstance(self.value, (int, float, str)),
+                    f"Expected one of type in (int, float, str), got {self.value}",
+                )
             elif self.type == ConstraintTypes.LESS_THAN_EQ:
-                assert isinstance(self.value, (int, float, str))
+                enforce(
+                    isinstance(self.value, (int, float, str)),
+                    f"Expected one of type in (int, float, str), got {self.value}",
+                )
             elif self.type == ConstraintTypes.GREATER_THAN:
-                assert isinstance(self.value, (int, float, str))
+                enforce(
+                    isinstance(self.value, (int, float, str)),
+                    f"Expected one of type in (int, float, str), got {self.value}",
+                )
             elif self.type == ConstraintTypes.GREATER_THAN_EQ:
-                assert isinstance(self.value, (int, float, str))
+                enforce(
+                    isinstance(self.value, (int, float, str)),
+                    f"Expected one of type in (int, float, str), got {self.value}",
+                )
             elif self.type == ConstraintTypes.WITHIN:
-                assert isinstance(self.value, (list, tuple))
-                assert len(self.value) == 2
-                assert isinstance(self.value[0], type(self.value[1]))
-                assert isinstance(self.value[1], type(self.value[0]))
+                enforce(
+                    isinstance(self.value, (list, tuple)),
+                    f"Expected one of type in (list, tuple), got {self.value}",
+                )
+                enforce(
+                    len(self.value) == 2, f"Expected length=2, got {len(self.value)}"
+                )
+                enforce(
+                    isinstance(self.value[0], type(self.value[1])), "Invalid types."
+                )
+                enforce(
+                    isinstance(self.value[1], type(self.value[0])), "Invalid types."
+                )
             elif self.type == ConstraintTypes.IN:
-                assert isinstance(self.value, (list, tuple, set))
+                enforce(
+                    isinstance(self.value, (list, tuple, set)),
+                    f"Expected one of type in (list, tuple, set), got {self.value}",
+                )
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
-                    assert all(isinstance(obj, _type) for obj in self.value)
+                    enforce(
+                        all(isinstance(obj, _type) for obj in self.value),
+                        "Invalid types.",
+                    )
             elif self.type == ConstraintTypes.NOT_IN:
-                assert isinstance(self.value, (list, tuple, set))
+                enforce(
+                    isinstance(self.value, (list, tuple, set)),
+                    f"Expected one of type in (list, tuple, set), got {self.value}",
+                )
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
-                    assert all(isinstance(obj, _type) for obj in self.value)
+                    enforce(
+                        all(isinstance(obj, _type) for obj in self.value),
+                        "Invalid types.",
+                    )
             elif self.type == ConstraintTypes.DISTANCE:
-                assert isinstance(self.value, (list, tuple))
-                assert len(self.value) == 2
-                assert isinstance(self.value[0], Location)
-                assert isinstance(self.value[1], float)
+                enforce(
+                    isinstance(self.value, (list, tuple)),
+                    f"Expected one of type in (list, tuple), got {self.value}",
+                )
+                enforce(
+                    len(self.value) == 2, f"Expected length=2, got {len(self.value)}"
+                )
+                enforce(
+                    isinstance(self.value[0], Location),
+                    "Invalid type, expected Location.",
+                )
+                enforce(
+                    isinstance(self.value[1], float), "Invalid type, expected Location."
+                )
             else:  # pragma: nocover
                 raise ValueError("Type not recognized.")
-        except (AssertionError, ValueError):
-            return False
+        except ValueError:
+            return False  # pragma: nocover
 
         return True
 
@@ -473,7 +524,8 @@ class ConstraintType:
         if self.type == ConstraintTypes.NOT_IN:
             return value not in self.value
         if self.type == ConstraintTypes.DISTANCE:
-            assert isinstance(value, Location), "Value must be of type Location."
+            if not isinstance(value, Location):  # pragma: nocover
+                raise ValueError("Value must be of type Location.")
             location = cast(Location, self.value[0])
             distance = self.value[1]
             return location.distance(value) <= distance

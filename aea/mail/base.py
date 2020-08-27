@@ -24,6 +24,7 @@ from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.configurations.base import PackageId, ProtocolId, PublicId
+from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
 
@@ -410,13 +411,16 @@ class Envelope:
     def _check_consistency(message: Message, to: str, sender: str) -> Message:
         """Check consistency of sender and to."""
         if message.has_to:
-            assert message.to == to, "To specified on message does not match envelope."
+            enforce(
+                message.to == to, "To specified on message does not match envelope."
+            )
         else:
             message.to = to
         if message.has_sender:
-            assert (
-                message.sender == sender
-            ), "Sender specified on message does not match envelope."
+            enforce(
+                message.sender == sender,
+                "Sender specified on message does not match envelope.",
+            )
         else:
             message.sender = sender
         return message

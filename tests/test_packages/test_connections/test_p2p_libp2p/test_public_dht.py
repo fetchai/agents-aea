@@ -330,7 +330,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
 
 @pytest.mark.integration
 class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
-    """"Test that public DHT's relay service is working properly, using aea cli"""
+    """Test that public DHT's relay service is working properly, using aea cli"""
 
     @libp2p_log_on_failure
     def test_connectivity(self):

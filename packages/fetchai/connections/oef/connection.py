@@ -32,6 +32,7 @@ from oef.messages import CFP_TYPES, PROPOSE_TYPES
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.mail.base import Address, Envelope, EnvelopeContext
@@ -92,7 +93,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
     @envelope_context.setter
     def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
         """Set envelope_context."""
-        assert self._envelope_context is None, "envelope_context already set!"
+        enforce(self._envelope_context is None, "envelope_context already set!")
         self._envelope_context = envelope_context
 
 
@@ -427,9 +428,10 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        assert isinstance(
-            envelope.message, OefSearchMessage
-        ), "Message not of type OefSearchMessage"
+        enforce(
+            isinstance(envelope.message, OefSearchMessage),
+            "Message not of type OefSearchMessage",
+        )
         oef_message = cast(OefSearchMessage, envelope.message)
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
@@ -478,8 +480,8 @@ class OEFChannel(OEFAgent):
         self._in_queue = None
 
     def _check_loop_and_queue(self):
-        assert self.in_queue is not None
-        assert self.loop is not None
+        enforce(self.in_queue is not None, "In queue is not set!")
+        enforce(self.loop is not None, "Loop is not set!")
 
     async def connect(  # pylint: disable=invalid-overridden-method,arguments-differ
         self,
@@ -549,7 +551,8 @@ class OEFConnection(Connection):
         super().__init__(**kwargs)
         addr = cast(str, self.configuration.config.get("addr"))
         port = cast(int, self.configuration.config.get("port"))
-        assert addr is not None and port is not None, "addr and port must be set!"
+        if addr is None or port is None:
+            raise ValueError("addr and port must be set!")  # pragma: nocover
         self.oef_addr = addr
         self.oef_port = port
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port)  # type: ignore

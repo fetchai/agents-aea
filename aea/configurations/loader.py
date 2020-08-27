@@ -46,6 +46,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
+from aea.exceptions import enforce
 from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -389,9 +390,10 @@ class ConfigLoader(Generic[T]):
         non_configurable_fields = set(configuration.keys()).difference(
             configurable_fields
         )
-        assert (
-            len(non_configurable_fields) == 0
-        ), f"Bad configuration for component {component_id}: {non_configurable_fields} are non-configurable fields."
+        enforce(
+            len(non_configurable_fields) == 0,
+            f"Bad configuration for component {component_id}: {non_configurable_fields} are non-configurable fields.",
+        )
 
 
 class ConfigLoaders:

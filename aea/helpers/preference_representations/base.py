@@ -22,6 +22,8 @@
 import math
 from typing import Dict
 
+from aea.exceptions import enforce
+
 
 def logarithmic_utility(
     utility_params_by_good_id: Dict[str, float],
@@ -36,9 +38,10 @@ def logarithmic_utility(
     :param quantity_shift: a non-negative factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
     :return: utility value
     """
-    assert (
-        quantity_shift >= 0
-    ), "The quantity_shift argument must be a non-negative integer."
+    enforce(
+        quantity_shift >= 0,
+        "The quantity_shift argument must be a non-negative integer.",
+    )
     goodwise_utility = [
         utility_params_by_good_id[good_id] * math.log(quantity + quantity_shift)
         if quantity + quantity_shift > 0

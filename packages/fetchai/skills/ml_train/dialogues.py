@@ -30,6 +30,7 @@ This module contains the classes required for dialogue management.
 
 from typing import Optional, Type
 
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.mail.base import Address
@@ -157,17 +158,16 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
     @property
     def associated_ml_trade_dialogue(self) -> MlTradeDialogue:
         """Get associated_ml_trade_dialogue."""
-        assert (
-            self._associated_ml_trade_dialogue is not None
-        ), "MlTradeDialogue not set!"
+        if self._associated_ml_trade_dialogue is None:
+            raise AEAEnforceError("MlTradeDialogue not set!")
         return self._associated_ml_trade_dialogue
 
     @associated_ml_trade_dialogue.setter
     def associated_ml_trade_dialogue(self, ml_trade_dialogue: MlTradeDialogue) -> None:
         """Set associated_ml_trade_dialogue"""
-        assert (
-            self._associated_ml_trade_dialogue is None
-        ), "MlTradeDialogue already set!"
+        enforce(
+            self._associated_ml_trade_dialogue is None, "MlTradeDialogue already set!"
+        )
         self._associated_ml_trade_dialogue = ml_trade_dialogue
 
 
@@ -265,9 +265,8 @@ class SigningDialogue(BaseSigningDialogue):
     @property
     def associated_ledger_api_dialogue(self) -> LedgerApiDialogue:
         """Get associated_ledger_api_dialogue."""
-        assert (
-            self._associated_ledger_api_dialogue is not None
-        ), "LedgerApiDialogue not set!"
+        if self._associated_ledger_api_dialogue is None:
+            raise AEAEnforceError("LedgerApiDialogue not set!")
         return self._associated_ledger_api_dialogue
 
     @associated_ledger_api_dialogue.setter
@@ -275,9 +274,10 @@ class SigningDialogue(BaseSigningDialogue):
         self, ledger_api_dialogue: LedgerApiDialogue
     ) -> None:
         """Set associated_ledger_api_dialogue"""
-        assert (
-            self._associated_ledger_api_dialogue is None
-        ), "LedgerApiDialogue already set!"
+        enforce(
+            self._associated_ledger_api_dialogue is None,
+            "LedgerApiDialogue already set!",
+        )
         self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 

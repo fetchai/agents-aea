@@ -26,6 +26,7 @@ from enum import Enum
 from typing import Dict, List, Optional, cast
 
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
@@ -132,13 +133,15 @@ class Configuration:
         Check the consistency of the game configuration.
 
         :return: None
-        :raises: AssertionError: if some constraint is not satisfied.
+        :raises: AEAEnforceError: if some constraint is not satisfied.
         """
-        assert self.version_id is not None, "A version id must be set."
-        assert self._tx_fee >= 0, "Tx fee must be non-negative."
-        assert len(self.agent_addr_to_name) >= 2, "Must have at least two agents."
-        assert len(self.good_id_to_name) >= 2, "Must have at least two goods."
-        assert len(self.currency_id_to_name) == 1, "Must have exactly one currency."
+        if self.version_id is None:
+            raise AEAEnforceError("A version id must be set.")
+
+        enforce(self._tx_fee >= 0, "Tx fee must be non-negative.")
+        enforce(len(self.agent_addr_to_name) >= 2, "Must have at least two agents.")
+        enforce(len(self.good_id_to_name) >= 2, "Must have at least two goods.")
+        enforce(len(self.currency_id_to_name) == 1, "Must have exactly one currency.")
 
 
 class Initialization:
@@ -218,49 +221,76 @@ class Initialization:
         Check the consistency of the game configuration.
 
         :return: None
-        :raises: AssertionError: if some constraint is not satisfied.
+        :raises: AEAEnforceError: if some constraint is not satisfied.
         """
-        assert all(
-            c_e >= 0
-            for currency_endowments in self.agent_addr_to_currency_endowments.values()
-            for c_e in currency_endowments.values()
-        ), "Currency endowments must be non-negative."
-        assert all(
-            p > 0
-            for params in self.agent_addr_to_exchange_params.values()
-            for p in params.values()
-        ), "ExchangeParams must be strictly positive."
-        assert all(
-            g_e > 0
-            for good_endowments in self.agent_addr_to_good_endowments.values()
-            for g_e in good_endowments.values()
-        ), "Good endowments must be strictly positive."
-        assert all(
-            p > 0
-            for params in self.agent_addr_to_utility_params.values()
-            for p in params.values()
-        ), "UtilityParams must be strictly positive."
-        assert len(self.agent_addr_to_good_endowments.keys()) == len(
-            self.agent_addr_to_currency_endowments.keys()
-        ), "Length of endowments must be the same."
-        assert len(self.agent_addr_to_exchange_params.keys()) == len(
-            self.agent_addr_to_utility_params.keys()
-        ), "Length of params must be the same."
-        assert all(
-            len(self.good_id_to_eq_prices.values()) == len(eq_good_holdings)
-            for eq_good_holdings in self.agent_addr_to_eq_good_holdings.values()
-        ), "Length of eq_prices and an element of eq_good_holdings must be the same."
-        assert len(self.agent_addr_to_eq_good_holdings.values()) == len(
-            self.agent_addr_to_eq_currency_holdings.values()
-        ), "Length of eq_good_holdings and eq_currency_holdings must be the same."
-        assert all(
-            len(self.agent_addr_to_exchange_params[agent_addr]) == len(endowments)
-            for agent_addr, endowments in self.agent_addr_to_currency_endowments.items()
-        ), "Dimensions for exchange_params and currency_endowments rows must be the same."
-        assert all(
-            len(self.agent_addr_to_utility_params[agent_addr]) == len(endowments)
-            for agent_addr, endowments in self.agent_addr_to_good_endowments.items()
-        ), "Dimensions for utility_params and good_endowments rows must be the same."
+        enforce(
+            all(
+                c_e >= 0
+                for currency_endowments in self.agent_addr_to_currency_endowments.values()
+                for c_e in currency_endowments.values()
+            ),
+            "Currency endowments must be non-negative.",
+        )
+        enforce(
+            all(
+                p > 0
+                for params in self.agent_addr_to_exchange_params.values()
+                for p in params.values()
+            ),
+            "ExchangeParams must be strictly positive.",
+        )
+        enforce(
+            all(
+                g_e > 0
+                for good_endowments in self.agent_addr_to_good_endowments.values()
+                for g_e in good_endowments.values()
+            ),
+            "Good endowments must be strictly positive.",
+        )
+        enforce(
+            all(
+                p > 0
+                for params in self.agent_addr_to_utility_params.values()
+                for p in params.values()
+            ),
+            "UtilityParams must be strictly positive.",
+        )
+        enforce(
+            len(self.agent_addr_to_good_endowments.keys())
+            == len(self.agent_addr_to_currency_endowments.keys()),
+            "Length of endowments must be the same.",
+        )
+        enforce(
+            len(self.agent_addr_to_exchange_params.keys())
+            == len(self.agent_addr_to_utility_params.keys()),
+            "Length of params must be the same.",
+        )
+        enforce(
+            all(
+                len(self.good_id_to_eq_prices.values()) == len(eq_good_holdings)
+                for eq_good_holdings in self.agent_addr_to_eq_good_holdings.values()
+            ),
+            "Length of eq_prices and an element of eq_good_holdings must be the same.",
+        )
+        enforce(
+            len(self.agent_addr_to_eq_good_holdings.values())
+            == len(self.agent_addr_to_eq_currency_holdings.values()),
+            "Length of eq_good_holdings and eq_currency_holdings must be the same.",
+        )
+        enforce(
+            all(
+                len(self.agent_addr_to_exchange_params[agent_addr]) == len(endowments)
+                for agent_addr, endowments in self.agent_addr_to_currency_endowments.items()
+            ),
+            "Dimensions for exchange_params and currency_endowments rows must be the same.",
+        )
+        enforce(
+            all(
+                len(self.agent_addr_to_utility_params[agent_addr]) == len(endowments)
+                for agent_addr, endowments in self.agent_addr_to_good_endowments.items()
+            ),
+            "Dimensions for utility_params and good_endowments rows must be the same.",
+        )
 
 
 class Transaction(Terms):
@@ -351,9 +381,10 @@ class Transaction(Terms):
         :param message: the message
         :return: Transaction
         """
-        assert (
-            message.performative == TacMessage.Performative.TRANSACTION
-        ), "Wrong performative"
+        enforce(
+            message.performative == TacMessage.Performative.TRANSACTION,
+            "Wrong performative",
+        )
         sender_is_seller = all(
             [value >= 0 for value in message.amount_by_currency_id.values()]
         )
@@ -369,9 +400,10 @@ class Transaction(Terms):
             sender_signature=message.sender_signature,
             counterparty_signature=message.counterparty_signature,
         )
-        assert (
-            transaction.id == message.transaction_id
-        ), "Transaction content does not match hash."
+        enforce(
+            transaction.id == message.transaction_id,
+            "Transaction content does not match hash.",
+        )
         return transaction
 
     def __eq__(self, other):
@@ -404,11 +436,14 @@ class AgentState:
         :param quantities_by_good_id: the quantities for each good.
         :param utility_params_by_good_id: the utility params for every good.
         """
-        assert len(amount_by_currency_id.keys()) == len(
-            exchange_params_by_currency_id.keys()
+        enforce(
+            len(amount_by_currency_id.keys())
+            == len(exchange_params_by_currency_id.keys()),
+            "Different number of elements in amount_by_currency_id and exchange_params_by_currency_id",
         )
-        assert len(quantities_by_good_id.keys()) == len(
-            utility_params_by_good_id.keys()
+        enforce(
+            len(quantities_by_good_id.keys()) == len(utility_params_by_good_id.keys()),
+            "Different number of elements in quantities_by_good_id and utility_params_by_good_id",
         )
         self._agent_address = agent_address
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
@@ -532,7 +567,7 @@ class AgentState:
         :param tx: the transaction.
         :return: None
         """
-        assert self.is_consistent_transaction(tx), "Inconsistent transaction."
+        enforce(self.is_consistent_transaction(tx), "Inconsistent transaction.")
 
         new_amount_by_currency_id = self.amount_by_currency_id
         if self.agent_address == tx.sender_address:
@@ -699,31 +734,29 @@ class Game(Model):
     @property
     def conf(self) -> Configuration:
         """Get game configuration."""
-        assert self._conf is not None, "Call create before calling configuration."
+        if self._conf is None:
+            raise AEAEnforceError("Call create before calling configuration.")
         return self._conf
 
     @property
     def initialization(self) -> Initialization:
         """Get game initialization."""
-        assert (
-            self._initialization is not None
-        ), "Call create before calling initialization."
+        if self._initialization is None:
+            raise AEAEnforceError("Call create before calling initialization.")
         return self._initialization
 
     @property
     def initial_agent_states(self) -> Dict[str, AgentState]:
         """Get initial state of each agent."""
-        assert (
-            self._initial_agent_states is not None
-        ), "Call create before calling initial_agent_states."
+        if self._initial_agent_states is None:
+            raise AEAEnforceError("Call create before calling initial_agent_states.")
         return self._initial_agent_states
 
     @property
     def current_agent_states(self) -> Dict[str, AgentState]:
         """Get current state of each agent."""
-        assert (
-            self._current_agent_states is not None
-        ), "Call create before calling current_agent_states."
+        if self._current_agent_states is None:
+            raise AEAEnforceError("Call create before calling current_agent_states.")
         return self._current_agent_states
 
     @property
@@ -733,7 +766,7 @@ class Game(Model):
 
     def create(self):
         """Create a game."""
-        assert not self.phase == Phase.GAME
+        enforce(self.phase != Phase.GAME, "A game phase is already active.")
         self._phase = Phase.GAME_SETUP
         self._generate()
 
@@ -899,7 +932,7 @@ class Game(Model):
 
         :param tx: the transaction.
         :return: True if the transaction is valid, False otherwise.
-        :raises: AssertionError: if the data in the transaction are not allowed (e.g. negative amount).
+        :raises: AEAEnforceError: if the data in the transaction are not allowed (e.g. negative amount).
         """
         sender_state = self.current_agent_states[tx.sender_address]
         counterparty_state = self.current_agent_states[tx.counterparty_address]
@@ -914,12 +947,11 @@ class Game(Model):
 
         :param tx: the game transaction.
         :return: None
-        :raises: AssertionError if the transaction is not valid.
+        :raises: AEAEnforceError if the transaction is not valid.
         """
-        assert (
-            self._current_agent_states is not None
-        ), "Call create before calling current_agent_states."
-        assert self.is_transaction_valid(tx), "Transaction is not valid."
+        if self._current_agent_states is None:
+            raise AEAEnforceError("Call create before calling current_agent_states.")
+        enforce(self.is_transaction_valid(tx), "Transaction is not valid.")
         sender_state = self.current_agent_states[tx.sender_address]
         counterparty_state = self.current_agent_states[tx.counterparty_address]
 

@@ -31,6 +31,8 @@ from asyncio import AbstractEventLoop
 from shutil import rmtree
 from typing import IO, Optional
 
+from aea.exceptions import enforce
+
 _default_logger = logging.getLogger(__name__)
 
 PIPE_CONN_TIMEOUT = 10.0
@@ -162,9 +164,10 @@ class PosixNamedPipeProtocol:
             raise e  # pragma: no cover
 
         # setup reader
-        assert (
-            self._in != -1 and self._out != -1 and self._loop is not None
-        ), "Incomplete initialization."
+        enforce(
+            self._in != -1 and self._out != -1 and self._loop is not None,
+            "Incomplete initialization.",
+        )
         self._stream_reader = asyncio.StreamReader(loop=self._loop)
         self._reader_protocol = asyncio.StreamReaderProtocol(
             self._stream_reader, loop=self._loop
@@ -179,7 +182,8 @@ class PosixNamedPipeProtocol:
     @property
     def __reader_protocol(self) -> asyncio.StreamReaderProtocol:
         """Get reader protocol."""
-        assert self._reader_protocol is not None, "reader protocol not set!"
+        if self._reader_protocol is None:
+            raise ValueError("reader protocol not set!")  # pragma: nocover
         return self._reader_protocol
 
     async def write(self, data: bytes) -> None:
@@ -199,9 +203,8 @@ class PosixNamedPipeProtocol:
 
         :return: read bytes
         """
-        assert (
-            self._stream_reader is not None
-        ), "StreamReader not set, call connect first!"
+        if self._stream_reader is None:  # pragma: nocover
+            raise ValueError("StreamReader not set, call connect first!")
         try:
             self.logger.debug("waiting for messages (in={})...".format(self._in_path))
             buf = await self._stream_reader.readexactly(4)
@@ -227,7 +230,8 @@ class PosixNamedPipeProtocol:
     async def close(self) -> None:
         """ Disconnect pipe """
         self.logger.debug("closing pipe (in={})...".format(self._in_path))
-        assert self._fileobj is not None, "Pipe not connected"
+        if self._fileobj is None:
+            raise ValueError("Pipe not connected")  # pragma: nocover
         try:
             # TOFIX(LR) Hack for MacOSX
             size = struct.pack("!I", 0)
@@ -270,7 +274,8 @@ class TCPSocketProtocol:
 
         :param data: bytes to write
         """
-        assert self._writer is not None
+        if self._writer is None:
+            raise ValueError("writer not set!")  # pragma: nocover
         self.logger.debug("writing {}...".format(len(data)))
         size = struct.pack("!I", len(data))
         self._writer.write(size + data)
@@ -346,7 +351,8 @@ class TCPSocketChannel(IPCChannel):
         self._server = await asyncio.start_server(
             self._handle_connection, host="127.0.0.1", port=self._port
         )
-        assert self._server.sockets is not None
+        if self._server.sockets is None:
+            raise ValueError("Server sockets is None!")  # pragma: nocover
         self._port = self._server.sockets[0].getsockname()[1]
         self.logger.debug("socket pipe rdv point: {}".format(self._port))
 
@@ -363,7 +369,8 @@ class TCPSocketChannel(IPCChannel):
     async def _handle_connection(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     ):
-        assert self._connected is not None
+        if self._connected is None:
+            raise ValueError("Connected is None!")  # pragma: nocover
         self._connected.set()
         self._sock = TCPSocketProtocol(
             reader, writer, logger=self.logger, loop=self._loop
@@ -375,8 +382,8 @@ class TCPSocketChannel(IPCChannel):
 
         :param data: bytes to write
         """
-
-        assert self._sock is not None, "Socket pipe not connected"
+        if self._sock is None:
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -385,13 +392,14 @@ class TCPSocketChannel(IPCChannel):
 
         :param data: read bytes
         """
-
-        assert self._sock is not None, "Socket pipe not connected"
+        if self._sock is None:
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         return await self._sock.read()
 
     async def close(self) -> None:
         """ Disconnect from channel and clean it up """
-        assert self._sock is not None, "Socket pipe not connected"
+        if self._sock is None:
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.close()
 
     @property
@@ -554,8 +562,8 @@ class TCPSocketChannelClient(IPCChannelClient):
 
         :param data: bytes to write
         """
-
-        assert self._sock is not None, "Socket pipe not connected"
+        if self._sock is None:
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -564,13 +572,14 @@ class TCPSocketChannelClient(IPCChannelClient):
 
         :return: read bytes
         """
-
-        assert self._sock is not None, "Socket pipe not connected"
+        if self._sock is None:
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         return await self._sock.read()
 
     async def close(self) -> None:
         """ Disconnect from communication channel """
-        assert self._sock is not None, "Socket pipe not connected"
+        if self._sock is None:
+            raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.close()
 
 
@@ -621,8 +630,8 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
 
         :param data: bytes to write
         """
-
-        assert self._pipe is not None, "Pipe not connected"
+        if self._pipe is None:
+            raise ValueError("Pipe not connected.")  # pragma: nocover
         await self._pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -631,13 +640,14 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
 
         :return: read bytes
         """
-
-        assert self._pipe is not None, "Pipe not connected"
+        if self._pipe is None:
+            raise ValueError("Pipe not connected.")  # pragma: nocover
         return await self._pipe.read()
 
     async def close(self) -> None:
         """ Disconnect from communication channel """
-        assert self._pipe is not None, "Pipe not connected"
+        if self._pipe is None:
+            raise ValueError("Pipe not connected.")  # pragma: nocover
         return await self._pipe.close()
 
 

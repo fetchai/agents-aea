@@ -230,7 +230,8 @@ class AEATestWrapper:
 
     def stop_loop(self) -> None:
         """Stop agents loop in dedicated thread, close thread."""
-        assert self._thread is not None, "Thread not set, call start_loop first."
+        if self._thread is None:
+            raise ValueError("Thread not set, call start_loop first.")
         self.aea.stop()
         self._thread.join()
 

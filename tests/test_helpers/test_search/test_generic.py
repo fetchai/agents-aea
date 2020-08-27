@@ -20,6 +20,7 @@
 
 import pytest
 
+from aea.exceptions import AEAEnforceError
 from aea.helpers.search.generic import GenericDataModel
 
 
@@ -31,20 +32,20 @@ def test_generic_data_model():
     )
 
     # bad type
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         GenericDataModel(
             "test",
             {"attr1": {"name": "attr1", "type": "bad type", "is_required": True}},
         )
 
     # bad name
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         GenericDataModel(
             "test", {"attr1": {"name": 1231, "type": "str", "is_required": True}}
         )
 
     # bad is required
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         GenericDataModel(
             "test", {"attr1": {"name": "attr1", "type": "str", "is_required": "True"}}
         )

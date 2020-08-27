@@ -115,18 +115,23 @@ def _process_envelopes(
     """
     envelope = _try_construct_envelope(agent_name, dialogues)
     if envelope is None:
-        if not inbox.empty():
-            envelope = inbox.get_nowait()
-            assert envelope is not None, "Could not recover envelope from inbox."
-            click.echo(_construct_message("received", envelope))
-        else:
-            click.echo("Received no new envelope!")
+        _check_for_incoming_envelope(inbox)
     else:
         outbox.put(envelope)
         click.echo(_construct_message("sending", envelope))
 
 
-def _construct_message(action_name, envelope):
+def _check_for_incoming_envelope(inbox: InBox):
+    if not inbox.empty():
+        envelope = inbox.get_nowait()
+        if envelope is None:
+            raise ValueError("Could not recover envelope from inbox.")
+        click.echo(_construct_message("received", envelope))
+    else:
+        click.echo("Received no new envelope!")
+
+
+def _construct_message(action_name: str, envelope: Envelope):
     action_name = action_name.title()
     msg = (
         DefaultMessage.serializer.decode(envelope.message)

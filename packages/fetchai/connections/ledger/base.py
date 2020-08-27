@@ -105,12 +105,16 @@ class RequestDispatcher(ABC):
         :param envelope: the envelope.
         :return: an awaitable.
         """
-        assert isinstance(envelope.message, Message)
+        if not isinstance(envelope.message, Message):  # pragma: nocover
+            raise ValueError("Ledger connection expects non-serialized messages.")
         message = envelope.message
         ledger_id = self.get_ledger_id(message)
         api = self.ledger_api_registry.make(ledger_id, **self.api_config(ledger_id))
         dialogue = self.dialogues.update(message)
-        assert dialogue is not None, "No dialogue created."
+        if dialogue is None:
+            raise ValueError(  # pragma: nocover
+                "No dialogue created. Message={} not valid.".format(message)
+            )
         performative = message.performative
         handler = self.get_handler(performative)
         return self.loop.create_task(self.run_async(handler, api, message, dialogue))

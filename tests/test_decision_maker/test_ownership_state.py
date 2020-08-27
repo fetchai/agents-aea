@@ -32,10 +32,10 @@ def test_non_initialized_ownership_state_raises_exception():
     """Test that non-initialized ownership state raises exception."""
     ownership_state = OwnershipState()
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         ownership_state.amount_by_currency_id
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         ownership_state.quantities_by_good_id
 
 

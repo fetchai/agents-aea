@@ -384,7 +384,8 @@ class GenericLedgerApiHandler(Handler):
             last_message = cast(
                 Optional[FipaMessage], fipa_dialogue.last_incoming_message
             )
-            assert last_message is not None, "Cannot retrieve last fipa message."
+            if last_message is None:
+                raise ValueError("Cannot retrieve last fipa message.")
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
                 target_message=last_message,

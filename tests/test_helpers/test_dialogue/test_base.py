@@ -23,6 +23,7 @@ from typing import FrozenSet, Tuple, Type, cast
 
 import pytest
 
+from aea.exceptions import AEAEnforceError
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel, DialogueStats
 from aea.helpers.dialogue.base import Dialogues as BaseDialogues
@@ -321,7 +322,7 @@ class TestDialogueBase:
 
     def test_get_message(self):
         """Test the 'get_message' method."""
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.dialogue._get_message(self.valid_message_1_by_self.message_id)
         assert str(cm.value) == "Message not present."
 
@@ -331,7 +332,7 @@ class TestDialogueBase:
             == self.valid_message_1_by_self
         )
 
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.dialogue._get_message(self.valid_message_2_by_other.message_id)
         assert str(cm.value) == "Message not present."
 
@@ -452,7 +453,7 @@ class TestDialogueBase:
 
     def test_reply_negative_empty_dialogue(self):
         """Negative test for the 'reply' method: target message is not in the dialogue."""
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(ValueError) as cm:
             self.dialogue.reply(
                 target_message=self.valid_message_1_by_self,
                 performative=DefaultMessage.Performative.BYTES,
@@ -476,7 +477,7 @@ class TestDialogueBase:
         invalid_message_1_by_self.sender = self.agent_address
         invalid_message_1_by_self.to = self.opponent_address
 
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(AEAEnforceError) as cm:
             self.dialogue.reply(
                 target_message=invalid_message_1_by_self,
                 performative=DefaultMessage.Performative.BYTES,
@@ -853,7 +854,7 @@ class TestDialogueBase:
         new_label = DialogueLabel(
             (str(1), str(2)), self.valid_message_1_by_self.to, self.agent_address
         )
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(AEAEnforceError) as cm:
             self.dialogue._update_dialogue_label(new_label)
         assert str(cm.value) == "Dialogue label cannot be updated."
 
@@ -866,7 +867,7 @@ class TestDialogueBase:
         new_label = DialogueLabel(
             (str(2), ""), self.valid_message_1_by_self.to, self.agent_address
         )
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(AEAEnforceError) as cm:
             self.dialogue._update_dialogue_label(new_label)
         assert str(cm.value) == "Dialogue label cannot be updated."
         assert self.dialogue.dialogue_label != new_label
@@ -1179,7 +1180,7 @@ class TestDialoguesBase:
         """Negative test for the 'update' method: the message is not by the counterparty."""
         assert len(self.own_dialogues.dialogues) == 0
 
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(self.valid_message_1_by_self)
         assert (
             str(cm.value)
@@ -1199,7 +1200,7 @@ class TestDialoguesBase:
 
         assert len(self.own_dialogues.dialogues) == 0
 
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
         assert str(cm.value) == "The message's 'to' field is not set {}".format(
             invalid_message_1_by_other
@@ -1218,7 +1219,7 @@ class TestDialoguesBase:
 
         assert len(self.own_dialogues.dialogues) == 0
 
-        with pytest.raises(AssertionError) as cm:
+        with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
         assert (
             str(cm.value)
@@ -1508,7 +1509,7 @@ class TestDialoguesBase:
                 self.opponent_address, ("", str(1)), Dialogue.Role.ROLE2
             )
             result = True
-        except AssertionError:
+        except AEAEnforceError:
             result = False
 
         assert not result

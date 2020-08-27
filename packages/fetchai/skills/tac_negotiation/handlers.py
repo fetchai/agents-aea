@@ -323,11 +323,12 @@ class FipaNegotiationHandler(Handler):
                 #     contract_address = self.context.shared_state.get( # noqa: E800
                 #         "erc1155_contract_address", None # noqa: E800
                 #     ) # noqa: E800
-                #     assert ( # noqa: E800
-                #         contract_address is not None # noqa: E800
-                #     ), "ERC1155Contract address not set!" # noqa: E800
+                #     enforce( # noqa: E800
+                #         contract_address is not None, # noqa: E800
+                #         "ERC1155Contract address not set!" # noqa: E800
+                #     ) # noqa: E800
                 # tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None) # noqa: E800
-                # assert tx_nonce is not None, "tx_nonce must be provided" # noqa: E800
+                # enforce(tx_nonce is not None, "tx_nonce must be provided") # noqa: E800
                 # transaction_msg = contract.get_hash_batch_transaction_msg( # noqa: E800
                 #     from_address=accept.counterparty, # noqa: E800
                 #     to_address=self.context.agent_address,  # must match self # noqa: E800
@@ -416,18 +417,20 @@ class FipaNegotiationHandler(Handler):
                 #     contract_address = self.context.shared_state.get( # noqa: E800
                 #         "erc1155_contract_address", None # noqa: E800
                 #     ) # noqa: E800
-                #     assert ( # noqa: E800
-                #         contract_address is not None # noqa: E800
-                #     ), "ERC1155Contract address not set!" # noqa: E800
+                #     enforce( # noqa: E800
+                #         contract_address is not None, # noqa: E800
+                #         "ERC1155Contract address not set!" # noqa: E800
+                #     ) # noqa: E800
                 #     contract.set_deployed_instance( # noqa: E800
                 #         ledger_api, cast(str, contract_address), # noqa: E800
                 #     ) # noqa: E800
                 # strategy = cast(Strategy, self.context.strategy) # noqa: E800
                 # tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None) # noqa: E800
                 # tx_signature = match_accept.info.get("tx_signature", None) # noqa: E800
-                # assert ( # noqa: E800
-                #     tx_nonce is not None and tx_signature is not None # noqa: E800
-                # ), "tx_nonce or tx_signature not available" # noqa: E800
+                # enforce( # noqa: E800
+                #     tx_nonce is not None and tx_signature is not None, # noqa: E800
+                #     "tx_nonce or tx_signature not available" # noqa: E800
+                # ) # noqa: E800
                 # transaction_msg = contract.get_atomic_swap_batch_transaction_msg( # noqa: E800
                 #     from_address=self.context.agent_address, # noqa: E800
                 #     to_address=match_accept.counterparty, # noqa: E800
@@ -593,9 +596,8 @@ class SigningHandler(Handler):
                 last_signing_msg = cast(
                     Optional[SigningMessage], signing_dialogue.last_outgoing_message
                 )
-                assert (
-                    last_signing_msg is not None
-                ), "Could not recover last signing message."
+                if last_signing_msg is None:
+                    raise ValueError("Could not recover last signing message.")
                 tx_id = last_signing_msg.terms.sender_hash
                 if "transactions" not in self.context.shared_state.keys():
                     self.context.shared_state["transactions"] = {}
@@ -666,7 +668,8 @@ class SigningHandler(Handler):
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
-            assert tx_digest is not None, "Error when submitting tx."
+            if tx_digest is None:
+                raise ValueError("Error when submitting tx.")
             self.context.logger.info("tx_digest={}.".format(tx_digest))
             count = 0
             while (

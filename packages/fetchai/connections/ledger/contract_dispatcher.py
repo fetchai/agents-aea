@@ -92,9 +92,8 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     def get_ledger_id(self, message: Message) -> str:
         """Get the ledger id."""
-        assert isinstance(
-            message, ContractApiMessage
-        ), "argument is not a ContractApiMessage instance."
+        if not isinstance(message, ContractApiMessage):  # pragma: nocover
+            raise ValueError("argument is not a ContractApiMessage instance.")
         message = cast(ContractApiMessage, message)
         return message.ledger_id
 

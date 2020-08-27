@@ -168,7 +168,8 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         last_msg = self.active_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_dialogue.reply(
             performative=GymMessage.Performative.CLOSE, target_message=last_msg,
         )
@@ -182,7 +183,8 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        assert not self._agent_thread.is_alive(), "Agent already running."
+        if self._agent_thread.is_alive():
+            raise ValueError("Agent already running.")
         self._agent_thread.start()
 
         while not self._agent.runtime.is_running:  # check agent completely running
@@ -207,7 +209,8 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         last_msg = self.active_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_dialogue.reply(
             performative=GymMessage.Performative.ACT,
             target_message=last_msg,

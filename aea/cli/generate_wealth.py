@@ -88,7 +88,7 @@ def _try_generate_wealth(
         if sync:
             _wait_funds_release(ctx.agent_config, wallet, type_)
 
-    except (AssertionError, ValueError) as e:  # pragma: no cover
+    except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
 
 

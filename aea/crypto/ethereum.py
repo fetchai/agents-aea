@@ -38,6 +38,7 @@ from web3 import HTTPProvider, Web3
 from web3.contract import Contract as EthereumContract
 
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.exceptions import enforce
 from aea.helpers.base import try_decorator
 from aea.mail.base import Address
 
@@ -238,7 +239,7 @@ class EthereumHelper(Helper):
         :return: the recovered addresses
         """
         if is_deprecated_mode:
-            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
+            enforce(len(message) == 32, "Message must be hashed to exactly 32 bytes.")
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 address = Account.recoverHash(  # pylint: disable=no-value-for-parameter

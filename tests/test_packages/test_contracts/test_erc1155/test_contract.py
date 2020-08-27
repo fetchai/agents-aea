@@ -246,6 +246,8 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
 
 
 class TestCosmWasmContract:
+    """Test the cosmwasm contract."""
+
     def setup(self):
         self.ledger_api = ledger_apis_registry.make(COSMOS, **COSMOS_TESTNET_CONFIG)
         self.faucet_api = faucet_apis_registry.make(COSMOS)

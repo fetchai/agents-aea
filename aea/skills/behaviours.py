@@ -22,6 +22,7 @@ import datetime
 from abc import ABC, abstractmethod
 from typing import Callable, Dict, List, Optional, Set
 
+from aea.exceptions import enforce
 from aea.skills.base import Behaviour
 
 
@@ -174,7 +175,7 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
         super().__init__(**kwargs)
 
         self._behaviour_sequence = behaviour_sequence
-        assert len(self._behaviour_sequence) > 0, "at least one behaviour."
+        enforce(len(self._behaviour_sequence) > 0, "at least one behaviour.")
         self._index = 0
 
     @property

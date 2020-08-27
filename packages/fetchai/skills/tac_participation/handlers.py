@@ -411,7 +411,8 @@ class TacHandler(Handler):
         )
         state_update_dialogue = game.state_update_dialogue
         last_msg = state_update_dialogue.last_message
-        assert last_msg is not None, "Could not retrieve last message."
+        if last_msg is None:
+            raise ValueError("Could not retrieve last message.")
         state_update_msg = state_update_dialogue.reply(
             performative=StateUpdateMessage.Performative.APPLY,
             target_message=last_msg,

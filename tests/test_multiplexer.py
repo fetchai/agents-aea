@@ -33,6 +33,7 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
+from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
@@ -575,7 +576,7 @@ def test_multiplexer_setup():
     connection_3 = _make_dummy_connection()
     connections = [connection_1, connection_2, connection_3]
     multiplexer = Multiplexer([])
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         multiplexer._connection_consistency_checks()
     multiplexer.setup(connections, default_routing=None)
     multiplexer._connection_consistency_checks()

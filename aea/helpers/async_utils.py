@@ -256,7 +256,7 @@ class PeriodicCaller:
         self._timerhandle = None
 
 
-def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
+def ensure_loop(loop: Optional[AbstractEventLoop] = None) -> AbstractEventLoop:
     """
     Use loop provided or create new if not provided or closed.
 
@@ -267,9 +267,11 @@ def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
     """
     try:
         loop = loop or asyncio.new_event_loop()
-        assert not loop.is_closed()
-        assert not loop.is_running()
-    except (RuntimeError, AssertionError):
+        if loop.is_closed():
+            raise ValueError("Event loop closed.")  # pragma: nocover
+        if loop.is_running():
+            raise ValueError("Event loop running.")
+    except (RuntimeError, ValueError):
         loop = asyncio.new_event_loop()
 
     return loop
@@ -333,7 +335,8 @@ class ThreadedAsyncRunner(Thread):
         :param loop: optional event loop. is it's running loop, threaded runner will use it.
         """
         self._loop = loop or asyncio.new_event_loop()
-        assert not self._loop.is_closed()
+        if self._loop.is_closed():
+            raise ValueError("Event loop closed.")  # pragma: nocover
         super().__init__(daemon=True)
 
     def start(self) -> None:
@@ -394,6 +397,7 @@ class AwaitableProc:
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialise awaitable proc."""
         self.args = args
         self.kwargs = kwargs
         self.proc = None
