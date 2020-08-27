@@ -993,7 +993,8 @@ class CosmosFaucetApi(FaucetApi):
         """
         Generates the request URI derived from `cls.faucet_base_url`
         """
-        assert cls.testnet_faucet_url is not None
+        if cls.testnet_faucet_url is None:
+            raise AEAEnforceError("The faucet url is None.")
         return f"{cls.testnet_faucet_url}/claim/requests"
 
     @classmethod
