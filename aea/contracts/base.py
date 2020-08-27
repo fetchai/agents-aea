@@ -33,7 +33,7 @@ from aea.configurations.base import (
 )
 from aea.crypto.base import LedgerApi
 from aea.exceptions import enforce
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 
 logger = logging.getLogger(__name__)
 

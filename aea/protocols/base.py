@@ -38,7 +38,6 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.exceptions import enforce
-from aea.helpers.base import load_aea_package
 
 logger = logging.getLogger(__name__)
 

@@ -42,7 +42,7 @@ from aea.configurations.base import (
 )
 from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.mail.base import Address
 from aea.multiplexer import ConnectionStatus, OutBox
