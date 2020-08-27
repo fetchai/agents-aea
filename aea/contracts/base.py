@@ -24,7 +24,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -32,7 +32,7 @@ from aea.configurations.base import (
     ContractId,
 )
 from aea.crypto.base import LedgerApi
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 
 logger = logging.getLogger(__name__)
 

@@ -31,7 +31,7 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -42,7 +42,7 @@ from aea.configurations.base import (
 )
 from aea.context.base import AgentContext
 from aea.exceptions import AEAException
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.mail.base import Address
 from aea.multiplexer import ConnectionStatus, OutBox
