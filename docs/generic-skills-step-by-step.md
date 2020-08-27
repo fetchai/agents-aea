@@ -230,6 +230,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             service_description=description,
         )
         self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("unregistering agent from SOEF.")
 ```
 
 This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the <a href="../simple-oef">SOEF search node</a> at regular tick intervals (here 60 seconds). By registering, the AEA becomes discoverable to possible clients.
@@ -687,7 +688,8 @@ class GenericLedgerApiHandler(Handler):
             last_message = cast(
                 Optional[FipaMessage], fipa_dialogue.last_incoming_message
             )
-            assert last_message is not None, "Cannot retrieve last fipa message."
+            if last_message is None:
+                raise ValueError("Cannot retrieve last fipa message.")
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
                 target_message=last_message,
@@ -841,6 +843,7 @@ from typing import Any, Dict, Optional, Tuple
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -894,11 +897,12 @@ class GenericStrategy(Model):
             )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        assert (
+        enforce(
             len(self._set_service_data) == 2
             and "key" in self._set_service_data
-            and "value" in self._set_service_data
-        ), "service_data must contain keys `key` and `value`"
+            and "value" in self._set_service_data,
+            "service_data must contain keys `key` and `value`",
+        )
         self._remove_service_data = {"key": self._set_service_data["key"]}
         self._simple_service_data = {
             self._set_service_data["key"]: self._set_service_data["value"]
@@ -911,9 +915,10 @@ class GenericStrategy(Model):
         }
 
         super().__init__(**kwargs)
-        assert (
-            self.context.agent_addresses.get(self._ledger_id, None) is not None
-        ), "Wallet does not contain cryptos for provided ledger id."
+        enforce(
+            self.context.agent_addresses.get(self._ledger_id, None) is not None,
+            "Wallet does not contain cryptos for provided ledger id.",
+        )
 
         if self._has_data_source:
             self._data_for_sale = self.collect_from_data_source()
@@ -1046,6 +1051,7 @@ When we are negotiating with other AEAs we would like to keep track of the state
 ``` python
 from typing import Dict, Optional, Type
 
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
@@ -1136,13 +1142,14 @@ class FipaDialogue(BaseFipaDialogue):
     @property
     def terms(self) -> Terms:
         """Get terms."""
-        assert self._terms is not None, "Terms not set!"
+        if self._terms is None:
+            raise AEAEnforceError("Terms not set!")
         return self._terms
 
     @terms.setter
     def terms(self, terms: Terms) -> None:
         """Set terms."""
-        assert self._terms is None, "Terms already set!"
+        enforce(self._terms is None, "Terms already set!")
         self._terms = terms
 
 
@@ -1207,13 +1214,14 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
         """Get associated_fipa_dialogue."""
-        assert self._associated_fipa_dialogue is not None, "FipaDialogue not set!"
+        if self._associated_fipa_dialogue is None:
+            raise AEAEnforceError("FipaDialogue not set!")
         return self._associated_fipa_dialogue
 
     @associated_fipa_dialogue.setter
     def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
         """Set associated_fipa_dialogue"""
-        assert self._associated_fipa_dialogue is None, "FipaDialogue already set!"
+        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
         self._associated_fipa_dialogue = fipa_dialogue
 
 
@@ -1959,9 +1967,8 @@ class GenericSigningHandler(Handler):
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
-        assert (
-            last_ledger_api_msg is not None
-        ), "Could not retrieve last message in ledger api dialogue"
+        if last_ledger_api_msg is None:
+            raise ValueError("Could not retrieve last message in ledger api dialogue")
         ledger_api_msg = ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             target_message=last_ledger_api_msg,
@@ -2137,7 +2144,8 @@ class GenericLedgerApiHandler(Handler):
             )
         )
         fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
-        assert fipa_msg is not None, "Could not retrieve fipa message"
+        if fipa_msg is None:
+            raise ValueError("Could not retrieve fipa message")
         inform_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.INFORM,
             target_message=fipa_msg,
@@ -2187,6 +2195,7 @@ We are going to create the strategy that we want our AEA to follow. Rename the `
 
 ``` python
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
 from aea.helpers.search.models import (
     Constraint,
@@ -2272,7 +2281,7 @@ We initialize the strategy class by trying to read the strategy variables from t
     @is_searching.setter
     def is_searching(self, is_searching: bool) -> None:
         """Check if the agent is searching."""
-        assert isinstance(is_searching, bool), "Can only set bool on is_searching!"
+        enforce(isinstance(is_searching, bool), "Can only set bool on is_searching!")
         self._is_searching = is_searching
 
     @property
@@ -2410,6 +2419,7 @@ As mentioned, when we are negotiating with other AEA we would like to keep track
 ``` python
 from typing import Optional, Type
 
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
@@ -2504,21 +2514,21 @@ class FipaDialogue(BaseFipaDialogue):
     @property
     def terms(self) -> Terms:
         """Get terms."""
-        assert self._terms is not None, "Terms not set!"
+        if self._terms is None:
+            raise AEAEnforceError("Terms not set!")
         return self._terms
 
     @terms.setter
     def terms(self, terms: Terms) -> None:
         """Set terms."""
-        assert self._terms is None, "Terms already set!"
+        enforce(self._terms is None, "Terms already set!")
         self._terms = terms
 
     @property
     def associated_ledger_api_dialogue(self) -> "LedgerApiDialogue":
         """Get associated_ledger_api_dialogue."""
-        assert (
-            self._associated_ledger_api_dialogue is not None
-        ), "LedgerApiDialogue not set!"
+        if self._associated_ledger_api_dialogue is None:
+            raise AEAEnforceError("LedgerApiDialogue not set!")
         return self._associated_ledger_api_dialogue
 
     @associated_ledger_api_dialogue.setter
@@ -2526,9 +2536,10 @@ class FipaDialogue(BaseFipaDialogue):
         self, ledger_api_dialogue: "LedgerApiDialogue"
     ) -> None:
         """Set associated_ledger_api_dialogue"""
-        assert (
-            self._associated_ledger_api_dialogue is None
-        ), "LedgerApiDialogue already set!"
+        enforce(
+            self._associated_ledger_api_dialogue is None,
+            "LedgerApiDialogue already set!",
+        )
         self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
@@ -2593,13 +2604,14 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
         """Get associated_fipa_dialogue."""
-        assert self._associated_fipa_dialogue is not None, "FipaDialogue not set!"
+        if self._associated_fipa_dialogue is None:
+            raise AEAEnforceError("FipaDialogue not set!")
         return self._associated_fipa_dialogue
 
     @associated_fipa_dialogue.setter
     def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
         """Set associated_fipa_dialogue"""
-        assert self._associated_fipa_dialogue is None, "FipaDialogue already set!"
+        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
         self._associated_fipa_dialogue = fipa_dialogue
 
 
@@ -2697,13 +2709,14 @@ class SigningDialogue(BaseSigningDialogue):
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
         """Get associated_fipa_dialogue."""
-        assert self._associated_fipa_dialogue is not None, "FipaDialogue not set!"
+        if self._associated_fipa_dialogue is None:
+            raise AEAEnforceError("FipaDialogue not set!")
         return self._associated_fipa_dialogue
 
     @associated_fipa_dialogue.setter
     def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
         """Set associated_fipa_dialogue"""
-        assert self._associated_fipa_dialogue is None, "FipaDialogue already set!"
+        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
         self._associated_fipa_dialogue = fipa_dialogue
 
 
