@@ -38,6 +38,7 @@ from ecdsa.util import sigencode_string_canonize
 import requests
 
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
 from aea.mail.base import Address
 
@@ -126,7 +127,8 @@ class CosmosHelper(Helper):
         s = hashlib.new("sha256", public_key_bytes).digest()
         r = hashlib.new("ripemd160", s).digest()
         five_bit_r = convertbits(r, 8, 5)
-        assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
+        if five_bit_r is None:
+            raise AEAEnforceError("Unsuccessful bech32.convertbits call")
         address = bech32_encode(cls.address_prefix, five_bit_r)
         return address
 
