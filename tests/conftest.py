@@ -75,9 +75,6 @@ from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
-from packages.fetchai.connections.p2p_client.connection import (
-    PeerToPeerClientConnection,
-)
 from packages.fetchai.connections.p2p_libp2p.connection import (
     MultiAddr,
     P2PLibp2pConnection,
@@ -243,7 +240,6 @@ connection_config_files = [
     os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "oef", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_stub", CONNECTION_YAML),
@@ -768,20 +764,6 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
         "aea.packages.fetchai.connections.tcp.tcp_client"
     )
     return tcp_connection
-
-
-def _make_p2p_client_connection(
-    address: Address, provider_addr: str, provider_port: int
-):
-    configuration = ConnectionConfig(
-        addr=provider_addr,
-        port=provider_port,
-        connection_id=PeerToPeerClientConnection.connection_id,
-    )
-    p2p_client_connection = PeerToPeerClientConnection(
-        configuration=configuration, identity=Identity("", address),
-    )
-    return p2p_client_connection
 
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):

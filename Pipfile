@@ -16,7 +16,6 @@ bs4 = "==0.0.1"
 colorlog = "==4.1.0"
 defusedxml = "==0.6.0"
 docker = "==4.2.0"
-fetch-p2p-api = {index = "https://test.pypi.org/simple/",version = "==0.0.2"}
 flake8 = "==3.7.9"
 flake8-bugbear = "==20.1.4"
 flake8-docstrings = "==1.5.0"
