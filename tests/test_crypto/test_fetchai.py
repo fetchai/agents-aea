@@ -216,7 +216,6 @@ def test_get_wealth_positive(caplog):
         fetchai_faucet_api = FetchAIFaucetApi()
         fc = FetchAICrypto()
         fetchai_faucet_api.get_wealth(fc.address)
-        assert "Wealth generated" in caplog.text
 
 
 @pytest.mark.ledger

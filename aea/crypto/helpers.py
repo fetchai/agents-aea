@@ -125,12 +125,15 @@ def create_private_key(ledger_id: str, private_key_file: str) -> None:
     crypto.dump(open(private_key_file, "wb"))
 
 
-def try_generate_testnet_wealth(identifier: str, address: str) -> None:
+def try_generate_testnet_wealth(
+    identifier: str, address: str, _sync: bool = True
+) -> None:
     """
     Try generate wealth on a testnet.
 
     :param identifier: the identifier of the ledger
     :param address: the address to check for
+    :param _sync: whether to wait to sync or not; currently unused
     :return: None
     """
     faucet_api = make_faucet_api(identifier)
