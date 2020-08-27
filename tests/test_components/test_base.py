@@ -22,8 +22,10 @@ from pathlib import Path
 
 import pytest
 
-from aea.components.base import Component
-from aea.configurations.base import ProtocolConfig
+from aea.components.base import Component, load_aea_package
+from aea.configurations.base import ConnectionConfig, ProtocolConfig
+
+from tests.conftest import ROOT_DIR
 
 
 class TestComponentProperties:
@@ -71,3 +73,10 @@ def test_directory_setter():
     new_path = Path("new_path")
     component.directory = new_path
     assert component.directory == new_path
+
+
+def test_load_aea_package():
+    """Test aea package load."""
+    config = ConnectionConfig("http_client", "fetchai", "0.5.0")
+    config.directory = Path(ROOT_DIR) / "packages"
+    load_aea_package(config)

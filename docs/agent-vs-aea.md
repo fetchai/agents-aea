@@ -11,7 +11,7 @@ First, import the python and application specific libraries.
 import os
 import time
 from threading import Thread
-from typing import List, Optional
+from typing import List
 
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
@@ -24,11 +24,10 @@ from aea.protocols.default.message import DefaultMessage
 
 Unlike an `AEA`, an `Agent` does not require a `Wallet`, `LedgerApis` or `Resources` module.
 
-However, we need to implement 5 abstract methods:
+However, we need to implement 4 abstract methods:
 - `setup()`
 - `act()`
-- `react()`
-- `update()`
+- `handle_envelope()`
 - `teardown()`
 
 
@@ -57,30 +56,22 @@ class MyAgent(Agent):
     def act(self):
         print("Act called for tick {}".format(self.tick))
 
-    def react(self):
+    def handle_envelope(self, envelope: Envelope) -> None:
         print("React called for tick {}".format(self.tick))
-        while not self.inbox.empty():
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if (
-                envelope is not None
-                and envelope.protocol_id == DefaultMessage.protocol_id
-            ):
-                sender = envelope.sender
-                receiver = envelope.to
-                envelope.to = sender
-                envelope.sender = receiver
-                envelope.message = DefaultMessage.serializer.decode(envelope.message)
-                envelope.message.sender = receiver
-                envelope.message.to = sender
-                print(
-                    "Received envelope from {} with protocol_id={}".format(
-                        sender, envelope.protocol_id
-                    )
+        if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
+            sender = envelope.sender
+            receiver = envelope.to
+            envelope.to = sender
+            envelope.sender = receiver
+            envelope.message = DefaultMessage.serializer.decode(envelope.message_bytes)
+            envelope.message.sender = receiver
+            envelope.message.to = sender
+            print(
+                "Received envelope from {} with protocol_id={}".format(
+                    sender, envelope.protocol_id
                 )
-                self.outbox.put(envelope)
-
-    def update(self):
-        print("Update called for tick {}".format(self.tick))
+            )
+            self.outbox.put(envelope)
 
     def teardown(self):
         pass
@@ -163,7 +154,7 @@ If you just want to copy and paste the entire script in you can find it here:
 import os
 import time
 from threading import Thread
-from typing import List, Optional
+from typing import List
 
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
@@ -191,30 +182,22 @@ class MyAgent(Agent):
     def act(self):
         print("Act called for tick {}".format(self.tick))
 
-    def react(self):
+    def handle_envelope(self, envelope: Envelope) -> None:
         print("React called for tick {}".format(self.tick))
-        while not self.inbox.empty():
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if (
-                envelope is not None
-                and envelope.protocol_id == DefaultMessage.protocol_id
-            ):
-                sender = envelope.sender
-                receiver = envelope.to
-                envelope.to = sender
-                envelope.sender = receiver
-                envelope.message = DefaultMessage.serializer.decode(envelope.message)
-                envelope.message.sender = receiver
-                envelope.message.to = sender
-                print(
-                    "Received envelope from {} with protocol_id={}".format(
-                        sender, envelope.protocol_id
-                    )
+        if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
+            sender = envelope.sender
+            receiver = envelope.to
+            envelope.to = sender
+            envelope.sender = receiver
+            envelope.message = DefaultMessage.serializer.decode(envelope.message_bytes)
+            envelope.message.sender = receiver
+            envelope.message.to = sender
+            print(
+                "Received envelope from {} with protocol_id={}".format(
+                    sender, envelope.protocol_id
                 )
-                self.outbox.put(envelope)
-
-    def update(self):
-        print("Update called for tick {}".format(self.tick))
+            )
+            self.outbox.put(envelope)
 
     def teardown(self):
         pass

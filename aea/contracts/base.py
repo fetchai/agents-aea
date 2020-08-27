@@ -24,7 +24,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,

@@ -16,18 +16,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of a generic agent."""
 import datetime
 import logging
-from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from multiprocessing.pool import AsyncResult
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
+from aea.abstract_agent import AbstractAgent
 from aea.connections.base import Connection
 from aea.identity.base import Identity
+from aea.mail.base import Envelope
 from aea.multiplexer import InBox, OutBox
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
@@ -35,7 +34,7 @@ from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntim
 logger = logging.getLogger(__name__)
 
 
-class Agent(ABC):
+class Agent(AbstractAgent):
     """This class provides an abstract base class for a generic agent."""
 
     RUNTIMES: Dict[str, Type[BaseRuntime]] = {
@@ -49,7 +48,7 @@ class Agent(ABC):
         identity: Identity,
         connections: List[Connection],
         loop: Optional[AbstractEventLoop] = None,
-        timeout: float = 1.0,
+        period: float = 1.0,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
     ) -> None:
@@ -59,7 +58,7 @@ class Agent(ABC):
         :param identity: the identity of the agent.
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
-        :param timeout: the time in (fractions of) seconds to time out an agent between act and react
+        :param period: period to call agent's act
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode to up agent.
 
@@ -67,7 +66,7 @@ class Agent(ABC):
         """
         self._connections = connections
         self._identity = identity
-        self._timeout = timeout
+        self._period = period
         self._tick = 0
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         runtime_cls = self._get_runtime_class()
@@ -106,23 +105,6 @@ class Agent(ABC):
             )
         return self.RUNTIMES[self._runtime_mode]
 
-    def _execution_control(  # pylint: disable=no-self-use  # cause  overrided in AEA
-        self,
-        fn: Callable,
-        args: Optional[Sequence] = None,
-        kwargs: Optional[Dict] = None,
-    ) -> Any:
-        """
-        Execute function within wrapper.
-
-        :param fn: function to call
-        :param args: optional sequence of arguments to pass to function on call
-        :param kwargs: optional dict of keyword arguments to pass to function on call
-
-        :return: same as function does
-        """
-        return fn(*(args or []), **(kwargs or {}))
-
     def enqueue_task(
         self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
     ) -> int:
@@ -145,11 +127,11 @@ class Agent(ABC):
         """
         return self.runtime.task_manager.get_task_result(task_id)
 
-    def _get_multiplexer_setup_options(self,) -> Optional[Dict]:
+    def get_multiplexer_setup_options(self) -> Optional[Dict]:
         """
-        Get dict of multiplexer setup options.
+        Get options to pass to Multiplexer.setup.
 
-        :return: dict of kwargs for Multipelxer.setup
+        :return: dict of kwargs
         """
         return {"connections": self.active_connections}
 
@@ -192,10 +174,19 @@ class Agent(ABC):
         """
         return self._tick
 
+    def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle an envelope.
+
+        :param envelope: the envelope to handle.
+        :return: None
+        """
+        raise NotImplementedError
+
     @property
-    def timeout(self) -> float:
-        """Get the time in (fractions of) seconds to time out an agent between act and react."""
-        return self._timeout
+    def period(self) -> float:
+        """Get a period to call act."""
+        return self._period
 
     @property
     def runtime(self) -> BaseRuntime:
@@ -225,19 +216,6 @@ class Agent(ABC):
         """
         self.runtime.start()
 
-    def start_setup(self) -> None:
-        """
-        Set up Agent on start.
-
-        - connect Multiplexer
-        - call agent.setup
-        - set liveness to started
-
-        :return: None
-        """
-        logger.debug("[{}]: Calling setup method...".format(self.name))
-        self.setup()
-
     def stop(self) -> None:
         """
         Stop the agent.
@@ -251,46 +229,6 @@ class Agent(ABC):
         :return: None
         """
         self.runtime.stop()
-
-    @abstractmethod
-    def setup(self) -> None:
-        """
-        Set up the agent.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def act(self) -> None:
-        """
-        Perform actions.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def react(self) -> None:
-        """
-        React to events.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def update(self) -> None:
-        """
-        Update the internals of the agent which are not exposed to the skills.
-
-        :return None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
 
     @property
     def state(self) -> RuntimeStates:
@@ -309,4 +247,26 @@ class Agent(ABC):
 
         :return: dict of callable with period specified
         """
-        return {self.act: (self._timeout, None)}
+        return {self.act: (self.period, None)}
+
+    def get_message_handlers(self) -> List[Tuple[Callable[[Any], None], Callable]]:
+        """
+        Get handlers with message getters.
+
+        :return: List of tuples of callables: handler and coroutine to get a message
+        """
+        return [(self.handle_envelope, self.inbox.async_get)]
+
+    def exception_handler(self, exception: Exception, function: Callable) -> bool:
+        """
+        Handle exception raised during agent main loop execution.
+
+        :param exception: exception raised
+        :param function: a callable exception raised in.
+
+        :return: bool, propagate exception if True otherwise skip it.
+        """
+        logger.exception(
+            f"Exception {repr(exception)} raised during {repr(function)} call."
+        )
+        return True

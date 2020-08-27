@@ -30,7 +30,7 @@ from typing import Any, Dict, Optional, Tuple, Type, cast
 
 from google.protobuf.struct_pb2 import Struct
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,

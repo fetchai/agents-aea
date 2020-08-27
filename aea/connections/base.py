@@ -28,7 +28,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Generator, Optional, Set, TYPE_CHECKING, cast
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -38,7 +38,7 @@ from aea.configurations.base import (
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.async_utils import AsyncState
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 from aea.identity.base import Identity
 
 

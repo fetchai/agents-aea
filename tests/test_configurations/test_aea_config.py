@@ -183,16 +183,16 @@ class BaseConfigTestVariable(TestCase):
             assert self._get_aea_value(aea) == good_value
 
 
-class TestTimeoutConfigVariable(BaseConfigTestVariable):
-    """Test `timeout` aea config option."""
+class TestPeriodConfigVariable(BaseConfigTestVariable):
+    """Test `period` aea config option."""
 
-    OPTION_NAME = "timeout"
-    CONFIG_ATTR_NAME = "timeout"
-    GOOD_VALUES = [0, 1.1]
-    INCORRECT_VALUES = ["sTrING?", -1]
+    OPTION_NAME = "period"
+    CONFIG_ATTR_NAME = "period"
+    GOOD_VALUES = [0.1, 1.1]
+    INCORRECT_VALUES = [0, "sTrING?", -1]
     REQUIRED = False
-    AEA_ATTR_NAME = "_timeout"
-    AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_AGENT_LOOP_TIMEOUT
+    AEA_ATTR_NAME = "_period"
+    AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_AGENT_ACT_PERIOD
 
 
 class TestExecutionTimeoutConfigVariable(BaseConfigTestVariable):
@@ -224,7 +224,7 @@ class TestLoopModeConfigVariable(BaseConfigTestVariable):
 
     OPTION_NAME = "loop_mode"
     CONFIG_ATTR_NAME = "loop_mode"
-    GOOD_VALUES = ["sync", "async"]
+    GOOD_VALUES = ["async", "sync"]
     INCORRECT_VALUES = [None, "sTrING?", -1]
     REQUIRED = False
     AEA_ATTR_NAME = "_loop_mode"

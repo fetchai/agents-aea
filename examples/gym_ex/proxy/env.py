@@ -186,8 +186,9 @@ class ProxyEnv(gym.Env):
         if self._agent_thread.is_alive():
             raise ValueError("Agent already running.")
         self._agent_thread.start()
-        while not self._agent.runtime.multiplexer.is_connected:
-            time.sleep(0.1)
+
+        while not self._agent.runtime.is_running:  # check agent completely running
+            time.sleep(0.01)
 
     def _disconnect(self):
         """

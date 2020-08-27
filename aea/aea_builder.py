@@ -47,7 +47,7 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
     AgentConfig,
@@ -70,6 +70,7 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.contracts import contract_registry
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
@@ -78,11 +79,9 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
-from aea.helpers.pypi import is_satisfiable
-from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
@@ -282,7 +281,7 @@ class AEABuilder:
 
     """
 
-    DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+    DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
     DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
@@ -347,7 +346,7 @@ class AEABuilder:
         self._default_ledger = DEFAULT_LEDGER
         self._default_connection: PublicId = DEFAULT_CONNECTION
         self._context_namespace: Dict[str, Any] = {}
-        self._timeout: Optional[float] = None
+        self._period: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
@@ -369,15 +368,15 @@ class AEABuilder:
                     component_config.component_id
                 )
 
-    def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
+    def set_period(self, period: Optional[float]) -> "AEABuilder":
         """
-        Set agent loop idle timeout in seconds.
+        Set agent act period.
 
-        :param timeout: timeout in seconds
+        :param period: period in seconds
 
         :return: self
         """
-        self._timeout = timeout
+        self._period = period
         return self
 
     def set_execution_timeout(self, execution_timeout: Optional[float]) -> "AEABuilder":
@@ -873,7 +872,7 @@ class AEABuilder:
             wallet,
             resources,
             loop=None,
-            timeout=self._get_agent_loop_timeout(),
+            period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
             is_debug=False,
             max_reactions=self._get_max_reactions(),
@@ -894,17 +893,13 @@ class AEABuilder:
         self._populate_contract_registry()
         return aea
 
-    def _get_agent_loop_timeout(self) -> float:
+    def _get_agent_act_period(self) -> float:
         """
-        Return agent loop idle timeout.
+        Return agent act period.
 
-        :return: timeout in seconds if set else default value.
+        :return: period in seconds if set else default value.
         """
-        return (
-            self._timeout
-            if self._timeout is not None
-            else self.DEFAULT_AGENT_LOOP_TIMEOUT
-        )
+        return self._period or self.DEFAULT_AGENT_ACT_PERIOD
 
     def _get_execution_timeout(self) -> float:
         """
@@ -1135,7 +1130,7 @@ class AEABuilder:
         self.set_default_connection(
             PublicId.from_str(agent_configuration.default_connection)
         )
-        self.set_timeout(agent_configuration.timeout)
+        self.set_period(agent_configuration.period)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
         if agent_configuration.decision_maker_handler != {}:

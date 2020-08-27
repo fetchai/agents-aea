@@ -74,15 +74,15 @@ def test_default_timeout_for_agent():
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
 
     aea = builder.build()
-    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
+    assert aea._period == builder.DEFAULT_AGENT_ACT_PERIOD
 
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    builder.set_timeout(100)
+    builder.set_period(100)
 
     aea = builder.build()
-    assert aea._timeout == 100
+    assert aea.period == 100
 
 
 def test_add_package_already_existing():

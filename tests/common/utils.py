@@ -83,7 +83,7 @@ class AeaTool:
 
     def setup(self) -> "AeaTool":
         """Call AEA._start_setup."""
-        self.aea.start_setup()
+        self.aea.setup()
         return self
 
     def teardown(self) -> "AeaTool":
@@ -121,13 +121,13 @@ class AeaTool:
                 raise Exception("timeout")
         return self
 
-    def react_one(self) -> "AeaTool":
+    def handle_envelope(self, envelope) -> "AeaTool":
         """
         Run AEA.react once to process inbox messages.
 
         :return: AeaTool
         """
-        self.aea._react_one()
+        self.aea.handle_envelope(envelope)
         return self
 
     def act_one(self) -> "AeaTool":
