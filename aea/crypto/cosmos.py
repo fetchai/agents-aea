@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 TESTNET_NAME = "testnet"
+DEFAULT_FAUCET_URL = 'https://faucet-agent-land.prod.fetch-ai.com'
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "agent-land"
@@ -894,9 +895,7 @@ class CosmosFaucetApi(FaucetApi):
     FAUCET_STATUS_RATE_UNAVAILABLE = 99  # noqa: F841
 
     identifier = _COSMOS
-    testnet_faucet_url = (
-        None
-    )  # type: Optional[str] # should be populated by deriving class
+    testnet_faucet_url = DEFAULT_FAUCET_URL
     testnet_name = TESTNET_NAME
 
     def __init__(self, poll_interval=None):
