@@ -35,7 +35,10 @@ from tests.conftest import (
 
 
 class MockRequestsResponse:
+    """Mock of request response."""
+
     def __init__(self, data, status_code=None):
+        """Initialize mock of request response."""
         self._data = data
         self._status_code = status_code or 200
 
@@ -213,7 +216,6 @@ def test_get_wealth_positive(caplog):
         fetchai_faucet_api = FetchAIFaucetApi()
         fc = FetchAICrypto()
         fetchai_faucet_api.get_wealth(fc.address)
-        assert "Wealth generated" in caplog.text
 
 
 @pytest.mark.ledger
