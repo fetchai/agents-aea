@@ -34,13 +34,13 @@ from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
 from aea.common import Address
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ProtocolId,
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_module
@@ -701,7 +701,7 @@ class Skill(Component):
         """
         configuration = cast(
             SkillConfig,
-            ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
+            load_component_configuration(ComponentType.SKILL, Path(directory)),
         )
         configuration.directory = Path(directory)
         return Skill.from_config(configuration, agent_context)

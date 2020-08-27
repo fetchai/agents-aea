@@ -44,6 +44,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
+from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
@@ -498,7 +499,7 @@ def test_find_import_order():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    _old_load = ComponentConfiguration.load
+    _old_load = load_component_configuration
 
     def _new_load(*args, **kwargs):
         skill_config = _old_load(*args, **kwargs)
