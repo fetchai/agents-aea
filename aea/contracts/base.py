@@ -33,7 +33,7 @@ from aea.configurations.base import (
 )
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_module
 
 
@@ -62,7 +62,8 @@ class Contract(Component):
     @property
     def configuration(self) -> ContractConfig:
         """Get the configuration."""
-        assert self._configuration is not None, "Configuration not set."
+        if self._configuration is None:  # pragma: nocover
+            raise ValueError("Configuration not set.")
         return cast(ContractConfig, super().configuration)
 
     @classmethod
@@ -105,9 +106,8 @@ class Contract(Component):
         :param configuration: the contract configuration.
         :return: the contract object.
         """
-        assert (
-            configuration.directory is not None
-        ), "Configuration must be associated with a directory."
+        if configuration.directory is None:  # pragma: nocover
+            raise ValueError("Configuration must be associated with a directory.")
         directory = configuration.directory
         load_aea_package(configuration)
         contract_module = load_module("contracts", directory / "contract.py")
@@ -119,10 +119,12 @@ class Contract(Component):
         name_to_class = dict(contract_classes)
         logger.debug(f"Processing contract {contract_class_name}")
         contract_class = name_to_class.get(contract_class_name, None)
-        assert (
-            contract_class is not None
-        ), f"Contract class '{contract_class_name}' not found."
+        enforce(
+            contract_class is not None,
+            f"Contract class '{contract_class_name}' not found.",
+        )
 
+        # TODO: load interfaces here: contract_interface = configuration.contract_interfaces
         _try_to_register_contract(configuration)
         # override contract configuration
         contract = contract_registry.make(

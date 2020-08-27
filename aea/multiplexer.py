@@ -26,6 +26,7 @@ from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
@@ -107,9 +108,10 @@ class AsyncMultiplexer(WithLogger):
         self, connections: Optional[Sequence[Connection]], default_connection_index: int
     ):
         if connections is not None and len(connections) > 0:
-            assert (
-                0 <= default_connection_index <= len(connections) - 1
-            ), "Default connection index out of range."
+            enforce(
+                (0 <= default_connection_index <= len(connections) - 1),
+                "Default connection index out of range.",
+            )
             for idx, connection in enumerate(connections):
                 self.add_connection(connection, idx == default_connection_index)
 
@@ -136,13 +138,15 @@ class AsyncMultiplexer(WithLogger):
         Do some consistency checks on the multiplexer connections.
 
         :return: None
-        :raise AssertionError: if an inconsistency is found.
+        :raise AEAEnforceError: if an inconsistency is found.
         """
-        assert len(self.connections) > 0, "List of connections cannot be empty."
+        enforce(len(self.connections) > 0, "List of connections cannot be empty.")
 
-        assert len(set(c.connection_id for c in self.connections)) == len(
-            self.connections
-        ), "Connection names must be unique."
+        enforce(
+            len(set(c.connection_id for c in self.connections))
+            == len(self.connections),
+            "Connection names must be unique.",
+        )
 
     def _set_default_connection_if_none(self):
         """Set the default connection if it is none."""
@@ -157,9 +161,8 @@ class AsyncMultiplexer(WithLogger):
     @property
     def out_queue(self) -> asyncio.Queue:
         """Get the out queue."""
-        assert (
-            self._out_queue is not None
-        ), "Accessing out queue before loop is started."
+        if self._out_queue is None:  # pragma: nocover
+            raise ValueError("Accessing out queue before loop is started.")
         return self._out_queue
 
     @property
@@ -199,7 +202,7 @@ class AsyncMultiplexer(WithLogger):
                 return
             try:
                 await self._connect_all()
-                assert self.is_connected, "At least one connection failed to connect!"
+                enforce(self.is_connected, "At least one connection failed to connect!")
                 self._connection_status.is_connected = True
                 self._recv_loop_task = self._loop.create_task(self._receiving_loop())
                 self._send_loop_task = self._loop.create_task(self._send_loop())
@@ -725,8 +728,8 @@ class OutBox:
                 "Only Message type allowed in envelope message field when putting into outbox."
             )
         message = cast(Message, envelope.message)
-        if not message.has_counterparty:  # pragma: nocover
-            raise ValueError("Provided message has message.counterparty not set.")
+        if not message.has_to:  # pragma: nocover
+            raise ValueError("Provided message has message.to not set.")
         if not message.has_sender:  # pragma: nocover
             raise ValueError("Provided message has message.sender not set.")
         self._multiplexer.put(envelope)
@@ -745,12 +748,12 @@ class OutBox:
         """
         if not isinstance(message, Message):
             raise ValueError("Provided message not of type Message.")
-        if not message.has_counterparty:
-            raise ValueError("Provided message has message.counterparty not set.")
+        if not message.has_to:
+            raise ValueError("Provided message has message.to not set.")
         if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,

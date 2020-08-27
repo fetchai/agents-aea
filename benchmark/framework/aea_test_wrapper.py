@@ -160,7 +160,7 @@ class AEATestWrapper:
             message=DefaultSerializer().encode(message),
         )
 
-    def set_loop_timeout(self, timeout: float) -> None:
+    def set_loop_timeout(self, period: float) -> None:
         """
         Set agent's loop timeout.
 
@@ -168,7 +168,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea._timeout = timeout  # pylint: disable=protected-access
+        self.aea._period = period  # pylint: disable=protected-access
 
     def setup(self) -> None:
         """
@@ -176,7 +176,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea.start_setup()
+        self.aea.setup()
 
     def stop(self) -> None:
         """
@@ -204,14 +204,6 @@ class AEATestWrapper:
         """
         return self.aea.runtime.multiplexer.in_queue.empty()
 
-    def react(self) -> None:
-        """
-        One time process of react for incoming message.
-
-        :return: None
-        """
-        self.aea.react()
-
     def __enter__(self) -> None:
         """Contenxt manager enter."""
         self.start_loop()
@@ -238,7 +230,8 @@ class AEATestWrapper:
 
     def stop_loop(self) -> None:
         """Stop agents loop in dedicated thread, close thread."""
-        assert self._thread is not None, "Thread not set, call start_loop first."
+        if self._thread is None:
+            raise ValueError("Thread not set, call start_loop first.")
         self.aea.stop()
         self._thread.join()
 

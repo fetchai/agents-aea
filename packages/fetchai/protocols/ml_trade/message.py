@@ -20,10 +20,10 @@
 """This module contains ml_trade's message definition."""
 
 import logging
-from enum import Enum
 from typing import Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
+from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.ml_trade.custom_types import (
@@ -45,7 +45,7 @@ class MlTradeMessage(Message):
 
     Query = CustomQuery
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the ml_trade protocol."""
 
         ACCEPT = "accept"
@@ -73,6 +73,7 @@ class MlTradeMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
+        self._performatives = {"accept", "cfp", "data", "terms"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -80,7 +81,6 @@ class MlTradeMessage(Message):
             performative=MlTradeMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"accept", "cfp", "data", "terms"}
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -90,86 +90,92 @@ class MlTradeMessage(Message):
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
         """Get the dialogue_reference of the message."""
-        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
+        enforce(self.is_set("dialogue_reference"), "dialogue_reference is not set.")
         return cast(Tuple[str, str], self.get("dialogue_reference"))
 
     @property
     def message_id(self) -> int:
         """Get the message_id of the message."""
-        assert self.is_set("message_id"), "message_id is not set."
+        enforce(self.is_set("message_id"), "message_id is not set.")
         return cast(int, self.get("message_id"))
 
     @property
     def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
-        assert self.is_set("performative"), "performative is not set."
+        enforce(self.is_set("performative"), "performative is not set.")
         return cast(MlTradeMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
         """Get the target of the message."""
-        assert self.is_set("target"), "target is not set."
+        enforce(self.is_set("target"), "target is not set.")
         return cast(int, self.get("target"))
 
     @property
     def payload(self) -> bytes:
         """Get the 'payload' content from the message."""
-        assert self.is_set("payload"), "'payload' content is not set."
+        enforce(self.is_set("payload"), "'payload' content is not set.")
         return cast(bytes, self.get("payload"))
 
     @property
     def query(self) -> CustomQuery:
         """Get the 'query' content from the message."""
-        assert self.is_set("query"), "'query' content is not set."
+        enforce(self.is_set("query"), "'query' content is not set.")
         return cast(CustomQuery, self.get("query"))
 
     @property
     def terms(self) -> CustomDescription:
         """Get the 'terms' content from the message."""
-        assert self.is_set("terms"), "'terms' content is not set."
+        enforce(self.is_set("terms"), "'terms' content is not set.")
         return cast(CustomDescription, self.get("terms"))
 
     @property
     def tx_digest(self) -> str:
         """Get the 'tx_digest' content from the message."""
-        assert self.is_set("tx_digest"), "'tx_digest' content is not set."
+        enforce(self.is_set("tx_digest"), "'tx_digest' content is not set.")
         return cast(str, self.get("tx_digest"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the ml_trade protocol."""
         try:
-            assert (
-                type(self.dialogue_reference) == tuple
-            ), "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
-                type(self.dialogue_reference)
+            enforce(
+                type(self.dialogue_reference) == tuple,
+                "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
+                    type(self.dialogue_reference)
+                ),
             )
-            assert (
-                type(self.dialogue_reference[0]) == str
-            ), "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
-                type(self.dialogue_reference[0])
+            enforce(
+                type(self.dialogue_reference[0]) == str,
+                "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
+                    type(self.dialogue_reference[0])
+                ),
             )
-            assert (
-                type(self.dialogue_reference[1]) == str
-            ), "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
-                type(self.dialogue_reference[1])
+            enforce(
+                type(self.dialogue_reference[1]) == str,
+                "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
+                    type(self.dialogue_reference[1])
+                ),
             )
-            assert (
-                type(self.message_id) == int
-            ), "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
-                type(self.message_id)
+            enforce(
+                type(self.message_id) == int,
+                "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
+                    type(self.message_id)
+                ),
             )
-            assert (
-                type(self.target) == int
-            ), "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
-                type(self.target)
+            enforce(
+                type(self.target) == int,
+                "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
+                    type(self.target)
+                ),
             )
 
             # Light Protocol Rule 2
             # Check correct performative
-            assert (
-                type(self.performative) == MlTradeMessage.Performative
-            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
-                self.valid_performatives, self.performative
+            enforce(
+                type(self.performative) == MlTradeMessage.Performative,
+                "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                    self.valid_performatives, self.performative
+                ),
             )
 
             # Check correct contents
@@ -177,64 +183,73 @@ class MlTradeMessage(Message):
             expected_nb_of_contents = 0
             if self.performative == MlTradeMessage.Performative.CFP:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.query) == CustomQuery
-                ), "Invalid type for content 'query'. Expected 'Query'. Found '{}'.".format(
-                    type(self.query)
+                enforce(
+                    type(self.query) == CustomQuery,
+                    "Invalid type for content 'query'. Expected 'Query'. Found '{}'.".format(
+                        type(self.query)
+                    ),
                 )
             elif self.performative == MlTradeMessage.Performative.TERMS:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.terms) == CustomDescription
-                ), "Invalid type for content 'terms'. Expected 'Description'. Found '{}'.".format(
-                    type(self.terms)
+                enforce(
+                    type(self.terms) == CustomDescription,
+                    "Invalid type for content 'terms'. Expected 'Description'. Found '{}'.".format(
+                        type(self.terms)
+                    ),
                 )
             elif self.performative == MlTradeMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 2
-                assert (
-                    type(self.terms) == CustomDescription
-                ), "Invalid type for content 'terms'. Expected 'Description'. Found '{}'.".format(
-                    type(self.terms)
+                enforce(
+                    type(self.terms) == CustomDescription,
+                    "Invalid type for content 'terms'. Expected 'Description'. Found '{}'.".format(
+                        type(self.terms)
+                    ),
                 )
-                assert (
-                    type(self.tx_digest) == str
-                ), "Invalid type for content 'tx_digest'. Expected 'str'. Found '{}'.".format(
-                    type(self.tx_digest)
+                enforce(
+                    type(self.tx_digest) == str,
+                    "Invalid type for content 'tx_digest'. Expected 'str'. Found '{}'.".format(
+                        type(self.tx_digest)
+                    ),
                 )
             elif self.performative == MlTradeMessage.Performative.DATA:
                 expected_nb_of_contents = 2
-                assert (
-                    type(self.terms) == CustomDescription
-                ), "Invalid type for content 'terms'. Expected 'Description'. Found '{}'.".format(
-                    type(self.terms)
+                enforce(
+                    type(self.terms) == CustomDescription,
+                    "Invalid type for content 'terms'. Expected 'Description'. Found '{}'.".format(
+                        type(self.terms)
+                    ),
                 )
-                assert (
-                    type(self.payload) == bytes
-                ), "Invalid type for content 'payload'. Expected 'bytes'. Found '{}'.".format(
-                    type(self.payload)
+                enforce(
+                    type(self.payload) == bytes,
+                    "Invalid type for content 'payload'. Expected 'bytes'. Found '{}'.".format(
+                        type(self.payload)
+                    ),
                 )
 
             # Check correct content count
-            assert (
-                expected_nb_of_contents == actual_nb_of_contents
-            ), "Incorrect number of contents. Expected {}. Found {}".format(
-                expected_nb_of_contents, actual_nb_of_contents
+            enforce(
+                expected_nb_of_contents == actual_nb_of_contents,
+                "Incorrect number of contents. Expected {}. Found {}".format(
+                    expected_nb_of_contents, actual_nb_of_contents
+                ),
             )
 
             # Light Protocol Rule 3
             if self.message_id == 1:
-                assert (
-                    self.target == 0
-                ), "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
-                    self.target
+                enforce(
+                    self.target == 0,
+                    "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
+                        self.target
+                    ),
                 )
             else:
-                assert (
-                    0 < self.target < self.message_id
-                ), "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                    self.message_id - 1, self.target,
+                enforce(
+                    0 < self.target < self.message_id,
+                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
+                        self.message_id - 1, self.target,
+                    ),
                 )
-        except (AssertionError, ValueError, KeyError) as e:
+        except (AEAEnforceError, ValueError, KeyError) as e:
             logger.error(str(e))
             return False
 

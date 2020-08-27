@@ -45,7 +45,8 @@ class TCPServerConnection(TCPConnection):
         """
         address = cast(str, configuration.config.get("address"))
         port = cast(int, configuration.config.get("port"))
-        assert address is not None and port is not None, "address and port must be set!"
+        if address is None or port is None:
+            raise ValueError("address and port must be set!")  # pragma: nocover
         super().__init__(address, port, configuration=configuration, **kwargs)
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]

@@ -75,9 +75,6 @@ from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
-from packages.fetchai.connections.p2p_client.connection import (
-    PeerToPeerClientConnection,
-)
 from packages.fetchai.connections.p2p_libp2p.connection import (
     MultiAddr,
     P2PLibp2pConnection,
@@ -161,8 +158,8 @@ COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
 COSMOS_ADDRESS_TWO = "cosmos1gssy8pmjdx8v4reg7lswvfktsaucp0w95nk78m"
 ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
-FETCHAI_ADDRESS_ONE = "Vu6aENcVSYYH9GhY1k3CsL7shWH9gKKBAWcc4ckLk5w4Ltynx"
-FETCHAI_ADDRESS_TWO = "2LnTTHvGxWvKK1WfEAXnZvu81RPcMRDVQW8CJF3Gsh7Z3axDfP"
+FETCHAI_ADDRESS_ONE = "fetch1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
+FETCHAI_ADDRESS_TWO = "fetch1gssy8pmjdx8v4reg7lswvfktsaucp0w95nk78m"
 
 # P2P addresses
 COSMOS_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"  # relates to NON_FUNDED_COSMOS_PRIVATE_KEY_1
@@ -191,8 +188,7 @@ ETHEREUM_TESTNET_CONFIG = {
     "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
     "gas_price": 50,
 }
-FETCHAI_TESTNET_CONFIG = {"network": "testnet"}
-ALT_FETCHAI_CONFIG = {"host": "127.0.0.1", "port": 80}
+FETCHAI_TESTNET_CONFIG = {"address": "https://rest-agent-land.sandbox.fetch-ai.com:443"}
 
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
@@ -244,7 +240,6 @@ connection_config_files = [
     os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "oef", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_stub", CONNECTION_YAML),
@@ -769,20 +764,6 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
         "aea.packages.fetchai.connections.tcp.tcp_client"
     )
     return tcp_connection
-
-
-def _make_p2p_client_connection(
-    address: Address, provider_addr: str, provider_port: int
-):
-    configuration = ConnectionConfig(
-        addr=provider_addr,
-        port=provider_port,
-        connection_id=PeerToPeerClientConnection.connection_id,
-    )
-    p2p_client_connection = PeerToPeerClientConnection(
-        configuration=configuration, identity=Identity("", address),
-    )
-    return p2p_client_connection
 
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):

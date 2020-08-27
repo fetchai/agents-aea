@@ -178,13 +178,10 @@ def test_react():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = agent.identity.address
+        msg.to = agent.identity.address
         msg.sender = agent.identity.address
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
@@ -233,10 +230,10 @@ def test_handle():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = aea.identity.address
+        msg.to = aea.identity.address
         msg.sender = aea.identity.address
         envelope = Envelope(
-            to=msg.counterparty,
+            to=msg.to,
             sender=msg.sender,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=msg,
@@ -273,13 +270,10 @@ def test_handle():
                 dialogue_reference=(str(0), ""),
                 target=0,
             )
-            msg.counterparty = aea.identity.address
+            msg.to = aea.identity.address
             msg.sender = aea.identity.address
             envelope = Envelope(
-                to=msg.counterparty,
-                sender=msg.sender,
-                protocol_id=msg.protocol_id,
-                message=msg,
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
@@ -317,10 +311,10 @@ def test_initialize_aea_programmatically():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_message.counterparty = aea.identity.address
+        expected_message.to = aea.identity.address
         expected_message.sender = aea.identity.address
         envelope = Envelope(
-            to=expected_message.counterparty,
+            to=expected_message.to,
             sender=expected_message.sender,
             protocol_id=expected_message.protocol_id,
             message=expected_message,
@@ -408,7 +402,7 @@ def test_initialize_aea_programmatically_build_resources():
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"hello",
             )
-            expected_message.counterparty = agent_name
+            expected_message.to = agent_name
             expected_message.sender = agent_name
 
             with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
@@ -515,7 +509,7 @@ def test_error_handler_is_not_set():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = agent.identity.address
+    msg.to = agent.identity.address
     envelope = Envelope(
         to=agent.identity.address,
         sender=agent.identity.address,
@@ -524,7 +518,7 @@ def test_error_handler_is_not_set():
     )
 
     with patch.object(agent, "stop") as mocked_stop:
-        agent._handle_envelope(envelope)
+        agent.handle_envelope(envelope)
 
     mocked_stop.assert_called()
 
@@ -548,7 +542,7 @@ def test_no_handlers_registered():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = aea.identity.address
+        msg.to = aea.identity.address
         envelope = Envelope(
             to=aea.identity.address,
             sender=aea.identity.address,
@@ -556,7 +550,7 @@ def test_no_handlers_registered():
             message=msg,
         )
         with patch.object(aea.filter, "get_active_handlers", return_value=[]):
-            aea._handle_envelope(envelope)
+            aea.handle_envelope(envelope)
             mock_logger.assert_any_call(
                 f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
             )
@@ -745,7 +739,7 @@ class TestAeaExceptionPolicy:
         self.aea._skills_exception_policy = ExceptionPolicyEnum.just_log
         self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        with patch.object(self.aea._logger, "exception") as patched:
+        with patch.object(self.aea.logger, "exception") as patched:
             t = Thread(target=self.aea.start)
             t.start()
 
@@ -795,6 +789,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
+        self.aea_tool.aea.runtime.main_loop.teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -818,25 +813,22 @@ class BaseTimeExecutionCase(TestCase):
         handler_cls = make_handler_cls_from_funcion(handler_func)
 
         behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
-
+        self.behaviour = behaviour_cls(name="behaviour1", skill_context=skill_context)
         test_skill = Skill(
             SkillConfig(name="test_skill", author="fetchai"),
             skill_context=skill_context,
             handlers={
                 "handler1": handler_cls(name="handler1", skill_context=skill_context)
             },
-            behaviours={
-                "behaviour1": behaviour_cls(
-                    name="behaviour1", skill_context=skill_context
-                )
-            },
+            behaviours={"behaviour1": self.behaviour},
         )
         skill_context._skill = test_skill  # weird hack
 
         builder.add_component_instance(test_skill)
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
-        self.aea_tool.put_inbox(AeaTool.dummy_envelope())
+        self.envelope = AeaTool.dummy_envelope()
+        self.aea_tool.aea.runtime.main_loop.setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
@@ -848,7 +840,6 @@ class BaseTimeExecutionCase(TestCase):
 
         self.prepare(lambda: sleep_a_bit(sleep_time, num_sleeps))
         self.aea_tool.set_execution_timeout(execution_timeout)
-        self.aea_tool.setup()
 
         with timeit_context() as timeit:
             self.aea_action()
@@ -894,11 +885,13 @@ class BaseTimeExecutionCase(TestCase):
 
 
 class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
-    """Test react timeout."""
+    """Test handle envelope timeout."""
 
     def aea_action(self):
         """Spin react on AEA."""
-        self.aea_tool.react_one()
+        self.aea_tool.aea.runtime.main_loop._execution_control(
+            self.aea_tool.handle_envelope, [self.envelope]
+        )
 
 
 class ActTimeoutExecutionCase(BaseTimeExecutionCase):
@@ -906,4 +899,6 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin act on AEA."""
-        self.aea_tool.act_one()
+        self.aea_tool.aea.runtime.main_loop._execution_control(
+            self.behaviour.act_wrapper
+        )

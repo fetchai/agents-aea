@@ -30,7 +30,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import Dependency
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, enforce
 
 
 @click.command()
@@ -92,7 +92,7 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
         if return_code == 1:
             # try a second time
             return_code = _run_install_subprocess(command)
-        assert return_code == 0, "Return code != 0."
+        enforce(return_code == 0, "Return code != 0.")
     except Exception as e:
         raise AEAException(
             "An error occurred while installing {}, {}: {}".format(
@@ -136,7 +136,7 @@ def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
         returncode = _run_install_subprocess(
             [sys.executable, "-m", "pip", "install", "-r", file], install_timeout
         )
-        assert returncode == 0, "Return code != 0."
+        enforce(returncode == 0, "Return code != 0.")
     except Exception:
         raise AEAException(
             "An error occurred while installing requirement file {}. Stopping...".format(

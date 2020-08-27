@@ -54,7 +54,7 @@ def test_init_identity_negative():
             addresses={DEFAULT_LEDGER: address_1, FETCHAI: address_1},
             default_address_key="wrong_key",
         )
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         Identity(name)
 
 

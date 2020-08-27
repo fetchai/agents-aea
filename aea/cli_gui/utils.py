@@ -164,7 +164,8 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
 
     :param process_id: the process id
     """
-    assert process_id is not None, "Process id cannot be None!"
+    if process_id is None:  # pragma: nocover
+        raise ValueError("Process id cannot be None!")
 
     return_code = process_id.poll()
     if return_code is None:

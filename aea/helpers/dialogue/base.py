@@ -27,12 +27,18 @@ This module contains the classes required for dialogue management.
 
 import itertools
 import secrets
-from abc import ABC, abstractmethod
+from abc import ABC
 from enum import Enum
+from inspect import signature
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
+from aea.exceptions import enforce
 from aea.mail.base import Address
 from aea.protocols.base import Message
+
+
+class InvalidDialogueMessage(Exception):
+    """Exception for adding invalid message to a dialogue."""
 
 
 class DialogueLabel:
@@ -130,7 +136,7 @@ class DialogueLabel:
     def get_incomplete_version(self) -> "DialogueLabel":
         """Get the incomplete version of the label."""
         dialogue_label = DialogueLabel(
-            (self.dialogue_starter_reference, Dialogue.OPPONENT_STARTER_REFERENCE),
+            (self.dialogue_starter_reference, Dialogue.UNASSIGNED_DIALOGUE_REFERENCE),
             self.dialogue_opponent_addr,
             self.dialogue_starter_addr,
         )
@@ -167,7 +173,13 @@ class Dialogue(ABC):
 
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0
-    OPPONENT_STARTER_REFERENCE = ""
+    UNASSIGNED_DIALOGUE_REFERENCE = ""
+
+    INITIAL_PERFORMATIVES = frozenset()  # type: FrozenSet[Message.Performative]
+    TERMINAL_PERFORMATIVES = frozenset()  # type: FrozenSet[Message.Performative]
+    VALID_REPLIES = (
+        dict()
+    )  # type: Dict[Message.Performative, FrozenSet[Message.Performative]]
 
     class Rules:
         """This class defines the rules for the dialogue."""
@@ -229,9 +241,10 @@ class Dialogue(ABC):
             :param performative: the performative in a message
             :return: list of valid performative replies
             """
-            assert (
-                performative in self.valid_replies
-            ), "this performative '{}' is not supported".format(performative)
+            enforce(
+                performative in self.valid_replies,
+                "this performative '{}' is not supported".format(performative),
+            )
             return self.valid_replies[performative]
 
     class Role(Enum):
@@ -251,10 +264,9 @@ class Dialogue(ABC):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        message_class: Optional[Type[Message]] = None,
-        agent_address: Optional[Address] = None,
-        role: Optional[Role] = None,
-        rules: Optional[Rules] = None,
+        message_class: Type[Message],
+        agent_address: Address,
+        role: Role,
     ) -> None:
         """
         Initialize a dialogue.
@@ -262,7 +274,6 @@ class Dialogue(ABC):
         :param dialogue_label: the identifier of the dialogue
         :param agent_address: the address of the agent for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :param rules: the rules of the dialogue
 
         :return: None
         """
@@ -270,6 +281,9 @@ class Dialogue(ABC):
         self._incomplete_dialogue_label = dialogue_label.get_incomplete_version()
         self._dialogue_label = dialogue_label
         self._role = role
+        self._rules = self.Rules(
+            self.INITIAL_PERFORMATIVES, self.TERMINAL_PERFORMATIVES, self.VALID_REPLIES
+        )
 
         self._is_self_initiated = (
             dialogue_label.dialogue_opponent_addr
@@ -278,10 +292,11 @@ class Dialogue(ABC):
 
         self._outgoing_messages = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
-        self._rules = rules
 
-        if message_class is not None:
-            assert issubclass(message_class, Message)
+        enforce(
+            issubclass(message_class, Message),
+            "Message class provided not a subclass of `Message`.",
+        )
         self._message_class = message_class
 
     @property
@@ -318,17 +333,9 @@ class Dialogue(ABC):
 
         :return: the agent address
         """
-        assert self._agent_address is not None, "agent_address is not set."
+        if self._agent_address is None:  # pragma: nocover
+            raise ValueError("agent_address is not set.")
         return self._agent_address
-
-    @agent_address.setter
-    def agent_address(self, agent_address: Address) -> None:
-        """
-        Set the address of the agent for whom this dialogues is maintained.
-
-        :param: the agent address
-        """
-        self._agent_address = agent_address
 
     @property
     def role(self) -> "Role":
@@ -337,18 +344,9 @@ class Dialogue(ABC):
 
         :return: the agent's role
         """
-        assert self._role is not None, "Role is not set."
+        if self._role is None:  # pragma: nocover
+            raise ValueError("Role is not set.")
         return self._role
-
-    @role.setter
-    def role(self, role: "Role") -> None:
-        """
-        Set the agent's role in the dialogue.
-
-        :param role: the agent's role
-        :return: None
-        """
-        self._role = role
 
     @property
     def rules(self) -> "Rules":
@@ -357,7 +355,8 @@ class Dialogue(ABC):
 
         :return: the rules
         """
-        assert self._rules is not None, "Rules is not set."
+        if self._rules is None:  # pragma: nocover
+            raise ValueError("Rules is not set.")
         return self._rules
 
     @property
@@ -412,22 +411,6 @@ class Dialogue(ABC):
 
         return last_message
 
-    def get_message(self, message_id_to_find: int) -> Optional[Message]:
-        """
-        Get the message whose id is 'message_id'.
-
-        :param message_id_to_find: the id of the message
-        :return: the message if it exists, None otherwise
-        """
-        result = None  # type: Optional[Message]
-        list_of_all_messages = self._outgoing_messages + self._incoming_messages
-        for message in list_of_all_messages:
-            if message.message_id == message_id_to_find:
-                result = message
-                break
-
-        return result
-
     @property
     def is_empty(self) -> bool:
         """
@@ -437,72 +420,162 @@ class Dialogue(ABC):
         """
         return len(self._outgoing_messages) == 0 and len(self._incoming_messages) == 0
 
-    def update(self, message: Message) -> bool:
+    def _counterparty_from_message(self, message: Message) -> Address:
+        """
+        Determine the counterparty of the agent in the dialogue from a message.
+
+        :param message: the message
+        :return: The address of the counterparty
+        """
+        counterparty = (
+            message.to if self._is_message_by_self(message) else message.sender
+        )
+        return counterparty
+
+    def _is_message_by_self(self, message: Message) -> bool:
+        """
+        Check whether the message is by this agent or not.
+
+        :param message: the message
+        :return: True if message is by this agent, False otherwise
+        """
+        return message.sender == self.agent_address
+
+    def _is_message_by_other(self, message: Message) -> bool:
+        """
+        Check whether the message is by the counterparty agent in this dialogue or not.
+
+        :param message: the message
+        :return: True if message is by the counterparty agent in this dialogue, False otherwise
+        """
+        return not self._is_message_by_self(message)
+
+    def _try_get_message(self, message_id: int) -> Optional[Message]:
+        """
+        Try to get the message whose id is 'message_id'.
+
+        :param message_id: the id of the message
+        :return: the message if it exists, None otherwise
+        """
+        result = None  # type: Optional[Message]
+        list_of_all_messages = self._outgoing_messages + self._incoming_messages
+        for message in list_of_all_messages:
+            if message.message_id == message_id:
+                result = message
+                break
+        return result
+
+    def _get_message(self, message_id: int) -> Message:
+        """
+        Get the message whose id is 'message_id'.
+
+        :param message_id: the id of the message
+        :return: the message
+        :raises: AssertionError if message is not present
+        """
+        message = self._try_get_message(message_id)
+        if message is None:
+            raise ValueError("Message not present.")
+        return message
+
+    def _has_message(self, message: Message) -> bool:
+        """
+        Check whether a message exists in this dialogue.
+
+        :param message: the message
+        :return: True if message exists in this dialogue, False otherwise
+        """
+        if self.is_empty:
+            return False
+
+        if not self._has_message_id(message.message_id):
+            return False
+
+        retrieved_message = self._get_message(message.message_id)
+        return message == retrieved_message
+
+    def _has_message_id(self, message_id: int) -> bool:
+        """
+        Check whether a message with the supplied message id exists in this dialogue.
+
+        :param message_id: the message id
+        :return: True if message with that id exists in this dialogue, False otherwise
+        """
+        if self.is_empty:
+            return False
+
+        return self.STARTING_MESSAGE_ID <= message_id <= self.last_message.message_id  # type: ignore
+
+    def _update(self, message: Message) -> None:
         """
         Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
 
         :param message: a message to be added
-        :return: True if message successfully added, false otherwise
-        """
-        if not message.is_incoming:
-            message.sender = self.agent_address
-
-        self.ensure_counterparty(message)
-
-        if not self.is_belonging_to_dialogue(message):
-            return False
-
-        is_extendable = self.is_valid_next_message(message)
-        if is_extendable:
-            if message.is_incoming:
-                self._incoming_messages.extend([message])
-            else:
-                self._outgoing_messages.extend([message])
-        return is_extendable
-
-    def ensure_counterparty(self, message: Message) -> None:
-        """
-        Ensure the counterparty is set (set if not) correctly.
-
-        :param message: a message
         :return: None
+        :raises: InvalidDialogueMessage: if message does not belong to this dialogue, or if message is invalid
         """
-        counterparty = None  # type: Optional[str]
-        try:
-            counterparty = message.counterparty
-        except AssertionError:
-            # assume message belongs to dialogue
-            message.counterparty = self.dialogue_label.dialogue_opponent_addr
+        if not message.has_sender:
+            message.sender = self.agent_address  # pragma: nocover
 
-        if counterparty is not None:
-            assert (
-                message.counterparty == self.dialogue_label.dialogue_opponent_addr
-            ), "The counterparty specified in the message is different from the opponent in this dialogue."
+        if not self._is_belonging_to_dialogue(message):
+            raise InvalidDialogueMessage(
+                "The message {} does not belong to this dialogue."
+                "The dialogue reference of the message is {}, while the dialogue reference of the dialogue is {}".format(
+                    message.message_id,
+                    message.dialogue_reference,
+                    self.dialogue_label.dialogue_reference,
+                )
+            )
 
-    def is_belonging_to_dialogue(self, message: Message) -> bool:
+        is_valid_result, validation_message = self._validate_next_message(message)
+
+        if not is_valid_result:
+            raise InvalidDialogueMessage(
+                "Message {} is invalid with respect to this dialogue. Error: {}".format(
+                    message.message_id, validation_message,
+                )
+            )
+
+        if self._is_message_by_self(message):
+            self._outgoing_messages.extend([message])
+        else:
+            self._incoming_messages.extend([message])
+
+    def _is_belonging_to_dialogue(self, message: Message) -> bool:
         """
         Check if the message is belonging to the dialogue.
 
         :param message: the message
-        :return: Ture if message is part of the dialogue, False otherwise
+        :return: True if message is part of the dialogue, False otherwise
         """
+        opponent = self._counterparty_from_message(message)
         if self.is_self_initiated:
             self_initiated_dialogue_label = DialogueLabel(
-                (message.dialogue_reference[0], Dialogue.OPPONENT_STARTER_REFERENCE),
-                message.counterparty,
+                (
+                    message.dialogue_reference[0],
+                    Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+                ),
+                opponent,
                 self.agent_address,
             )
             result = self_initiated_dialogue_label in self.dialogue_labels
         else:
             other_initiated_dialogue_label = DialogueLabel(
-                message.dialogue_reference, message.counterparty, message.counterparty
+                message.dialogue_reference, opponent, opponent,
             )
             result = other_initiated_dialogue_label in self.dialogue_labels
         return result
 
-    def reply(self, target_message: Message, performative, **kwargs) -> Message:
+    def reply(
+        self,
+        performative: Message.Performative,
+        target_message: Optional[Message] = None,
+        **kwargs,
+    ) -> Message:
         """
         Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
+
+        Note if no target_message is provided, the last message in the dialogue will be replied to.
 
         :param target_message: the message to reply to.
         :param performative: the performative of the reply message.
@@ -510,47 +583,82 @@ class Dialogue(ABC):
 
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
-        assert (
-            self._message_class is not None
-        ), "No 'message_class' argument was provided to this class on construction."
-        assert self.last_message is not None, "Cannot reply in an empty dialogue!"
+        last_message = self.last_message
+        if last_message is None:
+            raise ValueError("Cannot reply in an empty dialogue!")
+
+        if target_message is None:
+            target_message = last_message
+        else:
+            enforce(
+                self._has_message(
+                    target_message  # type: ignore
+                ),
+                "The target message does not exist in this dialogue.",
+            )
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
-            message_id=self.last_message.message_id + 1,
+            message_id=last_message.message_id + 1,
             target=target_message.message_id,
             performative=performative,
             **kwargs,
         )
-        reply.counterparty = self.dialogue_label.dialogue_opponent_addr
-        result = self.update(reply)
+        reply.sender = self.agent_address
+        reply.to = self.dialogue_label.dialogue_opponent_addr
 
-        if result:
-            return reply
-        raise Exception("Invalid message from performative and contents.")
+        self._update(reply)
 
-    def is_valid_next_message(self, message: Message) -> bool:
+        return reply
+
+    def _validate_next_message(self, message: Message) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in this dialogue.
 
         The evaluation of a message validity involves performing several categories of checks.
         Each category of checks resides in a separate method.
 
-        Currently, basic rules are fundamental structural constraints,
-        additional rules are applied for the time being, and more specific rules are captured in the is_valid method.
+        Currently, basic rules are general fundamental structural constraints,
+        additional rules are applied for the time being, and more specific rules to each dialogue are captured in the is_valid method.
 
         :param message: the message to be validated
-        :return: True if yes, False otherwise.
+        :return: Boolean result, and associated message.
         """
-        return (
-            self._basic_rules(message)
-            and self._additional_rules(message)
-            and self.is_valid(message)
-        )
+        is_basic_validated, msg_basic_validation = self._basic_validation(message)
+        if not is_basic_validated:
+            return False, msg_basic_validation
 
-    def _basic_rules(self, message: Message) -> bool:
+        (
+            result_additional_validation,
+            msg_additional_validation,
+        ) = self._additional_validation(message)
+        if not result_additional_validation:
+            return False, msg_additional_validation
+
+        result_is_valid, msg_is_valid = self._custom_validation(message)
+        if not result_is_valid:
+            return False, msg_is_valid
+
+        return True, "Message is valid with respect to this dialogue."
+
+    def _basic_validation(self, message: Message) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in the dialogue, according to basic rules.
+
+        This method redirects the checks to two other methods based on whether the message
+        is the first in the dialogue or not.
+
+        :param message: the message to be validated
+        :return: Boolean result, and associated message.
+        """
+        if self.is_empty:  # initial message
+            return self._basic_validation_initial_message(message)
+
+        return self._basic_validation_non_initial_message(message)
+
+    def _basic_validation_initial_message(self, message: Message) -> Tuple[bool, str]:
+        """
+        Check whether an initial 'message' is a valid next message in the dialogue, according to basic rules.
 
         These rules are designed to be fundamental to all dialogues, and enforce the following:
 
@@ -559,37 +667,111 @@ class Dialogue(ABC):
          - message targets are according to the reply structure of performatives
 
         :param message: the message to be validated
-        :return: True if valid, False otherwise.
+        :return: Boolean result, and associated message.
         """
         dialogue_reference = message.dialogue_reference
         message_id = message.message_id
         target = message.target
         performative = message.performative
 
-        if self.last_message is None:
-            result = (
-                dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
-                and message_id == Dialogue.STARTING_MESSAGE_ID
-                and target == Dialogue.STARTING_TARGET
-                and performative in self.rules.initial_performatives
+        if dialogue_reference[0] != self.dialogue_label.dialogue_reference[0]:
+            return (
+                False,
+                "Invalid dialogue_reference[0]. Expected {}. Found {}.".format(
+                    self.dialogue_label.dialogue_reference[0], dialogue_reference[0]
+                ),
             )
-        else:
-            last_message_id = self.last_message.message_id
-            target_message = self.get_message(target)
-            if target_message is not None:
-                target_performative = target_message.performative
-                result = (
-                    dialogue_reference[0] == self.dialogue_label.dialogue_reference[0]
-                    and message_id == last_message_id + 1
-                    and 1 <= target <= last_message_id
-                    and performative
-                    in self.rules.get_valid_replies(target_performative)
-                )
-            else:
-                result = False
-        return result
 
-    def _additional_rules(self, message: Message) -> bool:
+        if message_id != Dialogue.STARTING_MESSAGE_ID:
+            return (
+                False,
+                "Invalid message_id. Expected {}. Found {}.".format(
+                    Dialogue.STARTING_MESSAGE_ID, message_id
+                ),
+            )
+
+        if target != Dialogue.STARTING_TARGET:
+            return (
+                False,
+                "Invalid target. Expected {}. Found {}.".format(
+                    Dialogue.STARTING_TARGET, target
+                ),
+            )
+
+        if performative not in self.rules.initial_performatives:
+            return (
+                False,
+                "Invalid initial performative. Expected one of {}. Found {}.".format(
+                    self.rules.initial_performatives, performative
+                ),
+            )
+
+        return True, "The initial message passes basic validation."
+
+    def _basic_validation_non_initial_message(
+        self, message: Message
+    ) -> Tuple[bool, str]:
+        """
+        Check whether a non-initial 'message' is a valid next message in the dialogue, according to basic rules.
+
+        These rules are designed to be fundamental to all dialogues, and enforce the following:
+
+         - message ids are consistent
+         - targets are consistent
+         - message targets are according to the reply structure of performatives
+
+        :param message: the message to be validated
+        :return: Boolean result, and associated message.
+        """
+        dialogue_reference = message.dialogue_reference
+        message_id = message.message_id
+        target = message.target
+        performative = message.performative
+
+        if dialogue_reference[0] != self.dialogue_label.dialogue_reference[0]:
+            return (
+                False,
+                "Invalid dialogue_reference[0]. Expected {}. Found {}.".format(
+                    self.dialogue_label.dialogue_reference[0], dialogue_reference[0]
+                ),
+            )
+
+        last_message_id = self.last_message.message_id  # type: ignore
+        if message_id != last_message_id + 1:
+            return (
+                False,
+                "Invalid message_id. Expected {}. Found {}.".format(
+                    last_message_id + 1, message_id
+                ),
+            )
+        if target < 1:
+            return (
+                False,
+                "Invalid target. Expected a value greater than or equal to 1. Found {}.".format(
+                    target
+                ),
+            )
+        if last_message_id < target:
+            return (
+                False,
+                "Invalid target. Expected a value less than or equal to {}. Found {}.".format(
+                    last_message_id, target
+                ),
+            )
+
+        target_message = self._get_message(target)
+        target_performative = target_message.performative
+        if performative not in self.rules.get_valid_replies(target_performative):
+            return (
+                False,
+                "Invalid performative. Expected one of {}. Found {}.".format(
+                    self.rules.get_valid_replies(target_performative), performative
+                ),
+            )
+
+        return True, "The non-initial message passes basic validation."
+
+    def _additional_validation(self, message: Message) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in the dialogue, according to additional rules.
 
@@ -599,31 +781,40 @@ class Dialogue(ABC):
          - A message targets the message strictly before it in the dialogue
 
         :param message: the message to be validated
-        :return: True if valid, False otherwise.
+        :return: Boolean result, and associated message.
         """
-        if self.last_message is None:
-            result = True
-        else:
-            target = message.target
-            last_target = self.last_message.target
-            result = target == last_target + 1
-        return result
+        if self.is_empty:
+            return True, "The message passes additional validation."
 
-    def update_dialogue_label(self, final_dialogue_label: DialogueLabel) -> None:
+        last_target = self.last_message.target  # type: ignore
+        if message.target == last_target + 1:
+            return True, "The message passes additional validation."
+
+        return (
+            False,
+            "Invalid target. Expected {}. Found {}.".format(
+                last_target + 1, message.target
+            ),
+        )
+
+    def _update_dialogue_label(self, final_dialogue_label: DialogueLabel) -> None:
         """
         Update the dialogue label of the dialogue.
 
         :param final_dialogue_label: the final dialogue label
         """
-        assert (
-            self.dialogue_label.dialogue_reference[1] == self.OPPONENT_STARTER_REFERENCE
+        enforce(
+            self.dialogue_label.dialogue_reference[1]
+            == self.UNASSIGNED_DIALOGUE_REFERENCE
             and final_dialogue_label.dialogue_reference[1]
-            != self.OPPONENT_STARTER_REFERENCE
-        ), "Dialogue label cannot be updated."
+            != self.UNASSIGNED_DIALOGUE_REFERENCE,
+            "Dialogue label cannot be updated.",
+        )
         self._dialogue_label = final_dialogue_label
 
-    @abstractmethod
-    def is_valid(self, message: Message) -> bool:
+    def _custom_validation(  # pylint: disable=no-self-use
+        self, message: Message
+    ) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in the dialogue.
 
@@ -632,6 +823,7 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
+        return True, "The message passes custom validation."
 
     @staticmethod
     def _interleave(list_1, list_2) -> List:
@@ -705,10 +897,10 @@ class DialogueStats(ABC):
         :return: None
         """
         if is_self_initiated:
-            assert end_state in self._self_initiated, "End state not present!"
+            enforce(end_state in self._self_initiated, "End state not present!")
             self._self_initiated[end_state] += 1
         else:
-            assert end_state in self._other_initiated, "End state not present!"
+            enforce(end_state in self._other_initiated, "End state not present!")
             self._other_initiated[end_state] += 1
 
 
@@ -719,9 +911,9 @@ class Dialogues(ABC):
         self,
         agent_address: Address,
         end_states: FrozenSet[Dialogue.EndState],
-        message_class: Optional[Type[Message]] = None,
-        dialogue_class: Optional[Type[Dialogue]] = None,
-        role_from_first_message: Optional[Callable[[Message], Dialogue.Role]] = None,
+        message_class: Type[Message],
+        dialogue_class: Type[Dialogue],
+        role_from_first_message: Callable[[Message, Address], Dialogue.Role],
     ) -> None:
         """
         Initialize dialogues.
@@ -731,26 +923,58 @@ class Dialogues(ABC):
         :return: None
         """
         self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_by_address = {}  # type: Dict[Address, Dialogue]
         self._incomplete_to_complete_dialogue_labels = (
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
         self._agent_address = agent_address
         self._dialogue_stats = DialogueStats(end_states)
 
-        if message_class is not None:
-            assert issubclass(message_class, Message)
+        enforce(
+            issubclass(message_class, Message),
+            "message_class is not a subclass of Message.",
+        )
         self._message_class = message_class
 
-        if dialogue_class is not None:
-            assert issubclass(dialogue_class, Dialogue)
+        enforce(
+            issubclass(dialogue_class, Dialogue),
+            "dialogue_class is not a subclass of Dialogue.",
+        )
         self._dialogue_class = dialogue_class
 
-        if role_from_first_message is not None:
-            self._role_from_first_message = role_from_first_message
-        else:
-            self._role_from_first_message = (
-                self.role_from_first_message
-            )  # pragma: no cover
+        # Note the following might be too restrictive; if the supplied role_from_first_message function
+        # does not have the type hinting for its parameter or its return value, the second and third checks
+        # below would fail.
+        sig = signature(role_from_first_message)
+        parameter_length = len(sig.parameters.keys())
+        enforce(
+            parameter_length == 2,
+            "Invalid number of parameters for role_from_first_message. Expected 2. Found {}.".format(
+                parameter_length
+            ),
+        )
+        parameter_1_type = list(sig.parameters.values())[0].annotation
+        enforce(
+            parameter_1_type == Message,
+            "Invalid type for the first parameter of role_from_first_message. Expected 'Message'. Found {}.".format(
+                parameter_1_type
+            ),
+        )
+        parameter_2_type = list(sig.parameters.values())[1].annotation
+        enforce(
+            parameter_2_type == Address,
+            "Invalid type for the second parameter of role_from_first_message. Expected 'Address'. Found {}.".format(
+                parameter_2_type
+            ),
+        )
+        return_type = sig.return_annotation
+        enforce(
+            return_type == Dialogue.Role,
+            "Invalid return type for role_from_first_message. Expected 'Dialogue.Role'. Found {}.".format(
+                return_type
+            ),
+        )
+        self._role_from_first_message = role_from_first_message
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
@@ -760,7 +984,7 @@ class Dialogues(ABC):
     @property
     def agent_address(self) -> Address:
         """Get the address of the agent for whom dialogues are maintained."""
-        assert self._agent_address != "", "agent_address is not set."
+        enforce(self._agent_address != "", "agent_address is not set.")
         return self._agent_address
 
     @property
@@ -772,13 +996,54 @@ class Dialogues(ABC):
         """
         return self._dialogue_stats
 
+    def get_dialogue_with_counterparty(
+        self, counterparty: Address
+    ) -> Optional[Dialogue]:
+        """
+        Get the dialogue by address.
+
+        :param counterparty: the counterparty
+        :return: The dialogue is one exists with the counterparty, None otherwise.
+        """
+        return self._dialogue_by_address.get(counterparty, None)
+
+    def _is_message_by_self(self, message: Message) -> bool:
+        """
+        Check whether the message is by this agent or not.
+
+        :param message: the message
+        :return: True if message is by this agent, False otherwise
+        """
+        return message.sender == self.agent_address
+
+    def _is_message_by_other(self, message: Message) -> bool:
+        """
+        Check whether the message is by the counterparty agent in this dialogue or not.
+
+        :param message: the message
+        :return: True if message is by the counterparty agent in this dialogue, False otherwise
+        """
+        return not self._is_message_by_self(message)
+
+    def _counterparty_from_message(self, message: Message) -> Address:
+        """
+        Determine the counterparty of the agent in the dialogue from a message.
+
+        :param message: the message
+        :return: The address of the counterparty
+        """
+        counterparty = (
+            message.to if self._is_message_by_self(message) else message.sender
+        )
+        return counterparty
+
     def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
         """
         Return a dialogue label for a new self initiated dialogue.
 
         :return: the next nonce
         """
-        return self._generate_dialogue_nonce(), Dialogue.OPPONENT_STARTER_REFERENCE
+        return self._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
 
     def create(
         self, counterparty: Address, performative: Message.Performative, **kwargs,
@@ -792,10 +1057,6 @@ class Dialogues(ABC):
 
         :return: the initial message and the dialogue.
         """
-        assert (
-            self._message_class is not None
-        ), "No 'message_class' argument was provided to this class on construction."
-
         initial_message = self._message_class(
             dialogue_reference=self.new_self_initiated_dialogue_reference(),
             message_id=Dialogue.STARTING_MESSAGE_ID,
@@ -803,23 +1064,64 @@ class Dialogues(ABC):
             performative=performative,
             **kwargs,
         )
-        initial_message.counterparty = counterparty
+        initial_message.sender = self.agent_address
+        initial_message.to = counterparty
 
+        dialogue = self._create_dialogue(counterparty, initial_message)
+
+        return initial_message, dialogue
+
+    def create_with_message(
+        self, counterparty: Address, initial_message: Message
+    ) -> Dialogue:
+        """
+        Create a dialogue with 'counterparty', with an initial message provided.
+
+        :param counterparty: the counterparty of the dialogue.
+        :param initial_message: the initial_message.
+
+        :return: the initial message and the dialogue.
+        """
+        enforce(
+            not initial_message.has_sender,
+            "The message's 'sender' field is already set {}".format(initial_message),
+        )
+        enforce(
+            not initial_message.has_to,
+            "The message's 'to' field is already set {}".format(initial_message),
+        )
+        initial_message.sender = self.agent_address
+        initial_message.to = counterparty
+
+        dialogue = self._create_dialogue(counterparty, initial_message)
+
+        return dialogue
+
+    def _create_dialogue(
+        self, counterparty: Address, initial_message: Message
+    ) -> Dialogue:
+        """
+        Create a dialogue from an initial message provided.
+
+        :param counterparty: the counterparty of the dialogue.
+        :param initial_message: the initial_message.
+
+        :return: the dialogue.
+        """
         dialogue = self._create_self_initiated(
             dialogue_opponent_addr=counterparty,
             dialogue_reference=initial_message.dialogue_reference,
-            role=self._role_from_first_message(initial_message),
+            role=self._role_from_first_message(initial_message, self.agent_address),
         )
 
-        successfully_updated = dialogue.update(initial_message)
-
-        if not successfully_updated:
+        try:
+            dialogue._update(initial_message)  # pylint: disable=protected-access
+        except InvalidDialogueMessage as e:
             self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
-            raise Exception(
-                "Cannot create the a dialogue with the specified performative and contents."
-            )
-
-        return initial_message, dialogue
+            raise SyntaxError(
+                "Cannot create a dialogue with the specified performative and contents."
+            ) from e
+        return dialogue
 
     def update(self, message: Message) -> Optional[Dialogue]:
         """
@@ -829,106 +1131,107 @@ class Dialogues(ABC):
         If the message is addressed to an existing dialogue, the dialogue is retrieved, extended with this message and returned.
         If there are any errors, e.g. the message dialogue reference does not exists or the message is invalid w.r.t. the dialogue, return None.
 
-        :param message: a new message
+        :param message: a new incoming message
         :return: the new or existing dialogue the message is intended for, or None in case of any errors.
         """
+        enforce(
+            message.has_sender and self._is_message_by_other(message),
+            "Invalid 'update' usage. Update must only be used with a message by another agent.",
+        )
+        enforce(
+            message.has_to, "The message's 'to' field is not set {}".format(message)
+        )
+
         dialogue_reference = message.dialogue_reference
 
-        if not message.has_counterparty:
-            raise ValueError(
-                "The message counterparty field is not set {}".format(message)
-            )
-        if message.is_incoming and not message.has_sender:
-            raise ValueError("The message sender field is not set {}".format(message))
-
         is_invalid_label = (
-            dialogue_reference[0] == Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
         )
         is_new_dialogue = (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and message.message_id == 1
-            and message.target == 0
         )
         is_incomplete_label_and_non_initial_msg = (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and message.message_id > 1
         )
+
         if is_invalid_label:
             dialogue = None  # type: Optional[Dialogue]
-        elif is_new_dialogue and message.is_incoming:  # new dialogue by other
+        elif is_new_dialogue:  # initial message for new dialogue
             dialogue = self._create_opponent_initiated(
-                dialogue_opponent_addr=message.counterparty,
+                dialogue_opponent_addr=message.sender,
                 dialogue_reference=dialogue_reference,
-                role=self._role_from_first_message(message),
+                role=self._role_from_first_message(message, self.agent_address),
             )
-        elif is_new_dialogue and not message.is_incoming:  # new dialogue by self
-            dialogue = self._create_self_initiated(
-                dialogue_opponent_addr=message.counterparty,
-                dialogue_reference=dialogue_reference,
-                role=self._role_from_first_message(message),
-            )
-        elif (  # non-initial message with incomplete label
-            is_incomplete_label_and_non_initial_msg
-        ):
+        elif is_incomplete_label_and_non_initial_msg:
             # we can allow a dialogue to have incomplete reference
             # as multiple messages can be sent before one is received with complete reference
             dialogue = self.get_dialogue(message)
-        else:
-            self._update_self_initiated_dialogue_label_on_message_with_complete_reference(
-                message
-            )
+        else:  # non-initial message for existing dialogue
+            self._complete_dialogue_reference(message)
             dialogue = self.get_dialogue(message)
 
-        if dialogue is not None and dialogue.update(message):
-            result = dialogue  # type: Optional[Dialogue]
-        else:  # couldn't find the dialogue or invalid message
+        if dialogue is not None:
+            try:
+                dialogue._update(message)  # pylint: disable=protected-access
+                result = dialogue  # type: Optional[Dialogue]
+            except InvalidDialogueMessage:
+                # invalid message for the dialogue found
+                result = None
+                if (
+                    is_new_dialogue
+                ):  # remove the newly created dialogue if the initial message is invalid
+                    self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
+        else:
+            # couldn't find the dialogue referenced by the message
             result = None
 
         return result
 
-    def _update_self_initiated_dialogue_label_on_message_with_complete_reference(
-        self, message: Message
-    ) -> None:
+    def _complete_dialogue_reference(self, message: Message) -> None:
         """
         Update a self initiated dialogue label with a complete dialogue reference from counterparty's first message.
 
         :param message: A message in the dialogue (the first by the counterparty with a complete reference)
         :return: None
         """
-        dialogue_reference = message.dialogue_reference
-        assert (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] != Dialogue.OPPONENT_STARTER_REFERENCE
-        ), "Only complete dialogue references allowed."
-        self_initiated_dialogue_reference = (
-            dialogue_reference[0],
-            Dialogue.OPPONENT_STARTER_REFERENCE,
-        )
-        self_initiated_dialogue_label = DialogueLabel(
-            self_initiated_dialogue_reference, message.counterparty, self.agent_address,
+        complete_dialogue_reference = message.dialogue_reference
+        enforce(
+            complete_dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and complete_dialogue_reference[1]
+            != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            "Only complete dialogue references allowed.",
         )
 
-        if self_initiated_dialogue_label in self.dialogues:
-            self_initiated_dialogue = self.dialogues.pop(self_initiated_dialogue_label)
+        incomplete_dialogue_reference = (
+            complete_dialogue_reference[0],
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+        )
+        incomplete_dialogue_label = DialogueLabel(
+            incomplete_dialogue_reference, message.sender, self.agent_address,
+        )
+
+        if (
+            incomplete_dialogue_label in self.dialogues
+            and incomplete_dialogue_label
+            not in self._incomplete_to_complete_dialogue_labels
+        ):
+            dialogue = self.dialogues.pop(incomplete_dialogue_label)
             final_dialogue_label = DialogueLabel(
-                dialogue_reference,
-                self_initiated_dialogue_label.dialogue_opponent_addr,
-                self_initiated_dialogue_label.dialogue_starter_addr,
+                complete_dialogue_reference,
+                incomplete_dialogue_label.dialogue_opponent_addr,
+                incomplete_dialogue_label.dialogue_starter_addr,
             )
-            self_initiated_dialogue.update_dialogue_label(final_dialogue_label)
-            assert (
-                self_initiated_dialogue.dialogue_label not in self.dialogues
-                and self_initiated_dialogue_label
-                not in self._incomplete_to_complete_dialogue_labels
-            ), "DialogueLabel already present in dialogues."
-            self.dialogues.update(
-                {self_initiated_dialogue.dialogue_label: self_initiated_dialogue}
+            dialogue._update_dialogue_label(  # pylint: disable=protected-access
+                final_dialogue_label
             )
+            self.dialogues.update({dialogue.dialogue_label: dialogue})
             self._incomplete_to_complete_dialogue_labels[
-                self_initiated_dialogue_label
+                incomplete_dialogue_label
             ] = final_dialogue_label
 
     def get_dialogue(self, message: Message) -> Optional[Dialogue]:
@@ -938,34 +1241,35 @@ class Dialogues(ABC):
         :param message: a message
         :return: the dialogue, or None in case such a dialogue does not exist
         """
-        dialogue_reference = message.dialogue_reference
-        counterparty = message.counterparty
-
         self_initiated_dialogue_label = DialogueLabel(
-            dialogue_reference, counterparty, self.agent_address
+            message.dialogue_reference,
+            self._counterparty_from_message(message),
+            self.agent_address,
         )
         other_initiated_dialogue_label = DialogueLabel(
-            dialogue_reference, counterparty, counterparty
+            message.dialogue_reference,
+            self._counterparty_from_message(message),
+            self._counterparty_from_message(message),
         )
 
-        self_initiated_dialogue_label = self.get_latest_label(
+        self_initiated_dialogue_label = self._get_latest_label(
             self_initiated_dialogue_label
         )
-        other_initiated_dialogue_label = self.get_latest_label(
+        other_initiated_dialogue_label = self._get_latest_label(
             other_initiated_dialogue_label
         )
 
-        self_initiated_dialogue = self.get_dialogue_from_label(
+        self_initiated_dialogue = self._get_dialogue_from_label(
             self_initiated_dialogue_label
         )
-        other_initiated_dialogue = self.get_dialogue_from_label(
+        other_initiated_dialogue = self._get_dialogue_from_label(
             other_initiated_dialogue_label
         )
 
         result = self_initiated_dialogue or other_initiated_dialogue
         return result
 
-    def get_latest_label(self, dialogue_label: DialogueLabel) -> DialogueLabel:
+    def _get_latest_label(self, dialogue_label: DialogueLabel) -> DialogueLabel:
         """
         Retrieve the latest dialogue label if present otherwise return same label.
 
@@ -977,7 +1281,7 @@ class Dialogues(ABC):
         )
         return result
 
-    def get_dialogue_from_label(
+    def _get_dialogue_from_label(
         self, dialogue_label: DialogueLabel
     ) -> Optional[Dialogue]:
         """
@@ -1003,10 +1307,11 @@ class Dialogues(ABC):
 
         :return: the created dialogue.
         """
-        assert (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
-        ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
+        enforce(
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            "Cannot initiate dialogue with preassigned dialogue_responder_reference!",
+        )
         incomplete_dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
@@ -1028,10 +1333,11 @@ class Dialogues(ABC):
 
         :return: the created dialogue
         """
-        assert (
-            dialogue_reference[0] != Dialogue.OPPONENT_STARTER_REFERENCE
-            and dialogue_reference[1] == Dialogue.OPPONENT_STARTER_REFERENCE
-        ), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
+        enforce(
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            "Cannot initiate dialogue with preassigned dialogue_responder_reference!",
+        )
         incomplete_dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
         )
@@ -1062,10 +1368,11 @@ class Dialogues(ABC):
 
         :return: the created dialogue
         """
-        assert (
+        enforce(
             incomplete_dialogue_label
-            not in self._incomplete_to_complete_dialogue_labels
-        ), "Incomplete dialogue label already present."
+            not in self._incomplete_to_complete_dialogue_labels,
+            "Incomplete dialogue label already present.",
+        )
         if complete_dialogue_label is None:
             dialogue_label = incomplete_dialogue_label
         else:
@@ -1073,48 +1380,19 @@ class Dialogues(ABC):
                 incomplete_dialogue_label
             ] = complete_dialogue_label
             dialogue_label = complete_dialogue_label
-        assert (
-            dialogue_label not in self.dialogues
-        ), "Dialogue label already present in dialogues."
-        if self._message_class is not None and self._dialogue_class is not None:
-            dialogue = self._dialogue_class(
-                dialogue_label=dialogue_label,
-                message_class=self._message_class,
-                agent_address=self.agent_address,
-                role=role,
-            )
-        else:
-            # TODO: remove this approach
-            dialogue = self.create_dialogue(
-                dialogue_label=dialogue_label, role=role,
-            )  # pragma: no cover
+        enforce(
+            dialogue_label not in self.dialogues,
+            "Dialogue label already present in dialogues.",
+        )
+        dialogue = self._dialogue_class(
+            dialogue_label=dialogue_label,
+            message_class=self._message_class,
+            agent_address=self.agent_address,
+            role=role,
+        )
         self.dialogues.update({dialogue_label: dialogue})
+        self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = dialogue
         return dialogue
-
-    @abstractmethod
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> Dialogue:
-        """
-        THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN THE NEXT VERSION. USE THE NEW CONSTRUCTOR ARGUMENTS INSTEAD.
-
-        Create a dialogue instance.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> Dialogue.Role:
-        """
-        Infer the role of the agent from an incoming or outgoing first message.
-
-        :param message: an incoming/outgoing first message
-        :return: the agent's role
-        """
-        pass  # pragma: no cover
 
     @staticmethod
     def _generate_dialogue_nonce() -> str:

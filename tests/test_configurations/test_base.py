@@ -620,7 +620,7 @@ def test_agent_config_to_json_with_optional_configurations():
     agent_config = AgentConfig(
         "name",
         "author",
-        timeout=0.1,
+        period=0.1,
         execution_timeout=1.0,
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),

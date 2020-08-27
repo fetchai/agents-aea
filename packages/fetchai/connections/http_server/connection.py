@@ -20,7 +20,6 @@
 
 """HTTP server connection, channel, server, and handler."""
 import asyncio
-import copy
 import email
 import logging
 from abc import ABC, abstractmethod
@@ -56,10 +55,12 @@ from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel
-from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+from aea.mail.base import Address, Envelope, EnvelopeContext, Message, URI
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
@@ -71,6 +72,35 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_serve
 
 RequestId = DialogueLabel
 PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.7.0")
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, agent_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The server connection maintains the dialogue on behalf of the client
+            return HttpDialogue.Role.CLIENT
+
+        BaseHttpDialogues.__init__(
+            self,
+            agent_address=agent_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 def headers_to_string(headers: Dict):
@@ -159,8 +189,8 @@ class Request(OpenAPIRequest):
         )
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
-        http_message = HttpMessage(
-            dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
+        http_message, http_dialogue = dialogues.create(
+            counterparty=agent_address,
             performative=HttpMessage.Performative.REQUEST,
             method=self.method,
             url=url,
@@ -168,15 +198,11 @@ class Request(OpenAPIRequest):
             bodyy=self.body if self.body is not None else b"",
             version="",
         )
-        http_message.counterparty = agent_address
-        dialogue = cast(Optional[HttpDialogue], dialogues.update(http_message))
-        assert dialogue is not None, "Could not create dialogue for message={}".format(
-            http_message
-        )
+        dialogue = cast(HttpDialogue, http_dialogue)
         self.id = dialogue.incomplete_dialogue_label
         envelope = Envelope(
-            to=agent_address,
-            sender=str(connection_id),
+            to=http_message.to,
+            sender=http_message.sender,
             protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
@@ -358,7 +384,7 @@ class HTTPChannel(BaseAsyncChannel):
         self.timeout_window = timeout_window
         self.http_server: Optional[web.TCPSite] = None
         self.pending_requests: Dict[RequestId, Future] = {}
-        self._dialogues = HttpDialogues(self.address)
+        self._dialogues = HttpDialogues(str(HTTPServerConnection.connection_id))
         self.logger = logger
 
     @property
@@ -400,7 +426,8 @@ class HTTPChannel(BaseAsyncChannel):
         :return: a tuple of response code and response description
         """
         request = await Request.create(http_request)
-        assert self._in_queue is not None, "Channel not connected!"
+        if self._in_queue is None:  # pragma: nocover
+            raise ValueError("Channel not connected!")
 
         is_valid_request = self.api_spec.verify(request)
 
@@ -452,7 +479,8 @@ class HTTPChannel(BaseAsyncChannel):
         :param envelope: the envelope
         :return: None
         """
-        assert self.http_server is not None, "Server not connected, call connect first!"
+        if self.http_server is None:  # pragma: nocover
+            raise ValueError("Server not connected, call connect first!")
 
         if envelope.protocol_id not in self.restricted_to_protocols:
             self.logger.error(
@@ -462,13 +490,7 @@ class HTTPChannel(BaseAsyncChannel):
             )
             raise ValueError("Cannot send message.")
 
-        http_message = cast(HttpMessage, envelope.message)
-        message = copy.copy(
-            http_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = envelope.sender  # TODO: fix; should be done by framework
-
+        message = cast(HttpMessage, envelope.message)
         dialogue = self._dialogues.update(message)
 
         if dialogue is None:
@@ -494,7 +516,8 @@ class HTTPChannel(BaseAsyncChannel):
 
         Shut-off the HTTP Server.
         """
-        assert self.http_server is not None, "Server not connected, call connect first!"
+        if self.http_server is None:  # pragma: nocover
+            raise ValueError("Server not connected, call connect first!")
 
         if not self.is_stopped:
             await self.http_server.stop()
@@ -513,7 +536,8 @@ class HTTPServerConnection(Connection):
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
-        assert host is not None and port is not None, "host and port must be set!"
+        if host is None or port is None:  # pragma: nocover
+            raise ValueError("host and port must be set!")
         api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))
         self.channel = HTTPChannel(
             self.address,

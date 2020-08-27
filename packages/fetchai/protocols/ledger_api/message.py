@@ -20,10 +20,10 @@
 """This module contains ledger_api's message definition."""
 
 import logging
-from enum import Enum
 from typing import Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
+from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.ledger_api.custom_types import (
@@ -60,7 +60,7 @@ class LedgerApiMessage(Message):
 
     TransactionReceipt = CustomTransactionReceipt
 
-    class Performative(Enum):
+    class Performative(Message.Performative):
         """Performatives for the ledger_api protocol."""
 
         BALANCE = "balance"
@@ -93,13 +93,6 @@ class LedgerApiMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=LedgerApiMessage.Performative(performative),
-            **kwargs,
-        )
         self._performatives = {
             "balance",
             "error",
@@ -111,6 +104,13 @@ class LedgerApiMessage(Message):
             "transaction_digest",
             "transaction_receipt",
         }
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=LedgerApiMessage.Performative(performative),
+            **kwargs,
+        )
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -120,43 +120,43 @@ class LedgerApiMessage(Message):
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
         """Get the dialogue_reference of the message."""
-        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
+        enforce(self.is_set("dialogue_reference"), "dialogue_reference is not set.")
         return cast(Tuple[str, str], self.get("dialogue_reference"))
 
     @property
     def message_id(self) -> int:
         """Get the message_id of the message."""
-        assert self.is_set("message_id"), "message_id is not set."
+        enforce(self.is_set("message_id"), "message_id is not set.")
         return cast(int, self.get("message_id"))
 
     @property
     def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
-        assert self.is_set("performative"), "performative is not set."
+        enforce(self.is_set("performative"), "performative is not set.")
         return cast(LedgerApiMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
         """Get the target of the message."""
-        assert self.is_set("target"), "target is not set."
+        enforce(self.is_set("target"), "target is not set.")
         return cast(int, self.get("target"))
 
     @property
     def address(self) -> str:
         """Get the 'address' content from the message."""
-        assert self.is_set("address"), "'address' content is not set."
+        enforce(self.is_set("address"), "'address' content is not set.")
         return cast(str, self.get("address"))
 
     @property
     def balance(self) -> int:
         """Get the 'balance' content from the message."""
-        assert self.is_set("balance"), "'balance' content is not set."
+        enforce(self.is_set("balance"), "'balance' content is not set.")
         return cast(int, self.get("balance"))
 
     @property
     def code(self) -> int:
         """Get the 'code' content from the message."""
-        assert self.is_set("code"), "'code' content is not set."
+        enforce(self.is_set("code"), "'code' content is not set.")
         return cast(int, self.get("code"))
 
     @property
@@ -167,7 +167,7 @@ class LedgerApiMessage(Message):
     @property
     def ledger_id(self) -> str:
         """Get the 'ledger_id' content from the message."""
-        assert self.is_set("ledger_id"), "'ledger_id' content is not set."
+        enforce(self.is_set("ledger_id"), "'ledger_id' content is not set.")
         return cast(str, self.get("ledger_id"))
 
     @property
@@ -178,74 +178,83 @@ class LedgerApiMessage(Message):
     @property
     def raw_transaction(self) -> CustomRawTransaction:
         """Get the 'raw_transaction' content from the message."""
-        assert self.is_set("raw_transaction"), "'raw_transaction' content is not set."
+        enforce(self.is_set("raw_transaction"), "'raw_transaction' content is not set.")
         return cast(CustomRawTransaction, self.get("raw_transaction"))
 
     @property
     def signed_transaction(self) -> CustomSignedTransaction:
         """Get the 'signed_transaction' content from the message."""
-        assert self.is_set(
-            "signed_transaction"
-        ), "'signed_transaction' content is not set."
+        enforce(
+            self.is_set("signed_transaction"),
+            "'signed_transaction' content is not set.",
+        )
         return cast(CustomSignedTransaction, self.get("signed_transaction"))
 
     @property
     def terms(self) -> CustomTerms:
         """Get the 'terms' content from the message."""
-        assert self.is_set("terms"), "'terms' content is not set."
+        enforce(self.is_set("terms"), "'terms' content is not set.")
         return cast(CustomTerms, self.get("terms"))
 
     @property
     def transaction_digest(self) -> CustomTransactionDigest:
         """Get the 'transaction_digest' content from the message."""
-        assert self.is_set(
-            "transaction_digest"
-        ), "'transaction_digest' content is not set."
+        enforce(
+            self.is_set("transaction_digest"),
+            "'transaction_digest' content is not set.",
+        )
         return cast(CustomTransactionDigest, self.get("transaction_digest"))
 
     @property
     def transaction_receipt(self) -> CustomTransactionReceipt:
         """Get the 'transaction_receipt' content from the message."""
-        assert self.is_set(
-            "transaction_receipt"
-        ), "'transaction_receipt' content is not set."
+        enforce(
+            self.is_set("transaction_receipt"),
+            "'transaction_receipt' content is not set.",
+        )
         return cast(CustomTransactionReceipt, self.get("transaction_receipt"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the ledger_api protocol."""
         try:
-            assert (
-                type(self.dialogue_reference) == tuple
-            ), "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
-                type(self.dialogue_reference)
+            enforce(
+                type(self.dialogue_reference) == tuple,
+                "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
+                    type(self.dialogue_reference)
+                ),
             )
-            assert (
-                type(self.dialogue_reference[0]) == str
-            ), "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
-                type(self.dialogue_reference[0])
+            enforce(
+                type(self.dialogue_reference[0]) == str,
+                "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
+                    type(self.dialogue_reference[0])
+                ),
             )
-            assert (
-                type(self.dialogue_reference[1]) == str
-            ), "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
-                type(self.dialogue_reference[1])
+            enforce(
+                type(self.dialogue_reference[1]) == str,
+                "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
+                    type(self.dialogue_reference[1])
+                ),
             )
-            assert (
-                type(self.message_id) == int
-            ), "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
-                type(self.message_id)
+            enforce(
+                type(self.message_id) == int,
+                "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
+                    type(self.message_id)
+                ),
             )
-            assert (
-                type(self.target) == int
-            ), "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
-                type(self.target)
+            enforce(
+                type(self.target) == int,
+                "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
+                    type(self.target)
+                ),
             )
 
             # Light Protocol Rule 2
             # Check correct performative
-            assert (
-                type(self.performative) == LedgerApiMessage.Performative
-            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
-                self.valid_performatives, self.performative
+            enforce(
+                type(self.performative) == LedgerApiMessage.Performative,
+                "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                    self.valid_performatives, self.performative
+                ),
             )
 
             # Check correct contents
@@ -253,121 +262,137 @@ class LedgerApiMessage(Message):
             expected_nb_of_contents = 0
             if self.performative == LedgerApiMessage.Performative.GET_BALANCE:
                 expected_nb_of_contents = 2
-                assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
+                enforce(
+                    type(self.ledger_id) == str,
+                    "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                        type(self.ledger_id)
+                    ),
                 )
-                assert (
-                    type(self.address) == str
-                ), "Invalid type for content 'address'. Expected 'str'. Found '{}'.".format(
-                    type(self.address)
+                enforce(
+                    type(self.address) == str,
+                    "Invalid type for content 'address'. Expected 'str'. Found '{}'.".format(
+                        type(self.address)
+                    ),
                 )
             elif self.performative == LedgerApiMessage.Performative.GET_RAW_TRANSACTION:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.terms) == CustomTerms
-                ), "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
-                    type(self.terms)
+                enforce(
+                    type(self.terms) == CustomTerms,
+                    "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
+                        type(self.terms)
+                    ),
                 )
             elif (
                 self.performative
                 == LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION
             ):
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.signed_transaction) == CustomSignedTransaction
-                ), "Invalid type for content 'signed_transaction'. Expected 'SignedTransaction'. Found '{}'.".format(
-                    type(self.signed_transaction)
+                enforce(
+                    type(self.signed_transaction) == CustomSignedTransaction,
+                    "Invalid type for content 'signed_transaction'. Expected 'SignedTransaction'. Found '{}'.".format(
+                        type(self.signed_transaction)
+                    ),
                 )
             elif (
                 self.performative
                 == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
             ):
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.transaction_digest) == CustomTransactionDigest
-                ), "Invalid type for content 'transaction_digest'. Expected 'TransactionDigest'. Found '{}'.".format(
-                    type(self.transaction_digest)
+                enforce(
+                    type(self.transaction_digest) == CustomTransactionDigest,
+                    "Invalid type for content 'transaction_digest'. Expected 'TransactionDigest'. Found '{}'.".format(
+                        type(self.transaction_digest)
+                    ),
                 )
             elif self.performative == LedgerApiMessage.Performative.BALANCE:
                 expected_nb_of_contents = 2
-                assert (
-                    type(self.ledger_id) == str
-                ), "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.ledger_id)
+                enforce(
+                    type(self.ledger_id) == str,
+                    "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                        type(self.ledger_id)
+                    ),
                 )
-                assert (
-                    type(self.balance) == int
-                ), "Invalid type for content 'balance'. Expected 'int'. Found '{}'.".format(
-                    type(self.balance)
+                enforce(
+                    type(self.balance) == int,
+                    "Invalid type for content 'balance'. Expected 'int'. Found '{}'.".format(
+                        type(self.balance)
+                    ),
                 )
             elif self.performative == LedgerApiMessage.Performative.RAW_TRANSACTION:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.raw_transaction) == CustomRawTransaction
-                ), "Invalid type for content 'raw_transaction'. Expected 'RawTransaction'. Found '{}'.".format(
-                    type(self.raw_transaction)
+                enforce(
+                    type(self.raw_transaction) == CustomRawTransaction,
+                    "Invalid type for content 'raw_transaction'. Expected 'RawTransaction'. Found '{}'.".format(
+                        type(self.raw_transaction)
+                    ),
                 )
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_DIGEST:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.transaction_digest) == CustomTransactionDigest
-                ), "Invalid type for content 'transaction_digest'. Expected 'TransactionDigest'. Found '{}'.".format(
-                    type(self.transaction_digest)
+                enforce(
+                    type(self.transaction_digest) == CustomTransactionDigest,
+                    "Invalid type for content 'transaction_digest'. Expected 'TransactionDigest'. Found '{}'.".format(
+                        type(self.transaction_digest)
+                    ),
                 )
             elif self.performative == LedgerApiMessage.Performative.TRANSACTION_RECEIPT:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.transaction_receipt) == CustomTransactionReceipt
-                ), "Invalid type for content 'transaction_receipt'. Expected 'TransactionReceipt'. Found '{}'.".format(
-                    type(self.transaction_receipt)
+                enforce(
+                    type(self.transaction_receipt) == CustomTransactionReceipt,
+                    "Invalid type for content 'transaction_receipt'. Expected 'TransactionReceipt'. Found '{}'.".format(
+                        type(self.transaction_receipt)
+                    ),
                 )
             elif self.performative == LedgerApiMessage.Performative.ERROR:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.code) == int
-                ), "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
-                    type(self.code)
+                enforce(
+                    type(self.code) == int,
+                    "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
+                        type(self.code)
+                    ),
                 )
                 if self.is_set("message"):
                     expected_nb_of_contents += 1
                     message = cast(str, self.message)
-                    assert (
-                        type(message) == str
-                    ), "Invalid type for content 'message'. Expected 'str'. Found '{}'.".format(
-                        type(message)
+                    enforce(
+                        type(message) == str,
+                        "Invalid type for content 'message'. Expected 'str'. Found '{}'.".format(
+                            type(message)
+                        ),
                     )
                 if self.is_set("data"):
                     expected_nb_of_contents += 1
                     data = cast(bytes, self.data)
-                    assert (
-                        type(data) == bytes
-                    ), "Invalid type for content 'data'. Expected 'bytes'. Found '{}'.".format(
-                        type(data)
+                    enforce(
+                        type(data) == bytes,
+                        "Invalid type for content 'data'. Expected 'bytes'. Found '{}'.".format(
+                            type(data)
+                        ),
                     )
 
             # Check correct content count
-            assert (
-                expected_nb_of_contents == actual_nb_of_contents
-            ), "Incorrect number of contents. Expected {}. Found {}".format(
-                expected_nb_of_contents, actual_nb_of_contents
+            enforce(
+                expected_nb_of_contents == actual_nb_of_contents,
+                "Incorrect number of contents. Expected {}. Found {}".format(
+                    expected_nb_of_contents, actual_nb_of_contents
+                ),
             )
 
             # Light Protocol Rule 3
             if self.message_id == 1:
-                assert (
-                    self.target == 0
-                ), "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
-                    self.target
+                enforce(
+                    self.target == 0,
+                    "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
+                        self.target
+                    ),
                 )
             else:
-                assert (
-                    0 < self.target < self.message_id
-                ), "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                    self.message_id - 1, self.target,
+                enforce(
+                    0 < self.target < self.message_id,
+                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
+                        self.message_id - 1, self.target,
+                    ),
                 )
-        except (AssertionError, ValueError, KeyError) as e:
+        except (AEAEnforceError, ValueError, KeyError) as e:
             logger.error(str(e))
             return False
 

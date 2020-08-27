@@ -410,5 +410,5 @@ def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> in
         if balance is None:  # pragma: no cover
             raise ValueError("No balance returned!")
         return balance
-    except (AssertionError, ValueError) as e:  # pragma: no cover
+    except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))

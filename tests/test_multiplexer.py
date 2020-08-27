@@ -33,6 +33,7 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
+from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
@@ -440,7 +441,7 @@ async def test_inbox_outbox():
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
     msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
-    msg.counterparty = "to"
+    msg.to = "to"
     msg.sender = "sender"
     context = EnvelopeContext(connection_id=connection_1.connection_id)
     envelope = Envelope(
@@ -513,12 +514,10 @@ async def test_outbox_negative():
 
         with pytest.raises(ValueError) as execinfo:
             outbox.put_message(msg)
-        assert (
-            str(execinfo.value) == "Provided message has message.counterparty not set."
-        )
+        assert str(execinfo.value) == "Provided message has message.to not set."
 
         assert outbox.empty()
-        msg.counterparty = "to"
+        msg.to = "to"
 
         with pytest.raises(ValueError) as execinfo:
             outbox.put_message(msg)
@@ -577,7 +576,7 @@ def test_multiplexer_setup():
     connection_3 = _make_dummy_connection()
     connections = [connection_1, connection_2, connection_3]
     multiplexer = Multiplexer([])
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         multiplexer._connection_consistency_checks()
     multiplexer.setup(connections, default_routing=None)
     multiplexer._connection_consistency_checks()

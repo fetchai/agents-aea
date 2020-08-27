@@ -67,7 +67,7 @@ def test_directory_setter():
     configuration = ProtocolConfig("author", "name", "0.1.0")
     component = Component(configuration=configuration)
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         component.directory
 
     new_path = Path("new_path")

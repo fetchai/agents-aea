@@ -106,13 +106,11 @@ class TacBehaviour(Behaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
@@ -127,13 +125,11 @@ class TacBehaviour(Behaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering TAC data model on SOEF.")
 
@@ -148,13 +144,11 @@ class TacBehaviour(Behaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self._registered_description = None
         self.context.logger.info("unregistering TAC data model from SOEF.")
@@ -170,13 +164,11 @@ class TacBehaviour(Behaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=description,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")
 
@@ -191,16 +183,16 @@ class TacBehaviour(Behaviour):
         )
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.conf.agent_addr_to_name.keys():
-            tac_dialogue = tac_dialogues.dialogue_by_address.get(agent_address, None)
-            assert tac_dialogue is not None, "Error when retrieving dialogue."
+            tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(agent_address)
+            if tac_dialogue is None:
+                raise ValueError("Error when retrieving dialogue.")
             last_msg = tac_dialogue.last_message
-            assert last_msg is not None, "Error when retrieving last message."
+            if last_msg is None:
+                raise ValueError("Error when retrieving last message.")
             agent_state = game.current_agent_states[agent_address]
-            tac_msg = TacMessage(
+            tac_msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.GAME_DATA,
-                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
-                message_id=last_msg.message_id + 1,
-                target=last_msg.message_id,
+                target_message=last_msg,
                 amount_by_currency_id=agent_state.amount_by_currency_id,
                 exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                 quantities_by_good_id=agent_state.quantities_by_good_id,
@@ -211,8 +203,6 @@ class TacBehaviour(Behaviour):
                 good_id_to_name=game.conf.good_id_to_name,
                 version_id=game.conf.version_id,
             )
-            tac_msg.counterparty = agent_address
-            tac_dialogues.update(tac_msg)
             self.context.outbox.put_message(message=tac_msg)
             self.context.logger.debug(
                 "sending game data to '{}': {}".format(agent_address, str(tac_msg))
@@ -223,18 +213,15 @@ class TacBehaviour(Behaviour):
         self.context.logger.info("notifying agents that TAC is cancelled.")
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.registration.agent_addr_to_name.keys():
-            tac_dialogue = tac_dialogues.dialogue_by_address.get(agent_address, None)
-            assert tac_dialogue is not None, "Error when retrieving dialogue."
+            tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(agent_address)
+            if tac_dialogue is None:
+                raise ValueError("Error when retrieving dialogue.")
             last_msg = tac_dialogue.last_message
-            assert last_msg is not None, "Error when retrieving last message."
-            tac_msg = TacMessage(
+            if last_msg is None:
+                raise ValueError("Error when retrieving last message.")
+            tac_msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.CANCELLED,
-                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
-                message_id=last_msg.message_id + 1,
-                target=last_msg.message_id,
             )
-            tac_msg.counterparty = agent_address
-            tac_dialogues.update(tac_msg)
             self.context.outbox.put_message(message=tac_msg)
         if game.phase == Phase.GAME:
             self.context.logger.info(

@@ -25,6 +25,7 @@ from collections import defaultdict, deque
 from typing import Deque, Dict, List, Tuple, cast
 
 from aea.decision_maker.default import OwnershipState
+from aea.exceptions import enforce
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import RawMessage, Terms
@@ -138,16 +139,15 @@ class Transactions(Model):
         raw_message = RawMessage(
             ledger_id=ledger_id, body=terms.sender_hash.encode("utf-8")
         )
-        signing_msg = SigningMessage(
+        signing_msg, _ = signing_dialogues.create(
+            counterparty="decision_maker",
             performative=performative,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             skill_callback_ids=skill_callback_ids,
             terms=terms,
             skill_callback_info=skill_callback_info,
             raw_message=raw_message,
         )
-        signing_msg.counterparty = "decision_maker"
-        return signing_msg
+        return cast(SigningMessage, signing_msg)
 
     def update_confirmed_transactions(self) -> None:
         """
@@ -211,13 +211,14 @@ class Transactions(Model):
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
         :param signing_msg: the transaction message
-        :raise AssertionError: if the pending proposal is already present.
+        :raise AEAEnforceError: if the pending proposal is already present.
 
         :return: None
         """
-        assert (
+        enforce(
             dialogue_label not in self._pending_proposals
-            and proposal_id not in self._pending_proposals[dialogue_label]
+            and proposal_id not in self._pending_proposals[dialogue_label],
+            "Proposal is already in the list of pending proposals.",
         )
         self._pending_proposals[dialogue_label][proposal_id] = signing_msg
 
@@ -229,13 +230,14 @@ class Transactions(Model):
 
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
-        :raise AssertionError: if the pending proposal is not present.
+        :raise AEAEnforceError: if the pending proposal is not present.
 
         :return: the transaction message
         """
-        assert (
+        enforce(
             dialogue_label in self._pending_proposals
-            and proposal_id in self._pending_proposals[dialogue_label]
+            and proposal_id in self._pending_proposals[dialogue_label],
+            "Cannot find the proposal in the list of pending proposals.",
         )
         signing_msg = self._pending_proposals[dialogue_label].pop(proposal_id)
         return signing_msg
@@ -252,13 +254,14 @@ class Transactions(Model):
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
         :param signing_msg: the transaction message
-        :raise AssertionError: if the pending acceptance is already present.
+        :raise AEAEnforceError: if the pending acceptance is already present.
 
         :return: None
         """
-        assert (
+        enforce(
             dialogue_label not in self._pending_initial_acceptances
-            and proposal_id not in self._pending_initial_acceptances[dialogue_label]
+            and proposal_id not in self._pending_initial_acceptances[dialogue_label],
+            "Initial acceptance is already in the list of pending initial acceptances.",
         )
         self._pending_initial_acceptances[dialogue_label][proposal_id] = signing_msg
 
@@ -270,13 +273,14 @@ class Transactions(Model):
 
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
-        :raise AssertionError: if the pending acceptance is not present.
+        :raise AEAEnforceError: if the pending acceptance is not present.
 
         :return: the transaction message
         """
-        assert (
+        enforce(
             dialogue_label in self._pending_initial_acceptances
-            and proposal_id in self._pending_initial_acceptances[dialogue_label]
+            and proposal_id in self._pending_initial_acceptances[dialogue_label],
+            "Cannot find the initial acceptance in the list of pending initial acceptances.",
         )
         signing_msg = self._pending_initial_acceptances[dialogue_label].pop(proposal_id)
         return signing_msg
@@ -300,14 +304,17 @@ class Transactions(Model):
 
         :param signing_msg: the transaction message
         :param role: the role of the agent (seller or buyer)
-        :raise AssertionError: if the transaction is already present.
+        :raise AEAEnforceError: if the transaction is already present.
 
         :return: None
         """
         as_seller = role == FipaDialogue.Role.SELLER
 
         transaction_id = signing_msg.terms.id
-        assert transaction_id not in self._locked_txs
+        enforce(
+            transaction_id not in self._locked_txs,
+            "This transaction is already a locked transaction.",
+        )
         self._register_transaction_with_time(transaction_id)
         self._locked_txs[transaction_id] = signing_msg
         if as_seller:
@@ -320,12 +327,15 @@ class Transactions(Model):
         Remove a lock (in the form of a transaction).
 
         :param signing_msg: the transaction message
-        :raise AssertionError: if the transaction with the given transaction id has not been found.
+        :raise AEAEnforceError: if the transaction with the given transaction id has not been found.
 
         :return: the transaction
         """
         transaction_id = signing_msg.terms.id
-        assert transaction_id in self._locked_txs
+        enforce(
+            transaction_id in self._locked_txs,
+            "Cannot find this transaction in the list of locked transactions.",
+        )
         signing_msg = self._locked_txs.pop(transaction_id)
         self._locked_txs_as_buyer.pop(transaction_id, None)
         self._locked_txs_as_seller.pop(transaction_id, None)

@@ -8,8 +8,8 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   README.md: QmVFmJMyfFbDaYU5Jsjqec1wMU5zramzdPWNwuhsvWsKdF
   __init__.py: Qma2opyN54gwTpkVV1E14jjeMmMfoqgE6XMM9LsvGuTdkm
-  dialogues.py: QmUo2zDoSShCy6dY6HWR1i2yb7rfBSSyHK1xpAp1WmMpLT
-  message.py: QmSEnr6R1tu2oxMHqqaX8kkuXWvKUSMcnXeSvj2xG4ba8g
+  dialogues.py: QmZNqSnqzGyouCeyVg2U3x18kUczM1AAizA9TckRCnV49L
+  message.py: QmbXbxXbu1vzrCjzDy6qDtEvssmiHKFLWGgCEenrE4TPZW
   serialization.py: QmQDdbN4pgfdL1LUhV4J7xMUhdqUJ2Tamz7Nheca3yGw2G
   state_update.proto: QmdmEUSa7PDxJ98ZmGE7bLFPmUJv8refgbkHPejw6uDdwD
   state_update_pb2.py: QmQr5KXhapRv9AnfQe7Xbr5bBqYWp9DEMLjxX8UWmK75Z4

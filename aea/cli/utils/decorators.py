@@ -39,7 +39,7 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoaders
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, enforce
 
 
 pass_ctx = click.make_pass_decorator(Context)
@@ -77,14 +77,15 @@ def _validate_config_consistency(ctx: Context):
                 )
                 is_vendor = True
             # we fail if none of the two alternative works.
-            assert package_directory.exists(), "Package directory does not exist!"
+            enforce(package_directory.exists(), "Package directory does not exist!")
 
             loader = ConfigLoaders.from_package_type(item_type)
             config_file_name = _get_default_configuration_file_name_from_type(item_type)
             configuration_file_path = package_directory / config_file_name
-            assert (
-                configuration_file_path.exists()
-            ), "Configuration file path does not exist!"
+            enforce(
+                configuration_file_path.exists(),
+                "Configuration file path does not exist!",
+            )
         except Exception:
             raise ValueError("Cannot find {}: '{}'".format(item_type.value, public_id))
 

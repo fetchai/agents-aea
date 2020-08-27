@@ -216,7 +216,8 @@ class StubConnection(Connection):
     async def read_envelopes(self) -> None:
         """Read envelopes from inptut file, decode and put into in_queue."""
         self._ensure_connected()
-        assert self.in_queue is not None
+        if self.in_queue is None:  # pragma: nocover
+            raise ValueError("Input queue not initialized.")
 
         logger.debug("Read messages!")
         async for data in self._file_read_and_trunc(delay=self.read_delay):
@@ -293,7 +294,8 @@ class StubConnection(Connection):
         if self.is_disconnected:
             return
 
-        assert self.in_queue is not None, "Input queue not initialized."
+        if self.in_queue is None:  # pragma: nocover
+            raise ValueError("Input queue not initialized.")
 
         self._state.set(ConnectionStates.disconnecting)
         await self._stop_read_envelopes()

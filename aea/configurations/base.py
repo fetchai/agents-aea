@@ -52,6 +52,7 @@ from packaging.version import Version
 import semver
 
 import aea
+from aea.exceptions import enforce
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 T = TypeVar("T")
@@ -249,7 +250,7 @@ class Configuration(JSONSerializable, ABC):
         # parse all the known keys. This might ignore some keys in the dictionary.
         seen_keys = set()
         for key in self._key_order:
-            assert key not in result, "Key in results!"
+            enforce(key not in result, "Key in results!")
             value = data.get(key)
             if value is not None:
                 result[key] = value
@@ -719,9 +720,8 @@ class PackageConfiguration(Configuration, ABC):
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         """
         super().__init__()
-        assert (
-            name is not None and author is not None
-        ), "Name and author must be set on the configuration!"
+        if name is None or author is None:  # pragma: nocover
+            raise ValueError("Name and author must be set on the configuration!")
         self.name = name
         self.author = author
         self.version = version if version != "" else DEFAULT_VERSION
@@ -745,7 +745,8 @@ class PackageConfiguration(Configuration, ABC):
     @directory.setter
     def directory(self, directory: Path) -> None:
         """Set directory if not already set."""
-        assert self._directory is None, "Directory already set"
+        if self._directory is not None:  # pragma: nocover
+            raise ValueError("Directory already set")
         self._directory = directory
 
     @staticmethod
@@ -948,24 +949,24 @@ class ConnectionConfig(ComponentConfiguration):
     ):
         """Initialize a connection configuration object."""
         if connection_id is None:
-            assert name != "", "Name or connection_id must be set."
-            assert author != "", "Author or connection_id must be set."
-            assert version != "", "Version or connection_id must be set."
+            enforce(name != "", "Name or connection_id must be set.")
+            enforce(author != "", "Author or connection_id must be set.")
+            enforce(version != "", "Version or connection_id must be set.")
         else:
-            assert name in (
-                "",
-                connection_id.name,
-            ), "Non matching name in ConnectionConfig name and public id."
+            enforce(
+                name in ("", connection_id.name,),
+                "Non matching name in ConnectionConfig name and public id.",
+            )
             name = connection_id.name
-            assert author in (
-                "",
-                connection_id.author,
-            ), "Non matching author in ConnectionConfig author and public id."
+            enforce(
+                author in ("", connection_id.author,),
+                "Non matching author in ConnectionConfig author and public id.",
+            )
             author = connection_id.author
-            assert version in (
-                "",
-                connection_id.version,
-            ), "Non matching version in ConnectionConfig version and public id."
+            enforce(
+                version in ("", connection_id.version,),
+                "Non matching version in ConnectionConfig version and public id.",
+            )
             version = connection_id.version
         super().__init__(
             name,
@@ -1349,7 +1350,7 @@ class AgentConfig(PackageConfiguration):
         registry_path: str = DEFAULT_REGISTRY_PATH,
         description: str = "",
         logging_config: Optional[Dict] = None,
-        timeout: Optional[float] = None,
+        period: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
         decision_maker_handler: Optional[Dict] = None,
@@ -1387,7 +1388,7 @@ class AgentConfig(PackageConfiguration):
             self.logging_config["version"] = 1
             self.logging_config["disable_existing_loggers"] = False
 
-        self.timeout: Optional[float] = timeout
+        self.period: Optional[float] = period
         self.execution_timeout: Optional[float] = execution_timeout
         self.max_reactions: Optional[int] = max_reactions
         self.skill_exception_policy: Optional[str] = skill_exception_policy
@@ -1427,9 +1428,11 @@ class AgentConfig(PackageConfiguration):
         }
         # TODO add validation of dict values.
         for component_id, _ in d.items():
-            assert (
-                component_id.public_id in package_type_to_set[component_id.package_type]
-            ), f"Component {component_id} not declared in the agent configuration."
+            enforce(
+                component_id.public_id
+                in package_type_to_set[component_id.package_type],
+                f"Component {component_id} not declared in the agent configuration.",
+            )
         self._component_configurations = d
 
     @property
@@ -1471,7 +1474,8 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_connection(self) -> str:
         """Get the default connection."""
-        assert self._default_connection is not None, "Default connection not set yet."
+        if self._default_connection is None:  # pragma: nocover
+            raise ValueError("Default connection not set yet.")
         return str(self._default_connection)
 
     @default_connection.setter
@@ -1492,7 +1496,8 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_ledger(self) -> str:
         """Get the default ledger."""
-        assert self._default_ledger is not None, "Default ledger not set yet."
+        if self._default_ledger is None:  # pragma: nocover
+            raise ValueError("Default ledger not set yet.")
         return self._default_ledger
 
     @default_ledger.setter
@@ -1549,8 +1554,8 @@ class AgentConfig(PackageConfiguration):
                 "connection_private_key_paths"
             ] = self.connection_private_key_paths_dict
 
-        if self.timeout is not None:
-            config["timeout"] = self.timeout
+        if self.period is not None:
+            config["period"] = self.period
         if self.execution_timeout is not None:
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
@@ -1587,7 +1592,7 @@ class AgentConfig(PackageConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             logging_config=cast(Dict, obj.get("logging_config", {})),
-            timeout=cast(float, obj.get("timeout")),
+            period=cast(float, obj.get("period")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
@@ -1829,7 +1834,8 @@ class ContractConfig(ComponentConfiguration):
 
     def _get_contract_interfaces(self) -> Dict[str, str]:
         """Get the contract interfaces."""
-        assert self.directory is not None, "Set directory before calling."
+        if self.directory is None:  # pragma: nocover
+            raise ValueError("Set directory before calling.")
         contract_interfaces = {}  # type: Dict[str, str]
         for identifier, path in self.contract_interface_paths.items():
             full_path = Path(self.directory, path)
@@ -1919,7 +1925,7 @@ def _compute_fingerprint(
     for file in all_files:
         file_hash = hasher.get(str(file))
         key = str(file.relative_to(package_directory))
-        assert key not in fingerprints, "Key in fingerprints!"  # nosec
+        enforce(key not in fingerprints, "Key in fingerprints!")  # nosec
         # use '/' as path separator
         normalized_path = Path(key).as_posix()
         fingerprints[normalized_path] = file_hash

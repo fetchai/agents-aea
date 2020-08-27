@@ -116,7 +116,8 @@ class TestCli:
     @property
     def report_printer(self) -> ReportPrinter:
         """Get report printer."""
-        assert self._report_printer is not None, "report printer not set!"
+        if self._report_printer is None:
+            raise ValueError("report printer not set!")
         return self._report_printer
 
     def _make_command(self) -> Command:

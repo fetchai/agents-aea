@@ -23,6 +23,7 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.exceptions import AEAEnforceError
 
 
 class ConnectionTestCase(TestCase):
@@ -71,7 +72,7 @@ class ConnectionTestCase(TestCase):
         obj = self.TestConnection(
             ConnectionConfig("some_connection", "fetchai", "0.1.0")
         )
-        with pytest.raises(AssertionError):
+        with pytest.raises(AEAEnforceError):
             obj.loop
 
     def test_excluded_protocols_positive(self):

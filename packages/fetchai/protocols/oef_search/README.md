@@ -53,7 +53,6 @@ reply:
   register_service: [oef_error]
   unregister_service: [oef_error]
   search_services: [search_result, oef_error]
-  success: []
   search_result: []
   oef_error: []
 termination: [oef_error, search_result]

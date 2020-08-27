@@ -20,9 +20,8 @@
 """This module contains the tests of the ethereum module."""
 import logging
 import time
-from unittest.mock import MagicMock
-
-from fetchai.ledger.transaction import Transaction
+from unittest import mock
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -31,22 +30,42 @@ from aea.crypto.fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 from tests.conftest import (
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,
-    MAX_FLAKY_RERUNS,
+    # MAX_FLAKY_RERUNS,
 )
 
 
-def test_initialisation():
-    """Test the initialisation of the the fet crypto."""
-    fet_crypto = FetchAICrypto()
-    assert (
-        fet_crypto.public_key is not None
-    ), "Public key must not be None after Initialisation"
-    assert (
-        fet_crypto.address is not None
-    ), "Address must not be None after Initialisation"
+class MockRequestsResponse:
+    def __init__(self, data, status_code=None):
+        self._data = data
+        self._status_code = status_code or 200
+
+    @property
+    def status_code(self):
+        return 200
+
+    def json(self):
+        return self._data
+
+
+def test_creation():
+    """Test the creation of the crypto_objects."""
+    assert FetchAICrypto(), "Did not manage to initialise the crypto module"
     assert FetchAICrypto(
         FETCHAI_PRIVATE_KEY_PATH
-    ), "Couldn't load the fet private_key from the path!"
+    ), "Did not manage to load the cosmos private key"
+
+
+def test_initialization():
+    """Test the initialisation of the variables."""
+    account = FetchAICrypto()
+    assert account.entity is not None, "The property must return the account."
+    assert (
+        account.address is not None
+    ), "After creation the display address must not be None"
+    assert account.address.startswith("fetch")
+    assert (
+        account.public_key is not None
+    ), "After creation the public key must no be None"
 
 
 def test_sign_and_recover_message():
@@ -60,13 +79,6 @@ def test_sign_and_recover_message():
     assert (
         account.address in recovered_addresses
     ), "Failed to recover the correct address."
-
-
-def test_get_address_from_public_key():
-    """Test the address from public key."""
-    fet_crypto = FetchAICrypto()
-    address = FetchAIApi.get_address_from_public_key(fet_crypto.public_key)
-    assert address == fet_crypto.address, "The address must be the same."
 
 
 def test_get_hash():
@@ -90,7 +102,7 @@ def test_api_creation():
 def test_api_none():
     """Test the "api" of the cryptoApi is none."""
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    assert fetchai_api.api is not None, "The api property is None."
+    assert fetchai_api.api is None, "The api property is not None."
 
 
 def test_generate_nonce():
@@ -103,7 +115,14 @@ def test_generate_nonce():
     ), "The len(nonce) must not be 0 and must be hex"
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+def test_get_address_from_public_key():
+    """Test the address from public key."""
+    fet_crypto = FetchAICrypto()
+    address = FetchAIApi.get_address_from_public_key(fet_crypto.public_key)
+    assert address == fet_crypto.address, "The address must be the same."
+
+
+# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
@@ -121,16 +140,17 @@ def test_construct_sign_and_submit_transfer_transaction():
         destination_address=fc2.address,
         amount=amount,
         tx_fee=1000,
-        tx_nonce="",
+        tx_nonce="something",
     )
-    assert isinstance(
-        transfer_transaction, Transaction
+    assert (
+        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 6
     ), "Incorrect transfer_transaction constructed."
 
     signed_transaction = account.sign_transaction(transfer_transaction)
     assert (
-        isinstance(signed_transaction, Transaction)
-        and len(signed_transaction.signatures) == 1
+        isinstance(signed_transaction, dict)
+        and len(signed_transaction["tx"]) == 4
+        and isinstance(signed_transaction["tx"]["signatures"], list)
     ), "Incorrect signed_transaction constructed."
 
     transaction_digest = fetchai_api.send_signed_transaction(signed_transaction)
@@ -145,21 +165,19 @@ def test_construct_sign_and_submit_transfer_transaction():
         if transaction_receipt is None:
             continue
         is_settled = fetchai_api.is_transaction_settled(transaction_receipt)
-        if is_settled is None:
-            continue
         not_settled = not is_settled
     assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
     assert is_settled, "Failed to verify tx!"
 
     tx = fetchai_api.get_transaction(transaction_digest)
-    assert tx != transaction_receipt, "Should be same!"
     is_valid = fetchai_api.is_transaction_valid(
         tx, fc2.address, account.address, "", amount
     )
     assert is_valid, "Failed to settle tx correctly!"
+    assert tx == transaction_receipt, "Should be same!"
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_balance():
@@ -186,7 +204,7 @@ def get_wealth(address: str):
     return balance
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_wealth_positive(caplog):
@@ -195,26 +213,100 @@ def test_get_wealth_positive(caplog):
         fetchai_faucet_api = FetchAIFaucetApi()
         fc = FetchAICrypto()
         fetchai_faucet_api.get_wealth(fc.address)
-        assert (
-            "Message: Transfer pending" in caplog.text
-        ), f"Cannot find message in output: {caplog.text}"
+        assert "Wealth generated" in caplog.text
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
 @pytest.mark.ledger
-def test_get_contract_instance():
-    """Test the get contract instance method."""
-    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    with pytest.raises(NotImplementedError):
-        fetchai_api.get_contract_instance("interface")
+@mock.patch("requests.get")
+@mock.patch("requests.post")
+def test_successful_faucet_operation(mock_post, mock_get):
+    address = "a normal cosmos address would be here"
+    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
+
+    mock_get.return_value = MockRequestsResponse(
+        {
+            "uid": "a-uuid-v4-would-be-here",
+            "txDigest": "0x transaction hash would be here",
+            "status": "completed",
+            "statusCode": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+        }
+    )
+
+    faucet = FetchAIFaucetApi()
+    faucet.get_wealth(address)
+
+    mock_post.assert_has_calls(
+        [
+            call(
+                url=f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests",
+                data={"Address": address},
+            )
+        ]
+    )
+    mock_get.assert_has_calls(
+        [
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            )
+        ]
+    )
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
 @pytest.mark.ledger
-def test_get_deploy_transaction():
-    """Test the get deploy transaction method."""
-    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    with pytest.raises(NotImplementedError):
-        fetchai_api.get_deploy_transaction("interface", "deployer")
+@mock.patch("requests.get")
+@mock.patch("requests.post")
+def test_successful_realistic_faucet_operation(mock_post, mock_get):
+    address = "a normal cosmos address would be here"
+    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
+
+    mock_get.side_effect = [
+        MockRequestsResponse(
+            {
+                "uid": "a-uuid-v4-would-be-here",
+                "txDigest": None,
+                "status": "pending",
+                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_PENDING,
+            }
+        ),
+        MockRequestsResponse(
+            {
+                "uid": "a-uuid-v4-would-be-here",
+                "txDigest": None,
+                "status": "processing",
+                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_PROCESSING,
+            }
+        ),
+        MockRequestsResponse(
+            {
+                "uid": "a-uuid-v4-would-be-here",
+                "txDigest": "0x transaction hash would be here",
+                "status": "completed",
+                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+            }
+        ),
+    ]
+
+    faucet = FetchAIFaucetApi(poll_interval=0)
+    faucet.get_wealth(address)
+
+    mock_post.assert_has_calls(
+        [
+            call(
+                url=f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests",
+                data={"Address": address},
+            )
+        ]
+    )
+    mock_get.assert_has_calls(
+        [
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            ),
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            ),
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            ),
+        ]
+    )

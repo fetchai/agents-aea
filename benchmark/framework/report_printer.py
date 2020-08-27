@@ -75,7 +75,6 @@ class PerformanceReport:
 
         :param exec_reports: tested function execution reports with measurements
         """
-        assert exec_reports
         self.exec_reports = exec_reports
 
     @property

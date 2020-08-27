@@ -59,6 +59,12 @@ class InboxWithHistory(InBox):
         self._history.append(item)
         return item
 
+    async def async_get(self, *args, **kwargs) -> Envelope:
+        """Get envelope."""
+        item = await super().async_get()
+        self._history.append(item)
+        return item
+
 
 class TestSkillError:
     """Test the skill: Error."""
@@ -78,7 +84,7 @@ class TestSkillError:
         self.my_aea = AEA(
             self.identity,
             self.wallet,
-            timeout=0.1,
+            period=0.1,
             resources=Resources(),
             default_connection=self.connection.public_id,
         )
@@ -107,7 +113,7 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = "a_counterparty"
+        msg.to = "a_counterparty"
         self.my_error_handler.handle(message=msg)
 
     def test_error_skill_unsupported_protocol(self):
@@ -119,9 +125,9 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = self.address
+        msg.to = self.address
         envelope = Envelope(
-            to=self.address,
+            to=msg.to,
             sender=self.address,
             protocol_id=FipaMessage.protocol_id,
             message=msg,
@@ -144,9 +150,9 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = self.address
+        msg.to = self.address
         envelope = Envelope(
-            to=self.address,
+            to=msg.to,
             sender=self.address,
             protocol_id=DefaultMessage.protocol_id,
             message=msg,
@@ -168,13 +174,10 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg.counterparty = self.address
+        msg.to = self.address
         msg.sender = self.address
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)

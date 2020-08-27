@@ -22,6 +22,7 @@
 import datetime
 from typing import List, Optional, Set
 
+from aea.exceptions import AEAEnforceError, enforce
 from aea.skills.base import Model
 
 DEFAULT_MIN_NB_AGENTS = 5
@@ -117,7 +118,8 @@ class Parameters(Model):
     @property
     def contract_address(self) -> str:
         """The contract address of an already deployed smart-contract."""
-        assert self._contract_address is not None, "No contract address provided."
+        if self._contract_address is None:
+            raise AEAEnforceError("No contract address provided.")
         return self._contract_address
 
     @property
@@ -128,15 +130,15 @@ class Parameters(Model):
     @property
     def good_ids(self) -> List[int]:
         """The item ids of an already deployed smart-contract."""
-        assert self.is_contract_deployed, "There is no deployed contract."
-        assert self._good_ids != [], "No good_ids provided."
+        enforce(self.is_contract_deployed, "There is no deployed contract.")
+        enforce(self._good_ids != [], "No good_ids provided.")
         return self._good_ids
 
     @property
     def currency_ids(self) -> List[int]:
         """The currency ids of an already deployed smart-contract."""
-        assert self.is_contract_deployed, "There is no deployed contract."
-        assert self._currency_ids != [], "No currency_ids provided."
+        enforce(self.is_contract_deployed, "There is no deployed contract.")
+        enforce(self._currency_ids != [], "No currency_ids provided.")
         return self._currency_ids
 
     @property

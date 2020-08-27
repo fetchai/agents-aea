@@ -16,9 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the misc utils for async code."""
 import asyncio
+import collections
 import datetime
 import logging
 import subprocess  # nosec
@@ -26,9 +26,9 @@ import time
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
-from asyncio.tasks import Task
+from asyncio.tasks import FIRST_COMPLETED, Task
 from collections.abc import Iterable
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from threading import Thread
 from typing import (
     Any,
@@ -256,7 +256,7 @@ class PeriodicCaller:
         self._timerhandle = None
 
 
-def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
+def ensure_loop(loop: Optional[AbstractEventLoop] = None) -> AbstractEventLoop:
     """
     Use loop provided or create new if not provided or closed.
 
@@ -267,9 +267,11 @@ def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
     """
     try:
         loop = loop or asyncio.new_event_loop()
-        assert not loop.is_closed()
-        assert not loop.is_running()
-    except (RuntimeError, AssertionError):
+        if loop.is_closed():
+            raise ValueError("Event loop closed.")  # pragma: nocover
+        if loop.is_running():
+            raise ValueError("Event loop running.")
+    except (RuntimeError, ValueError):
         loop = asyncio.new_event_loop()
 
     return loop
@@ -333,7 +335,8 @@ class ThreadedAsyncRunner(Thread):
         :param loop: optional event loop. is it's running loop, threaded runner will use it.
         """
         self._loop = loop or asyncio.new_event_loop()
-        assert not self._loop.is_closed()
+        if self._loop.is_closed():
+            raise ValueError("Event loop closed.")  # pragma: nocover
         super().__init__(daemon=True)
 
     def start(self) -> None:
@@ -394,6 +397,7 @@ class AwaitableProc:
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialise awaitable proc."""
         self.args = args
         self.kwargs = kwargs
         self.proc = None
@@ -419,3 +423,70 @@ class AwaitableProc:
     def _in_thread(self):
         self.proc.wait()
         self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)
+
+
+class ItemGetter:
+    """Virtual queue like object to get items from getters function."""
+
+    def __init__(self, getters: List[Callable]) -> None:
+        """
+        Init ItemGetter.
+
+        :param getters: List of couroutines to be awaited.
+        """
+        if not getters:  # pragma: nocover
+            raise ValueError("getters list can not be empty!")
+        self._getters = getters
+        self._items: collections.deque = collections.deque()
+
+    async def get(self) -> Any:
+        """Get item."""
+        if not self._items:
+            await self._wait()
+        return self._items.pop()
+
+    async def _wait(self) -> None:
+        """Populate cache queue with items."""
+        loop = asyncio.get_event_loop()
+        try:
+            tasks = [loop.create_task(getter()) for getter in self._getters]
+            done, _ = await asyncio.wait(tasks, return_when=FIRST_COMPLETED)
+            for task in done:
+                self._items.append(await task)
+        finally:
+            for task in tasks:
+                if task.done():
+                    continue
+                task.cancel()
+                with suppress(CancelledError):
+                    await task
+
+
+class HandlerItemGetter(ItemGetter):
+    """ItemGetter with handler passed."""
+
+    @staticmethod
+    def _make_getter(handler: Callable[[Any], None], getter: Callable) -> Callable:
+        """
+        Create getter for handler and item getter function.
+
+        :param handler: callable with one position argument.
+        :param getter: a couroutine to await for item
+
+        :return: callable to return handler and item from getter.
+        """
+        # for pydocstyle
+        async def _getter():
+            return handler, await getter()
+
+        return _getter
+
+    def __init__(self, getters: List[Tuple[Callable[[Any], None], Callable]]):
+        """
+        Init HandlerItemGetter.
+
+        :param getters: List of tuples of handler and couroutine to be awaiteed for an item.
+        """
+        super(HandlerItemGetter, self).__init__(
+            [self._make_getter(handler, getter) for handler, getter in getters]
+        )

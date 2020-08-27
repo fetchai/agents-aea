@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Tests for the pipe module."""
 
 import asyncio
 from threading import Thread

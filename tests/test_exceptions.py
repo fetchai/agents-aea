@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,5 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This module contains tests for aea exceptions."""
 
-"""This module contains the tests of the p2p_client connection implementation."""
+import pytest
+
+from aea.exceptions import AEAEnforceError, enforce
+
+
+def test_enforce_no_exception():
+    """Test enforce does not throw exception if condition is True."""
+    enforce(True, "Error message")
+
+
+def test_enforce_exception():
+    """Test enforce does throw exception if condition is False."""
+    error_msg = "Error message"
+    with pytest.raises(AEAEnforceError, match=error_msg):
+        enforce(False, error_msg)

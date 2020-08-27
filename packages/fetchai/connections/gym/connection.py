@@ -20,7 +20,6 @@
 """Gym connector and gym channel."""
 
 import asyncio
-import copy
 import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
@@ -31,16 +30,48 @@ import gym
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.base import locate
-from aea.mail.base import Address, Envelope
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.mail.base import Address, Envelope, Message
 
-from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
+from packages.fetchai.protocols.gym.dialogues import GymDialogue
+from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
 PUBLIC_ID = PublicId.from_str("fetchai/gym:0.6.0")
+
+
+class GymDialogues(BaseGymDialogues):
+    """The dialogues class keeps track of all gym dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The gym connection maintains the dialogue on behalf of the environment
+            return GymDialogue.Role.ENVIRONMENT
+
+        BaseGymDialogues.__init__(
+            self,
+            agent_address=str(PUBLIC_ID),
+            role_from_first_message=role_from_first_message,
+        )
 
 
 class GymChannel:
@@ -58,7 +89,7 @@ class GymChannel:
             self.THREAD_POOL_SIZE
         )
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = logger
-        self._dialogues = GymDialogues(str(PUBLIC_ID))
+        self._dialogues = GymDialogues()
 
     def _get_message_and_dialogue(
         self, envelope: Envelope
@@ -68,16 +99,9 @@ class GymChannel:
 
         :param envelope: incoming envelope
 
-        :return: Tuple[MEssage, Optional[Dialogue]]
+        :return: Tuple[Message, Optional[Dialogue]]
         """
-        orig_message = cast(GymMessage, envelope.message)
-        message = copy.copy(
-            orig_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = (
-            orig_message.sender
-        )  # TODO: fix; should be done by framework
+        message = cast(GymMessage, envelope.message)
         dialogue = cast(GymDialogue, self._dialogues.update(message))
         return message, dialogue
 
@@ -121,9 +145,9 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        assert isinstance(
-            envelope.message, GymMessage
-        ), "Message not of type GymMessage"
+        enforce(
+            isinstance(envelope.message, GymMessage), "Message not of type GymMessage"
+        )
         gym_message, dialogue = self._get_message_and_dialogue(envelope)
 
         if dialogue is None:
@@ -139,36 +163,28 @@ class GymChannel:
             observation, reward, done, info = await self._run_in_executor(
                 self.gym_env.step, action
             )
-            msg = GymMessage(
+
+            msg = dialogue.reply(
                 performative=GymMessage.Performative.PERCEPT,
+                target_message=gym_message,
                 observation=GymMessage.AnyObject(observation),
                 reward=reward,
                 done=done,
                 info=GymMessage.AnyObject(info),
                 step_id=step_id,
-                target=gym_message.message_id,
-                message_id=gym_message.message_id + 1,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             )
         elif gym_message.performative == GymMessage.Performative.RESET:
             await self._run_in_executor(self.gym_env.reset)
-            msg = GymMessage(
+            msg = dialogue.reply(
                 performative=GymMessage.Performative.STATUS,
+                target_message=gym_message,
                 content={"reset": "success"},
-                target=gym_message.message_id,
-                message_id=gym_message.message_id + 1,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             )
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        msg.counterparty = gym_message.counterparty
-        assert dialogue.update(msg), "Error during dialogue update."
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         await self._send(envelope)
 
@@ -210,7 +226,8 @@ class GymConnection(Connection):
         super().__init__(**kwargs)
         if gym_env is None:
             gym_env_package = cast(str, self.configuration.config.get("env"))
-            assert gym_env_package is not None, "env must be set!"
+            if gym_env_package is None:  # pragma: nocover
+                raise ValueError("`env` must be set in configuration!")
             gym_env_class = locate(gym_env_package)
             gym_env = gym_env_class()
         self.channel = GymChannel(self.address, gym_env)

@@ -49,6 +49,7 @@ def test_initialization():
     assert (
         account.address is not None
     ), "After creation the display address must not be None"
+    assert account.address.startswith("cosmos")
     assert (
         account.public_key is not None
     ), "After creation the public key must no be None"

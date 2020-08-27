@@ -148,6 +148,7 @@ class Uri:
         host: Optional[str] = None,
         port: Optional[int] = None,
     ):
+        """Initialise Uri."""
         if uri is not None:
             split = uri.split(":", 1)
             self._host = split[0]
@@ -349,7 +350,8 @@ class Libp2pNode:
 
         :param data: data to write to stream
         """
-        assert self.pipe is not None
+        if self.pipe is None:
+            raise ValueError("pipe is not set.")  # pragma: nocover
         await self.pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -358,7 +360,8 @@ class Libp2pNode:
 
         :return: bytes
         """
-        assert self.pipe is not None
+        if self.pipe is None:
+            raise ValueError("pipe is not set.")  # pragma: nocover
         return await self.pipe.read()
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
@@ -405,7 +408,8 @@ class Libp2pNode:
                 "Waiting for node process {} to terminate...".format(self.proc.pid)
             )
             self.proc.wait()
-            assert self._log_file_desc is not None
+            if self._log_file_desc is None:
+                raise ValueError("log file descriptor is not set.")  # pragma: nocover
             self._log_file_desc.close()
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
@@ -580,7 +584,8 @@ class P2PLibp2pConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
@@ -613,7 +618,8 @@ class P2PLibp2pConnection(Connection):
         """
         while True:
             data = await self.node.read()
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             self._in_queue.put_nowait(data)
             if data is None:
                 break

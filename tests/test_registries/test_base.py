@@ -520,10 +520,9 @@ class TestFilter:
             skill_callback_info={},
             signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
-        t.counterparty = "skill"
+        t.to = "skill"
         t.sender = "decision_maker"
-        self.aea.runtime.decision_maker.message_out_queue.put(t)
-        self.aea._filter.handle_internal_messages()
+        self.aea._filter.handle_internal_message(t)
 
         internal_handlers_list = self.aea.resources.get_handlers(t.protocol_id)
         assert len(internal_handlers_list) == 1
@@ -542,6 +541,8 @@ class TestFilter:
 
 
 class TestAgentComponentRegistry:
+    """Test agent component registry."""
+
     def setup_class(self):
         """Set up the test."""
         self.registry = AgentComponentRegistry()

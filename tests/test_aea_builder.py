@@ -45,7 +45,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.contracts.base import Contract
-from aea.exceptions import AEAException
+from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.protocols.base import Protocol
@@ -74,15 +74,15 @@ def test_default_timeout_for_agent():
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
 
     aea = builder.build()
-    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
+    assert aea._period == builder.DEFAULT_AGENT_ACT_PERIOD
 
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    builder.set_timeout(100)
+    builder.set_period(100)
 
     aea = builder.build()
-    assert aea._timeout == 100
+    assert aea.period == 100
 
 
 def test_add_package_already_existing():
@@ -675,7 +675,7 @@ class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmp
         self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()
         with pytest.raises(
-            AssertionError,
+            AEAEnforceError,
             match=r"Component \(protocol, some_author/non_existing_package:0.1.0\) not declared in the agent configuration.",
         ):
             with cd(self._get_cwd()):

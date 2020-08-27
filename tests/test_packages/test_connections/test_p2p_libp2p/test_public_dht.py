@@ -123,6 +123,8 @@ class TestLibp2pConnectionPublicDHTRelay:
                 assert delivered_envelope.protocol_id == envelope.protocol_id
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                msg.to = delivered_envelope.to
+                msg.sender = delivered_envelope.sender
                 assert envelope.message == msg
             except Exception:
                 raise
@@ -179,6 +181,8 @@ class TestLibp2pConnectionPublicDHTRelay:
                     assert delivered_envelope.protocol_id == envelope.protocol_id
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                    msg.to = delivered_envelope.to
+                    msg.sender = delivered_envelope.sender
                     assert envelope.message == msg
                 except Exception:
                     multiplexer1.disconnect()
@@ -254,6 +258,8 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 assert delivered_envelope.protocol_id == envelope.protocol_id
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                msg.to = delivered_envelope.to
+                msg.sender = delivered_envelope.sender
                 assert envelope.message == msg
             except Exception:
                 raise
@@ -274,13 +280,6 @@ class TestLibp2pConnectionPublicDHTDelegate:
             multiplexer1.connect()
 
             addr_1 = connection1.address
-            msg = DefaultMessage(
-                dialogue_reference=("", ""),
-                message_id=1,
-                target=0,
-                performative=DefaultMessage.Performative.BYTES,
-                content=b"hello",
-            )
 
             for j in range(len(PUBLIC_DHT_DELEGATE_URIS)):
                 if j == i:
@@ -293,6 +292,13 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 multiplexer2.connect()
 
                 addr_2 = connection2.address
+                msg = DefaultMessage(
+                    dialogue_reference=("", ""),
+                    message_id=1,
+                    target=0,
+                    performative=DefaultMessage.Performative.BYTES,
+                    content=b"hello",
+                )
                 envelope = Envelope(
                     to=addr_2,
                     sender=addr_1,
@@ -310,6 +316,8 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     assert delivered_envelope.protocol_id == envelope.protocol_id
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                    msg.to = delivered_envelope.to
+                    msg.sender = delivered_envelope.sender
                     assert envelope.message == msg
                 except Exception:
                     multiplexer1.disconnect()
@@ -322,7 +330,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
 
 @pytest.mark.integration
 class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
-    """"Test that public DHT's relay service is working properly, using aea cli"""
+    """Test that public DHT's relay service is working properly, using aea cli"""
 
     @libp2p_log_on_failure
     def test_connectivity(self):
