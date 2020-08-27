@@ -51,10 +51,127 @@ DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "agent-land"
 
 
+class CosmosHelper(Helper):
+    """Helper class usable as Mixin for CosmosApi or as standalone class."""
+
+    address_prefix = _COSMOS
+
+    @staticmethod
+    def is_transaction_settled(tx_receipt: Any) -> bool:
+        """
+        Check whether a transaction is settled or not.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: True if the transaction has been settled, False o/w.
+        """
+        is_successful = False
+        if tx_receipt is not None:
+            # TODO: quick fix only, not sure this is reliable
+            is_successful = True
+        return is_successful
+
+    @staticmethod
+    def is_transaction_valid(
+        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param tx: the transaction.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :return: True if the random_message is equals to tx['input']
+        """
+        if tx is None:
+            return False  # pragma: no cover
+
+        try:
+            _tx = tx.get("tx").get("value").get("msg")[0]
+            recovered_amount = int(_tx.get("value").get("amount")[0].get("amount"))
+            sender = _tx.get("value").get("from_address")
+            recipient = _tx.get("value").get("to_address")
+            is_valid = (
+                recovered_amount == amount and sender == client and recipient == seller
+            )
+        except (KeyError, IndexError):  # pragma: no cover
+            is_valid = False
+        return is_valid
+
+    @staticmethod
+    def generate_tx_nonce(seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish txs with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = hashlib.sha256(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+        return aggregate_hash.hexdigest()
+
+    @classmethod
+    def get_address_from_public_key(cls, public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        public_key_bytes = bytes.fromhex(public_key)
+        s = hashlib.new("sha256", public_key_bytes).digest()
+        r = hashlib.new("ripemd160", s).digest()
+        five_bit_r = convertbits(r, 8, 5)
+        assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
+        address = bech32_encode(cls.address_prefix, five_bit_r)
+        return address
+
+    @classmethod
+    def recover_message(
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
+        """
+        Recover the addresses from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
+        """
+        signature_b64 = base64.b64decode(signature)
+        verifying_keys = VerifyingKey.from_public_key_recovery(
+            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
+        )
+        public_keys = [
+            verifying_key.to_string("compressed").hex()
+            for verifying_key in verifying_keys
+        ]
+        addresses = [
+            cls.get_address_from_public_key(public_key) for public_key in public_keys
+        ]
+        return tuple(addresses)
+
+    @staticmethod
+    def get_hash(message: bytes) -> str:
+        """
+        Get the hash of a message.
+
+        :param message: the message to be hashed.
+        :return: the hash of the message.
+        """
+        digest = hashlib.sha256(message).hexdigest()
+        return digest
+
+
 class CosmosCrypto(Crypto[SigningKey]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
     identifier = _COSMOS
+    helper = CosmosHelper
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
@@ -64,7 +181,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         """
         super().__init__(private_key_path=private_key_path)
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
-        self._address = CosmosHelper.get_address_from_public_key(self.public_key)
+        self._address = self.helper.get_address_from_public_key(self.public_key)
 
     @property
     def private_key(self) -> str:
@@ -228,129 +345,15 @@ class CosmosCrypto(Crypto[SigningKey]):
         fp.write(self.private_key.encode("utf-8"))
 
 
-class CosmosHelper(Helper):
-    """Helper class usable as Mixin for CosmosApi or as standalone class."""
-
-    @staticmethod
-    def is_transaction_settled(tx_receipt: Any) -> bool:
-        """
-        Check whether a transaction is settled or not.
-
-        :param tx_digest: the digest associated to the transaction.
-        :return: True if the transaction has been settled, False o/w.
-        """
-        is_successful = False
-        if tx_receipt is not None:
-            # TODO: quick fix only, not sure this is reliable
-            is_successful = True
-        return is_successful
-
-    @staticmethod
-    def is_transaction_valid(
-        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
-    ) -> bool:
-        """
-        Check whether a transaction is valid or not.
-
-        :param tx: the transaction.
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :param tx_nonce: the transaction nonce.
-        :param amount: the amount we expect to get from the transaction.
-        :return: True if the random_message is equals to tx['input']
-        """
-        if tx is None:
-            return False  # pragma: no cover
-
-        try:
-            _tx = tx.get("tx").get("value").get("msg")[0]
-            recovered_amount = int(_tx.get("value").get("amount")[0].get("amount"))
-            sender = _tx.get("value").get("from_address")
-            recipient = _tx.get("value").get("to_address")
-            is_valid = (
-                recovered_amount == amount and sender == client and recipient == seller
-            )
-        except (KeyError, IndexError):  # pragma: no cover
-            is_valid = False
-        return is_valid
-
-    @staticmethod
-    def generate_tx_nonce(seller: Address, client: Address) -> str:
-        """
-        Generate a unique hash to distinguish txs with the same terms.
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
-        """
-        time_stamp = int(time.time())
-        aggregate_hash = hashlib.sha256(
-            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
-        )
-        return aggregate_hash.hexdigest()
-
-    @staticmethod
-    def get_address_from_public_key(public_key: str) -> str:
-        """
-        Get the address from the public key.
-
-        :param public_key: the public key
-        :return: str
-        """
-        public_key_bytes = bytes.fromhex(public_key)
-        s = hashlib.new("sha256", public_key_bytes).digest()
-        r = hashlib.new("ripemd160", s).digest()
-        five_bit_r = convertbits(r, 8, 5)
-        if five_bit_r is None:  # pragma: no cover
-            raise ValueError("Unsuccessful bech32.convertbits call.")
-        address = bech32_encode(_COSMOS, five_bit_r)
-        return address
-
-    @staticmethod
-    def recover_message(
-        message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Tuple[Address, ...]:
-        """
-        Recover the addresses from the hash.
-
-        :param message: the message we expect
-        :param signature: the transaction signature
-        :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered addresses
-        """
-        signature_b64 = base64.b64decode(signature)
-        verifying_keys = VerifyingKey.from_public_key_recovery(
-            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
-        )
-        public_keys = [
-            verifying_key.to_string("compressed").hex()
-            for verifying_key in verifying_keys
-        ]
-        addresses = [
-            CosmosHelper.get_address_from_public_key(public_key)
-            for public_key in public_keys
-        ]
-        return tuple(addresses)
-
-    @staticmethod
-    def get_hash(message: bytes) -> str:
-        """
-        Get the hash of a message.
-
-        :param message: the message to be hashed.
-        :return: the hash of the message.
-        """
-        digest = hashlib.sha256(message).hexdigest()
-        return digest
-
-
-class CosmosApi(LedgerApi, CosmosHelper):
+class _CosmosApi(LedgerApi):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
 
     identifier = _COSMOS
 
     def __init__(self, **kwargs):
-        """Initialize the Ethereum ledger APIs."""
+        """
+        Initialize the Cosmos ledger APIs.
+        """
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
@@ -856,6 +859,10 @@ class CosmosApi(LedgerApi, CosmosHelper):
         return res[-1]["address"]
 
 
+class CosmosApi(_CosmosApi, CosmosHelper):
+    """Class to interact with the Cosmos SDK via a HTTP APIs."""
+
+
 class CosmWasmCLIWrapper:
     """Wrapper of the CosmWasm CLI."""
 
@@ -865,6 +872,7 @@ class CosmosFaucetApi(FaucetApi):
 
     identifier = _COSMOS
     testnet_name = TESTNET_NAME
+    testnet_faucet_url = COSMOS_TESTNET_FAUCET_URL
 
     def get_wealth(self, address: Address) -> None:
         """
@@ -875,21 +883,18 @@ class CosmosFaucetApi(FaucetApi):
         """
         self._try_get_wealth(address)
 
-    @staticmethod
     @try_decorator(
         "An error occured while attempting to generate wealth:\n{}",
         logger_method=logger.error,
     )
-    def _try_get_wealth(address: Address) -> None:
+    def _try_get_wealth(self, address: Address) -> None:
         """
         Get wealth from the faucet for the provided address.
 
         :param address: the address.
         :return: None
         """
-        response = requests.post(
-            url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
-        )
+        response = requests.post(url=self.testnet_faucet_url, data={"Address": address})
         if response.status_code == 200:
             tx_hash = response.text
             logger.info("Wealth generated, tx_hash: {}".format(tx_hash))

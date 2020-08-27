@@ -25,15 +25,12 @@ from unittest import mock
 
 import eth_account
 
-from fetchai.ledger.api.token import TokenTxFactory
-from fetchai.ledger.crypto import Address as FetchaiAddress
-from fetchai.ledger.transaction import Transaction as FetchaiTransaction
-
 import pytest
 
 import aea
 import aea.decision_maker.default
 from aea.configurations.base import PublicId
+from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
@@ -62,6 +59,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
+    FETCHAI_TESTNET_CONFIG,
 )
 
 
@@ -304,12 +302,16 @@ class TestDecisionMaker2:
 
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
-        tx = TokenTxFactory.transfer(
-            FetchaiAddress("v3sZs7gKKz9xmoTo9yzRkfHkjYuX42MzXaq4eVjGHxrX9qu3U"),
-            FetchaiAddress("2bzQNV4TTjMAiKZe85EyLUttoFpHHuksRzUUBYB1brt98pMXKK"),
-            1,
-            1,
-            [],
+        fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+        account = FetchAICrypto()
+        fc2 = FetchAICrypto()
+        amount = 10000
+        transfer_transaction = fetchai_api.get_transfer_transaction(
+            sender_address=account.address,
+            destination_address=fc2.address,
+            amount=amount,
+            tx_fee=1000,
+            tx_nonce="something",
         )
         signing_dialogues = SigningDialogues("agent")
         signing_msg = SigningMessage(
@@ -326,7 +328,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_transaction=RawTransaction(FETCHAI, tx),
+            raw_transaction=RawTransaction(FETCHAI, transfer_transaction),
         )
         signing_dialogue = signing_dialogues.create_with_message(
             "decision_maker", signing_msg
@@ -341,7 +343,7 @@ class TestDecisionMaker2:
             == SigningMessage.Performative.SIGNED_TRANSACTION
         )
         assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
-        assert type(signing_msg_response.signed_transaction.body) == FetchaiTransaction
+        assert type(signing_msg_response.signed_transaction.body) == dict
 
     def test_handle_tx_signing_ethereum(self):
         """Test tx signing for ethereum."""
