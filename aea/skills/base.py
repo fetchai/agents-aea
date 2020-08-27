@@ -31,6 +31,7 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
 
+from aea.common import Address
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -44,7 +45,6 @@ from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_module
 from aea.helpers.logging import AgentLoggerAdapter
-from aea.mail.base import Address
 from aea.multiplexer import ConnectionStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager

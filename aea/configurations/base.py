@@ -51,7 +51,7 @@ from packaging.version import Version
 
 import semver
 
-import aea
+from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -732,7 +732,7 @@ class PackageConfiguration(Configuration, ABC):
             if fingerprint_ignore_patterns is not None
             else []
         )
-        self.aea_version = aea_version if aea_version != "" else aea.__version__
+        self.aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
@@ -1982,7 +1982,7 @@ def _compare_fingerprints(
 
 def _check_aea_version(package_configuration: PackageConfiguration):
     """Check the package configuration version against the version of the framework."""
-    current_aea_version = Version(aea.__version__)
+    current_aea_version = Version(__aea_version__)
     version_specifiers = package_configuration.aea_version_specifiers
     if current_aea_version not in version_specifiers:
         raise ValueError(

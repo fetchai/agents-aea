@@ -22,6 +22,7 @@
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
@@ -33,7 +34,6 @@ from aea.helpers.search.generic import (
 )
 from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER

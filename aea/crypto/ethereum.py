@@ -37,10 +37,10 @@ import requests
 from web3 import HTTPProvider, Web3
 from web3.contract import Contract as EthereumContract
 
+from aea.common import Address
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import enforce
 from aea.helpers.base import try_decorator
-from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 

@@ -21,7 +21,7 @@
 
 from typing import Dict, Optional, Tuple, cast
 
-from aea.mail.base import Address
+from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.state_update.message import StateUpdateMessage
 from aea.skills.base import Handler

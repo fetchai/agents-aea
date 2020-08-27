@@ -25,9 +25,10 @@ from typing import cast
 
 import pytest
 
+from aea.common import Address
 from aea.helpers.dialogue.base import Dialogue
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.multiplexer import ConnectionStatus
 from aea.protocols.base import Message
 

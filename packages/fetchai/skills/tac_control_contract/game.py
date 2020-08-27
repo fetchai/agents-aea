@@ -25,13 +25,13 @@ import pprint
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
+from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TacMessage

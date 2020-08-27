@@ -23,15 +23,13 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
+from aea.common import Address
 from aea.configurations.base import PackageId, ProtocolId, PublicId
 from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
-
-
-Address = str
 
 
 class AEAConnectionError(Exception):

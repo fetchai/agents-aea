@@ -46,6 +46,7 @@ import pytest
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
+from aea.common import Address
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -69,7 +70,6 @@ from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
-from aea.mail.base import Address
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 

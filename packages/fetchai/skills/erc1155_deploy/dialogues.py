@@ -26,12 +26,12 @@ This module contains the classes required for dialogue management.
 
 from typing import Optional, Type
 
+from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues

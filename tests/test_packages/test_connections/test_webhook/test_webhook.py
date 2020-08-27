@@ -30,10 +30,11 @@ from aiohttp.client_reqrep import ClientResponse
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.helpers.dialogue.base import Dialogue
 from aea.identity.base import Identity
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection

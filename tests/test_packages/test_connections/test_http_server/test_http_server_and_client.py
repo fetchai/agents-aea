@@ -24,10 +24,11 @@ from typing import cast
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.identity.base import Identity
-from aea.mail.base import Address, Envelope, Message
+from aea.mail.base import Envelope, Message
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection

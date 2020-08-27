@@ -26,9 +26,10 @@ from typing import Any, Optional, Tuple, cast
 
 import gym
 
+from aea.common import Address
 from aea.helpers.base import locate
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 sys.modules["packages.fetchai.connections.gym"] = locate(

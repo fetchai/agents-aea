@@ -995,7 +995,7 @@ class ProtocolGenerator:
             self.indent
             + "from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
         )
-        cls_str += self.indent + "from aea.mail.base import Address\n"
+        cls_str += self.indent + "from aea.common import Address\n"
         cls_str += self.indent + "from aea.protocols.base import Message\n\n"
         cls_str += self.indent + "from {}.message import {}Message\n".format(
             self.dotted_path_to_protocol_package,
