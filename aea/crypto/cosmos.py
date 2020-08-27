@@ -899,7 +899,7 @@ class CosmosFaucetApi(FaucetApi):
     testnet_name = TESTNET_NAME
 
     def __init__(self, poll_interval=None):
-        """Initialise."""
+        """Initialize CosmosFaucetApi."""
         self._poll_interval = float(poll_interval or 1)
 
     def get_wealth(self, address: Address) -> None:
@@ -921,16 +921,15 @@ class CosmosFaucetApi(FaucetApi):
             if status is None:
                 raise RuntimeError("Failed to check faucet claim status")
 
-            # if the status is complete or failed
-            if status.status_code >= self.FAUCET_STATUS_COMPLETED:
-
-                # do the failure check
-                if status.status_code != self.FAUCET_STATUS_COMPLETED:
-                    raise RuntimeError(f"Failed to get wealth for {address}")
-
+            # if the status is complete
+            if status.status_code == self.FAUCET_STATUS_COMPLETED:
                 break
 
-            # wait for a bit
+            # if the status is failure
+            if status.status_code > self.FAUCET_STATUS_COMPLETED:
+                raise RuntimeError(f"Failed to get wealth for {address}")
+
+            # if the status is incomplete
             time.sleep(self._poll_interval)
 
     @classmethod
@@ -995,7 +994,7 @@ class CosmosFaucetApi(FaucetApi):
         Generates the request URI derived from `cls.faucet_base_url`
         """
         if cls.testnet_faucet_url is None:
-            raise AEAEnforceError("The faucet url is None.")
+            raise ValueError("Testnet faucet url not set.")
         return f"{cls.testnet_faucet_url}/claim/requests"
 
     @classmethod
