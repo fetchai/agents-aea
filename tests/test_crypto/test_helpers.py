@@ -79,23 +79,6 @@ class TestHelperFile:
             )
             try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
 
-    @patch("aea.crypto.fetchai.logger")
-    def tests_generate_wealth_fetchai(self, mock_logging):
-        """Test generate wealth for fetchai."""
-        address = "my_address"
-        result = ResponseMock(status_code=500)
-        with patch.object(requests, "post", return_value=result):
-            try_generate_testnet_wealth(
-                identifier=FetchAICrypto.identifier, address=address
-            )
-            assert mock_logging.error.called
-
-        result.status_code = 200
-        with patch.object(requests, "post", return_value=result):
-            try_generate_testnet_wealth(
-                identifier=FetchAICrypto.identifier, address=address
-            )
-
     @patch("aea.crypto.ethereum.logger")
     def tests_generate_wealth_ethereum(self, mock_logging):
         """Test generate wealth for ethereum."""
@@ -112,12 +95,6 @@ class TestHelperFile:
             try_generate_testnet_wealth(
                 identifier=EthereumCrypto.identifier, address=address
             )
-
-    @patch("aea.crypto.fetchai.requests.post", return_value=ResponseMock())
-    @patch("aea.crypto.fetchai.json.loads", return_value={"error_message": ""})
-    def test_try_generate_testnet_wealth_error_resp_fetchai(self, *mocks):
-        """Test try_generate_testnet_wealth error_resp."""
-        try_generate_testnet_wealth(FetchAICrypto.identifier, "address")
 
     @patch("aea.crypto.ethereum.requests.post", return_value=ResponseMock())
     @patch("aea.crypto.ethereum.json.loads", return_value={"error_message": ""})
