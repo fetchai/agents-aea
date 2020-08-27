@@ -789,7 +789,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
-        self.aea_tool.aea.runtime.main_loop.teardown()()
+        self.aea_tool.aea.runtime.main_loop.teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.

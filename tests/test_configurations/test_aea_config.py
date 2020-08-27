@@ -224,8 +224,8 @@ class TestLoopModeConfigVariable(BaseConfigTestVariable):
 
     OPTION_NAME = "loop_mode"
     CONFIG_ATTR_NAME = "loop_mode"
-    GOOD_VALUES = ["async"]
-    INCORRECT_VALUES = ["sync", None, "sTrING?", -1]
+    GOOD_VALUES = ["async", "sync"]
+    INCORRECT_VALUES = [None, "sTrING?", -1]
     REQUIRED = False
     AEA_ATTR_NAME = "_loop_mode"
     AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_LOOP_MODE

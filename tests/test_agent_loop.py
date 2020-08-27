@@ -26,7 +26,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from aea.aea import AEA
-from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop
+from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.mail.base import Envelope
@@ -289,3 +289,10 @@ class TestAsyncAgentLoop:
         agent_loop.stop()
         loop.run_until_complete(asyncio.sleep(0.1))
         assert loop_task.done()
+
+
+class TestSyncAgentLoop:
+    """Tests for synchronous loop."""
+
+    AGENT_LOOP_CLASS: Type[BaseAgentLoop] = SyncAgentLoop
+    FAKE_AGENT_CLASS = SyncFakeAgent

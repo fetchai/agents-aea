@@ -33,7 +33,7 @@ from typing import (
 )
 
 from aea.agent import Agent
-from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop
+from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SKILL
 from aea.connections.base import Connection
@@ -61,6 +61,7 @@ class AEA(Agent, WithLogger):
 
     RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
         "async": AsyncAgentLoop,
+        "sync": SyncAgentLoop,
     }
     DEFAULT_RUN_LOOP: str = "async"
 

@@ -24,7 +24,7 @@ from aea.protocols.default.message import DefaultMessage
 
 Unlike an `AEA`, an `Agent` does not require a `Wallet`, `LedgerApis` or `Resources` module.
 
-However, we need to implement 5 abstract methods:
+However, we need to implement 4 abstract methods:
 - `setup()`
 - `act()`
 - `handle_envelope()`

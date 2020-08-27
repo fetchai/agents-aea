@@ -132,7 +132,7 @@
     },
     "loop_mode": {
       "type": "string",
-      "enum": ["async"]
+      "enum": ["async", "sync"]
     },
     "runtime_mode": {
       "type": "string",

@@ -77,10 +77,12 @@ class BaseAgentLoop(WithLogger, ABC):
 
     def setup(self) -> None:  # pylint: disable=no-self-use
         """Set up loop before started."""
+        # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.start()
 
     def teardown(self):  # pylint: disable=no-self-use
         """Tear down loop on stop."""
+        # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.stop()
 
     async def run_loop(self) -> None:
@@ -322,3 +324,6 @@ class AsyncAgentLoop(BaseAgentLoop):
         while self.is_running:
             self._register_periodic_tasks()  # re register, cause new may appear
             await asyncio.sleep(self.NEW_BEHAVIOURS_PROCESS_SLEEP)
+
+
+SyncAgentLoop = AsyncAgentLoop  # temporary solution!
