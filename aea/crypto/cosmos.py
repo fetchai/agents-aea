@@ -899,6 +899,7 @@ class CosmosFaucetApi(FaucetApi):
     testnet_name = TESTNET_NAME
 
     def __init__(self, poll_interval=None):
+        """Initialise."""
         self._poll_interval = float(poll_interval or 1)
 
     def get_wealth(self, address: Address) -> None:

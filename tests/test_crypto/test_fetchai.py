@@ -35,7 +35,10 @@ from tests.conftest import (
 
 
 class MockRequestsResponse:
+    """This class mocks requests and response"""
+
     def __init__(self, data, status_code=None):
+        """Initialise."""
         self._data = data
         self._status_code = status_code or 200
 
