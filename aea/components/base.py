@@ -32,6 +32,7 @@ from aea.configurations.base import (
     ComponentType,
     PublicId,
 )
+from aea.exceptions import AEAEnforceError
 from aea.helpers.logging import WithLogger
 
 logger = logging.getLogger(__name__)
@@ -114,7 +115,8 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     :return: None
     """
     dir_ = configuration.directory
-    assert dir_ is not None
+    if dir_ is None:
+        raise AEAEnforceError("configuration directory does not exists.")
 
     # patch sys.modules with dummy modules
     prefix_root = "packages"
