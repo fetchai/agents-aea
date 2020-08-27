@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests for the Multiplexer."""
 
 import asyncio
@@ -33,6 +34,7 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
+from aea.connections.base import ConnectionStates
 from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
@@ -58,10 +60,10 @@ async def test_receiving_loop_terminated():
     multiplexer.connect()
 
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        multiplexer.connection_status.is_connected = False
+        multiplexer.connection_status.set(ConnectionStates.disconnected)
         await multiplexer._receiving_loop()
         mock_logger_debug.assert_called_with("Receiving loop terminated.")
-        multiplexer.connection_status.is_connected = True
+        multiplexer.connection_status.set(ConnectionStates.connected)
         multiplexer.disconnect()
 
 
@@ -209,9 +211,9 @@ def test_multiplexer_disconnect_all_raises_error():
             multiplexer.disconnect()
 
     # # do the true disconnection - for clean the test up
-    assert multiplexer.connection_status.is_connected
+    assert multiplexer.connection_status.is_disconnecting
     multiplexer.disconnect()
-    assert not multiplexer.connection_status.is_connected
+    assert multiplexer.connection_status.is_disconnected
 
 
 @pytest.mark.asyncio
@@ -553,7 +555,6 @@ async def test_default_route_applied(caplog):
 
             assert inbox.empty()
             assert outbox.empty()
-
             multiplexer.put(envelope)
             await outbox.async_get()
         finally:

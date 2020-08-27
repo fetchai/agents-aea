@@ -28,7 +28,7 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
+from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
     AEAConnectionError,
@@ -40,17 +40,34 @@ from aea.mail.base import (
 from aea.protocols.base import Message
 
 
-# TODO refactoring: this should be an enum
-#      but beware of backward-compatibility.
-
-
-class ConnectionStatus:
+class MultiplexerStatus(AsyncState):
     """The connection status class."""
 
     def __init__(self):
         """Initialize the connection status."""
-        self.is_connected = False  # type: bool
-        self.is_connecting = False  # type: bool
+        super().__init__(
+            initial_state=ConnectionStates.disconnected, states_enum=ConnectionStates
+        )
+
+    @property
+    def is_connected(self) -> bool:
+        """Return is connected."""
+        return self.get() == ConnectionStates.connected
+
+    @property
+    def is_connecting(self) -> bool:
+        """Return is connecting."""
+        return self.get() == ConnectionStates.connecting
+
+    @property
+    def is_disconnected(self) -> bool:
+        """Return is disconnected."""
+        return self.get() == ConnectionStates.disconnected
+
+    @property
+    def is_disconnecting(self) -> bool:
+        """Return is disconnected."""
+        return self.get() == ConnectionStates.disconnecting
 
 
 class AsyncMultiplexer(WithLogger):
@@ -78,7 +95,7 @@ class AsyncMultiplexer(WithLogger):
         self._default_connection: Optional[Connection] = None
         self._initialize_connections_if_any(connections, default_connection_index)
 
-        self._connection_status = ConnectionStatus()
+        self._connection_status = MultiplexerStatus()
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
@@ -173,7 +190,7 @@ class AsyncMultiplexer(WithLogger):
     @property
     def is_connected(self) -> bool:
         """Check whether the multiplexer is processing envelopes."""
-        return all(c.is_connected for c in self._connections)
+        return self.connection_status.is_connected
 
     @property
     def default_routing(self) -> Dict[PublicId, PublicId]:
@@ -186,7 +203,7 @@ class AsyncMultiplexer(WithLogger):
         self._default_routing = default_routing
 
     @property
-    def connection_status(self) -> ConnectionStatus:
+    def connection_status(self) -> MultiplexerStatus:
         """Get the connection status."""
         return self._connection_status
 
@@ -201,15 +218,21 @@ class AsyncMultiplexer(WithLogger):
                 self.logger.debug("Multiplexer already connected.")
                 return
             try:
+                self.connection_status.set(ConnectionStates.connecting)
                 await self._connect_all()
-                enforce(self.is_connected, "At least one connection failed to connect!")
-                self._connection_status.is_connected = True
+
+                if all(c.is_connected for c in self._connections):
+                    self.connection_status.set(ConnectionStates.connected)
+                elif not all(
+                    c.is_connected or c.is_connecting for c in self._connections
+                ):
+                    raise AEAConnectionError("Failed to connect the multiplexer.")
+
                 self._recv_loop_task = self._loop.create_task(self._receiving_loop())
                 self._send_loop_task = self._loop.create_task(self._send_loop())
                 self.logger.debug("Multiplexer connected and running.")
             except (CancelledError, Exception):
                 self.logger.exception("Exception on connect:")
-                self._connection_status.is_connected = False
                 await self._stop()
                 raise AEAConnectionError("Failed to connect the multiplexer.")
 
@@ -217,14 +240,14 @@ class AsyncMultiplexer(WithLogger):
         """Disconnect the multiplexer."""
         self.logger.debug("Multiplexer disconnecting...")
         async with self._lock:
-            if not self.connection_status.is_connected:
+            if self.connection_status.is_disconnected:
                 self.logger.debug("Multiplexer already disconnected.")
                 await asyncio.wait_for(self._stop(), timeout=60)
                 return
             try:
+                self.connection_status.set(ConnectionStates.disconnecting)
                 await asyncio.wait_for(self._disconnect_all(), timeout=60)
                 await asyncio.wait_for(self._stop(), timeout=60)
-                self._connection_status.is_connected = False
                 self.logger.debug("Multiplexer disconnected.")
             except (CancelledError, Exception):
                 self.logger.exception("Exception on disconnect:")
@@ -253,6 +276,10 @@ class AsyncMultiplexer(WithLogger):
             if c.state in (ConnectionStates.connecting, ConnectionStates.connected)
         ]:
             await connection.disconnect()
+
+        if all([c.is_disconnected for c in self.connections]):
+            self.connection_status.set(ConnectionStates.disconnected)
+
         self.logger.debug("Multiplexer stopped.")
 
     async def _connect_all(self) -> None:

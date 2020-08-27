@@ -271,6 +271,11 @@ class Connection(Component, ABC):
         return self.state == ConnectionStates.connected
 
     @property
+    def is_connecting(self) -> bool:
+        """Return is connecting state."""
+        return self.state == ConnectionStates.connecting
+
+    @property
     def is_disconnected(self) -> bool:
         """Return is disconnected state."""
         return self.state == ConnectionStates.disconnected

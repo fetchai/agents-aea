@@ -188,3 +188,4 @@ _.get_dialogue_with_counterparty  # unused method (aea/helpers/dialogue/base.py:
 receiver_address  # unused variable (aea/decision_maker/default.py:70)
 receiver_address  # unused variable (aea/decision_maker/default.py:99)
 create_with_message  # unused method (aea/helpers/dialogue/base.py:1054)
+_.is_disconnecting  # unused property (aea/multiplexer.py:67)

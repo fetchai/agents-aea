@@ -28,7 +28,7 @@ import pytest
 from aea.helpers.dialogue.base import Dialogue
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.mail.base import Address, Envelope
-from aea.multiplexer import ConnectionStatus
+from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
 
 from packages.fetchai.connections.ledger.contract_dispatcher import (
@@ -278,7 +278,7 @@ async def test_run_async():
         ),
     )
     api = None
-    msg = await ContractApiRequestDispatcher(ConnectionStatus()).run_async(
+    msg = await ContractApiRequestDispatcher(MultiplexerStatus()).run_async(
         _raise, api, request, dialogue
     )
     assert msg.performative == ContractApiMessage.Performative.ERROR
@@ -288,7 +288,7 @@ async def test_run_async():
 async def test_get_handler():
     """Test failed to get handler."""
     with pytest.raises(Exception, match="Performative not recognized."):
-        ContractApiRequestDispatcher(ConnectionStatus()).get_handler(
+        ContractApiRequestDispatcher(MultiplexerStatus()).get_handler(
             ContractApiMessage.Performative.ERROR
         )
 

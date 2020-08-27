@@ -45,7 +45,7 @@ from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.mail.base import Address
-from aea.multiplexer import ConnectionStatus, OutBox
+from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
@@ -164,7 +164,7 @@ class SkillContext:
         return self._get_agent_context().address
 
     @property
-    def connection_status(self) -> ConnectionStatus:
+    def connection_status(self) -> MultiplexerStatus:
         """Get connection status."""
         return self._get_agent_context().connection_status
 
