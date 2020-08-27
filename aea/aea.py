@@ -45,7 +45,6 @@ from aea.decision_maker.default import (
 )
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -187,7 +186,6 @@ class AEA(Agent, WithLogger):
         :return: None
         """
         self.resources.setup()
-        ExecTimeoutThreadGuard.start()
 
     def act(self) -> None:
         """
@@ -269,6 +267,12 @@ class AEA(Agent, WithLogger):
         """
         Handle an envelope.
 
+        - fetching the protocol referenced by the envelope, and
+        - returning an envelope to sender if the protocol is unsupported, using the error handler, or
+        - returning an envelope to sender if there is a decoding error, using the error handler, or
+        - returning an envelope to sender if no active handler is available for the specified protocol, using the error handler, or
+        - handling the message recovered from the envelope with all active handlers for the specified protocol.
+
         :param envelope: the envelope to handle.
         :return: None
         """
@@ -280,20 +284,6 @@ class AEA(Agent, WithLogger):
 
         for handler in handlers:
             handler.handle(msg)
-
-    def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        Performs the following:
-
-        - tears down the resources.
-
-        :return: None
-        """
-        self.logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.resources.teardown()
-        ExecTimeoutThreadGuard.stop()
 
     def _setup_loggers(self):
         """Set up logger with agent name."""
@@ -377,3 +367,16 @@ class AEA(Agent, WithLogger):
         raise AEAException(
             f"Unsupported exception policy: {self._skills_exception_policy}"
         )
+
+    def teardown(self) -> None:
+        """
+        Tear down the agent.
+
+        Performs the following:
+
+        - tears down the resources.
+
+        :return: None
+        """
+        self.logger.debug("[{}]: Calling teardown method...".format(self.name))
+        self.resources.teardown()

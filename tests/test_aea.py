@@ -789,6 +789,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
+        self.aea_tool.aea.runtime.main_loop.teardown()()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -827,6 +828,7 @@ class BaseTimeExecutionCase(TestCase):
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
         self.envelope = AeaTool.dummy_envelope()
+        self.aea_tool.aea.runtime.main_loop.setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
@@ -838,7 +840,6 @@ class BaseTimeExecutionCase(TestCase):
 
         self.prepare(lambda: sleep_a_bit(sleep_time, num_sleeps))
         self.aea_tool.set_execution_timeout(execution_timeout)
-        self.aea_tool.setup()
 
         with timeit_context() as timeit:
             self.aea_action()

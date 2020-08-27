@@ -65,14 +65,6 @@ class AbstractAgent(ABC):
         """
 
     @abstractmethod
-    def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
-
-    @abstractmethod
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Handle an envelope.
@@ -122,4 +114,12 @@ class AbstractAgent(ABC):
         :param function: a callable exception raised in.
 
         :return: skip exception if True, otherwise re-raise it
+        """
+
+    @abstractmethod
+    def teardown(self) -> None:
+        """
+        Tear down the agent.
+
+        :return: None
         """

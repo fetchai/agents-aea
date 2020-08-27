@@ -62,7 +62,7 @@ class BaseAgentLoop(WithLogger, ABC):
         self._exceptions: List[Exception] = []
 
     @property
-    def agent(self):  # pragma: nocover
+    def agent(self) -> AbstractAgent:  # pragma: nocover
         """Get agent."""
         return self._agent
 
@@ -72,7 +72,16 @@ class BaseAgentLoop(WithLogger, ABC):
 
     def start(self) -> None:
         """Start agent loop synchronously in own asyncio loop."""
+        self.setup()
         self._loop.run_until_complete(self.run_loop())
+
+    def setup(self) -> None:  # pylint: disable=no-self-use
+        """Set up loop before started."""
+        ExecTimeoutThreadGuard.start()
+
+    def teardown(self):  # pylint: disable=no-self-use
+        """Tear down loop on stop."""
+        ExecTimeoutThreadGuard.stop()
 
     async def run_loop(self) -> None:
         """Run agent loop."""
@@ -102,6 +111,7 @@ class BaseAgentLoop(WithLogger, ABC):
 
     def stop(self) -> None:
         """Stop agent loop."""
+        self.teardown()
         self._state.set(AgentLoopStates.stopping)
         logger.debug("agent loop stopping!")
         if self._loop.is_running():
@@ -310,6 +320,5 @@ class AsyncAgentLoop(BaseAgentLoop):
     async def _task_register_periodic_tasks(self) -> None:
         """Process new behaviours added to skills in runtime."""
         while self.is_running:
-            # TODO: better handling internal messages for skills internal updates
             self._register_periodic_tasks()  # re register, cause new may appear
             await asyncio.sleep(self.NEW_BEHAVIOURS_PROCESS_SLEEP)
