@@ -229,7 +229,6 @@ class AEA(Agent, WithLogger):
     ) -> Tuple[Optional[Message], List[Handler]]:
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
-        # TODO specify error handler in config and make this work for different skill/protocol versions.
         error_handler = self._get_error_handler()
 
         if error_handler is None:

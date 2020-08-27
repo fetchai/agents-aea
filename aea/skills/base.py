@@ -280,7 +280,6 @@ class SkillComponent(ABC):
             raise ValueError("Configuration not set.")  # pragma: nocover
         return self._configuration
 
-    # TODO consider rename this property
     @property
     def config(self) -> Dict[Any, Any]:
         """Get the config of the skill component."""

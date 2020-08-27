@@ -231,7 +231,7 @@ class LocalNode:
                 message_id=MESSAGE_ID,
                 error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
                 error_msg="Destination not available",
-                error_data={},  # TODO: reference incoming message.
+                error_data={},
             )
             error_envelope = Envelope(
                 to=envelope.sender,

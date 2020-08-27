@@ -328,7 +328,6 @@ class TacHandler(Handler):
                 self.context.logger.info(
                     "received a contract address: {}".format(contract_address)
                 )
-                # TODO; verify on-chain matches off-chain wealth
                 self._update_ownership_and_preferences(tac_msg, tac_dialogue)
             else:
                 self.context.logger.warning("did not receive a contract address!")

@@ -209,7 +209,6 @@ class ConfigLoader(Generic[T]):
         self.validate(json_data)
 
         expected_type = self.configuration_class.package_type
-        # TODO 'type' is optional for backward compatibility
         if expected_type != PackageType.AGENT and "type" in json_data:
             actual_type = PackageType(json_data["type"])
             if expected_type != actual_type:
@@ -446,6 +445,4 @@ def _config_loader():
     yaml.add_constructor("!envvar", envvar_constructor, SafeLoader)
 
 
-# TODO: instead of this, create custom loader and use it
-#       by wrapping yaml.safe_load to use it
 _config_loader()

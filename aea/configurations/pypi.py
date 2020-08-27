@@ -83,7 +83,7 @@ def is_satisfiable(specifier_set: SpecifierSet) -> bool:
         # split specifier "~=<major.minor>" in two specifiers:
         # - >= <major.minor>
         # - < <major+1>
-        # TODO this is not the full story. we should check the version number
+        #   this is not the full story. we should check the version number
         #   up to the last zero, which might be the micro number.
         #   e.g. see last examples of https://www.python.org/dev/peps/pep-0440/#compatible-release
         if specifier.operator == "~=":

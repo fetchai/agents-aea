@@ -137,10 +137,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        # TODO: adapt this line to the new APIs. We no longer have a mailbox.
-        self._agent.mailbox._connection.channel.gym_env.render(  # pylint: disable=protected-access,no-member
-            mode
-        )
+        self._agent.runtime.multiplexer.default_connection.channel.gym_env.render(mode)
 
     def reset(self) -> None:
         """

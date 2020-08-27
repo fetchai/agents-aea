@@ -67,7 +67,6 @@ class CosmosHelper(Helper):
         """
         is_successful = False
         if tx_receipt is not None:
-            # TODO: quick fix only, not sure this is reliable
             is_successful = True
         return is_successful
 

@@ -107,7 +107,7 @@ def get_agents() -> List[Dict]:
                     "public_id": tail,  # it is not a public_id actually, just a folder name.
                     # the reason it's called here so is the view that is used to represent items with public_ids
                     # used also for agent displaying
-                    # TODO: change it when we will have a separate view for an agent.
+                    # change it when we will have a separate view for an agent.
                     "description": "placeholder description",
                 }
             )
