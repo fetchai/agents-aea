@@ -899,6 +899,7 @@ class CosmosFaucetApi(FaucetApi):
     testnet_name = TESTNET_NAME
 
     def __init__(self, poll_interval=None):
+        """Initialize CosmosFaucetApi."""
         self._poll_interval = float(poll_interval or 1)
 
     def get_wealth(self, address: Address) -> None:
@@ -993,7 +994,8 @@ class CosmosFaucetApi(FaucetApi):
         """
         Generates the request URI derived from `cls.faucet_base_url`
         """
-        assert cls.testnet_faucet_url is not None
+        if cls.testnet_faucet_url is None:
+            raise ValueError("Testnet faucet url not set.")
         return f"{cls.testnet_faucet_url}/claim/requests"
 
     @classmethod
