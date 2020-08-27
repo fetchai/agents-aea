@@ -120,14 +120,13 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         assert _match_files(proto_file_generated, proto_file_original)
 
         # compare _pb2.py # noqa: E800
-        # TODO Fails in CI. Investigate! # noqa: E800
-        # pb2_file_generated = Path( # noqa: E800
-        #     self.t, T_PROTOCOL_NAME, "{}_pb2.py".format(T_PROTOCOL_NAME) # noqa: E800
-        # ) # noqa: E800
-        # pb2_file_original = Path( # noqa: E800
-        #     PATH_TO_T_PROTOCOL, "{}_pb2.py".format(T_PROTOCOL_NAME), # noqa: E800
-        # ) # noqa: E800
-        # assert filecmp.cmp(pb2_file_generated, pb2_file_original) # noqa: E800
+        pb2_file_generated = Path(
+            self.t, T_PROTOCOL_NAME, "{}_pb2.py".format(T_PROTOCOL_NAME)
+        )
+        pb2_file_original = Path(
+            PATH_TO_T_PROTOCOL, "{}_pb2.py".format(T_PROTOCOL_NAME),
+        )
+        assert _match_files(pb2_file_generated, pb2_file_original)
 
     @classmethod
     def teardown_class(cls):
@@ -211,14 +210,13 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         assert _match_files(proto_file_generated, proto_file_original)
 
         # compare _pb2.py # noqa: E800
-        # TODO Fails in CI. Investigate! # noqa: E800
-        # pb2_file_generated = Path( # noqa: E800
-        #     self.t, protocol_name, "{}_pb2.py".format(protocol_name) # noqa: E800
-        # ) # noqa: E800
-        # pb2_file_original = Path( # noqa: E800
-        #     path_to_protocol, "{}_pb2.py".format(protocol_name), # noqa: E800
-        # ) # noqa: E800
-        # assert filecmp.cmp(pb2_file_generated, pb2_file_original) # noqa: E800
+        pb2_file_generated = Path(
+            self.t, protocol_name, "{}_pb2.py".format(protocol_name)
+        )
+        pb2_file_original = Path(
+            path_to_protocol, "{}_pb2.py".format(protocol_name),
+        )
+        assert filecmp.cmp(pb2_file_generated, pb2_file_original)
 
     @classmethod
     def teardown_class(cls):

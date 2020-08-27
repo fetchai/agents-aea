@@ -1052,13 +1052,13 @@ When we are negotiating with other AEAs we would like to keep track of the state
 from typing import Dict, Optional, Type
 
 from aea.exceptions import AEAEnforceError, enforce
-from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
@@ -2420,13 +2420,13 @@ As mentioned, when we are negotiating with other AEA we would like to keep track
 from typing import Optional, Type
 
 from aea.exceptions import AEAEnforceError, enforce
-from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage

@@ -991,16 +991,28 @@ class ProtocolGenerator:
         cls_str += (
             self.indent + "from typing import Callable, FrozenSet, Type, cast\n\n"
         )
-        cls_str += (
-            self.indent
-            + "from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
-        )
         cls_str += self.indent + "from aea.mail.base import Address\n"
-        cls_str += self.indent + "from aea.protocols.base import Message\n\n"
-        cls_str += self.indent + "from {}.message import {}Message\n".format(
-            self.dotted_path_to_protocol_package,
-            self.protocol_specification_in_camel_case,
-        )
+        cls_str += self.indent + "from aea.protocols.base import Message\n"
+        if "aea.protocols.dialogue" < self.dotted_path_to_protocol_package:
+            cls_str += (
+                    self.indent
+                    + "from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
+            )
+            if not self.dotted_path_to_protocol_package.startswith("aea"):
+                cls_str += "\n"
+            cls_str += self.indent + "from {}.message import {}Message\n".format(
+                self.dotted_path_to_protocol_package,
+                self.protocol_specification_in_camel_case,
+            )
+        else:
+            cls_str += self.indent + "from {}.message import {}Message\n".format(
+                self.dotted_path_to_protocol_package,
+                self.protocol_specification_in_camel_case,
+            )
+            cls_str += (
+                    self.indent
+                    + "from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
+            )
 
         # Class Header
         cls_str += "\nclass {}Dialogue(Dialogue):\n".format(
