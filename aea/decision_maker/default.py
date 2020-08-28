@@ -29,7 +29,6 @@ from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHan
 from aea.decision_maker.base import OwnershipState as BaseOwnershipState
 from aea.decision_maker.base import Preferences as BasePreferences
 from aea.exceptions import enforce
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
@@ -37,6 +36,7 @@ from aea.helpers.preference_representations.base import (
 from aea.helpers.transaction.base import SignedMessage, SignedTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage

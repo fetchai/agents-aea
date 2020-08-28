@@ -26,11 +26,11 @@ from unittest import mock
 import pytest
 
 from aea.common import Address
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage

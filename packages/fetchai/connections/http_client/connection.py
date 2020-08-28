@@ -35,8 +35,8 @@ from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.mail.base import Envelope, EnvelopeContext, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues

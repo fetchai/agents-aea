@@ -31,10 +31,10 @@ import pytest
 from aea import AEA_DIR
 from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.exceptions import AEAEnforceError
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, ProtobufSerializer, Protocol
 from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel
 from aea.protocols.signing.dialogues import SigningDialogue, SigningDialogues
 from aea.protocols.state_update.dialogues import (
     StateUpdateDialogue,

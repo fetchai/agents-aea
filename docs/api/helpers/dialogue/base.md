@@ -1,5 +1,5 @@
-<a name="aea.helpers.dialogue.base"></a>
-# aea.helpers.dialogue.base
+<a name="aea.protocols.dialogue.base"></a>
+# aea.protocols.dialogue.base
 
 This module contains the classes required for dialogue management.
 
@@ -7,7 +7,7 @@ This module contains the classes required for dialogue management.
 - Dialogue: The dialogue class maintains state of a dialogue and manages it.
 - Dialogues: The dialogues class keeps track of all dialogues.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel"></a>
 ## DialogueLabel Objects
 
 ```python
@@ -16,7 +16,7 @@ class DialogueLabel()
 
 The dialogue label class acts as an identifier for dialogues.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.__init__"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -35,7 +35,7 @@ Initialize a dialogue label.
 
 None
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.dialogue_reference"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.dialogue_reference"></a>
 #### dialogue`_`reference
 
 ```python
@@ -45,7 +45,7 @@ None
 
 Get the dialogue reference.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.dialogue_starter_reference"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.dialogue_starter_reference"></a>
 #### dialogue`_`starter`_`reference
 
 ```python
@@ -55,7 +55,7 @@ Get the dialogue reference.
 
 Get the dialogue starter reference.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.dialogue_responder_reference"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.dialogue_responder_reference"></a>
 #### dialogue`_`responder`_`reference
 
 ```python
@@ -65,7 +65,7 @@ Get the dialogue starter reference.
 
 Get the dialogue responder reference.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.dialogue_opponent_addr"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.dialogue_opponent_addr"></a>
 #### dialogue`_`opponent`_`addr
 
 ```python
@@ -75,7 +75,7 @@ Get the dialogue responder reference.
 
 Get the address of the dialogue opponent.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.dialogue_starter_addr"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.dialogue_starter_addr"></a>
 #### dialogue`_`starter`_`addr
 
 ```python
@@ -85,7 +85,7 @@ Get the address of the dialogue opponent.
 
 Get the address of the dialogue starter.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.__eq__"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.__eq__"></a>
 #### `__`eq`__`
 
 ```python
@@ -94,7 +94,7 @@ Get the address of the dialogue starter.
 
 Check for equality between two DialogueLabel objects.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.__hash__"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.__hash__"></a>
 #### `__`hash`__`
 
 ```python
@@ -103,7 +103,7 @@ Check for equality between two DialogueLabel objects.
 
 Turn object into hash.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.json"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.json"></a>
 #### json
 
 ```python
@@ -113,7 +113,7 @@ Turn object into hash.
 
 Return the JSON representation.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.from_json"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.from_json"></a>
 #### from`_`json
 
 ```python
@@ -123,7 +123,7 @@ Return the JSON representation.
 
 Get dialogue label from json.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.get_incomplete_version"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.get_incomplete_version"></a>
 #### get`_`incomplete`_`version
 
 ```python
@@ -132,7 +132,7 @@ Get dialogue label from json.
 
 Get the incomplete version of the label.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.__str__"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -141,7 +141,7 @@ Get the incomplete version of the label.
 
 Get the string representation.
 
-<a name="aea.helpers.dialogue.base.DialogueLabel.from_str"></a>
+<a name="aea.protocols.dialogue.base.DialogueLabel.from_str"></a>
 #### from`_`str
 
 ```python
@@ -151,7 +151,7 @@ Get the string representation.
 
 Get the dialogue label from string representation.
 
-<a name="aea.helpers.dialogue.base.Dialogue"></a>
+<a name="aea.protocols.dialogue.base.Dialogue"></a>
 ## Dialogue Objects
 
 ```python
@@ -160,7 +160,7 @@ class Dialogue(ABC)
 
 The dialogue class maintains state of a dialogue and manages it.
 
-<a name="aea.helpers.dialogue.base.Dialogue.Rules"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Rules"></a>
 ## Rules Objects
 
 ```python
@@ -169,7 +169,7 @@ class Rules()
 
 This class defines the rules for the dialogue.
 
-<a name="aea.helpers.dialogue.base.Dialogue.Rules.__init__"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Rules.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -188,7 +188,7 @@ Initialize a dialogue.
 
 None
 
-<a name="aea.helpers.dialogue.base.Dialogue.Rules.initial_performatives"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Rules.initial_performatives"></a>
 #### initial`_`performatives
 
 ```python
@@ -202,7 +202,7 @@ Get the performatives one of which the terminal message in the dialogue must hav
 
 the valid performatives of an terminal message
 
-<a name="aea.helpers.dialogue.base.Dialogue.Rules.terminal_performatives"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Rules.terminal_performatives"></a>
 #### terminal`_`performatives
 
 ```python
@@ -216,7 +216,7 @@ Get the performatives one of which the terminal message in the dialogue must hav
 
 the valid performatives of an terminal message
 
-<a name="aea.helpers.dialogue.base.Dialogue.Rules.valid_replies"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Rules.valid_replies"></a>
 #### valid`_`replies
 
 ```python
@@ -230,7 +230,7 @@ Get all the valid performatives which are a valid replies to performatives.
 
 the full valid reply structure.
 
-<a name="aea.helpers.dialogue.base.Dialogue.Rules.get_valid_replies"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Rules.get_valid_replies"></a>
 #### get`_`valid`_`replies
 
 ```python
@@ -247,7 +247,7 @@ Given a `performative`, return the list of performatives which are its valid rep
 
 list of valid performative replies
 
-<a name="aea.helpers.dialogue.base.Dialogue.Role"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Role"></a>
 ## Role Objects
 
 ```python
@@ -256,7 +256,7 @@ class Role(Enum)
 
 This class defines the agent's role in a dialogue.
 
-<a name="aea.helpers.dialogue.base.Dialogue.Role.__str__"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.Role.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -265,7 +265,7 @@ This class defines the agent's role in a dialogue.
 
 Get the string representation.
 
-<a name="aea.helpers.dialogue.base.Dialogue.EndState"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.EndState"></a>
 ## EndState Objects
 
 ```python
@@ -274,7 +274,7 @@ class EndState(Enum)
 
 This class defines the end states of a dialogue.
 
-<a name="aea.helpers.dialogue.base.Dialogue.EndState.__str__"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.EndState.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -283,7 +283,7 @@ This class defines the end states of a dialogue.
 
 Get the string representation.
 
-<a name="aea.helpers.dialogue.base.Dialogue.__init__"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -303,7 +303,7 @@ Initialize a dialogue.
 
 None
 
-<a name="aea.helpers.dialogue.base.Dialogue.dialogue_label"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.dialogue_label"></a>
 #### dialogue`_`label
 
 ```python
@@ -317,7 +317,7 @@ Get the dialogue label.
 
 The dialogue label
 
-<a name="aea.helpers.dialogue.base.Dialogue.incomplete_dialogue_label"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.incomplete_dialogue_label"></a>
 #### incomplete`_`dialogue`_`label
 
 ```python
@@ -331,7 +331,7 @@ Get the dialogue label.
 
 The incomplete dialogue label
 
-<a name="aea.helpers.dialogue.base.Dialogue.dialogue_labels"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.dialogue_labels"></a>
 #### dialogue`_`labels
 
 ```python
@@ -345,7 +345,7 @@ Get the dialogue labels (incomplete and complete, if it exists)
 
 the dialogue labels
 
-<a name="aea.helpers.dialogue.base.Dialogue.agent_address"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.agent_address"></a>
 #### agent`_`address
 
 ```python
@@ -359,7 +359,7 @@ Get the address of the agent for whom this dialogues is maintained.
 
 the agent address
 
-<a name="aea.helpers.dialogue.base.Dialogue.agent_address"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.agent_address"></a>
 #### agent`_`address
 
 ```python
@@ -371,7 +371,7 @@ Set the address of the agent for whom this dialogues is maintained.
 
 :param: the agent address
 
-<a name="aea.helpers.dialogue.base.Dialogue.role"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.role"></a>
 #### role
 
 ```python
@@ -385,7 +385,7 @@ Get the agent's role in the dialogue.
 
 the agent's role
 
-<a name="aea.helpers.dialogue.base.Dialogue.role"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.role"></a>
 #### role
 
 ```python
@@ -403,7 +403,7 @@ Set the agent's role in the dialogue.
 
 None
 
-<a name="aea.helpers.dialogue.base.Dialogue.rules"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.rules"></a>
 #### rules
 
 ```python
@@ -417,7 +417,7 @@ Get the dialogue rules.
 
 the rules
 
-<a name="aea.helpers.dialogue.base.Dialogue.is_self_initiated"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.is_self_initiated"></a>
 #### is`_`self`_`initiated
 
 ```python
@@ -431,7 +431,7 @@ Check whether the agent initiated the dialogue.
 
 True if the agent initiated the dialogue, False otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.last_incoming_message"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.last_incoming_message"></a>
 #### last`_`incoming`_`message
 
 ```python
@@ -445,7 +445,7 @@ Get the last incoming message.
 
 the last incoming message if it exists, None otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.last_outgoing_message"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.last_outgoing_message"></a>
 #### last`_`outgoing`_`message
 
 ```python
@@ -459,7 +459,7 @@ Get the last outgoing message.
 
 the last outgoing message if it exists, None otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.last_message"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.last_message"></a>
 #### last`_`message
 
 ```python
@@ -473,7 +473,7 @@ Get the last message.
 
 the last message if it exists, None otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.get_message"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.get_message"></a>
 #### get`_`message
 
 ```python
@@ -490,7 +490,7 @@ Get the message whose id is 'message_id'.
 
 the message if it exists, None otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.is_empty"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.is_empty"></a>
 #### is`_`empty
 
 ```python
@@ -504,7 +504,7 @@ Check whether the dialogue is empty.
 
 True if empty, False otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.update"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.update"></a>
 #### update
 
 ```python
@@ -521,7 +521,7 @@ Extend the list of incoming/outgoing messages with 'message', if 'message' belon
 
 True if message successfully added, false otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.ensure_counterparty"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.ensure_counterparty"></a>
 #### ensure`_`counterparty
 
 ```python
@@ -538,7 +538,7 @@ Ensure the counterparty is set (set if not) correctly.
 
 None
 
-<a name="aea.helpers.dialogue.base.Dialogue.is_belonging_to_dialogue"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.is_belonging_to_dialogue"></a>
 #### is`_`belonging`_`to`_`dialogue
 
 ```python
@@ -555,7 +555,7 @@ Check if the message is belonging to the dialogue.
 
 Ture if message is part of the dialogue, False otherwise
 
-<a name="aea.helpers.dialogue.base.Dialogue.reply"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.reply"></a>
 #### reply
 
 ```python
@@ -574,7 +574,7 @@ Reply to the 'target_message' in this dialogue with a message with 'performative
 
 the reply message if it was successfully added as a reply, None otherwise.
 
-<a name="aea.helpers.dialogue.base.Dialogue.is_valid_next_message"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.is_valid_next_message"></a>
 #### is`_`valid`_`next`_`message
 
 ```python
@@ -597,7 +597,7 @@ additional rules are applied for the time being, and more specific rules are cap
 
 True if yes, False otherwise.
 
-<a name="aea.helpers.dialogue.base.Dialogue.update_dialogue_label"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.update_dialogue_label"></a>
 #### update`_`dialogue`_`label
 
 ```python
@@ -610,7 +610,7 @@ Update the dialogue label of the dialogue.
 
 - `final_dialogue_label`: the final dialogue label
 
-<a name="aea.helpers.dialogue.base.Dialogue.is_valid"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.is_valid"></a>
 #### is`_`valid
 
 ```python
@@ -630,7 +630,7 @@ These rules capture specific constraints designed for dialogues which are instan
 
 True if valid, False otherwise.
 
-<a name="aea.helpers.dialogue.base.Dialogue.__str__"></a>
+<a name="aea.protocols.dialogue.base.Dialogue.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -643,7 +643,7 @@ Get the string representation.
 
 The string representation of the dialogue
 
-<a name="aea.helpers.dialogue.base.DialogueStats"></a>
+<a name="aea.protocols.dialogue.base.DialogueStats"></a>
 ## DialogueStats Objects
 
 ```python
@@ -652,7 +652,7 @@ class DialogueStats(ABC)
 
 Class to handle statistics on default dialogues.
 
-<a name="aea.helpers.dialogue.base.DialogueStats.__init__"></a>
+<a name="aea.protocols.dialogue.base.DialogueStats.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -665,7 +665,7 @@ Initialize a StatsManager.
 
 - `end_states`: the list of dialogue endstates
 
-<a name="aea.helpers.dialogue.base.DialogueStats.self_initiated"></a>
+<a name="aea.protocols.dialogue.base.DialogueStats.self_initiated"></a>
 #### self`_`initiated
 
 ```python
@@ -675,7 +675,7 @@ Initialize a StatsManager.
 
 Get the stats dictionary on self initiated dialogues.
 
-<a name="aea.helpers.dialogue.base.DialogueStats.other_initiated"></a>
+<a name="aea.protocols.dialogue.base.DialogueStats.other_initiated"></a>
 #### other`_`initiated
 
 ```python
@@ -685,7 +685,7 @@ Get the stats dictionary on self initiated dialogues.
 
 Get the stats dictionary on other initiated dialogues.
 
-<a name="aea.helpers.dialogue.base.DialogueStats.add_dialogue_endstate"></a>
+<a name="aea.protocols.dialogue.base.DialogueStats.add_dialogue_endstate"></a>
 #### add`_`dialogue`_`endstate
 
 ```python
@@ -703,7 +703,7 @@ Add dialogue endstate stats.
 
 None
 
-<a name="aea.helpers.dialogue.base.Dialogues"></a>
+<a name="aea.protocols.dialogue.base.Dialogues"></a>
 ## Dialogues Objects
 
 ```python
@@ -712,7 +712,7 @@ class Dialogues(ABC)
 
 The dialogues class keeps track of all dialogues for an agent.
 
-<a name="aea.helpers.dialogue.base.Dialogues.__init__"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -730,7 +730,7 @@ Initialize dialogues.
 
 None
 
-<a name="aea.helpers.dialogue.base.Dialogues.dialogues"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.dialogues"></a>
 #### dialogues
 
 ```python
@@ -740,7 +740,7 @@ None
 
 Get dictionary of dialogues in which the agent engages.
 
-<a name="aea.helpers.dialogue.base.Dialogues.agent_address"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.agent_address"></a>
 #### agent`_`address
 
 ```python
@@ -750,7 +750,7 @@ Get dictionary of dialogues in which the agent engages.
 
 Get the address of the agent for whom dialogues are maintained.
 
-<a name="aea.helpers.dialogue.base.Dialogues.dialogue_stats"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.dialogue_stats"></a>
 #### dialogue`_`stats
 
 ```python
@@ -764,7 +764,7 @@ Get the dialogue statistics.
 
 dialogue stats object
 
-<a name="aea.helpers.dialogue.base.Dialogues.new_self_initiated_dialogue_reference"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.new_self_initiated_dialogue_reference"></a>
 #### new`_`self`_`initiated`_`dialogue`_`reference
 
 ```python
@@ -777,7 +777,7 @@ Return a dialogue label for a new self initiated dialogue.
 
 the next nonce
 
-<a name="aea.helpers.dialogue.base.Dialogues.create"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.create"></a>
 #### create
 
 ```python
@@ -796,7 +796,7 @@ Create a dialogue with 'counterparty', with an initial message whose performativ
 
 the initial message and the dialogue.
 
-<a name="aea.helpers.dialogue.base.Dialogues.update"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.update"></a>
 #### update
 
 ```python
@@ -817,7 +817,7 @@ If there are any errors, e.g. the message dialogue reference does not exists or 
 
 the new or existing dialogue the message is intended for, or None in case of any errors.
 
-<a name="aea.helpers.dialogue.base.Dialogues.get_dialogue"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.get_dialogue"></a>
 #### get`_`dialogue
 
 ```python
@@ -834,7 +834,7 @@ Retrieve the dialogue 'message' belongs to.
 
 the dialogue, or None in case such a dialogue does not exist
 
-<a name="aea.helpers.dialogue.base.Dialogues.get_latest_label"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.get_latest_label"></a>
 #### get`_`latest`_`label
 
 ```python
@@ -848,7 +848,7 @@ Retrieve the latest dialogue label if present otherwise return same label.
 - `dialogue_label`: the dialogue label
 :return dialogue_label: the dialogue label
 
-<a name="aea.helpers.dialogue.base.Dialogues.get_dialogue_from_label"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.get_dialogue_from_label"></a>
 #### get`_`dialogue`_`from`_`label
 
 ```python
@@ -865,7 +865,7 @@ Retrieve a dialogue based on its label.
 
 the dialogue if present
 
-<a name="aea.helpers.dialogue.base.Dialogues.create_dialogue"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.create_dialogue"></a>
 #### create`_`dialogue
 
 ```python
@@ -886,7 +886,7 @@ Create a dialogue instance.
 
 the created dialogue
 
-<a name="aea.helpers.dialogue.base.Dialogues.role_from_first_message"></a>
+<a name="aea.protocols.dialogue.base.Dialogues.role_from_first_message"></a>
 #### role`_`from`_`first`_`message
 
 ```python

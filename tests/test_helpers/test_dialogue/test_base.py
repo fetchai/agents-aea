@@ -25,12 +25,12 @@ import pytest
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel, DialogueStats
-from aea.helpers.dialogue.base import Dialogues as BaseDialogues
-from aea.helpers.dialogue.base import InvalidDialogueMessage
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel, DialogueStats
+from aea.protocols.dialogue.base import Dialogues as BaseDialogues
+from aea.protocols.dialogue.base import InvalidDialogueMessage
 from aea.protocols.state_update.message import StateUpdateMessage
 
 

@@ -34,7 +34,6 @@ from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
@@ -43,6 +42,7 @@ from aea.helpers.transaction.base import (
 )
 from aea.identity.base import Identity
 from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage

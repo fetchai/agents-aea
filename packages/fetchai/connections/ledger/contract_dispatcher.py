@@ -25,12 +25,12 @@ from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
 from aea.exceptions import AEAException
-from aea.helpers.dialogue.base import (
+from aea.helpers.transaction.base import RawMessage, RawTransaction, State
+from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import (
     Dialogue as BaseDialogue,
     Dialogues as BaseDialogues,
 )
-from aea.helpers.transaction.base import RawMessage, RawTransaction, State
-from aea.protocols.base import Address, Message
 
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID,

@@ -28,12 +28,12 @@ from typing import Dict, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue

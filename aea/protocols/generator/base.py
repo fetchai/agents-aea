@@ -992,11 +992,11 @@ class ProtocolGenerator:
             self.indent + "from typing import Callable, FrozenSet, Type, cast\n\n"
         )
         cls_str += self.indent + "from aea.common import Address\n"
+        cls_str += self.indent + "from aea.protocols.base import Message\n"
         cls_str += (
             self.indent
-            + "from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
+            + "from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues\n\n"
         )
-        cls_str += self.indent + "from aea.protocols.base import Message\n\n"
         cls_str += self.indent + "from {}.message import {}Message\n".format(
             self.dotted_path_to_protocol_package,
             self.protocol_specification_in_camel_case,

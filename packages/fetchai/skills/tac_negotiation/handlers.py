@@ -24,10 +24,10 @@ import time
 from typing import Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 

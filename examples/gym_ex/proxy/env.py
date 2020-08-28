@@ -28,9 +28,9 @@ import gym
 
 from aea.common import Address
 from aea.helpers.base import locate
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
