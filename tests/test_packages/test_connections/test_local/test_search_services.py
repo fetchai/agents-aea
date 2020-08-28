@@ -60,7 +60,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         :return: None
         """
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -386,7 +386,7 @@ class TestAgentMessage:
             [_make_local_connection(cls.address_1, cls.node,)]
         )
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message

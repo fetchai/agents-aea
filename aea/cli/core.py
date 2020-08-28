@@ -85,7 +85,9 @@ def cli(click_context, skip_consistency_check: bool) -> None:
 @click.option("-p", "--port", default=8080)
 @click.option("--local", is_flag=True, help="For using local folder.")
 @click.pass_context
-def gui(click_context, port, local):  # pragma: no cover
+def gui(  # pragma: no cover # pylint: disable=unused-argument
+    click_context, port, local
+):
     """Run the CLI GUI."""
     _init_gui()
     import aea.cli_gui  # pylint: disable=import-outside-toplevel,redefined-outer-name

@@ -2,10 +2,7 @@
 ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0613,W1202,W1203,R0902,R0913,R0914,R0801,R0904,R0903,R0911,R0912,R0901,R0916,R1702,R0915
-
-## Resolve these:
-# W0613: unused-argument
+disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W1202,W1203,R0902,R0913,R0914,R0801,R0904,R0903,R0911,R0912,R0901,R0916,R1702,R0915
 
 ## Eventually resolve these:
 # R0902: too-many-instance-attributes

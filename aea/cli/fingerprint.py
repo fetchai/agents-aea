@@ -40,7 +40,7 @@ from aea.configurations.loader import ConfigLoader
 
 @click.group()
 @click.pass_context
-def fingerprint(click_context):
+def fingerprint(click_context):  # pylint: disable=unused-argument
     """Fingerprint a resource."""
 
 

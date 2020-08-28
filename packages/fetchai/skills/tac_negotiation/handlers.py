@@ -616,7 +616,7 @@ class SigningHandler(Handler):
                 "last message should be of performative accept or match accept."
             )
 
-    def _handle_signed_transaction(
+    def _handle_signed_transaction(  # pylint: disable=unused-argument)
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
     ) -> None:
         """
@@ -820,7 +820,8 @@ class OefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
-                oef_search_msg.dialogue_reference, oef_search_msg.oef_error_operation,
+                oef_search_dialogue.dialogue_label.dialogue_reference,
+                oef_search_msg.oef_error_operation,
             )
         )
 

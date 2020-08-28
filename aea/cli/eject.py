@@ -39,7 +39,7 @@ from aea.configurations.base import DEFAULT_VERSION, PublicId
 @click.group()
 @click.pass_context
 @check_aea_project
-def eject(click_context: click.core.Context):
+def eject(click_context: click.core.Context):  # pylint: disable=unused-argument
     """Eject an installed item."""
 
 

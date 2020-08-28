@@ -167,7 +167,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> Dialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -426,7 +426,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> Dialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message

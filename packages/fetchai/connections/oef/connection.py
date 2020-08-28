@@ -101,14 +101,14 @@ class OefSearchDialogue(BaseOefSearchDialogue):
 class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         """
         Initialize dialogues.
 
         :return: None
         """
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message

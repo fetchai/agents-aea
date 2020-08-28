@@ -40,7 +40,7 @@ from aea.protocols.generator.common import load_protocol_specification
 @click.group()
 @click.pass_context
 @check_aea_project
-def generate(click_context):
+def generate(click_context):  # pylint: disable=unused-argument
     """Generate a resource for the agent."""
 
 

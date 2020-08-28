@@ -73,7 +73,7 @@ class TACBehaviour(SimpleBehaviour):
         else:
             self._deploy_contract(ledger_api, contract)
 
-    def _set_game(
+    def _set_game(  # pylint: disable=unused-argument
         self, parameters: Parameters, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Set the contract and configuration based on provided parameters."""
@@ -88,7 +88,7 @@ class TACBehaviour(SimpleBehaviour):
         configuration.contract_address = parameters.contract_address
         game.conf = configuration
 
-    def _deploy_contract(
+    def _deploy_contract(  # pylint: disable=unused-argument
         self, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Send deploy contract tx msg to decision maker."""
@@ -283,7 +283,7 @@ class TACBehaviour(SimpleBehaviour):
             "computed equilibrium:\n{}".format(game.equilibrium_summary)
         )
 
-    def _get_create_items_tx_msg(  # pylint: disable=no-self-use
+    def _get_create_items_tx_msg(  # pylint: disable=no-self-use,unused-argument
         self,
         configuration: Configuration,
         ledger_api: LedgerApi,
@@ -303,7 +303,7 @@ class TACBehaviour(SimpleBehaviour):
         # ) # noqa: E800
         return None  # type: ignore
 
-    def _get_mint_goods_and_currency_tx_msg(  # pylint: disable=no-self-use,useless-return
+    def _get_mint_goods_and_currency_tx_msg(  # pylint: disable=no-self-use,useless-return,unused-argument
         self, agent_state: AgentState, ledger_api: LedgerApi, contract: ERC1155Contract,
     ) -> SigningMessage:
         token_ids = []  # type: List[int]

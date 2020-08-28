@@ -704,7 +704,7 @@ class Skill(Component):
             load_component_configuration(ComponentType.SKILL, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Skill.from_config(configuration, agent_context)
+        return Skill.from_config(configuration, agent_context, **kwargs)
 
     @property
     def logger(self) -> Logger:
@@ -746,7 +746,7 @@ class Skill(Component):
         )
         skill_context.logger = cast(Logger, _logger)
 
-        skill = Skill(configuration, skill_context)
+        skill = Skill(configuration, skill_context, **kwargs)
 
         directory = configuration.directory
         load_aea_package(configuration)

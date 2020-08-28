@@ -228,7 +228,7 @@ def generate_exchange_params(
     return {agent_addr: exchange_params for agent_addr in agent_addresses}
 
 
-def generate_equilibrium_prices_and_holdings(
+def generate_equilibrium_prices_and_holdings(  # pylint: disable=unused-argument
     agent_addr_to_good_endowments: Dict[str, Dict[str, int]],
     agent_addr_to_utility_params: Dict[str, Dict[str, float]],
     agent_addr_to_currency_endowments: Dict[str, Dict[str, int]],

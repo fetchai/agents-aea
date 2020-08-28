@@ -38,7 +38,9 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--local", is_flag=True, help="For init AEA locally.")
 @pass_ctx
-def init(ctx: Context, author: str, reset: bool, local: bool):
+def init(  # pylint: disable=unused-argument
+    ctx: Context, author: str, reset: bool, local: bool
+):
     """Initialize your AEA configurations."""
     do_init(author, reset, not local)
 

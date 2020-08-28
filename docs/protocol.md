@@ -356,7 +356,7 @@ class BuyerDialogues(FipaDialogues):
         return dialogue
 
     @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+    def role_from_first_message(  # pylint: disable=unused-argumentmessage: Message) -> BaseDialogue.Role:
         """Infer the role of the agent from an incoming/outgoing first message
 
         :param message: an incoming/outgoing first message
@@ -417,7 +417,7 @@ class SellerDialogues(FipaDialogues):
         return dialogue
 
     @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+    def role_from_first_message(  # pylint: disable=unused-argumentmessage: Message) -> BaseDialogue.Role:
         """Infer the role of the agent from an incoming/outgoing first message
 
         :param message: an incoming/outgoing first message

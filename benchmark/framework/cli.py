@@ -109,7 +109,7 @@ class TestCli:
         self.func_details = BenchmarkFuncDetails(func)
         self.func_details.check()
         self.func = func
-        self.executor_class = Executor
+        self.executor_class = executor_class
         self.report_printer_class = report_printer_class
         self._report_printer = None  # type: Optional[ReportPrinter]
 

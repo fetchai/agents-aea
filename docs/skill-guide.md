@@ -293,7 +293,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -661,7 +661,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
     @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+    def role_from_first_message(  # pylint: disable=unused-argumentmessage: Message) -> BaseDialogue.Role:
         """Infer the role of the agent from an incoming/outgoing first message
 
         :param message: an incoming/outgoing first message
