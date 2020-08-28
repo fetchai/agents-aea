@@ -145,7 +145,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: Dialogue.Role,
         message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
@@ -153,7 +153,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
@@ -161,7 +161,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         BaseOefSearchDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )

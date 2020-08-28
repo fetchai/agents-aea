@@ -62,21 +62,21 @@ class Dialogue(BaseDialogue):
         self,
         dialogue_label: DialogueLabel,
         message_class: Type[Message] = DefaultMessage,
-        agent_address: Address = "agent 1",
+        self_address: Address = "agent 1",
         role: BaseDialogue.Role = Role.ROLE1,
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :return: None
         """
         BaseDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )

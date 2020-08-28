@@ -681,7 +681,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: the created dialogue
         """
         dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+            dialogue_label=dialogue_label, self_address=self.self_address, role=role
         )
         return dialogue
 ```
