@@ -160,7 +160,12 @@ def ipfs_hashing(
     #      use ignore patterns somehow
     # ignore_patterns = configuration.fingerprint_ignore_patterns # noqa: E800
     assert configuration.directory is not None
-    result_list = client.add(configuration.directory, recursive=True)
+    result_list = client.add(
+        configuration.directory,
+        recursive=True,
+        period_special=False,
+        follow_symlinks=False,
+    )
     key = os.path.join(
         configuration.author, package_type.to_plural(), configuration.directory.name,
     )
@@ -211,9 +216,9 @@ class IPFSDaemon:
             ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
         output, _ = process.communicate()
-        if b"0.4.23" not in output:
+        if b"0.6.0" not in output:
             raise Exception(
-                "Please ensure you have version 0.4.23 of IPFS daemon installed."
+                "Please ensure you have version 0.6.0 of IPFS daemon installed."
             )
         self.process = None  # type: Optional[subprocess.Popen]
 
