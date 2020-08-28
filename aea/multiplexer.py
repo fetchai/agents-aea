@@ -223,9 +223,7 @@ class AsyncMultiplexer(WithLogger):
 
                 if all(c.is_connected for c in self._connections):
                     self.connection_status.set(ConnectionStates.connected)
-                elif not all(
-                    c.is_connected or c.is_connecting for c in self._connections
-                ):
+                else:
                     raise AEAConnectionError("Failed to connect the multiplexer.")
 
                 self._recv_loop_task = self._loop.create_task(self._receiving_loop())
@@ -270,15 +268,12 @@ class AsyncMultiplexer(WithLogger):
             await cancel_and_wait(self._send_loop_task)
             self._send_loop_task = None
 
-        for connection in [
-            c
-            for c in self.connections
-            if c.state in (ConnectionStates.connecting, ConnectionStates.connected)
-        ]:
-            await connection.disconnect()
-
         if all([c.is_disconnected for c in self.connections]):
             self.connection_status.set(ConnectionStates.disconnected)
+        else:
+            raise AEAConnectionError(
+                "Failed to disconnect multiplexer, some connections are not disconnected!"
+            )
 
         self.logger.debug("Multiplexer stopped.")
 
