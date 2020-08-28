@@ -34,7 +34,6 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder, _DependenciesManager
 from aea.components.base import Component
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
@@ -506,7 +505,7 @@ def test_find_import_order():
         skill_config.skills = [Mock()]
         return skill_config
 
-    with patch.object(ComponentConfiguration, "load", _new_load):
+    with patch("aea.aea_builder.load_component_configuration", _new_load):
         with pytest.raises(
             AEAException, match=r"Cannot load skills, there is a cyclic dependency."
         ):
