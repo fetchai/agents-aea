@@ -243,7 +243,7 @@ class TestDialogueBase:
         assert self.dialogue.dialogue_label == self.dialogue_label
         assert self.dialogue.incomplete_dialogue_label == self.dialogue_label
         assert self.dialogue.dialogue_labels == {self.dialogue_label}
-        assert self.dialogue.agent_address == self.agent_address
+        assert self.dialogue.self_address == self.agent_address
 
         assert self.dialogue.role == Dialogue.Role.ROLE1
         assert str(self.dialogue.role) == "role1"
