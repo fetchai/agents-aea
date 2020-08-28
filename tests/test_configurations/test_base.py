@@ -28,11 +28,9 @@ import semver
 
 import yaml
 
-import aea
 from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
-    ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
@@ -51,7 +49,7 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.configurations.loader import ConfigLoaders
+from aea.configurations.loader import ConfigLoaders, load_component_configuration
 
 from tests.conftest import (
     AUTHOR,
@@ -536,7 +534,7 @@ def test_component_configuration_load_file_not_found():
     """Test Component.load when a file is not found."""
     with mock.patch("builtins.open", side_effect=FileNotFoundError):
         with pytest.raises(FileNotFoundError):
-            ComponentConfiguration.load(
+            load_component_configuration(
                 ComponentType.PROTOCOL, mock.MagicMock(spec=Path)
             )
 
@@ -583,7 +581,7 @@ def test_component_configuration_check_fingerprint_different_fingerprints_no_ven
 def test_check_aea_version_when_it_fails():
     """Test the check for the AEA version when it fails."""
     config = ProtocolConfig("name", "author", "0.1.0", aea_version=">0.1.0")
-    with mock.patch.object(aea, "__version__", "0.1.0"):
+    with mock.patch("aea.configurations.base.__aea_version__", "0.1.0"):
         with pytest.raises(
             ValueError,
             match="The CLI version is 0.1.0, but package author/name:0.1.0 requires version >0.1.0",

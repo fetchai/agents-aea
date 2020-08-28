@@ -193,7 +193,6 @@ def test_get_wealth_positive(caplog):
         cosmos_faucet_api = CosmosFaucetApi()
         cc = CosmosCrypto()
         cosmos_faucet_api.get_wealth(cc.address)
-        assert "Wealth generated" in caplog.text
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)

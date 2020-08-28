@@ -27,6 +27,7 @@ import os
 import subprocess  # nosec
 import tempfile
 import time
+from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
@@ -45,8 +46,8 @@ from aea.helpers.base import try_decorator
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
-COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
 TESTNET_NAME = "testnet"
+DEFAULT_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com"
 DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "agent-land"
@@ -868,12 +869,37 @@ class CosmWasmCLIWrapper:
     """Wrapper of the CosmWasm CLI."""
 
 
+""" Equivalent to:
+
+@dataclass
+class CosmosFaucetStatus:
+    tx_digest: Optional[str]
+    status: str
+    status_code: int
+"""
+CosmosFaucetStatus = namedtuple(
+    "CosmosFaucetStatus", ["tx_digest", "status", "status_code"]
+)
+
+
 class CosmosFaucetApi(FaucetApi):
     """Cosmos testnet faucet API."""
 
+    FAUCET_STATUS_PENDING = 1  # noqa: F841
+    FAUCET_STATUS_PROCESSING = 2  # noqa: F841
+    FAUCET_STATUS_COMPLETED = 20  # noqa: F841
+    FAUCET_STATUS_FAILED = 21  # noqa: F841
+    FAUCET_STATUS_TIMED_OUT = 22  # noqa: F841
+    FAUCET_STATUS_RATE_LIMITED = 23  # noqa: F841
+    FAUCET_STATUS_RATE_UNAVAILABLE = 99  # noqa: F841
+
     identifier = _COSMOS
+    testnet_faucet_url = DEFAULT_FAUCET_URL
     testnet_name = TESTNET_NAME
-    testnet_faucet_url = COSMOS_TESTNET_FAUCET_URL
+
+    def __init__(self, poll_interval=None):
+        """Initialize CosmosFaucetApi."""
+        self._poll_interval = float(poll_interval or 1)
 
     def get_wealth(self, address: Address) -> None:
         """
@@ -881,25 +907,98 @@ class CosmosFaucetApi(FaucetApi):
 
         :param address: the address.
         :return: None
+        :raises: RuntimeError of explicit faucet failures
         """
-        self._try_get_wealth(address)
+        uid = self._try_create_faucet_claim(address)
+        if uid is None:
+            raise RuntimeError("Unable to create faucet claim")
 
+        while True:
+
+            # lookup status form the claim uid
+            status = self._try_check_faucet_claim(uid)
+            if status is None:
+                raise RuntimeError("Failed to check faucet claim status")
+
+            # if the status is complete
+            if status.status_code == self.FAUCET_STATUS_COMPLETED:
+                break
+
+            # if the status is failure
+            if status.status_code > self.FAUCET_STATUS_COMPLETED:
+                raise RuntimeError(f"Failed to get wealth for {address}")
+
+            # if the status is incomplete
+            time.sleep(self._poll_interval)
+
+    @classmethod
     @try_decorator(
-        "An error occured while attempting to generate wealth:\n{}",
+        "An error occured while attempting to request a faucet request:\n{}",
         logger_method=logger.error,
     )
-    def _try_get_wealth(self, address: Address) -> None:
+    def _try_create_faucet_claim(cls, address: Address) -> Optional[str]:
         """
-        Get wealth from the faucet for the provided address.
+        Create a token faucet claim request
 
-        :param address: the address.
-        :return: None
+        :param address: the address to request funds
+        :return: None on failure, otherwise the request uid
         """
-        response = requests.post(url=self.testnet_faucet_url, data={"Address": address})
+        response = requests.post(
+            url=cls._faucet_request_uri(), data={"Address": address}
+        )
+
+        uid = None
         if response.status_code == 200:
-            tx_hash = response.text
-            logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
+            data = response.json()
+            uid = data["uid"]
+
+            logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
             logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)
             )
+
+        return uid
+
+    @classmethod
+    @try_decorator(
+        "An error occured while attempting to request a faucet request:\n{}",
+        logger_method=logger.error,
+    )
+    def _try_check_faucet_claim(cls, uid: str) -> Optional[CosmosFaucetStatus]:
+        """
+        Check the status of a faucet request
+
+        :param uid: The request uid to be checked
+        :return: None on failure otherwise a CosmosFaucetStatus for the specified uid
+        """
+        response = requests.get(cls._faucet_status_uri(uid))
+        if response.status_code != 200:
+            logger.warning(
+                "Response: {}, Text: {}".format(response.status_code, response.text)
+            )
+            return None
+
+        # parse the response
+        data = response.json()
+        return CosmosFaucetStatus(
+            tx_digest=data.get("txDigest"),
+            status=data["status"],
+            status_code=data["statusCode"],
+        )
+
+    @classmethod
+    def _faucet_request_uri(cls) -> str:
+        """
+        Generates the request URI derived from `cls.faucet_base_url`
+        """
+        if cls.testnet_faucet_url is None:
+            raise ValueError("Testnet faucet url not set.")
+        return f"{cls.testnet_faucet_url}/claim/requests"
+
+    @classmethod
+    def _faucet_status_uri(cls, uid: str) -> str:
+        """
+        Generates the status URI derived from `cls.faucet_base_url`
+        """
+        return f"{cls._faucet_request_uri()}/{uid}"

@@ -19,24 +19,16 @@
 
 """Implementation of the 'aea generate_wealth' subcommand."""
 
-import time
 from typing import Dict, Optional, cast
 
 import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import (
-    try_get_balance,
-    verify_or_create_private_keys_ctx,
-)
-from aea.configurations.base import AgentConfig
+from aea.cli.utils.package_utils import verify_or_create_private_keys_ctx
 from aea.crypto.helpers import try_generate_testnet_wealth
 from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
 from aea.crypto.wallet import Wallet
-
-
-FUNDS_RELEASE_TIMEOUT = 30
 
 
 @click.command()
@@ -84,30 +76,7 @@ def _try_generate_wealth(
                 address, testnet
             )
         )
-        try_generate_testnet_wealth(type_, address)
-        if sync:
-            _wait_funds_release(ctx.agent_config, wallet, type_)
+        try_generate_testnet_wealth(type_, address, sync)
 
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
-
-
-def _wait_funds_release(agent_config: AgentConfig, wallet: Wallet, type_: str) -> None:
-    """
-    Wait for the funds to be released.
-
-    :param agent_config: the agent config
-    :param wallet: the wallet
-    :param type_: the network type
-    """
-    start_balance = try_get_balance(agent_config, wallet, type_)
-    end_time = time.time() + FUNDS_RELEASE_TIMEOUT
-    has_hit_timeout = True
-    while time.time() < end_time:
-        current_balance = try_get_balance(agent_config, wallet, type_)
-        if start_balance != current_balance:
-            has_hit_timeout = False
-            break  # pragma: no cover
-        time.sleep(1)
-    if has_hit_timeout:
-        raise ValueError("Timeout hit. Syncing did not finish.")

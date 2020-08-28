@@ -69,7 +69,7 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.contracts import contract_registry
 from aea.crypto.helpers import verify_or_create_private_keys
@@ -629,7 +629,7 @@ class AEABuilder:
         :return: the AEABuilder
         """
         directory = Path(directory)
-        configuration = ComponentConfiguration.load(
+        configuration = load_component_configuration(
             component_type, directory, skip_consistency_check
         )
         self._check_can_add(configuration)
@@ -1246,7 +1246,7 @@ class AEABuilder:
             )
             configuration = cast(
                 SkillConfig,
-                ComponentConfiguration.load(
+                load_component_configuration(
                     skill_id.component_type, component_path, skip_consistency_check
                 ),
             )

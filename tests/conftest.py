@@ -48,7 +48,6 @@ from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
 from aea.common import Address
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
     ContractConfig,
@@ -60,6 +59,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
+from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.contracts import Contract, contract_registry
@@ -1003,7 +1003,7 @@ def erc1155_contract():
     As a side effect, register it to the registry, if not already registered.
     """
     directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
-    configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
     configuration._directory = directory
     configuration = cast(ContractConfig, configuration)
 
