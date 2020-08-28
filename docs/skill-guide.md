@@ -83,18 +83,16 @@ class MySearchBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        search_request = OefSearchMessage(
-            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            query=self.query,
-        )
         self.context.logger.info(
             "sending search request to OEF search node, search_count={}".format(
                 self.sent_search_count
             )
         )
-        search_request.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(search_request)
+        search_request, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=self.query,
+        )
         self.context.outbox.put_message(message=search_request)
 
     def teardown(self) -> None:
@@ -270,8 +268,7 @@ We have implemented a behaviour and a handler. We now implement a <a href="../ap
 ``` python
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.skills.base import Model
+from aea.skills.base import Address, Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
