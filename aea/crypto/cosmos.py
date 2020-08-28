@@ -226,7 +226,9 @@ class CosmosCrypto(Crypto[SigningKey]):
             signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
         return signing_key
 
-    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
+    def sign_message(  # pylint: disable=unused-argument
+        self, message: bytes, is_deprecated_mode: bool = False
+    ) -> str:
         """
         Sign a message in bytes string form.
 

@@ -616,7 +616,7 @@ class SigningHandler(Handler):
                 "last message should be of performative accept or match accept."
             )
 
-    def _handle_signed_transaction(  # pylint: disable=unused-argument)
+    def _handle_signed_transaction(  # pylint: disable=unused-argument
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
     ) -> None:
         """

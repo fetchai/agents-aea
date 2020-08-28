@@ -188,7 +188,7 @@ class OEFChannel(OEFAgent):
             raise ValueError("Channel not connected!")
         return self._loop
 
-    def on_message(
+    def on_message(  # pylint: disable=unused-argument
         self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
     ) -> None:
         """
@@ -231,7 +231,7 @@ class OEFChannel(OEFAgent):
             )
         )
 
-    def on_propose(
+    def on_propose(  # pylint: disable=unused-argument
         self,
         msg_id: int,
         dialogue_id: int,
@@ -366,7 +366,7 @@ class OEFChannel(OEFAgent):
         )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
-    def on_dialogue_error(
+    def on_dialogue_error(  # pylint: disable=unused-argument
         self, answer_id: int, dialogue_id: int, origin: Address
     ) -> None:
         """
@@ -466,7 +466,7 @@ class OEFChannel(OEFAgent):
         else:
             raise ValueError("OEF request not recognized.")  # pragma: nocover
 
-    def handle_failure(  # pylint: disable=no-self-use
+    def handle_failure(  # pylint: disable=no-self-use,unused-argument
         self, exception: Exception, conn
     ) -> None:
         """Handle failure."""

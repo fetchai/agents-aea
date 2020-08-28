@@ -97,7 +97,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(  # pylint: disable=unused-argument
+        def role_from_first_message(
             message: Message, receiver_address: Address
         ) -> Dialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
