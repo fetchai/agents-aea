@@ -266,16 +266,16 @@ class Connection(Component, ABC):
         )
 
     @property
-    def is_connected(self) -> bool:
+    def is_connected(self) -> bool:  # pragma: nocover
         """Return is connected state."""
         return self.state == ConnectionStates.connected
 
     @property
-    def is_connecting(self) -> bool:
+    def is_connecting(self) -> bool:  # pragma: nocover
         """Return is connecting state."""
         return self.state == ConnectionStates.connecting
 
     @property
-    def is_disconnected(self) -> bool:
+    def is_disconnected(self) -> bool:  # pragma: nocover
         """Return is disconnected state."""
         return self.state == ConnectionStates.disconnected

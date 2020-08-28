@@ -50,22 +50,22 @@ class MultiplexerStatus(AsyncState):
         )
 
     @property
-    def is_connected(self) -> bool:
+    def is_connected(self) -> bool:  # pragma: nocover
         """Return is connected."""
         return self.get() == ConnectionStates.connected
 
     @property
-    def is_connecting(self) -> bool:
+    def is_connecting(self) -> bool:  # pragma: nocover
         """Return is connecting."""
         return self.get() == ConnectionStates.connecting
 
     @property
-    def is_disconnected(self) -> bool:
+    def is_disconnected(self) -> bool:  # pragma: nocover
         """Return is disconnected."""
         return self.get() == ConnectionStates.disconnected
 
     @property
-    def is_disconnecting(self) -> bool:
+    def is_disconnecting(self) -> bool:  # pragma: nocover
         """Return is disconnected."""
         return self.get() == ConnectionStates.disconnecting
 

@@ -174,7 +174,7 @@ class Agent(AbstractAgent):
         """
         return self._tick
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle_envelope(self, envelope: Envelope) -> None:  # pragma: nocover
         """
         Handle an envelope.
 
@@ -257,7 +257,9 @@ class Agent(AbstractAgent):
         """
         return [(self.handle_envelope, self.inbox.async_get)]
 
-    def exception_handler(self, exception: Exception, function: Callable) -> bool:
+    def exception_handler(
+        self, exception: Exception, function: Callable
+    ) -> bool:  # pragma: nocover
         """
         Handle exception raised during agent main loop execution.
 
