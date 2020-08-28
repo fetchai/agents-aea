@@ -78,7 +78,6 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
-# TODO implement a proper class to represent this type.
 Dependency = dict
 """
 A dependency is a dictionary with the following (optional) keys:
@@ -1261,7 +1260,6 @@ class SkillConfig(ComponentConfiguration):
         :param data: the data to replace.
         :return: None
         """
-        # TODO check consistency of data.
         for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
             behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
             self.behaviours.update(behaviour_id, behaviour_config)
@@ -1369,7 +1367,6 @@ class AgentConfig(PackageConfiguration):
             PackageType.CONTRACT: self.contracts,
             PackageType.SKILL: self.skills,
         }
-        # TODO add validation of dict values.
         for component_id, _ in d.items():
             enforce(
                 component_id.public_id

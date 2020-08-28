@@ -133,7 +133,6 @@ class FaberHTTPHandler(Handler):
             "attributes": schema_attrs,
         }
         self.context.logger.info("Registering schema " + str(schema_body))
-        # ToDo debug point
         # The following call isn't responded to. This is most probably because of missing options when running the accompanying ACA.
         # THe accompanying ACA is not properly connected to the von network ledger (missing pointer to genesis file/wallet type)
         self.context.behaviours.faber.send_http_request_message(
