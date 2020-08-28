@@ -27,8 +27,8 @@ This module contains the classes required for oef_search dialogue management.
 from abc import ABC
 from typing import Callable, FrozenSet, Type, cast
 
+from aea.common import Address
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
-from aea.mail.base import Address
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage

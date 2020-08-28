@@ -38,10 +38,10 @@ from ecdsa.util import sigencode_string_canonize
 
 import requests
 
+from aea.common import Address
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
-from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,6 @@ class CosmosHelper(Helper):
         """
         is_successful = False
         if tx_receipt is not None:
-            # TODO: quick fix only, not sure this is reliable
             is_successful = True
         return is_successful
 

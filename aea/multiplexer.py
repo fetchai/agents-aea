@@ -40,10 +40,6 @@ from aea.mail.base import (
 from aea.protocols.base import Message
 
 
-# TODO refactoring: this should be an enum
-#      but beware of backward-compatibility.
-
-
 class ConnectionStatus:
     """The connection status class."""
 

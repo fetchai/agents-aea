@@ -610,7 +610,7 @@ class And(ConstraintExpr):
         :return ``None``
         :raises ValueError: if the object does not satisfy some requirements.
         """
-        if len(self.constraints) < 2:  # pragma: nocover  # TODO: do we need this check?
+        if len(self.constraints) < 2:  # pragma: nocover
             raise ValueError(
                 "Invalid input value for type '{}': number of "
                 "subexpression must be at least 2.".format(type(self).__name__)
@@ -659,7 +659,7 @@ class Or(ConstraintExpr):
         :return ``None``
         :raises ValueError: if the object does not satisfy some requirements.
         """
-        if len(self.constraints) < 2:  # pragma: nocover # TODO: do we need this check?
+        if len(self.constraints) < 2:  # pragma: nocover
             raise ValueError(
                 "Invalid input value for type '{}': number of "
                 "subexpression must be at least 2.".format(type(self).__name__)

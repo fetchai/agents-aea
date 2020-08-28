@@ -30,6 +30,7 @@ from pathlib import Path
 from random import randint
 from typing import IO, List, Optional, Sequence, cast
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
@@ -38,7 +39,7 @@ from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import AwaitableProc
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 

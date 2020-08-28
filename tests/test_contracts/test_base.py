@@ -28,10 +28,10 @@ import pytest
 import web3
 
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ContractConfig,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.contracts import contract_registry
 from aea.contracts.base import Contract
 from aea.contracts.scaffold.contract import MyScaffoldContract
@@ -53,7 +53,7 @@ def test_from_config_and_registration():
     """Tests the from config method and contract registry registration."""
 
     directory = Path(ROOT_DIR, "tests", "data", "dummy_contract")
-    configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
     configuration._directory = directory
     configuration = cast(ContractConfig, configuration)
 
@@ -94,7 +94,7 @@ def test_non_implemented_class_methods():
 @pytest.fixture()
 def dummy_contract(request):
     directory = Path(ROOT_DIR, "tests", "data", "dummy_contract")
-    configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
     configuration._directory = directory
     configuration = cast(ContractConfig, configuration)
 

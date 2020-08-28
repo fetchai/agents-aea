@@ -78,7 +78,7 @@ class Strategy(Model):
 
         super().__init__(**kwargs)
         # loading ML dataset
-        # TODO this should be parametrized
+        # (this could be parametrized)
         (
             (self.train_x, self.train_y),
             (self.test_x, self.test_y),

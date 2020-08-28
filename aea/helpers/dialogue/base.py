@@ -32,8 +32,8 @@ from enum import Enum
 from inspect import signature
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
+from aea.common import Address
 from aea.exceptions import enforce
-from aea.mail.base import Address
 from aea.protocols.base import Message
 
 

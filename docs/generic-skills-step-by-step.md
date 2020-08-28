@@ -841,6 +841,7 @@ Next, we are going to create the strategy that we want our `my_generic_seller` A
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
@@ -852,7 +853,6 @@ from aea.helpers.search.generic import (
 )
 from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
@@ -1051,11 +1051,11 @@ When we are negotiating with other AEAs we would like to keep track of the state
 ``` python
 from typing import Dict, Optional, Type
 
+from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
@@ -2194,6 +2194,7 @@ class GenericLedgerApiHandler(Handler):
 We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_generic_buyer/skills/generic_buyer/`) to `strategy.py` and paste the following code (replacing the stub code already present in the file):
 
 ``` python
+from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
@@ -2205,7 +2206,6 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
@@ -2419,11 +2419,11 @@ As mentioned, when we are negotiating with other AEA we would like to keep track
 ``` python
 from typing import Optional, Type
 
+from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues

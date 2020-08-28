@@ -24,6 +24,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
@@ -38,7 +39,7 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.identity.base import Identity
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 from packages.fetchai.connections.soef.connection import SOEFConnection, SOEFException

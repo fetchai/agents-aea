@@ -868,7 +868,7 @@ Get the prefix import path for this component.
 
 Check whether the component is abstract.
 
-<a name="aea.configurations.base.ComponentConfiguration.load"></a>
+<a name="aea.configurations.loader.load_component_configuration"></a>
 #### load
 
 ```python

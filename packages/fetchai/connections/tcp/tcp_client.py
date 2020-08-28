@@ -91,7 +91,7 @@ class TCPClientConnection(TCPConnection):
                 self.logger.debug("[{}] No data received.".format(self.address))
                 return None
             self.logger.debug("[{}] Message received: {!r}".format(self.address, data))
-            envelope = Envelope.decode(data)  # TODO handle decoding error
+            envelope = Envelope.decode(data)
             self.logger.debug(
                 "[{}] Decoded envelope: {}".format(self.address, envelope)
             )

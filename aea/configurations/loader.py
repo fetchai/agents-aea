@@ -36,6 +36,7 @@ from yaml import SafeLoader
 
 from aea.configurations.base import (
     AgentConfig,
+    ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
@@ -209,7 +210,6 @@ class ConfigLoader(Generic[T]):
         self.validate(json_data)
 
         expected_type = self.configuration_class.package_type
-        # TODO 'type' is optional for backward compatibility
         if expected_type != PackageType.AGENT and "type" in json_data:
             actual_type = PackageType(json_data["type"])
             if expected_type != actual_type:
@@ -426,6 +426,57 @@ class ConfigLoaders:
         return cls._from_configuration_type_to_loaders[configuration_type]
 
 
+def load_component_configuration(
+    component_type: ComponentType,
+    directory: Path,
+    skip_consistency_check: bool = False,
+) -> "ComponentConfiguration":
+    """
+    Load configuration and check that it is consistent against the directory.
+
+    :param component_type: the component type.
+    :param directory: the root of the package
+    :param skip_consistency_check: if True, the consistency check are skipped.
+    :return: the configuration object.
+    """
+    configuration_object = _load_configuration_object(component_type, directory)
+    if not skip_consistency_check:
+        configuration_object._check_configuration_consistency(  # pylint: disable=protected-access
+            directory
+        )
+    return configuration_object
+
+
+def _load_configuration_object(
+    component_type: ComponentType, directory: Path
+) -> "ComponentConfiguration":
+    """
+    Load the configuration object, without consistency checks.
+
+    :param component_type: the component type.
+    :param directory: the directory of the configuration.
+    :return: the configuration object.
+    :raises FileNotFoundError: if the configuration file is not found.
+    """
+    configuration_loader = ConfigLoader.from_configuration_type(
+        component_type.to_configuration_type()
+    )
+    configuration_filename = (
+        configuration_loader.configuration_class.default_configuration_filename
+    )
+    configuration_filepath = directory / configuration_filename
+    try:
+        fp = open(configuration_filepath)
+        configuration_object = configuration_loader.load(fp)
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "{} configuration not found: {}".format(
+                component_type.value.capitalize(), configuration_filepath
+            )
+        )
+    return configuration_object
+
+
 def _config_loader():
     envvar_matcher = re.compile(r"\${([^}^{]+)\}")
 
@@ -446,6 +497,4 @@ def _config_loader():
     yaml.add_constructor("!envvar", envvar_constructor, SafeLoader)
 
 
-# TODO: instead of this, create custom loader and use it
-#       by wrapping yaml.safe_load to use it
 _config_loader()

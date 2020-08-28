@@ -132,6 +132,4 @@ def _build_aea(
     except AEAPackageLoadingError as e:  # pragma: nocover
         raise click.ClickException("Package loading error: {}".format(str(e)))
     except Exception as e:
-        # TODO use an ad-hoc exception class for predictable errors
-        #      all the other exceptions should be logged with ClickException
         raise click.ClickException(str(e))

@@ -34,7 +34,6 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder, _DependenciesManager
 from aea.components.base import Component
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
@@ -44,6 +43,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
+from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
@@ -498,14 +498,14 @@ def test_find_import_order():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    _old_load = ComponentConfiguration.load
+    _old_load = load_component_configuration
 
     def _new_load(*args, **kwargs):
         skill_config = _old_load(*args, **kwargs)
         skill_config.skills = [Mock()]
         return skill_config
 
-    with patch.object(ComponentConfiguration, "load", _new_load):
+    with patch("aea.aea_builder.load_component_configuration", _new_load):
         with pytest.raises(
             AEAException, match=r"Cannot load skills, there is a cyclic dependency."
         ):

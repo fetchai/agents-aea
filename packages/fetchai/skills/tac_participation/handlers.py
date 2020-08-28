@@ -21,7 +21,7 @@
 
 from typing import Dict, Optional, Tuple, cast
 
-from aea.mail.base import Address
+from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.state_update.message import StateUpdateMessage
 from aea.skills.base import Handler
@@ -328,7 +328,6 @@ class TacHandler(Handler):
                 self.context.logger.info(
                     "received a contract address: {}".format(contract_address)
                 )
-                # TODO; verify on-chain matches off-chain wealth
                 self._update_ownership_and_preferences(tac_msg, tac_dialogue)
             else:
                 self.context.logger.warning("did not receive a contract address!")
