@@ -26,6 +26,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ProtocolId
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.ledger_apis import LedgerApis
@@ -38,7 +39,7 @@ from aea.helpers.transaction.base import (
     TransactionDigest,
     TransactionReceipt,
 )
-from aea.mail.base import Address, Envelope, Message
+from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection

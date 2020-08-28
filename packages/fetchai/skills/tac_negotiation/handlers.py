@@ -667,7 +667,6 @@ class SigningHandler(Handler):
             tx_digest = self.context.ledger_apis.get_api(
                 strategy.ledger_id
             ).send_signed_transaction(tx_signed=tx_signed)
-            # TODO; handle case when no tx_digest returned and remove loop
             if tx_digest is None:
                 raise ValueError("Error when submitting tx.")
             self.context.logger.info("tx_digest={}.".format(tx_digest))

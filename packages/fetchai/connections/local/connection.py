@@ -25,10 +25,11 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
+from aea.common import Address
 from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.helpers.search.models import Description
-from aea.mail.base import Address, Envelope, Message
+from aea.mail.base import Envelope, Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
@@ -230,7 +231,7 @@ class LocalNode:
                 message_id=MESSAGE_ID,
                 error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
                 error_msg="Destination not available",
-                error_data={},  # TODO: reference incoming message.
+                error_data={},
             )
             error_envelope = Envelope(
                 to=envelope.sender,

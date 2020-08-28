@@ -27,6 +27,7 @@ import click
 
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
+from aea.common import Address
 from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -39,7 +40,7 @@ from aea.connections.stub.connection import (
     StubConnection,
 )
 from aea.identity.base import Identity
-from aea.mail.base import Address, Envelope, Message
+from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.default.message import DefaultMessage

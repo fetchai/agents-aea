@@ -34,6 +34,7 @@ from oef.query import ConstraintExpr
 
 import pytest
 
+from aea.common import Address
 from aea.helpers.async_utils import cancel_and_wait
 from aea.helpers.search.models import (
     Attribute,
@@ -45,7 +46,7 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage

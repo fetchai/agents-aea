@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
@@ -30,7 +31,6 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER

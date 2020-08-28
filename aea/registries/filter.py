@@ -110,13 +110,10 @@ class Filter:
         """Handlle internal message."""
         if internal_message is None:
             logger.warning("Got 'None' while processing internal messages.")
-        elif isinstance(
-            internal_message, SigningMessage
-        ):  # TODO: remove; all messages allowed
+        elif isinstance(internal_message, SigningMessage):
             internal_message = cast(SigningMessage, internal_message)
             self._handle_signing_message(internal_message)
         else:
-            # TODO: is it expected unknown data type here?
             logger.warning("Cannot handle a {} message.".format(type(internal_message)))
 
     def _handle_new_behaviours(self) -> None:
@@ -159,8 +156,7 @@ class Filter:
         ]
         for skill_id in skill_callback_ids:
             handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-                signing_message.protocol_id,
-                skill_id,  # TODO: route based on component id specified on message
+                signing_message.protocol_id, skill_id,
             )
             if handler is not None:
                 logger.debug(

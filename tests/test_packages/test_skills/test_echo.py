@@ -20,7 +20,8 @@
 """This test module contains the integration test for the echo skill."""
 import time
 
-from aea.mail.base import Address, Envelope
+from aea.common import Address
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues

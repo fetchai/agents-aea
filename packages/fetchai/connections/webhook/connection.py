@@ -26,9 +26,10 @@ from typing import Optional, Union, cast
 
 from aiohttp import web  # type: ignore
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+from aea.mail.base import Envelope, EnvelopeContext, URI
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 

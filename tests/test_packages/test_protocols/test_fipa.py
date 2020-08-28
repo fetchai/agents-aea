@@ -25,8 +25,9 @@ from unittest import mock
 
 import pytest
 
+from aea.common import Address
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel

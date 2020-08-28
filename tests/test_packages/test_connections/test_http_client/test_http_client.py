@@ -27,9 +27,10 @@ import aiohttp
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
-from aea.mail.base import Address, Envelope, Message
+from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection

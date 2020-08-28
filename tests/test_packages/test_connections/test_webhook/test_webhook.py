@@ -30,9 +30,10 @@ from aiohttp.client_reqrep import ClientResponse
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
 

@@ -25,13 +25,13 @@ import pprint
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
+from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TacMessage
@@ -395,7 +395,7 @@ class Transaction(Terms):
             amount_by_currency_id=message.amount_by_currency_id,
             fee_by_currency_id=message.fee_by_currency_id,
             quantities_by_good_id=message.quantities_by_good_id,
-            is_sender_payable_tx_fee=True,  # TODO: check
+            is_sender_payable_tx_fee=True,
             nonce=str(message.nonce),
             sender_signature=message.sender_signature,
             counterparty_signature=message.counterparty_signature,

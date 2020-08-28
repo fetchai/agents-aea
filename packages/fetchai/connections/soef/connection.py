@@ -33,6 +33,7 @@ from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 import requests
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
@@ -43,7 +44,7 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Address, Envelope, EnvelopeContext
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel

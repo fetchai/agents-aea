@@ -138,7 +138,6 @@ def build_goods_query(
     constraint_expr = cast(List[ConstraintExpr], constraints)
 
     if len(good_ids) > 1:
-        # TODO: fix  # noqa: E800
         constraint_expr = [Or(constraint_expr)]
 
     query = Query(constraint_expr, model=data_model)

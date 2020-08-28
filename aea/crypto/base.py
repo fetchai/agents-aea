@@ -22,7 +22,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
 
-from aea.mail.base import Address
+from aea.common import Address
 
 
 EntityClass = TypeVar("EntityClass")

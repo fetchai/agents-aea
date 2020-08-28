@@ -28,11 +28,12 @@ from typing import Optional, Tuple, Union, cast
 
 import gym
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.base import locate
-from aea.mail.base import Address, Envelope, Message
+from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.protocols.gym.dialogues import GymDialogue

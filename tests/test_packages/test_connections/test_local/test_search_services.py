@@ -22,6 +22,7 @@ from typing import cast
 
 import pytest
 
+from aea.common import Address
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -30,7 +31,7 @@ from aea.helpers.search.models import (
     Description,
     Query,
 )
-from aea.mail.base import Address, Envelope, Message
+from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue

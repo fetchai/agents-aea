@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.search.models import (
     Constraint,
@@ -26,7 +27,6 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 # Default Config

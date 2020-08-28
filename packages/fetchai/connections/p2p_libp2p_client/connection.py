@@ -103,7 +103,6 @@ class P2PLibp2pClientConnection(Connection):
                     ledger_id, SUPPORTED_LEDGER_IDS
                 )
             )
-        # TODO: ensure ledger_id matches with provided key of p2p node.
 
         key_file = self.configuration.config.get("client_key_file")  # Optional[str]
         nodes = self.configuration.config.get("nodes")

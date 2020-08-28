@@ -991,7 +991,7 @@ class ProtocolGenerator:
         cls_str += (
             self.indent + "from typing import Callable, FrozenSet, Type, cast\n\n"
         )
-        cls_str += self.indent + "from aea.mail.base import Address\n"
+        cls_str += self.indent + "from aea.common import Address\n"
         cls_str += self.indent + "from aea.protocols.base import Message\n"
         cls_str += (
             self.indent

@@ -53,9 +53,10 @@ from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
     ImmutableMultiDict,
 )
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Address, Envelope, EnvelopeContext, Message, URI
+from aea.mail.base import Envelope, EnvelopeContext, Message, URI
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
