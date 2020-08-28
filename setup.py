@@ -32,7 +32,7 @@ def get_all_extras() -> Dict:
 
     fetch_ledger_deps = cosmos_ledger_deps
 
-    ethereum_ledger_deps = ["web3==5.2.2", "ipfshttpclient==0.4.12", "eth-account==0.4.0"]
+    ethereum_ledger_deps = ["web3==5.12.0", "ipfshttpclient==0.4.13", "eth-account>=0.5.2,<0.6.0"]
 
     crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
 

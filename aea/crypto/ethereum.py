@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
 
 from eth_account import Account
-from eth_account.datastructures import AttributeDict
+# from eth_account.datastructures import AttributeDict
 from eth_account.messages import encode_defunct
 
 from eth_keys import keys
@@ -379,7 +379,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        tx_signed = cast(AttributeDict, tx_signed)
+        #import pdb; pdb.set_trace()
+        #tx_signed = cast(AttributeDict, tx_signed)
         hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
             tx_signed.rawTransaction
         )
@@ -476,7 +477,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         # create the transaction dict
         nonce = self.api.eth.getTransactionCount(deployer_address)
         instance = self.get_contract_instance(contract_interface)
-        data = instance.constructor().__dict__.get("data_in_transaction")
+        data = instance.constructor(**kwargs).buildTransaction().get("data", "0x")
+        # data = instance.constructor().__dict__.get("data_in_transaction")
         tx = {
             "from": deployer_address,  # only 'from' address, don't insert 'to' address!
             "value": value,  # transfer as part of deployment
