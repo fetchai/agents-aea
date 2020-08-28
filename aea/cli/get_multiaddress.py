@@ -19,6 +19,7 @@
 
 """Implementation of the 'aea get_multiaddress' subcommand."""
 import re
+import typing
 from pathlib import Path
 from typing import Optional, Tuple, cast
 
@@ -191,7 +192,7 @@ def _read_host_and_port_from_config(
     try:
         m = URI_REGEX.search(url_value)
         enforce(m is not None, f"URI Doesn't match regex '{URI_REGEX}'")
-        m = cast(re.Match, m)
+        m = cast(typing.Match, m)
         host = m.group("host")
         port = int(m.group("port"))
         return host, port
