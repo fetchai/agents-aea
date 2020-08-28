@@ -20,7 +20,8 @@
 """This module contains the tests of the ethereum module."""
 import logging
 import time
-from unittest.mock import MagicMock
+from unittest import mock
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -31,6 +32,22 @@ from tests.conftest import (
     FETCHAI_TESTNET_CONFIG,
     # MAX_FLAKY_RERUNS,
 )
+
+
+class MockRequestsResponse:
+    """Mock of request response."""
+
+    def __init__(self, data, status_code=None):
+        """Initialize mock of request response."""
+        self._data = data
+        self._status_code = status_code or 200
+
+    @property
+    def status_code(self):
+        return 200
+
+    def json(self):
+        return self._data
 
 
 def test_creation():
@@ -199,4 +216,99 @@ def test_get_wealth_positive(caplog):
         fetchai_faucet_api = FetchAIFaucetApi()
         fc = FetchAICrypto()
         fetchai_faucet_api.get_wealth(fc.address)
-        assert "Wealth generated" in caplog.text
+
+
+@pytest.mark.ledger
+@mock.patch("requests.get")
+@mock.patch("requests.post")
+def test_successful_faucet_operation(mock_post, mock_get):
+    address = "a normal cosmos address would be here"
+    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
+
+    mock_get.return_value = MockRequestsResponse(
+        {
+            "uid": "a-uuid-v4-would-be-here",
+            "txDigest": "0x transaction hash would be here",
+            "status": "completed",
+            "statusCode": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+        }
+    )
+
+    faucet = FetchAIFaucetApi()
+    faucet.get_wealth(address)
+
+    mock_post.assert_has_calls(
+        [
+            call(
+                url=f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests",
+                data={"Address": address},
+            )
+        ]
+    )
+    mock_get.assert_has_calls(
+        [
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            )
+        ]
+    )
+
+
+@pytest.mark.ledger
+@mock.patch("requests.get")
+@mock.patch("requests.post")
+def test_successful_realistic_faucet_operation(mock_post, mock_get):
+    address = "a normal cosmos address would be here"
+    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
+
+    mock_get.side_effect = [
+        MockRequestsResponse(
+            {
+                "uid": "a-uuid-v4-would-be-here",
+                "txDigest": None,
+                "status": "pending",
+                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_PENDING,
+            }
+        ),
+        MockRequestsResponse(
+            {
+                "uid": "a-uuid-v4-would-be-here",
+                "txDigest": None,
+                "status": "processing",
+                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_PROCESSING,
+            }
+        ),
+        MockRequestsResponse(
+            {
+                "uid": "a-uuid-v4-would-be-here",
+                "txDigest": "0x transaction hash would be here",
+                "status": "completed",
+                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+            }
+        ),
+    ]
+
+    faucet = FetchAIFaucetApi(poll_interval=0)
+    faucet.get_wealth(address)
+
+    mock_post.assert_has_calls(
+        [
+            call(
+                url=f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests",
+                data={"Address": address},
+            )
+        ]
+    )
+    mock_get.assert_has_calls(
+        [
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            ),
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            ),
+            call(
+                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+            ),
+        ]
+    )
