@@ -29,7 +29,11 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner
+from aea.helpers.async_utils import (
+    AsyncState,
+    Runnable,
+    ThreadedAsyncRunner,
+)
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger
 from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext
@@ -67,7 +71,7 @@ class MultiplexerStatus(AsyncState):
         return self.get() == ConnectionStates.disconnecting
 
 
-class AsyncMultiplexer(WithLogger):
+class AsyncMultiplexer(Runnable, WithLogger):
     """This class can handle multiple connections at once."""
 
     def __init__(
@@ -76,6 +80,7 @@ class AsyncMultiplexer(WithLogger):
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
         exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
+        threaded: bool = False,
     ):
         """
         Initialize the connection multiplexer.
@@ -89,6 +94,8 @@ class AsyncMultiplexer(WithLogger):
         """
         super().__init__(default_logger)
         self._exception_policy: ExceptionPolicyEnum = exception_policy
+        WithLogger.__init__(self, default_logger)
+        Runnable.__init__(self, loop=loop, threaded=threaded)
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
@@ -102,8 +109,21 @@ class AsyncMultiplexer(WithLogger):
         self._recv_loop_task = None  # type: Optional[asyncio.Task]
         self._send_loop_task = None  # type: Optional[asyncio.Task]
         self._default_routing = {}  # type: Dict[PublicId, PublicId]
+        self._loop: asyncio.AbstractEventLoop = loop if loop is not None else asyncio.new_event_loop()
+        self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
+        self.set_loop(self._loop)
 
-        self.set_loop(loop if loop is not None else asyncio.new_event_loop())
+    async def run(self) -> None:
+        """Run multiplexer connect and recv/send tasks."""
+        self.set_loop(asyncio.get_event_loop())
+        try:
+            await self.connect()
+            if not self._recv_loop_task or not self._send_loop_task:
+                raise ValueError("Multiplexer is not connected properly.")
+
+            await asyncio.gather(self._recv_loop_task, self._send_loop_task)
+        finally:
+            await self.disconnect()
 
     @property
     def default_connection(self) -> Optional[Connection]:
@@ -117,8 +137,8 @@ class AsyncMultiplexer(WithLogger):
         :param loop: asyncio event loop.
         :return: None
         """
-        self._loop: AbstractEventLoop = loop
-        self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
+        self._loop = loop
+        self._lock = asyncio.Lock(loop=self._loop)
 
     def _initialize_connections_if_any(
         self, connections: Optional[Sequence[Connection]], default_connection_index: int
@@ -226,6 +246,7 @@ class AsyncMultiplexer(WithLogger):
 
     async def connect(self) -> None:
         """Connect the multiplexer."""
+        self._loop = asyncio.get_event_loop()
         self.logger.debug("Multiplexer connecting...")
         self._connection_consistency_checks()
         self._set_default_connection_if_none()
@@ -559,6 +580,25 @@ class AsyncMultiplexer(WithLogger):
         """
         self.out_queue.put_nowait(envelope)
 
+    def setup(
+        self,
+        connections: Collection[Connection],
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        default_connection: Optional[PublicId] = None,
+    ) -> None:
+        """
+        Set up the multiplexer.
+
+        :param connections: the connections to use. It will replace the other ones.
+        :param default_routing: the default routing.
+        :param default_connection: the default connection.
+        :return: None.
+        """
+        self.default_routing = default_routing or {}
+        self._connections = []
+        for c in connections:
+            self.add_connection(c, c.public_id == default_connection)
+
 
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
@@ -635,30 +675,11 @@ class Multiplexer(AsyncMultiplexer):
         """
         self._thread_runner.call(super()._put(envelope))  # .result(240)
 
-    def setup(
-        self,
-        connections: Collection[Connection],
-        default_routing: Optional[Dict[PublicId, PublicId]] = None,
-        default_connection: Optional[PublicId] = None,
-    ) -> None:
-        """
-        Set up the multiplexer.
-
-        :param connections: the connections to use. It will replace the other ones.
-        :param default_routing: the default routing.
-        :param default_connection: the default connection.
-        :return: None.
-        """
-        self.default_routing = default_routing or {}
-        self._connections = []
-        for c in connections:
-            self.add_connection(c, c.public_id == default_connection)
-
 
 class InBox:
     """A queue from where you can only consume envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer):
         """
         Initialize the inbox.
 
@@ -745,7 +766,7 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer):
         """
         Initialize the outbox.
 

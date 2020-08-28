@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
@@ -24,6 +26,7 @@ from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
+from contextlib import suppress
 from enum import Enum
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
@@ -34,109 +37,13 @@ from aea.helpers.async_utils import (
     AsyncState,
     HandlerItemGetter,
     PeriodicCaller,
-    ensure_loop,
+    Runnable,
 )
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.helpers.logging import WithLogger
 
 
 logger = logging.getLogger(__name__)
-
-
-class BaseAgentLoop(WithLogger, ABC):
-    """Base abstract  agent loop class."""
-
-    def __init__(
-        self, agent: AbstractAgent, loop: Optional[AbstractEventLoop] = None
-    ) -> None:
-        """Init loop.
-
-        :params agent: Agent or AEA to run.
-        :params loop: optional asyncio event loop. if not specified a new loop will be created.
-        """
-        WithLogger.__init__(self, logger)
-        self._agent: AbstractAgent = agent
-        self.set_loop(ensure_loop(loop))
-        self._tasks: List[asyncio.Task] = []
-        self._state: AsyncState = AsyncState()
-        self._exceptions: List[Exception] = []
-
-    @property
-    def agent(self) -> AbstractAgent:  # pragma: nocover
-        """Get agent."""
-        return self._agent
-
-    def set_loop(self, loop: AbstractEventLoop) -> None:
-        """Set event loop and all event loopp related objects."""
-        self._loop: AbstractEventLoop = loop
-
-    def start(self) -> None:
-        """Start agent loop synchronously in own asyncio loop."""
-        self.setup()
-        self._loop.run_until_complete(self.run_loop())
-
-    def setup(self) -> None:  # pylint: disable=no-self-use
-        """Set up loop before started."""
-        # start and stop methods are classmethods cause one instance shared across muiltiple threads
-        ExecTimeoutThreadGuard.start()
-
-    def teardown(self):  # pylint: disable=no-self-use
-        """Tear down loop on stop."""
-        # start and stop methods are classmethods cause one instance shared across muiltiple threads
-        ExecTimeoutThreadGuard.stop()
-
-    async def run_loop(self) -> None:
-        """Run agent loop."""
-        self.logger.debug("agent loop started")
-        self._set_tasks()
-        try:
-            await self._gather_tasks()
-        except (CancelledError, KeyboardInterrupt):
-            await self.wait_run_loop_stopped()
-        logger.debug("agent loop stopped")
-        self._state.set(AgentLoopStates.stopped)
-
-    async def _gather_tasks(self) -> None:
-        """Wait till first task exception."""
-        await asyncio.gather(*self._tasks, loop=self._loop)
-
-    @abstractmethod
-    def _set_tasks(self) -> None:  # pragma: nocover
-        """Set run loop tasks."""
-        raise NotImplementedError
-
-    async def wait_run_loop_stopped(self) -> None:
-        """Wait all tasks stopped."""
-        return await asyncio.gather(
-            *self._tasks, loop=self._loop, return_exceptions=True
-        )
-
-    def stop(self) -> None:
-        """Stop agent loop."""
-        self.teardown()
-        self._state.set(AgentLoopStates.stopping)
-        logger.debug("agent loop stopping!")
-        if self._loop.is_running():
-            self._loop.call_soon_threadsafe(self._stop_tasks)
-        else:
-
-            async def stop():
-                self._stop_tasks()
-                await self.wait_run_loop_stopped()
-
-            self._loop.run_until_complete(stop())
-
-    def _stop_tasks(self) -> None:
-        """Cancel all tasks."""
-        for task in self._tasks:
-            if task.done():
-                continue  #  pragma: nocover
-            task.cancel()
-
-    @property
-    def is_running(self) -> bool:
-        """Get running state of the loop."""
-        return self._state.get() == AgentLoopStates.started
 
 
 class AgentLoopException(AEAException):
@@ -153,19 +60,107 @@ class AgentLoopStates(Enum):
     error = "error"
 
 
+class BaseAgentLoop(Runnable, WithLogger, ABC):
+    """Base abstract  agent loop class."""
+
+    def __init__(
+        self,
+        agent: AbstractAgent,
+        loop: Optional[AbstractEventLoop] = None,
+        threaded=False,
+    ) -> None:
+        """Init loop.
+
+        :params agent: Agent or AEA to run.
+        :params loop: optional asyncio event loop. if not specified a new loop will be created.
+        """
+        WithLogger.__init__(self, logger)
+        Runnable.__init__(self, loop=loop, threaded=threaded)
+
+        self._agent: AbstractAgent = agent
+        self._tasks: List[asyncio.Task] = []
+        self._state: AsyncState = AsyncState()
+        self._exceptions: List[Exception] = []
+
+    @property
+    def agent(self) -> AbstractAgent:  # pragma: nocover
+        """Get agent."""
+        return self._agent
+
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """Set event loop and all event loopp related objects."""
+        self._loop: AbstractEventLoop = loop
+
+    def setup(self) -> None:  # pylint: disable=no-self-use
+        """Set up loop before started."""
+        # start and stop methods are classmethods cause one instance shared across muiltiple threads
+        ExecTimeoutThreadGuard.start()
+
+    def teardown(self):  # pylint: disable=no-self-use
+        """Tear down loop on stop."""
+        # start and stop methods are classmethods cause one instance shared across muiltiple threads
+        ExecTimeoutThreadGuard.stop()
+
+    async def run(self) -> None:
+        """Run agent loop."""
+        self.logger.debug("agent loop started")
+        self.setup()
+        self._set_tasks()
+        try:
+            await self._gather_tasks()
+        except (CancelledError, KeyboardInterrupt):
+            pass
+        finally:
+            self.teardown()
+            self._stop_tasks()
+            for t in self._tasks:
+                with suppress(BaseException):
+                    await t
+            self._state.set(AgentLoopStates.stopped)
+            logger.debug("agent loop stopped")
+
+    async def _gather_tasks(self) -> None:
+        """Wait till first task exception."""
+        await asyncio.gather(*self._tasks, loop=self._loop)
+
+    @abstractmethod
+    def _set_tasks(self) -> None:  # pragma: nocover
+        """Set run loop tasks."""
+        raise NotImplementedError
+
+    def _stop_tasks(self) -> None:
+        """Cancel all tasks."""
+        for task in self._tasks:
+            if task.done():
+                continue  #  pragma: nocover
+            task.cancel()
+
+    @property
+    def state(self) -> AgentLoopStates:
+        """Get current main loop state."""
+        return self._state.get()
+
+    @property
+    def is_running(self) -> bool:
+        """Get running state of the loop."""
+        return self._state.get() == AgentLoopStates.started
+
+
 class AsyncAgentLoop(BaseAgentLoop):
     """Asyncio based agent loop suitable only for AEA."""
 
     NEW_BEHAVIOURS_PROCESS_SLEEP = 1  # check new behaviours registered every second.
 
-    def __init__(self, agent: AbstractAgent, loop: AbstractEventLoop = None):
+    def __init__(
+        self, agent: AbstractAgent, loop: AbstractEventLoop = None, threaded=False
+    ):
         """
         Init agent loop.
 
         :param agent: AEA instance
         :param loop: asyncio loop to use. optional
         """
-        super().__init__(agent=agent, loop=loop)
+        super().__init__(agent=agent, loop=loop, threaded=threaded)
         self._agent: AbstractAgent = self._agent
 
         self._periodic_tasks: Dict[Callable, PeriodicCaller] = {}

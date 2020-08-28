@@ -23,6 +23,7 @@ import datetime
 import logging
 import subprocess  # nosec
 import time
+from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
@@ -259,27 +260,6 @@ class PeriodicCaller:
         self._timerhandle = None
 
 
-def ensure_loop(loop: Optional[AbstractEventLoop] = None) -> AbstractEventLoop:
-    """
-    Use loop provided or create new if not provided or closed.
-
-    Return loop passed if its provided,not closed and not running, otherwise returns new event loop.
-
-    :param loop: optional event loop
-    :return: asyncio event loop
-    """
-    try:
-        loop = loop or asyncio.new_event_loop()
-        if loop.is_closed():
-            raise ValueError("Event loop closed.")  # pragma: nocover
-        if loop.is_running():
-            raise ValueError("Event loop running.")
-    except (RuntimeError, ValueError):
-        loop = asyncio.new_event_loop()
-
-    return loop
-
-
 class AnotherThreadTask:
     """
     Schedule a task to run on the loop in another thread.
@@ -477,3 +457,171 @@ class HandlerItemGetter(ItemGetter):
         super().__init__(
             [self._make_getter(handler, getter) for handler, getter in getters]
         )
+
+
+ready_future: Future = Future()
+ready_future.set_result(None)
+
+
+class Runnable(ABC):
+    """Abstract Runnable class."""
+
+    def __init__(self, loop=None, threaded=False) -> None:
+        """
+        Init runnable.
+
+        :param loop: asyncio event loop to use.
+        :param threaded: bool. start in thread if True.
+
+        :return: None
+        """
+        if loop and threaded:
+            raise ValueError(
+                "You can not set a loop in threaded mode, cause own loop will be created"
+            )
+        self._loop = loop
+        self._threaded = threaded
+        self._task: Optional[asyncio.Task] = None
+        self._thread: Optional[Thread] = None
+        self._completed_event: Optional[asyncio.Event] = None
+        self._got_result = False
+
+    def start(self) -> bool:
+        """
+        Start runnable.
+
+        :return: bool started or not.
+        """
+        if self._task and not self._task.done():
+            logger.debug("already running")
+            return False
+
+        self._got_result = False
+        self._set_loop()
+        self._completed_event = asyncio.Event(loop=self._loop)
+        self._set_task()
+
+        if self._threaded:
+            self._thread = Thread(
+                target=self._loop.run_until_complete, args=[self._task]
+            )
+            self._thread.start()
+
+        return True
+
+    def _set_loop(self) -> None:
+        """Select and set loop."""
+        if self._threaded:
+            self._loop = asyncio.new_event_loop()
+        else:
+            try:
+                self._loop = self._loop or asyncio.get_event_loop()
+            except RuntimeError:
+                self._loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(self._loop)
+
+    def _set_task(self) -> None:
+        """Create task."""
+        self._task = self._loop.create_task(self._run_wrapper())
+
+    async def _run_wrapper(self) -> None:
+        """Wrap run() method."""
+        if not self._completed_event:
+            raise ValueError("Start was not called!")
+        try:
+            with suppress(asyncio.CancelledError):
+                return await self.run()
+        finally:
+            self._loop.call_soon_threadsafe(self._completed_event.set)
+
+    @abstractmethod
+    async def run(self) -> Any:
+        """Implement run logic respectfull to CancelError on termination."""
+
+    def wait(
+        self, sync: bool = False, timeout: float = None, force_result: bool = False
+    ) -> Awaitable:
+        """
+        Wait task to complete.
+
+        :param sync: bool. blocking wait
+        :param timeout: float seconds
+        :param force_result: check result even it was waited.
+
+        :return: awaitable if sync is False, otherise None
+        """
+        if not self._task:
+            logger.warning("Runnable is not no started")
+            return ready_future
+
+        if self._got_result and not force_result:
+            logger.warning("Already got result, skip")
+            return ready_future
+
+        if self._task.done():
+            return ready_future
+
+        coro = self._wait()
+        if timeout is not None:
+            coro = asyncio.wait_for(self._wait(), timeout=timeout)  # type: ignore
+
+        if sync:
+            if self._loop.is_running():
+                start_time = time.time()
+                while not self._task.done():
+                    time.sleep(0.01)
+                    if timeout is not None and time.time() - start_time > timeout:
+                        raise asyncio.TimeoutError()
+                self._got_result = True
+                if self._task.exception():
+                    raise self._task.exception()
+            else:
+                self._loop.run_until_complete(coro)
+            return ready_future
+
+        if self._threaded:
+            loop = asyncio.get_event_loop()
+            fut = loop.create_future()
+
+            def done(task):
+                if fut.done():  # pragma: nocover
+                    return
+                if task.exception():
+                    fut.set_exception(task.exception())
+                else:  # pragma: nocover
+                    fut.set_result(None)
+
+            self._task.add_done_callback(
+                lambda task: loop.call_soon_threadsafe(lambda: done(task))
+            )
+            return fut
+
+        return coro
+
+    async def _wait(self) -> None:
+        """Wait internal method."""
+        if not self._task or not self._completed_event:  # pragma: nocover
+            raise ValueError("Not started")
+
+        await self._completed_event.wait()
+
+        try:
+            await self._task
+        finally:
+            self._got_result = True
+
+    def stop(self) -> None:
+        """Stop runnable."""
+        logger.debug(f"{self} is going to be stopped {self._task}")
+        if not self._task:
+            logger.debug("not running!")
+            return
+        if self._task.done():
+            logger.debug("already completed")
+            return
+        self._loop.call_soon_threadsafe(self._task.cancel)
+
+    def start_and_wait(self, sync=False):
+        """Alias for start and wait methods."""
+        self.start()
+        return self.wait(sync=sync)

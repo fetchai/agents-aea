@@ -132,7 +132,6 @@ class TestThreadLauncherMode:
 
             with pytest.raises(Exception, match="Expected exception!"):
                 runner.start()
-            time.sleep(1)
         finally:
             runner.stop()
 

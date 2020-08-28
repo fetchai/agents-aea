@@ -59,7 +59,7 @@ class AEAInstanceTask(AbstractExecutorTask):
 
     def stop(self) -> None:
         """Stop task."""
-        self._agent.stop()
+        self._agent.runtime.stop()
 
     def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:
         """
@@ -73,7 +73,7 @@ class AEAInstanceTask(AbstractExecutorTask):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(self._agent.runtime.run_runtime())
+        return loop.create_task(self._agent.runtime.start_and_wait())
 
     @property
     def id(self):

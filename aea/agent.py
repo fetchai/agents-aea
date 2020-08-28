@@ -191,7 +191,8 @@ class Agent(AbstractAgent):
 
         :return: None
         """
-        self.runtime.start()
+        if self.runtime.start():
+            self.runtime.wait(sync=True)
 
     def stop(self) -> None:
         """
@@ -206,6 +207,7 @@ class Agent(AbstractAgent):
         :return: None
         """
         self.runtime.stop()
+        self.runtime.wait(sync=True)
 
     @property
     def state(self) -> RuntimeStates:

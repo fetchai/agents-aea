@@ -26,7 +26,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from aea.aea import AEA
-from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
+from aea.agent_loop import AgentLoopStates, AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.mail.base import Envelope
@@ -36,7 +36,7 @@ from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 
-from tests.common.utils import run_in_thread, wait_for_condition
+from tests.common.utils import wait_for_condition
 
 
 class CountHandler(Handler):
@@ -200,23 +200,27 @@ class TestAsyncAgentLoop:
 
     def test_loop_start_stop(self):
         """Test loop start and stopped properly."""
-        agent_loop = self.AGENT_LOOP_CLASS(self.FAKE_AGENT_CLASS())
-        with run_in_thread(agent_loop.start):
-            wait_for_condition(lambda: agent_loop.is_running, timeout=10)
-            agent_loop.stop()
+        agent_loop = self.AGENT_LOOP_CLASS(self.FAKE_AGENT_CLASS(), threaded=True)
+
+        agent_loop.start()
+        wait_for_condition(lambda: agent_loop.is_running, timeout=10)
+        agent_loop.stop()
+        agent_loop.wait(sync=True)
+        assert not agent_loop.is_running, agent_loop.state
 
     def test_handle_envelope(self):
         """Test one envelope handling."""
         handler = CountHandler.make()
         agent = self.FAKE_AGENT_CLASS(handlers=[handler])
-        agent_loop = self.AGENT_LOOP_CLASS(agent)
+        agent_loop = self.AGENT_LOOP_CLASS(agent, threaded=True)
 
         handler.setup()
-        with run_in_thread(agent_loop.start, timeout=10):
-            wait_for_condition(lambda: agent_loop.is_running, timeout=10)
-            agent.put_inbox("msg")
-            wait_for_condition(lambda: handler.counter == 1, timeout=2)
-            agent_loop.stop()
+        agent_loop.start()
+        wait_for_condition(lambda: agent_loop.is_running, timeout=10)
+        agent.put_inbox("msg")
+        wait_for_condition(lambda: handler.counter == 1, timeout=2)
+        agent_loop.stop()
+        agent_loop.wait(sync=True)
 
     def test_behaviour_act(self):
         """Test behaviour act called by schedule."""
@@ -225,44 +229,43 @@ class TestAsyncAgentLoop:
         behaviour = CountBehaviour.make(tick_interval=tick_interval)
         behaviour.setup()
         agent = self.FAKE_AGENT_CLASS(behaviours=[behaviour])
-        agent_loop = self.AGENT_LOOP_CLASS(agent)
+        agent_loop = self.AGENT_LOOP_CLASS(agent, threaded=True)
 
-        with run_in_thread(agent_loop.start, timeout=5):
-            wait_for_condition(lambda: agent_loop.is_running, timeout=10)
+        agent_loop.start()
+        wait_for_condition(lambda: agent_loop.is_running, timeout=10)
 
-            # test behaviour called
-            wait_for_condition(
-                lambda: behaviour.counter >= 1, timeout=tick_interval * 2
-            )
-
-            agent_loop.stop()
+        wait_for_condition(lambda: behaviour.counter >= 1, timeout=tick_interval * 2)
+        agent_loop.stop()
+        agent_loop.wait(sync=True)
 
     def test_internal_messages(self):
         """Test internal meesages are processed."""
         agent = self.FAKE_AGENT_CLASS()
-        agent_loop = self.AGENT_LOOP_CLASS(agent)
+        agent_loop = self.AGENT_LOOP_CLASS(agent, threaded=True)
 
-        with run_in_thread(agent_loop.start, timeout=5):
-            wait_for_condition(lambda: agent_loop.is_running, timeout=10)
-            agent.put_internal_message("msg")
-            wait_for_condition(
-                lambda: agent.filter.handle_internal_message.called is True, timeout=5,
-            )
-            agent_loop.stop()
+        agent_loop.start()
+        wait_for_condition(lambda: agent_loop.is_running, timeout=10)
+        agent.put_internal_message("msg")
+        wait_for_condition(
+            lambda: agent.filter.handle_internal_message.called is True, timeout=5,
+        )
+        agent_loop.stop()
+        agent_loop.wait(sync=True)
 
     def test_new_behaviours(self):
         """Test new behaviours are added."""
         agent = self.FAKE_AGENT_CLASS()
-        agent_loop = self.AGENT_LOOP_CLASS(agent)
+        agent_loop = self.AGENT_LOOP_CLASS(agent, threaded=True)
         agent_loop.NEW_BEHAVIOURS_PROCESS_SLEEP = 0.5
 
-        with run_in_thread(agent_loop.start, timeout=5):
-            wait_for_condition(lambda: agent_loop.is_running, timeout=10)
-            wait_for_condition(
-                lambda: agent.filter.handle_new_handlers_and_behaviours.call_count >= 2,
-                timeout=agent_loop.NEW_BEHAVIOURS_PROCESS_SLEEP * 3,
-            )
-            agent_loop.stop()
+        agent_loop.start()
+        wait_for_condition(lambda: agent_loop.is_running, timeout=10)
+        wait_for_condition(
+            lambda: agent.filter.handle_new_handlers_and_behaviours.call_count >= 2,
+            timeout=agent_loop.NEW_BEHAVIOURS_PROCESS_SLEEP * 3,
+        )
+        agent_loop.stop()
+        agent_loop.wait(sync=True)
 
     @pytest.mark.asyncio
     async def test_behaviour_exception(self):
@@ -270,25 +273,26 @@ class TestAsyncAgentLoop:
         tick_interval = 0.1
         behaviour = FailBehaviour.make(tick_interval)
         agent = self.FAKE_AGENT_CLASS(behaviours=[behaviour])
-        loop = asyncio.get_event_loop()
-        agent_loop = self.AGENT_LOOP_CLASS(agent)
-        agent_loop.set_loop(loop)
-        loop_task = loop.create_task(agent_loop.run_loop())
-        await asyncio.sleep(tick_interval * 2)
+        agent_loop = self.AGENT_LOOP_CLASS(agent, threaded=True)
+
         agent._skills_exception_policy = ExceptionPolicyEnum.propagate
         with pytest.raises(ValueError, match="expected!"):
-            await loop_task
+            agent_loop.start()
+            agent_loop.wait(sync=True)
 
-    def test_stop(self):
+    @pytest.mark.asyncio
+    async def test_stop(self):
         """Test loop stoped."""
         agent = self.FAKE_AGENT_CLASS()
-        loop = asyncio.get_event_loop()
         agent_loop = self.AGENT_LOOP_CLASS(agent)
-        agent_loop.set_loop(loop)
-        loop_task = loop.create_task(agent_loop.run_loop())
+        agent_loop.start()
+        await asyncio.wait_for(
+            agent_loop._state.wait(AgentLoopStates.started), timeout=10
+        )
         agent_loop.stop()
-        loop.run_until_complete(asyncio.sleep(0.1))
-        assert loop_task.done()
+        await asyncio.wait_for(
+            agent_loop._state.wait(AgentLoopStates.stopped), timeout=10
+        )
 
 
 class TestSyncAgentLoop:

@@ -55,6 +55,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
+from aea.runtime import StopRuntime
 from aea.skills.base import Behaviour, Handler
 from aea.skills.error.handlers import ErrorHandler
 
@@ -241,8 +242,8 @@ class AEA(Agent, WithLogger):
 
         if error_handler is None:
             self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
-            self.stop()
-            return None, []
+            raise StopRuntime()
+
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
@@ -363,9 +364,10 @@ class AEA(Agent, WithLogger):
 
         if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
             log_exception(exception, function)
-            self.stop()
-            raise AEAException(
-                f"AEA was terminated cause exception `{exception}` in skills {function}! Please check logs."
+            raise StopRuntime(
+                AEAException(
+                    f"AEA was terminated cause exception `{exception}` in skills {function}! Please check logs."
+                )
             )
 
         if self._skills_exception_policy == ExceptionPolicyEnum.just_log:

@@ -20,6 +20,7 @@
 import asyncio
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
+from threading import Thread
 
 import pytest
 
@@ -28,9 +29,9 @@ from aea.helpers.async_utils import (
     AwaitableProc,
     HandlerItemGetter,
     PeriodicCaller,
+    Runnable,
     ThreadedAsyncRunner,
     ensure_list,
-    ensure_loop,
 )
 
 
@@ -168,16 +169,6 @@ async def test_periodic_caller_exception():
 
 
 @pytest.mark.asyncio
-async def test_ensure_loop():
-    """Test ensure_loop."""
-    loop = asyncio.new_event_loop()
-    assert ensure_loop(loop) == loop
-
-    loop = asyncio.get_event_loop()
-    assert ensure_loop(loop) != loop
-
-
-@pytest.mark.asyncio
 async def test_threaded_async_run():
     """Test threaded async runner."""
     runner = ThreadedAsyncRunner()
@@ -254,3 +245,143 @@ def test_libp2pconnection_awaitable_proc_cancelled():
     proc = AwaitableProc(["sleep", "100"], shell=False)
     proc_task = asyncio.ensure_future(proc.start())
     proc_task.cancel()
+
+
+class RunAndExit(Runnable):
+    """Test class."""
+
+    async def run(self):
+        """Test method."""
+        await asyncio.sleep(0.2)
+
+
+class TestRunnable:
+    """Tests for Runnable object."""
+
+    def test_no_loop_and_threded(self):
+        """Test runnable fails on threaded mode and loop provided.."""
+        with pytest.raises(ValueError,):
+            RunAndExit(loop=asyncio.get_event_loop(), threaded=True)
+
+    @pytest.mark.asyncio
+    async def test_runnable_async(self):
+        """Test runnable async methods."""
+
+        class TestRun(Runnable):
+            async def run(self):
+                while True:
+                    await asyncio.sleep(1)
+
+        run = TestRun()
+        run.start()
+        run.stop()
+        await run.wait()
+
+        run = TestRun(threaded=True)
+        run.start()
+        run.stop()
+        run.wait(sync=True)
+
+        run = RunAndExit()
+        await run.start_and_wait()
+
+    def test_runnable_sync(self):
+        """Test runnable sync methods."""
+        run = RunAndExit()
+        run.start_and_wait(sync=True)
+
+    @pytest.mark.asyncio
+    async def test_double_start(self):
+        """Test runnable async methods."""
+
+        class TestRun(Runnable):
+            async def run(self):
+                while True:
+                    await asyncio.sleep(1)
+
+        run = TestRun()
+        await run.wait()
+        assert run.start()
+        assert not run.start()
+        run.stop()
+        await run.wait()
+        await run.wait()
+
+    @pytest.mark.asyncio
+    async def test_run_in_thread(self):
+        """Test runnable async methods."""
+
+        class TestRun(Runnable):
+            async def run(self):
+                while True:
+                    await asyncio.sleep(1)
+
+        run = TestRun()
+        t = Thread(target=run.start)
+        t.start()
+        run.stop()
+        t.join()
+
+    @pytest.mark.asyncio
+    async def test_timeout(self):
+        """Test runnable async methods."""
+
+        class TestRun(Runnable):
+            async def run(self):
+                while True:
+                    await asyncio.sleep(1)
+
+        run = TestRun(threaded=True)
+        run.start()
+        with pytest.raises(asyncio.TimeoutError):
+            run.wait(sync=True, timeout=0.1)
+
+        run.stop()
+        run.wait(sync=True)
+
+        run = TestRun()
+        run.start()
+        with pytest.raises(asyncio.TimeoutError):
+            await run.wait(timeout=0.1)
+        run.stop()
+        await run.wait()
+
+    @pytest.mark.asyncio
+    async def test_exception(self):
+        """Test runnable async methods."""
+
+        class TestRun(Runnable):
+            async def run(self):
+                raise Exception("awaited")
+
+        run = TestRun(threaded=True)
+        run.start()
+        with pytest.raises(Exception, match="awaited"):
+            run.wait(sync=True, timeout=0.1)
+
+        run.stop()
+        run.wait(sync=True)
+
+        run = TestRun()
+        run.start()
+        with pytest.raises(Exception, match="awaited"):
+            await run.wait(timeout=0.1)
+
+        run.stop()
+        await run.wait()
+
+    @pytest.mark.asyncio
+    async def test_wait_async_threaded(self):
+        """Test runnable async methods."""
+
+        class TestRun(Runnable):
+            async def run(self):
+                raise Exception("awaited")
+
+        run = TestRun(threaded=True)
+        run.start()
+        with pytest.raises(Exception, match="awaited"):
+            await run.wait(timeout=0.2)
+
+        run.stop()
+        await run.wait()
