@@ -360,7 +360,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
             Exception,
-            match=fr"Cannot extract host and port from some_uri: 'some-unparsable_URI'. Reason: not enough values to unpack \(expected 2, got 1\)",
+            match=fr"Cannot extract host and port from some_uri: 'some-unparsable_URI'. Reason: URI Doesn't match regex '",
         ):
             self.run_cli_command(
                 "get-multiaddress",

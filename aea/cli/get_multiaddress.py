@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea get_multiaddress' subcommand."""
+import re
 from pathlib import Path
 from typing import Optional, Tuple, cast
 
@@ -36,6 +37,9 @@ from aea.configurations.base import (
 from aea.crypto.base import Crypto
 from aea.crypto.registries import crypto_registry
 from aea.helpers.multiaddr.base import MultiAddr
+
+
+URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
 
 
 @click.command()
@@ -184,7 +188,10 @@ def _read_host_and_port_from_config(
         )
     url_value = connection_config.config[uri_field]
     try:
-        host, port = url_value.split(":")
+        m = URI_REGEX.search(url_value)
+        assert m is not None, f"URI Doesn't match regex '{URI_REGEX}'"
+        host = m.group("host")
+        port = m.group("port")
         port = int(port)
         return host, port
     except Exception as e:
