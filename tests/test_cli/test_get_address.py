@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This test module contains the tests for commands in aea.cli.generate_wealth module."""
+"""This test module contains the tests for commands in aea.cli.get_address module."""
 
 from unittest import TestCase, mock
 

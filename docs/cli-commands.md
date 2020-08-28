@@ -17,6 +17,7 @@
 | `generate-key [ledger_id]`                  | Generate private keys. The AEA uses a private key to derive the associated public key and address. |
 | `generate-wealth [ledger_id]`               | Generate wealth for address on test network.                                 |
 | `get-address [ledger_id]`                   | Get the address associated with the private key.                             |
+| `get-multiaddress [ledger_id]`...           | Get the multiaddress associated with a private key or connection.            |
 | `get-wealth [ledger_id]`                    | Get the wealth associated with the private key.                              |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
 | `init`                                      | Initialize your AEA configurations. (With `--author` to define author.)      |
