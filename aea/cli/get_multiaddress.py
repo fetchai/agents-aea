@@ -179,21 +179,20 @@ def _read_host_and_port_from_config(
         raise ClickException(
             "-h/--host-field and -p/--port-field must be specified together."
         )
-    else:  # using uri_field
-        if uri_field not in connection_config.config:
-            raise ClickException(
-                f"URI field '{uri_field}' not present in connection configuration {connection_config.public_id}"
-            )
-        url_value = connection_config.config[uri_field]
-        try:
-            url = urlparse(url_value)
-            host = url.scheme
-            port = int(url.path)
-            return host, port
-        except Exception:
-            raise ClickException(
-                f"Cannot extract host and port from {uri_field}: '{url_value}'"
-            )
+    if uri_field not in connection_config.config:
+        raise ClickException(
+            f"URI field '{uri_field}' not present in connection configuration {connection_config.public_id}"
+        )
+    url_value = connection_config.config[uri_field]
+    try:
+        url = urlparse(url_value)
+        host = url.scheme
+        port = int(url.path)
+        return host, port
+    except Exception:
+        raise ClickException(
+            f"Cannot extract host and port from {uri_field}: '{url_value}'"
+        )
 
 
 def _try_get_connection_multiaddress(
@@ -202,7 +201,7 @@ def _try_get_connection_multiaddress(
     connection_id: PublicId,
     host_field: Optional[str],
     port_field: Optional[str],
-    uri_field: Optional[str],
+    uri_field: str,
 ) -> str:
     """
     Try to get the connection multiaddress.
