@@ -20,7 +20,6 @@
 """Implementation of the 'aea get_multiaddress' subcommand."""
 from pathlib import Path
 from typing import Optional, Tuple, cast
-from urllib.parse import urlparse
 
 import click
 from click import ClickException
@@ -185,13 +184,12 @@ def _read_host_and_port_from_config(
         )
     url_value = connection_config.config[uri_field]
     try:
-        url = urlparse(url_value)
-        host = url.scheme
-        port = int(url.path)
+        host, port = url_value.split(":")
+        port = int(port)
         return host, port
-    except Exception:
+    except Exception as e:
         raise ClickException(
-            f"Cannot extract host and port from {uri_field}: '{url_value}'"
+            f"Cannot extract host and port from {uri_field}: '{url_value}'. Reason: {str(e)}"
         )
 
 
