@@ -32,11 +32,11 @@ from google.protobuf.struct_pb2 import Struct
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ProtocolConfig,
     PublicId,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
 
 logger = logging.getLogger(__name__)
@@ -92,7 +92,7 @@ class Message:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
-        # enforce(self._sender is None, "Sender already set.")  # TODO: check if we can enable # noqa: E800
+        enforce(self._sender is None, "Sender already set.")
         self._sender = sender
 
     @property
@@ -306,7 +306,7 @@ class Protocol(Component):
         """
         configuration = cast(
             ProtocolConfig,
-            ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
+            load_component_configuration(ComponentType.PROTOCOL, Path(directory)),
         )
         configuration.directory = Path(directory)
         return Protocol.from_config(configuration, **kwargs)

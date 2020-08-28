@@ -26,11 +26,11 @@ from typing import Any, Dict, Optional, cast
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ContractConfig,
     ContractId,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.crypto.base import LedgerApi
 from aea.exceptions import enforce
 from aea.helpers.base import load_module
@@ -90,7 +90,7 @@ class Contract(Component):
         """
         configuration = cast(
             ContractConfig,
-            ComponentConfiguration.load(ComponentType.CONTRACT, Path(directory)),
+            load_component_configuration(ComponentType.CONTRACT, Path(directory)),
         )
         configuration.directory = Path(directory)
         return Contract.from_config(configuration, **kwargs)
@@ -120,8 +120,6 @@ class Contract(Component):
             contract_class_name is not None,
             "Contract class '{}' not found.".format(contract_class_name),
         )
-
-        # TODO: load interfaces here: contract_interface = configuration.contract_interfaces
 
         return contract_class(configuration, **kwargs)
 

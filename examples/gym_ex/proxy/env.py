@@ -26,9 +26,10 @@ from typing import Any, Optional, Tuple, cast
 
 import gym
 
+from aea.common import Address
 from aea.helpers.base import locate
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
 sys.modules["packages.fetchai.connections.gym"] = locate(
@@ -136,10 +137,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        # TODO: adapt this line to the new APIs. We no longer have a mailbox.
-        self._agent.mailbox._connection.channel.gym_env.render(  # pylint: disable=protected-access,no-member
-            mode
-        )
+        self._agent.runtime.multiplexer.default_connection.channel.gym_env.render(mode)
 
     def reset(self) -> None:
         """

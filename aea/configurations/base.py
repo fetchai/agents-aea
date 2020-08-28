@@ -51,7 +51,7 @@ from packaging.version import Version
 
 import semver
 
-import aea
+from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -78,7 +78,6 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
-# TODO implement a proper class to represent this type.
 Dependency = dict
 """
 A dependency is a dictionary with the following (optional) keys:
@@ -732,7 +731,7 @@ class PackageConfiguration(Configuration, ABC):
             if fingerprint_ignore_patterns is not None
             else []
         )
-        self.aea_version = aea_version if aea_version != "" else aea.__version__
+        self.aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
@@ -828,63 +827,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
     def is_abstract_component(self) -> bool:
         """Check whether the component is abstract."""
         return False
-
-    @staticmethod
-    def load(
-        component_type: ComponentType,
-        directory: Path,
-        skip_consistency_check: bool = False,
-    ) -> "ComponentConfiguration":
-        """
-        Load configuration and check that it is consistent against the directory.
-
-        :param component_type: the component type.
-        :param directory: the root of the package
-        :param skip_consistency_check: if True, the consistency check are skipped.
-        :return: the configuration object.
-        """
-        configuration_object = ComponentConfiguration._load_configuration_object(
-            component_type, directory
-        )
-        if not skip_consistency_check:
-            configuration_object._check_configuration_consistency(  # pylint: disable=protected-access
-                directory
-            )
-        return configuration_object
-
-    @staticmethod
-    def _load_configuration_object(
-        component_type: ComponentType, directory: Path
-    ) -> "ComponentConfiguration":
-        """
-        Load the configuration object, without consistency checks.
-
-        :param component_type: the component type.
-        :param directory: the directory of the configuration.
-        :return: the configuration object.
-        :raises FileNotFoundError: if the configuration file is not found.
-        """
-        from aea.configurations.loader import (  # pylint: disable=import-outside-toplevel
-            ConfigLoader,
-        )
-
-        configuration_loader = ConfigLoader.from_configuration_type(
-            component_type.to_configuration_type()
-        )
-        configuration_filename = (
-            configuration_loader.configuration_class.default_configuration_filename
-        )
-        configuration_filepath = directory / configuration_filename
-        try:
-            fp = open(configuration_filepath)
-            configuration_object = configuration_loader.load(fp)
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                "{} configuration not found: {}".format(
-                    component_type.value.capitalize(), configuration_filepath
-                )
-            )
-        return configuration_object
 
     def _check_configuration_consistency(self, directory: Path):
         """Check that the configuration file is consistent against a directory."""
@@ -1318,7 +1260,6 @@ class SkillConfig(ComponentConfiguration):
         :param data: the data to replace.
         :return: None
         """
-        # TODO check consistency of data.
         for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
             behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
             self.behaviours.update(behaviour_id, behaviour_config)
@@ -1426,7 +1367,6 @@ class AgentConfig(PackageConfiguration):
             PackageType.CONTRACT: self.contracts,
             PackageType.SKILL: self.skills,
         }
-        # TODO add validation of dict values.
         for component_id, _ in d.items():
             enforce(
                 component_id.public_id
@@ -1982,7 +1922,7 @@ def _compare_fingerprints(
 
 def _check_aea_version(package_configuration: PackageConfiguration):
     """Check the package configuration version against the version of the framework."""
-    current_aea_version = Version(aea.__version__)
+    current_aea_version = Version(__aea_version__)
     version_specifiers = package_configuration.aea_version_specifiers
     if current_aea_version not in version_specifiers:
         raise ValueError(

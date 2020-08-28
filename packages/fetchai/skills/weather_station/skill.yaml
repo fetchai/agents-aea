@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   dummy_weather_station_data.py: QmeSSsAiCKBfMHfUN4QvoKBTQRNCcGxeJicThkDTGRQE7i
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
-  strategy.py: Qmdqw5XB7biCSY8G7dhJZ7nVzy22ffSbGCvQtUD3jqP7ij
+  strategy.py: QmWZiiNXeXGiduzro1bWdTr6ZLjL45TtvxFtY1dUQNWfYZ
 fingerprint_ignore_patterns:
 - '*.db'
 contracts: []

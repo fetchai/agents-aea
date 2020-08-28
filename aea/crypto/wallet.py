@@ -91,8 +91,6 @@ class Wallet:
 
     """
 
-    # TODO do some check after loading the keys
-    #   to see whether we have duplicate cryptos?
     def __init__(
         self,
         private_key_paths: Dict[str, Optional[str]],

@@ -26,10 +26,10 @@ from typing import Any, Dict, List, Optional, cast
 
 from vyper.utils import keccak256
 
+from aea.common import Address
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
-from aea.mail.base import Address
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1

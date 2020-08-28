@@ -30,11 +30,11 @@ from typing import Generator, Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
     PublicId,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.async_utils import AsyncState
@@ -214,7 +214,7 @@ class Connection(Component, ABC):
         """
         configuration = cast(
             ConnectionConfig,
-            ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
+            load_component_configuration(ComponentType.CONNECTION, Path(directory)),
         )
         configuration.directory = Path(directory)
         return Connection.from_config(configuration, identity, crypto_store, **kwargs)

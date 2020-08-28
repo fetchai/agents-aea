@@ -69,7 +69,7 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.contracts import contract_registry
 from aea.crypto.helpers import verify_or_create_private_keys
@@ -629,7 +629,7 @@ class AEABuilder:
         :return: the AEABuilder
         """
         directory = Path(directory)
-        configuration = ComponentConfiguration.load(
+        configuration = load_component_configuration(
             component_type, directory, skip_consistency_check
         )
         self._check_can_add(configuration)
@@ -1246,7 +1246,7 @@ class AEABuilder:
             )
             configuration = cast(
                 SkillConfig,
-                ComponentConfiguration.load(
+                load_component_configuration(
                     skill_id.component_type, component_path, skip_consistency_check
                 ),
             )
@@ -1270,9 +1270,7 @@ class AEABuilder:
         while len(queue) > 0:
             current = queue.pop()
             order.append(current)
-            for node in supports[
-                current
-            ]:  # pragma: nocover # TODO: extract method and test properly
+            for node in supports[current]:  # pragma: nocover
                 depends_on[node].discard(current)
                 if len(depends_on[node]) == 0:
                     queue.append(node)
@@ -1306,8 +1304,6 @@ class AEABuilder:
             aea_project_path=aea_project_path, exit_on_error=False
         )
         builder = AEABuilder(with_default_packages=False)
-
-        # TODO isolate environment: load_env_file(str(aea_config_path / ".env"))
 
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
@@ -1384,7 +1380,7 @@ class AEABuilder:
                     class_kwargs={
                         "contract_interface": configuration.contract_interfaces
                     },
-                    contract_config=configuration,  # TODO: resolve configuration being applied globally
+                    contract_config=configuration,
                 )
             except AEAException as e:  # pragma: nocover
                 if "Cannot re-register id:" in str(e):

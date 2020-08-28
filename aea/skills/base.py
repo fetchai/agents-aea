@@ -31,20 +31,20 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
 
+from aea.common import Address
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ProtocolId,
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_module
 from aea.helpers.logging import AgentLoggerAdapter
-from aea.mail.base import Address
 from aea.multiplexer import ConnectionStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
@@ -280,7 +280,6 @@ class SkillComponent(ABC):
             raise ValueError("Configuration not set.")  # pragma: nocover
         return self._configuration
 
-    # TODO consider rename this property
     @property
     def config(self) -> Dict[Any, Any]:
         """Get the config of the skill component."""
@@ -702,7 +701,7 @@ class Skill(Component):
         """
         configuration = cast(
             SkillConfig,
-            ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
+            load_component_configuration(ComponentType.SKILL, Path(directory)),
         )
         configuration.directory = Path(directory)
         return Skill.from_config(configuration, agent_context)

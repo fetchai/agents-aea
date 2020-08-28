@@ -19,6 +19,7 @@
 """This module contains miscellaneous tests for the protocol generator."""
 import logging
 import os
+import pprint
 import shutil
 import tempfile
 from pathlib import Path
@@ -51,7 +52,13 @@ logging.basicConfig(level=logging.INFO)
 def _match_files(fname1: str, fname2: str) -> bool:
     """Simple match file function."""
     with open(fname1, "r") as f1, open(fname2, "r") as f2:
-        return f1.read() == f2.read()
+        file1_content = f1.read()
+        file2_content = f2.read()
+        result = file1_content == file2_content
+        if not result:
+            pprint.pprint(file1_content)
+            pprint.pprint(file2_content)
+        return result
 
 
 class TestCompareLatestGeneratorOutputWithTestProtocol:

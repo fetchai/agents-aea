@@ -21,6 +21,7 @@
 import logging
 from typing import Any, Dict, Optional, Tuple, Union
 
+from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
@@ -35,7 +36,6 @@ from aea.crypto.registries import (
     make_ledger_api_cls,
 )
 from aea.exceptions import enforce
-from aea.mail.base import Address
 
 DEFAULT_LEDGER_CONFIGS = {
     CosmosApi.identifier: {"address": COSMOS_DEFAULT_ADDRESS},

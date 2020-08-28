@@ -156,7 +156,7 @@ def ipfs_hashing(
            | and the hash of the whole package.
     """
     # hash again to get outer hash (this time all files)
-    # TODO we still need to ignore some files
+    # we still need to ignore some files
     #      use ignore patterns somehow
     # ignore_patterns = configuration.fingerprint_ignore_patterns # noqa: E800
     assert configuration.directory is not None
@@ -502,7 +502,6 @@ def check_hashes(timeout: float = 10.0) -> int:
 
             for package_type, package_path in _get_all_packages():
                 configuration_obj = load_configuration(package_type, package_path)
-                # TODO: check the configuration file is sorted.
                 failed = failed or not check_fingerprint(configuration_obj, client)
                 failed = failed or not check_same_ipfs_hash(
                     client, configuration_obj, package_type, all_expected_hashes

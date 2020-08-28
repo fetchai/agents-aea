@@ -20,8 +20,8 @@
 """This module contains a custom crypto class for testing purposes."""
 from typing import Any, BinaryIO, Tuple
 
+from aea.common import Address
 from aea.crypto.base import Crypto, EntityClass
-from aea.mail.base import Address
 
 
 class CustomCrypto(Crypto):

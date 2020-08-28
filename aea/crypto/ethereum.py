@@ -37,10 +37,10 @@ import requests
 from web3 import HTTPProvider, Web3
 from web3.contract import Contract as EthereumContract
 
+from aea.common import Address
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import enforce
 from aea.helpers.base import try_decorator
-from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
@@ -481,7 +481,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "from": deployer_address,  # only 'from' address, don't insert 'to' address!
             "value": value,  # transfer as part of deployment
             "gas": gas,
-            "gasPrice": self.api.eth.gasPrice,  # TODO: refine
+            "gasPrice": self.api.eth.gasPrice,
             "nonce": nonce,
             "data": data,
         }
