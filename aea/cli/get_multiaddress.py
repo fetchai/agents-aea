@@ -19,7 +19,8 @@
 
 """Implementation of the 'aea get_multiaddress' subcommand."""
 from pathlib import Path
-from typing import Optional, cast
+from typing import Optional, Tuple, cast
+from urllib.parse import urlparse
 
 import click
 from click import ClickException
@@ -50,10 +51,13 @@ from aea.helpers.multiaddr.base import MultiAddr
     "-i", "--connection-id", type=PublicIdParameter(), required=False, default=None,
 )
 @click.option(
-    "-h", "--host-field", type=str, required=False, default="host",
+    "-h", "--host-field", type=str, required=False, default=None,
 )
 @click.option(
-    "-p", "--port-field", type=str, required=False, default="port",
+    "-p", "--port-field", type=str, required=False, default=None,
+)
+@click.option(
+    "-u", "--uri-field", type=str, required=False, default="public_uri",
 )
 @click.pass_context
 @check_aea_project
@@ -64,10 +68,17 @@ def get_multiaddress(
     connection_id: Optional[PublicId],
     host_field: str,
     port_field: str,
+    uri_field: str,
 ):
     """Get the multiaddress associated with a private key or connection."""
     address = _try_get_multiaddress(
-        click_context, ledger_id, connection, connection_id, host_field, port_field
+        click_context,
+        ledger_id,
+        connection,
+        connection_id,
+        host_field,
+        port_field,
+        uri_field,
     )
     click.echo(address)
 
@@ -79,6 +90,7 @@ def _try_get_multiaddress(
     connection_id: Optional[PublicId],
     host_field: str,
     port_field: str,
+    uri_field: str,
 ):
     """
     Try to get the multi-address.
@@ -114,7 +126,12 @@ def _try_get_multiaddress(
     if connection_id is None:
         return _try_get_peerid(crypto)
     return _try_get_connection_multiaddress(
-        click_context, crypto, cast(PublicId, connection_id), host_field, port_field
+        click_context,
+        crypto,
+        cast(PublicId, connection_id),
+        host_field,
+        port_field,
+        uri_field,
     )
 
 
@@ -127,21 +144,77 @@ def _try_get_peerid(crypto: Crypto) -> str:
         raise ClickException(str(e))
 
 
+def _read_host_and_port_from_config(
+    connection_config: ConnectionConfig,
+    uri_field: str,
+    host_field: Optional[str],
+    port_field: Optional[str],
+) -> Tuple[str, int]:
+    """
+    Read host and port from config connection.
+
+    :param host_field: the host field.
+    :param port_field: the port field.
+    :param uri_field: the uri field.
+    :return: the host and the port.
+    """
+    host_is_none = host_field is None
+    port_is_none = port_field is None
+    one_is_none = (not host_is_none and port_is_none) or (
+        host_is_none and not port_is_none
+    )
+    if not host_is_none and not port_is_none:
+        if host_field not in connection_config.config:
+            raise ClickException(
+                f"Host field '{host_field}' not present in connection configuration {connection_config.public_id}"
+            )
+        if port_field not in connection_config.config:
+            raise ClickException(
+                f"Port field '{port_field}' not present in connection configuration {connection_config.public_id}"
+            )
+        host = connection_config.config[host_field]
+        port = int(connection_config.config[port_field])
+        return host, port
+    if one_is_none:
+        raise ClickException(
+            "-h/--host-field and -p/--port-field must be specified together."
+        )
+    else:  # using uri_field
+        if uri_field not in connection_config.config:
+            raise ClickException(
+                f"URI field '{uri_field}' not present in connection configuration {connection_config.public_id}"
+            )
+        url_value = connection_config.config[uri_field]
+        try:
+            url = urlparse(url_value)
+            host = url.scheme
+            port = int(url.path)
+            return host, port
+        except Exception:
+            raise ClickException(
+                f"Cannot extract host and port from {uri_field}: '{url_value}'"
+            )
+
+
 def _try_get_connection_multiaddress(
     click_context,
     crypto: Crypto,
     connection_id: PublicId,
-    host_field: str,
-    port_field: str,
+    host_field: Optional[str],
+    port_field: Optional[str],
+    uri_field: Optional[str],
 ) -> str:
     """
     Try to get the connection multiaddress.
+
+    The host and the port options have the precedence over the uri option.
 
     :param click_context: the click context object.
     :param crypto: the crypto.
     :param connection_id: the connection id.
     :param host_field: the host field.
     :param port_field: the port field.
+    :param uri_field: the uri field.
     :return: the multiaddress.
     """
     ctx = cast(Context, click_context.obj)
@@ -153,17 +226,9 @@ def _try_get_connection_multiaddress(
         ConnectionConfig, load_item_config("connection", package_path)
     )
 
-    if host_field not in connection_config.config:
-        raise ValueError(
-            f"Host field '{host_field}' not present in connection configuration {connection_id}"
-        )
-    if port_field not in connection_config.config:
-        raise ValueError(
-            f"Port field '{port_field}' not present in connection configuration {connection_id}"
-        )
-
-    host = connection_config.config[host_field]
-    port = int(connection_config.config[port_field])
+    host, port = _read_host_and_port_from_config(
+        connection_config, uri_field, host_field, port_field
+    )
 
     try:
         multiaddr = MultiAddr(host, port, crypto.public_key)

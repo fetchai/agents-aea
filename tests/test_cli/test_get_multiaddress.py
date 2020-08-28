@@ -81,6 +81,41 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
             "--connection",
             "--connection-id",
             "fetchai/stub:0.9.0",
+            "--host-field",
+            "host",
+            "--port-field",
+            "port",
+            cwd=self.current_agent_context,
+        )
+
+        assert result.exit_code == 0
+        # multiaddr test
+        expected_multiaddr_prefix = "/dns/127.0.0.1/tcp/10000/p2p/"
+        assert expected_multiaddr_prefix in result.stdout
+        base58_addr = str(result.stdout).replace(expected_multiaddr_prefix, "")
+        base58.b58decode(base58_addr)
+
+
+class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
+    """Test case for CLI get-multiaddress command with --connection flag and --uri."""
+
+    def test_run(self, *mocks):
+        """Run the test."""
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, connection=True)
+
+        self.force_set_config(
+            "vendor.fetchai.connections.stub.config.public_uri", "127.0.0.1:10000"
+        )
+
+        result = self.run_cli_command(
+            "get-multiaddress",
+            COSMOS,
+            "--connection",
+            "--connection-id",
+            "fetchai/stub:0.9.0",
+            "--uri-field",
+            "public_uri",
             cwd=self.current_agent_context,
         )
 
@@ -163,6 +198,8 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
                 "fetchai/stub:0.9.0",
                 "--host-field",
                 "some_host",
+                "--port-field",
+                "some_port",
                 cwd=self.current_agent_context,
             )
 
@@ -190,6 +227,8 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
+                "--host-field",
+                "host",
                 "--port-field",
                 "some_port",
                 cwd=self.current_agent_context,
@@ -248,5 +287,88 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
+                "--host-field",
+                "host",
+                "--port-field",
+                "port",
+                cwd=self.current_agent_context,
+            )
+
+
+class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
+    """Test case for CLI get-multiaddress when only the host field is specified."""
+
+    def test_run(self, *mocks):
+        """Run the test."""
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, connection=True)
+
+        # this will cause exception because only the host, and not the port, are specified.
+        with pytest.raises(
+            Exception,
+            match="-h/--host-field and -p/--port-field must be specified together.",
+        ):
+            self.run_cli_command(
+                "get-multiaddress",
+                COSMOS,
+                "--connection",
+                "--connection-id",
+                "fetchai/stub:0.9.0",
+                "--host-field",
+                "some_host",
+                cwd=self.current_agent_context,
+            )
+
+
+class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
+    """Test case for CLI get-multiaddress when the URI field doesn't exists."""
+
+    def test_run(self, *mocks):
+        """Run the test."""
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, connection=True)
+
+        # this will cause exception because only the host, and not the port, are specified.
+        with pytest.raises(
+            Exception,
+            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.9.0",
+        ):
+            self.run_cli_command(
+                "get-multiaddress",
+                COSMOS,
+                "--connection",
+                "--connection-id",
+                "fetchai/stub:0.9.0",
+                "--uri-field",
+                "some_uri",
+                cwd=self.current_agent_context,
+            )
+
+
+class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
+    """Test case for CLI get-multiaddress when we cannot parse the URI field."""
+
+    def test_run(self, *mocks):
+        """Run the test."""
+        self.generate_private_key(COSMOS)
+        self.add_private_key(COSMOS, connection=True)
+
+        self.force_set_config(
+            "vendor.fetchai.connections.stub.config.some_uri", "some-unparsable_URI"
+        )
+
+        # this will cause exception because only the host, and not the port, are specified.
+        with pytest.raises(
+            Exception,
+            match="Cannot extract host and port from some_uri: 'some-unparsable_URI'",
+        ):
+            self.run_cli_command(
+                "get-multiaddress",
+                COSMOS,
+                "--connection",
+                "--connection-id",
+                "fetchai/stub:0.9.0",
+                "--uri-field",
+                "some_uri",
                 cwd=self.current_agent_context,
             )
