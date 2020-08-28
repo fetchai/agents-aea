@@ -151,7 +151,6 @@ class TestClientServer:
     ) -> Envelope:
         """Make response envelope."""
         incoming_message = cast(HttpMessage, request_envelope.message)
-        incoming_message.sender = str(HTTPServerConnection.connection_id)
         dialogue = self._server_dialogues.update(incoming_message)
         assert dialogue is not None
         message = dialogue.reply(
