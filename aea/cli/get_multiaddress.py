@@ -36,6 +36,7 @@ from aea.configurations.base import (
 )
 from aea.crypto.base import Crypto
 from aea.crypto.registries import crypto_registry
+from aea.exceptions import enforce
 from aea.helpers.multiaddr.base import MultiAddr
 
 
@@ -189,10 +190,10 @@ def _read_host_and_port_from_config(
     url_value = connection_config.config[uri_field]
     try:
         m = URI_REGEX.search(url_value)
-        assert m is not None, f"URI Doesn't match regex '{URI_REGEX}'"
+        enforce(m is not None, f"URI Doesn't match regex '{URI_REGEX}'")
+        m = cast(re.Match, m)
         host = m.group("host")
-        port = m.group("port")
-        port = int(port)
+        port = int(m.group("port"))
         return host, port
     except Exception as e:
         raise ClickException(
