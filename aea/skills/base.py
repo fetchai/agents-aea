@@ -635,6 +635,7 @@ class Skill(Component):
         handlers: Optional[Dict[str, Handler]] = None,
         behaviours: Optional[Dict[str, Behaviour]] = None,
         models: Optional[Dict[str, Model]] = None,
+        **kwargs,
     ):
         """
         Initialize a skill.
@@ -645,6 +646,8 @@ class Skill(Component):
         :param behaviours: dictionary of behaviours.
         :param models: dictionary of models.
         """
+        if kwargs is not None:
+            pass
         super().__init__(configuration)
         self.config = configuration
         self._skill_context = (

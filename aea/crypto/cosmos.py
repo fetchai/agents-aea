@@ -127,7 +127,7 @@ class CosmosHelper(Helper):
         s = hashlib.new("sha256", public_key_bytes).digest()
         r = hashlib.new("ripemd160", s).digest()
         five_bit_r = convertbits(r, 8, 5)
-        if five_bit_r is None:
+        if five_bit_r is None:  # pragma: nocover
             raise AEAEnforceError("Unsuccessful bech32.convertbits call")
         address = bech32_encode(cls.address_prefix, five_bit_r)
         return address
@@ -912,14 +912,14 @@ class CosmosFaucetApi(FaucetApi):
         :raises: RuntimeError of explicit faucet failures
         """
         uid = self._try_create_faucet_claim(address)
-        if uid is None:
+        if uid is None:  # pragma: nocover
             raise RuntimeError("Unable to create faucet claim")
 
         while True:
 
             # lookup status form the claim uid
             status = self._try_check_faucet_claim(uid)
-            if status is None:
+            if status is None:  # pragma: nocover
                 raise RuntimeError("Failed to check faucet claim status")
 
             # if the status is complete
@@ -927,7 +927,7 @@ class CosmosFaucetApi(FaucetApi):
                 break
 
             # if the status is failure
-            if status.status_code > self.FAUCET_STATUS_COMPLETED:
+            if status.status_code > self.FAUCET_STATUS_COMPLETED:  # pragma: nocover
                 raise RuntimeError(f"Failed to get wealth for {address}")
 
             # if the status is incomplete
@@ -975,7 +975,7 @@ class CosmosFaucetApi(FaucetApi):
         :return: None on failure otherwise a CosmosFaucetStatus for the specified uid
         """
         response = requests.get(cls._faucet_status_uri(uid))
-        if response.status_code != 200:
+        if response.status_code != 200:  # pragma: nocover
             logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)
             )
@@ -994,7 +994,7 @@ class CosmosFaucetApi(FaucetApi):
         """
         Generates the request URI derived from `cls.faucet_base_url`
         """
-        if cls.testnet_faucet_url is None:
+        if cls.testnet_faucet_url is None:  # pragma: nocover
             raise ValueError("Testnet faucet url not set.")
         return f"{cls.testnet_faucet_url}/claim/requests"
 

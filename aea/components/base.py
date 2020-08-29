@@ -115,7 +115,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     :return: None
     """
     dir_ = configuration.directory
-    if dir_ is None:
+    if dir_ is None:  # pragma: nocover
         raise AEAEnforceError("configuration directory does not exists.")
 
     # patch sys.modules with dummy modules
