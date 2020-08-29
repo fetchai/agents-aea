@@ -158,7 +158,7 @@ def test_construct_sign_and_submit_transfer_transaction():
 
     signed_transaction = account.sign_transaction(transfer_transaction)
     assert (
-        isinstance(signed_transaction, eth_account.datastructures.AttributeDict)
+        isinstance(signed_transaction, eth_account.datastructures.SignedTransaction)
         and len(signed_transaction) == 5
     ), "Incorrect signed_transaction constructed."
 
