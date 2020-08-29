@@ -265,19 +265,19 @@ class Dialogue(ABC):
         self,
         dialogue_label: DialogueLabel,
         message_class: Type[Message],
-        agent_address: Address,
+        self_address: Address,
         role: Role,
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
-        self._agent_address = agent_address
+        self._self_address = self_address
         self._incomplete_dialogue_label = dialogue_label.get_incomplete_version()
         self._dialogue_label = dialogue_label
         self._role = role
@@ -327,15 +327,15 @@ class Dialogue(ABC):
         return {self._dialogue_label, self._incomplete_dialogue_label}
 
     @property
-    def agent_address(self) -> Address:
+    def self_address(self) -> Address:
         """
-        Get the address of the agent for whom this dialogues is maintained.
+        Get the address of the entity for whom this dialogues is maintained.
 
-        :return: the agent address
+        :return: the address of this entity
         """
-        if self._agent_address is None:  # pragma: nocover
-            raise ValueError("agent_address is not set.")
-        return self._agent_address
+        if self._self_address is None:  # pragma: nocover
+            raise ValueError("self_address is not set.")
+        return self._self_address
 
     @property
     def role(self) -> "Role":
@@ -439,7 +439,7 @@ class Dialogue(ABC):
         :param message: the message
         :return: True if message is by this agent, False otherwise
         """
-        return message.sender == self.agent_address
+        return message.sender == self.self_address
 
     def _is_message_by_other(self, message: Message) -> bool:
         """
@@ -515,7 +515,7 @@ class Dialogue(ABC):
         :raises: InvalidDialogueMessage: if message does not belong to this dialogue, or if message is invalid
         """
         if not message.has_sender:
-            message.sender = self.agent_address  # pragma: nocover
+            message.sender = self.self_address  # pragma: nocover
 
         if not self._is_belonging_to_dialogue(message):
             raise InvalidDialogueMessage(
@@ -556,7 +556,7 @@ class Dialogue(ABC):
                     Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
                 ),
                 opponent,
-                self.agent_address,
+                self.self_address,
             )
             result = self_initiated_dialogue_label in self.dialogue_labels
         else:
@@ -604,7 +604,7 @@ class Dialogue(ABC):
             performative=performative,
             **kwargs,
         )
-        reply.sender = self.agent_address
+        reply.sender = self.self_address
         reply.to = self.dialogue_label.dialogue_opponent_addr
 
         self._update(reply)
@@ -1387,7 +1387,7 @@ class Dialogues(ABC):
         dialogue = self._dialogue_class(
             dialogue_label=dialogue_label,
             message_class=self._message_class,
-            agent_address=self.agent_address,
+            self_address=self.agent_address,
             role=role,
         )
         self.dialogues.update({dialogue_label: dialogue})

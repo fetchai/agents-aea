@@ -310,7 +310,7 @@ class BuyerDialogue(FipaDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
         message_class: Type[FipaMessage] = FipaMessage,
     ) -> None:
@@ -318,7 +318,7 @@ class BuyerDialogue(FipaDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
@@ -367,7 +367,7 @@ class SellerDialogue(FipaDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
         message_class: Type[FipaMessage] = FipaMessage,
     ) -> None:
@@ -375,7 +375,7 @@ class SellerDialogue(FipaDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None

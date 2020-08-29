@@ -91,7 +91,7 @@ class FipaDialogue(BaseFipaDialogue):
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
         message_class: Type[FipaMessage] = FipaMessage,
     ) -> None:
@@ -99,7 +99,7 @@ class FipaDialogue(BaseFipaDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
@@ -107,7 +107,7 @@ class FipaDialogue(BaseFipaDialogue):
         BaseFipaDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )
@@ -164,7 +164,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
         message_class: Type[LedgerApiMessage] = LedgerApiMessage,
     ) -> None:
@@ -172,7 +172,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
@@ -180,7 +180,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         BaseLedgerApiDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )

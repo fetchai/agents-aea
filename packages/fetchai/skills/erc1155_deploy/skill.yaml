@@ -9,7 +9,7 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
   behaviours.py: QmV6DLrWy7oPpvgXVd8FJckvk8fHXg9Bz9JncuDi4wfAdJ
-  dialogues.py: QmfHuYewexPLpDMaGsLRRvGwr6ZfMuzdzb7g5xRG3WoLEy
+  dialogues.py: QmRZV428wLhHmSSFBYseKHjhhYp9uXV8XF6wqPv5bGpTK3
   handlers.py: QmTFoXgGRs8FdTwcGmnKYFrrAPqHBRvS8d5SEDWNtjdHYq
   strategy.py: QmeoDg7UT5MG5khmrZna3v8HYrC6QJjjEV26kcq1mPs6yx
 fingerprint_ignore_patterns: []

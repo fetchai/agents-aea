@@ -380,7 +380,7 @@ class TestDecisionMaker2:
         assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
             type(signing_msg_response.signed_transaction.body)
-            == eth_account.datastructures.AttributeDict
+            == eth_account.datastructures.SignedTransaction
         )
 
     def test_handle_tx_signing_unknown(self):
