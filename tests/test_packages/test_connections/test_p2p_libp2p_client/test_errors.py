@@ -124,8 +124,8 @@ class TestLibp2pClientConnectionNodeDisconnected:
 
     def test_node_disconnected(self):
         assert self.connection_client.is_connected is True
-        self.multiplexer_node.disconnect()
         self.multiplexer_client.disconnect()
+        self.multiplexer_node.disconnect()
 
     @classmethod
     def teardown_class(cls):

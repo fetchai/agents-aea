@@ -35,7 +35,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAException
 from aea.identity.base import Identity
-from aea.multiplexer import ConnectionStatus
+from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.skills.base import (
@@ -92,7 +92,7 @@ class TestSkillContext:
 
     def test_connection_status(self):
         """Test the default agent's connection status."""
-        assert isinstance(self.skill_context.connection_status, ConnectionStatus)
+        assert isinstance(self.skill_context.connection_status, MultiplexerStatus)
 
     def test_decision_maker_message_queue(self):
         """Test the decision maker's queue."""
