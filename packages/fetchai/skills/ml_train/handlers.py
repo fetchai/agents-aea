@@ -86,7 +86,7 @@ class MlTradeHandler(Handler):
         if ml_trade_msg.performative == MlTradeMessage.Performative.TERMS:
             self._handle_terms(ml_trade_msg, ml_trade_dialogue)
         elif ml_trade_msg.performative == MlTradeMessage.Performative.DATA:
-            self._handle_data(ml_trade_msg, ml_trade_dialogue)
+            self._handle_data(ml_trade_msg)
         else:
             self._handle_invalid(ml_trade_msg, ml_trade_dialogue)
 
@@ -185,14 +185,11 @@ class MlTradeHandler(Handler):
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info("sending dummy transaction digest ...")
 
-    def _handle_data(
-        self, ml_trade_msg: MlTradeMessage, ml_trade_dialogue: MlTradeDialogue
-    ) -> None:
+    def _handle_data(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle the data.
 
         :param ml_trade_msg: the ml trade message
-        :param ml_trade_dialogue: the dialogue object
         :return: None
         """
         terms = ml_trade_msg.terms
@@ -313,7 +310,11 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         if len(oef_search_msg.agents) == 0:
-            self.context.logger.info("found no agents, continue searching.")
+            self.context.logger.info(
+                "found no agents in dialogue={}, continue searching.".format(
+                    oef_search_dialogue
+                )
+            )
             return
 
         self.context.logger.info(
@@ -386,7 +387,7 @@ class LedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif (
             ledger_api_msg.performative is LedgerApiMessage.Performative.RAW_TRANSACTION
         ):
@@ -421,9 +422,7 @@ class LedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 

@@ -354,7 +354,9 @@ class GenericOefSearchHandler(Handler):
         :return: None
         """
         if len(oef_search_msg.agents) == 0:
-            self.context.logger.info("found no agents, continue searching.")
+            self.context.logger.info(
+                f"found no agents in dialogue={oef_search_dialogue}, continue searching."
+            )
             return
 
         self.context.logger.info(
@@ -539,7 +541,7 @@ class GenericLedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif (
             ledger_api_msg.performative is LedgerApiMessage.Performative.RAW_TRANSACTION
         ):
@@ -574,14 +576,11 @@ class GenericLedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
         :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         strategy = cast(GenericStrategy, self.context.strategy)
         if ledger_api_msg.balance > 0:

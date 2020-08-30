@@ -112,7 +112,8 @@ class OefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
-                oef_search_msg.dialogue_reference, oef_search_msg.oef_error_operation,
+                oef_search_dialogue.dialogue_label.dialogue_reference,
+                oef_search_msg.oef_error_operation,
             )
         )
 
@@ -128,7 +129,8 @@ class OefSearchHandler(Handler):
         """
         self.context.logger.debug(
             "on search result: dialogue_reference={} agents={}".format(
-                oef_search_msg.dialogue_reference, oef_search_msg.agents,
+                oef_search_dialogue.dialogue_label.dialogue_reference,
+                oef_search_msg.agents,
             )
         )
         self._on_controller_search_result(oef_search_msg.agents)
@@ -242,11 +244,11 @@ class TacHandler(Handler):
         if tac_msg.performative == TacMessage.Performative.TAC_ERROR:
             self._on_tac_error(tac_msg, tac_dialogue)
         elif tac_msg.performative == TacMessage.Performative.GAME_DATA:
-            self._on_start(tac_msg, tac_dialogue)
+            self._on_start(tac_msg)
         elif tac_msg.performative == TacMessage.Performative.CANCELLED:
-            self._on_cancelled(tac_msg, tac_dialogue)
+            self._on_cancelled(tac_msg)
         elif tac_msg.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
-            self._on_transaction_confirmed(tac_msg, tac_dialogue)
+            self._on_transaction_confirmed(tac_msg)
         else:
             self._handle_invalid(tac_msg, tac_dialogue)
 
@@ -278,8 +280,8 @@ class TacHandler(Handler):
         """
         error_code = tac_msg.error_code
         self.context.logger.debug(
-            "received error from the controller. error_msg={}".format(
-                TacMessage.ErrorCode.to_msg(error_code.value)
+            "received error from the controller in dialogue={}. error_msg={}".format(
+                tac_dialogue, TacMessage.ErrorCode.to_msg(error_code.value)
             )
         )
         if error_code == TacMessage.ErrorCode.TRANSACTION_NOT_VALID:
@@ -293,12 +295,11 @@ class TacHandler(Handler):
                 "received error on transaction id: {}".format(transaction_id[-10:])
             )
 
-    def _on_start(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
+    def _on_start(self, tac_msg: TacMessage) -> None:
         """
         Handle the 'start' event emitted by the controller.
 
         :param tac_msg: the game data
-        :param tac_dialogue: the tac dialogue
         :return: None
         """
         game = cast(Game, self.context.game)
@@ -328,20 +329,17 @@ class TacHandler(Handler):
                 self.context.logger.info(
                     "received a contract address: {}".format(contract_address)
                 )
-                self._update_ownership_and_preferences(tac_msg, tac_dialogue)
+                self._update_ownership_and_preferences(tac_msg)
             else:
                 self.context.logger.warning("did not receive a contract address!")
         else:
-            self._update_ownership_and_preferences(tac_msg, tac_dialogue)
+            self._update_ownership_and_preferences(tac_msg)
 
-    def _update_ownership_and_preferences(
-        self, tac_msg: TacMessage, tac_dialogue: TacDialogue
-    ) -> None:
+    def _update_ownership_and_preferences(self, tac_msg: TacMessage) -> None:
         """
         Update ownership and preferences.
 
         :param tac_msg: the game data
-        :param tac_dialogue: the tac dialogue
         :return: None
         """
         state_update_dialogues = cast(
@@ -361,19 +359,18 @@ class TacHandler(Handler):
         game.state_update_dialogue = state_update_dialogue
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
-    def _on_cancelled(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
+    def _on_cancelled(self, tac_msg: TacMessage) -> None:
         """
         Handle the cancellation of the competition from the TAC controller.
 
         :param tac_msg: the TacMessage.
-        :param tac_dialogue: the tac dialogue
         :return: None
         """
         game = cast(Game, self.context.game)
         if game.phase.value not in [Phase.GAME_REGISTRATION.value, Phase.GAME.value]:
             self.context.logger.warning(
-                "we do not expect a start message in game phase={}".format(
-                    game.phase.value
+                "we do not expect a message in game phase={}, received msg={}".format(
+                    game.phase.value, tac_msg
                 )
             )
             return
@@ -384,21 +381,18 @@ class TacHandler(Handler):
         self.context.is_active = False
         self.context.shared_state["is_game_finished"] = True
 
-    def _on_transaction_confirmed(
-        self, tac_msg: TacMessage, tac_dialogue: TacDialogue
-    ) -> None:
+    def _on_transaction_confirmed(self, tac_msg: TacMessage) -> None:
         """
         Handle 'on transaction confirmed' event emitted by the controller.
 
         :param tac_msg: the TacMessage.
-        :param tac_dialogue: the tac dialogue
         :return: None
         """
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.GAME.value:
             self.context.logger.warning(
-                "we do not expect a tranasaction in game phase={}".format(
-                    game.phase.value
+                "we do not expect a tranasaction in game phase={}, received msg={}".format(
+                    game.phase.value, tac_msg
                 )
             )
             return

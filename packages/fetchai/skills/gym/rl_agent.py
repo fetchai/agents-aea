@@ -138,7 +138,9 @@ class MyRLAgent(RLAgent):
 
         return action
 
-    def _update_model(self, observation, reward, done, info, action) -> None:
+    def _update_model(  # pylint: disable=unused-argument
+        self, observation, reward, done, info, action
+    ) -> None:
         """
         Update the model.
 

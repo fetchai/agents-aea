@@ -253,7 +253,7 @@ class LedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif (
             ledger_api_msg.performative
             is LedgerApiMessage.Performative.TRANSACTION_DIGEST
@@ -263,7 +263,7 @@ class LedgerApiHandler(Handler):
             ledger_api_msg.performative
             is LedgerApiMessage.Performative.TRANSACTION_RECEIPT
         ):
-            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
+            self._handle_transaction_receipt(ledger_api_msg)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -289,14 +289,11 @@ class LedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
         :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -326,14 +323,11 @@ class LedgerApiHandler(Handler):
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 
-    def _handle_transaction_receipt(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_transaction_receipt(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of transaction_receipt performative.
 
         :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         is_transaction_successful = EthereumHelper.is_transaction_settled(
             ledger_api_msg.transaction_receipt.receipt

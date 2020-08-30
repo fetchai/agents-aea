@@ -120,7 +120,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
-    def register(  # pylint: disable=arguments-differ
+    def register(  # pylint: disable=arguments-differ,unused-argument
         self,
         component_id: ComponentId,
         component: Component,

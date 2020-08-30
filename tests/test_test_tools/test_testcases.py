@@ -226,7 +226,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
         # add sending and receiving envelope from input/output files
         sender = "sender"
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: str
         ) -> Dialogue.Role:
             return DefaultDialogue.Role.AGENT

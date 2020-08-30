@@ -497,7 +497,7 @@ class TCPSocketChannelClient(IPCChannelClient):
     Interprocess communication channel client using tcp sockets
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=unused-argument
         self,
         in_path: str,
         out_path: str,

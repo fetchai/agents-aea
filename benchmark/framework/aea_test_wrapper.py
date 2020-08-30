@@ -53,7 +53,9 @@ class AEATestWrapper:
         self.aea = self.make_aea(self.name, self.components)
         self._thread = None  # type: Optional[Thread]
 
-    def make_aea(self, name: str = "my_aea", components: List[Component] = None) -> AEA:
+    def make_aea(
+        self, name: Optional[str] = None, components: List[Component] = None
+    ) -> AEA:
         """
         Create AEA from name and already loaded components.
 
@@ -65,7 +67,7 @@ class AEATestWrapper:
         components = components or []
         builder = AEABuilder()
 
-        builder.set_name(self.name)
+        builder.set_name(name or self.name)
 
         builder.add_private_key(FetchAICrypto.identifier, private_key_path=None)
 

@@ -617,7 +617,7 @@ class GenericLedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif (
             ledger_api_msg.performative
             is LedgerApiMessage.Performative.TRANSACTION_RECEIPT
@@ -648,14 +648,11 @@ class GenericLedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
         :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -995,7 +992,7 @@ The following properties and methods deal with different aspects of the strategy
         """
         return query.check(self.get_service_description())
 
-    def generate_proposal_terms_and_data(
+    def generate_proposal_terms_and_data(  # pylint: disable=unused-argument
         self, query: Query, counterparty_address: Address
     ) -> Tuple[Description, Terms, Dict[str, str]]:
         """
@@ -1092,7 +1089,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -1164,7 +1161,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -1236,7 +1233,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -1270,7 +1267,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -1852,7 +1849,9 @@ class GenericOefSearchHandler(Handler):
         :return: None
         """
         if len(oef_search_msg.agents) == 0:
-            self.context.logger.info("found no agents, continue searching.")
+            self.context.logger.info(
+                f"found no agents in dialogue={oef_search_dialogue}, continue searching."
+            )
             return
 
         self.context.logger.info(
@@ -2041,7 +2040,7 @@ class GenericLedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif (
             ledger_api_msg.performative is LedgerApiMessage.Performative.RAW_TRANSACTION
         ):
@@ -2076,14 +2075,11 @@ class GenericLedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
         :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         strategy = cast(GenericStrategy, self.context.strategy)
         if ledger_api_msg.balance > 0:
@@ -2464,7 +2460,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -2554,7 +2550,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -2626,7 +2622,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -2660,7 +2656,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -2732,7 +2728,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message

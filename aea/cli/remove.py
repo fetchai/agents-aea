@@ -35,7 +35,7 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 @click.group()
 @click.pass_context
 @check_aea_project
-def remove(click_context):
+def remove(click_context):  # pylint: disable=unused-argument
     """Remove a resource from the agent."""
 
 

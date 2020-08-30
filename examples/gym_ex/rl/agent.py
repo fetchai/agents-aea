@@ -140,7 +140,7 @@ class RLAgent:
 
         return action
 
-    def _update_model(
+    def _update_model(  # pylint: disable=unused-argument
         self,
         observation: Observation,
         reward: Reward,

@@ -812,7 +812,7 @@ class Dialogue(ABC):
         )
         self._dialogue_label = final_dialogue_label
 
-    def _custom_validation(  # pylint: disable=no-self-use
+    def _custom_validation(  # pylint: disable=no-self-use,unused-argument
         self, message: Message
     ) -> Tuple[bool, str]:
         """

@@ -50,7 +50,7 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 @click.command()
 @click.pass_context
 @check_aea_project
-def interact(click_context: click.core.Context):
+def interact(click_context: click.core.Context):  # pylint: disable=unused-argument
     """Interact with a running AEA via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
@@ -75,7 +75,7 @@ def _run_interaction_channel():
     inbox = InBox(multiplexer)
     outbox = OutBox(multiplexer)
 
-    def role_from_first_message(
+    def role_from_first_message(  # pylint: disable=unused-argument
         message: Message, receiver_address: Address
     ) -> BaseDialogue.Role:
         """Infer the role of the agent from an incoming/outgoing first message

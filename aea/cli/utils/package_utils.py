@@ -266,7 +266,9 @@ def find_item_locally(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
-def find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
+def find_item_in_distribution(  # pylint: disable=unused-argument
+    ctx, item_type, item_public_id
+) -> Path:
     """
     Find an item in the AEA directory.
 
@@ -437,7 +439,9 @@ def is_item_present(
     ).exists()
 
 
-def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> int:
+def try_get_balance(  # pylint: disable=unused-argument
+    agent_config: AgentConfig, wallet: Wallet, type_: str
+) -> int:
     """
     Try to get wallet balance.
 

@@ -37,7 +37,7 @@ from aea.configurations.loader import ConfigLoader
 @click.group()
 @click.pass_context
 @check_aea_project
-def config(click_context):
+def config(click_context):  # pylint: disable=unused-argument
     """Read or modify a configuration."""
 
 

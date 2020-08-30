@@ -74,7 +74,7 @@ def simple_verbosity_option(
     kwargs.setdefault("is_eager", True)
 
     def decorator(f):
-        def _set_level(ctx, param, value):
+        def _set_level(ctx, param, value):  # pylint: disable=unused-argument
             level = logging.getLevelName(value)
             logger.setLevel(level)
             # save verbosity option so it can be

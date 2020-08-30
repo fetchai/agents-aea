@@ -70,7 +70,7 @@ class ERC1155Contract(Contract):
         return token_id
 
     @classmethod
-    def get_create_batch_transaction(
+    def get_create_batch_transaction(  # pylint: disable=unused-argument
         cls,
         ledger_api: LedgerApi,
         contract_address: Address,

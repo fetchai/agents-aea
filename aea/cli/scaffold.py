@@ -44,7 +44,7 @@ from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-im
 @click.group()
 @click.pass_context
 @check_aea_project
-def scaffold(click_context):
+def scaffold(click_context):  # pylint: disable=unused-argument
     """Scaffold a resource for the agent."""
 
 

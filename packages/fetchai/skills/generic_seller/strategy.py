@@ -170,7 +170,7 @@ class GenericStrategy(Model):
         """
         return query.check(self.get_service_description())
 
-    def generate_proposal_terms_and_data(
+    def generate_proposal_terms_and_data(  # pylint: disable=unused-argument
         self, query: Query, counterparty_address: Address
     ) -> Tuple[Description, Terms, Dict[str, str]]:
         """

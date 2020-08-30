@@ -54,7 +54,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         Initialize the Fetch.ai ledger APIs.
         """
         if "address" not in kwargs:
-            kwargs["address"] = DEFAULT_ADDRESS
+            kwargs["address"] = DEFAULT_ADDRESS  # pragma: nocover
         if "denom" not in kwargs:
             kwargs["denom"] = DEFAULT_CURRENCY_DENOM
         if "chain_id" not in kwargs:

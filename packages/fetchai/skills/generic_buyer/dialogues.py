@@ -73,7 +73,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -163,7 +163,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -235,7 +235,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -269,7 +269,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
@@ -341,7 +341,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         """
         Model.__init__(self, **kwargs)
 
-        def role_from_first_message(
+        def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
