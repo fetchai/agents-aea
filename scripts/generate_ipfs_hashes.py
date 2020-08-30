@@ -205,7 +205,7 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self, timeout: float = 10.0):
+    def __init__(self, timeout: float = 15.0):
         """Initialise IPFS daemon."""
         # check we have ipfs
         self.timeout = timeout
@@ -396,7 +396,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--timeout",
         type=float,
-        default=10.0,
+        default=15.0,
         help="Time to wait before IPFS daemon is up and running.",
     )
 
@@ -404,7 +404,7 @@ def parse_arguments() -> argparse.Namespace:
     return arguments_
 
 
-def update_hashes(timeout: float = 10.0) -> int:
+def update_hashes(timeout: float = 15.0) -> int:
     """
     Process all AEA packages, update fingerprint, and update hashes.csv files.
 
@@ -484,7 +484,7 @@ def check_same_ipfs_hash(
     return result
 
 
-def check_hashes(timeout: float = 10.0) -> int:
+def check_hashes(timeout: float = 15.0) -> int:
     """
     Check fingerprints and outer hash of all AEA packages.
 

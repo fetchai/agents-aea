@@ -923,7 +923,7 @@ class Dialogues(ABC):
         :return: None
         """
         self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
-        self._dialogue_by_address = {}  # type: Dict[Address, Dialogue]
+        self._dialogue_by_address = {}  # type: Dict[Address, List[Dialogue]]
         self._incomplete_to_complete_dialogue_labels = (
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
@@ -996,16 +996,14 @@ class Dialogues(ABC):
         """
         return self._dialogue_stats
 
-    def get_dialogue_with_counterparty(
-        self, counterparty: Address
-    ) -> Optional[Dialogue]:
+    def get_dialogues_with_counterparty(self, counterparty: Address) -> List[Dialogue]:
         """
-        Get the dialogue by address.
+        Get the dialogues by address.
 
         :param counterparty: the counterparty
-        :return: The dialogue is one exists with the counterparty, None otherwise.
+        :return: The dialogues with the counterparty.
         """
-        return self._dialogue_by_address.get(counterparty, None)
+        return self._dialogue_by_address.get(counterparty, [])
 
     def _is_message_by_self(self, message: Message) -> bool:
         """
@@ -1391,7 +1389,14 @@ class Dialogues(ABC):
             role=role,
         )
         self.dialogues.update({dialogue_label: dialogue})
-        self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = dialogue
+        if (
+            self._dialogue_by_address.get(dialogue_label.dialogue_opponent_addr, None)
+            is None
+        ):
+            self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = []
+        self._dialogue_by_address[dialogue_label.dialogue_opponent_addr].append(
+            dialogue
+        )
         return dialogue
 
     @staticmethod
