@@ -152,4 +152,11 @@ def test_get_deploy_transaction_cosmwasm(dummy_contract):
 
 def test_scaffold():
     """Test the scaffold contract can be loaded/instantiated."""
-    MyScaffoldContract("config")
+    scaffold = MyScaffoldContract("config")
+    kwargs = {"key": "value"}
+    with pytest.raises(NotImplementedError):
+        scaffold.get_raw_transaction("ledger_api", "contract_address", **kwargs)
+    with pytest.raises(NotImplementedError):
+        scaffold.get_raw_message("ledger_api", "contract_address", **kwargs)
+    with pytest.raises(NotImplementedError):
+        scaffold.get_state("ledger_api", "contract_address", **kwargs)

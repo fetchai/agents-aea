@@ -200,7 +200,7 @@ class Contract(Component):
 
 def _try_to_register_contract(configuration: ContractConfig):
     """Register a contract to the registry."""
-    if str(configuration.public_id) in contract_registry.specs:
+    if str(configuration.public_id) in contract_registry.specs:  # pragma: nocover
         logger.warning(
             f"Skipping registration of contract {configuration.public_id} since already registered."
         )
