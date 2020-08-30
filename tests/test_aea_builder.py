@@ -160,7 +160,9 @@ class TestReentrancy:
 
     @staticmethod
     def are_components_different(
-        components_a: Collection[Component], components_b: Collection[Component]
+        components_a: Collection[Component],
+        components_b: Collection[Component],
+        is_including_config: bool = True,
     ) -> None:
         """
         Compare collections of component instances.
@@ -178,9 +180,10 @@ class TestReentrancy:
         d2 = {c.component_id: c for c in components_b}
         assert all(d1[k] is not d2[k] for k in d1.keys())
 
-        c1 = {c.component_id: c.configuration for c in components_a}
-        c2 = {c.component_id: c.configuration for c in components_b}
-        assert all(c1[k] is not c2[k] for k in c1.keys())
+        if is_including_config:
+            c1 = {c.component_id: c.configuration for c in components_a}
+            c2 = {c.component_id: c.configuration for c in components_b}
+            assert all(c1[k] is not c2[k] for k in c1.keys())
 
     def test_skills_instances_are_different(self):
         """Test that skill instances are different."""
@@ -198,7 +201,9 @@ class TestReentrancy:
         """Test that contract instances are different."""
         aea1_contracts = self.aea1.resources.get_all_contracts()
         aea2_contracts = self.aea2.resources.get_all_contracts()
-        self.are_components_different(aea1_contracts, aea2_contracts)
+        self.are_components_different(
+            aea1_contracts, aea2_contracts, is_including_config=False
+        )
 
     def test_connections_instances_are_different(self):
         """Test that connection instances are different."""
