@@ -74,11 +74,11 @@ logger = logging.getLogger(__name__)
 class OefSearchDialogues(BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, agent_address: str) -> None:
+    def __init__(self, self_address: str) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
 
@@ -95,7 +95,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 

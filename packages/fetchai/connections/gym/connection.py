@@ -70,7 +70,7 @@ class GymDialogues(BaseGymDialogues):
 
         BaseGymDialogues.__init__(
             self,
-            agent_address=str(PUBLIC_ID),
+            self_address=str(PUBLIC_ID),
             role_from_first_message=role_from_first_message,
             **kwargs,
         )

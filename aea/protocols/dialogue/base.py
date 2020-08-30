@@ -909,7 +909,7 @@ class Dialogues(ABC):
 
     def __init__(
         self,
-        agent_address: Address,
+        self_address: Address,
         end_states: FrozenSet[Dialogue.EndState],
         message_class: Type[Message],
         dialogue_class: Type[Dialogue],
@@ -918,7 +918,7 @@ class Dialogues(ABC):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :param end_states: the list of dialogue endstates
         :return: None
         """
@@ -927,7 +927,7 @@ class Dialogues(ABC):
         self._incomplete_to_complete_dialogue_labels = (
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
-        self._agent_address = agent_address
+        self._self_address = self_address
         self._dialogue_stats = DialogueStats(end_states)
 
         enforce(
@@ -982,10 +982,10 @@ class Dialogues(ABC):
         return self._dialogues_by_dialogue_label
 
     @property
-    def agent_address(self) -> Address:
+    def self_address(self) -> Address:
         """Get the address of the agent for whom dialogues are maintained."""
-        enforce(self._agent_address != "", "agent_address is not set.")
-        return self._agent_address
+        enforce(self._self_address != "", "self_address is not set.")
+        return self._self_address
 
     @property
     def dialogue_stats(self) -> DialogueStats:
@@ -1012,7 +1012,7 @@ class Dialogues(ABC):
         :param message: the message
         :return: True if message is by this agent, False otherwise
         """
-        return message.sender == self.agent_address
+        return message.sender == self.self_address
 
     def _is_message_by_other(self, message: Message) -> bool:
         """
@@ -1062,7 +1062,7 @@ class Dialogues(ABC):
             performative=performative,
             **kwargs,
         )
-        initial_message.sender = self.agent_address
+        initial_message.sender = self.self_address
         initial_message.to = counterparty
 
         dialogue = self._create_dialogue(counterparty, initial_message)
@@ -1088,7 +1088,7 @@ class Dialogues(ABC):
             not initial_message.has_to,
             "The message's 'to' field is already set {}".format(initial_message),
         )
-        initial_message.sender = self.agent_address
+        initial_message.sender = self.self_address
         initial_message.to = counterparty
 
         dialogue = self._create_dialogue(counterparty, initial_message)
@@ -1109,7 +1109,7 @@ class Dialogues(ABC):
         dialogue = self._create_self_initiated(
             dialogue_opponent_addr=counterparty,
             dialogue_reference=initial_message.dialogue_reference,
-            role=self._role_from_first_message(initial_message, self.agent_address),
+            role=self._role_from_first_message(initial_message, self.self_address),
         )
 
         try:
@@ -1163,7 +1163,7 @@ class Dialogues(ABC):
             dialogue = self._create_opponent_initiated(
                 dialogue_opponent_addr=message.sender,
                 dialogue_reference=dialogue_reference,
-                role=self._role_from_first_message(message, self.agent_address),
+                role=self._role_from_first_message(message, self.self_address),
             )
         elif is_incomplete_label_and_non_initial_msg:
             # we can allow a dialogue to have incomplete reference
@@ -1210,7 +1210,7 @@ class Dialogues(ABC):
             Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
         )
         incomplete_dialogue_label = DialogueLabel(
-            incomplete_dialogue_reference, message.sender, self.agent_address,
+            incomplete_dialogue_reference, message.sender, self.self_address,
         )
 
         if (
@@ -1242,7 +1242,7 @@ class Dialogues(ABC):
         self_initiated_dialogue_label = DialogueLabel(
             message.dialogue_reference,
             self._counterparty_from_message(message),
-            self.agent_address,
+            self.self_address,
         )
         other_initiated_dialogue_label = DialogueLabel(
             message.dialogue_reference,
@@ -1311,7 +1311,7 @@ class Dialogues(ABC):
             "Cannot initiate dialogue with preassigned dialogue_responder_reference!",
         )
         incomplete_dialogue_label = DialogueLabel(
-            dialogue_reference, dialogue_opponent_addr, self.agent_address
+            dialogue_reference, dialogue_opponent_addr, self.self_address
         )
         dialogue = self._create(incomplete_dialogue_label, role)
         return dialogue
@@ -1385,7 +1385,7 @@ class Dialogues(ABC):
         dialogue = self._dialogue_class(
             dialogue_label=dialogue_label,
             message_class=self._message_class,
-            self_address=self.agent_address,
+            self_address=self.self_address,
             role=role,
         )
         self.dialogues.update({dialogue_label: dialogue})

@@ -81,7 +81,7 @@ ledger_ids = pytest.mark.parametrize(
 class LedgerApiDialogues(BaseLedgerApiDialogues):
     """The dialogues class keeps track of all ledger_api dialogues."""
 
-    def __init__(self, agent_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -101,7 +101,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 

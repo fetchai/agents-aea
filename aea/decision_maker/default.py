@@ -80,7 +80,7 @@ class SigningDialogues(BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address="decision_maker",
+            self_address="decision_maker",
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -110,7 +110,7 @@ class StateUpdateDialogues(BaseStateUpdateDialogues):
 
         BaseStateUpdateDialogues.__init__(
             self,
-            agent_address="decision_maker",
+            self_address="decision_maker",
             role_from_first_message=role_from_first_message,
             **kwargs,
         )

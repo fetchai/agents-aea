@@ -91,14 +91,14 @@ class Dialogues(BaseDialogues):
 
     def __init__(
         self,
-        agent_address: Address,
+        self_address: Address,
         message_class=DefaultMessage,
         dialogue_class=Dialogue,
     ) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
 
@@ -115,7 +115,7 @@ class Dialogues(BaseDialogues):
 
         BaseDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             end_states=cast(FrozenSet[BaseDialogue.EndState], self.END_STATES),
             message_class=message_class,
             dialogue_class=dialogue_class,
@@ -1040,7 +1040,7 @@ class TestDialoguesBase:
     def test_dialogues_properties(self):
         """Test dialogue properties."""
         assert self.own_dialogues.dialogues == dict()
-        assert self.own_dialogues.agent_address == self.agent_address
+        assert self.own_dialogues.self_address == self.agent_address
         assert self.own_dialogues.dialogue_stats.other_initiated == {
             Dialogue.EndState.SUCCESSFUL: 0,
             Dialogue.EndState.FAILED: 0,

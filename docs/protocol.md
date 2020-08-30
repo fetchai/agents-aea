@@ -326,7 +326,7 @@ class BuyerDialogue(FipaDialogue):
         FipaDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )
@@ -336,7 +336,7 @@ class BuyerDialogue(FipaDialogue):
 class BuyerDialogues(FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, agent_address: str) -> None:
+    def __init__(self, self_address: Address) -> None:
         """
         Initialize dialogues.
 
@@ -355,7 +355,7 @@ class BuyerDialogues(FipaDialogues):
 
         FipaDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=FipaDialogue,
         )
@@ -383,7 +383,7 @@ class SellerDialogue(FipaDialogue):
         FipaDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )
@@ -393,7 +393,7 @@ class SellerDialogue(FipaDialogue):
 class SellerDialogues(FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, agent_address: str) -> None:
+    def __init__(self, self_address: Address) -> None:
         """
         Initialize dialogues.
 
@@ -412,7 +412,7 @@ class SellerDialogues(FipaDialogues):
 
         FipaDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=FipaDialogue,
         )

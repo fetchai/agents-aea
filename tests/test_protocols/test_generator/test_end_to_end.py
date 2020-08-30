@@ -134,7 +134,7 @@ class TestEndToEndGenerator(UseOef):
             return TProtocolDialogue.Role.ROLE_1
 
         agent_1_dialogues = TProtocolDialogues(
-            agent_address=aea_1.identity.address,
+            self_address=aea_1.identity.address,
             role_from_first_message=role_from_first_message_1,
         )
 
@@ -150,7 +150,7 @@ class TestEndToEndGenerator(UseOef):
             return TProtocolDialogue.Role.ROLE_2
 
         agent_2_dialogues = TProtocolDialogues(
-            agent_address=aea_2.identity.address,
+            self_address=aea_2.identity.address,
             role_from_first_message=role_from_first_message_1,
         )
 

@@ -122,7 +122,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=str(OEFConnection.connection_id),
+            self_address=str(OEFConnection.connection_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=OefSearchDialogue,
         )

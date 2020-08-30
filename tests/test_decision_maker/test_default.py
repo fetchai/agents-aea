@@ -66,11 +66,11 @@ from tests.conftest import (
 class SigningDialogues(BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, agent_address: str) -> None:
+    def __init__(self, self_address: Address) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
 
@@ -87,7 +87,7 @@ class SigningDialogues(BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=SigningDialogue,
         )
@@ -96,11 +96,11 @@ class SigningDialogues(BaseSigningDialogues):
 class StateUpdateDialogues(BaseStateUpdateDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, agent_address: str) -> None:
+    def __init__(self, self_address: Address) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
 
@@ -117,7 +117,7 @@ class StateUpdateDialogues(BaseStateUpdateDialogues):
 
         BaseStateUpdateDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 

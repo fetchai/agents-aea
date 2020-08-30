@@ -66,7 +66,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 
         BaseDefaultDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -99,7 +99,7 @@ class HttpDialogues(Model, BaseHttpDialogues):
 
         BaseHttpDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -132,6 +132,6 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )

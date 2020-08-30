@@ -64,6 +64,6 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )

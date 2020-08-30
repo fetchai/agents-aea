@@ -66,7 +66,7 @@ Add a simple skill with a signing handler and the signing dialogues.
     signing_dialogues_model = SigningDialogues(
         skill_context=skill_context,
         name="signing_dialogues",
-        agent_address=str(skill_config.public_id),
+        self_address=str(skill_config.public_id),
     )
 
     simple_skill = Skill(
@@ -159,7 +159,7 @@ To be able to register a handler that reads the internal messages, we have to cr
 class SigningDialogues(Model, BaseSigningDialogues):
     """Signing dialogues model."""
 
-    def __init__(self, agent_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -180,7 +180,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -344,7 +344,7 @@ def run():
     signing_dialogues_model = SigningDialogues(
         skill_context=skill_context,
         name="signing_dialogues",
-        agent_address=str(skill_config.public_id),
+        self_address=str(skill_config.public_id),
     )
 
     simple_skill = Skill(
@@ -418,7 +418,7 @@ def run():
 class SigningDialogues(Model, BaseSigningDialogues):
     """Signing dialogues model."""
 
-    def __init__(self, agent_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -439,7 +439,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 
