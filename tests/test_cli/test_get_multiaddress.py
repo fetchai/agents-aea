@@ -90,7 +90,7 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
 
         assert result.exit_code == 0
         # multiaddr test
-        expected_multiaddr_prefix = "/dns/127.0.0.1/tcp/10000/p2p/"
+        expected_multiaddr_prefix = "/dns4/127.0.0.1/tcp/10000/p2p/"
         assert expected_multiaddr_prefix in result.stdout
         base58_addr = str(result.stdout).replace(expected_multiaddr_prefix, "")
         base58.b58decode(base58_addr)
@@ -121,7 +121,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
 
         assert result.exit_code == 0
         # multiaddr test
-        expected_multiaddr_prefix = "/dns/127.0.0.1/tcp/10000/p2p/"
+        expected_multiaddr_prefix = "/dns4/127.0.0.1/tcp/10000/p2p/"
         assert expected_multiaddr_prefix in result.stdout
         base58_addr = str(result.stdout).replace(expected_multiaddr_prefix, "")
         base58.b58decode(base58_addr)
@@ -360,7 +360,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
             Exception,
-            match=fr"Cannot extract host and port from some_uri: 'some-unparsable_URI'. Reason: URI Doesn't match regex '",
+            match=r"Cannot extract host and port from some_uri: 'some-unparsable_URI'. Reason: URI Doesn't match regex '",
         ):
             self.run_cli_command(
                 "get-multiaddress",
