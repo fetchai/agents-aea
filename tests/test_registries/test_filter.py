@@ -181,10 +181,9 @@ class TestFilter:
         public_id = "author/non_existing_skill:0.1.0"
         message = SigningMessage(
             SigningMessage.Performative.ERROR,
-            skill_callback_ids=(public_id,),
-            skill_callback_info={},
             error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         )
+        message.to = public_id
         with unittest.mock.patch.object(
             aea.registries.filter.logger, "warning"
         ) as mock_logger_warning:

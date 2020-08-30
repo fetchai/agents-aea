@@ -33,6 +33,7 @@ from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialo
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
+from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
@@ -212,7 +213,65 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         )
 
 
-SigningDialogue = BaseSigningDialogue
+class SigningDialogue(BaseSigningDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        self_address: Address,
+        role: Dialogue.Role,
+        message_class: Type[SigningMessage] = SigningMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseSigningDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self._counterparty_signature = None  # type: Optional[str]
+        self._associated_fipa_dialogue: Optional[FipaDialogue] = None
+
+    @property
+    def counterparty_signature(self) -> str:
+        """Get counterparty signature."""
+        if self._counterparty_signature is None:
+            raise ValueError("counterparty_signature not set!")
+        return self._counterparty_signature
+
+    @counterparty_signature.setter
+    def counterparty_signature(self, counterparty_signature: str) -> None:
+        """Set is_seller_search."""
+        enforce(
+            self._counterparty_signature is None, "counterparty_signature already set!"
+        )
+        self._counterparty_signature = counterparty_signature
+
+    @property
+    def associated_fipa_dialogue(self) -> FipaDialogue:
+        """Get associated_fipa_dialogue."""
+        if self._associated_fipa_dialogue is None:
+            raise ValueError("associated_fipa_dialogue not set!")
+        return self._associated_fipa_dialogue
+
+    @associated_fipa_dialogue.setter
+    def associated_fipa_dialogue(self, associated_fipa_dialogue: FipaDialogue) -> None:
+        """Set associated_fipa_dialogue."""
+        enforce(
+            self._associated_fipa_dialogue is None,
+            "associated_fipa_dialogue already set!",
+        )
+        self._associated_fipa_dialogue = associated_fipa_dialogue
 
 
 class SigningDialogues(Model, BaseSigningDialogues):
@@ -240,6 +299,6 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=self.context.agent_address + "_" + str(self.context.skill_id),
+            agent_address=str(self.context.skill_id),
             role_from_first_message=role_from_first_message,
         )

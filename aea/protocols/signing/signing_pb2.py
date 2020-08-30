@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="fetch.aea.Signing",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b"\n\rsigning.proto\x12\x11\x66\x65tch.aea.Signing\"\x93\x14\n\x0eSigningMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12\"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x45\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x34.fetch.aea.Signing.SigningMessage.Error_PerformativeH\x00\x12S\n\x0csign_message\x18\x06 \x01(\x0b\x32;.fetch.aea.Signing.SigningMessage.Sign_Message_PerformativeH\x00\x12[\n\x10sign_transaction\x18\x07 \x01(\x0b\x32?.fetch.aea.Signing.SigningMessage.Sign_Transaction_PerformativeH\x00\x12W\n\x0esigned_message\x18\x08 \x01(\x0b\x32=.fetch.aea.Signing.SigningMessage.Signed_Message_PerformativeH\x00\x12_\n\x12signed_transaction\x18\t \x01(\x0b\x32\x41.fetch.aea.Signing.SigningMessage.Signed_Transaction_PerformativeH\x00\x1a\xb3\x01\n\tErrorCode\x12M\n\nerror_code\x18\x01 \x01(\x0e\x32\x39.fetch.aea.Signing.SigningMessage.ErrorCode.ErrorCodeEnum\"W\n\rErrorCodeEnum\x12 \n\x1cUNSUCCESSFUL_MESSAGE_SIGNING\x10\x00\x12$\n UNSUCCESSFUL_TRANSACTION_SIGNING\x10\x01\x1a!\n\nRawMessage\x12\x13\n\x0braw_message\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a'\n\rSignedMessage\x12\x16\n\x0esigned_message\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a\xed\x02\n\x1dSign_Transaction_Performative\x12\x1a\n\x12skill_callback_ids\x18\x01 \x03(\t\x12s\n\x13skill_callback_info\x18\x02 \x03(\x0b\x32V.fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.SkillCallbackInfoEntry\x12\x36\n\x05terms\x18\x03 \x01(\x0b\x32'.fetch.aea.Signing.SigningMessage.Terms\x12I\n\x0fraw_transaction\x18\x04 \x01(\x0b\x32\x30.fetch.aea.Signing.SigningMessage.RawTransaction\x1a\x38\n\x16SkillCallbackInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xdd\x02\n\x19Sign_Message_Performative\x12\x1a\n\x12skill_callback_ids\x18\x01 \x03(\t\x12o\n\x13skill_callback_info\x18\x02 \x03(\x0b\x32R.fetch.aea.Signing.SigningMessage.Sign_Message_Performative.SkillCallbackInfoEntry\x12\x36\n\x05terms\x18\x03 \x01(\x0b\x32'.fetch.aea.Signing.SigningMessage.Terms\x12\x41\n\x0braw_message\x18\x04 \x01(\x0b\x32,.fetch.aea.Signing.SigningMessage.RawMessage\x1a\x38\n\x16SkillCallbackInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xbf\x02\n\x1fSigned_Transaction_Performative\x12\x1a\n\x12skill_callback_ids\x18\x01 \x03(\t\x12u\n\x13skill_callback_info\x18\x02 \x03(\x0b\x32X.fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.SkillCallbackInfoEntry\x12O\n\x12signed_transaction\x18\x03 \x01(\x0b\x32\x33.fetch.aea.Signing.SigningMessage.SignedTransaction\x1a\x38\n\x16SkillCallbackInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xaf\x02\n\x1bSigned_Message_Performative\x12\x1a\n\x12skill_callback_ids\x18\x01 \x03(\t\x12q\n\x13skill_callback_info\x18\x02 \x03(\x0b\x32T.fetch.aea.Signing.SigningMessage.Signed_Message_Performative.SkillCallbackInfoEntry\x12G\n\x0esigned_message\x18\x03 \x01(\x0b\x32/.fetch.aea.Signing.SigningMessage.SignedMessage\x1a\x38\n\x16SkillCallbackInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x95\x02\n\x12\x45rror_Performative\x12\x1a\n\x12skill_callback_ids\x18\x01 \x03(\t\x12h\n\x13skill_callback_info\x18\x02 \x03(\x0b\x32K.fetch.aea.Signing.SigningMessage.Error_Performative.SkillCallbackInfoEntry\x12?\n\nerror_code\x18\x03 \x01(\x0b\x32+.fetch.aea.Signing.SigningMessage.ErrorCode\x1a\x38\n\x16SkillCallbackInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3",
+    serialized_pb=b"\n\rsigning.proto\x12\x11\x66\x65tch.aea.Signing\"\xa8\x0c\n\x0eSigningMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12\"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x45\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x34.fetch.aea.Signing.SigningMessage.Error_PerformativeH\x00\x12S\n\x0csign_message\x18\x06 \x01(\x0b\x32;.fetch.aea.Signing.SigningMessage.Sign_Message_PerformativeH\x00\x12[\n\x10sign_transaction\x18\x07 \x01(\x0b\x32?.fetch.aea.Signing.SigningMessage.Sign_Transaction_PerformativeH\x00\x12W\n\x0esigned_message\x18\x08 \x01(\x0b\x32=.fetch.aea.Signing.SigningMessage.Signed_Message_PerformativeH\x00\x12_\n\x12signed_transaction\x18\t \x01(\x0b\x32\x41.fetch.aea.Signing.SigningMessage.Signed_Transaction_PerformativeH\x00\x1a\xb3\x01\n\tErrorCode\x12M\n\nerror_code\x18\x01 \x01(\x0e\x32\x39.fetch.aea.Signing.SigningMessage.ErrorCode.ErrorCodeEnum\"W\n\rErrorCodeEnum\x12 \n\x1cUNSUCCESSFUL_MESSAGE_SIGNING\x10\x00\x12$\n UNSUCCESSFUL_TRANSACTION_SIGNING\x10\x01\x1a!\n\nRawMessage\x12\x13\n\x0braw_message\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a'\n\rSignedMessage\x12\x16\n\x0esigned_message\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a\xa2\x01\n\x1dSign_Transaction_Performative\x12\x36\n\x05terms\x18\x01 \x01(\x0b\x32'.fetch.aea.Signing.SigningMessage.Terms\x12I\n\x0fraw_transaction\x18\x02 \x01(\x0b\x32\x30.fetch.aea.Signing.SigningMessage.RawTransaction\x1a\x96\x01\n\x19Sign_Message_Performative\x12\x36\n\x05terms\x18\x01 \x01(\x0b\x32'.fetch.aea.Signing.SigningMessage.Terms\x12\x41\n\x0braw_message\x18\x02 \x01(\x0b\x32,.fetch.aea.Signing.SigningMessage.RawMessage\x1ar\n\x1fSigned_Transaction_Performative\x12O\n\x12signed_transaction\x18\x01 \x01(\x0b\x32\x33.fetch.aea.Signing.SigningMessage.SignedTransaction\x1a\x66\n\x1bSigned_Message_Performative\x12G\n\x0esigned_message\x18\x01 \x01(\x0b\x32/.fetch.aea.Signing.SigningMessage.SignedMessage\x1aU\n\x12\x45rror_Performative\x12?\n\nerror_code\x18\x01 \x01(\x0b\x32+.fetch.aea.Signing.SigningMessage.ErrorCodeB\x0e\n\x0cperformativeb\x06proto3",
 )
 
 
@@ -278,62 +278,6 @@ _SIGNINGMESSAGE_TERMS = _descriptor.Descriptor(
     serialized_end=972,
 )
 
-_SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY = _descriptor.Descriptor(
-    name="SkillCallbackInfoEntry",
-    full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.SkillCallbackInfoEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.SkillCallbackInfoEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.SkillCallbackInfoEntry.value",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=b"8\001",
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=1284,
-    serialized_end=1340,
-)
-
 _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     name="Sign_Transaction_Performative",
     full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative",
@@ -342,46 +286,10 @@ _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="skill_callback_ids",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.skill_callback_ids",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="skill_callback_info",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.skill_callback_info",
-            index=1,
-            number=2,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
             name="terms",
             full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.terms",
-            index=2,
-            number=3,
+            index=0,
+            number=1,
             type=11,
             cpp_type=10,
             label=1,
@@ -398,8 +306,8 @@ _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
         _descriptor.FieldDescriptor(
             name="raw_transaction",
             full_name="fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.raw_transaction",
-            index=3,
-            number=4,
+            index=1,
+            number=2,
             type=11,
             cpp_type=10,
             label=1,
@@ -415,9 +323,7 @@ _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY,
-    ],
+    nested_types=[],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
@@ -425,63 +331,7 @@ _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=975,
-    serialized_end=1340,
-)
-
-_SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY = _descriptor.Descriptor(
-    name="SkillCallbackInfoEntry",
-    full_name="fetch.aea.Signing.SigningMessage.Sign_Message_Performative.SkillCallbackInfoEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Message_Performative.SkillCallbackInfoEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Message_Performative.SkillCallbackInfoEntry.value",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=b"8\001",
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=1284,
-    serialized_end=1340,
+    serialized_end=1137,
 )
 
 _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
@@ -492,46 +342,10 @@ _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="skill_callback_ids",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Message_Performative.skill_callback_ids",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="skill_callback_info",
-            full_name="fetch.aea.Signing.SigningMessage.Sign_Message_Performative.skill_callback_info",
-            index=1,
-            number=2,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
             name="terms",
             full_name="fetch.aea.Signing.SigningMessage.Sign_Message_Performative.terms",
-            index=2,
-            number=3,
+            index=0,
+            number=1,
             type=11,
             cpp_type=10,
             label=1,
@@ -548,8 +362,8 @@ _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
         _descriptor.FieldDescriptor(
             name="raw_message",
             full_name="fetch.aea.Signing.SigningMessage.Sign_Message_Performative.raw_message",
-            index=3,
-            number=4,
+            index=1,
+            number=2,
             type=11,
             cpp_type=10,
             label=1,
@@ -565,71 +379,15 @@ _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY,],
+    nested_types=[],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1343,
-    serialized_end=1692,
-)
-
-_SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY = _descriptor.Descriptor(
-    name="SkillCallbackInfoEntry",
-    full_name="fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.SkillCallbackInfoEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.SkillCallbackInfoEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.SkillCallbackInfoEntry.value",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=b"8\001",
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=1284,
-    serialized_end=1340,
+    serialized_start=1140,
+    serialized_end=1290,
 )
 
 _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
@@ -640,46 +398,10 @@ _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="skill_callback_ids",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.skill_callback_ids",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="skill_callback_info",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.skill_callback_info",
-            index=1,
-            number=2,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
             name="signed_transaction",
             full_name="fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.signed_transaction",
-            index=2,
-            number=3,
+            index=0,
+            number=1,
             type=11,
             cpp_type=10,
             label=1,
@@ -695,73 +417,15 @@ _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY,
-    ],
+    nested_types=[],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1695,
-    serialized_end=2014,
-)
-
-_SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY = _descriptor.Descriptor(
-    name="SkillCallbackInfoEntry",
-    full_name="fetch.aea.Signing.SigningMessage.Signed_Message_Performative.SkillCallbackInfoEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Message_Performative.SkillCallbackInfoEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Message_Performative.SkillCallbackInfoEntry.value",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=b"8\001",
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=1284,
-    serialized_end=1340,
+    serialized_start=1292,
+    serialized_end=1406,
 )
 
 _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
@@ -772,107 +436,15 @@ _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="skill_callback_ids",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Message_Performative.skill_callback_ids",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="skill_callback_info",
-            full_name="fetch.aea.Signing.SigningMessage.Signed_Message_Performative.skill_callback_info",
-            index=1,
-            number=2,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
             name="signed_message",
             full_name="fetch.aea.Signing.SigningMessage.Signed_Message_Performative.signed_message",
-            index=2,
-            number=3,
+            index=0,
+            number=1,
             type=11,
             cpp_type=10,
             label=1,
             has_default_value=False,
             default_value=None,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[_SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY,],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=2017,
-    serialized_end=2320,
-)
-
-_SIGNINGMESSAGE_ERROR_PERFORMATIVE_SKILLCALLBACKINFOENTRY = _descriptor.Descriptor(
-    name="SkillCallbackInfoEntry",
-    full_name="fetch.aea.Signing.SigningMessage.Error_Performative.SkillCallbackInfoEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.Signing.SigningMessage.Error_Performative.SkillCallbackInfoEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.Signing.SigningMessage.Error_Performative.SkillCallbackInfoEntry.value",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=b"".decode("utf-8"),
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -885,13 +457,13 @@ _SIGNINGMESSAGE_ERROR_PERFORMATIVE_SKILLCALLBACKINFOENTRY = _descriptor.Descript
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=b"8\001",
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1284,
-    serialized_end=1340,
+    serialized_start=1408,
+    serialized_end=1510,
 )
 
 _SIGNINGMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
@@ -902,46 +474,10 @@ _SIGNINGMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="skill_callback_ids",
-            full_name="fetch.aea.Signing.SigningMessage.Error_Performative.skill_callback_ids",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="skill_callback_info",
-            full_name="fetch.aea.Signing.SigningMessage.Error_Performative.skill_callback_info",
-            index=1,
-            number=2,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
             name="error_code",
             full_name="fetch.aea.Signing.SigningMessage.Error_Performative.error_code",
-            index=2,
-            number=3,
+            index=0,
+            number=1,
             type=11,
             cpp_type=10,
             label=1,
@@ -957,15 +493,15 @@ _SIGNINGMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_SIGNINGMESSAGE_ERROR_PERFORMATIVE_SKILLCALLBACKINFOENTRY,],
+    nested_types=[],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2323,
-    serialized_end=2600,
+    serialized_start=1512,
+    serialized_end=1597,
 )
 
 _SIGNINGMESSAGE = _descriptor.Descriptor(
@@ -1167,7 +703,7 @@ _SIGNINGMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=37,
-    serialized_end=2616,
+    serialized_end=1613,
 )
 
 _SIGNINGMESSAGE_ERRORCODE.fields_by_name[
@@ -1180,12 +716,6 @@ _SIGNINGMESSAGE_RAWTRANSACTION.containing_type = _SIGNINGMESSAGE
 _SIGNINGMESSAGE_SIGNEDMESSAGE.containing_type = _SIGNINGMESSAGE
 _SIGNINGMESSAGE_SIGNEDTRANSACTION.containing_type = _SIGNINGMESSAGE
 _SIGNINGMESSAGE_TERMS.containing_type = _SIGNINGMESSAGE
-_SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY.containing_type = (
-    _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE
-)
-_SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE.fields_by_name[
-    "skill_callback_info"
-].message_type = _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY
 _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE.fields_by_name[
     "terms"
 ].message_type = _SIGNINGMESSAGE_TERMS
@@ -1193,12 +723,6 @@ _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE.fields_by_name[
     "raw_transaction"
 ].message_type = _SIGNINGMESSAGE_RAWTRANSACTION
 _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE.containing_type = _SIGNINGMESSAGE
-_SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY.containing_type = (
-    _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE
-)
-_SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE.fields_by_name[
-    "skill_callback_info"
-].message_type = _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY
 _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE.fields_by_name[
     "terms"
 ].message_type = _SIGNINGMESSAGE_TERMS
@@ -1206,32 +730,14 @@ _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE.fields_by_name[
     "raw_message"
 ].message_type = _SIGNINGMESSAGE_RAWMESSAGE
 _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE.containing_type = _SIGNINGMESSAGE
-_SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY.containing_type = (
-    _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE
-)
-_SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE.fields_by_name[
-    "skill_callback_info"
-].message_type = _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY
 _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE.fields_by_name[
     "signed_transaction"
 ].message_type = _SIGNINGMESSAGE_SIGNEDTRANSACTION
 _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE.containing_type = _SIGNINGMESSAGE
-_SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY.containing_type = (
-    _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE
-)
-_SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE.fields_by_name[
-    "skill_callback_info"
-].message_type = _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY
 _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE.fields_by_name[
     "signed_message"
 ].message_type = _SIGNINGMESSAGE_SIGNEDMESSAGE
 _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE.containing_type = _SIGNINGMESSAGE
-_SIGNINGMESSAGE_ERROR_PERFORMATIVE_SKILLCALLBACKINFOENTRY.containing_type = (
-    _SIGNINGMESSAGE_ERROR_PERFORMATIVE
-)
-_SIGNINGMESSAGE_ERROR_PERFORMATIVE.fields_by_name[
-    "skill_callback_info"
-].message_type = _SIGNINGMESSAGE_ERROR_PERFORMATIVE_SKILLCALLBACKINFOENTRY
 _SIGNINGMESSAGE_ERROR_PERFORMATIVE.fields_by_name[
     "error_code"
 ].message_type = _SIGNINGMESSAGE_ERRORCODE
@@ -1346,15 +852,6 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             "Sign_Transaction_Performative",
             (_message.Message,),
             {
-                "SkillCallbackInfoEntry": _reflection.GeneratedProtocolMessageType(
-                    "SkillCallbackInfoEntry",
-                    (_message.Message,),
-                    {
-                        "DESCRIPTOR": _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY,
-                        "__module__": "signing_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative.SkillCallbackInfoEntry)
-                    },
-                ),
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE,
                 "__module__": "signing_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Sign_Transaction_Performative)
@@ -1364,15 +861,6 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             "Sign_Message_Performative",
             (_message.Message,),
             {
-                "SkillCallbackInfoEntry": _reflection.GeneratedProtocolMessageType(
-                    "SkillCallbackInfoEntry",
-                    (_message.Message,),
-                    {
-                        "DESCRIPTOR": _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY,
-                        "__module__": "signing_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Sign_Message_Performative.SkillCallbackInfoEntry)
-                    },
-                ),
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE,
                 "__module__": "signing_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Sign_Message_Performative)
@@ -1382,15 +870,6 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             "Signed_Transaction_Performative",
             (_message.Message,),
             {
-                "SkillCallbackInfoEntry": _reflection.GeneratedProtocolMessageType(
-                    "SkillCallbackInfoEntry",
-                    (_message.Message,),
-                    {
-                        "DESCRIPTOR": _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY,
-                        "__module__": "signing_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative.SkillCallbackInfoEntry)
-                    },
-                ),
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE,
                 "__module__": "signing_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Signed_Transaction_Performative)
@@ -1400,15 +879,6 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             "Signed_Message_Performative",
             (_message.Message,),
             {
-                "SkillCallbackInfoEntry": _reflection.GeneratedProtocolMessageType(
-                    "SkillCallbackInfoEntry",
-                    (_message.Message,),
-                    {
-                        "DESCRIPTOR": _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY,
-                        "__module__": "signing_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Signed_Message_Performative.SkillCallbackInfoEntry)
-                    },
-                ),
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE,
                 "__module__": "signing_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Signed_Message_Performative)
@@ -1418,15 +888,6 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             "Error_Performative",
             (_message.Message,),
             {
-                "SkillCallbackInfoEntry": _reflection.GeneratedProtocolMessageType(
-                    "SkillCallbackInfoEntry",
-                    (_message.Message,),
-                    {
-                        "DESCRIPTOR": _SIGNINGMESSAGE_ERROR_PERFORMATIVE_SKILLCALLBACKINFOENTRY,
-                        "__module__": "signing_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Error_Performative.SkillCallbackInfoEntry)
-                    },
-                ),
                 "DESCRIPTOR": _SIGNINGMESSAGE_ERROR_PERFORMATIVE,
                 "__module__": "signing_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.Signing.SigningMessage.Error_Performative)
@@ -1445,26 +906,10 @@ _sym_db.RegisterMessage(SigningMessage.SignedMessage)
 _sym_db.RegisterMessage(SigningMessage.SignedTransaction)
 _sym_db.RegisterMessage(SigningMessage.Terms)
 _sym_db.RegisterMessage(SigningMessage.Sign_Transaction_Performative)
-_sym_db.RegisterMessage(
-    SigningMessage.Sign_Transaction_Performative.SkillCallbackInfoEntry
-)
 _sym_db.RegisterMessage(SigningMessage.Sign_Message_Performative)
-_sym_db.RegisterMessage(SigningMessage.Sign_Message_Performative.SkillCallbackInfoEntry)
 _sym_db.RegisterMessage(SigningMessage.Signed_Transaction_Performative)
-_sym_db.RegisterMessage(
-    SigningMessage.Signed_Transaction_Performative.SkillCallbackInfoEntry
-)
 _sym_db.RegisterMessage(SigningMessage.Signed_Message_Performative)
-_sym_db.RegisterMessage(
-    SigningMessage.Signed_Message_Performative.SkillCallbackInfoEntry
-)
 _sym_db.RegisterMessage(SigningMessage.Error_Performative)
-_sym_db.RegisterMessage(SigningMessage.Error_Performative.SkillCallbackInfoEntry)
 
 
-_SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY._options = None
-_SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY._options = None
-_SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE_SKILLCALLBACKINFOENTRY._options = None
-_SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE_SKILLCALLBACKINFOENTRY._options = None
-_SIGNINGMESSAGE_ERROR_PERFORMATIVE_SKILLCALLBACKINFOENTRY._options = None
 # @@protoc_insertion_point(module_scope)

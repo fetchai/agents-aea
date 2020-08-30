@@ -21,7 +21,6 @@
 
 import pytest
 
-from aea.configurations.base import PublicId
 from aea.decision_maker.default import OwnershipState
 from aea.helpers.transaction.base import Terms
 
@@ -112,8 +111,6 @@ class TestOwnershipState:
             quantities_by_good_id={"good_id": -10},
             nonce="transaction nonce",
         )
-        cls.skill_callback_ids = (PublicId("author", "a_skill", "0.1.0"),)
-        cls.skill_callback_info = {"some_info_key": "some_info_value"}
 
     def test_transaction_is_affordable_agent_is_buyer(self):
         """Check if the agent has the money to cover the sender_amount (the agent=sender is the buyer)."""

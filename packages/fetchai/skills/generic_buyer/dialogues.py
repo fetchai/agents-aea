@@ -354,7 +354,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            agent_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=SigningDialogue,
         )

@@ -474,10 +474,8 @@ class ContractApiHandler(Handler):
         signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=contract_api_msg.raw_transaction,
             terms=contract_api_dialogue.terms,
-            skill_callback_info={},
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue

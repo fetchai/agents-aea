@@ -35,6 +35,7 @@ from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     FipaDialogue,
+    SigningDialogue,
     SigningDialogues,
 )
 
@@ -89,7 +90,7 @@ class Transactions(Model):
         self,
         performative: SigningMessage.Performative,
         proposal_description: Description,
-        dialogue_label: DialogueLabel,
+        fipa_dialogue: FipaDialogue,
         role: FipaDialogue.Role,
         agent_addr: Address,
     ) -> SigningMessage:
@@ -97,7 +98,7 @@ class Transactions(Model):
         Generate the transaction message from the description and the dialogue.
 
         :param proposal_description: the description of the proposal
-        :param dialogue_label: the dialogue label
+        :param fipa_dialogue: the fipa dialogue
         :param role: the role of the agent (seller or buyer)
         :param agent_addr: the address of the agent
         :return: a transaction message
@@ -126,27 +127,25 @@ class Transactions(Model):
         terms = Terms(
             ledger_id=ledger_id,
             sender_address=agent_addr,
-            counterparty_address=dialogue_label.dialogue_opponent_addr,
+            counterparty_address=fipa_dialogue.dialogue_label.dialogue_opponent_addr,
             amount_by_currency_id=amount_by_currency_id,
             is_sender_payable_tx_fee=not is_seller,
             quantities_by_good_id=goods_component,
             nonce=nonce,
             fee_by_currency_id=fee_by_currency_id,
         )
-        skill_callback_ids = (str(self.context.skill_id),)
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        skill_callback_info = {"dialogue_label": str(dialogue_label)}
         raw_message = RawMessage(
             ledger_id=ledger_id, body=terms.sender_hash.encode("utf-8")
         )
-        signing_msg, _ = signing_dialogues.create(
+        signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty="decision_maker",
             performative=performative,
-            skill_callback_ids=skill_callback_ids,
             terms=terms,
-            skill_callback_info=skill_callback_info,
             raw_message=raw_message,
         )
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
         return cast(SigningMessage, signing_msg)
 
     def update_confirmed_transactions(self) -> None:

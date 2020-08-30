@@ -313,12 +313,12 @@ class TestDecisionMaker2:
             tx_fee=1000,
             tx_nonce="something",
         )
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id=FETCHAI,
                 sender_address="pk1",
@@ -342,18 +342,17 @@ class TestDecisionMaker2:
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_TRANSACTION
         )
-        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert type(signing_msg_response.signed_transaction.body) == dict
 
     def test_handle_tx_signing_ethereum(self):
         """Test tx signing for ethereum."""
         tx = {"gasPrice": 30, "nonce": 1, "gas": 20000}
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id=ETHEREUM,
                 sender_address="pk1",
@@ -377,7 +376,6 @@ class TestDecisionMaker2:
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_TRANSACTION
         )
-        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
             type(signing_msg_response.signed_transaction.body)
             == eth_account.datastructures.SignedTransaction
@@ -386,12 +384,12 @@ class TestDecisionMaker2:
     def test_handle_tx_signing_unknown(self):
         """Test tx signing for unknown."""
         tx = {}
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id="unknown",
                 sender_address="pk1",
@@ -412,7 +410,6 @@ class TestDecisionMaker2:
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR
-        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
             signing_msg_response.error_code
             == SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING
@@ -421,12 +418,12 @@ class TestDecisionMaker2:
     def test_handle_message_signing_fetchai(self):
         """Test message signing for fetchai."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id=FETCHAI,
                 sender_address="pk1",
@@ -450,18 +447,17 @@ class TestDecisionMaker2:
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_MESSAGE
         )
-        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert type(signing_msg_response.signed_message) == SignedMessage
 
     def test_handle_message_signing_ethereum(self):
         """Test message signing for ethereum."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id=ETHEREUM,
                 sender_address="pk1",
@@ -485,18 +481,17 @@ class TestDecisionMaker2:
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_MESSAGE
         )
-        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert type(signing_msg_response.signed_message) == SignedMessage
 
     def test_handle_message_signing_ethereum_deprecated(self):
         """Test message signing for ethereum deprecated."""
         message = b"0x11f3f9487724404e3a1fb7252a3226"
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id=ETHEREUM,
                 sender_address="pk1",
@@ -520,19 +515,18 @@ class TestDecisionMaker2:
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_MESSAGE
         )
-        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert type(signing_msg_response.signed_message) == SignedMessage
         assert signing_msg_response.signed_message.is_deprecated_mode
 
     def test_handle_message_signing_unknown_and_two_dialogues(self):
         """Test message signing for unknown."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id="unknown",
                 sender_address="pk1",
@@ -553,7 +547,6 @@ class TestDecisionMaker2:
         recovered_dialogue = signing_dialogues.update(signing_msg_response)
         assert recovered_dialogue is not None and recovered_dialogue == signing_dialogue
         assert signing_msg_response.performative == SigningMessage.Performative.ERROR
-        assert signing_msg_response.skill_callback_ids == signing_msg.skill_callback_ids
         assert (
             signing_msg_response.error_code
             == SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING
@@ -562,13 +555,13 @@ class TestDecisionMaker2:
     def test_handle_messages_from_two_dialogues_same_agent(self):
         """Test message signing for unknown."""
         message = b"0x11f3f9487724404e3a1fb7252a322656b90ba0455a2ca5fcdcbe6eeee5f8126d"
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         dialogue_reference = signing_dialogues.new_self_initiated_dialogue_reference()
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=dialogue_reference,
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id="unknown",
                 sender_address="pk1",
@@ -587,12 +580,12 @@ class TestDecisionMaker2:
         self.decision_maker.message_in_queue.put_nowait(signing_msg)
         signing_msg_response = self.decision_maker.message_out_queue.get(timeout=2)
         assert signing_msg_response is not None
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=dialogue_reference,
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id="unknown",
                 sender_address="pk1",
@@ -612,12 +605,12 @@ class TestDecisionMaker2:
             # Exception occurs because the same counterparty sends two identical dialogue references
             self.decision_maker.message_out_queue.get(timeout=1)
         # test twice; should work again even from same agent
-        signing_dialogues = SigningDialogues("agent")
+        signing_dialogues = SigningDialogues(
+            str(PublicId("author", "a_skill", "0.1.0"))
+        )
         signing_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(PublicId("author", "a_skill", "0.1.0")),),
-            skill_callback_info={},
             terms=Terms(
                 ledger_id="unknown",
                 sender_address="pk1",

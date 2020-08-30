@@ -27,7 +27,6 @@ from aea.configurations.base import ProtocolId
 from aea.helpers.search.models import Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.dialogue.base import DialogueLabel
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
@@ -164,7 +163,7 @@ class FipaNegotiationHandler(Handler):
             signing_msg = transactions.generate_signing_message(
                 SigningMessage.Performative.SIGN_MESSAGE,
                 proposal_description,
-                fipa_dialogue.dialogue_label,
+                fipa_dialogue,
                 cast(FipaDialogue.Role, fipa_dialogue.role),
                 self.context.agent_address,
             )
@@ -210,7 +209,7 @@ class FipaNegotiationHandler(Handler):
         signing_msg = transactions.generate_signing_message(
             SigningMessage.Performative.SIGN_MESSAGE,
             proposal_description,
-            fipa_dialogue.dialogue_label,
+            fipa_dialogue,
             cast(FipaDialogue.Role, fipa_dialogue.role),
             self.context.agent_address,
         )
@@ -407,8 +406,18 @@ class FipaNegotiationHandler(Handler):
             signing_msg = transactions.pop_pending_initial_acceptance(
                 fipa_dialogue.dialogue_label, match_accept.target
             )
+            signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+            signing_dialogue = cast(
+                Optional[SigningDialogue], signing_dialogues.get_dialogue(signing_msg)
+            )
+            if signing_dialogue is None:
+                raise ValueError("Could not recover dialogue.")
             strategy = cast(Strategy, self.context.strategy)
             counterparty_signature = match_accept.info.get("signature")
+            if counterparty_signature is None:
+                self.context.logger.warning("No signature from counterparty.")
+                return
+            signing_dialogue.counterparty_signature = counterparty_signature
             if strategy.is_contract_tx:
                 pass
                 # contract = cast(ERC1155Contract, self.context.contracts.erc1155) # noqa: E800
@@ -468,13 +477,6 @@ class FipaNegotiationHandler(Handler):
                 #     }, # noqa: E800
                 # ) # noqa: E800
             else:
-                signing_msg.set(
-                    "skill_callback_info",
-                    {
-                        **signing_msg.skill_callback_info,
-                        **{"counterparty_signature": counterparty_signature},
-                    },
-                )
                 self.context.logger.info(
                     "sending signing_msg={} to decison maker following MATCH_ACCEPT.".format(
                         signing_msg
@@ -563,11 +565,7 @@ class SigningHandler(Handler):
             )
             return
         self.context.logger.info("message signed by decision maker.")
-        dialogue_label = DialogueLabel.from_str(
-            cast(str, signing_msg.skill_callback_info.get("dialogue_label"))
-        )
-        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        fipa_dialogue = fipa_dialogues.dialogues[dialogue_label]
+        fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         last_fipa_message = cast(FipaMessage, fipa_dialogue.last_incoming_message)
         if (
             last_fipa_message is not None
@@ -589,9 +587,7 @@ class SigningHandler(Handler):
             and last_fipa_message.performative
             == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM
         ):
-            counterparty_signature = cast(
-                str, signing_msg.skill_callback_info.get("counterparty_signature")
-            )
+            counterparty_signature = signing_dialogue.counterparty_signature
             if counterparty_signature is not None:
                 last_signing_msg = cast(
                     Optional[SigningMessage], signing_dialogue.last_outgoing_message
@@ -633,11 +629,7 @@ class SigningHandler(Handler):
             )
             return
         self.context.logger.info("transaction signed by decision maker.")
-        dialogue_label = DialogueLabel.from_str(
-            cast(str, signing_msg.skill_callback_info.get("dialogue_label"))
-        )
-        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        fipa_dialogue = fipa_dialogues.dialogues[dialogue_label]
+        fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         last_fipa_message = cast(FipaMessage, fipa_dialogue.last_incoming_message)
         if (
             last_fipa_message is not None
