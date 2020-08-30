@@ -253,6 +253,7 @@ class Libp2pNode:
         self.proc = None  # type: Optional[subprocess.Popen]
         self._log_file_desc = None  # type: Optional[IO[str]]
 
+        self._config = ""
         self.logger = logger
         self._connection_timeout = PIPE_CONN_TIMEOUT
 
@@ -269,19 +270,16 @@ class Libp2pNode:
         self._log_file_desc = open(self.log_file, "a", 1)
 
         # build the node
-        # TOFIX(LR) fix async version
         self.logger.info("Downloading golang dependencies. This may take a while...")
         returncode = await _golang_module_build_async(
             self.source, self._log_file_desc, logger=self.logger
         )
-        with open(self.log_file, "r") as f:
-            self.logger.debug(f.read())
         node_log = ""
         with open(self.log_file, "r") as f:
             node_log = f.read()
         if returncode != 0:
             raise Exception(
-                "Error while downloading golang dependencies and building it: {}, {}".format(
+                "Error while downloading golang dependencies and building it: {},\n{}".format(
                     returncode, node_log
                 )
             )
@@ -293,34 +291,29 @@ class Libp2pNode:
         # setup config
         if os.path.exists(self.env_file):
             os.remove(self.env_file)
+        self._config = ""
         with open(self.env_file, "a") as env_file:
-            env_file.write("AEA_AGENT_ADDR={}\n".format(self.address))
-            env_file.write("AEA_P2P_ID={}\n".format(self.key))
-            env_file.write("AEA_P2P_URI={}\n".format(str(self.uri)))
-            env_file.write(
-                "AEA_P2P_ENTRY_URIS={}\n".format(
-                    ",".join(
-                        [
-                            str(maddr)
-                            for maddr in self.entry_peers
-                            if str(maddr)
-                            != str(self.uri)  # TOFIX(LR) won't exclude self
-                        ]
-                    )
+            self._config += "AEA_AGENT_ADDR={}\n".format(self.address)
+            self._config += "AEA_P2P_ID={}\n".format(self.key)
+            self._config += "AEA_P2P_URI={}\n".format(str(self.uri))
+            self._config += "AEA_P2P_ENTRY_URIS={}\n".format(
+                ",".join(
+                    [
+                        str(maddr)
+                        for maddr in self.entry_peers
+                        if str(maddr) != str(self.uri)  # TOFIX(LR) won't exclude self
+                    ]
                 )
             )
-            env_file.write("NODE_TO_AEA={}\n".format(self.pipe.in_path))
-            env_file.write("AEA_TO_NODE={}\n".format(self.pipe.out_path))
-            env_file.write(
-                "AEA_P2P_URI_PUBLIC={}\n".format(
-                    str(self.public_uri) if self.public_uri is not None else ""
-                )
+            self._config += "NODE_TO_AEA={}\n".format(self.pipe.in_path)
+            self._config += "AEA_TO_NODE={}\n".format(self.pipe.out_path)
+            self._config += "AEA_P2P_URI_PUBLIC={}\n".format(
+                str(self.public_uri) if self.public_uri is not None else ""
             )
-            env_file.write(
-                "AEA_P2P_DELEGATE_URI={}\n".format(
-                    str(self.delegate_uri) if self.delegate_uri is not None else ""
-                )
+            self._config += "AEA_P2P_DELEGATE_URI={}\n".format(
+                str(self.delegate_uri) if self.delegate_uri is not None else ""
             )
+            env_file.write(self._config)
 
         # run node
         self.logger.info("Starting libp2p node...")
@@ -333,11 +326,25 @@ class Libp2pNode:
         try:
             connected = await self.pipe.connect(timeout=self._connection_timeout)
             if not connected:
-                raise Exception("Couldn't connect to libp2p p2p process within timeout")
+                raise Exception("Couldn't connect to libp2p process within timeout")
         except Exception as e:
-            with open(self.log_file, "r") as f:
-                self.logger.error("Couldn't connect to libp2p p2p process, logs:")
-                self.logger.error(f.read())
+            err_msg = self.get_libp2p_node_error()
+            self.logger.error("Couldn't connect to libp2p process: {}".format(err_msg))
+            self.logger.error(
+                "Libp2p process configuration:\n{}".format(self._config.strip())
+            )
+            if err_msg == "":
+                with open(self.log_file, "r") as f:
+                    self.logger.error(
+                        "Libp2p process log file {}:\n{}".format(
+                            self.log_file, f.read()
+                        )
+                    )
+            else:
+                self.logger.error(
+                    "Please check log file {} for more details.".format(self.log_file)
+                )
+
             self.stop()
             raise e
 
@@ -394,6 +401,33 @@ class Libp2pNode:
                 else:
                     found = False
         return multiaddrs
+
+    def get_libp2p_node_error(self) -> str:
+        """
+        Parses libp2p node logs for critical errors
+
+        :return: error message if any, empty string otherwise
+        """
+
+        CRITICAL_ERROR = "LIBP2P_NODE_PANIC_ERROR"
+        PANIC_ERROR = "panic:"
+
+        error_msg = ""
+        panic_msg = ""
+
+        lines = []
+        with open(self.log_file, "r") as f:
+            lines = f.readlines()
+
+        for line in lines:
+            if CRITICAL_ERROR in line:
+                parts = line.split(":", 1)
+                error_msg = parts[1].strip()
+            if PANIC_ERROR in line:
+                parts = line.split(":", 1)
+                panic_msg = parts[1].strip()
+
+        return error_msg if error_msg != "" else panic_msg
 
     def stop(self) -> None:
         """

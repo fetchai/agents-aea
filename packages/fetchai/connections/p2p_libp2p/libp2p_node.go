@@ -22,7 +22,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 
@@ -35,18 +34,26 @@ import (
 	"libp2p_node/utils"
 )
 
+const (
+	libp2pNodePanicError      = "LIBP2P_NODE_PANIC_ERROR"
+	libp2pNodeIgnored         = "IGNORED"
+	libp2pMultiaddrsListStart = "MULTIADDRS_LIST_START"
+	libp2pMultiaddrsListEnd   = "MULTIADDRS_LIST_END"
+)
+
 var logger zerolog.Logger = utils.NewDefaultLogger()
 
 // panics if err is not nil
 func check(err error) {
 	if err != nil {
+		fmt.Println(libp2pNodePanicError, ":", err.Error())
 		panic(err)
 	}
 }
 
 func ignore(err error) {
 	if err != nil {
-		log.Println("IGNORED", err)
+		fmt.Println(libp2pNodeIgnored, ":", err)
 	}
 }
 
@@ -57,7 +64,7 @@ func main() {
 	// Initialize connection to aea
 	agent := aea.AeaApi{}
 	check(agent.Init())
-	log.Println("successfully initialized API to AEA!")
+	logger.Info().Msg("successfully initialized API to AEA!")
 
 	// Get node configuration
 
@@ -110,9 +117,9 @@ func main() {
 	defer node.Close()
 
 	// Connect to the agent
-	fmt.Println("MULTIADDRS_LIST_START") // keyword
+	fmt.Println(libp2pMultiaddrsListStart) // keyword
 	fmt.Println(node.MultiAddr())
-	fmt.Println("MULTIADDRS_LIST_END") // keyword
+	fmt.Println(libp2pMultiaddrsListEnd) // keyword
 
 	check(agent.Connect())
 	logger.Info().Msg("successfully connected to AEA!")
