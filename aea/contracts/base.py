@@ -32,9 +32,12 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.base import LedgerApi
-from aea.exceptions import enforce
+from aea.crypto.registries import Registry
+from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_module
 
+
+contract_registry: Registry["Contract"] = Registry["Contract"]()
 logger = logging.getLogger(__name__)
 
 
@@ -114,14 +117,16 @@ class Contract(Component):
             filter(lambda x: re.match(contract_class_name, x[0]), classes)
         )
         name_to_class = dict(contract_classes)
-        logger.debug("Processing contract {}".format(contract_class_name))
+        logger.debug(f"Processing contract {contract_class_name}")
         contract_class = name_to_class.get(contract_class_name, None)
         enforce(
-            contract_class_name is not None,
-            "Contract class '{}' not found.".format(contract_class_name),
+            contract_class is not None,
+            f"Contract class '{contract_class_name}' not found.",
         )
 
-        return contract_class(configuration, **kwargs)
+        _try_to_register_contract(configuration)
+        contract = contract_registry.make(str(configuration.public_id), **kwargs)
+        return contract
 
     @classmethod
     def get_deploy_transaction(
@@ -191,3 +196,25 @@ class Contract(Component):
         :return: the tx
         """
         raise NotImplementedError
+
+
+def _try_to_register_contract(configuration: ContractConfig):
+    """Register a contract to the registry."""
+    if str(configuration.public_id) in contract_registry.specs:
+        logger.warning(
+            f"Skipping registration of contract {configuration.public_id} since already registered."
+        )
+        return
+    logger.debug(f"Registering contract {configuration.public_id}")  # pragma: nocover
+    try:  # pragma: nocover
+        contract_registry.register(
+            id_=str(configuration.public_id),
+            entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+            class_kwargs={"contract_interface": configuration.contract_interfaces},
+            contract_config=configuration,
+        )
+    except AEAException as e:  # pragma: nocover
+        if "Cannot re-register id:" in str(e):
+            logger.warning("Already registered: {}".format(configuration.class_name))
+        else:
+            raise e
