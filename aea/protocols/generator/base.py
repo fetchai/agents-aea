@@ -1112,7 +1112,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "def __init__(\n"
         self._change_indent(1)
         cls_str += self.indent + "self,\n"
-        cls_str += self.indent + "agent_address: Address,\n"
+        cls_str += self.indent + "self_address: Address,\n"
         cls_str += (
             self.indent
             + "role_from_first_message: Callable[[Message, Address], Dialogue.Role],\n"

@@ -308,7 +308,7 @@ async def test_no_balance():
         ledger_id=ETHEREUM,
         address="test",
     )
-    message.to = dispatcher.dialogues.agent_address
+    message.to = dispatcher.dialogues.self_address
     message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
     assert dialogue is not None
@@ -338,7 +338,7 @@ async def test_no_raw_tx():
             chain_id=3,
         ),
     )
-    message.to = dispatcher.dialogues.agent_address
+    message.to = dispatcher.dialogues.self_address
     message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
     assert dialogue is not None
@@ -358,7 +358,7 @@ async def test_attempts_get_transaction_receipt():
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         transaction_digest=TransactionDigest("asdad", "sdfdsf"),
     )
-    message.to = dispatcher.dialogues.agent_address
+    message.to = dispatcher.dialogues.self_address
     message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
     assert dialogue is not None
