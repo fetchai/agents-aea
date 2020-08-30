@@ -102,15 +102,21 @@ class MultiAddr:
             raise Exception("Malformed public key:{}".format(str(e)))
 
         self._public_key = public_key
-        self._peerid = self._compute_peerid()
+        self._peerid = self.compute_peerid(self._public_key)
 
-    def _compute_peerid(self) -> str:
+    @staticmethod
+    def compute_peerid(public_key: str) -> str:
         """
-        Compute base58 representation of libp2p PeerID from Bitcoin EC encoded Secp256k1 public key
-        """
+        Compute the peer id from a public key.
 
+        In particular, compute the base58 representation of
+        libp2p PeerID from Bitcoin EC encoded Secp256k1 public key.
+
+        :param public_key: the public key.
+        :return: the peer id.
+        """
         key_protobuf = PublicKey(
-            key_type=KeyType.Secp256k1, data=_hex_to_bytes(self._public_key)  # type: ignore
+            key_type=KeyType.Secp256k1, data=_hex_to_bytes(public_key)  # type: ignore
         )
         key_serialized = key_protobuf.SerializeToString()
         algo = multihash.Func.sha2_256
@@ -119,9 +125,19 @@ class MultiAddr:
         key_mh = multihash.digest(key_serialized, algo)
         return base58.b58encode(key_mh.encode()).decode()
 
+    @property
+    def public_key(self) -> str:
+        """Get the public key."""
+        return self._public_key
+
+    @property
+    def peer_id(self) -> str:
+        """Get the peer id."""
+        return self._peerid
+
     def format(self) -> str:
-        """Canonical representation of a multiaddress."""
-        return f"/dns/{self._host}/tcp/{str(self._port)}/p2p/{self._peerid}"
+        """ Canonical representation of a multiaddress """
+        return f"/dns4/{self._host}/tcp/{self._port}/p2p/{self._peerid}"
 
     def __str__(self) -> str:
         """Default string representation of a mutliaddress."""

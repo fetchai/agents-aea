@@ -58,34 +58,35 @@ Options:
   --help                    Show this message and exit.
 
 Commands:
-  add              Add a resource to the agent.
-  add-key          Add a private key to the wallet.
-  config           Read or modify a configuration.
-  create           Create an agent.
-  delete           Delete an agent.
-  eject            Eject an installed item.
-  fetch            Fetch Agent from Registry.
-  fingerprint      Fingerprint a resource.
-  freeze           Get the dependencies.
-  generate         Generate a resource for the agent.
-  generate-key     Generate private keys.
-  generate-wealth  Generate wealth for address on test network.
-  get-address      Get the address associated with the private key.
-  get-wealth       Get the wealth associated with the private key.
-  gui              Run the CLI GUI.
-  init             Initialize your AEA configurations.
-  install          Install the dependencies.
-  interact         Interact with a running AEA via the stub connection.
-  launch           Launch many agents at the same time.
-  list             List the installed resources.
-  login            Login to Registry account.
-  logout           Logout from Registry account.
-  publish          Publish Agent to Registry.
-  push             Push item to Registry or save it in local packages.
-  register         Register a new Registry account.
-  remove           Remove a resource from the agent.
-  run              Run the agent.
-  scaffold         Scaffold a resource for the agent.
-  search           Search for components in the registry.
+  add               Add a resource to the agent.
+  add-key           Add a private key to the wallet.
+  config            Read or modify a configuration.
+  create            Create an agent.
+  delete            Delete an agent.
+  eject             Eject an installed item.
+  fetch             Fetch Agent from Registry.
+  fingerprint       Fingerprint a resource.
+  freeze            Get the dependencies.
+  generate          Generate a resource for the agent.
+  generate-key      Generate private keys.
+  generate-wealth   Generate wealth for address on test network.
+  get-address       Get the address associated with the private key.
+  get-multiaddress  Get the multiaddress associated with a private key or...
+  get-wealth        Get the wealth associated with the private key.
+  gui               Run the CLI GUI.
+  init              Initialize your AEA configurations.
+  install           Install the dependencies.
+  interact          Interact with a running AEA via the stub connection.
+  launch            Launch many agents at the same time.
+  list              List the installed resources.
+  login             Login to Registry account.
+  logout            Logout from Registry account.
+  publish           Publish Agent to Registry.
+  push              Push item to Registry or save it in local packages.
+  register          Register a new Registry account.
+  remove            Remove a resource from the agent.
+  run               Run the agent.
+  scaffold          Scaffold a resource for the agent.
+  search            Search for components in the registry.
 """
     )

@@ -47,6 +47,8 @@ def test_multiaddr_consistency():
     rmtree(tmpdir)
 
     assert str(maddr1) == str(maddr2)
+    assert maddr1.public_key == maddr2.public_key
+    assert maddr1.peer_id == maddr2.peer_id
 
 
 def test_multiaddr_correctness():
