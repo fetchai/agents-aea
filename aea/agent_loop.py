@@ -130,7 +130,7 @@ class BaseAgentLoop(WithLogger, ABC):
         """Cancel all tasks."""
         for task in self._tasks:
             if task.done():
-                continue
+                continue  #  pragma: nocover
             task.cancel()
 
     @property
@@ -208,7 +208,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         try:
             with ExecTimeoutThreadGuard(execution_timeout):
                 return fn(*(args or []), **(kwargs or {}))
-        except TimeoutException:
+        except TimeoutException:  #  pragma: nocover
             self.logger.warning(
                 "`{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
                     fn, execution_timeout

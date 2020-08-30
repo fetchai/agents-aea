@@ -344,7 +344,7 @@ class GenericLedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(self, ledger_api_msg: LedgerApiMessage,) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
