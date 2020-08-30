@@ -19,7 +19,7 @@
 """This module contains registries."""
 
 import logging
-from typing import List, Optional, cast
+from typing import List, Optional
 
 from aea.configurations.base import (
     PublicId,
@@ -27,7 +27,6 @@ from aea.configurations.base import (
 )
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.protocols.base import Message
-from aea.protocols.signing.message import SigningMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler
 
@@ -110,11 +109,8 @@ class Filter:
         """Handlle internal message."""
         if internal_message is None:
             logger.warning("Got 'None' while processing internal messages.")
-        elif isinstance(internal_message, SigningMessage):
-            internal_message = cast(SigningMessage, internal_message)
-            self._handle_signing_message(internal_message)
-        else:
-            logger.warning("Cannot handle a {} message.".format(type(internal_message)))
+            return
+        self._handle_internal_message(internal_message)
 
     def _handle_new_behaviours(self) -> None:
         """Register new behaviours added to skills."""
@@ -148,22 +144,22 @@ class Filter:
                         "Error when trying to add a new handler: {}".format(str(e))
                     )
 
-    def _handle_signing_message(self, signing_message: SigningMessage):
-        """Handle transaction message from the Decision Maker."""
-        skill_callback_ids = [
-            PublicId.from_str(skill_id)
-            for skill_id in signing_message.skill_callback_ids
-        ]
-        for skill_id in skill_callback_ids:
-            handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-                signing_message.protocol_id, skill_id,
+    def _handle_internal_message(self, message: Message):
+        """Handle message from the Decision Maker."""
+        try:
+            skill_id = PublicId.from_str(message.to)
+        except ValueError:
+            logger.warning("Invalid public id as destination={}".format(message.to))
+            return
+        handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+            message.protocol_id, skill_id,
+        )
+        if handler is not None:
+            logger.debug(
+                "Calling handler {} of skill {}".format(type(handler), skill_id)
             )
-            if handler is not None:
-                logger.debug(
-                    "Calling handler {} of skill {}".format(type(handler), skill_id)
-                )
-                handler.handle(cast(Message, signing_message))
-            else:
-                logger.warning(
-                    "No internal handler fetched for skill_id={}".format(skill_id)
-                )
+            handler.handle(message)
+        else:
+            logger.warning(
+                "No internal handler fetched for skill_id={}".format(skill_id)
+            )

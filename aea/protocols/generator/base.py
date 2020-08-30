@@ -1112,7 +1112,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "def __init__(\n"
         self._change_indent(1)
         cls_str += self.indent + "self,\n"
-        cls_str += self.indent + "agent_address: Address,\n"
+        cls_str += self.indent + "self_address: Address,\n"
         cls_str += (
             self.indent
             + "role_from_first_message: Callable[[Message, Address], Dialogue.Role],\n"
@@ -1131,14 +1131,14 @@ class ProtocolGenerator:
         cls_str += self.indent + "Initialize dialogues.\n\n"
         cls_str += (
             self.indent
-            + ":param agent_address: the address of the agent for whom dialogues are maintained\n"
+            + ":param self_address: the address of the entity for whom dialogues are maintained\n"
         )
         cls_str += self.indent + ":return: None\n"
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogues.__init__(\n"
         self._change_indent(1)
         cls_str += self.indent + "self,\n"
-        cls_str += self.indent + "agent_address=agent_address,\n"
+        cls_str += self.indent + "self_address=self_address,\n"
         cls_str += (
             self.indent
             + "end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),\n"

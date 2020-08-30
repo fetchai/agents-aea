@@ -611,10 +611,8 @@ class GenericLedgerApiHandler(Handler):
         signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
-            skill_callback_info={},
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_fipa_dialogue = (

@@ -1102,7 +1102,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 
         BaseDefaultDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -1174,7 +1174,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
 
         BaseFipaDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=FipaDialogue,
         )
@@ -1246,7 +1246,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -1280,7 +1280,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 ```
@@ -2110,10 +2110,8 @@ class GenericLedgerApiHandler(Handler):
         signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
-            skill_callback_info={},
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_fipa_dialogue = (
@@ -2473,7 +2471,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 
         BaseDefaultDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -2563,7 +2561,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
 
         BaseFipaDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=FipaDialogue,
         )
@@ -2635,7 +2633,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -2669,7 +2667,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -2741,7 +2739,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=SigningDialogue,
         )

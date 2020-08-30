@@ -9,11 +9,11 @@ aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: QmUm9C86crCZpXkHGCaPKeMfuMnP8BjMzSsjrUGkysmg9T
-  dialogues.py: QmZPeYFdyMH75zF46vT9dEFBHJ31wEzQduq2bhJb7tTf4Y
-  handlers.py: QmZiuHDY64Yi4Q1VQz1xq1k3Sh5H68xMnyyjjduL26Mjxf
+  dialogues.py: QmdPAjBTpgrW9qP8SnAjKHWxBQRiGUqmgiiXMdrPKAJUKj
+  handlers.py: QmeSaLfQV3rzHuHPhzsBps9z4AbX1MNevTs2YTjnZaWuEA
   helpers.py: QmfRnfpeCtHMEXSH3q3ofWhoSc7pbpRrSFSBVStUK3JWt3
   strategy.py: QmPSfuF3MMjryq6Gg7JHbk5qcVpDLf1fGD7j2ozGSwxbz2
-  transactions.py: QmYThBsS1Dd2H8XZvdjn92WYshoifKQ21ZHpANwC4mXKAt
+  transactions.py: QmbsJPvgJHyFRnE5bwWk7K7mygenzHLgog1GQtn4E5xaib
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.9.0

@@ -20,7 +20,7 @@
 """This module contains signing's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
@@ -163,24 +163,6 @@ class SigningMessage(Message):
         return cast(CustomSignedTransaction, self.get("signed_transaction"))
 
     @property
-    def skill_callback_ids(self) -> Tuple[str, ...]:
-        """Get the 'skill_callback_ids' content from the message."""
-        enforce(
-            self.is_set("skill_callback_ids"),
-            "'skill_callback_ids' content is not set.",
-        )
-        return cast(Tuple[str, ...], self.get("skill_callback_ids"))
-
-    @property
-    def skill_callback_info(self) -> Dict[str, str]:
-        """Get the 'skill_callback_info' content from the message."""
-        enforce(
-            self.is_set("skill_callback_info"),
-            "'skill_callback_info' content is not set.",
-        )
-        return cast(Dict[str, str], self.get("skill_callback_info"))
-
-    @property
     def terms(self) -> CustomTerms:
         """Get the 'terms' content from the message."""
         enforce(self.is_set("terms"), "'terms' content is not set.")
@@ -233,39 +215,7 @@ class SigningMessage(Message):
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == SigningMessage.Performative.SIGN_TRANSACTION:
-                expected_nb_of_contents = 4
-                enforce(
-                    type(self.skill_callback_ids) == tuple,
-                    "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
-                        type(self.skill_callback_ids)
-                    ),
-                )
-                enforce(
-                    all(type(element) == str for element in self.skill_callback_ids),
-                    "Invalid type for tuple elements in content 'skill_callback_ids'. Expected 'str'.",
-                )
-                enforce(
-                    type(self.skill_callback_info) == dict,
-                    "Invalid type for content 'skill_callback_info'. Expected 'dict'. Found '{}'.".format(
-                        type(self.skill_callback_info)
-                    ),
-                )
-                for (
-                    key_of_skill_callback_info,
-                    value_of_skill_callback_info,
-                ) in self.skill_callback_info.items():
-                    enforce(
-                        type(key_of_skill_callback_info) == str,
-                        "Invalid type for dictionary keys in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(key_of_skill_callback_info)
-                        ),
-                    )
-                    enforce(
-                        type(value_of_skill_callback_info) == str,
-                        "Invalid type for dictionary values in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(value_of_skill_callback_info)
-                        ),
-                    )
+                expected_nb_of_contents = 2
                 enforce(
                     type(self.terms) == CustomTerms,
                     "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
@@ -279,39 +229,7 @@ class SigningMessage(Message):
                     ),
                 )
             elif self.performative == SigningMessage.Performative.SIGN_MESSAGE:
-                expected_nb_of_contents = 4
-                enforce(
-                    type(self.skill_callback_ids) == tuple,
-                    "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
-                        type(self.skill_callback_ids)
-                    ),
-                )
-                enforce(
-                    all(type(element) == str for element in self.skill_callback_ids),
-                    "Invalid type for tuple elements in content 'skill_callback_ids'. Expected 'str'.",
-                )
-                enforce(
-                    type(self.skill_callback_info) == dict,
-                    "Invalid type for content 'skill_callback_info'. Expected 'dict'. Found '{}'.".format(
-                        type(self.skill_callback_info)
-                    ),
-                )
-                for (
-                    key_of_skill_callback_info,
-                    value_of_skill_callback_info,
-                ) in self.skill_callback_info.items():
-                    enforce(
-                        type(key_of_skill_callback_info) == str,
-                        "Invalid type for dictionary keys in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(key_of_skill_callback_info)
-                        ),
-                    )
-                    enforce(
-                        type(value_of_skill_callback_info) == str,
-                        "Invalid type for dictionary values in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(value_of_skill_callback_info)
-                        ),
-                    )
+                expected_nb_of_contents = 2
                 enforce(
                     type(self.terms) == CustomTerms,
                     "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
@@ -325,39 +243,7 @@ class SigningMessage(Message):
                     ),
                 )
             elif self.performative == SigningMessage.Performative.SIGNED_TRANSACTION:
-                expected_nb_of_contents = 3
-                enforce(
-                    type(self.skill_callback_ids) == tuple,
-                    "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
-                        type(self.skill_callback_ids)
-                    ),
-                )
-                enforce(
-                    all(type(element) == str for element in self.skill_callback_ids),
-                    "Invalid type for tuple elements in content 'skill_callback_ids'. Expected 'str'.",
-                )
-                enforce(
-                    type(self.skill_callback_info) == dict,
-                    "Invalid type for content 'skill_callback_info'. Expected 'dict'. Found '{}'.".format(
-                        type(self.skill_callback_info)
-                    ),
-                )
-                for (
-                    key_of_skill_callback_info,
-                    value_of_skill_callback_info,
-                ) in self.skill_callback_info.items():
-                    enforce(
-                        type(key_of_skill_callback_info) == str,
-                        "Invalid type for dictionary keys in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(key_of_skill_callback_info)
-                        ),
-                    )
-                    enforce(
-                        type(value_of_skill_callback_info) == str,
-                        "Invalid type for dictionary values in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(value_of_skill_callback_info)
-                        ),
-                    )
+                expected_nb_of_contents = 1
                 enforce(
                     type(self.signed_transaction) == CustomSignedTransaction,
                     "Invalid type for content 'signed_transaction'. Expected 'SignedTransaction'. Found '{}'.".format(
@@ -365,39 +251,7 @@ class SigningMessage(Message):
                     ),
                 )
             elif self.performative == SigningMessage.Performative.SIGNED_MESSAGE:
-                expected_nb_of_contents = 3
-                enforce(
-                    type(self.skill_callback_ids) == tuple,
-                    "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
-                        type(self.skill_callback_ids)
-                    ),
-                )
-                enforce(
-                    all(type(element) == str for element in self.skill_callback_ids),
-                    "Invalid type for tuple elements in content 'skill_callback_ids'. Expected 'str'.",
-                )
-                enforce(
-                    type(self.skill_callback_info) == dict,
-                    "Invalid type for content 'skill_callback_info'. Expected 'dict'. Found '{}'.".format(
-                        type(self.skill_callback_info)
-                    ),
-                )
-                for (
-                    key_of_skill_callback_info,
-                    value_of_skill_callback_info,
-                ) in self.skill_callback_info.items():
-                    enforce(
-                        type(key_of_skill_callback_info) == str,
-                        "Invalid type for dictionary keys in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(key_of_skill_callback_info)
-                        ),
-                    )
-                    enforce(
-                        type(value_of_skill_callback_info) == str,
-                        "Invalid type for dictionary values in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(value_of_skill_callback_info)
-                        ),
-                    )
+                expected_nb_of_contents = 1
                 enforce(
                     type(self.signed_message) == CustomSignedMessage,
                     "Invalid type for content 'signed_message'. Expected 'SignedMessage'. Found '{}'.".format(
@@ -405,39 +259,7 @@ class SigningMessage(Message):
                     ),
                 )
             elif self.performative == SigningMessage.Performative.ERROR:
-                expected_nb_of_contents = 3
-                enforce(
-                    type(self.skill_callback_ids) == tuple,
-                    "Invalid type for content 'skill_callback_ids'. Expected 'tuple'. Found '{}'.".format(
-                        type(self.skill_callback_ids)
-                    ),
-                )
-                enforce(
-                    all(type(element) == str for element in self.skill_callback_ids),
-                    "Invalid type for tuple elements in content 'skill_callback_ids'. Expected 'str'.",
-                )
-                enforce(
-                    type(self.skill_callback_info) == dict,
-                    "Invalid type for content 'skill_callback_info'. Expected 'dict'. Found '{}'.".format(
-                        type(self.skill_callback_info)
-                    ),
-                )
-                for (
-                    key_of_skill_callback_info,
-                    value_of_skill_callback_info,
-                ) in self.skill_callback_info.items():
-                    enforce(
-                        type(key_of_skill_callback_info) == str,
-                        "Invalid type for dictionary keys in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(key_of_skill_callback_info)
-                        ),
-                    )
-                    enforce(
-                        type(value_of_skill_callback_info) == str,
-                        "Invalid type for dictionary values in content 'skill_callback_info'. Expected 'str'. Found '{}'.".format(
-                            type(value_of_skill_callback_info)
-                        ),
-                    )
+                expected_nb_of_contents = 1
                 enforce(
                     type(self.error_code) == CustomErrorCode,
                     "Invalid type for content 'error_code'. Expected 'ErrorCode'. Found '{}'.".format(

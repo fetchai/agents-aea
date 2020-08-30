@@ -131,7 +131,7 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
 
         BaseContractApiDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=ContractApiDialogue,
         )
@@ -164,7 +164,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 
         BaseDefaultDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -235,7 +235,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
 
         BaseFipaDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=FipaDialogue,
         )
@@ -312,7 +312,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -346,7 +346,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -425,7 +425,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=SigningDialogue,
         )

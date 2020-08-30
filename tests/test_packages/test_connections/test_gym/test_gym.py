@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 class GymDialogues(BaseGymDialogues):
     """The dialogues class keeps track of all gym dialogues."""
 
-    def __init__(self, receiver_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -67,7 +67,7 @@ class GymDialogues(BaseGymDialogues):
 
         BaseGymDialogues.__init__(
             self,
-            agent_address=receiver_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 

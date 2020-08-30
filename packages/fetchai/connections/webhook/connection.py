@@ -72,7 +72,7 @@ class HttpDialogues(BaseHttpDialogues):
 
         BaseHttpDialogues.__init__(
             self,
-            agent_address=str(WebhookConnection.connection_id),
+            self_address=str(WebhookConnection.connection_id),
             role_from_first_message=role_from_first_message,
             **kwargs,
         )

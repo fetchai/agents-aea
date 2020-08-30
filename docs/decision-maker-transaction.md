@@ -64,7 +64,9 @@ Add a simple skill with a signing handler and the signing dialogues.
         skill_context=skill_context, name="signing_handler"
     )
     signing_dialogues_model = SigningDialogues(
-        skill_context=skill_context, name="signing_dialogues"
+        skill_context=skill_context,
+        name="signing_dialogues",
+        self_address=str(skill_config.public_id),
     )
 
     simple_skill = Skill(
@@ -117,10 +119,8 @@ Next, we are creating the signing message and we send it to the decision-maker.
     signing_msg = SigningMessage(
         performative=SigningMessage.Performative.SIGN_TRANSACTION,
         dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-        skill_callback_ids=(str(skill_context.skill_id),),
         raw_transaction=RawTransaction(CosmosCrypto.identifier, stub_transaction),
         terms=terms,
-        skill_callback_info={"some_info_key": "some_info_value"},
     )
     signing_dialogue = cast(
         Optional[SigningDialogue],
@@ -159,7 +159,7 @@ To be able to register a handler that reads the internal messages, we have to cr
 class SigningDialogues(Model, BaseSigningDialogues):
     """Signing dialogues model."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -180,7 +180,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 
@@ -342,7 +342,9 @@ def run():
         skill_context=skill_context, name="signing_handler"
     )
     signing_dialogues_model = SigningDialogues(
-        skill_context=skill_context, name="signing_dialogues"
+        skill_context=skill_context,
+        name="signing_dialogues",
+        self_address=str(skill_config.public_id),
     )
 
     simple_skill = Skill(
@@ -388,10 +390,8 @@ def run():
     signing_msg = SigningMessage(
         performative=SigningMessage.Performative.SIGN_TRANSACTION,
         dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-        skill_callback_ids=(str(skill_context.skill_id),),
         raw_transaction=RawTransaction(CosmosCrypto.identifier, stub_transaction),
         terms=terms,
-        skill_callback_info={"some_info_key": "some_info_value"},
     )
     signing_dialogue = cast(
         Optional[SigningDialogue],
@@ -418,7 +418,7 @@ def run():
 class SigningDialogues(Model, BaseSigningDialogues):
     """Signing dialogues model."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -439,7 +439,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 

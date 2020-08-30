@@ -33,7 +33,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 class DefaultDialogues(BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, agent_address: Address) -> None:
+    def __init__(self, self_address: Address) -> None:
         """
         Initialize dialogues.
 
@@ -53,7 +53,7 @@ class DefaultDialogues(BaseDefaultDialogues):
 
         BaseDefaultDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 

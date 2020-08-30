@@ -91,14 +91,14 @@ class Dialogues(BaseDialogues):
 
     def __init__(
         self,
-        agent_address: Address,
+        self_address: Address,
         message_class=DefaultMessage,
         dialogue_class=Dialogue,
     ) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
 
@@ -115,7 +115,7 @@ class Dialogues(BaseDialogues):
 
         BaseDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             end_states=cast(FrozenSet[BaseDialogue.EndState], self.END_STATES),
             message_class=message_class,
             dialogue_class=dialogue_class,
@@ -1040,7 +1040,7 @@ class TestDialoguesBase:
     def test_dialogues_properties(self):
         """Test dialogue properties."""
         assert self.own_dialogues.dialogues == dict()
-        assert self.own_dialogues.agent_address == self.agent_address
+        assert self.own_dialogues.self_address == self.agent_address
         assert self.own_dialogues.dialogue_stats.other_initiated == {
             Dialogue.EndState.SUCCESSFUL: 0,
             Dialogue.EndState.FAILED: 0,
@@ -1161,6 +1161,22 @@ class TestDialoguesBase:
         assert dialogue.last_message.target == valid_message_2_by_other.target
         assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
         assert dialogue.last_message.content == b"Hello back"
+
+    def test_update_positive_existing_dialogue_2(self):
+        """Positive test for the 'update' method: the input message is for an existing dialogue from the original sender."""
+        msg_1, dialogue = self.own_dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+
+        opponent_dialogue_1 = self.opponent_dialogues.update(msg_1)
+
+        msg_2 = dialogue.reply(
+            performative=DefaultMessage.Performative.BYTES, content=b"Hello again",
+        )
+
+        opponent_dialogue_2 = self.opponent_dialogues.update(msg_2)
+
+        assert opponent_dialogue_1 == opponent_dialogue_2
 
     def test_update_negative_invalid_label(self):
         """Negative test for the 'update' method: dialogue is not extendable with the input message."""
@@ -1515,6 +1531,15 @@ class TestDialoguesBase:
         assert not result
         assert len(self.own_dialogues.dialogues) == 0
 
+    def test_create_with_message(self):
+        """Positive test for create with message."""
+        msg = DefaultMessage(
+            dialogue_reference=self.own_dialogues.new_self_initiated_dialogue_reference(),
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        self.own_dialogues.create_with_message("opponent", msg)
+
     def test__create_positive(self):
         """Positive test for the '_create' method."""
         pass
@@ -1537,3 +1562,15 @@ class TestDialoguesBase:
         )
         second_nonce = self.own_dialogues._generate_dialogue_nonce()
         assert nonce != second_nonce
+
+    def test_get_dialogues_with_counterparty(self):
+        assert (
+            self.own_dialogues.get_dialogues_with_counterparty(self.opponent_address)
+            == []
+        )
+        _, dialogue = self.own_dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        assert self.own_dialogues.get_dialogues_with_counterparty(
+            self.opponent_address
+        ) == [dialogue]

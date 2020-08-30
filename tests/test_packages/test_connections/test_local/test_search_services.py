@@ -53,7 +53,7 @@ from tests.conftest import MAX_FLAKY_RERUNS, _make_local_connection
 class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
-    def __init__(self, agent_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -73,7 +73,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
         )
 

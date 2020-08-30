@@ -55,10 +55,6 @@ class SigningSerializer(Serializer):
         performative_id = msg.performative
         if performative_id == SigningMessage.Performative.SIGN_TRANSACTION:
             performative = signing_pb2.SigningMessage.Sign_Transaction_Performative()  # type: ignore
-            skill_callback_ids = msg.skill_callback_ids
-            performative.skill_callback_ids.extend(skill_callback_ids)
-            skill_callback_info = msg.skill_callback_info
-            performative.skill_callback_info.update(skill_callback_info)
             terms = msg.terms
             Terms.encode(performative.terms, terms)
             raw_transaction = msg.raw_transaction
@@ -66,10 +62,6 @@ class SigningSerializer(Serializer):
             signing_msg.sign_transaction.CopyFrom(performative)
         elif performative_id == SigningMessage.Performative.SIGN_MESSAGE:
             performative = signing_pb2.SigningMessage.Sign_Message_Performative()  # type: ignore
-            skill_callback_ids = msg.skill_callback_ids
-            performative.skill_callback_ids.extend(skill_callback_ids)
-            skill_callback_info = msg.skill_callback_info
-            performative.skill_callback_info.update(skill_callback_info)
             terms = msg.terms
             Terms.encode(performative.terms, terms)
             raw_message = msg.raw_message
@@ -77,10 +69,6 @@ class SigningSerializer(Serializer):
             signing_msg.sign_message.CopyFrom(performative)
         elif performative_id == SigningMessage.Performative.SIGNED_TRANSACTION:
             performative = signing_pb2.SigningMessage.Signed_Transaction_Performative()  # type: ignore
-            skill_callback_ids = msg.skill_callback_ids
-            performative.skill_callback_ids.extend(skill_callback_ids)
-            skill_callback_info = msg.skill_callback_info
-            performative.skill_callback_info.update(skill_callback_info)
             signed_transaction = msg.signed_transaction
             SignedTransaction.encode(
                 performative.signed_transaction, signed_transaction
@@ -88,19 +76,11 @@ class SigningSerializer(Serializer):
             signing_msg.signed_transaction.CopyFrom(performative)
         elif performative_id == SigningMessage.Performative.SIGNED_MESSAGE:
             performative = signing_pb2.SigningMessage.Signed_Message_Performative()  # type: ignore
-            skill_callback_ids = msg.skill_callback_ids
-            performative.skill_callback_ids.extend(skill_callback_ids)
-            skill_callback_info = msg.skill_callback_info
-            performative.skill_callback_info.update(skill_callback_info)
             signed_message = msg.signed_message
             SignedMessage.encode(performative.signed_message, signed_message)
             signing_msg.signed_message.CopyFrom(performative)
         elif performative_id == SigningMessage.Performative.ERROR:
             performative = signing_pb2.SigningMessage.Error_Performative()  # type: ignore
-            skill_callback_ids = msg.skill_callback_ids
-            performative.skill_callback_ids.extend(skill_callback_ids)
-            skill_callback_info = msg.skill_callback_info
-            performative.skill_callback_info.update(skill_callback_info)
             error_code = msg.error_code
             ErrorCode.encode(performative.error_code, error_code)
             signing_msg.error.CopyFrom(performative)
@@ -131,12 +111,6 @@ class SigningSerializer(Serializer):
         performative_id = SigningMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]
         if performative_id == SigningMessage.Performative.SIGN_TRANSACTION:
-            skill_callback_ids = signing_pb.sign_transaction.skill_callback_ids
-            skill_callback_ids_tuple = tuple(skill_callback_ids)
-            performative_content["skill_callback_ids"] = skill_callback_ids_tuple
-            skill_callback_info = signing_pb.sign_transaction.skill_callback_info
-            skill_callback_info_dict = dict(skill_callback_info)
-            performative_content["skill_callback_info"] = skill_callback_info_dict
             pb2_terms = signing_pb.sign_transaction.terms
             terms = Terms.decode(pb2_terms)
             performative_content["terms"] = terms
@@ -144,12 +118,6 @@ class SigningSerializer(Serializer):
             raw_transaction = RawTransaction.decode(pb2_raw_transaction)
             performative_content["raw_transaction"] = raw_transaction
         elif performative_id == SigningMessage.Performative.SIGN_MESSAGE:
-            skill_callback_ids = signing_pb.sign_message.skill_callback_ids
-            skill_callback_ids_tuple = tuple(skill_callback_ids)
-            performative_content["skill_callback_ids"] = skill_callback_ids_tuple
-            skill_callback_info = signing_pb.sign_message.skill_callback_info
-            skill_callback_info_dict = dict(skill_callback_info)
-            performative_content["skill_callback_info"] = skill_callback_info_dict
             pb2_terms = signing_pb.sign_message.terms
             terms = Terms.decode(pb2_terms)
             performative_content["terms"] = terms
@@ -157,32 +125,14 @@ class SigningSerializer(Serializer):
             raw_message = RawMessage.decode(pb2_raw_message)
             performative_content["raw_message"] = raw_message
         elif performative_id == SigningMessage.Performative.SIGNED_TRANSACTION:
-            skill_callback_ids = signing_pb.signed_transaction.skill_callback_ids
-            skill_callback_ids_tuple = tuple(skill_callback_ids)
-            performative_content["skill_callback_ids"] = skill_callback_ids_tuple
-            skill_callback_info = signing_pb.signed_transaction.skill_callback_info
-            skill_callback_info_dict = dict(skill_callback_info)
-            performative_content["skill_callback_info"] = skill_callback_info_dict
             pb2_signed_transaction = signing_pb.signed_transaction.signed_transaction
             signed_transaction = SignedTransaction.decode(pb2_signed_transaction)
             performative_content["signed_transaction"] = signed_transaction
         elif performative_id == SigningMessage.Performative.SIGNED_MESSAGE:
-            skill_callback_ids = signing_pb.signed_message.skill_callback_ids
-            skill_callback_ids_tuple = tuple(skill_callback_ids)
-            performative_content["skill_callback_ids"] = skill_callback_ids_tuple
-            skill_callback_info = signing_pb.signed_message.skill_callback_info
-            skill_callback_info_dict = dict(skill_callback_info)
-            performative_content["skill_callback_info"] = skill_callback_info_dict
             pb2_signed_message = signing_pb.signed_message.signed_message
             signed_message = SignedMessage.decode(pb2_signed_message)
             performative_content["signed_message"] = signed_message
         elif performative_id == SigningMessage.Performative.ERROR:
-            skill_callback_ids = signing_pb.error.skill_callback_ids
-            skill_callback_ids_tuple = tuple(skill_callback_ids)
-            performative_content["skill_callback_ids"] = skill_callback_ids_tuple
-            skill_callback_info = signing_pb.error.skill_callback_info
-            skill_callback_info_dict = dict(skill_callback_info)
-            performative_content["skill_callback_info"] = skill_callback_info_dict
             pb2_error_code = signing_pb.error.error_code
             error_code = ErrorCode.decode(pb2_error_code)
             performative_content["error_code"] = error_code

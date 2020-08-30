@@ -76,7 +76,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            agent_address=self.context.agent_address + "_" + str(self.context.skill_id),
+            self_address=self.context.agent_address + "_" + str(self.context.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
@@ -109,7 +109,7 @@ class StateUpdateDialogues(Model, BaseStateUpdateDialogues):
 
         BaseStateUpdateDialogues.__init__(
             self,
-            agent_address=self.context.agent_address + "_" + str(self.context.skill_id),
+            self_address=self.context.agent_address + "_" + str(self.context.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
@@ -141,6 +141,6 @@ class TacDialogues(Model, BaseTacDialogues):
 
         BaseTacDialogues.__init__(
             self,
-            agent_address=self.context.agent_address,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )

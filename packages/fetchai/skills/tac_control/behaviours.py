@@ -183,9 +183,12 @@ class TacBehaviour(Behaviour):
         )
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.conf.agent_addr_to_name.keys():
-            tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(agent_address)
-            if tac_dialogue is None:
+            _tac_dialogues = tac_dialogues.get_dialogues_with_counterparty(
+                agent_address
+            )
+            if len(_tac_dialogues) != 1:
                 raise ValueError("Error when retrieving dialogue.")
+            tac_dialogue = _tac_dialogues[0]
             last_msg = tac_dialogue.last_message
             if last_msg is None:
                 raise ValueError("Error when retrieving last message.")
@@ -213,9 +216,12 @@ class TacBehaviour(Behaviour):
         self.context.logger.info("notifying agents that TAC is cancelled.")
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.registration.agent_addr_to_name.keys():
-            tac_dialogue = tac_dialogues.get_dialogue_with_counterparty(agent_address)
-            if tac_dialogue is None:
+            _tac_dialogues = tac_dialogues.get_dialogues_with_counterparty(
+                agent_address
+            )
+            if len(_tac_dialogues) != 1:
                 raise ValueError("Error when retrieving dialogue.")
+            tac_dialogue = _tac_dialogues[0]
             last_msg = tac_dialogue.last_message
             if last_msg is None:
                 raise ValueError("Error when retrieving last message.")

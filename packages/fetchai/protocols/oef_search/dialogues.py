@@ -112,19 +112,19 @@ class OefSearchDialogues(Dialogues, ABC):
 
     def __init__(
         self,
-        agent_address: Address,
+        self_address: Address,
         role_from_first_message: Callable[[Message, Address], Dialogue.Role],
         dialogue_class: Type[OefSearchDialogue] = OefSearchDialogue,
     ) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
         Dialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),
             message_class=OefSearchMessage,
             dialogue_class=dialogue_class,

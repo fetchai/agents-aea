@@ -78,7 +78,7 @@ PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.7.0")
 class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
-    def __init__(self, agent_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
@@ -99,7 +99,7 @@ class HttpDialogues(BaseHttpDialogues):
 
         BaseHttpDialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
             **kwargs,
         )

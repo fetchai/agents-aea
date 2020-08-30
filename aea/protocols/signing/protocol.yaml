@@ -6,14 +6,14 @@ description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=0.5.0, <0.6.0'
 fingerprint:
-  README.md: QmaZorxxBQ8HAzGmzYdnGJ7YfdKETdRgNeUTAmQsbDKDBH
+  README.md: QmRY5KMWgJHWmJi5oKgZvvx7ikBUmPRH5ToDL2DhDCsxqm
   __init__.py: QmcCL3TTdvd8wxYKzf2d3cgKEtY9RzLjPCn4hex4wmb6h6
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
-  dialogues.py: QmZnMcKgY9BPXRXmEpz6yTZj73FsjtHAwYSZFAcTWkzveW
-  message.py: QmSrtxy9fvpHsMjMtKzwBXPEis7Jbvf9LUJTq5P2WmTpkN
-  serialization.py: QmPUWHUpQ9pst42s1naM5nTbsxxko5HxPi2gB86FQnMGnL
-  signing.proto: QmT59ZVsevFoJ51uiuAzCgHGowmwfo3bLAKRSgXV1qyXFo
-  signing_pb2.py: QmPZFneKLZUipxAZ3usnmUm1br6VvetzvBpid6GU4JjR39
+  dialogues.py: QmQ1WKs3Dn15oDSwpc4N8hdADLxrn76U4X5SiLAmyGiPPY
+  message.py: QmRLWAYfjCQmdg2hH8R5R63DKYaDrzuX4dVTFqNHuyjawq
+  serialization.py: QmZrztNBaWA6B5wJHQWfM2g6opPtvsEXtqytzmxjKWm7Sb
+  signing.proto: QmcxyLzqhTE9xstAEzCVH17osbLxmSdALx9njmuPjhjrvZ
+  signing_pb2.py: QmY3Ak5ih5zGvKjeZ5EnzrGX4tMYn5dWpjPArQwFeJpVKu
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

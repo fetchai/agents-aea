@@ -22,7 +22,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
@@ -80,7 +80,7 @@ class SigningDialogues(BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            agent_address="decision_maker",
+            self_address="decision_maker",
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -110,7 +110,7 @@ class StateUpdateDialogues(BaseStateUpdateDialogues):
 
         BaseStateUpdateDialogues.__init__(
             self,
-            agent_address="decision_maker",
+            self_address="decision_maker",
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -638,10 +638,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         """
         performative = SigningMessage.Performative.ERROR
         kwargs = {
-            "skill_callback_ids": signing_msg.skill_callback_ids,
-            "skill_callback_info": signing_msg.skill_callback_info,
             "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
-        }
+        }  # type: Dict[str, Any]
         if self._is_acceptable_for_signing(signing_msg):
             signed_message = self.wallet.sign_message(
                 signing_msg.raw_message.ledger_id,
@@ -673,10 +671,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         """
         performative = SigningMessage.Performative.ERROR
         kwargs = {
-            "skill_callback_ids": signing_msg.skill_callback_ids,
-            "skill_callback_info": signing_msg.skill_callback_info,
             "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
-        }
+        }  # type: Dict[str, Any]
         if self._is_acceptable_for_signing(signing_msg):
             signed_tx = self.wallet.sign_transaction(
                 signing_msg.raw_transaction.ledger_id, signing_msg.raw_transaction.body

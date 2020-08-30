@@ -65,7 +65,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            agent_address=str(CONNECTION_ID),
+            self_address=str(CONNECTION_ID),
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
