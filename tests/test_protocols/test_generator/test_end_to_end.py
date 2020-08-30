@@ -35,8 +35,8 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.helpers import create_private_key
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
 

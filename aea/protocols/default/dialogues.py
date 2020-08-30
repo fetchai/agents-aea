@@ -28,9 +28,9 @@ from abc import ABC
 from typing import Callable, FrozenSet, Type, cast
 
 from aea.common import Address
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
 
 class DefaultDialogue(Dialogue):
@@ -63,7 +63,7 @@ class DefaultDialogue(Dialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: Dialogue.Role,
         message_class: Type[DefaultMessage] = DefaultMessage,
     ) -> None:
@@ -71,7 +71,7 @@ class DefaultDialogue(Dialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :return: None
         """
@@ -79,7 +79,7 @@ class DefaultDialogue(Dialogue):
             self,
             dialogue_label=dialogue_label,
             message_class=message_class,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
         )
 

@@ -37,8 +37,6 @@ from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
@@ -48,6 +46,8 @@ from aea.helpers.search.models import (
 )
 from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -129,7 +129,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
         message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
@@ -137,7 +137,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
@@ -145,7 +145,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         BaseOefSearchDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )

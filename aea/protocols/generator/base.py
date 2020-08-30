@@ -992,11 +992,11 @@ class ProtocolGenerator:
             self.indent + "from typing import Callable, FrozenSet, Type, cast\n\n"
         )
         cls_str += self.indent + "from aea.common import Address\n"
+        cls_str += self.indent + "from aea.protocols.base import Message\n"
         cls_str += (
             self.indent
-            + "from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
+            + "from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues\n\n"
         )
-        cls_str += self.indent + "from aea.protocols.base import Message\n\n"
         cls_str += self.indent + "from {}.message import {}Message\n".format(
             self.dotted_path_to_protocol_package,
             self.protocol_specification_in_camel_case,
@@ -1053,7 +1053,7 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += self.indent + "self,\n"
         cls_str += self.indent + "dialogue_label: DialogueLabel,\n"
-        cls_str += self.indent + "agent_address: Address,\n"
+        cls_str += self.indent + "self_address: Address,\n"
         cls_str += self.indent + "role: Dialogue.Role,\n"
         cls_str += self.indent + "message_class: Type[{}Message] = {}Message,\n".format(
             self.protocol_specification_in_camel_case,
@@ -1069,7 +1069,7 @@ class ProtocolGenerator:
         )
         cls_str += (
             self.indent
-            + ":param agent_address: the address of the agent for whom this dialogue is maintained\n"
+            + ":param self_address: the address of the entity for whom this dialogue is maintained\n"
         )
         cls_str += (
             self.indent
@@ -1081,7 +1081,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "self,\n"
         cls_str += self.indent + "dialogue_label=dialogue_label,\n"
         cls_str += self.indent + "message_class=message_class,\n"
-        cls_str += self.indent + "agent_address=agent_address,\n"
+        cls_str += self.indent + "self_address=self_address,\n"
         cls_str += self.indent + "role=role,\n"
         cls_str += self.indent + ")\n"
         self._change_indent(-2)

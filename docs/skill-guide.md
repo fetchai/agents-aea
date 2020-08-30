@@ -83,18 +83,16 @@ class MySearchBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        search_request = OefSearchMessage(
-            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            query=self.query,
-        )
         self.context.logger.info(
             "sending search request to OEF search node, search_count={}".format(
                 self.sent_search_count
             )
         )
-        search_request.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(search_request)
+        search_request, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=self.query,
+        )
         self.context.outbox.put_message(message=search_request)
 
     def teardown(self) -> None:
@@ -268,10 +266,9 @@ We place this code in `my_aea/skills/my_search/handlers.py`.
 We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> classes.
 
 ``` python
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.base import Message
-from aea.skills.base import Model
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.skills.base import Address, Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
@@ -295,32 +292,23 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseOefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            agent_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 ```
 
 We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then renamce `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
@@ -643,9 +631,9 @@ class Strategy(Model):
 We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`.
 
 ``` python
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -693,7 +681,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: the created dialogue
         """
         dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+            dialogue_label=dialogue_label, self_address=self.self_address, role=role
         )
         return dialogue
 ```

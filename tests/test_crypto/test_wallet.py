@@ -167,7 +167,7 @@ class WalletTestCase(TestCase):
             transaction={"gasPrice": 50, "nonce": 10, "gas": 10},
         )
         assert (
-            type(signed_transaction) == eth_account.datastructures.AttributeDict
+            type(signed_transaction) == eth_account.datastructures.SignedTransaction
         ), "No signed transaction returned"
 
     def test_wallet_sign_transaction_negative(self):

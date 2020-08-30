@@ -25,12 +25,12 @@ import pytest
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel, DialogueStats
-from aea.helpers.dialogue.base import Dialogues as BaseDialogues
-from aea.helpers.dialogue.base import InvalidDialogueMessage
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel, DialogueStats
+from aea.protocols.dialogue.base import Dialogues as BaseDialogues
+from aea.protocols.dialogue.base import InvalidDialogueMessage
 from aea.protocols.state_update.message import StateUpdateMessage
 
 
@@ -62,21 +62,21 @@ class Dialogue(BaseDialogue):
         self,
         dialogue_label: DialogueLabel,
         message_class: Type[Message] = DefaultMessage,
-        agent_address: Address = "agent 1",
+        self_address: Address = "agent 1",
         role: BaseDialogue.Role = Role.ROLE1,
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :return: None
         """
         BaseDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )
@@ -243,7 +243,7 @@ class TestDialogueBase:
         assert self.dialogue.dialogue_label == self.dialogue_label
         assert self.dialogue.incomplete_dialogue_label == self.dialogue_label
         assert self.dialogue.dialogue_labels == {self.dialogue_label}
-        assert self.dialogue.agent_address == self.agent_address
+        assert self.dialogue.self_address == self.agent_address
 
         assert self.dialogue.role == Dialogue.Role.ROLE1
         assert str(self.dialogue.role) == "role1"

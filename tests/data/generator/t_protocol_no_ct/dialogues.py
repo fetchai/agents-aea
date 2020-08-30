@@ -28,8 +28,8 @@ from abc import ABC
 from typing import Callable, FrozenSet, Type, cast
 
 from aea.common import Address
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
 from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 
@@ -90,7 +90,7 @@ class TProtocolNoCtDialogue(Dialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: Dialogue.Role,
         message_class: Type[TProtocolNoCtMessage] = TProtocolNoCtMessage,
     ) -> None:
@@ -98,7 +98,7 @@ class TProtocolNoCtDialogue(Dialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :return: None
         """
@@ -106,7 +106,7 @@ class TProtocolNoCtDialogue(Dialogue):
             self,
             dialogue_label=dialogue_label,
             message_class=message_class,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
         )
 

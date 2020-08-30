@@ -28,10 +28,10 @@ This module contains the classes required for dialogue management.
 - TacDialogues: The dialogues class keeps track of all dialogues of type tac.
 """
 
-from aea.helpers.dialogue.base import Dialogue
 from aea.protocols.base import Address, Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
+from aea.protocols.dialogue.base import Dialogue
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (

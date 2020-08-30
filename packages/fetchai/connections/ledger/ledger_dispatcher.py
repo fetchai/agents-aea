@@ -22,12 +22,12 @@ from typing import cast
 
 from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
-from aea.helpers.dialogue.base import (
+from aea.helpers.transaction.base import RawTransaction, TransactionDigest
+from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import (
     Dialogue as BaseDialogue,
     Dialogues as BaseDialogues,
 )
-from aea.helpers.transaction.base import RawTransaction, TransactionDigest
-from aea.protocols.base import Address, Message
 
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID,

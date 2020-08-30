@@ -294,11 +294,11 @@ Below, we give an example of a dialogue between two agents. In practice; both di
 We first create concrete implementations of `FipaDialogue` and `FipaDialogues` for the buyer and seller:
 ``` python
 from aea.common import Address
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -310,20 +310,20 @@ class BuyerDialogue(FipaDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
         FipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self, dialogue_label=dialogue_label, self_address=self_address, role=role
         )
         self.proposal = None  # type: Optional[Description]
 
@@ -351,7 +351,7 @@ class BuyerDialogues(FipaDialogues):
         :return: the created dialogue
         """
         dialogue = BuyerDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+            dialogue_label=dialogue_label, self_address=self.self_address, role=role
         )
         return dialogue
 
@@ -371,20 +371,20 @@ class SellerDialogue(FipaDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
         FipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self, dialogue_label=dialogue_label, self_address=self_address, role=role
         )
         self.proposal = None  # type: Optional[Description]
 
@@ -412,7 +412,7 @@ class SellerDialogues(FipaDialogues):
         :return: the created dialogue
         """
         dialogue = SellerDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+            dialogue_label=dialogue_label, self_address=self.self_address, role=role
         )
         return dialogue
 

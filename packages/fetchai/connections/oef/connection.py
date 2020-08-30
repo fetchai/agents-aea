@@ -34,11 +34,11 @@ from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -68,7 +68,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
         message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
@@ -76,13 +76,13 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
         BaseOefSearchDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self, dialogue_label=dialogue_label, self_address=self_address, role=role
         )
         self._envelope_context = None  # type: Optional[EnvelopeContext]
 

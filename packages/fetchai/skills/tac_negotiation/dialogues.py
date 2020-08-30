@@ -27,10 +27,10 @@ from typing import Optional, Type, cast
 
 from aea.common import Address
 from aea.exceptions import enforce
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.skills.base import Model
@@ -145,7 +145,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: Dialogue.Role,
         message_class: Type[OefSearchMessage] = OefSearchMessage,
     ) -> None:
@@ -153,7 +153,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
@@ -161,7 +161,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         BaseOefSearchDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            self_address=self_address,
             role=role,
             message_class=message_class,
         )
