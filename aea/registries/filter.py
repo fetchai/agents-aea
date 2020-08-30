@@ -19,7 +19,7 @@
 """This module contains registries."""
 
 import logging
-from typing import List, Optional, cast
+from typing import List, Optional
 
 from aea.configurations.base import (
     PublicId,
@@ -149,7 +149,7 @@ class Filter:
         try:
             skill_id = PublicId.from_str(message.to)
         except ValueError:
-            logger.warning("Invalid public id={}".format(message.to))
+            logger.warning("Invalid public id as destination={}".format(message.to))
             return
         handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
             message.protocol_id, skill_id,
@@ -158,7 +158,7 @@ class Filter:
             logger.debug(
                 "Calling handler {} of skill {}".format(type(handler), skill_id)
             )
-            handler.handle(cast(Message, message))
+            handler.handle(message)
         else:
             logger.warning(
                 "No internal handler fetched for skill_id={}".format(skill_id)
