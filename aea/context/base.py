@@ -26,7 +26,7 @@ from typing import Any, Dict, Optional
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.identity.base import Identity
-from aea.multiplexer import ConnectionStatus, OutBox
+from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.skills.tasks import TaskManager
 
 
@@ -36,7 +36,7 @@ class AgentContext:
     def __init__(
         self,
         identity: Identity,
-        connection_status: ConnectionStatus,
+        connection_status: MultiplexerStatus,
         outbox: OutBox,
         decision_maker_message_queue: Queue,
         decision_maker_handler_context: SimpleNamespace,
@@ -101,7 +101,7 @@ class AgentContext:
         return self.identity.address
 
     @property
-    def connection_status(self) -> ConnectionStatus:
+    def connection_status(self) -> MultiplexerStatus:
         """Get connection status of the multiplexer."""
         return self._connection_status
 
