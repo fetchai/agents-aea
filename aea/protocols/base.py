@@ -327,9 +327,8 @@ class ProtobufSerializer(Serializer):
             dialogue_responder_reference = (
                 dialogue_message_pb.dialogue_responder_reference
             )
-            content = dialogue_message_pb.content
             body_json = Struct()
-            content.Unpack(body_json)
+            dialogue_message_pb.content.Unpack(body_json)
             body = dict(body_json)
             body["message_id"] = message_id
             body["target"] = target
