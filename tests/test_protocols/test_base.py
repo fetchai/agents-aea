@@ -122,6 +122,12 @@ class TestBaseSerializations:
         """Set up the use case."""
         cls.message = Message(content="hello")
         cls.message2 = Message(body={"content": "hello"})
+        cls.message3 = Message(
+            message_id=1,
+            target=0,
+            dialogue_reference=("", ""),
+            body={"content": "hello"},
+        )
 
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
@@ -140,6 +146,25 @@ class TestBaseSerializations:
 
         expected_msg = ProtobufSerializer().decode(expected_envelope.message)
         actual_msg = self.message
+        assert expected_msg == actual_msg
+
+    def test_default_protobuf_serialization_with_dialogue_info(self):
+        """Test that the default Protobuf serialization with dialogue info works."""
+        message_bytes = ProtobufSerializer().encode(self.message3)
+        envelope = Envelope(
+            to="receiver",
+            sender="sender",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            message=message_bytes,
+        )
+        envelope_bytes = envelope.encode()
+
+        expected_envelope = Envelope.decode(envelope_bytes)
+        actual_envelope = envelope
+        assert expected_envelope == actual_envelope
+
+        expected_msg = ProtobufSerializer().decode(expected_envelope.message)
+        actual_msg = self.message3
         assert expected_msg == actual_msg
 
     def test_set(self):

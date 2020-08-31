@@ -266,6 +266,8 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         """
         Decode the envelope.
 
+        The default serializer doesn't decode the message field.
+
         :param envelope_bytes: the encoded envelope
         :return: the envelope
         """
@@ -276,7 +278,8 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         sender = envelope_pb.sender  # pylint: disable=no-member
         raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
         protocol_id = PublicId.from_str(raw_protocol_id)
-        message = envelope_pb.message  # pylint: disable=no-member
+        message = envelope_pb.message
+
         uri_raw = envelope_pb.uri  # pylint: disable=no-member
         if uri_raw != "":  # empty string means this field is not set in proto3
             uri = URI(uri_raw=uri_raw)

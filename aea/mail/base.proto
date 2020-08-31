@@ -3,8 +3,10 @@ syntax = "proto3";
 package fetch.aea;
 
 import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
 
-message Message {
+
+message DialogueMessage {
     int32 message_id = 1;
     string dialogue_starter_reference = 2;
     string dialogue_responder_reference = 3;
@@ -12,13 +14,17 @@ message Message {
     google.protobuf.Any content = 5;
 }
 
+message Message {
+    oneof message {
+        google.protobuf.Struct body = 1;
+        DialogueMessage dialogue_message = 2;
+    }
+}
+
 message Envelope{
     string to = 1;
     string sender = 2;
     string protocol_id = 3;
-    oneof message {
-        bytes message_bytes = 4;
-        Message message_ = 5;
-    }
-    string uri = 6;
+    bytes message = 4;
+    string uri = 5;
 }
