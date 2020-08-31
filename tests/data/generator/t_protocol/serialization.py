@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
@@ -41,12 +42,15 @@ class TProtocolSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(TProtocolMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         t_protocol_msg = t_protocol_pb2.TProtocolMessage()
-        t_protocol_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        t_protocol_msg.dialogue_starter_reference = dialogue_reference[0]
-        t_protocol_msg.dialogue_responder_reference = dialogue_reference[1]
-        t_protocol_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == TProtocolMessage.Performative.PERFORMATIVE_CT:
@@ -274,8 +278,11 @@ class TProtocolSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        t_protocol_bytes = t_protocol_msg.SerializeToString()
-        return t_protocol_bytes
+        dialogue_message_pb.content.Pack(t_protocol_msg)
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -285,15 +292,17 @@ class TProtocolSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'TProtocol' message.
         """
+        message_pb = ProtobufMessage()
         t_protocol_pb = t_protocol_pb2.TProtocolMessage()
-        t_protocol_pb.ParseFromString(obj)
-        message_id = t_protocol_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            t_protocol_pb.dialogue_starter_reference,
-            t_protocol_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = t_protocol_pb.target
+        target = message_pb.dialogue_message.target
 
+        message_pb.dialogue_message.content.Unpack(t_protocol_pb)
         performative = t_protocol_pb.WhichOneof("performative")
         performative_id = TProtocolMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]
