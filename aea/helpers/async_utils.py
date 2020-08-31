@@ -391,7 +391,7 @@ async def cancel_and_wait(task: Optional[Task]) -> Any:
         return e
 
 
-class AwaitableProc:
+class AwaitableProc:  # pragma: nocover
     """
     Async-friendly subprocess.Popen
     """
