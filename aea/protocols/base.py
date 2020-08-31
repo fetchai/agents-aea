@@ -295,12 +295,14 @@ class ProtobufSerializer(Serializer):
             body_json = Struct()
             body_json.update(new_body)  # pylint: disable=no-member
 
-            dialogue_message_pb.content.Pack(body_json)
-            message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+            dialogue_message_pb.content.Pack(body_json)  # pylint: disable=no-member
+            message_pb.dialogue_message.CopyFrom(  # pylint: disable=no-member
+                dialogue_message_pb
+            )
         else:
             body_json = Struct()
             body_json.update(msg.body)  # pylint: disable=no-member
-            message_pb.body.CopyFrom(body_json)
+            message_pb.body.CopyFrom(body_json)  # pylint: disable=no-member
 
         return message_pb.SerializeToString()
 
@@ -316,11 +318,13 @@ class ProtobufSerializer(Serializer):
         message_pb.ParseFromString(obj)
         message_type = message_pb.WhichOneof("message")
         if message_type == "body":
-            body = dict(message_pb.body)
+            body = dict(message_pb.body)  # pylint: disable=no-member
             msg = Message(body=body)
             return msg
-        elif message_type == "dialogue_message":
-            dialogue_message_pb = message_pb.dialogue_message
+        if message_type == "dialogue_message":
+            dialogue_message_pb = (
+                message_pb.dialogue_message  # pylint: disable=no-member
+            )
             message_id = dialogue_message_pb.message_id
             target = dialogue_message_pb.target
             dialogue_starter_reference = dialogue_message_pb.dialogue_starter_reference
@@ -337,8 +341,7 @@ class ProtobufSerializer(Serializer):
                 dialogue_responder_reference,
             )
             return Message(body=body)
-        else:
-            raise ValueError("Message type not recognized.")  # pragma: nocover
+        raise ValueError("Message type not recognized.")  # pragma: nocover
 
 
 class Protocol(Component):

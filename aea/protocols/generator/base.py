@@ -1488,7 +1488,10 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += self.indent + "from typing import Any, Dict, cast\n\n"
-        cls_str += self.indent + "from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage\n"
+        cls_str += (
+            self.indent
+            + "from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage\n"
+        )
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += self.indent + "from {} import (\n    {}_pb2,\n)\n".format(
@@ -1543,19 +1546,13 @@ class ProtocolGenerator:
         cls_str += self.indent + "dialogue_reference = msg.dialogue_reference\n"
         cls_str += (
             self.indent
-            + "dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]\n".format(
-                self.protocol_specification.name
-            )
+            + "dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]\n"
         )
         cls_str += (
             self.indent
-            + "dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]\n".format(
-                self.protocol_specification.name
-            )
+            + "dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]\n"
         )
-        cls_str += self.indent + "dialogue_message_pb.target = msg.target\n\n".format(
-            self.protocol_specification.name
-        )
+        cls_str += self.indent + "dialogue_message_pb.target = msg.target\n\n"
         cls_str += self.indent + "performative_id = msg.performative\n"
         counter = 1
         for performative, contents in self.spec.speech_acts.items():
@@ -1596,7 +1593,9 @@ class ProtocolGenerator:
         cls_str += self.indent + "dialogue_message_pb.content.Pack({}_msg)\n\n".format(
             self.protocol_specification.name,
         )
-        cls_str += self.indent + "message_pb.dialogue_message.CopyFrom(dialogue_message_pb)\n"
+        cls_str += (
+            self.indent + "message_pb.dialogue_message.CopyFrom(dialogue_message_pb)\n"
+        )
         cls_str += self.indent + "message_bytes = message_pb.SerializeToString()\n"
         cls_str += self.indent + "return message_bytes\n"
         self._change_indent(-1)
@@ -1626,10 +1625,13 @@ class ProtocolGenerator:
             self.indent
             + "dialogue_reference = (message_pb.dialogue_message.dialogue_starter_reference, message_pb.dialogue_message.dialogue_responder_reference)\n"
         )
-        cls_str += self.indent + "target = message_pb.dialogue_message.target\n\n".format(
-            self.protocol_specification.name
+        cls_str += self.indent + "target = message_pb.dialogue_message.target\n\n"
+        cls_str += (
+            self.indent
+            + "message_pb.dialogue_message.content.Unpack({}_pb)\n".format(
+                self.protocol_specification.name
+            )
         )
-        cls_str += self.indent + "message_pb.dialogue_message.content.Unpack({}_pb)\n".format(self.protocol_specification.name)
         cls_str += (
             self.indent
             + 'performative = {}_pb.WhichOneof("performative")\n'.format(

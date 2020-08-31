@@ -278,7 +278,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         sender = envelope_pb.sender  # pylint: disable=no-member
         raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
         protocol_id = PublicId.from_str(raw_protocol_id)
-        message = envelope_pb.message
+        message = envelope_pb.message  # pylint: disable=no-member
 
         uri_raw = envelope_pb.uri  # pylint: disable=no-member
         if uri_raw != "":  # empty string means this field is not set in proto3
