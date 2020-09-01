@@ -59,9 +59,7 @@ class TestAgentVsAEA(BaseAEATestCase):
         run()
         assert os.path.exists(Path(self.t, "input_file"))
 
-        message_text = (
-            b"other_agent,my_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
-        )
+        message_text = b"other_agent,my_agent,fetchai/default:0.5.0,\x12H\x08\x01\x12\x011*A\n4type.googleapis.com/fetch.aea.Default.DefaultMessage\x12\t*\x07\n\x05hello,"
         path = os.path.join(self.t, "output_file")
         with open(path, "rb") as file:
             msg = file.read()
