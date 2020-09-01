@@ -217,16 +217,12 @@ def search_items(ctx: Context, item_type: str, query: str) -> Tuple[List, int]:
         resp = request_api(
             "GET", "/{}".format(item_type_plural), params={"search": query}
         )
-        results = resp['results']
-        count = resp['count']
+        results = resp["results"]
+        count = resp["count"]
     return results, count
 
 
-def _output_search_results(
-    item_type: str,
-    results: List[Dict],
-    count: int
-) -> None:
+def _output_search_results(item_type: str, results: List[Dict], count: int) -> None:
     """
     Output search results.
 
