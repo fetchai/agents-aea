@@ -2,7 +2,9 @@ This page provides some tipps of how to upgrade between versions.
 
 ## v0.5.4 to v0.6.0
 
-The dialogue and dialogues APIs have changed significantly. There are four primary methods for the developer:
+### `Dialogue` and `Dialogues` API updates
+
+The dialogue and dialogues APIs have changed significantly. The constructor is different for both classes and there are now four primary methods for the developer:
 
 - Dialogues.create: this method is used to create a new dialogue and message:
 ``` python
@@ -42,6 +44,22 @@ proposal_msg = fipa_dialogue.reply(
 The method will raise if the provided arguments are inconsistent.
 
 The new methods significantly reduce the lines of code needed to maintain a dialogue. They also make it easier for the developer to construct valid dialogues and messages.
+
+### FetchAICrypto - default crypto
+
+The FetchAICrypto has been upgraded to the default crypto. Update your `default_ledger` to `fetchai`.
+
+### Private key file naming
+
+The private key files are now consistenly named with the `ledger_id` followed by `_private_key.txt` (e.g. `fetchai_private_key.txt`). Rename your existing files to match this pattern.
+
+### Type in package yaml
+
+The package yamls now contain a type field. This must be added for the loading mechanism to work properly.
+
+### Moved address type
+
+The address type has moved to `aea.common`. The import paths must be updated.
 
 ## v0.5.3 to v0.5.4
 

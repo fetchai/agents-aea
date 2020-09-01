@@ -233,7 +233,7 @@ class P2PLibp2pClientConnection(Connection):
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
-                if not self.is_disconnected:
+                if not self.is_disconnected:  # pragma: no cover
                     await self.disconnect()
                 return None
                 # TOFIX(LR) attempt restarting the node?
@@ -266,7 +266,7 @@ class P2PLibp2pClientConnection(Connection):
                 raise ValueError("Input queue not initialized.")  # pragma: nocover
             self._in_queue.put_nowait(data)
             if data is None:
-                break
+                break  # pragma: no cover
 
     async def _send(self, data: bytes) -> None:
         if self._writer is None:
@@ -289,7 +289,7 @@ class P2PLibp2pClientConnection(Connection):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:
+        except asyncio.streams.IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected

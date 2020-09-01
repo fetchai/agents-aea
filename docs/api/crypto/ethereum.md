@@ -219,8 +219,8 @@ return the hash in hex.
 #### get`_`address`_`from`_`public`_`key
 
 ```python
- | @staticmethod
- | get_address_from_public_key(public_key: str) -> str
+ | @classmethod
+ | get_address_from_public_key(cls, public_key: str) -> str
 ```
 
 Get the address from the public key.
@@ -237,8 +237,8 @@ str
 #### recover`_`message
 
 ```python
- | @staticmethod
- | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+ | @classmethod
+ | recover_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
 Recover the addresses from the hash.

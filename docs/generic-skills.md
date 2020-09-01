@@ -128,9 +128,9 @@ default_routing:
 
 First, create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Add keys and generate wealth for the buyer AEA
@@ -139,14 +139,14 @@ The buyer needs to have some wealth to purchase the service from the seller.
 
 First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
-aea generate-wealth cosmos
+aea generate-wealth fetchai
 ```
 
 ### Update the skill configs
@@ -164,7 +164,7 @@ models:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -186,7 +186,7 @@ models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

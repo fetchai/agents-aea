@@ -44,9 +44,9 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 Add keys for the weather station.
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Run the weather station AEA
@@ -73,7 +73,7 @@ from typing import cast
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -90,10 +90,12 @@ API_KEY = "TwiCIriSl0mLahw17pyqoA"
 SOEF_ADDR = "soef.fetch.ai"
 SOEF_PORT = 9002
 ENTRY_PEER_ADDRESS = (
-    "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"
+    "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"
 )
-COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
-COSMOS_PRIVATE_KEY_FILE_CONNECTION = PRIVATE_KEY_PATH_SCHEMA.format("cosmos_connection")
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
+FETCHAI_PRIVATE_KEY_FILE_CONNECTION = PRIVATE_KEY_PATH_SCHEMA.format(
+    "fetchai_connection"
+)
 ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
@@ -102,17 +104,19 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
-    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
 
     # Set up the wallet, identity and (empty) resources
     wallet = Wallet(
-        private_key_paths={CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE},
+        private_key_paths={FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE},
         connection_private_key_paths={
-            CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         },
     )
-    identity = Identity("my_aea", address=wallet.addresses.get(CosmosCrypto.identifier))
+    identity = Identity(
+        "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
+    )
     resources = Resources()
 
     # specify the default routing for some protocols

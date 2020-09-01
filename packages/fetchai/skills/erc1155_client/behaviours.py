@@ -74,7 +74,6 @@ class SearchBehaviour(TickerBehaviour):
             oef_search_msg, _ = oef_search_dialogues.create(
                 counterparty=self.context.search_service_address,
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
             self.context.outbox.put_message(message=oef_search_msg)

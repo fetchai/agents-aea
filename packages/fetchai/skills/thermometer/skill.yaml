@@ -4,7 +4,7 @@ version: 0.10.0
 type: skill
 description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
@@ -55,7 +55,7 @@ models:
         temperature: 26
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

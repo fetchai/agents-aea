@@ -25,7 +25,7 @@ Abstract runtime class to create implementations.
 #### `__`init`__`
 
 ```python
- | __init__(agent: "Agent", loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init runtime.
@@ -33,11 +33,80 @@ Init runtime.
 **Arguments**:
 
 - `agent`: Agent to run.
+- `loop_mode`: agent main loop mode.
 - `loop`: optional event loop. if not provided a new one will be created.
 
 **Returns**:
 
 None
+
+<a name="aea.runtime.BaseRuntime.loop_mode"></a>
+#### loop`_`mode
+
+```python
+ | @property
+ | loop_mode() -> str
+```
+
+Get current loop mode.
+
+<a name="aea.runtime.BaseRuntime.setup_multiplexer"></a>
+#### setup`_`multiplexer
+
+```python
+ | setup_multiplexer() -> None
+```
+
+Set up the multiplexer.
+
+<a name="aea.runtime.BaseRuntime.task_manager"></a>
+#### task`_`manager
+
+```python
+ | @property
+ | task_manager() -> TaskManager
+```
+
+Get the task manager.
+
+<a name="aea.runtime.BaseRuntime.loop"></a>
+#### loop
+
+```python
+ | @property
+ | loop() -> AbstractEventLoop
+```
+
+Get event loop.
+
+<a name="aea.runtime.BaseRuntime.multiplexer"></a>
+#### multiplexer
+
+```python
+ | @property
+ | multiplexer() -> Multiplexer
+```
+
+Get multiplexer.
+
+<a name="aea.runtime.BaseRuntime.decision_maker"></a>
+#### decision`_`maker
+
+```python
+ | @property
+ | decision_maker() -> DecisionMaker
+```
+
+Return decision maker if set.
+
+<a name="aea.runtime.BaseRuntime.set_decision_maker"></a>
+#### set`_`decision`_`maker
+
+```python
+ | set_decision_maker(decision_maker_handler: DecisionMakerHandler) -> None
+```
+
+Set decision maker with handler provided.
 
 <a name="aea.runtime.BaseRuntime.start"></a>
 #### start
@@ -117,7 +186,7 @@ Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loo
 #### `__`init`__`
 
 ```python
- | __init__(agent: "Agent", loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init runtime.
@@ -125,6 +194,7 @@ Init runtime.
 **Arguments**:
 
 - `agent`: Agent to run.
+- `loop_mode`: agent main loop mode.
 - `loop`: optional event loop. if not provided a new one will be created.
 
 **Returns**:

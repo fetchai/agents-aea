@@ -29,42 +29,6 @@ Initialize dialogues.
 
 None
 
-<a name="aea.decision_maker.default.SigningDialogues.role_from_first_message"></a>
-#### role`_`from`_`first`_`message
-
-```python
- | @staticmethod
- | role_from_first_message(message: Message) -> BaseDialogue.Role
-```
-
-Infer the role of the agent from an incoming/outgoing first message
-
-**Arguments**:
-
-- `message`: an incoming/outgoing first message
-
-**Returns**:
-
-The role of the agent
-
-<a name="aea.decision_maker.default.SigningDialogues.create_dialogue"></a>
-#### create`_`dialogue
-
-```python
- | create_dialogue(dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role) -> SigningDialogue
-```
-
-Create an instance of fipa dialogue.
-
-**Arguments**:
-
-- `dialogue_label`: the identifier of the dialogue
-- `role`: the role of the agent this dialogue is maintained for
-
-**Returns**:
-
-the created dialogue
-
 <a name="aea.decision_maker.default.StateUpdateDialogues"></a>
 ## StateUpdateDialogues Objects
 
@@ -90,42 +54,6 @@ Initialize dialogues.
 **Returns**:
 
 None
-
-<a name="aea.decision_maker.default.StateUpdateDialogues.role_from_first_message"></a>
-#### role`_`from`_`first`_`message
-
-```python
- | @staticmethod
- | role_from_first_message(message: Message) -> BaseDialogue.Role
-```
-
-Infer the role of the agent from an incoming/outgoing first message
-
-**Arguments**:
-
-- `message`: an incoming/outgoing first message
-
-**Returns**:
-
-The role of the agent
-
-<a name="aea.decision_maker.default.StateUpdateDialogues.create_dialogue"></a>
-#### create`_`dialogue
-
-```python
- | create_dialogue(dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role) -> StateUpdateDialogue
-```
-
-Create an instance of fipa dialogue.
-
-**Arguments**:
-
-- `dialogue_label`: the identifier of the dialogue
-- `role`: the role of the agent this dialogue is maintained for
-
-**Returns**:
-
-the created dialogue
 
 <a name="aea.decision_maker.default.GoalPursuitReadiness"></a>
 ## GoalPursuitReadiness Objects

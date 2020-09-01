@@ -80,6 +80,16 @@ This behaviour is executed until the agent is stopped.
 
 Initialize the cyclic behaviour.
 
+<a name="aea.skills.behaviours.CyclicBehaviour.number_of_executions"></a>
+#### number`_`of`_`executions
+
+```python
+ | @property
+ | number_of_executions() -> int
+```
+
+Get the number of executions.
+
 <a name="aea.skills.behaviours.CyclicBehaviour.act_wrapper"></a>
 #### act`_`wrapper
 

@@ -4,9 +4,9 @@ version: 0.5.0
 type: protocol
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmcoWaezoTDWvV749RJBNB7WmXCrNuqZpmGKSiUPPNBsGi
+  README.md: QmP3q9463opixzdv17QXkCSQvgR8KJXgLAVkfUPpdHJzPv
   __init__.py: QmPMtKUrzVJp594VqNuapJzCesWLQ6Awjqv2ufG3wKNRmH
   custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
   default.proto: QmUgEHG3L7M6ar7E4BDdTpUV8UWhbTbW2etFAk1FtDWuk1

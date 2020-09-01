@@ -5,7 +5,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
@@ -61,7 +61,7 @@ models:
         wind: 10
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

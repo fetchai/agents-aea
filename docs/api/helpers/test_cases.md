@@ -259,7 +259,7 @@ subprocess object.
 
 ```python
  | @classmethod
- | terminate_agents(cls, *subprocesses: subprocess.Popen, *, signal: signal.Signals = signal.SIGINT, timeout: int = 10) -> None
+ | terminate_agents(cls, *subprocesses: subprocess.Popen, *, timeout: int = 10) -> None
 ```
 
 Terminate agent subprocesses.
@@ -269,7 +269,6 @@ Run from agent's directory.
 **Arguments**:
 
 - `subprocesses`: the subprocesses running the agents
-- `signal`: the signal for interruption
 - `timeout`: the timeout for interruption
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.is_successfully_terminated"></a>

@@ -5,7 +5,7 @@ type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmQiBzKV5rEFpMQbSjfjzAJ7SqwwGmso6TozWkjdytucLR
@@ -66,7 +66,7 @@ models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

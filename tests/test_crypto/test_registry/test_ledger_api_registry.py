@@ -26,9 +26,6 @@ import pytest
 import aea.crypto
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_ADDRESS_ONE,
-    COSMOS_TESTNET_CONFIG,
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_TESTNET_CONFIG,
@@ -45,7 +42,6 @@ logger = logging.getLogger(__name__)
     [
         (FETCHAI, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
         (ETHEREUM, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
-        (COSMOS, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
 def test_make_ledger_apis(identifier, address, config):

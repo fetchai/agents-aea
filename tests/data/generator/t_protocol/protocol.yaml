@@ -4,7 +4,7 @@ version: 0.1.0
 type: protocol
 description: A protocol for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmTwLir2v2eYMkDeUomf9uL1hrQhjzVTTqrQwamGG5iwn4
   custom_types.py: QmVboXL98TzRtreCRMrCF3U9xjRGRkGJjNgDBTAm5GXyLq

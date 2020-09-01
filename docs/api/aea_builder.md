@@ -227,18 +227,18 @@ only resets:
 
 None
 
-<a name="aea.aea_builder.AEABuilder.set_timeout"></a>
-#### set`_`timeout
+<a name="aea.aea_builder.AEABuilder.set_period"></a>
+#### set`_`period
 
 ```python
- | set_timeout(timeout: Optional[float]) -> "AEABuilder"
+ | set_period(period: Optional[float]) -> "AEABuilder"
 ```
 
-Set agent loop idle timeout in seconds.
+Set agent act period.
 
 **Arguments**:
 
-- `timeout`: timeout in seconds
+- `period`: period in seconds
 
 **Returns**:
 

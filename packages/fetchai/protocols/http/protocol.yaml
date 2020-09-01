@@ -4,9 +4,9 @@ version: 0.5.0
 type: protocol
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmUmyFd8kSobeS16dR6BQ6T5HGt5PFLgSdjuQGPimgxrQW
+  README.md: QmY7fxhyNBgwU7uc6LKtCN4aSQ4bym5BwqtwRAfwPokULN
   __init__.py: QmRWie4QPiFJE8nK4fFJ6prqoG3u36cPo7st5JUZAGpVWv
   dialogues.py: QmdwTehjCppcxyDid8m6zuHY5YwprUhato88R9Zdm9aXaM
   http.proto: QmdTUTvvxGxMxSTB67AXjMUSDLdsxBYiSuJNVxHuLKB1jS

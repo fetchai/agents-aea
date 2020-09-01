@@ -16,7 +16,7 @@ A protocol for state updates to the decision maker state.
 ## Performative Objects
 
 ```python
-class Performative(Enum)
+class Performative(Message.Performative)
 ```
 
 Performatives for the state_update protocol.

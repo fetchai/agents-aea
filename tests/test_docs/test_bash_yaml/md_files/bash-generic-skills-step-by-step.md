@@ -40,12 +40,12 @@ aea scaffold skill generic_buyer
 aea fingerprint skill fetchai/generic_buyer:0.1.0
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
-aea generate-wealth cosmos --sync
+aea generate-wealth fetchai --sync
 ```
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.8.0
@@ -81,7 +81,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
@@ -131,7 +131,7 @@ models:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -150,7 +150,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
@@ -204,7 +204,7 @@ models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

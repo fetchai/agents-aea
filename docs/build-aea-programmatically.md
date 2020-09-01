@@ -17,7 +17,7 @@ Then, import the application specific libraries.
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.connections.stub.connection import write_with_lock
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.skills.base import Skill
 ```
@@ -27,14 +27,14 @@ Set up a variable pointing to where the packages directory is located - this sho
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
-COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 ```
 
 ## Create a private key
 We need a private key to populate the AEA's wallet.
 ``` python
     # Create a private key
-    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 ```
 
 ## Clearing the input and output files
@@ -59,7 +59,7 @@ We set the name, add the private key for the AEA to use and set the ledger confi
 ``` python
     builder.set_name("my_aea")
 
-    builder.add_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 ```
 
 Next, we add the echo skill which will bounce our messages back to us. We first need to place the echo skill into a relevant directory (see path), either by downloading the `packages` directory from the AEA repo or by getting the package from the registry.
@@ -165,19 +165,19 @@ from threading import Thread
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.connections.stub.connection import write_with_lock
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.skills.base import Skill
 
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
-COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -191,7 +191,7 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")

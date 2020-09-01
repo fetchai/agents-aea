@@ -32,6 +32,7 @@ from aea.protocols.dialogue.base import Dialogue
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
+from tests.conftest import FETCHAI
 from tests.test_cli import test_generate_wealth, test_interact
 
 
@@ -195,7 +196,7 @@ class TestGetWealth(AEATestCaseEmpty):
     def test_get_wealth(self):
         """Test get_wealth."""
         # just call it, network related and quite unstable
-        self.get_wealth("cosmos")
+        self.get_wealth(FETCHAI)
 
 
 class TestAEA(AEATestCase):

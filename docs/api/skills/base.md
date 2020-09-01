@@ -34,6 +34,16 @@ Initialize a skill context.
 
 Get the logger.
 
+<a name="aea.skills.base.SkillContext.logger"></a>
+#### logger
+
+```python
+ | @logger.setter
+ | logger(logger_: Logger) -> None
+```
+
+Set the logger.
+
 <a name="aea.skills.base.SkillContext.set_agent_context"></a>
 #### set`_`agent`_`context
 
@@ -148,7 +158,7 @@ Get address.
 
 ```python
  | @property
- | connection_status() -> ConnectionStatus
+ | connection_status() -> MultiplexerStatus
 ```
 
 Get connection status.
@@ -565,7 +575,7 @@ This class implements a skill.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: SkillConfig, skill_context: Optional[SkillContext] = None, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None)
+ | __init__(configuration: SkillConfig, skill_context: Optional[SkillContext] = None, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None, **kwargs, ,)
 ```
 
 Initialize a skill.

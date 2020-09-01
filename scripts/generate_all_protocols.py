@@ -22,7 +22,7 @@
 This script takes all the protocol specification (scraped from the protocol README)
 and calls the `aea generate protocol` command.
 """
-import subprocess
+import subprocess  # nosec
 import sys
 from pathlib import Path
 
