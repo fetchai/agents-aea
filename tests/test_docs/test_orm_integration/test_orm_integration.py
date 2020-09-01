@@ -31,8 +31,9 @@ from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
     COSMOS,
-    COSMOS_PRIVATE_KEY_FILE,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE,
     MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
@@ -60,7 +61,7 @@ seller_strategy_replacement = """models:
         temperature: 26
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -93,7 +94,7 @@ buyer_strategy_replacement = """models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -166,15 +167,17 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.run_install()
 
         # add keys
-        self.generate_private_key(COSMOS)
+        self.generate_private_key(FETCHAI)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = "skills.thermometer.models.strategy.args.location"
@@ -197,19 +200,21 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.run_install()
 
         # add keys
-        self.generate_private_key(COSMOS)
+        self.generate_private_key(FETCHAI)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
-        self.generate_wealth(COSMOS)
+        self.generate_wealth(FETCHAI)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (

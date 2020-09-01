@@ -129,9 +129,9 @@ default_routing:
 
 First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Add keys and generate wealth for the thermometer client AEA
@@ -140,14 +140,14 @@ The thermometer client needs to have some wealth to purchase the thermometer inf
 
 First, create the private key for the thermometer client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your thermometer client based on the network you want to transact with. On the Fetch.ai `testnet` network:
 ``` bash
-aea generate-key cosmos
+aea generate-key fetchai
 ```
 
 
@@ -164,7 +164,7 @@ models:
         temperature: 26
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -188,7 +188,7 @@ models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

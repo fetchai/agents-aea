@@ -21,14 +21,14 @@ protocols:                                      # The list of protocol public id
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 - fetchai/error:0.5.0
 default_connection: fetchai/p2p_libp2p:0.8.0    # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
-default_ledger: cosmos                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
+default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 logging_config:                                 # The logging configurations the AEA project uses
   disable_existing_loggers: false
   version: 1
 private_key_paths:                              # The private key paths the AEA project uses (keys must satisfy LEDGER_ID_REGEX, values must be file paths)
-  cosmos: cosmos_private_key.txt
+  fetchai: fetchai_private_key.txt
 connection_private_key_paths:                   # The private key paths the AEA project uses for its connections (keys must satisfy LEDGER_ID_REGEX, values must be file paths)
-  cosmos: cosmos_private_key.txt
+  fetchai: fetchai_private_key.txt
 registry_path: ../packages                      # The path to the local package registry (must be a directory path and point to a directory called `packages`)
 ```
 ``` yaml

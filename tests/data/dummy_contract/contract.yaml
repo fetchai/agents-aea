@@ -15,4 +15,5 @@ class_name: DummyContract
 contract_interface_paths:
   cosmos: build/some.wasm
   ethereum: build/some.json
+  fetchai: build/some.wasm
 dependencies: {}

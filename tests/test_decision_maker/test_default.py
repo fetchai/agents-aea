@@ -149,7 +149,7 @@ class TestDecisionMaker:
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=COSMOS,
+            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet
@@ -268,7 +268,7 @@ class TestDecisionMaker2:
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=COSMOS,
+            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet

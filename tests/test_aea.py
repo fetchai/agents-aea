@@ -58,9 +58,9 @@ from tests.common.utils import (
 )
 
 from .conftest import (
-    COSMOS_PRIVATE_KEY_PATH,
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
+    FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_local_connection,
@@ -655,7 +655,7 @@ class TestAeaExceptionPolicy:
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
+        builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
 
         self.handler_called = 0
 
@@ -815,7 +815,7 @@ class BaseTimeExecutionCase(TestCase):
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
+        builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
 
         self.function_finished = False
 

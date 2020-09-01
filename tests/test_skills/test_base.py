@@ -50,10 +50,10 @@ from aea.skills.base import (
 )
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_PATH,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
 )
@@ -66,11 +66,11 @@ class TestSkillContext:
     def setup_class(cls):
         """Test the initialisation of the AEA."""
         cls.wallet = Wallet(
-            {COSMOS: COSMOS_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
+            {FETCHAI: FETCHAI_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
         )
         cls.connection = _make_dummy_connection()
         cls.identity = Identity(
-            "name", addresses=cls.wallet.addresses, default_address_key=COSMOS,
+            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI,
         )
         cls.my_aea = AEA(cls.identity, cls.wallet, resources=Resources())
         cls.my_aea.resources.add_connection(cls.connection)

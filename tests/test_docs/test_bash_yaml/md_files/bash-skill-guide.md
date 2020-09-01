@@ -18,17 +18,17 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 aea fetch fetchai/simple_service_registration:0.11.0 && cd simple_service_registration
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
 aea run
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
 aea run

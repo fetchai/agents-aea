@@ -26,19 +26,19 @@ from threading import Thread
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.connections.stub.connection import write_with_lock
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.skills.base import Skill
 
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
-COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 
 
 def run():
     # Create a private key
-    create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -52,7 +52,7 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
